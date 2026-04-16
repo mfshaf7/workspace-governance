@@ -6,7 +6,7 @@
 > `workspace-governance/scripts/sync_workspace_root.py`.
 
 This workspace is the operator-facing multi-repo source of truth for the
-current platform, OpenClaw, and host-control stack.
+current platform and product stack.
 
 Treat it as a governed system, not a loose folder of related repos.
 
@@ -45,6 +45,15 @@ Treat it as a governed system, not a loose folder of related repos.
 6. `security-architecture/` governs trust-boundary, control, and review
    expectations across the stack.
 
+## Current Product Surfaces
+
+- OpenClaw
+  - product integration, runbooks, and release workflow:
+    [platform-engineering/products/openclaw/README.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/README.md)
+- OpenProject
+  - product integration, access, and operations guidance:
+    [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+
 ## Workspace Governance And Audit
 
 `workspace-governance/` owns the canonical copies of the workspace-root files
@@ -59,6 +68,12 @@ Supported audit entrypoint:
 python3 /home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 ```
 
+Supported stale-content audit entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
+```
+
 ## Start Here
 
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
@@ -66,6 +81,7 @@ python3 /home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py --work
 - Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
 - Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
 - OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/architecture-and-owner-model.md)
+- OpenProject platform model: [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
 - Active OpenClaw runtime composition: [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
 - Canonical Telegram source: [openclaw-telegram-enhanced/README.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
 - Canonical host bridge: [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)

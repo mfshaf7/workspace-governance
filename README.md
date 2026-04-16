@@ -6,6 +6,10 @@ This repository is the cross-repo governance and routing layer for the
 It owns the canonical workspace-level guidance and audit tooling that are
 materialized into the local workspace root for day-to-day operator use.
 
+The workspace is multi-product. This repo should not drift into OpenClaw-only
+language when the actual workspace governs shared platform services plus
+multiple products.
+
 ## What This Repository Owns
 
 - canonical source for the workspace-root `README.md` and `AGENTS.md`
@@ -76,7 +80,8 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
 ```
 
 ## Read First

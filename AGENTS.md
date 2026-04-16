@@ -17,6 +17,7 @@ delivery repo.
 
 - canonical workspace-root guidance
 - workspace audit and sync tooling
+- stale-content audit rules for active docs
 - repo inventory and cross-repo routing rules
 - validation that the workspace-level control surface stays coherent
 
@@ -43,6 +44,9 @@ Route those changes back to the owner repos.
   - `workspace-root/README.md`
   - `workspace-root/AGENTS.md`
   - `scripts/audit_workspace_layout.py`
+- If you retire a script name, move a workflow path, or change an ownership
+  phrase that appears across repos, update `scripts/audit_stale_content.py` so
+  the stale wording is caught automatically next time.
 - If repo boundaries change, update the owning repo docs in the same work. This
   repo documents the boundary; it does not replace owner-repo documentation.
 - Treat `openclaw-isolated-deployment/` as retired unless the retirement
@@ -57,5 +61,6 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
 ```

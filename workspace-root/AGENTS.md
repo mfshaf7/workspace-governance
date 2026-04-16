@@ -131,6 +131,9 @@ That classification determines the owner.
   - `workspace-governance/workspace-root/README.md`
   - `workspace-governance/workspace-root/AGENTS.md`
   - `workspace-governance/scripts/audit_workspace_layout.py`
+- If a retired path, repo, or operator command must never reappear in active
+  guidance, update `workspace-governance/scripts/audit_stale_content.py` in the
+  same work.
 - If a repo boundary changes, update the owning repo docs in the same work.
 
 ## Operating Rules
@@ -165,5 +168,6 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`
 - other repos
   - follow the local repo `AGENTS.md`

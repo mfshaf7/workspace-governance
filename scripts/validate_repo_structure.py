@@ -13,6 +13,7 @@ REQUIRED_FILES = (
     ".github/workflows/validate.yaml",
     "scripts/README.md",
     "scripts/audit_workspace_layout.py",
+    "scripts/audit_stale_content.py",
     "scripts/sync_workspace_root.py",
     "scripts/validate_repo_structure.py",
     "workspace-root/README.md",
