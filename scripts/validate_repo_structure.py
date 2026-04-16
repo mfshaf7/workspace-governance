@@ -89,6 +89,11 @@ REQUIRED_DIRECTORIES = (
 )
 
 
+GITHUB_REPO_RE = re.compile(
+    r"(?:git@|https://|ssh://git@)?github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/.]+?)(?:\.git)?$"
+)
+
+
 def run(cmd: list[str], *, cwd: Path | None = None) -> str:
     result = subprocess.run(
         cmd,
@@ -98,6 +103,15 @@ def run(cmd: list[str], *, cwd: Path | None = None) -> str:
         capture_output=True,
     )
     return result.stdout.strip()
+
+
+def normalize_repository_url(value: str | None) -> str | None:
+    if not value:
+        return None
+    match = GITHUB_REPO_RE.search(value.strip())
+    if match:
+        return f"github.com/{match.group('owner')}/{match.group('repo')}"
+    return value.strip().removesuffix(".git")
 
 
 def main() -> int:
@@ -151,7 +165,7 @@ def main() -> int:
         errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
     else:
         expected_origin = "git@github.com:mfshaf7/workspace-governance.git"
-        if origin != expected_origin:
+        if normalize_repository_url(origin) != normalize_repository_url(expected_origin):
             errors.append(f"expected origin {expected_origin!r}, got {origin!r}")
 
     if errors:
