@@ -95,6 +95,38 @@ Before editing, classify the task into one of these buckets:
 
 That classification determines the owner.
 
+## Architecture Discussion Gate
+
+Before implementing, stop and discuss with the user first when the request
+introduces any of these:
+
+- a new product on the platform
+- a new shared platform component or control plane
+- a new ingress, gateway, service-mesh, or networking layer
+- a new identity, secret-delivery, storage, messaging, or observability
+  subsystem
+- a new host-control capability or privileged execution path
+- a feature with multiple plausible long-term architectures and no clear
+  existing pattern
+
+Examples include:
+
+- introducing Envoy for `k3s`
+- adding a new product beside OpenClaw or OpenProject
+- introducing a new controller that changes delivery or runtime trust
+
+In those cases, do not jump straight into implementation. First frame the
+discussion around:
+
+- target role in the architecture
+- owner repo or control plane
+- trust-boundary impact
+- workflow maturity that would exist after the change
+- operator surface, access path, and visibility model
+- rollout and rollback shape
+
+Only start implementation after that discussion narrows the target design.
+
 ## Routing Rules
 
 - Cross-repo routing, workspace repo inventory, workspace-root guidance, and
@@ -140,6 +172,8 @@ That classification determines the owner.
 
 - Prefer the owner that should hold the long-lived contract, not the repo where
   the patch is easiest.
+- When the request is architecture-shaping rather than implementation-shaped,
+  discuss the decision with the user before editing code.
 - When docs and code disagree, fix the immediate problem in the correct owner
   repo and update the docs in the same work.
 - Live-only fixes are containment, not completion.

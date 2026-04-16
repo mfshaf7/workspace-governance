@@ -34,6 +34,9 @@ Route those changes back to the owner repos.
 
 - Edit the canonical files here, not the materialized root copies, unless you
   are doing short-lived incident containment.
+- When a request introduces a new product, shared component, control plane, or
+  architecture-shaping feature, the first step is discussion and framing, not
+  implementation.
 - After changing `workspace-root/` or `scripts/audit_workspace_layout.py`, you
   must run `scripts/sync_workspace_root.py` before the work is complete.
 - A workspace-root governance change is not complete until:
