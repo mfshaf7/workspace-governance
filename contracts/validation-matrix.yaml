@@ -1,0 +1,25 @@
+schema_version: 1
+validators:
+  repo-structure:
+    script: scripts/validate_repo_structure.py
+    scope: workspace-governance
+  contract-model:
+    script: scripts/validate_contracts.py
+    scope: workspace-governance
+  cross-repo-truth:
+    script: scripts/validate_cross_repo_truth.py
+    scope: local-workspace
+    requires_workspace_checkout: true
+    generated_outputs:
+      - generated/system-map.yaml
+      - generated/resolved-owner-map.json
+      - generated/resolved-dependency-graph.json
+      - generated/stale-content-rules.json
+  workspace-layout:
+    script: scripts/audit_workspace_layout.py
+    scope: local-workspace
+    requires_workspace_checkout: true
+  stale-content:
+    script: scripts/audit_stale_content.py
+    scope: local-workspace
+    requires_workspace_checkout: true

@@ -1,0 +1,18 @@
+schema_version: 1
+repo: openclaw-host-bridge
+lifecycle: active
+required_repo_refs:
+  - platform-engineering
+  - security-architecture
+required_patterns:
+  readme:
+    - canonical host-side enforcement layer
+    - policy,
+    - audit
+    - runtime attestation
+  agents:
+    - canonical runnable host-side enforcement layer
+    - host trust boundary
+forbidden_patterns:
+  readme: []
+  agents: []

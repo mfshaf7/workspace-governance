@@ -1,0 +1,30 @@
+schema_version: 1
+task_types:
+  workspace-governance-change:
+    primary_repo: workspace-governance
+    change_class: architecture-shaping
+    discussion_required: false
+  shared-platform-change:
+    primary_repo: platform-engineering
+    change_class: platform-contract
+    discussion_required: false
+  product-runtime-change:
+    primary_repo: openclaw-runtime-distribution
+    change_class: runtime-composition
+    discussion_required: false
+  telegram-behavior-change:
+    primary_repo: openclaw-telegram-enhanced
+    change_class: source-behavior
+    discussion_required: false
+  host-enforcement-change:
+    primary_repo: openclaw-host-bridge
+    change_class: source-behavior
+    discussion_required: false
+  security-governance-change:
+    primary_repo: security-architecture
+    change_class: architecture-shaping
+    discussion_required: false
+  architecture-discussion:
+    primary_repo: workspace-governance
+    change_class: architecture-shaping
+    discussion_required: true

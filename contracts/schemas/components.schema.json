@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "components"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "components": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["lifecycle", "component_class", "owner_repo", "product", "security_owner"],
+        "properties": {
+          "lifecycle": { "type": "string", "minLength": 1 },
+          "component_class": { "type": "string", "minLength": 1 },
+          "owner_repo": { "type": "string", "minLength": 1 },
+          "product": { "type": ["string", "null"] },
+          "security_owner": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

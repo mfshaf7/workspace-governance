@@ -1,0 +1,21 @@
+schema_version: 1
+repo: openclaw-runtime-distribution
+lifecycle: active
+required_repo_refs:
+  - openclaw-telegram-enhanced
+  - openclaw-host-bridge
+  - platform-engineering
+  - security-architecture
+required_patterns:
+  readme:
+    - active stage/prod runtime composition
+    - no copied Telegram source tree hidden inside the build repo
+    - source SHAs and digests recorded in `platform-engineering`
+  agents:
+    - active stage/prod runtime composition path
+    - distribution-specific verification
+forbidden_patterns:
+  readme:
+    - deployment workspace copy
+    - bundled build input
+  agents: []

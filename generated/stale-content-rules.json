@@ -1,0 +1,122 @@
+[
+  {
+    "exclude_paths": [
+      "/docs/archive/",
+      "/docs/records/change-records/",
+      "/docs/decisions/adr/"
+    ],
+    "id": "retired-openclaw-isolated-deployment",
+    "pattern": "openclaw-isolated-deployment",
+    "repo_names": [
+      "platform-engineering",
+      "openclaw-runtime-distribution",
+      "openclaw-telegram-enhanced",
+      "openclaw-host-bridge",
+      "security-architecture"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "retired-copy-sync-script",
+    "pattern": "sync-telegram-build-copy\\\\.sh",
+    "repo_names": [
+      "workspace-governance",
+      "platform-engineering",
+      "openclaw-runtime-distribution",
+      "openclaw-telegram-enhanced",
+      "openclaw-host-bridge",
+      "security-architecture"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "retired-workspace-sync-verifier",
+    "pattern": "verify-workspace-sync\\\\.sh",
+    "repo_names": [
+      "workspace-governance",
+      "platform-engineering",
+      "openclaw-runtime-distribution",
+      "openclaw-telegram-enhanced",
+      "openclaw-host-bridge",
+      "security-architecture"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "retired-gateway-image-recorder",
+    "pattern": "record_gateway_image\\\\.py",
+    "repo_names": [
+      "workspace-governance",
+      "platform-engineering"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "retired-stage-readiness-entrypoint",
+    "pattern": "stage_promotion_readiness\\\\.py",
+    "repo_names": [
+      "workspace-governance",
+      "platform-engineering"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "retired-environment-contract-validator",
+    "pattern": "validate_environment_contract\\\\.py",
+    "repo_names": [
+      "workspace-governance",
+      "platform-engineering"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "openclaw-runtime-distribution-readme-forbidden",
+    "pattern": "deployment workspace copy|bundled build input",
+    "repo_names": [
+      "openclaw-runtime-distribution"
+    ],
+    "targets": [
+      "README.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "openclaw-telegram-enhanced-readme-forbidden",
+    "pattern": "deployment workspace copy|bundled build input|in the isolated deployment workflow",
+    "repo_names": [
+      "openclaw-telegram-enhanced"
+    ],
+    "targets": [
+      "README.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "platform-engineering-readme-forbidden",
+    "pattern": "openclaw-isolated-deployment",
+    "repo_names": [
+      "platform-engineering"
+    ],
+    "targets": [
+      "README.md"
+    ]
+  }
+]

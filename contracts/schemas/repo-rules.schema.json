@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "repo", "lifecycle", "required_repo_refs", "required_patterns", "forbidden_patterns"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "repo": { "type": "string", "minLength": 1 },
+    "lifecycle": { "type": "string", "minLength": 1 },
+    "required_repo_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "required_patterns": {
+      "type": "object",
+      "required": ["readme", "agents"],
+      "properties": {
+        "readme": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "agents": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "forbidden_patterns": {
+      "type": "object",
+      "required": ["readme", "agents"],
+      "properties": {
+        "readme": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "agents": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

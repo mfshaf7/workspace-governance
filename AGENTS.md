@@ -16,6 +16,9 @@ delivery repo.
 ## What This Repo Owns
 
 - canonical workspace-root guidance
+- machine-readable workspace contracts
+- generated governance artifacts
+- workspace-level skill source
 - workspace audit and sync tooling
 - stale-content audit rules for active docs
 - repo inventory and cross-repo routing rules
@@ -44,12 +47,18 @@ Route those changes back to the owner repos.
   - the live workspace root has been re-synced
   - the sync and workspace audit both pass
 - If the active repo inventory changes, update:
+  - `contracts/repos.yaml`
+  - `contracts/repo-rules/`
   - `workspace-root/README.md`
   - `workspace-root/AGENTS.md`
   - `scripts/audit_workspace_layout.py`
+- If the owner model, product map, component map, or review/evidence model
+  changes, update the affected files under `contracts/` and refresh
+  `generated/` through `scripts/validate_cross_repo_truth.py --write-generated`.
 - If you retire a script name, move a workflow path, or change an ownership
-  phrase that appears across repos, update `scripts/audit_stale_content.py` so
-  the stale wording is caught automatically next time.
+  phrase that appears across repos, update `contracts/vocabulary.yaml` or the
+  affected `contracts/repo-rules/*.yaml` so the stale wording is caught
+  automatically next time.
 - If repo boundaries change, update the owning repo docs in the same work. This
   repo documents the boundary; it does not replace owner-repo documentation.
 - Treat `openclaw-isolated-deployment/` as retired unless the retirement
@@ -62,8 +71,10 @@ Run these after structural changes:
 ```bash
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
+python3 scripts/validate_contracts.py --repo-root .
+python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py
 ```

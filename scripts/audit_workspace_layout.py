@@ -3,15 +3,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
-
-REQUIRED_REPOS = (
-    "workspace-governance",
-    "platform-engineering",
-    "openclaw-runtime-distribution",
-    "openclaw-telegram-enhanced",
-    "openclaw-host-bridge",
-    "security-architecture",
-)
+from contracts_lib import active_repo_names, load_contracts
 
 
 def run(cmd: list[str], *, cwd: Path | None = None) -> str:
@@ -51,10 +43,13 @@ def main() -> int:
     args = parser.parse_args()
 
     workspace_root = args.workspace_root.resolve()
+    workspace_governance_root = workspace_root / "workspace-governance"
+    contracts = load_contracts(workspace_governance_root)
+    required_repos = tuple(active_repo_names(contracts))
     errors: list[str] = []
     dirty_repos: list[str] = []
 
-    for repo_name in REQUIRED_REPOS:
+    for repo_name in required_repos:
         repo_root = workspace_root / repo_name
         if not repo_root.exists():
             errors.append(f"missing repo: {repo_root}")
@@ -73,7 +68,6 @@ def main() -> int:
         if status:
             dirty_repos.append(repo_name)
 
-    workspace_governance_root = workspace_root / "workspace-governance"
     if workspace_governance_root.exists():
         compare_files(
             workspace_governance_root / "workspace-root" / "README.md",
@@ -92,6 +86,30 @@ def main() -> int:
         )
     else:
         errors.append(f"missing workspace governance repo: {workspace_governance_root}")
+
+    contract_validator = workspace_governance_root / "scripts" / "validate_contracts.py"
+    cross_repo_validator = workspace_governance_root / "scripts" / "validate_cross_repo_truth.py"
+    try:
+        output = run(["python3", str(contract_validator), "--repo-root", str(workspace_governance_root)])
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    try:
+        output = run(
+            [
+                "python3",
+                str(cross_repo_validator),
+                "--workspace-root",
+                str(workspace_root),
+                "--check-generated",
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
 
     platform_validator = (
         workspace_root / "platform-engineering" / "scripts" / "validate_repo_structure.py"
@@ -123,8 +141,8 @@ def main() -> int:
 
     print(
         "workspace layout valid: "
-        f"repos={len(REQUIRED_REPOS)} "
-        f"repo_guidance={len(REQUIRED_REPOS)} "
+        f"repos={len(required_repos)} "
+        f"repo_guidance={len(required_repos)} "
         "git_auth=ssh "
         "root_sync=ok"
     )

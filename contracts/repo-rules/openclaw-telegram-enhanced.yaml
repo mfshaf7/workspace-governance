@@ -1,0 +1,20 @@
+schema_version: 1
+repo: openclaw-telegram-enhanced
+lifecycle: active
+required_repo_refs:
+  - openclaw-runtime-distribution
+  - openclaw-host-bridge
+  - platform-engineering
+required_patterns:
+  readme:
+    - canonical Telegram channel plugin source
+    - copied source
+  agents:
+    - canonical Telegram channel plugin source
+    - Telegram-specific UX
+forbidden_patterns:
+  readme:
+    - deployment workspace copy
+    - bundled build input
+    - in the isolated deployment workflow
+  agents: []

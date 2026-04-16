@@ -1,0 +1,32 @@
+schema_version: 1
+evidence_by_change_class:
+  architecture-shaping:
+    required:
+      - owner repo commit
+      - updated architecture or ownership doc
+      - ADR when the decision is durable
+  source-behavior:
+    required:
+      - owner repo commit
+      - repo-local validation result
+      - updated docs when behavior changed
+  runtime-composition:
+    required:
+      - owner repo commit
+      - contract verification result
+      - approved image digest when promoted live
+  platform-contract:
+    required:
+      - platform commit
+      - contract validation result
+      - Argo or environment evidence when applied live
+  live-drift-repair:
+    required:
+      - repair evidence
+      - follow-up owner repo change or explicit exception
+      - updated runbook or operator note
+  temporary-containment:
+    required:
+      - containment evidence
+      - expiry or follow-up owner
+      - governing follow-up reference

@@ -1,0 +1,23 @@
+schema_version: 1
+review_obligations:
+  identity:
+    requires_security_review: true
+    evidence:
+      - security review checklist reference
+  secrets:
+    requires_security_review: true
+    evidence:
+      - storage owner
+      - rotation model
+  delivery:
+    requires_security_review: true
+    evidence:
+      - rollout or rollback implication
+  runtime:
+    requires_security_review: true
+    evidence:
+      - policy or audit surface reference
+  ai:
+    requires_security_review: true
+    evidence:
+      - action safety or control note

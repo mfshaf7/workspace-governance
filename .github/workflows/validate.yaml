@@ -18,11 +18,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install validation dependencies
+        run: pip install -r requirements.txt
+
       - name: Validate repo structure
         run: python3 scripts/validate_repo_structure.py --repo-root .
+
+      - name: Validate contract model
+        run: python3 scripts/validate_contracts.py --repo-root .
 
       - name: Audit stale content
         run: python3 scripts/audit_stale_content.py --workspace-root . --repo-name workspace-governance
 
       - name: Compile validation scripts
-        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py

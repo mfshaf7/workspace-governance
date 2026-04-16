@@ -10,9 +10,16 @@ The workspace is multi-product. This repo should not drift into OpenClaw-only
 language when the actual workspace governs shared platform services plus
 multiple products.
 
+It now also owns the machine-readable control-plane contracts that describe the
+active repo map, product maturity, component inventory, dependency semantics,
+review obligations, and stale vocabulary.
+
 ## What This Repository Owns
 
 - canonical source for the workspace-root `README.md` and `AGENTS.md`
+- contract source under `contracts/`
+- generated resolved governance artifacts under `generated/`
+- workspace-level skill source under `skills-src/`
 - workspace audit and sync tooling
 - cross-repo owner-map and routing conventions
 - workspace-level validation that the active repos remain aligned
@@ -36,6 +43,15 @@ Those stay in the owning repos:
 
 - `workspace-root/`
   - canonical copies of the files synced into `/home/mfshaf7/projects`
+- `contracts/`
+  - machine-readable repo, product, component, lifecycle, evidence, review, and
+    vocabulary contracts
+- `generated/`
+  - resolved owner map, dependency graph, stale-content rules, and system map
+- `skills-src/`
+  - workspace-level skill source directories
+- `templates/`
+  - scaffolds for new governance objects
 - `scripts/`
   - audit, sync, and repo-structure validation helpers
 - `.github/`
@@ -78,15 +94,18 @@ Run these from this repo:
 ```bash
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
+python3 scripts/validate_contracts.py --repo-root .
+python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py
 ```
 
 ## Read First
 
 - [AGENTS.md](AGENTS.md)
+- [contracts/README.md](contracts/README.md)
 - [workspace-root/README.md](workspace-root/README.md)
 - [workspace-root/AGENTS.md](workspace-root/AGENTS.md)
 - [scripts/README.md](scripts/README.md)

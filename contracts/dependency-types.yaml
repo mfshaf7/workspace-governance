@@ -1,0 +1,27 @@
+schema_version: 1
+dependency_types:
+  authoritative-reference:
+    description: one repo is allowed to reference another as the owner of durable truth
+    allow_target_lifecycle:
+      - active
+      - platform-integrated
+      - fully-governed
+  docs-reference:
+    description: documentation may refer to another active repo for related context
+    allow_target_lifecycle:
+      - active
+      - platform-integrated
+      - fully-governed
+      - retired
+  security-reference:
+    description: delivery or runtime repos may reference security-architecture for review and control expectations
+    allow_target_lifecycle:
+      - active
+  runtime-input:
+    description: one repo provides packaged or staged input into another repo's build or runtime workflow
+    allow_target_lifecycle:
+      - active
+      - fully-governed
+  prohibited:
+    description: dependency direction is not allowed in the current architecture
+    allow_target_lifecycle: []

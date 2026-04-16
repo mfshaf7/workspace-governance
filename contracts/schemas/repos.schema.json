@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "repos", "retired_repos"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "repos": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["lifecycle", "repo_class", "owns", "must_not_own", "allowed_authoritative_refs"],
+        "properties": {
+          "lifecycle": { "type": "string", "minLength": 1 },
+          "repo_class": { "type": "string", "minLength": 1 },
+          "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "must_not_own": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "retired_repos": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["lifecycle", "replaced_by"],
+        "properties": {
+          "lifecycle": { "type": "string", "minLength": 1 },
+          "replaced_by": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
