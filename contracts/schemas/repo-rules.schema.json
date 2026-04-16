@@ -24,6 +24,42 @@
         "agents": { "type": "array", "items": { "type": "string", "minLength": 1 } }
       },
       "additionalProperties": false
+    },
+    "security_requirements": {
+      "type": "object",
+      "required": ["security_owner", "review_checklist_path", "review_output_path", "required_artifacts"],
+      "properties": {
+        "security_owner": { "type": "string", "minLength": 1 },
+        "review_checklist_path": { "type": "string", "minLength": 1 },
+        "review_output_path": { "type": "string", "minLength": 1 },
+        "required_artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "path", "review_areas", "required_in_docs"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "path": { "type": "string", "minLength": 1 },
+              "review_areas": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "required_in_docs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "enum": ["readme", "agents"]
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

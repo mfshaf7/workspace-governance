@@ -16,3 +16,23 @@ required_patterns:
 forbidden_patterns:
   readme: []
   agents: []
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/README.md
+  required_artifacts:
+    - id: host-bridge-component-view
+      path: docs/architecture/components/openclaw-host-bridge/README.md
+      review_areas:
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: host-control-domain
+      path: docs/architecture/domains/host-control.md
+      review_areas:
+        - runtime
+        - ai
+      required_in_docs:
+        - readme
+        - agents

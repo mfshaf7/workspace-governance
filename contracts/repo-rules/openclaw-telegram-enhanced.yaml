@@ -18,3 +18,30 @@ forbidden_patterns:
     - bundled build input
     - in the isolated deployment workflow
   agents: []
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/README.md
+  required_artifacts:
+    - id: telegram-channel-component-view
+      path: docs/architecture/components/openclaw-telegram-channel/README.md
+      review_areas:
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: openclaw-data-flow
+      path: docs/architecture/products/openclaw/data-flow-and-boundaries.md
+      review_areas:
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: ai-and-agentic-domain
+      path: docs/architecture/domains/ai-and-agentic.md
+      review_areas:
+        - ai
+        - identity
+      required_in_docs:
+        - readme
+        - agents

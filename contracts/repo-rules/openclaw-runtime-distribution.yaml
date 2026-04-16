@@ -19,3 +19,31 @@ forbidden_patterns:
     - deployment workspace copy
     - bundled build input
   agents: []
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/README.md
+  required_artifacts:
+    - id: runtime-distribution-component-view
+      path: docs/architecture/components/openclaw-runtime-distribution/README.md
+      review_areas:
+        - delivery
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: openclaw-required-controls
+      path: docs/architecture/products/openclaw/required-controls.md
+      review_areas:
+        - runtime
+        - ai
+      required_in_docs:
+        - readme
+        - agents
+    - id: gitops-machine-trust
+      path: docs/architecture/domains/gitops-and-machine-trust.md
+      review_areas:
+        - delivery
+      required_in_docs:
+        - readme
+        - agents

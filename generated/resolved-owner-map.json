@@ -126,7 +126,8 @@
         "host runtime attestation",
         "WSL and Windows bridge behavior"
       ],
-      "repo_class": "runtime-enforcement"
+      "repo_class": "runtime-enforcement",
+      "requires_security_bindings": true
     },
     "openclaw-runtime-distribution": {
       "allowed_authoritative_refs": [
@@ -148,7 +149,8 @@
         "active host-control plugin package",
         "runtime-required workspace templates"
       ],
-      "repo_class": "product-runtime"
+      "repo_class": "product-runtime",
+      "requires_security_bindings": true
     },
     "openclaw-telegram-enhanced": {
       "allowed_authoritative_refs": [
@@ -169,7 +171,8 @@
         "staged media delivery behavior",
         "Telegram packaging and tests"
       ],
-      "repo_class": "product-channel"
+      "repo_class": "product-channel",
+      "requires_security_bindings": true
     },
     "platform-engineering": {
       "allowed_authoritative_refs": [
@@ -192,7 +195,8 @@
         "shared platform component docs",
         "product integration docs and runbooks"
       ],
-      "repo_class": "platform"
+      "repo_class": "platform",
+      "requires_security_bindings": true
     },
     "security-architecture": {
       "allowed_authoritative_refs": [
@@ -214,7 +218,8 @@
         "security findings and assessments",
         "product security overlays"
       ],
-      "repo_class": "security-governance"
+      "repo_class": "security-governance",
+      "requires_security_bindings": false
     },
     "workspace-governance": {
       "allowed_authoritative_refs": [
@@ -234,7 +239,8 @@
         "workspace audit tooling",
         "workspace-level skill source"
       ],
-      "repo_class": "governance"
+      "repo_class": "governance",
+      "requires_security_bindings": false
     }
   }
 }

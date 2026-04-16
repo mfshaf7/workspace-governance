@@ -3,6 +3,7 @@ repos:
   workspace-governance:
     lifecycle: active
     repo_class: governance
+    requires_security_bindings: false
     owns:
       - workspace-root guidance
       - cross-repo contracts
@@ -19,6 +20,7 @@ repos:
   platform-engineering:
     lifecycle: active
     repo_class: platform
+    requires_security_bindings: true
     owns:
       - environment contracts
       - pinned source SHAs and digests
@@ -38,6 +40,7 @@ repos:
   security-architecture:
     lifecycle: active
     repo_class: security-governance
+    requires_security_bindings: false
     owns:
       - trust-boundary architecture
       - security standards
@@ -56,6 +59,7 @@ repos:
   openclaw-runtime-distribution:
     lifecycle: active
     repo_class: product-runtime
+    requires_security_bindings: true
     owns:
       - active OpenClaw runtime composition
       - packaged runtime seam verification
@@ -74,6 +78,7 @@ repos:
   openclaw-host-bridge:
     lifecycle: active
     repo_class: runtime-enforcement
+    requires_security_bindings: true
     owns:
       - host-side policy enforcement
       - allowed roots
@@ -93,6 +98,7 @@ repos:
   openclaw-telegram-enhanced:
     lifecycle: active
     repo_class: product-channel
+    requires_security_bindings: true
     owns:
       - canonical Telegram behavior
       - Telegram routing and approvals

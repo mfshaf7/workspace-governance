@@ -15,3 +15,31 @@ forbidden_patterns:
   readme:
     - openclaw-isolated-deployment
   agents: []
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/platform/README.md
+  required_artifacts:
+    - id: platform-trust-boundaries
+      path: docs/architecture/platform/trust-boundaries.md
+      review_areas:
+        - delivery
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: gitops-machine-trust
+      path: docs/architecture/domains/gitops-and-machine-trust.md
+      review_areas:
+        - identity
+        - delivery
+      required_in_docs:
+        - readme
+        - agents
+    - id: secrets-and-recovery
+      path: docs/architecture/domains/secrets-and-recovery.md
+      review_areas:
+        - secrets
+      required_in_docs:
+        - readme
+        - agents
