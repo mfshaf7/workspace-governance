@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 import sys
 
+from contracts_lib import load_contracts
+
 
 def directories_match(left: Path, right: Path) -> bool:
     if not left.exists() or not right.exists():
@@ -20,7 +22,7 @@ def directories_match(left: Path, right: Path) -> bool:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install workspace-governance skills into a Codex skill directory.")
+    parser = argparse.ArgumentParser(description="Install registered workspace skills into a Codex skill directory.")
     parser.add_argument(
         "--repo-root",
         default=Path(__file__).resolve().parents[1],
@@ -44,20 +46,41 @@ def main() -> int:
         action="store_true",
         help="only verify that installed skills match the source directories",
     )
+    parser.add_argument(
+        "--workspace-root",
+        default=Path(__file__).resolve().parents[2],
+        type=Path,
+        help="workspace root containing the active repos",
+    )
     args = parser.parse_args()
 
     repo_root = args.repo_root.resolve()
-    source_root = repo_root / "skills-src"
+    workspace_root = args.workspace_root.resolve()
+    contracts = load_contracts(repo_root)
     target_root = args.target_root.expanduser().resolve()
     selected = set(args.skill_names or [])
-
-    source_dirs = sorted(path for path in source_root.iterdir() if path.is_dir())
+    registered_skills = contracts["skills"]["skills"]
     errors: list[str] = []
 
-    for source_dir in source_dirs:
-        if selected and source_dir.name not in selected:
+    unknown = sorted(selected - set(registered_skills))
+    if unknown:
+        for name in unknown:
+            errors.append(f"unknown registered skill: {name}")
+        for error in errors:
+            print(f"ERROR: {error}")
+        return 1
+
+    for skill_name, payload in sorted(registered_skills.items()):
+        if selected and skill_name not in selected:
             continue
+        source_dir = workspace_root / payload["owner_repo"] / payload["source_path"]
         target_dir = target_root / source_dir.name
+        if not source_dir.exists():
+            errors.append(f"missing skill source: {source_dir}")
+            continue
+        if not (source_dir / "SKILL.md").exists():
+            errors.append(f"missing skill definition: {source_dir / 'SKILL.md'}")
+            continue
         if args.check:
             if not directories_match(source_dir, target_dir):
                 errors.append(f"skill out of sync: {target_dir}")
@@ -73,7 +96,7 @@ def main() -> int:
 
     print(
         ("skill install check valid: " if args.check else "skills installed: ")
-        + ", ".join(sorted(selected or [path.name for path in source_dirs]))
+        + ", ".join(sorted(selected or registered_skills.keys()))
     )
     return 0
 

@@ -54,6 +54,7 @@ def main() -> int:
         "vocabulary": repo_root / "contracts/vocabulary.yaml",
         "exceptions": repo_root / "contracts/exceptions.yaml",
         "validation_matrix": repo_root / "contracts/validation-matrix.yaml",
+        "skills": repo_root / "contracts/skills.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -69,6 +70,7 @@ def main() -> int:
     product_names = set(contracts["products"]["products"].keys())
     change_classes = set(contracts["change_classes"]["change_classes"].keys())
     validator_scripts = contracts["validation_matrix"]["validators"]
+    registered_skills = contracts["skills"]["skills"]
 
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:
@@ -176,6 +178,16 @@ def main() -> int:
                 f"contracts/exceptions.yaml: exception {entry['id']} expired on {entry['expires_on']}"
             )
 
+    for skill_name, payload in registered_skills.items():
+        if payload["owner_repo"] not in active_repos:
+            errors.append(
+                f"contracts/skills.yaml: {skill_name} owner_repo {payload['owner_repo']!r} is not an active repo"
+            )
+        if Path(payload["source_path"]).name != skill_name:
+            errors.append(
+                f"contracts/skills.yaml: {skill_name} source_path must end in the skill name"
+            )
+
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
@@ -186,7 +198,8 @@ def main() -> int:
         f"active_repos={len(active_repos)} "
         f"products={len(product_names)} "
         f"components={len(contracts['components']['components'])} "
-        f"repo_rules={len(repo_rules)}"
+        f"repo_rules={len(repo_rules)} "
+        f"skills={len(registered_skills)}"
     )
     return 0
 

@@ -10,7 +10,8 @@
 - `contracts_lib.py`
   - shared YAML and generated-artifact loader for the governance scripts
 - `install_skills.py`
-  - installs or verifies the workspace-level skills under `skills-src/`
+  - installs or verifies the registered skills declared in `contracts/skills.yaml`
+    from their owner repos into a Codex skill directory
 - `sync_workspace_root.py`
   - syncs the canonical files in this repo back into `/home/mfshaf7/projects`
 - `validate_contracts.py`

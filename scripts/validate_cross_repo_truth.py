@@ -40,6 +40,7 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
     repos = contracts["repos"]["repos"]
     products = contracts["products"]["products"]
     components = contracts["components"]["components"]
+    skills = contracts["skills"]["skills"]
 
     dependency_edges: list[dict[str, str]] = []
     for repo_name, payload in repos.items():
@@ -93,11 +94,13 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
             "retired_repos": contracts["repos"].get("retired_repos", {}),
             "products": products,
             "components": components,
+            "skills": skills,
         },
         "resolved_owner_map": {
             "repos": repos,
             "products": products,
             "components": components,
+            "skills": skills,
         },
         "resolved_dependency_graph": {
             "dependency_types": contracts["dependency_types"]["dependency_types"],
@@ -181,6 +184,16 @@ def main() -> int:
                 f"contracts/components.yaml: {component_name} interface contract path is missing in owner repo {payload['owner_repo']}: {contract_path}"
             )
 
+    for skill_name, payload in contracts["skills"]["skills"].items():
+        skill_path = workspace_root / payload["owner_repo"] / payload["source_path"]
+        if not skill_path.exists():
+            errors.append(
+                f"contracts/skills.yaml: {skill_name} source path is missing in owner repo {payload['owner_repo']}: {skill_path}"
+            )
+            continue
+        if not (skill_path / "SKILL.md").exists():
+            errors.append(f"{skill_path}: missing SKILL.md for registered skill {skill_name}")
+
     compiled = build_generated_contracts(repo_root, contracts)
     paths = generated_paths(repo_root)
 
@@ -217,7 +230,8 @@ def main() -> int:
         "cross-repo truth valid: "
         f"repos={len(active_repo_names(contracts))} "
         f"products={len(contracts['products']['products'])} "
-        f"components={len(contracts['components']['components'])}"
+        f"components={len(contracts['components']['components'])} "
+        f"skills={len(contracts['skills']['skills'])}"
     )
     return 0
 

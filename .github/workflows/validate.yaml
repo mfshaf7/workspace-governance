@@ -45,6 +45,7 @@ jobs:
           if workspace_root.exists():
               shutil.rmtree(workspace_root)
           workspace_root.mkdir()
+          shutil.copytree(repo_root, workspace_root / "workspace-governance")
 
           repos = yaml.safe_load((repo_root / "contracts" / "repos.yaml").read_text())["repos"]
           owner_repos = sorted(repos.keys())
@@ -71,6 +72,12 @@ jobs:
 
       - name: Validate security bindings
         run: python3 scripts/validate_security_bindings.py --workspace-root .workspace-ci
+
+      - name: Install registered skills
+        run: python3 scripts/install_skills.py --workspace-root .workspace-ci --target-root .workspace-skills
+
+      - name: Verify installed skills
+        run: python3 scripts/install_skills.py --workspace-root .workspace-ci --target-root .workspace-skills --check
 
       - name: Audit stale content
         run: python3 scripts/audit_stale_content.py --workspace-root . --repo-name workspace-governance

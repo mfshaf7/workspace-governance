@@ -242,5 +242,37 @@
       "repo_class": "governance",
       "requires_security_bindings": false
     }
+  },
+  "skills": {
+    "architecture-discussion-gate": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/architecture-discussion-gate"
+    },
+    "contract-drift-check": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/contract-drift-check"
+    },
+    "done-criteria-enforcer": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/done-criteria-enforcer"
+    },
+    "openclaw-governed-delivery": {
+      "owner_repo": "platform-engineering",
+      "scope": "product",
+      "source_path": "products/openclaw/skills-src/openclaw-governed-delivery"
+    },
+    "security-governance-review": {
+      "owner_repo": "security-architecture",
+      "scope": "repo",
+      "source_path": "skills-src/security-governance-review"
+    },
+    "workspace-change-router": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/workspace-change-router"
+    }
   }
 }

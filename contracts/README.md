@@ -39,6 +39,9 @@ Use these contracts to declare:
   - time-bounded waivers with owner, rationale, and expiry
 - `validation-matrix.yaml`
   - which validator or audit enforces which contract surface
+- `skills.yaml`
+  - registered workspace and repo-owned skills, their owner repo, and their
+    source path
 
 ## Repo Rules
 

@@ -22,6 +22,7 @@ CONTRACT_FILES = {
     "vocabulary": "contracts/vocabulary.yaml",
     "exceptions": "contracts/exceptions.yaml",
     "validation_matrix": "contracts/validation-matrix.yaml",
+    "skills": "contracts/skills.yaml",
 }
 
 SCHEMA_FILES = {
@@ -38,6 +39,7 @@ SCHEMA_FILES = {
     "vocabulary": "contracts/schemas/vocabulary.schema.json",
     "exceptions": "contracts/schemas/exceptions.schema.json",
     "validation_matrix": "contracts/schemas/validation-matrix.schema.json",
+    "skills": "contracts/schemas/skills.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"
