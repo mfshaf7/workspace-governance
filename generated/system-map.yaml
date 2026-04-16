@@ -176,12 +176,18 @@ components:
     owner_repo: openclaw-host-bridge
     product: openclaw
     security_owner: security-architecture
+    interface_contract:
+      path: contracts/interface-manifest.json
+      validation_command: npm run test:interface-contract
   openclaw-telegram-channel:
     lifecycle: active
     component_class: product-channel
     owner_repo: openclaw-telegram-enhanced
     product: openclaw
     security_owner: security-architecture
+    interface_contract:
+      path: contracts/interface-manifest.json
+      validation_command: npm run test:host-control-contract
   openclaw-runtime-distribution:
     lifecycle: active
     component_class: product-runtime
@@ -194,3 +200,6 @@ components:
     owner_repo: openclaw-runtime-distribution
     product: openclaw
     security_owner: security-architecture
+    interface_contract:
+      path: host-control-openclaw-plugin/contracts/interface-manifest.json
+      validation_command: npm --prefix host-control-openclaw-plugin run test:interface-contract

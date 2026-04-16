@@ -16,6 +16,10 @@
     },
     "host-control-plugin": {
       "component_class": "product-plugin",
+      "interface_contract": {
+        "path": "host-control-openclaw-plugin/contracts/interface-manifest.json",
+        "validation_command": "npm --prefix host-control-openclaw-plugin run test:interface-contract"
+      },
       "lifecycle": "active",
       "owner_repo": "openclaw-runtime-distribution",
       "product": "openclaw",
@@ -30,6 +34,10 @@
     },
     "openclaw-host-bridge": {
       "component_class": "product-runtime",
+      "interface_contract": {
+        "path": "contracts/interface-manifest.json",
+        "validation_command": "npm run test:interface-contract"
+      },
       "lifecycle": "active",
       "owner_repo": "openclaw-host-bridge",
       "product": "openclaw",
@@ -44,6 +52,10 @@
     },
     "openclaw-telegram-channel": {
       "component_class": "product-channel",
+      "interface_contract": {
+        "path": "contracts/interface-manifest.json",
+        "validation_command": "npm run test:host-control-contract"
+      },
       "lifecycle": "active",
       "owner_repo": "openclaw-telegram-enhanced",
       "product": "openclaw",
