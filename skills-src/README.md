@@ -1,5 +1,7 @@
 # Skill Source
 
-This directory holds the canonical source for workspace-level skills.
+This directory holds the canonical source for workspace-level skills owned by
+`workspace-governance`.
 
-Install them into the Codex skill path through `scripts/install_skills.py`.
+Repo-owned registered skills may live in other owner repos, but they are still
+installed through `contracts/skills.yaml` and `scripts/install_skills.py`.

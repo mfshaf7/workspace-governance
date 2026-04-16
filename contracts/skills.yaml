@@ -1,0 +1,26 @@
+schema_version: 1
+skills:
+  workspace-change-router:
+    owner_repo: workspace-governance
+    source_path: skills-src/workspace-change-router
+    scope: workspace
+  architecture-discussion-gate:
+    owner_repo: workspace-governance
+    source_path: skills-src/architecture-discussion-gate
+    scope: workspace
+  contract-drift-check:
+    owner_repo: workspace-governance
+    source_path: skills-src/contract-drift-check
+    scope: workspace
+  done-criteria-enforcer:
+    owner_repo: workspace-governance
+    source_path: skills-src/done-criteria-enforcer
+    scope: workspace
+  security-governance-review:
+    owner_repo: security-architecture
+    source_path: skills-src/security-governance-review
+    scope: repo
+  openclaw-governed-delivery:
+    owner_repo: platform-engineering
+    source_path: products/openclaw/skills-src/openclaw-governed-delivery
+    scope: product

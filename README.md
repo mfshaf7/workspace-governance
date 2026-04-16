@@ -49,7 +49,7 @@ Those stay in the owning repos:
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
 - `skills-src/`
-  - workspace-level skill source directories
+  - workspace-level skill source directories owned here
 - `templates/`
   - scaffolds for new governance objects
 - `scripts/`
@@ -63,7 +63,9 @@ Those stay in the owning repos:
 2. Sync them into the live workspace root.
 3. Run repo-local validation.
 4. Run the workspace audit against `/home/mfshaf7/projects`.
-5. If repo ownership or routing changed, update the owning repo docs in the
+5. Reinstall or verify the registered skills if skill source or registry state
+   changed.
+6. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
 ## Sync Model
@@ -98,6 +100,8 @@ python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
@@ -108,6 +112,7 @@ python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_cont
 
 - [AGENTS.md](AGENTS.md)
 - [contracts/README.md](contracts/README.md)
+- [contracts/skills.yaml](contracts/skills.yaml)
 - [workspace-root/README.md](workspace-root/README.md)
 - [workspace-root/AGENTS.md](workspace-root/AGENTS.md)
 - [scripts/README.md](scripts/README.md)

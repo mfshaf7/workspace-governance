@@ -19,6 +19,7 @@ delivery repo.
 - machine-readable workspace contracts
 - generated governance artifacts
 - workspace-level skill source
+- registered repo-owned skill inventory
 - workspace audit and sync tooling
 - stale-content audit rules for active docs
 - repo inventory and cross-repo routing rules
@@ -55,6 +56,8 @@ Route those changes back to the owner repos.
 - If the owner model, product map, component map, or review/evidence model
   changes, update the affected files under `contracts/` and refresh
   `generated/` through `scripts/validate_cross_repo_truth.py --write-generated`.
+- If the registered skill inventory changes, update `contracts/skills.yaml`,
+  the owner repo skill source, and rerun `scripts/install_skills.py`.
 - Repos that declare `requires_security_bindings: true` in `contracts/repos.yaml`
   must keep concrete `security-architecture` artifact references, review
   checklist references, and review-output scope references in their root docs.
@@ -80,6 +83,8 @@ python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
