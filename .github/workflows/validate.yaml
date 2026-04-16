@@ -1,0 +1,25 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate repo structure
+        run: python3 scripts/validate_repo_structure.py --repo-root .
+
+      - name: Compile validation scripts
+        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py

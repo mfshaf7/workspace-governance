@@ -1,0 +1,83 @@
+# Workspace Governance
+
+This repository is the cross-repo governance and routing layer for the
+`/home/mfshaf7/projects` workspace.
+
+It owns the canonical workspace-level guidance and audit tooling that are
+materialized into the local workspace root for day-to-day operator use.
+
+## What This Repository Owns
+
+- canonical source for the workspace-root `README.md` and `AGENTS.md`
+- workspace audit and sync tooling
+- cross-repo owner-map and routing conventions
+- workspace-level validation that the active repos remain aligned
+
+## What This Repository Does Not Own
+
+- platform manifests, Argo apps, or environment contracts
+- product source, runtime packaging, or host-runtime implementation
+- repo-local operator runbooks
+- security standards or review outputs
+
+Those stay in the owning repos:
+
+- `platform-engineering/`
+- `openclaw-runtime-distribution/`
+- `openclaw-telegram-enhanced/`
+- `openclaw-host-bridge/`
+- `security-architecture/`
+
+## Repository Layout
+
+- `workspace-root/`
+  - canonical copies of the files synced into `/home/mfshaf7/projects`
+- `scripts/`
+  - audit, sync, and repo-structure validation helpers
+- `.github/`
+  - repo ownership and validation workflow metadata
+
+## Operating Model
+
+1. Edit the canonical files in this repo.
+2. Sync them into the live workspace root.
+3. Run repo-local validation.
+4. Run the workspace audit against `/home/mfshaf7/projects`.
+5. If repo ownership or routing changed, update the owning repo docs in the
+   same work.
+
+## Sync Model
+
+The workspace root is not a Git repo, but local tools and future sessions still
+read these paths directly:
+
+- `/home/mfshaf7/projects/README.md`
+- `/home/mfshaf7/projects/AGENTS.md`
+- `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
+
+This repo keeps the canonical copies in:
+
+- `workspace-root/README.md`
+- `workspace-root/AGENTS.md`
+- `scripts/audit_workspace_layout.py`
+
+Use `scripts/sync_workspace_root.py` to materialize the canonical files back
+into the workspace root.
+
+## Validation
+
+Run these from this repo:
+
+```bash
+python3 scripts/validate_repo_structure.py --repo-root .
+python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
+python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/sync_workspace_root.py scripts/validate_repo_structure.py
+```
+
+## Read First
+
+- [AGENTS.md](AGENTS.md)
+- [workspace-root/README.md](workspace-root/README.md)
+- [workspace-root/AGENTS.md](workspace-root/AGENTS.md)
+- [scripts/README.md](scripts/README.md)
