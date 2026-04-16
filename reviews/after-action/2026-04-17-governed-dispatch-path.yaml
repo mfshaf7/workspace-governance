@@ -1,0 +1,55 @@
+schema_version: 1
+id: 2026-04-17-governed-dispatch-path
+title: Governed GitHub workflow dispatch path was discovered too late
+recorded_on: '2026-04-17'
+owner_repo: workspace-governance
+summary: An OpenClaw stage change initially stalled because the agent defaulted to
+  raw gh auth assumptions instead of the governed secret-backed workflow dispatch
+  path already owned by platform-engineering.
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openclaw
+  related_components: []
+  change_classes:
+  - platform-contract
+source_refs:
+- https://github.com/mfshaf7/platform-engineering/pull/54
+- https://github.com/mfshaf7/platform-engineering/pull/55
+lessons:
+- id: governed-dispatch-path-must-win-over-raw-gh
+  title: Governed workflow dispatch should win over raw shell auth assumptions
+  failure_class: shell-reliability-miss
+  trigger: shell-or-tooling-reliability-miss
+  finding: The workflow dispatch step fell back to raw gh workflow run and local auth
+    assumptions even though platform-engineering already published a supported secret-backed
+    dispatch script for this exact operation.
+  impact: The stage experiment paused on an avoidable auth blocker, created unnecessary
+    operator friction, and delayed delivery even though the governed credential path
+    already existed.
+  status: closed
+  expected_control_types:
+  - contract
+  - doc
+  - script
+  - skill
+  control_refs:
+  - type: skill
+    path: platform-engineering/products/openclaw/skills-src/openclaw-governed-delivery/SKILL.md
+    owner_repo: platform-engineering
+    note: Prefer the secret-backed dispatch helper for governed workflow runs
+  - type: script
+    path: platform-engineering/scripts/dispatch_github_workflow_from_k3s_secret.sh
+    owner_repo: platform-engineering
+    note: Existing governed dispatch seam that reads the GitHub token from the cluster-managed
+      secret
+  - type: doc
+    path: platform-engineering/scripts/README.md
+    owner_repo: platform-engineering
+    note: Documents the dispatch helper as a supported operator script
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
