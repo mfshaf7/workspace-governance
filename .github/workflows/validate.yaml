@@ -18,6 +18,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install validation dependencies
         run: pip install -r requirements.txt
 
@@ -27,8 +32,49 @@ jobs:
       - name: Validate contract model
         run: python3 scripts/validate_contracts.py --repo-root .
 
+      - name: Materialize component-owner repos
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          import subprocess
+          import yaml
+
+          repo_root = Path(".").resolve()
+          workspace_root = repo_root / ".workspace-ci"
+          if workspace_root.exists():
+              shutil.rmtree(workspace_root)
+          workspace_root.mkdir()
+
+          components = yaml.safe_load((repo_root / "contracts" / "components.yaml").read_text())["components"]
+          owner_repos = sorted(
+              {
+                  payload["owner_repo"]
+                  for payload in components.values()
+                  if payload.get("interface_contract")
+              }
+          )
+
+          for repo_name in owner_repos:
+              target = workspace_root / repo_name
+              subprocess.run(
+                  [
+                      "git",
+                      "clone",
+                      "--depth",
+                      "1",
+                      f"https://github.com/mfshaf7/{repo_name}.git",
+                      str(target),
+                  ],
+                  check=True,
+              )
+          PY
+
+      - name: Validate component contracts
+        run: python3 scripts/validate_component_contracts.py --workspace-root .workspace-ci --prepare-node-deps
+
       - name: Audit stale content
         run: python3 scripts/audit_stale_content.py --workspace-root . --repo-name workspace-governance
 
       - name: Compile validation scripts
-        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py
+        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py

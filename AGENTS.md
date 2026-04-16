@@ -55,6 +55,8 @@ Route those changes back to the owner repos.
 - If the owner model, product map, component map, or review/evidence model
   changes, update the affected files under `contracts/` and refresh
   `generated/` through `scripts/validate_cross_repo_truth.py --write-generated`.
+- If a component publishes an `interface_contract`, its declared
+  `validation_command` must stay runnable from `scripts/validate_component_contracts.py`.
 - If you retire a script name, move a workflow path, or change an ownership
   phrase that appears across repos, update `contracts/vocabulary.yaml` or the
   affected `contracts/repo-rules/*.yaml` so the stale wording is caught
@@ -73,8 +75,9 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
+python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py
 ```

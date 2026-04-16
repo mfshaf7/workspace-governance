@@ -39,6 +39,7 @@ REQUIRED_FILES = (
     "scripts/audit_stale_content.py",
     "scripts/contracts_lib.py",
     "scripts/install_skills.py",
+    "scripts/validate_component_contracts.py",
     "scripts/sync_workspace_root.py",
     "scripts/validate_contracts.py",
     "scripts/validate_cross_repo_truth.py",
