@@ -35,12 +35,16 @@ That means:
 3. Use this file only to route the task to the correct owner.
 4. Use the workspace audit when repo inventory or workspace governance changed:
    - `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
+5. When cross-repo ownership or vocabulary truth matters, use the machine-readable
+   contracts in:
+   - `/home/mfshaf7/projects/workspace-governance/contracts/`
 
 ## Current Owner Map
 
 - `workspace-governance/`
-  - owns workspace-root `README.md` and `AGENTS.md`, workspace audit tooling,
-    and cross-repo routing rules
+  - owns workspace-root `README.md` and `AGENTS.md`, workspace contracts,
+    generated governance artifacts, workspace audit tooling, and cross-repo
+    routing rules
   - read first:
     - `workspace-governance/AGENTS.md`
     - `workspace-governance/README.md`
@@ -160,12 +164,14 @@ Only start implementation after that discussion narrows the target design.
 - A workspace-governance change is not complete until the sync has been run and
   the workspace audit passes against the live root.
 - If the repo inventory, owner map, or routing model changes, update:
+  - `workspace-governance/contracts/repos.yaml`
+  - `workspace-governance/contracts/repo-rules/`
   - `workspace-governance/workspace-root/README.md`
   - `workspace-governance/workspace-root/AGENTS.md`
   - `workspace-governance/scripts/audit_workspace_layout.py`
 - If a retired path, repo, or operator command must never reappear in active
-  guidance, update `workspace-governance/scripts/audit_stale_content.py` in the
-  same work.
+  guidance, update `workspace-governance/contracts/vocabulary.yaml` or the
+  affected `workspace-governance/contracts/repo-rules/*.yaml` in the same work.
 - If a repo boundary changes, update the owning repo docs in the same work.
 
 ## Operating Rules
@@ -200,6 +206,8 @@ If that evidence cannot be produced, the work is not complete.
 - `workspace-governance/`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_repo_structure.py --repo-root .`
+  - `python3 scripts/validate_contracts.py --repo-root .`
+  - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`

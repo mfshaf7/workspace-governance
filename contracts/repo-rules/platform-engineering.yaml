@@ -1,0 +1,17 @@
+schema_version: 1
+repo: platform-engineering
+lifecycle: active
+required_repo_refs:
+  - security-architecture
+required_patterns:
+  readme:
+    - shared platform and release-governance repository
+    - products/
+    - docs/components/
+  agents:
+    - workflow maturity
+    - products/<product>
+forbidden_patterns:
+  readme:
+    - openclaw-isolated-deployment
+  agents: []

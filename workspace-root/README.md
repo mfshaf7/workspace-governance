@@ -57,7 +57,9 @@ Treat it as a governed system, not a loose folder of related repos.
 ## Workspace Governance And Audit
 
 `workspace-governance/` owns the canonical copies of the workspace-root files
-and the workspace audit script.
+plus the machine-readable contract model that defines the active repo map,
+product maturity, component inventory, vocabulary, and cross-repo routing
+rules.
 
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
@@ -74,10 +76,18 @@ Supported stale-content audit entrypoint:
 python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
 ```
 
+Supported contract validation entrypoints:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_contracts.py --repo-root /home/mfshaf7/projects/workspace-governance
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
+```
+
 ## Start Here
 
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
+- Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
 - Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
 - Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
 - OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/architecture-and-owner-model.md)

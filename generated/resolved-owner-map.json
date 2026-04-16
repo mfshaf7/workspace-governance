@@ -1,0 +1,228 @@
+{
+  "components": {
+    "argo-cd": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture"
+    },
+    "external-secrets": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture"
+    },
+    "host-control-plugin": {
+      "component_class": "product-plugin",
+      "lifecycle": "active",
+      "owner_repo": "openclaw-runtime-distribution",
+      "product": "openclaw",
+      "security_owner": "security-architecture"
+    },
+    "observability": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture"
+    },
+    "openclaw-host-bridge": {
+      "component_class": "product-runtime",
+      "lifecycle": "active",
+      "owner_repo": "openclaw-host-bridge",
+      "product": "openclaw",
+      "security_owner": "security-architecture"
+    },
+    "openclaw-runtime-distribution": {
+      "component_class": "product-runtime",
+      "lifecycle": "active",
+      "owner_repo": "openclaw-runtime-distribution",
+      "product": "openclaw",
+      "security_owner": "security-architecture"
+    },
+    "openclaw-telegram-channel": {
+      "component_class": "product-channel",
+      "lifecycle": "active",
+      "owner_repo": "openclaw-telegram-enhanced",
+      "product": "openclaw",
+      "security_owner": "security-architecture"
+    },
+    "platform-postgresql": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture"
+    },
+    "vault": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture"
+    }
+  },
+  "products": {
+    "openclaw": {
+      "governed_prod_promotion": true,
+      "highest_real_endpoint": "governed-prod",
+      "lifecycle": "fully-governed",
+      "platform_owner": "platform-engineering",
+      "runtime_owner": "openclaw-runtime-distribution",
+      "security_owner": "security-architecture",
+      "source_owners": [
+        "openclaw-telegram-enhanced",
+        "openclaw-host-bridge",
+        "openclaw-runtime-distribution"
+      ],
+      "stage_supported": true
+    },
+    "openproject": {
+      "governed_prod_promotion": false,
+      "highest_real_endpoint": "platform-integrated-runtime",
+      "lifecycle": "platform-integrated",
+      "platform_owner": "platform-engineering",
+      "runtime_owner": "platform-engineering",
+      "security_owner": "security-architecture",
+      "source_owners": [
+        "platform-engineering"
+      ],
+      "stage_supported": false
+    }
+  },
+  "repos": {
+    "openclaw-host-bridge": {
+      "allowed_authoritative_refs": [
+        "platform-engineering",
+        "security-architecture",
+        "openclaw-runtime-distribution",
+        "openclaw-telegram-enhanced"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "Telegram UX",
+        "environment promotion",
+        "image composition"
+      ],
+      "owns": [
+        "host-side policy enforcement",
+        "allowed roots",
+        "audit logging",
+        "host export staging",
+        "host runtime attestation",
+        "WSL and Windows bridge behavior"
+      ],
+      "repo_class": "runtime-enforcement"
+    },
+    "openclaw-runtime-distribution": {
+      "allowed_authoritative_refs": [
+        "openclaw-telegram-enhanced",
+        "openclaw-host-bridge",
+        "platform-engineering",
+        "security-architecture"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "canonical Telegram source",
+        "canonical host bridge source",
+        "environment approval",
+        "Argo deployment state"
+      ],
+      "owns": [
+        "active OpenClaw runtime composition",
+        "packaged runtime seam verification",
+        "active host-control plugin package",
+        "runtime-required workspace templates"
+      ],
+      "repo_class": "product-runtime"
+    },
+    "openclaw-telegram-enhanced": {
+      "allowed_authoritative_refs": [
+        "openclaw-runtime-distribution",
+        "openclaw-host-bridge",
+        "platform-engineering",
+        "security-architecture"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "host enforcement",
+        "platform rollout",
+        "security standards"
+      ],
+      "owns": [
+        "canonical Telegram behavior",
+        "Telegram routing and approvals",
+        "staged media delivery behavior",
+        "Telegram packaging and tests"
+      ],
+      "repo_class": "product-channel"
+    },
+    "platform-engineering": {
+      "allowed_authoritative_refs": [
+        "security-architecture",
+        "openclaw-runtime-distribution",
+        "openclaw-telegram-enhanced",
+        "openclaw-host-bridge",
+        "workspace-governance"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "canonical Telegram source",
+        "canonical host bridge source",
+        "security governance standards"
+      ],
+      "owns": [
+        "environment contracts",
+        "pinned source SHAs and digests",
+        "Argo-managed deployment state",
+        "shared platform component docs",
+        "product integration docs and runbooks"
+      ],
+      "repo_class": "platform"
+    },
+    "security-architecture": {
+      "allowed_authoritative_refs": [
+        "platform-engineering",
+        "openclaw-host-bridge",
+        "openclaw-runtime-distribution",
+        "openclaw-telegram-enhanced"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "rollout implementation",
+        "product packaging",
+        "operator runbooks"
+      ],
+      "owns": [
+        "trust-boundary architecture",
+        "security standards",
+        "review methodology",
+        "security findings and assessments",
+        "product security overlays"
+      ],
+      "repo_class": "security-governance"
+    },
+    "workspace-governance": {
+      "allowed_authoritative_refs": [
+        "platform-engineering",
+        "security-architecture"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "platform rollout",
+        "product source",
+        "runtime packaging",
+        "security standards"
+      ],
+      "owns": [
+        "workspace-root guidance",
+        "cross-repo contracts",
+        "workspace audit tooling",
+        "workspace-level skill source"
+      ],
+      "repo_class": "governance"
+    }
+  }
+}

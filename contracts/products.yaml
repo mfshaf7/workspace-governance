@@ -1,0 +1,24 @@
+schema_version: 1
+products:
+  openclaw:
+    lifecycle: fully-governed
+    platform_owner: platform-engineering
+    security_owner: security-architecture
+    runtime_owner: openclaw-runtime-distribution
+    source_owners:
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - openclaw-runtime-distribution
+    stage_supported: true
+    governed_prod_promotion: true
+    highest_real_endpoint: governed-prod
+  openproject:
+    lifecycle: platform-integrated
+    platform_owner: platform-engineering
+    security_owner: security-architecture
+    runtime_owner: platform-engineering
+    source_owners:
+      - platform-engineering
+    stage_supported: false
+    governed_prod_promotion: false
+    highest_real_endpoint: platform-integrated-runtime

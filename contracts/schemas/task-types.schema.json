@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "task_types"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "task_types": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["primary_repo", "change_class", "discussion_required"],
+        "properties": {
+          "primary_repo": { "type": "string", "minLength": 1 },
+          "change_class": { "type": "string", "minLength": 1 },
+          "discussion_required": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

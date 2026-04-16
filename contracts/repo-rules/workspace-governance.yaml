@@ -1,0 +1,18 @@
+schema_version: 1
+repo: workspace-governance
+lifecycle: active
+required_repo_refs:
+  - platform-engineering
+  - security-architecture
+required_patterns:
+  readme:
+    - cross-repo governance and routing layer
+    - workspace-root
+    - workspace audit and sync tooling
+  agents:
+    - workspace-level control plane
+    - new product
+    - Treat `openclaw-isolated-deployment/` as retired
+forbidden_patterns:
+  readme: []
+  agents: []

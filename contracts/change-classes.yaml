@@ -1,0 +1,14 @@
+schema_version: 1
+change_classes:
+  architecture-shaping:
+    description: shared design, ownership, or trust-boundary change
+  source-behavior:
+    description: source-level behavior or implementation change in the owning repo
+  runtime-composition:
+    description: packaging, workspace-template, or bundled runtime assembly change
+  platform-contract:
+    description: environment contract, GitOps, promotion, or rollout-model change
+  live-drift-repair:
+    description: host, runtime, or platform drift repair outside normal build flow
+  temporary-containment:
+    description: incident containment that must be backported to the owner path

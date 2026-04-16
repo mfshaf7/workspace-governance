@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "validators"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "validators": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["script", "scope"],
+        "properties": {
+          "script": { "type": "string", "minLength": 1 },
+          "scope": { "type": "string", "minLength": 1 },
+          "requires_workspace_checkout": { "type": "boolean" },
+          "generated_outputs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

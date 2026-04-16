@@ -1,0 +1,12 @@
+schema_version: 1
+contract_set: workspace-governance
+compatibility:
+  minimum_validator_version: 1
+  supported_schema_versions:
+    - 1
+migration_policy:
+  breaking_change_requires:
+    - schema version bump
+    - validator update
+    - generated artifact refresh
+    - workspace audit rerun

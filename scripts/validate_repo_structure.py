@@ -9,12 +9,39 @@ REQUIRED_FILES = (
     "README.md",
     "AGENTS.md",
     ".gitignore",
+    "requirements.txt",
     ".github/CODEOWNERS",
     ".github/workflows/validate.yaml",
+    "contracts/README.md",
+    "contracts/version.yaml",
+    "contracts/repos.yaml",
+    "contracts/products.yaml",
+    "contracts/components.yaml",
+    "contracts/task-types.yaml",
+    "contracts/lifecycle.yaml",
+    "contracts/dependency-types.yaml",
+    "contracts/change-classes.yaml",
+    "contracts/evidence-obligations.yaml",
+    "contracts/review-obligations.yaml",
+    "contracts/vocabulary.yaml",
+    "contracts/exceptions.yaml",
+    "contracts/validation-matrix.yaml",
+    "contracts/schemas/version.schema.json",
+    "contracts/schemas/repos.schema.json",
+    "contracts/schemas/products.schema.json",
+    "contracts/schemas/components.schema.json",
+    "contracts/schemas/repo-rules.schema.json",
+    "generated/README.md",
+    "skills-src/README.md",
+    "templates/README.md",
     "scripts/README.md",
     "scripts/audit_workspace_layout.py",
     "scripts/audit_stale_content.py",
+    "scripts/contracts_lib.py",
+    "scripts/install_skills.py",
     "scripts/sync_workspace_root.py",
+    "scripts/validate_contracts.py",
+    "scripts/validate_cross_repo_truth.py",
     "scripts/validate_repo_structure.py",
     "workspace-root/README.md",
     "workspace-root/AGENTS.md",
@@ -24,6 +51,21 @@ REQUIRED_FILES = (
 WORKSPACE_ROOT_MARKDOWN_FILES = (
     "workspace-root/README.md",
     "workspace-root/AGENTS.md",
+)
+
+
+REQUIRED_DIRECTORIES = (
+    "contracts/repo-rules",
+    "contracts/schemas",
+    "templates/repo-rule",
+    "templates/product",
+    "templates/component",
+    "templates/exception",
+    "generated",
+    "skills-src/workspace-change-router",
+    "skills-src/architecture-discussion-gate",
+    "skills-src/contract-drift-check",
+    "skills-src/done-criteria-enforcer",
 )
 
 
@@ -57,6 +99,11 @@ def main() -> int:
         target = repo_root / rel_path
         if not target.exists():
             errors.append(f"missing required file: {target}")
+
+    for rel_path in REQUIRED_DIRECTORIES:
+        target = repo_root / rel_path
+        if not target.exists():
+            errors.append(f"missing required directory: {target}")
 
     canonical_note = "Canonical source:"
     for rel_path in ("workspace-root/README.md", "workspace-root/AGENTS.md"):

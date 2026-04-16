@@ -1,0 +1,64 @@
+schema_version: 1
+canonical_terms:
+  runtimeDistribution:
+    preferred: openclaw-runtime-distribution
+    aliases:
+      - runtime distribution
+  workspaceControlPlane:
+    preferred: workspace-governance
+    aliases:
+      - workspace control plane
+  platformAuthority:
+    preferred: platform-engineering
+    aliases:
+      - platform authority
+  securityAuthority:
+    preferred: security-architecture
+    aliases:
+      - security governance
+retired_terms:
+  - id: retired-openclaw-isolated-deployment
+    pattern: openclaw-isolated-deployment
+    repo_names:
+      - platform-engineering
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - security-architecture
+    exclude_paths:
+      - /docs/archive/
+      - /docs/records/change-records/
+      - /docs/decisions/adr/
+  - id: retired-copy-sync-script
+    pattern: sync-telegram-build-copy\\.sh
+    repo_names:
+      - workspace-governance
+      - platform-engineering
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - security-architecture
+  - id: retired-workspace-sync-verifier
+    pattern: verify-workspace-sync\\.sh
+    repo_names:
+      - workspace-governance
+      - platform-engineering
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - security-architecture
+  - id: retired-gateway-image-recorder
+    pattern: record_gateway_image\\.py
+    repo_names:
+      - workspace-governance
+      - platform-engineering
+  - id: retired-stage-readiness-entrypoint
+    pattern: stage_promotion_readiness\\.py
+    repo_names:
+      - workspace-governance
+      - platform-engineering
+  - id: retired-environment-contract-validator
+    pattern: validate_environment_contract\\.py
+    repo_names:
+      - workspace-governance
+      - platform-engineering

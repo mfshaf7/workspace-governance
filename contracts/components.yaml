@@ -1,0 +1,56 @@
+schema_version: 1
+components:
+  argo-cd:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+  vault:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+  external-secrets:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+  observability:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+  platform-postgresql:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+  openclaw-host-bridge:
+    lifecycle: active
+    component_class: product-runtime
+    owner_repo: openclaw-host-bridge
+    product: openclaw
+    security_owner: security-architecture
+  openclaw-telegram-channel:
+    lifecycle: active
+    component_class: product-channel
+    owner_repo: openclaw-telegram-enhanced
+    product: openclaw
+    security_owner: security-architecture
+  openclaw-runtime-distribution:
+    lifecycle: active
+    component_class: product-runtime
+    owner_repo: openclaw-runtime-distribution
+    product: openclaw
+    security_owner: security-architecture
+  host-control-plugin:
+    lifecycle: active
+    component_class: product-plugin
+    owner_repo: openclaw-runtime-distribution
+    product: openclaw
+    security_owner: security-architecture

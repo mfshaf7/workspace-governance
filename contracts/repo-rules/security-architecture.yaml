@@ -1,0 +1,17 @@
+schema_version: 1
+repo: security-architecture
+lifecycle: active
+required_repo_refs:
+  - platform-engineering
+  - openclaw-host-bridge
+required_patterns:
+  readme:
+    - docs/architecture/domains/
+    - docs/architecture/components/
+    - docs/architecture/products/
+  agents:
+    - trust-boundary and security architecture views
+    - review methodology and security review outputs
+forbidden_patterns:
+  readme: []
+  agents: []

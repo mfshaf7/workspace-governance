@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "contract_set", "compatibility", "migration_policy"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "contract_set": { "type": "string", "minLength": 1 },
+    "compatibility": { "type": "object" },
+    "migration_policy": { "type": "object" }
+  },
+  "additionalProperties": false
+}

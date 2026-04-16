@@ -1,0 +1,205 @@
+{
+  "dependency_types": {
+    "authoritative-reference": {
+      "allow_target_lifecycle": [
+        "active",
+        "platform-integrated",
+        "fully-governed"
+      ],
+      "description": "one repo is allowed to reference another as the owner of durable truth"
+    },
+    "docs-reference": {
+      "allow_target_lifecycle": [
+        "active",
+        "platform-integrated",
+        "fully-governed",
+        "retired"
+      ],
+      "description": "documentation may refer to another active repo for related context"
+    },
+    "prohibited": {
+      "allow_target_lifecycle": [],
+      "description": "dependency direction is not allowed in the current architecture"
+    },
+    "runtime-input": {
+      "allow_target_lifecycle": [
+        "active",
+        "fully-governed"
+      ],
+      "description": "one repo provides packaged or staged input into another repo's build or runtime workflow"
+    },
+    "security-reference": {
+      "allow_target_lifecycle": [
+        "active"
+      ],
+      "description": "delivery or runtime repos may reference security-architecture for review and control expectations"
+    }
+  },
+  "edges": [
+    {
+      "from": "workspace-governance",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-governance",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "platform-engineering",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "platform-engineering",
+      "to": "openclaw-runtime-distribution",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "platform-engineering",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "platform-engineering",
+      "to": "openclaw-host-bridge",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "platform-engineering",
+      "to": "workspace-governance",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "security-architecture",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "security-architecture",
+      "to": "openclaw-host-bridge",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "security-architecture",
+      "to": "openclaw-runtime-distribution",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "security-architecture",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-runtime-distribution",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-runtime-distribution",
+      "to": "openclaw-host-bridge",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-runtime-distribution",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-runtime-distribution",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-host-bridge",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-host-bridge",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-host-bridge",
+      "to": "openclaw-runtime-distribution",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-host-bridge",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-telegram-enhanced",
+      "to": "openclaw-runtime-distribution",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-telegram-enhanced",
+      "to": "openclaw-host-bridge",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-telegram-enhanced",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw-telegram-enhanced",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw",
+      "to": "security-architecture",
+      "type": "security-reference"
+    },
+    {
+      "from": "openclaw",
+      "to": "openclaw-runtime-distribution",
+      "type": "runtime-input"
+    },
+    {
+      "from": "openclaw",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw",
+      "to": "openclaw-host-bridge",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openclaw",
+      "to": "openclaw-runtime-distribution",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openproject",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "openproject",
+      "to": "security-architecture",
+      "type": "security-reference"
+    },
+    {
+      "from": "openproject",
+      "to": "platform-engineering",
+      "type": "runtime-input"
+    },
+    {
+      "from": "openproject",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    }
+  ]
+}

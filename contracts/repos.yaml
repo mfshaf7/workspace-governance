@@ -1,0 +1,118 @@
+schema_version: 1
+repos:
+  workspace-governance:
+    lifecycle: active
+    repo_class: governance
+    owns:
+      - workspace-root guidance
+      - cross-repo contracts
+      - workspace audit tooling
+      - workspace-level skill source
+    must_not_own:
+      - platform rollout
+      - product source
+      - runtime packaging
+      - security standards
+    allowed_authoritative_refs:
+      - platform-engineering
+      - security-architecture
+  platform-engineering:
+    lifecycle: active
+    repo_class: platform
+    owns:
+      - environment contracts
+      - pinned source SHAs and digests
+      - Argo-managed deployment state
+      - shared platform component docs
+      - product integration docs and runbooks
+    must_not_own:
+      - canonical Telegram source
+      - canonical host bridge source
+      - security governance standards
+    allowed_authoritative_refs:
+      - security-architecture
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - workspace-governance
+  security-architecture:
+    lifecycle: active
+    repo_class: security-governance
+    owns:
+      - trust-boundary architecture
+      - security standards
+      - review methodology
+      - security findings and assessments
+      - product security overlays
+    must_not_own:
+      - rollout implementation
+      - product packaging
+      - operator runbooks
+    allowed_authoritative_refs:
+      - platform-engineering
+      - openclaw-host-bridge
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+  openclaw-runtime-distribution:
+    lifecycle: active
+    repo_class: product-runtime
+    owns:
+      - active OpenClaw runtime composition
+      - packaged runtime seam verification
+      - active host-control plugin package
+      - runtime-required workspace templates
+    must_not_own:
+      - canonical Telegram source
+      - canonical host bridge source
+      - environment approval
+      - Argo deployment state
+    allowed_authoritative_refs:
+      - openclaw-telegram-enhanced
+      - openclaw-host-bridge
+      - platform-engineering
+      - security-architecture
+  openclaw-host-bridge:
+    lifecycle: active
+    repo_class: runtime-enforcement
+    owns:
+      - host-side policy enforcement
+      - allowed roots
+      - audit logging
+      - host export staging
+      - host runtime attestation
+      - WSL and Windows bridge behavior
+    must_not_own:
+      - Telegram UX
+      - environment promotion
+      - image composition
+    allowed_authoritative_refs:
+      - platform-engineering
+      - security-architecture
+      - openclaw-runtime-distribution
+      - openclaw-telegram-enhanced
+  openclaw-telegram-enhanced:
+    lifecycle: active
+    repo_class: product-channel
+    owns:
+      - canonical Telegram behavior
+      - Telegram routing and approvals
+      - staged media delivery behavior
+      - Telegram packaging and tests
+    must_not_own:
+      - host enforcement
+      - platform rollout
+      - security standards
+    allowed_authoritative_refs:
+      - openclaw-runtime-distribution
+      - openclaw-host-bridge
+      - platform-engineering
+      - security-architecture
+retired_repos:
+  openclaw-isolated-deployment:
+    lifecycle: retired
+    replaced_by:
+      platform_architecture: platform-engineering
+      security_architecture: security-architecture
+      runtime_distribution: openclaw-runtime-distribution
+      host_enforcement: openclaw-host-bridge
+      telegram_source: openclaw-telegram-enhanced

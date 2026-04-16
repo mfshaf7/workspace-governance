@@ -1,80 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import re
-from dataclasses import dataclass
 from pathlib import Path
 
-
-@dataclass(frozen=True)
-class Rule:
-    description: str
-    pattern: str
-    repo_names: tuple[str, ...]
-    exclude_substrings: tuple[str, ...] = ()
-
-
-ACTIVE_DOC_RULES = (
-    Rule(
-        description="retired openclaw-isolated-deployment repo reference in active platform docs",
-        pattern=r"openclaw-isolated-deployment",
-        repo_names=("platform-engineering",),
-    ),
-    Rule(
-        description="retired telegram deployment-workspace copy language",
-        pattern=r"deployment workspace copy",
-        repo_names=("openclaw-telegram-enhanced",),
-    ),
-    Rule(
-        description="retired telegram bundled build input language",
-        pattern=r"bundled build input",
-        repo_names=("openclaw-telegram-enhanced",),
-    ),
-    Rule(
-        description="retired telegram isolated-deployment workflow language",
-        pattern=r"in the isolated deployment workflow",
-        repo_names=("openclaw-telegram-enhanced",),
-    ),
-    Rule(
-        description="retired Telegram copy-sync workflow",
-        pattern=r"sync-telegram-build-copy\.sh",
-        repo_names=(
-            "workspace-governance",
-            "platform-engineering",
-            "openclaw-runtime-distribution",
-            "openclaw-telegram-enhanced",
-            "openclaw-host-bridge",
-            "security-architecture",
-        ),
-    ),
-    Rule(
-        description="retired workspace-sync verifier",
-        pattern=r"verify-workspace-sync\.sh",
-        repo_names=(
-            "workspace-governance",
-            "platform-engineering",
-            "openclaw-runtime-distribution",
-            "openclaw-telegram-enhanced",
-            "openclaw-host-bridge",
-            "security-architecture",
-        ),
-    ),
-    Rule(
-        description="retired gateway image recorder entrypoint",
-        pattern=r"record_gateway_image\.py",
-        repo_names=("workspace-governance", "platform-engineering"),
-    ),
-    Rule(
-        description="retired stage readiness entrypoint",
-        pattern=r"stage_promotion_readiness\.py",
-        repo_names=("workspace-governance", "platform-engineering"),
-    ),
-    Rule(
-        description="retired environment contract validator path",
-        pattern=r"validate_environment_contract\.py",
-        repo_names=("workspace-governance", "platform-engineering"),
-    ),
-)
-
+from contracts_lib import load_contracts
 
 DEFAULT_EXCLUDES = (
     "/.git/",
@@ -111,13 +40,17 @@ def main() -> int:
     args = parser.parse_args()
 
     workspace_root = args.workspace_root.resolve()
+    contracts = load_contracts(workspace_root / "workspace-governance")
     errors: list[str] = []
-    compiled_rules = [(rule, re.compile(rule.pattern)) for rule in ACTIVE_DOC_RULES]
 
-    for rule, pattern in compiled_rules:
-        repo_names = tuple(args.repo_names) if args.repo_names else rule.repo_names
-        for repo_name in repo_names:
-            if repo_name not in rule.repo_names:
+    retired_terms = contracts["vocabulary"]["retired_terms"]
+    repo_rules = contracts["repo_rules"]
+    selected_repo_names = set(args.repo_names or [])
+
+    for entry in retired_terms:
+        pattern = re.compile(entry["pattern"])
+        for repo_name in entry["repo_names"]:
+            if selected_repo_names and repo_name not in selected_repo_names:
                 continue
             repo_root = workspace_root / repo_name
             if not repo_root.exists():
@@ -125,12 +58,32 @@ def main() -> int:
                 continue
             for path in iter_markdown_files(repo_root):
                 path_str = str(path)
-                if any(marker in path_str for marker in rule.exclude_substrings):
+                if any(marker in path_str for marker in entry.get("exclude_paths", [])):
                     continue
                 text = path.read_text()
                 if pattern.search(text):
                     errors.append(
-                        f"{path}: found stale-content pattern for {rule.description!r} matching /{rule.pattern}/"
+                        f"{path}: found stale-content pattern for retired term {entry['id']!r} matching /{entry['pattern']}/"
+                    )
+
+    for repo_name, rule in repo_rules.items():
+        if selected_repo_names and repo_name not in selected_repo_names:
+            continue
+        repo_root = workspace_root / repo_name
+        for filename, pattern_list in (
+            ("README.md", rule["forbidden_patterns"]["readme"]),
+            ("AGENTS.md", rule["forbidden_patterns"]["agents"]),
+        ):
+            path = repo_root / filename
+            if not path.exists():
+                errors.append(f"missing ownership doc for stale-content audit: {path}")
+                continue
+            text = path.read_text()
+            for pattern_text in pattern_list:
+                pattern = re.compile(pattern_text)
+                if pattern.search(text):
+                    errors.append(
+                        f"{path}: found repo-rule stale-content pattern matching /{pattern_text}/"
                     )
 
     if errors:
