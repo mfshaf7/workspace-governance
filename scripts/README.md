@@ -16,6 +16,9 @@
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
+- `validate_component_contracts.py`
+  - executes the component-level interface validation commands declared in
+    `contracts/components.yaml` across the local workspace
 - `validate_cross_repo_truth.py`
   - validates that active repos still tell the same ownership truth and
     regenerates the resolved governance artifacts under `generated/`
