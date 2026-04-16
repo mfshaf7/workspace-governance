@@ -64,11 +64,15 @@ This repo keeps the canonical copies in:
 Use `scripts/sync_workspace_root.py` to materialize the canonical files back
 into the workspace root.
 
+A workspace-governance change is not complete until that sync has been run and
+the workspace audit passes against the live root.
+
 ## Validation
 
 Run these from this repo:
 
 ```bash
+python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects

@@ -122,6 +122,11 @@ That classification determines the owner.
   - `/home/mfshaf7/projects/AGENTS.md`
   - `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
   Update the canonical files in `workspace-governance/` and sync them back.
+- After any change to the canonical workspace-root governance files, sync the
+  live root immediately with:
+  - `python3 /home/mfshaf7/projects/workspace-governance/scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
+- A workspace-governance change is not complete until the sync has been run and
+  the workspace audit passes against the live root.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/workspace-root/README.md`
   - `workspace-governance/workspace-root/AGENTS.md`
@@ -156,6 +161,7 @@ If that evidence cannot be produced, the work is not complete.
 ## Validation Entry Points
 
 - `workspace-governance/`
+  - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`

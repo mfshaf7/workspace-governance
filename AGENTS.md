@@ -33,8 +33,12 @@ Route those changes back to the owner repos.
 
 - Edit the canonical files here, not the materialized root copies, unless you
   are doing short-lived incident containment.
-- After changing `workspace-root/` or `scripts/audit_workspace_layout.py`, run
-  `scripts/sync_workspace_root.py` so the live workspace root stays aligned.
+- After changing `workspace-root/` or `scripts/audit_workspace_layout.py`, you
+  must run `scripts/sync_workspace_root.py` before the work is complete.
+- A workspace-root governance change is not complete until:
+  - the canonical files are updated in this repo
+  - the live workspace root has been re-synced
+  - the sync and workspace audit both pass
 - If the active repo inventory changes, update:
   - `workspace-root/README.md`
   - `workspace-root/AGENTS.md`
@@ -49,6 +53,7 @@ Route those changes back to the owner repos.
 Run these after structural changes:
 
 ```bash
+python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
