@@ -29,6 +29,11 @@ Use these contracts to declare:
   - approved cross-repo dependency semantics
 - `change-classes.yaml`
   - durable change categories used for routing and evidence
+- `failure-taxonomy.yaml`
+  - reusable failure classes for after-action review and learning closure
+- `improvement-triggers.yaml`
+  - triggers that decide when an after-action review is expected and which
+    kinds of durable controls usually close it
 - `evidence-obligations.yaml`
   - required evidence for each change class
 - `review-obligations.yaml`
@@ -64,6 +69,22 @@ Repo rules must not:
 - carry ad hoc prose-only exceptions
 
 Use `exceptions.yaml` for temporary waivers instead.
+
+## After-Action Reviews
+
+Meaningful misses, late discoveries, or repeated operator pain should be
+captured under `../reviews/after-action/`.
+
+These records are not free-form notes. They are governed learning artifacts
+that should either:
+
+- stay explicitly open with an owner and due date, or
+- close only when they link the durable control changes that actually landed
+
+Use:
+
+- `scripts/record_after_action.py`
+- `scripts/validate_learning_closure.py`
 
 ## Generated Artifacts
 

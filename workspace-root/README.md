@@ -59,7 +59,8 @@ Treat it as a governed system, not a loose folder of related repos.
 `workspace-governance/` owns the canonical copies of the workspace-root files
 plus the machine-readable contract model that defines the active repo map,
 product maturity, component inventory, vocabulary, and cross-repo routing
-rules.
+rules. It also owns the after-action learning loop that turns major misses into
+reviewable controls or explicit follow-up.
 
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
@@ -81,6 +82,12 @@ Supported contract validation entrypoints:
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_contracts.py --repo-root /home/mfshaf7/projects/workspace-governance
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
+```
+
+Supported learning-closure validation entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
 ```
 
 ## Start Here

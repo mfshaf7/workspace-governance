@@ -17,6 +17,8 @@ CONTRACT_FILES = {
     "components": "contracts/components.yaml",
     "task_types": "contracts/task-types.yaml",
     "change_classes": "contracts/change-classes.yaml",
+    "failure_taxonomy": "contracts/failure-taxonomy.yaml",
+    "improvement_triggers": "contracts/improvement-triggers.yaml",
     "evidence_obligations": "contracts/evidence-obligations.yaml",
     "review_obligations": "contracts/review-obligations.yaml",
     "vocabulary": "contracts/vocabulary.yaml",
@@ -34,6 +36,8 @@ SCHEMA_FILES = {
     "components": "contracts/schemas/components.schema.json",
     "task_types": "contracts/schemas/task-types.schema.json",
     "change_classes": "contracts/schemas/change-classes.schema.json",
+    "failure_taxonomy": "contracts/schemas/failure-taxonomy.schema.json",
+    "improvement_triggers": "contracts/schemas/improvement-triggers.schema.json",
     "evidence_obligations": "contracts/schemas/evidence-obligations.schema.json",
     "review_obligations": "contracts/schemas/review-obligations.schema.json",
     "vocabulary": "contracts/schemas/vocabulary.schema.json",
@@ -43,6 +47,7 @@ SCHEMA_FILES = {
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"
+AFTER_ACTION_RECORD_SCHEMA = "contracts/schemas/after-action-record.schema.json"
 
 
 def load_yaml(path: Path) -> Any:

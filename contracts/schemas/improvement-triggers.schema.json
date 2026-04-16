@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "triggers"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "triggers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description", "requires_after_action", "recommended_control_types"],
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "requires_after_action": { "type": "boolean" },
+          "recommended_control_types": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "validator",
+                "skill",
+                "contract",
+                "runbook",
+                "test",
+                "workflow",
+                "doc",
+                "adr",
+                "change-record",
+                "template",
+                "script"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

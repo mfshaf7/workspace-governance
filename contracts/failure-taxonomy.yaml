@@ -1,0 +1,64 @@
+schema_version: 1
+failure_classes:
+  routing-miss:
+    description: Work was routed to the wrong owner, or the correct owner was discovered late.
+    recommended_control_types:
+      - contract
+      - skill
+      - doc
+  owner-boundary-miss:
+    description: Repo or component boundaries were unclear and allowed the wrong layer to absorb a long-lived fix.
+    recommended_control_types:
+      - contract
+      - doc
+      - adr
+  contract-drift:
+    description: Active repos, docs, or build seams no longer told the same architecture truth.
+    recommended_control_types:
+      - contract
+      - validator
+      - doc
+  rollout-evidence-gap:
+    description: The delivery model lacked explicit evidence for build, verification, approval, promotion, or completion.
+    recommended_control_types:
+      - contract
+      - workflow
+      - runbook
+      - adr
+  host-drift-undetected:
+    description: Host-owned drift was discovered only during live testing instead of being caught earlier by a preflight or validator.
+    recommended_control_types:
+      - validator
+      - runbook
+      - workflow
+  unsafe-assumption:
+    description: A risky assumption about runtime behavior, trust boundaries, or user flow survived too long before being corrected.
+    recommended_control_types:
+      - test
+      - validator
+      - doc
+  missing-discussion-gate:
+    description: Architecture-shaping work started as implementation before the framing discussion happened.
+    recommended_control_types:
+      - skill
+      - contract
+      - doc
+  missing-deterministic-test-seam:
+    description: A required acceptance or contract check had no supported deterministic seam and depended on improvised manual proof.
+    recommended_control_types:
+      - validator
+      - workflow
+      - runbook
+  shell-reliability-miss:
+    description: Tooling or shell quoting fragility caused avoidable operator friction or execution failure.
+    recommended_control_types:
+      - skill
+      - script
+      - doc
+  workflow-doctrine-gap:
+    description: The documented workflow model was missing a real enterprise control or completion rule.
+    recommended_control_types:
+      - contract
+      - adr
+      - workflow
+      - doc

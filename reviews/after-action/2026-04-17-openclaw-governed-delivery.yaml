@@ -1,0 +1,143 @@
+schema_version: 1
+id: 2026-04-17-openclaw-governed-delivery
+title: OpenClaw governed delivery exposed prod acceptance and host-drift detection gaps
+recorded_on: 2026-04-17
+owner_repo: workspace-governance
+summary: >
+  The first full candidate-first OpenClaw rollout proved the value of explicit
+  stage candidate, verification, and approval state, but it also exposed
+  missing prod smoke evidence and host-drift checks that were discovered too
+  late during rehearsal.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+  related_products:
+    - openclaw
+  related_components: []
+  change_classes:
+    - platform-contract
+    - live-drift-repair
+source_refs:
+  - https://github.com/mfshaf7/platform-engineering/pull/45
+  - https://github.com/mfshaf7/platform-engineering/pull/47
+  - https://github.com/mfshaf7/platform-engineering/pull/52
+lessons:
+  - id: prod-acceptance-must-be-explicit
+    title: Prod acceptance could not stop at reconciliation evidence
+    failure_class: rollout-evidence-gap
+    trigger: post-promotion-evidence-gap
+    finding: >
+      The rollout reached prod with strong stage evidence and reconciliation
+      proof, but the workflow had no explicit post-promotion prod smoke or UAT
+      object bound to the live prod contract.
+    impact: >
+      A user-facing rollout could have been reported complete without one real
+      prod functional proof, which is weaker than enterprise release evidence.
+    status: closed
+    expected_control_types:
+      - contract
+      - workflow
+      - runbook
+      - adr
+      - skill
+    control_refs:
+      - type: contract
+        path: platform-engineering/environments/prod/verification.yaml
+        owner_repo: platform-engineering
+        note: Explicit prod smoke or UAT object bound to the promoted prod contract.
+      - type: workflow
+        path: platform-engineering/.github/workflows/promote-environment.yaml
+        owner_repo: platform-engineering
+        note: Promotion now resets prod verification to pending and surfaces its status.
+      - type: runbook
+        path: platform-engineering/products/openclaw/runbooks/verify-prod-after-promotion.md
+        owner_repo: platform-engineering
+        note: Defines the baseline post-promotion prod smoke pack.
+      - type: adr
+        path: platform-engineering/docs/decisions/adr/ADR-007-post-promotion-prod-smoke-evidence.md
+        owner_repo: platform-engineering
+        note: Captures the workflow doctrine change.
+      - type: skill
+        path: platform-engineering/products/openclaw/skills-src/openclaw-governed-delivery/SKILL.md
+        owner_repo: platform-engineering
+        note: Updated to require prod verification in the governed path.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
+  - id: learning-needs-a-governed-loop
+    title: Major misses need a workspace-level closure loop
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-manual-retrospective
+    finding: >
+      Lessons were being discovered conversationally, but the workspace had no
+      governed way to classify them, require closure, and validate that a
+      durable control actually landed.
+    impact: >
+      The same failure class could recur without a formal signal that the
+      control plane improved.
+    status: closed
+    expected_control_types:
+      - contract
+      - validator
+      - script
+      - template
+      - skill
+      - doc
+    control_refs:
+      - type: contract
+        path: workspace-governance/contracts/failure-taxonomy.yaml
+        owner_repo: workspace-governance
+        note: Declares reusable failure classes for after-action review.
+      - type: contract
+        path: workspace-governance/contracts/improvement-triggers.yaml
+        owner_repo: workspace-governance
+        note: Declares the trigger model for when after-action review is expected.
+      - type: validator
+        path: workspace-governance/scripts/validate_learning_closure.py
+        owner_repo: workspace-governance
+        note: Enforces closed lessons versus open follow-up.
+      - type: script
+        path: workspace-governance/scripts/record_after_action.py
+        owner_repo: workspace-governance
+        note: Scaffolds governed after-action records.
+      - type: template
+        path: workspace-governance/templates/after-action/README.md
+        owner_repo: workspace-governance
+        note: Documents the scaffold path for new learning records.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Turns late discoveries into a governed review loop.
+      - type: doc
+        path: workspace-governance/reviews/after-action/README.md
+        owner_repo: workspace-governance
+        note: Documents how after-action reviews are recorded and validated.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
+  - id: stage-host-drift-preflight-needs-broader-coverage
+    title: Stage preflight still does not catch every host-owned media drift early enough
+    failure_class: host-drift-undetected
+    trigger: late-host-drift-discovery
+    finding: >
+      Bridge audit path drift and media staging writability drift were still
+      discovered during live stage rehearsal instead of by a dedicated preflight
+      before operator testing began.
+    impact: >
+      Rehearsal time was spent diagnosing host drift instead of validating the
+      candidate, and late discovery increased rollout friction.
+    status: open
+    expected_control_types:
+      - validator
+      - workflow
+      - runbook
+    control_refs: []
+    follow_up:
+      owner_repo: platform-engineering
+      due_on: 2026-05-01
+      note: >
+        Add a stage preflight that checks bridge audit and media staging
+        writability before stage rehearsal begins.

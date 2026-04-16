@@ -1,0 +1,53 @@
+schema_version: 1
+triggers:
+  repeated-manual-retrospective:
+    description: Important lessons are being discovered conversationally or from memory rather than through a governed after-action loop.
+    requires_after_action: true
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - doc
+  repeated-operator-friction:
+    description: The same operator pain or workflow confusion keeps recurring across tasks.
+    requires_after_action: true
+    recommended_control_types:
+      - validator
+      - runbook
+      - skill
+  post-promotion-evidence-gap:
+    description: A rollout reached reconciliation, but completion evidence or prod smoke proof was missing or too weak.
+    requires_after_action: true
+    recommended_control_types:
+      - contract
+      - workflow
+      - runbook
+      - adr
+  late-host-drift-discovery:
+    description: Host or runtime drift was found only during late-stage rehearsal or production validation.
+    requires_after_action: true
+    recommended_control_types:
+      - validator
+      - workflow
+      - runbook
+  late-architecture-discovery:
+    description: The real control-plane or ownership shape was discovered only after implementation had already started.
+    requires_after_action: true
+    recommended_control_types:
+      - contract
+      - adr
+      - skill
+  missing-deterministic-seam:
+    description: A required contract, smoke, or UAT check had no deterministic supported seam.
+    requires_after_action: true
+    recommended_control_types:
+      - validator
+      - workflow
+      - runbook
+  shell-or-tooling-reliability-miss:
+    description: Execution reliability failed because the operator or agent had no robust supported command path.
+    requires_after_action: true
+    recommended_control_types:
+      - skill
+      - script
+      - doc

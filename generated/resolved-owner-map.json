@@ -269,6 +269,11 @@
       "scope": "repo",
       "source_path": "skills-src/security-governance-review"
     },
+    "self-improvement-review": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/self-improvement-review"
+    },
     "workspace-change-router": {
       "owner_repo": "workspace-governance",
       "scope": "workspace",
