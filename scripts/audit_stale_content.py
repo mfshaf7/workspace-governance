@@ -15,6 +15,11 @@ class Rule:
 
 ACTIVE_DOC_RULES = (
     Rule(
+        description="retired openclaw-isolated-deployment repo reference in active platform docs",
+        pattern=r"openclaw-isolated-deployment",
+        repo_names=("platform-engineering",),
+    ),
+    Rule(
         description="retired Telegram copy-sync workflow",
         pattern=r"sync-telegram-build-copy\.sh",
         repo_names=(
