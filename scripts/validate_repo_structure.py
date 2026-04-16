@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import re
 import subprocess
 from pathlib import Path
 
@@ -14,6 +15,12 @@ REQUIRED_FILES = (
     "scripts/audit_workspace_layout.py",
     "scripts/sync_workspace_root.py",
     "scripts/validate_repo_structure.py",
+    "workspace-root/README.md",
+    "workspace-root/AGENTS.md",
+)
+
+
+WORKSPACE_ROOT_MARKDOWN_FILES = (
     "workspace-root/README.md",
     "workspace-root/AGENTS.md",
 )
@@ -55,6 +62,20 @@ def main() -> int:
         target = repo_root / rel_path
         if target.exists() and canonical_note not in target.read_text():
             errors.append(f"{target}: missing canonical source note")
+
+    link_pattern = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+    for rel_path in WORKSPACE_ROOT_MARKDOWN_FILES:
+        target = repo_root / rel_path
+        if not target.exists():
+            continue
+        for match in link_pattern.finditer(target.read_text()):
+            link_target = match.group(1)
+            if link_target.startswith("#") or "://" in link_target:
+                continue
+            if not link_target.startswith("/home/mfshaf7/projects/"):
+                errors.append(
+                    f"{target}: workspace-root links must use absolute /home/mfshaf7/projects paths, got {link_target!r}"
+                )
 
     try:
         origin = run(["git", "-C", str(repo_root), "remote", "get-url", "origin"])

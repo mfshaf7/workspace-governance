@@ -61,12 +61,12 @@ python3 /home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py --work
 
 ## Start Here
 
-- Workspace routing: [AGENTS.md](AGENTS.md)
-- Workspace governance repo: [workspace-governance/README.md](workspace-governance/README.md)
-- Workspace audit: [_workspace_tools/audit_workspace_layout.py](_workspace_tools/audit_workspace_layout.py)
-- Platform authority: [platform-engineering/README.md](platform-engineering/README.md)
-- OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](platform-engineering/products/openclaw/architecture-and-owner-model.md)
-- Active OpenClaw runtime composition: [openclaw-runtime-distribution/README.md](openclaw-runtime-distribution/README.md)
-- Canonical Telegram source: [openclaw-telegram-enhanced/README.md](openclaw-telegram-enhanced/README.md)
-- Canonical host bridge: [openclaw-host-bridge/README.md](openclaw-host-bridge/README.md)
-- Security governance: [security-architecture/README.md](security-architecture/README.md)
+- Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
+- Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
+- Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
+- Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
+- OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/architecture-and-owner-model.md)
+- Active OpenClaw runtime composition: [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
+- Canonical Telegram source: [openclaw-telegram-enhanced/README.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
+- Canonical host bridge: [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)
+- Security governance: [security-architecture/README.md](/home/mfshaf7/projects/security-architecture/README.md)
