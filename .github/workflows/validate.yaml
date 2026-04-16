@@ -45,7 +45,11 @@ jobs:
           if workspace_root.exists():
               shutil.rmtree(workspace_root)
           workspace_root.mkdir()
-          shutil.copytree(repo_root, workspace_root / "workspace-governance")
+          shutil.copytree(
+              repo_root,
+              workspace_root / "workspace-governance",
+              ignore=shutil.ignore_patterns(".git", ".workspace-ci", ".workspace-skills", "__pycache__", "*.pyc"),
+          )
 
           repos = yaml.safe_load((repo_root / "contracts" / "repos.yaml").read_text())["repos"]
           owner_repos = sorted(repos.keys())
