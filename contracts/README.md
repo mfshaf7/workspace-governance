@@ -48,6 +48,8 @@ Repo rules may define:
 
 - required ownership language in `README.md` and `AGENTS.md`
 - required authoritative repo references
+- required security-architecture artifacts, review checklist, and review-output
+  scope for repos that cross security-relevant trust boundaries
 - forbidden ownership or topology language
 - additional stale-content patterns that should never reappear
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 import sys
 
@@ -91,11 +92,36 @@ def main() -> int:
         if repo_name not in active_repos:
             errors.append(f"contracts/repo-rules/{repo_name}.yaml: repo is not in active repos")
             continue
-        if rule["lifecycle"] != contracts["repos"]["repos"][repo_name]["lifecycle"]:
+        repo_payload = contracts["repos"]["repos"][repo_name]
+        if rule["lifecycle"] != repo_payload["lifecycle"]:
             errors.append(f"contracts/repo-rules/{repo_name}.yaml: lifecycle does not match repos.yaml")
         for ref in rule["required_repo_refs"]:
             if ref not in active_repos:
                 errors.append(f"contracts/repo-rules/{repo_name}.yaml: unknown required_repo_ref {ref!r}")
+        security_requirements = rule.get("security_requirements")
+        if repo_payload["requires_security_bindings"] and not security_requirements:
+            errors.append(
+                f"contracts/repo-rules/{repo_name}.yaml: missing security_requirements for repo requiring security bindings"
+            )
+        if not security_requirements:
+            continue
+        if security_requirements["security_owner"] not in active_repos:
+            errors.append(
+                f"contracts/repo-rules/{repo_name}.yaml: security_owner {security_requirements['security_owner']!r} is not an active repo"
+            )
+        elif security_requirements["security_owner"] not in repo_payload["allowed_authoritative_refs"]:
+            errors.append(
+                f"contracts/repo-rules/{repo_name}.yaml: security_owner {security_requirements['security_owner']!r} is not an allowed authoritative ref"
+            )
+        for artifact in security_requirements["required_artifacts"]:
+            unknown_areas = sorted(
+                set(artifact["review_areas"])
+                - set(contracts["review_obligations"]["review_obligations"])
+            )
+            if unknown_areas:
+                errors.append(
+                    f"contracts/repo-rules/{repo_name}.yaml: security artifact {artifact['id']} uses unknown review areas {', '.join(unknown_areas)}"
+                )
 
     for product_name, payload in contracts["products"]["products"].items():
         if payload["lifecycle"] not in lifecycle_states:
@@ -138,6 +164,17 @@ def main() -> int:
     for entry in contracts["exceptions"]["exceptions"]:
         if entry["owner"] not in active_repos:
             errors.append(f"contracts/exceptions.yaml: exception {entry['id']} owner {entry['owner']!r} is not an active repo")
+        try:
+            expires_on = date.fromisoformat(entry["expires_on"])
+        except ValueError:
+            errors.append(
+                f"contracts/exceptions.yaml: exception {entry['id']} has invalid expires_on {entry['expires_on']!r}"
+            )
+            continue
+        if expires_on < date.today():
+            errors.append(
+                f"contracts/exceptions.yaml: exception {entry['id']} expired on {entry['expires_on']}"
+            )
 
     if errors:
         for error in errors:

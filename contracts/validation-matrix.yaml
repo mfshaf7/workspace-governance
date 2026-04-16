@@ -15,6 +15,10 @@ validators:
       - generated/resolved-owner-map.json
       - generated/resolved-dependency-graph.json
       - generated/stale-content-rules.json
+  security-bindings:
+    script: scripts/validate_security_bindings.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   component-contracts:
     script: scripts/validate_component_contracts.py
     scope: local-workspace

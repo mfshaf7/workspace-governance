@@ -9,10 +9,11 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["lifecycle", "repo_class", "owns", "must_not_own", "allowed_authoritative_refs"],
+        "required": ["lifecycle", "repo_class", "requires_security_bindings", "owns", "must_not_own", "allowed_authoritative_refs"],
         "properties": {
           "lifecycle": { "type": "string", "minLength": 1 },
           "repo_class": { "type": "string", "minLength": 1 },
+          "requires_security_bindings": { "type": "boolean" },
           "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "must_not_own": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
