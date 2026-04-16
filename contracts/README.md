@@ -19,7 +19,8 @@ Use these contracts to declare:
 - `products.yaml`
   - product maturity, owning repos, and delivery model
 - `components.yaml`
-  - shared and product-linked components, operator surface, and owner repo
+  - shared and product-linked components, operator surface, owner repo, and
+    any published interface contract path plus validation entrypoint
 - `task-types.yaml`
   - workspace-level routing and discussion gates by task type
 - `lifecycle.yaml`

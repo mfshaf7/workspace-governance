@@ -171,6 +171,16 @@ def main() -> int:
         if not product_readme.exists():
             errors.append(f"platform-engineering product missing README for declared product {product_name}: {product_readme}")
 
+    for component_name, payload in contracts["components"]["components"].items():
+        interface_contract = payload.get("interface_contract")
+        if not interface_contract:
+            continue
+        contract_path = workspace_root / payload["owner_repo"] / interface_contract["path"]
+        if not contract_path.exists():
+            errors.append(
+                f"contracts/components.yaml: {component_name} interface contract path is missing in owner repo {payload['owner_repo']}: {contract_path}"
+            )
+
     compiled = build_generated_contracts(repo_root, contracts)
     paths = generated_paths(repo_root)
 
