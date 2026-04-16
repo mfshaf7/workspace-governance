@@ -226,6 +226,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/done-criteria-enforcer
     scope: workspace
+  self-improvement-review:
+    owner_repo: workspace-governance
+    source_path: skills-src/self-improvement-review
+    scope: workspace
   security-governance-review:
     owner_repo: security-architecture
     source_path: skills-src/security-governance-review

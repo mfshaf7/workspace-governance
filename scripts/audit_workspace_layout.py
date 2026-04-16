@@ -95,6 +95,9 @@ def main() -> int:
     component_contract_validator = (
         workspace_governance_root / "scripts" / "validate_component_contracts.py"
     )
+    learning_closure_validator = (
+        workspace_governance_root / "scripts" / "validate_learning_closure.py"
+    )
     try:
         output = run(["python3", str(contract_validator), "--repo-root", str(workspace_governance_root)])
     except subprocess.CalledProcessError as exc:
@@ -136,6 +139,20 @@ def main() -> int:
             [
                 "python3",
                 str(component_contract_validator),
+                "--workspace-root",
+                str(workspace_root),
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    try:
+        output = run(
+            [
+                "python3",
+                str(learning_closure_validator),
                 "--workspace-root",
                 str(workspace_root),
             ]

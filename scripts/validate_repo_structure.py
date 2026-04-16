@@ -21,6 +21,8 @@ REQUIRED_FILES = (
     "contracts/lifecycle.yaml",
     "contracts/dependency-types.yaml",
     "contracts/change-classes.yaml",
+    "contracts/failure-taxonomy.yaml",
+    "contracts/improvement-triggers.yaml",
     "contracts/evidence-obligations.yaml",
     "contracts/review-obligations.yaml",
     "contracts/vocabulary.yaml",
@@ -31,17 +33,26 @@ REQUIRED_FILES = (
     "contracts/schemas/repos.schema.json",
     "contracts/schemas/products.schema.json",
     "contracts/schemas/components.schema.json",
+    "contracts/schemas/failure-taxonomy.schema.json",
+    "contracts/schemas/improvement-triggers.schema.json",
+    "contracts/schemas/after-action-record.schema.json",
     "contracts/schemas/repo-rules.schema.json",
     "contracts/schemas/skills.schema.json",
     "generated/README.md",
+    "reviews/README.md",
+    "reviews/after-action/README.md",
+    "reviews/after-action/TEMPLATE.yaml",
     "skills-src/README.md",
     "templates/README.md",
     "templates/skill/README.md",
+    "templates/after-action/README.md",
     "scripts/README.md",
     "scripts/audit_workspace_layout.py",
     "scripts/audit_stale_content.py",
     "scripts/contracts_lib.py",
     "scripts/install_skills.py",
+    "scripts/record_after_action.py",
+    "scripts/validate_learning_closure.py",
     "scripts/validate_component_contracts.py",
     "scripts/validate_security_bindings.py",
     "scripts/sync_workspace_root.py",
@@ -67,11 +78,19 @@ REQUIRED_DIRECTORIES = (
     "templates/component",
     "templates/exception",
     "templates/skill",
+    "templates/after-action",
     "generated",
+    "reviews/after-action",
     "skills-src/workspace-change-router",
     "skills-src/architecture-discussion-gate",
     "skills-src/contract-drift-check",
     "skills-src/done-criteria-enforcer",
+    "skills-src/self-improvement-review",
+)
+
+
+GITHUB_REPO_RE = re.compile(
+    r"(?:git@|https://|ssh://git@)?github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/.]+?)(?:\.git)?$"
 )
 
 
@@ -84,6 +103,15 @@ def run(cmd: list[str], *, cwd: Path | None = None) -> str:
         capture_output=True,
     )
     return result.stdout.strip()
+
+
+def normalize_repository_url(value: str | None) -> str | None:
+    if not value:
+        return None
+    match = GITHUB_REPO_RE.search(value.strip())
+    if match:
+        return f"github.com/{match.group('owner')}/{match.group('repo')}"
+    return value.strip().removesuffix(".git")
 
 
 def main() -> int:
@@ -137,7 +165,7 @@ def main() -> int:
         errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
     else:
         expected_origin = "git@github.com:mfshaf7/workspace-governance.git"
-        if origin != expected_origin:
+        if normalize_repository_url(origin) != normalize_repository_url(expected_origin):
             errors.append(f"expected origin {expected_origin!r}, got {origin!r}")
 
     if errors:

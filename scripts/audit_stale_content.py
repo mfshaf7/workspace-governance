@@ -21,6 +21,25 @@ def iter_markdown_files(repo_root: Path):
         yield path
 
 
+def resolve_contract_repo(workspace_root: Path) -> Path:
+    direct_repo = workspace_root
+    nested_repo = workspace_root / "workspace-governance"
+    if (direct_repo / "contracts").exists():
+        return direct_repo
+    if (nested_repo / "contracts").exists():
+        return nested_repo
+    return nested_repo
+
+
+def resolve_repo_root(workspace_root: Path, repo_name: str, contract_repo: Path) -> Path:
+    nested_repo = workspace_root / repo_name
+    if nested_repo.exists():
+        return nested_repo
+    if repo_name == "workspace-governance" and contract_repo.exists():
+        return contract_repo
+    return nested_repo
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Audit active docs for known stale-content patterns."
@@ -40,7 +59,8 @@ def main() -> int:
     args = parser.parse_args()
 
     workspace_root = args.workspace_root.resolve()
-    contracts = load_contracts(workspace_root / "workspace-governance")
+    contract_repo = resolve_contract_repo(workspace_root)
+    contracts = load_contracts(contract_repo)
     errors: list[str] = []
 
     retired_terms = contracts["vocabulary"]["retired_terms"]
@@ -52,7 +72,7 @@ def main() -> int:
         for repo_name in entry["repo_names"]:
             if selected_repo_names and repo_name not in selected_repo_names:
                 continue
-            repo_root = workspace_root / repo_name
+            repo_root = resolve_repo_root(workspace_root, repo_name, contract_repo)
             if not repo_root.exists():
                 errors.append(f"missing repo for stale-content audit: {repo_root}")
                 continue
@@ -69,7 +89,7 @@ def main() -> int:
     for repo_name, rule in repo_rules.items():
         if selected_repo_names and repo_name not in selected_repo_names:
             continue
-        repo_root = workspace_root / repo_name
+        repo_root = resolve_repo_root(workspace_root, repo_name, contract_repo)
         for filename, pattern_list in (
             ("README.md", rule["forbidden_patterns"]["readme"]),
             ("AGENTS.md", rule["forbidden_patterns"]["agents"]),

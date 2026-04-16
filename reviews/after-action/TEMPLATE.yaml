@@ -1,0 +1,28 @@
+schema_version: 1
+id: YYYY-MM-DD-example
+title: Replace with after-action title
+recorded_on: YYYY-MM-DD
+owner_repo: workspace-governance
+summary: Replace with a short summary of what was learned.
+scope:
+  related_repos: []
+  related_products: []
+  related_components: []
+  change_classes: []
+source_refs:
+  - replace-with-pr-or-incident-ref
+lessons:
+  - id: lesson-1
+    title: Replace with the lesson title
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-manual-retrospective
+    finding: Replace with the concrete miss or late discovery.
+    impact: Replace with the cost or risk this created.
+    status: open
+    expected_control_types:
+      - contract
+    control_refs: []
+    follow_up:
+      owner_repo: workspace-governance
+      due_on: YYYY-MM-DD
+      note: Replace with the next control that must land to close this lesson.

@@ -10,3 +10,4 @@ migration_policy:
     - validator update
     - generated artifact refresh
     - workspace audit rerun
+    - learning-closure audit rerun

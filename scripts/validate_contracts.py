@@ -49,6 +49,8 @@ def main() -> int:
         "components": repo_root / "contracts/components.yaml",
         "task_types": repo_root / "contracts/task-types.yaml",
         "change_classes": repo_root / "contracts/change-classes.yaml",
+        "failure_taxonomy": repo_root / "contracts/failure-taxonomy.yaml",
+        "improvement_triggers": repo_root / "contracts/improvement-triggers.yaml",
         "evidence_obligations": repo_root / "contracts/evidence-obligations.yaml",
         "review_obligations": repo_root / "contracts/review-obligations.yaml",
         "vocabulary": repo_root / "contracts/vocabulary.yaml",
@@ -69,6 +71,8 @@ def main() -> int:
     active_repos = set(active_repo_names(contracts))
     product_names = set(contracts["products"]["products"].keys())
     change_classes = set(contracts["change_classes"]["change_classes"].keys())
+    failure_classes = contracts["failure_taxonomy"]["failure_classes"]
+    improvement_triggers = contracts["improvement_triggers"]["triggers"]
     validator_scripts = contracts["validation_matrix"]["validators"]
     registered_skills = contracts["skills"]["skills"]
 
@@ -154,6 +158,11 @@ def main() -> int:
     evidence_keys = set(contracts["evidence_obligations"]["evidence_by_change_class"].keys())
     if evidence_keys != change_classes:
         errors.append("contracts/evidence-obligations.yaml: change-class coverage does not match contracts/change-classes.yaml")
+
+    if not failure_classes:
+        errors.append("contracts/failure-taxonomy.yaml: failure_classes must not be empty")
+    if not improvement_triggers:
+        errors.append("contracts/improvement-triggers.yaml: triggers must not be empty")
 
     for validator_name, payload in validator_scripts.items():
         script_path = repo_root / payload["script"]

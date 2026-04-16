@@ -31,3 +31,7 @@ validators:
     script: scripts/audit_stale_content.py
     scope: local-workspace
     requires_workspace_checkout: true
+  learning-closure:
+    script: scripts/validate_learning_closure.py
+    scope: local-workspace
+    requires_workspace_checkout: true

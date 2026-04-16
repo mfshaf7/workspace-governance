@@ -45,7 +45,11 @@ jobs:
           if workspace_root.exists():
               shutil.rmtree(workspace_root)
           workspace_root.mkdir()
-          shutil.copytree(repo_root, workspace_root / "workspace-governance")
+          shutil.copytree(
+              repo_root,
+              workspace_root / "workspace-governance",
+              ignore=shutil.ignore_patterns(".git", ".workspace-ci", ".workspace-skills", "__pycache__", "*.pyc"),
+          )
 
           repos = yaml.safe_load((repo_root / "contracts" / "repos.yaml").read_text())["repos"]
           owner_repos = sorted(repos.keys())
@@ -73,6 +77,9 @@ jobs:
       - name: Validate security bindings
         run: python3 scripts/validate_security_bindings.py --workspace-root .workspace-ci
 
+      - name: Validate learning closure
+        run: python3 scripts/validate_learning_closure.py --workspace-root .workspace-ci
+
       - name: Install registered skills
         run: python3 scripts/install_skills.py --workspace-root .workspace-ci --target-root .workspace-skills
 
@@ -83,4 +90,4 @@ jobs:
         run: python3 scripts/audit_stale_content.py --workspace-root . --repo-name workspace-governance
 
       - name: Compile validation scripts
-        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py

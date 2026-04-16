@@ -12,8 +12,13 @@
 - `install_skills.py`
   - installs or verifies the registered skills declared in `contracts/skills.yaml`
     from their owner repos into a Codex skill directory
+- `record_after_action.py`
+  - creates a scaffolded after-action review record under `reviews/after-action/`
 - `sync_workspace_root.py`
   - syncs the canonical files in this repo back into `/home/mfshaf7/projects`
+- `validate_learning_closure.py`
+  - validates that after-action reviews either link real durable controls or
+    stay explicitly open with owner and due date
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
