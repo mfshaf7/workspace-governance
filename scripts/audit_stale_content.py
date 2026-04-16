@@ -20,6 +20,21 @@ ACTIVE_DOC_RULES = (
         repo_names=("platform-engineering",),
     ),
     Rule(
+        description="retired telegram deployment-workspace copy language",
+        pattern=r"deployment workspace copy",
+        repo_names=("openclaw-telegram-enhanced",),
+    ),
+    Rule(
+        description="retired telegram bundled build input language",
+        pattern=r"bundled build input",
+        repo_names=("openclaw-telegram-enhanced",),
+    ),
+    Rule(
+        description="retired telegram isolated-deployment workflow language",
+        pattern=r"in the isolated deployment workflow",
+        repo_names=("openclaw-telegram-enhanced",),
+    ),
+    Rule(
         description="retired Telegram copy-sync workflow",
         pattern=r"sync-telegram-build-copy\.sh",
         repo_names=(
