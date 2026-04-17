@@ -22,7 +22,7 @@ forbidden_patterns:
 security_requirements:
   security_owner: security-architecture
   review_checklist_path: docs/reviews/security-review-checklist.md
-  review_output_path: docs/reviews/components/README.md
+  review_output_path: docs/reviews/components/2026-04-18-openclaw-runtime-distribution-security-baseline.md
   required_artifacts:
     - id: runtime-distribution-component-view
       path: docs/architecture/components/openclaw-runtime-distribution/README.md

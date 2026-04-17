@@ -61,6 +61,9 @@ Repo rules may define:
 - forbidden ownership or topology language
 - additional stale-content patterns that should never reappear
 
+`security_requirements.review_output_path` must point to a concrete dated
+security review artifact, not a directory `README.md` placeholder.
+
 Repo rules must not:
 
 - redefine lifecycle semantics
