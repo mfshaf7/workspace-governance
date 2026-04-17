@@ -6,6 +6,7 @@
     "workspace_inventory",
     "statuses",
     "governance_triggers",
+    "ai_suggestions",
     "repos",
     "products",
     "components"
@@ -30,6 +31,36 @@
       "type": "array",
       "minItems": 1,
       "items": { "type": "string", "minLength": 1 }
+    },
+    "ai_suggestions": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "governed_profile_registry",
+        "required_profile_status",
+        "required_purposes",
+        "require_human_approval"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "governed_profile_registry": {
+          "type": "object",
+          "required": ["repo", "path"],
+          "properties": {
+            "repo": { "type": "string", "minLength": 1 },
+            "path": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "required_profile_status": { "type": "string", "minLength": 1 },
+        "required_purposes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "require_human_approval": { "type": "boolean" }
+      },
+      "additionalProperties": false
     },
     "repos": {
       "type": "object",

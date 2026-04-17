@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/intake-ai-suggestion.schema.json",
+  "type": "object",
+  "required": [
+    "profile_id",
+    "policy_status",
+    "decision_id",
+    "generated_at",
+    "confidence",
+    "accepted_by",
+    "accepted_at"
+  ],
+  "properties": {
+    "profile_id": { "type": "string", "minLength": 1 },
+    "policy_status": { "type": "string", "minLength": 1 },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "accepted_by": { "type": "string", "minLength": 1 },
+    "accepted_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}

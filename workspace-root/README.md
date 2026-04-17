@@ -71,6 +71,10 @@ to be classified first:
 
 before they quietly become part of the governed active model.
 
+AI may assist intake classification later, but that suggestion only counts as
+governed when it references an active approved model profile from
+`platform-engineering` and the operator still records explicit acceptance.
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 

@@ -21,6 +21,10 @@ quietly drift into the governed system. The goal is not to govern everything.
 The goal is to make the decision explicit before anything new becomes part of
 the operator-facing control plane by accident.
 
+AI may assist that intake decision, but an `ai-suggested` intake entry only
+counts as governed when it references an active approved model profile from
+`platform-engineering` and still records explicit operator acceptance.
+
 ## What This Repository Owns
 
 - canonical source for the workspace-root `README.md` and `AGENTS.md`

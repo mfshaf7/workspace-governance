@@ -183,6 +183,10 @@ Only start implementation after that discussion narrows the target design.
   - `out-of-scope`
   - `proposed`
   - `admitted`
+- `decision_source: ai-suggested` only counts as governed when the intake entry
+  carries active approved profile evidence from
+  `platform-engineering/security/governed-ai-model-profiles.yaml` and still
+  records explicit operator acceptance.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
   route the learning record to `workspace-governance/reviews/after-action/`
   instead of leaving it only in chat memory.

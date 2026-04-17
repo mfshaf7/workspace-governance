@@ -59,6 +59,10 @@ Route those changes back to the owner repos.
 - New repos, products, and components must be classified through the intake
   layer first. Do not silently let them appear in the workspace and only wire
   them into governance later.
+- AI may assist intake classification, but `decision_source: ai-suggested` is
+  only valid when the entry carries governed-profile evidence from the approved
+  `platform-engineering` model-profile registry and still records operator
+  acceptance.
 - If the owner model, product map, component map, or review/evidence model
   changes, update the affected files under `contracts/` and refresh
   `generated/` through `scripts/validate_cross_repo_truth.py --write-generated`.
