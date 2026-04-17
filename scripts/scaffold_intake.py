@@ -10,6 +10,8 @@ from contracts_lib import dump_yaml, load_yaml
 
 DEFAULT_SECURITY_OWNER = "security-architecture"
 DEFAULT_DECISION_SOURCE = "operator"
+AI_POLICY_STATUS_CHOICES = ("active", "suspended", "retired", "exception")
+AI_CONFIDENCE_CHOICES = ("low", "medium", "high")
 
 
 def load_intake(repo_root: Path) -> dict:
@@ -18,6 +20,35 @@ def load_intake(repo_root: Path) -> dict:
 
 def write_intake(repo_root: Path, payload: dict) -> None:
     dump_yaml(repo_root / "contracts" / "intake-register.yaml", payload)
+
+
+def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
+    if args.decision_source != "ai-suggested":
+        return None
+    missing = [
+        flag
+        for flag, value in (
+            ("--ai-profile-id", args.ai_profile_id),
+            ("--ai-policy-status", args.ai_policy_status),
+            ("--ai-decision-id", args.ai_decision_id),
+            ("--ai-generated-at", args.ai_generated_at),
+            ("--ai-confidence", args.ai_confidence),
+            ("--accepted-by", args.accepted_by),
+            ("--accepted-at", args.accepted_at),
+        )
+        if not value
+    ]
+    if missing:
+        raise SystemExit(" ".join(missing) + " required when --decision-source ai-suggested")
+    return {
+        "profile_id": args.ai_profile_id,
+        "policy_status": args.ai_policy_status,
+        "decision_id": args.ai_decision_id,
+        "generated_at": args.ai_generated_at,
+        "confidence": args.ai_confidence,
+        "accepted_by": args.accepted_by,
+        "accepted_at": args.accepted_at,
+    }
 
 
 def add_repo_entry(register: dict, args: argparse.Namespace) -> str:
@@ -34,6 +65,7 @@ def add_repo_entry(register: dict, args: argparse.Namespace) -> str:
         "requires_security_bindings": args.requires_security_bindings if in_scope else None,
         "security_owner": args.security_owner if in_scope and args.requires_security_bindings else None,
         "notes": args.notes,
+        "ai_suggestion": build_ai_suggestion(args),
     }
     return f"repo:{args.name}"
 
@@ -66,6 +98,7 @@ def add_product_entry(register: dict, args: argparse.Namespace) -> str:
         "source_owners": args.source_owner if in_scope else [],
         "intended_endpoint": args.intended_endpoint if in_scope else None,
         "notes": args.notes,
+        "ai_suggestion": build_ai_suggestion(args),
     }
     return f"product:{args.name}"
 
@@ -96,8 +129,19 @@ def add_component_entry(register: dict, args: argparse.Namespace) -> str:
         "security_owner": args.security_owner if in_scope else None,
         "product": args.product if in_scope else None,
         "notes": args.notes,
+        "ai_suggestion": build_ai_suggestion(args),
     }
     return f"component:{args.name}"
+
+
+def add_ai_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--ai-profile-id")
+    parser.add_argument("--ai-policy-status", choices=AI_POLICY_STATUS_CHOICES)
+    parser.add_argument("--ai-decision-id")
+    parser.add_argument("--ai-generated-at")
+    parser.add_argument("--ai-confidence", choices=AI_CONFIDENCE_CHOICES)
+    parser.add_argument("--accepted-by")
+    parser.add_argument("--accepted-at")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -120,6 +164,7 @@ def build_parser() -> argparse.ArgumentParser:
     repo_parser.add_argument("--requires-security-bindings", action="store_true")
     repo_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
     repo_parser.add_argument("--notes", required=True)
+    add_ai_arguments(repo_parser)
     repo_parser.set_defaults(handler=add_repo_entry)
 
     product_parser = subparsers.add_parser("product", help="scaffold a product intake entry")
@@ -132,6 +177,7 @@ def build_parser() -> argparse.ArgumentParser:
     product_parser.add_argument("--source-owner", action="append", default=[])
     product_parser.add_argument("--intended-endpoint")
     product_parser.add_argument("--notes", required=True)
+    add_ai_arguments(product_parser)
     product_parser.set_defaults(handler=add_product_entry)
 
     component_parser = subparsers.add_parser("component", help="scaffold a component intake entry")
@@ -143,6 +189,7 @@ def build_parser() -> argparse.ArgumentParser:
     component_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
     component_parser.add_argument("--product")
     component_parser.add_argument("--notes", required=True)
+    add_ai_arguments(component_parser)
     component_parser.set_defaults(handler=add_component_entry)
 
     return parser

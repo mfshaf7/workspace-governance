@@ -43,3 +43,10 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+    - id: ai-security-and-governance
+      path: docs/standards/ai-security-and-governance.md
+      review_areas:
+        - ai
+      required_in_docs:
+        - readme
+        - agents

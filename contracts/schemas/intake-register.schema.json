@@ -2,84 +2,156 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "required": ["schema_version", "repos", "products", "components"],
+  "$defs": {
+    "aiSuggestion": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "policy_status",
+        "decision_id",
+        "generated_at",
+        "confidence",
+        "accepted_by",
+        "accepted_at"
+      ],
+      "properties": {
+        "profile_id": { "type": "string", "minLength": 1 },
+        "policy_status": { "type": "string", "minLength": 1 },
+        "decision_id": { "type": "string", "minLength": 1 },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+        "accepted_by": { "type": "string", "minLength": 1 },
+        "accepted_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "repoEntry": {
+      "type": "object",
+      "required": [
+        "status",
+        "decision_source",
+        "repo_class",
+        "requires_security_bindings",
+        "security_owner",
+        "notes"
+      ],
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "decision_source": { "type": "string", "minLength": 1 },
+        "repo_class": { "type": ["string", "null"] },
+        "requires_security_bindings": { "type": ["boolean", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "notes": { "type": "string", "minLength": 1 },
+        "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "decision_source": { "const": "ai-suggested" }
+            }
+          },
+          "then": {
+            "required": ["ai_suggestion"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "productEntry": {
+      "type": "object",
+      "required": [
+        "status",
+        "decision_source",
+        "platform_owner",
+        "security_owner",
+        "runtime_owner",
+        "source_owners",
+        "intended_endpoint",
+        "notes"
+      ],
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "decision_source": { "type": "string", "minLength": 1 },
+        "platform_owner": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "runtime_owner": { "type": ["string", "null"] },
+        "source_owners": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "intended_endpoint": { "type": ["string", "null"] },
+        "notes": { "type": "string", "minLength": 1 },
+        "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "decision_source": { "const": "ai-suggested" }
+            }
+          },
+          "then": {
+            "required": ["ai_suggestion"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "componentEntry": {
+      "type": "object",
+      "required": [
+        "status",
+        "decision_source",
+        "component_class",
+        "owner_repo",
+        "security_owner",
+        "product",
+        "notes"
+      ],
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "decision_source": { "type": "string", "minLength": 1 },
+        "component_class": { "type": ["string", "null"] },
+        "owner_repo": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "product": { "type": ["string", "null"] },
+        "notes": { "type": "string", "minLength": 1 },
+        "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "decision_source": { "const": "ai-suggested" }
+            }
+          },
+          "then": {
+            "required": ["ai_suggestion"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
   "properties": {
     "schema_version": { "type": "integer", "minimum": 1 },
     "repos": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "status",
-          "decision_source",
-          "repo_class",
-          "requires_security_bindings",
-          "security_owner",
-          "notes"
-        ],
-        "properties": {
-          "status": { "type": "string", "minLength": 1 },
-          "decision_source": { "type": "string", "minLength": 1 },
-          "repo_class": { "type": ["string", "null"] },
-          "requires_security_bindings": { "type": ["boolean", "null"] },
-          "security_owner": { "type": ["string", "null"] },
-          "notes": { "type": "string", "minLength": 1 }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/repoEntry"
       }
     },
     "products": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "status",
-          "decision_source",
-          "platform_owner",
-          "security_owner",
-          "runtime_owner",
-          "source_owners",
-          "intended_endpoint",
-          "notes"
-        ],
-        "properties": {
-          "status": { "type": "string", "minLength": 1 },
-          "decision_source": { "type": "string", "minLength": 1 },
-          "platform_owner": { "type": ["string", "null"] },
-          "security_owner": { "type": ["string", "null"] },
-          "runtime_owner": { "type": ["string", "null"] },
-          "source_owners": {
-            "type": "array",
-            "items": { "type": "string", "minLength": 1 }
-          },
-          "intended_endpoint": { "type": ["string", "null"] },
-          "notes": { "type": "string", "minLength": 1 }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/productEntry"
       }
     },
     "components": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "status",
-          "decision_source",
-          "component_class",
-          "owner_repo",
-          "security_owner",
-          "product",
-          "notes"
-        ],
-        "properties": {
-          "status": { "type": "string", "minLength": 1 },
-          "decision_source": { "type": "string", "minLength": 1 },
-          "component_class": { "type": ["string", "null"] },
-          "owner_repo": { "type": ["string", "null"] },
-          "security_owner": { "type": ["string", "null"] },
-          "product": { "type": ["string", "null"] },
-          "notes": { "type": "string", "minLength": 1 }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/componentEntry"
       }
     }
   },

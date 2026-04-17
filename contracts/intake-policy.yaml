@@ -12,6 +12,15 @@ governance_triggers:
   - shared platform or shared component role
   - operator-facing runtime or service
   - secrets, identity, AI, or host-control path
+ai_suggestions:
+  enabled: true
+  governed_profile_registry:
+    repo: platform-engineering
+    path: security/governed-ai-model-profiles.yaml
+  required_profile_status: active
+  required_purposes:
+    - workspace-intake-assist
+  require_human_approval: true
 repos:
   admitted_requires_physical_repo: true
   admitted_required_files:

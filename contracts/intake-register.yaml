@@ -1,4 +1,12 @@
 schema_version: 1
 repos: {}
 products: {}
-components: {}
+components:
+  ai-access-plane:
+    status: proposed
+    decision_source: operator
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    security_owner: security-architecture
+    product: null
+    notes: Proposed internal AI gateway and approved model-profile control plane; not yet live or admitted into the active component inventory.
