@@ -1,0 +1,107 @@
+schema_version: 1
+id: 2026-04-17-openclaw-prod-suspend
+title: OpenClaw prod suspend exposed a missing prune control and a containment command guardrail
+recorded_on: 2026-04-17
+owner_repo: workspace-governance
+summary: >
+  The first governed OpenClaw prod suspend correctly removed the OpenClaw prod
+  Application objects from the Argo root, but it also exposed that the prod
+  child Applications lacked the Argo resource finalizer required to prune live
+  resources on deletion. The containment cleanup also exposed a shell-reliability
+  miss in how destructive kubectl deletes were issued.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+  related_products:
+    - openclaw
+  related_components: []
+  change_classes:
+    - platform-contract
+    - live-drift-repair
+source_refs:
+  - https://github.com/mfshaf7/platform-engineering/pull/72
+  - https://github.com/mfshaf7/platform-engineering/pull/73
+  - https://github.com/mfshaf7/platform-engineering/pull/74
+lessons:
+  - id: prod-suspend-prune-needs-child-app-finalizers
+    title: Governing prod suspend also requires prune-capable child Applications
+    failure_class: workflow-doctrine-gap
+    trigger: late-architecture-discovery
+    finding: >
+      The initial prod lifecycle contract removed the OpenClaw prod Application
+      objects from the prod root, but the managed prod child Applications did
+      not carry `resources-finalizer.argocd.argoproj.io`, so the live OpenClaw
+      runtime resources stayed behind as orphans.
+    impact: >
+      The first prod suspend left the service partially live until manual
+      containment cleaned up the orphaned runtime slice, which is weaker than a
+      deterministic governed stop path.
+    status: closed
+    expected_control_types:
+      - contract
+      - validator
+      - runbook
+      - adr
+      - doc
+    control_refs:
+      - type: contract
+        path: platform-engineering/environments/prod/argocd/openclaw-gateway-app.yaml
+        owner_repo: platform-engineering
+        note: Managed prod gateway Application now carries the Argo resources finalizer.
+      - type: contract
+        path: platform-engineering/environments/prod/argocd/platform-secrets-app.yaml
+        owner_repo: platform-engineering
+        note: Managed prod secrets Application now carries the Argo resources finalizer.
+      - type: contract
+        path: platform-engineering/environments/prod/argocd/platform-version-app.yaml
+        owner_repo: platform-engineering
+        note: Managed prod version Application now carries the Argo resources finalizer.
+      - type: validator
+        path: platform-engineering/products/openclaw/scripts/prod_lifecycle.py
+        owner_repo: platform-engineering
+        note: Prod lifecycle validation now fails if the managed prod child Applications lack the required finalizer.
+      - type: runbook
+        path: platform-engineering/products/openclaw/runbooks/manage-prod-lifecycle.md
+        owner_repo: platform-engineering
+        note: Runbook now states that prod suspend must prune live OpenClaw resources, not only remove child app objects.
+      - type: adr
+        path: platform-engineering/docs/decisions/adr/ADR-010-governed-openclaw-prod-lifecycle.md
+        owner_repo: platform-engineering
+        note: ADR now captures the child-application finalizer requirement for prod suspend.
+      - type: doc
+        path: platform-engineering/docs/records/change-records/2026-04-17-openclaw-prod-suspend-test.md
+        owner_repo: platform-engineering
+        note: Change record captures the first suspend test, manual containment, and remaining residual risk.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
+  - id: destructive-kubectl-delete-needs-explicit-kind-name-targets
+    title: Destructive kubectl containment commands should use explicit kind and name targets
+    failure_class: shell-reliability-miss
+    trigger: shell-or-tooling-reliability-miss
+    finding: >
+      During the orphan cleanup, a mixed shorthand `kubectl delete` form was
+      issued too quickly, which deleted the deployment first but misparsed the
+      remaining service, configmap, and secret targets.
+    impact: >
+      The cleanup still succeeded, but the command mistake added avoidable
+      operator friction during a prod containment step.
+    status: closed
+    expected_control_types:
+      - skill
+      - doc
+    control_refs:
+      - type: skill
+        path: platform-engineering/products/openclaw/skills-src/openclaw-governed-delivery/SKILL.md
+        owner_repo: platform-engineering
+        note: The governed delivery skill now requires explicit `kind/name` targets for live containment deletes.
+      - type: doc
+        path: platform-engineering/docs/records/change-records/2026-04-17-openclaw-prod-suspend-test.md
+        owner_repo: platform-engineering
+        note: The change record preserves the exact containment commands that worked.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
