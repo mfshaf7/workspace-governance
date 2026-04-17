@@ -25,6 +25,10 @@
 - `validate_security_evidence.py`
   - runs the security-architecture evidence validator so stale assessment
     metadata and unlinked findings or risks fail at workspace level too
+- `validate_security_change_record_lanes.py`
+  - validates that repos with contract-declared security change-record lanes
+    keep their README/AGENTS reference, policy file, PR workflow/template, and
+    diff-aware validator intact
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks

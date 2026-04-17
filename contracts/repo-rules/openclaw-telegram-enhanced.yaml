@@ -45,3 +45,12 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+security_change_record_requirements:
+  change_record_readme_path: docs/records/change-records/README.md
+  policy_path: docs/records/change-records/policy.yaml
+  validator_script_path: scripts/validate_change_record_requirement.py
+  workflow_path: .github/workflows/validate-governance-docs.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_in_docs:
+    - readme
+    - agents

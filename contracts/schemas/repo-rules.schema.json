@@ -60,6 +60,33 @@
         }
       },
       "additionalProperties": false
+    },
+    "security_change_record_requirements": {
+      "type": "object",
+      "required": [
+        "change_record_readme_path",
+        "policy_path",
+        "validator_script_path",
+        "workflow_path",
+        "pr_template_path",
+        "required_in_docs"
+      ],
+      "properties": {
+        "change_record_readme_path": { "type": "string", "minLength": 1 },
+        "policy_path": { "type": "string", "minLength": 1 },
+        "validator_script_path": { "type": "string", "minLength": 1 },
+        "workflow_path": { "type": "string", "minLength": 1 },
+        "pr_template_path": { "type": "string", "minLength": 1 },
+        "required_in_docs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["readme", "agents"]
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
