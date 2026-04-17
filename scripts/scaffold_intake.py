@@ -51,6 +51,13 @@ def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     }
 
 
+def with_optional_ai_suggestion(entry: dict, args: argparse.Namespace) -> dict:
+    ai_suggestion = build_ai_suggestion(args)
+    if ai_suggestion is not None:
+        entry["ai_suggestion"] = ai_suggestion
+    return entry
+
+
 def add_repo_entry(register: dict, args: argparse.Namespace) -> str:
     repos = register["repos"]
     if args.name in repos:
@@ -58,15 +65,14 @@ def add_repo_entry(register: dict, args: argparse.Namespace) -> str:
     in_scope = args.status != "out-of-scope"
     if in_scope and not args.repo_class:
         raise SystemExit("--repo-class is required when status is proposed or admitted")
-    repos[args.name] = {
+    repos[args.name] = with_optional_ai_suggestion({
         "status": args.status,
         "decision_source": args.decision_source,
         "repo_class": args.repo_class if in_scope else None,
         "requires_security_bindings": args.requires_security_bindings if in_scope else None,
         "security_owner": args.security_owner if in_scope and args.requires_security_bindings else None,
         "notes": args.notes,
-        "ai_suggestion": build_ai_suggestion(args),
-    }
+    }, args)
     return f"repo:{args.name}"
 
 
@@ -89,7 +95,7 @@ def add_product_entry(register: dict, args: argparse.Namespace) -> str:
             raise SystemExit(
                 " ".join(missing) + " required when status is proposed or admitted"
             )
-    products[args.name] = {
+    products[args.name] = with_optional_ai_suggestion({
         "status": args.status,
         "decision_source": args.decision_source,
         "platform_owner": args.platform_owner if in_scope else None,
@@ -98,8 +104,7 @@ def add_product_entry(register: dict, args: argparse.Namespace) -> str:
         "source_owners": args.source_owner if in_scope else [],
         "intended_endpoint": args.intended_endpoint if in_scope else None,
         "notes": args.notes,
-        "ai_suggestion": build_ai_suggestion(args),
-    }
+    }, args)
     return f"product:{args.name}"
 
 
@@ -121,7 +126,7 @@ def add_component_entry(register: dict, args: argparse.Namespace) -> str:
             raise SystemExit(
                 " ".join(missing) + " required when status is proposed or admitted"
             )
-    components[args.name] = {
+    components[args.name] = with_optional_ai_suggestion({
         "status": args.status,
         "decision_source": args.decision_source,
         "component_class": args.component_class if in_scope else None,
@@ -129,8 +134,7 @@ def add_component_entry(register: dict, args: argparse.Namespace) -> str:
         "security_owner": args.security_owner if in_scope else None,
         "product": args.product if in_scope else None,
         "notes": args.notes,
-        "ai_suggestion": build_ai_suggestion(args),
-    }
+    }, args)
     return f"component:{args.name}"
 
 
