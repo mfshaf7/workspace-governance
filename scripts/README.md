@@ -12,6 +12,10 @@
 - `install_skills.py`
   - installs or verifies the registered skills declared in `contracts/skills.yaml`
     from their owner repos into a Codex skill directory
+- `scaffold_intake.py`
+  - creates a new intake classification entry so a repo, product, or component
+    is explicitly marked out-of-scope, proposed, or admitted before it joins
+    the active contracts
 - `record_after_action.py`
   - creates a scaffolded after-action review record under `reviews/after-action/`
 - `sync_workspace_root.py`
@@ -19,6 +23,10 @@
 - `validate_learning_closure.py`
   - validates that after-action reviews either link real durable controls or
     stay explicitly open with owner and due date
+- `validate_intake.py`
+  - validates the intake register, explicit out-of-scope/proposed/admitted
+    classifications, and the rule that new git repos at the workspace root
+    must be classified before they become part of the governed system
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata

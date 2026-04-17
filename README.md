@@ -15,6 +15,12 @@ active repo map, product maturity, component inventory, dependency semantics,
 review obligations, security-binding expectations, stale vocabulary, and the
 after-action learning loop.
 
+It also owns the intake layer that forces new repos, products, and components
+to be explicitly classified as out-of-scope, proposed, or admitted before they
+quietly drift into the governed system. The goal is not to govern everything.
+The goal is to make the decision explicit before anything new becomes part of
+the operator-facing control plane by accident.
+
 ## What This Repository Owns
 
 - canonical source for the workspace-root `README.md` and `AGENTS.md`
@@ -47,7 +53,7 @@ Those stay in the owning repos:
   - canonical copies of the files synced into `/home/mfshaf7/projects`
 - `contracts/`
   - machine-readable repo, product, component, lifecycle, evidence, review, and
-    vocabulary contracts
+    vocabulary contracts plus intake policy and intake register
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
 - `skills-src/`
@@ -103,6 +109,7 @@ Run these from this repo:
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
+python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
@@ -112,7 +119,7 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
 ```
 
 ## Read First

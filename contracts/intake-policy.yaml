@@ -1,0 +1,23 @@
+schema_version: 1
+workspace_inventory:
+  scan_workspace_root_git_repos: true
+  allow_unclassified_git_repos: false
+statuses:
+  - out-of-scope
+  - proposed
+  - admitted
+governance_triggers:
+  - trust-boundary crossing
+  - production-impacting delivery surface
+  - shared platform or shared component role
+  - operator-facing runtime or service
+  - secrets, identity, AI, or host-control path
+repos:
+  admitted_requires_physical_repo: true
+  admitted_required_files:
+    - README.md
+    - AGENTS.md
+products:
+  require_owner_metadata_when_in_scope: true
+components:
+  require_owner_metadata_when_in_scope: true

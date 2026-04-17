@@ -62,6 +62,15 @@ product maturity, component inventory, vocabulary, and cross-repo routing
 rules. It also owns the after-action learning loop that turns major misses into
 reviewable controls or explicit follow-up.
 
+It also owns the intake gate. New repos, products, and components are supposed
+to be classified first:
+
+- `out-of-scope`
+- `proposed`
+- `admitted`
+
+before they quietly become part of the governed active model.
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 
@@ -81,6 +90,7 @@ Supported contract validation entrypoints:
 
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_contracts.py --repo-root /home/mfshaf7/projects/workspace-governance
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
 ```
 

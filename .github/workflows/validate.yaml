@@ -71,6 +71,9 @@ jobs:
               )
           PY
 
+      - name: Validate intake model
+        run: python3 scripts/validate_intake.py --workspace-root .workspace-ci
+
       - name: Validate component contracts
         run: python3 scripts/validate_component_contracts.py --workspace-root .workspace-ci --prepare-node-deps
 
@@ -90,4 +93,4 @@ jobs:
         run: python3 scripts/audit_stale_content.py --workspace-root . --repo-name workspace-governance
 
       - name: Compile validation scripts
-        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+        run: python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
