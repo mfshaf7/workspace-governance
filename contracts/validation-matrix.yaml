@@ -6,6 +6,10 @@ validators:
   contract-model:
     script: scripts/validate_contracts.py
     scope: workspace-governance
+  intake-model:
+    script: scripts/validate_intake.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   cross-repo-truth:
     script: scripts/validate_cross_repo_truth.py
     scope: local-workspace

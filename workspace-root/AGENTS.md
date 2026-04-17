@@ -165,6 +165,8 @@ Only start implementation after that discussion narrows the target design.
   the workspace audit passes against the live root.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/contracts/repos.yaml`
+  - `workspace-governance/contracts/intake-register.yaml` when the entrant is
+    only out-of-scope, proposed, or admitted
   - `workspace-governance/contracts/repo-rules/`
   - `workspace-governance/workspace-root/README.md`
   - `workspace-governance/workspace-root/AGENTS.md`
@@ -173,6 +175,14 @@ Only start implementation after that discussion narrows the target design.
   guidance, update `workspace-governance/contracts/vocabulary.yaml` or the
   affected `workspace-governance/contracts/repo-rules/*.yaml` in the same work.
 - If a repo boundary changes, update the owning repo docs in the same work.
+- New repos, products, and components must be classified through the intake
+  layer before they become part of the governed active model. Not everything
+  must be governed, but everything new must be classified.
+- Intake classification can start from operator judgment or an AI suggestion,
+  but the recorded workspace decision is still explicit:
+  - `out-of-scope`
+  - `proposed`
+  - `admitted`
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
   route the learning record to `workspace-governance/reviews/after-action/`
   instead of leaving it only in chat memory.
@@ -212,6 +222,7 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/validate_contracts.py --repo-root .`
+  - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`

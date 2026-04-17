@@ -5,6 +5,8 @@ This directory is the source of truth for the workspace control-plane model.
 Use these contracts to declare:
 
 - which repos are active, retired, or governed differently
+- which repos, products, or components are explicitly out-of-scope, proposed,
+  or admitted before they join the active control plane
 - which products and components exist
 - which repo owns which long-lived responsibility
 - which dependency and review relationships are allowed
@@ -16,6 +18,14 @@ Use these contracts to declare:
 - `repos.yaml`
   - active and retired repos, lifecycle, ownership scope, and allowed
     authoritative references
+- `intake-policy.yaml`
+  - how new repos, products, and components are classified before they become
+    part of the governed system
+- `intake-register.yaml`
+  - explicit intake decisions for new repos, products, and components that are
+    out-of-scope, proposed, or admitted but not yet in the active contracts;
+    the decision may come directly from the operator or from an AI suggestion
+    that the operator then records
 - `products.yaml`
   - product maturity, owning repos, and delivery model
 - `components.yaml`
@@ -51,6 +61,10 @@ Use these contracts to declare:
 ## Repo Rules
 
 `repo-rules/*.yaml` extends the shared contracts for one active repo at a time.
+
+The intake layer is separate from `repo-rules/`. Use intake first to classify a
+new entrant. Only create a repo rule when the repo is promoted into the active
+governed set.
 
 Repo rules may define:
 

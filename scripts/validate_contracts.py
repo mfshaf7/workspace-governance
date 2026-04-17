@@ -43,6 +43,8 @@ def main() -> int:
     instance_paths = {
         "version": repo_root / "contracts/version.yaml",
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
+        "intake_policy": repo_root / "contracts/intake-policy.yaml",
+        "intake_register": repo_root / "contracts/intake-register.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
         "repos": repo_root / "contracts/repos.yaml",
         "products": repo_root / "contracts/products.yaml",
@@ -68,13 +70,26 @@ def main() -> int:
 
     contracts = load_contracts(repo_root)
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
+    intake_policy = contracts["intake_policy"]
+    intake_register = contracts["intake_register"]
+    intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
+    intake_repos = set(intake_register["repos"].keys())
     product_names = set(contracts["products"]["products"].keys())
+    intake_products = set(intake_register["products"].keys())
     change_classes = set(contracts["change_classes"]["change_classes"].keys())
+    component_names = set(contracts["components"]["components"].keys())
+    intake_components = set(intake_register["components"].keys())
     failure_classes = contracts["failure_taxonomy"]["failure_classes"]
     improvement_triggers = contracts["improvement_triggers"]["triggers"]
     validator_scripts = contracts["validation_matrix"]["validators"]
     registered_skills = contracts["skills"]["skills"]
+
+    expected_intake_statuses = {"out-of-scope", "proposed", "admitted"}
+    if intake_statuses != expected_intake_statuses:
+        errors.append(
+            "contracts/intake-policy.yaml: statuses must be exactly out-of-scope, proposed, admitted"
+        )
 
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:
@@ -154,6 +169,129 @@ def main() -> int:
         if payload["product"] is not None and payload["product"] not in product_names:
             errors.append(f"contracts/components.yaml: {component_name} product {payload['product']!r} is not declared in products.yaml")
 
+    duplicate_repos = sorted((active_repos | set(contracts["repos"].get("retired_repos", {}).keys())) & intake_repos)
+    if duplicate_repos:
+        errors.append(
+            "contracts/intake-register.yaml: repos must not overlap repos.yaml or retired_repos: "
+            + ", ".join(duplicate_repos)
+        )
+    duplicate_products = sorted(product_names & intake_products)
+    if duplicate_products:
+        errors.append(
+            "contracts/intake-register.yaml: products must not overlap products.yaml: "
+            + ", ".join(duplicate_products)
+        )
+    duplicate_components = sorted(component_names & intake_components)
+    if duplicate_components:
+        errors.append(
+            "contracts/intake-register.yaml: components must not overlap components.yaml: "
+            + ", ".join(duplicate_components)
+        )
+
+    in_scope_statuses = {"proposed", "admitted"}
+    admissible_repo_refs = active_repos | intake_repos
+    admissible_product_refs = product_names | intake_products
+
+    for repo_name, payload in intake_register["repos"].items():
+        if payload["status"] not in intake_statuses:
+            errors.append(
+                f"contracts/intake-register.yaml: repo {repo_name} uses unknown status {payload['status']!r}"
+            )
+        if payload["decision_source"] not in {"operator", "ai-suggested"}:
+            errors.append(
+                f"contracts/intake-register.yaml: repo {repo_name} decision_source must be operator or ai-suggested"
+            )
+        if payload["status"] in in_scope_statuses:
+            if not payload["repo_class"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: repo {repo_name} in scope must declare repo_class"
+                )
+            if payload["requires_security_bindings"] is None:
+                errors.append(
+                    f"contracts/intake-register.yaml: repo {repo_name} in scope must declare requires_security_bindings"
+                )
+            if payload["requires_security_bindings"]:
+                if not payload["security_owner"]:
+                    errors.append(
+                        f"contracts/intake-register.yaml: repo {repo_name} requires security bindings but has no security_owner"
+                    )
+                elif payload["security_owner"] not in active_repos:
+                    errors.append(
+                        f"contracts/intake-register.yaml: repo {repo_name} security_owner {payload['security_owner']!r} is not an active repo"
+                    )
+        elif payload["security_owner"] is not None and payload["security_owner"] not in active_repos:
+            errors.append(
+                f"contracts/intake-register.yaml: repo {repo_name} security_owner {payload['security_owner']!r} is not an active repo"
+            )
+
+    for product_name, payload in intake_register["products"].items():
+        if payload["status"] not in intake_statuses:
+            errors.append(
+                f"contracts/intake-register.yaml: product {product_name} uses unknown status {payload['status']!r}"
+            )
+        if payload["decision_source"] not in {"operator", "ai-suggested"}:
+            errors.append(
+                f"contracts/intake-register.yaml: product {product_name} decision_source must be operator or ai-suggested"
+            )
+        if payload["status"] in in_scope_statuses and intake_policy["products"]["require_owner_metadata_when_in_scope"]:
+            for owner_key in ("platform_owner", "security_owner", "runtime_owner"):
+                if not payload[owner_key]:
+                    errors.append(
+                        f"contracts/intake-register.yaml: product {product_name} in scope must declare {owner_key}"
+                    )
+                elif payload[owner_key] not in active_repos:
+                    errors.append(
+                        f"contracts/intake-register.yaml: product {product_name} {owner_key} {payload[owner_key]!r} is not an active repo"
+                    )
+            if not payload["source_owners"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: product {product_name} in scope must declare source_owners"
+                )
+            for repo_name in payload["source_owners"]:
+                if repo_name not in admissible_repo_refs:
+                    errors.append(
+                        f"contracts/intake-register.yaml: product {product_name} source owner {repo_name!r} is not an active or intake-classified repo"
+                    )
+            if not payload["intended_endpoint"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: product {product_name} in scope must declare intended_endpoint"
+                )
+
+    for component_name, payload in intake_register["components"].items():
+        if payload["status"] not in intake_statuses:
+            errors.append(
+                f"contracts/intake-register.yaml: component {component_name} uses unknown status {payload['status']!r}"
+            )
+        if payload["decision_source"] not in {"operator", "ai-suggested"}:
+            errors.append(
+                f"contracts/intake-register.yaml: component {component_name} decision_source must be operator or ai-suggested"
+            )
+        if payload["status"] in in_scope_statuses and intake_policy["components"]["require_owner_metadata_when_in_scope"]:
+            if not payload["component_class"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} in scope must declare component_class"
+                )
+            if not payload["owner_repo"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} in scope must declare owner_repo"
+                )
+            elif payload["owner_repo"] not in admissible_repo_refs:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} owner_repo {payload['owner_repo']!r} is not an active or intake-classified repo"
+                )
+            if not payload["security_owner"]:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} in scope must declare security_owner"
+                )
+            elif payload["security_owner"] not in active_repos:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} security_owner {payload['security_owner']!r} is not an active repo"
+                )
+            if payload["product"] is not None and payload["product"] not in admissible_product_refs:
+                errors.append(
+                    f"contracts/intake-register.yaml: component {component_name} product {payload['product']!r} is not an active or intake-classified product"
+                )
+
     for task_type, payload in contracts["task_types"]["task_types"].items():
         if payload["primary_repo"] not in active_repos:
             errors.append(f"contracts/task-types.yaml: {task_type} primary_repo {payload['primary_repo']!r} is not an active repo")
@@ -210,8 +348,11 @@ def main() -> int:
     print(
         "contract model valid: "
         f"active_repos={len(active_repos)} "
+        f"intake_repos={len(intake_repos)} "
         f"products={len(product_names)} "
+        f"intake_products={len(intake_products)} "
         f"components={len(contracts['components']['components'])} "
+        f"intake_components={len(intake_components)} "
         f"repo_rules={len(repo_rules)} "
         f"skills={len(registered_skills)}"
     )

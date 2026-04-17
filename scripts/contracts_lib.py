@@ -11,6 +11,8 @@ import yaml
 CONTRACT_FILES = {
     "version": "contracts/version.yaml",
     "lifecycle": "contracts/lifecycle.yaml",
+    "intake_policy": "contracts/intake-policy.yaml",
+    "intake_register": "contracts/intake-register.yaml",
     "dependency_types": "contracts/dependency-types.yaml",
     "repos": "contracts/repos.yaml",
     "products": "contracts/products.yaml",
@@ -30,6 +32,8 @@ CONTRACT_FILES = {
 SCHEMA_FILES = {
     "version": "contracts/schemas/version.schema.json",
     "lifecycle": "contracts/schemas/lifecycle.schema.json",
+    "intake_policy": "contracts/schemas/intake-policy.schema.json",
+    "intake_register": "contracts/schemas/intake-register.schema.json",
     "dependency_types": "contracts/schemas/dependency-types.schema.json",
     "repos": "contracts/schemas/repos.schema.json",
     "products": "contracts/schemas/products.schema.json",
@@ -81,6 +85,10 @@ def load_contracts(repo_root: Path) -> dict[str, Any]:
 
 def active_repo_names(contracts: dict[str, Any]) -> list[str]:
     return sorted(contracts["repos"]["repos"].keys())
+
+
+def intake_repo_names(contracts: dict[str, Any]) -> list[str]:
+    return sorted(contracts["intake_register"]["repos"].keys())
 
 
 def retired_repo_names(contracts: dict[str, Any]) -> list[str]:

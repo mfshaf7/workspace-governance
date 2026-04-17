@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "workspace_inventory",
+    "statuses",
+    "governance_triggers",
+    "repos",
+    "products",
+    "components"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "workspace_inventory": {
+      "type": "object",
+      "required": ["scan_workspace_root_git_repos", "allow_unclassified_git_repos"],
+      "properties": {
+        "scan_workspace_root_git_repos": { "type": "boolean" },
+        "allow_unclassified_git_repos": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "governance_triggers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "repos": {
+      "type": "object",
+      "required": ["admitted_requires_physical_repo", "admitted_required_files"],
+      "properties": {
+        "admitted_requires_physical_repo": { "type": "boolean" },
+        "admitted_required_files": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "products": {
+      "type": "object",
+      "required": ["require_owner_metadata_when_in_scope"],
+      "properties": {
+        "require_owner_metadata_when_in_scope": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "object",
+      "required": ["require_owner_metadata_when_in_scope"],
+      "properties": {
+        "require_owner_metadata_when_in_scope": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
