@@ -1,5 +1,14 @@
 schema_version: 1
-repos: {}
+repos:
+  operator-orchestration-service:
+    status: proposed
+    decision_source: operator
+    repo_class: shared-operator-service
+    requires_security_bindings: true
+    security_owner: security-architecture
+    notes: Proposed shared operator workflow service that brokers operator-triggered
+      workflows between fast chat surfaces, AI-assist backends, and canonical backend
+      systems like OpenProject.
 products: {}
 components:
   ai-access-plane:
@@ -9,4 +18,15 @@ components:
     owner_repo: platform-engineering
     security_owner: security-architecture
     product: null
-    notes: Proposed internal AI gateway and approved model-profile control plane; not yet live or admitted into the active component inventory.
+    notes: Proposed internal AI gateway and approved model-profile control plane;
+      not yet live or admitted into the active component inventory.
+  operator-orchestration-service:
+    status: proposed
+    decision_source: operator
+    component_class: shared-platform
+    owner_repo: operator-orchestration-service
+    security_owner: security-architecture
+    product: null
+    notes: Proposed shared operator-facing workflow broker service that mediates Telegram/operator
+      requests, AI-assisted bounded workflow suggestions, and canonical backend writes
+      such as OpenProject.
