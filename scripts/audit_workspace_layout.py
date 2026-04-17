@@ -98,6 +98,9 @@ def main() -> int:
     security_evidence_validator = (
         workspace_governance_root / "scripts" / "validate_security_evidence.py"
     )
+    security_change_record_lane_validator = (
+        workspace_governance_root / "scripts" / "validate_security_change_record_lanes.py"
+    )
     component_contract_validator = (
         workspace_governance_root / "scripts" / "validate_component_contracts.py"
     )
@@ -116,6 +119,20 @@ def main() -> int:
             [
                 "python3",
                 str(security_evidence_validator),
+                "--workspace-root",
+                str(workspace_root),
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    try:
+        output = run(
+            [
+                "python3",
+                str(security_change_record_lane_validator),
                 "--workspace-root",
                 str(workspace_root),
             ]

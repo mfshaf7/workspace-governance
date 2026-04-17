@@ -27,6 +27,10 @@ validators:
     script: scripts/validate_security_evidence.py
     scope: local-workspace
     requires_workspace_checkout: true
+  security-change-record-lanes:
+    script: scripts/validate_security_change_record_lanes.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   component-contracts:
     script: scripts/validate_component_contracts.py
     scope: local-workspace

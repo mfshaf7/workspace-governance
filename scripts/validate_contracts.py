@@ -105,6 +105,7 @@ def main() -> int:
             if ref not in active_repos:
                 errors.append(f"contracts/repo-rules/{repo_name}.yaml: unknown required_repo_ref {ref!r}")
         security_requirements = rule.get("security_requirements")
+        security_change_record_requirements = rule.get("security_change_record_requirements")
         if repo_payload["requires_security_bindings"] and not security_requirements:
             errors.append(
                 f"contracts/repo-rules/{repo_name}.yaml: missing security_requirements for repo requiring security bindings"
@@ -128,6 +129,10 @@ def main() -> int:
                 errors.append(
                     f"contracts/repo-rules/{repo_name}.yaml: security artifact {artifact['id']} uses unknown review areas {', '.join(unknown_areas)}"
                 )
+        if security_change_record_requirements and not security_requirements:
+            errors.append(
+                f"contracts/repo-rules/{repo_name}.yaml: security_change_record_requirements require security_requirements"
+            )
 
     for product_name, payload in contracts["products"]["products"].items():
         if payload["lifecycle"] not in lifecycle_states:
