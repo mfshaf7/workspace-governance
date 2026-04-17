@@ -23,6 +23,10 @@ validators:
     script: scripts/validate_review_coverage.py
     scope: local-workspace
     requires_workspace_checkout: true
+  security-evidence:
+    script: scripts/validate_security_evidence.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   component-contracts:
     script: scripts/validate_component_contracts.py
     scope: local-workspace

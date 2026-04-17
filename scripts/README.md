@@ -22,6 +22,9 @@
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata
+- `validate_security_evidence.py`
+  - runs the security-architecture evidence validator so stale assessment
+    metadata and unlinked findings or risks fail at workspace level too
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
