@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 from pathlib import Path
+import re
 import sys
 
 from contracts_lib import active_repo_names, load_contracts
@@ -15,6 +16,11 @@ def build_reference_tokens(security_path: str) -> set[str]:
         f"../security-architecture/{security_path}",
         f"https://github.com/mfshaf7/security-architecture/blob/main/{security_path}",
     }
+
+
+DATED_REVIEW_OUTPUT_PATTERN = re.compile(
+    r"^docs/reviews/(platform|components|products)/\d{4}-\d{2}-\d{2}-.+\.md$"
+)
 
 
 def has_active_waiver(
@@ -62,6 +68,12 @@ def main() -> int:
         repos_checked += 1
         repo_rule = contracts["repo_rules"][repo_name]
         security_requirements = repo_rule["security_requirements"]
+        review_output_path = security_requirements["review_output_path"]
+        if not DATED_REVIEW_OUTPUT_PATTERN.match(review_output_path):
+            errors.append(
+                "contracts/repo-rules/"
+                f"{repo_name}.yaml: review_output_path must point to a concrete dated review artifact, got {review_output_path!r}"
+            )
         repo_root = workspace_root / repo_name
         readme_path = repo_root / "README.md"
         agents_path = repo_root / "AGENTS.md"
@@ -71,7 +83,7 @@ def main() -> int:
 
         for binding_id, security_path in (
             ("review-checklist", security_requirements["review_checklist_path"]),
-            ("review-output", security_requirements["review_output_path"]),
+            ("review-output", review_output_path),
         ):
             absolute_path = security_repo_root / security_path
             if not absolute_path.exists():

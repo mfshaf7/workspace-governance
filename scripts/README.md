@@ -27,8 +27,8 @@
     `contracts/components.yaml` across the local workspace
 - `validate_security_bindings.py`
   - validates that repos with security-relevant trust boundaries point at
-    concrete `security-architecture` artifacts, checklist scope, and review
-    output scope
+    concrete `security-architecture` artifacts, checklist scope, and dated
+    review output artifacts instead of directory-level placeholders
 - `validate_cross_repo_truth.py`
   - validates that active repos still tell the same ownership truth and
     regenerates the resolved governance artifacts under `generated/`
