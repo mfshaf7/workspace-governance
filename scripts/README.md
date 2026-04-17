@@ -19,6 +19,9 @@
 - `validate_learning_closure.py`
   - validates that after-action reviews either link real durable controls or
     stay explicitly open with owner and due date
+- `validate_review_coverage.py`
+  - validates that active security-owned repos, components, and products have
+    concrete baseline review coverage and non-stale review inventory metadata
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
