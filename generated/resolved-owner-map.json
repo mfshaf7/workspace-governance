@@ -61,6 +61,17 @@
       "product": "openclaw",
       "security_owner": "security-architecture"
     },
+    "operator-orchestration-service": {
+      "component_class": "shared-platform",
+      "interface_contract": {
+        "path": "contracts/interface-manifest.json",
+        "validation_command": "npm test"
+      },
+      "lifecycle": "active",
+      "owner_repo": "operator-orchestration-service",
+      "product": null,
+      "security_owner": "security-architecture"
+    },
     "platform-postgresql": {
       "component_class": "shared-platform",
       "lifecycle": "active",
@@ -172,6 +183,29 @@
         "Telegram packaging and tests"
       ],
       "repo_class": "product-channel",
+      "requires_security_bindings": true
+    },
+    "operator-orchestration-service": {
+      "allowed_authoritative_refs": [
+        "workspace-governance",
+        "platform-engineering",
+        "security-architecture",
+        "openclaw-telegram-enhanced"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "Telegram delivery or chat UX",
+        "platform rollout authority",
+        "security standards",
+        "direct workspace contract mutation"
+      ],
+      "owns": [
+        "shared operator workflow APIs",
+        "workflow audit and correlation",
+        "provider-agnostic AI-assist orchestration for bounded operator workflows",
+        "OpenProject workflow adapters"
+      ],
+      "repo_class": "shared-operator-service",
       "requires_security_bindings": true
     },
     "platform-engineering": {

@@ -1,0 +1,49 @@
+schema_version: 1
+repo: operator-orchestration-service
+lifecycle: active
+required_repo_refs:
+  - workspace-governance
+  - platform-engineering
+  - security-architecture
+  - openclaw-telegram-enhanced
+required_patterns:
+  readme:
+    - shared operator-facing workflow service
+    - OpenProject
+  agents:
+    - stable workflow APIs
+    - Telegram UX or transport behavior
+forbidden_patterns:
+  readme: []
+  agents: []
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/2026-04-18-operator-orchestration-service-runtime-admission.md
+  required_artifacts:
+    - id: operator-orchestration-component-view
+      path: docs/architecture/components/operator-orchestration-service/README.md
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      required_in_docs:
+        - readme
+        - agents
+    - id: ai-security-and-governance
+      path: docs/standards/ai-security-and-governance.md
+      review_areas:
+        - ai
+      required_in_docs:
+        - readme
+        - agents
+security_change_record_requirements:
+  change_record_readme_path: docs/records/change-records/README.md
+  policy_path: docs/records/change-records/policy.yaml
+  validator_script_path: scripts/validate_change_record_requirement.py
+  workflow_path: .github/workflows/validate-governance-docs.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_in_docs:
+    - readme
+    - agents

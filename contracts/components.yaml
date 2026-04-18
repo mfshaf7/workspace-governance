@@ -63,3 +63,12 @@ components:
     interface_contract:
       path: host-control-openclaw-plugin/contracts/interface-manifest.json
       validation_command: npm --prefix host-control-openclaw-plugin run test:interface-contract
+  operator-orchestration-service:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: operator-orchestration-service
+    product: null
+    security_owner: security-architecture
+    interface_contract:
+      path: contracts/interface-manifest.json
+      validation_command: npm test

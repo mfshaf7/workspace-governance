@@ -152,6 +152,26 @@
       "type": "authoritative-reference"
     },
     {
+      "from": "operator-orchestration-service",
+      "to": "workspace-governance",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "operator-orchestration-service",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "operator-orchestration-service",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "operator-orchestration-service",
+      "to": "openclaw-telegram-enhanced",
+      "type": "authoritative-reference"
+    },
+    {
       "from": "openclaw",
       "to": "platform-engineering",
       "type": "authoritative-reference"

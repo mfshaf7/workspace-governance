@@ -113,6 +113,25 @@ repos:
       - openclaw-host-bridge
       - platform-engineering
       - security-architecture
+  operator-orchestration-service:
+    lifecycle: active
+    repo_class: shared-operator-service
+    requires_security_bindings: true
+    owns:
+      - shared operator workflow APIs
+      - workflow audit and correlation
+      - provider-agnostic AI-assist orchestration for bounded operator workflows
+      - OpenProject workflow adapters
+    must_not_own:
+      - Telegram delivery or chat UX
+      - platform rollout authority
+      - security standards
+      - direct workspace contract mutation
+    allowed_authoritative_refs:
+      - workspace-governance
+      - platform-engineering
+      - security-architecture
+      - openclaw-telegram-enhanced
 retired_repos:
   openclaw-isolated-deployment:
     lifecycle: retired
