@@ -70,11 +70,6 @@ def main() -> int:
 
     if workspace_governance_root.exists():
         compare_files(
-            workspace_governance_root / "workspace-root" / "ARCHITECTURE.md",
-            workspace_root / "ARCHITECTURE.md",
-            errors,
-        )
-        compare_files(
             workspace_governance_root / "workspace-root" / "README.md",
             workspace_root / "README.md",
             errors,

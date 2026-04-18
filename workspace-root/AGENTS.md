@@ -11,10 +11,6 @@ It owns cross-repo routing, workspace-level governance expectations, and the
 current owner map. It does not own product-specific incident lore or repo-local
 implementation details.
 
-For immediate architecture orientation in a new session, read
-`/home/mfshaf7/projects/ARCHITECTURE.md` first. Use this file to route the
-task after the system shape is clear.
-
 ## Default Perspective
 
 Operate first as:
@@ -34,8 +30,6 @@ That means:
 
 ## Start Here
 
-0. If this is a new workspace-level session, read:
-   - `/home/mfshaf7/projects/ARCHITECTURE.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -160,7 +154,6 @@ Only start implementation after that discussion narrows the target design.
 - The workspace root is not a Git repo. The canonical source for its governance
   files now lives in `workspace-governance/`.
 - Do not hand-maintain long-lived edits directly in:
-  - `/home/mfshaf7/projects/ARCHITECTURE.md`
   - `/home/mfshaf7/projects/README.md`
   - `/home/mfshaf7/projects/AGENTS.md`
   - `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
