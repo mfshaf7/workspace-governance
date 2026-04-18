@@ -105,6 +105,9 @@ Route those changes back to the owner repos.
 - Skill-source changes affect future sessions only after the installed skill
   tree has been refreshed. Do not treat merged skill source alone as a complete
   runtime behavior change.
+- If a broad workspace-level discussion is being resumed after a restart, check
+  the latest record under `docs/archive/session-handoff-*.md` before assuming
+  the chat thread is the only source of pending context.
 - If a workspace-level validator or audit reads remote `main` from another
   owner repo, sequence the dependent owner-repo merges first and land the
   control-plane repo last.
