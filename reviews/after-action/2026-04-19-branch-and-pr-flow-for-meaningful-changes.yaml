@@ -1,0 +1,58 @@
+schema_version: 1
+id: 2026-04-19-branch-and-pr-flow-for-meaningful-changes
+title: Meaningful landed changes need explicit branch and PR doctrine
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: A repeated execution miss exposed that validated changes could stop at
+  local state, push directly to `main`, or otherwise bypass the expected branch,
+  PR, and summary flow because the workspace doctrine and completion skill did
+  not state that path explicitly enough.
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly called the missing branch and PR flow a repeated mistake'
+lessons:
+  - id: branch-and-pr-flow-must-be-explicit
+    title: Meaningful landed work should not rely on implied Git habits
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-operator-friction
+    finding: The workspace had strong routing, validation, and evidence doctrine,
+      but it did not explicitly say that meaningful landed changes should move
+      through branch, push, PR, and meaningful PR summary flow unless a direct
+      landing path is explicitly requested or documented. That left too much
+      room for inconsistent execution.
+    impact: A completed fix first stalled in local state, then background push
+      sessions landed it directly on `main`, which bypassed the expected review
+      flow and forced extra recovery work through revert PRs and reintroduction
+      PRs.
+    status: closed
+    expected_control_types:
+      - doc
+      - skill
+    control_refs:
+      - type: doc
+        path: workspace-governance/AGENTS.md
+        owner_repo: workspace-governance
+        note: Declares branch and PR doctrine for meaningful landed work.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Makes the same doctrine visible to fresh workspace sessions.
+      - type: doc
+        path: workspace-governance/README.md
+        owner_repo: workspace-governance
+        note: Adds branch and PR flow to the repo operating model.
+      - type: skill
+        path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+        owner_repo: workspace-governance
+        note: Requires branch and PR checks before calling landed work complete.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
