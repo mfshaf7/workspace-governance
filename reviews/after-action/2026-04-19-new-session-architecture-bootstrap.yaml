@@ -1,0 +1,74 @@
+schema_version: 1
+id: 2026-04-19-new-session-architecture-bootstrap
+title: New sessions needed a synced architecture bootstrap surface
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The workspace had accurate architecture truth, but a new Codex session
+  could not absorb it quickly from the existing spread of contracts, root docs,
+  repo docs, and security overlays. A synced architecture snapshot plus
+  orientation cleanup was needed.
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly identified the main gap as new Codex sessions being unable to see the full architecture immediately'
+lessons:
+  - id: new-sessions-need-architecture-bootstrap
+    title: Workspace routing doctrine was not enough without one fast architecture snapshot
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-operator-friction
+    finding: The workspace already had contracts, runbooks, security overlays,
+      and repo-local owner docs, but they did not provide one synced root-level
+      surface that a fresh session could read to load the whole architecture at
+      once. That increased the chance of redundant proposals and stale
+      assumptions.
+    impact: Fresh sessions spent time re-deriving the architecture and could
+      miss already-landed workflow controls or current repo maturity. That
+      directly reduced recommendation quality and session startup reliability.
+    status: closed
+    expected_control_types:
+      - doc
+      - script
+      - validator
+    control_refs:
+      - type: doc
+        path: workspace-governance/workspace-root/ARCHITECTURE.md
+        owner_repo: workspace-governance
+        note: New synced architecture bootstrap surface for workspace-level sessions.
+      - type: doc
+        path: workspace-governance/workspace-root/README.md
+        owner_repo: workspace-governance
+        note: Startup path now points new sessions to the architecture snapshot first.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Routing guidance now explicitly tells new sessions to read the architecture snapshot first.
+      - type: script
+        path: workspace-governance/scripts/sync_workspace_root.py
+        owner_repo: workspace-governance
+        note: Adds the architecture snapshot to the synced workspace-root set.
+      - type: validator
+        path: workspace-governance/scripts/audit_workspace_layout.py
+        owner_repo: workspace-governance
+        note: Fails if the live workspace root architecture snapshot drifts from the canonical copy.
+      - type: doc
+        path: operator-orchestration-service/AGENTS.md
+        owner_repo: operator-orchestration-service
+        note: Removes stale proposed-state wording that distorted fresh-session architecture understanding.
+      - type: doc
+        path: operator-orchestration-service/README.md
+        owner_repo: operator-orchestration-service
+        note: Aligns active runtime posture with the current workspace contracts.
+      - type: doc
+        path: operator-orchestration-service/docs/architecture/overview.md
+        owner_repo: operator-orchestration-service
+        note: Removes stale proposed-state wording from the architecture surface.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

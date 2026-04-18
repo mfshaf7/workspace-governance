@@ -9,6 +9,7 @@ delivery repo.
 ## Read First
 
 - `README.md`
+- `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
 - `scripts/README.md`
@@ -48,6 +49,10 @@ Route those changes back to the owner repos.
   - the canonical files are updated in this repo
   - the live workspace root has been re-synced
   - the sync and workspace audit both pass
+- For meaningful git-tracked changes that are intended to land, use a repo
+  branch and pull request with a meaningful summary instead of committing
+  directly to `main`, unless the user explicitly asks for direct landing or the
+  repo's documented workflow says otherwise.
 - If the active repo inventory changes, update:
   - `contracts/repos.yaml`
   - `contracts/intake-register.yaml` when a new entrant is still out-of-scope,
@@ -121,6 +126,9 @@ Route those changes back to the owner repos.
   control-plane repo last.
 - If that sequence is violated, fix the merge order and rerun validation
   honestly. Do not represent a no-op rerun commit as the real fix.
+- If work spans multiple repos and is meant to land through PRs, state the PR
+  merge order explicitly while the work is in flight and do not leave the
+  branch/PR plan only in chat memory.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
   do not jump straight from chat to after-action closure.
 - Record or update an improvement candidate under

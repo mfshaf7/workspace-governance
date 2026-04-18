@@ -77,6 +77,7 @@ counts as governed when it references an active approved model profile from
 ## What This Repository Owns
 
 - canonical source for the workspace-root `README.md` and `AGENTS.md`
+- canonical source for the workspace-root `ARCHITECTURE.md`
 - contract source under `contracts/`
 - generated resolved governance artifacts under `generated/`
 - workspace-level skill source under `skills-src/`
@@ -104,6 +105,7 @@ Those stay in the owning repos:
 
 - `workspace-root/`
   - canonical copies of the files synced into `/home/mfshaf7/projects`
+  - includes the new-session architecture snapshot at `ARCHITECTURE.md`
 - `contracts/`
   - machine-readable repo, product, component, lifecycle, evidence, review, and
     vocabulary contracts plus intake policy, intake register, and
@@ -124,16 +126,19 @@ Those stay in the owning repos:
 ## Operating Model
 
 1. Edit the canonical files in this repo.
-2. Sync them into the live workspace root.
-3. Run repo-local validation.
-4. Run the workspace audit against `/home/mfshaf7/projects`.
-5. Reinstall or verify the registered skills if skill source or registry state
+2. Land meaningful git-tracked changes through a repo branch and pull request
+   with a meaningful summary unless the user explicitly asks for direct landing
+   or the repo's documented workflow says otherwise.
+3. Sync them into the live workspace root.
+4. Run repo-local validation.
+5. Run the workspace audit against `/home/mfshaf7/projects`.
+6. Reinstall or verify the registered skills if skill source or registry state
    changed.
    The real local install under `~/.codex/skills` matters, not just a temp
    validation copy.
-6. Validate improvement candidates and learning closure if self-improvement
+7. Validate improvement candidates and learning closure if self-improvement
    records or closure controls changed.
-7. If repo ownership or routing changed, update the owning repo docs in the
+8. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
 ## Sync Model
@@ -143,10 +148,12 @@ read these paths directly:
 
 - `/home/mfshaf7/projects/README.md`
 - `/home/mfshaf7/projects/AGENTS.md`
+- `/home/mfshaf7/projects/ARCHITECTURE.md`
 - `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
 
 This repo keeps the canonical copies in:
 
+- `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
 - `scripts/audit_workspace_layout.py`
@@ -186,6 +193,7 @@ python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_cont
 ## Read First
 
 - [AGENTS.md](AGENTS.md)
+- [workspace-root/ARCHITECTURE.md](workspace-root/ARCHITECTURE.md)
 - [contracts/README.md](contracts/README.md)
 - [contracts/skills.yaml](contracts/skills.yaml)
 - [reviews/improvement-candidates/README.md](reviews/improvement-candidates/README.md)

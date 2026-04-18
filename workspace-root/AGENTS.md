@@ -11,6 +11,10 @@ It owns cross-repo routing, workspace-level governance expectations, and the
 current owner map. It does not own product-specific incident lore or repo-local
 implementation details.
 
+For immediate architecture orientation in a new session, read
+`/home/mfshaf7/projects/ARCHITECTURE.md` first. Use this file to route the
+task after the system shape is clear.
+
 ## Default Perspective
 
 Operate first as:
@@ -30,6 +34,8 @@ That means:
 
 ## Start Here
 
+0. If this is a new workspace-level session, read:
+   - `/home/mfshaf7/projects/ARCHITECTURE.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -154,6 +160,7 @@ Only start implementation after that discussion narrows the target design.
 - The workspace root is not a Git repo. The canonical source for its governance
   files now lives in `workspace-governance/`.
 - Do not hand-maintain long-lived edits directly in:
+  - `/home/mfshaf7/projects/ARCHITECTURE.md`
   - `/home/mfshaf7/projects/README.md`
   - `/home/mfshaf7/projects/AGENTS.md`
   - `/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py`
@@ -163,6 +170,10 @@ Only start implementation after that discussion narrows the target design.
   - `python3 /home/mfshaf7/projects/workspace-governance/scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
 - A workspace-governance change is not complete until the sync has been run and
   the workspace audit passes against the live root.
+- For meaningful git-tracked repo changes that are intended to land, use a repo
+  branch and pull request with a meaningful summary instead of committing
+  directly to `main`, unless the user explicitly asks for direct landing or the
+  repo's documented workflow says otherwise.
 - If the registered skill inventory or any workspace-owned skill source
   changes, the work is not complete until the live installed skills under
   `~/.codex/skills` are refreshed and the workspace audit confirms they are in
@@ -186,6 +197,9 @@ Only start implementation after that discussion narrows the target design.
 - If a workspace-level validator or audit depends on another repo's remote
   `main`, sequence the dependency repo merges first and land the dependent
   control-plane change after them.
+- If multiple repos are landing through PRs, make the merge order explicit and
+  do not treat local commits, background pushes, or unreviewed direct-to-`main`
+  landings as complete.
 - New repos, products, and components must be classified through the intake
   layer before they become part of the governed active model. Not everything
   must be governed, but everything new must be classified.
