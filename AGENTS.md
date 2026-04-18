@@ -21,7 +21,7 @@ delivery repo.
 - workspace-level skill source
 - registered repo-owned skill inventory
 - workspace audit and sync tooling
-- after-action reviews and learning-closure validation
+- after-action reviews, improvement-candidate triage, and self-improvement validation
 - stale-content audit rules for active docs
 - repo inventory and cross-repo routing rules
 - validation that the workspace-level control surface stays coherent
@@ -102,8 +102,13 @@ Route those changes back to the owner repos.
 - If the registered skill inventory changes, update `contracts/skills.yaml`,
   the owner repo skill source, and rerun `scripts/install_skills.py`.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
-  record an after-action under `reviews/after-action/` and either close it with
-  linked durable controls or leave it explicitly open with owner and due date.
+  do not jump straight from chat to after-action closure.
+- Record or update an improvement candidate under
+  `reviews/improvement-candidates/` as soon as the signal is real.
+- If the user explicitly says something is a repeated mistake, that is a
+  mandatory candidate signal.
+- If the lesson and control shape are already clear, record the after-action
+  too and close the candidate through the linked review or direct controls.
 - Do not treat conversational hindsight as a durable fix. Repeated failure
   classes should leave behind a real control change such as a validator, skill
   update, contract update, workflow update, runbook, or test.
@@ -131,14 +136,16 @@ python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
 ```

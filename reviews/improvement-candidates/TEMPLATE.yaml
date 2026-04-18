@@ -1,0 +1,30 @@
+schema_version: 1
+id: YYYY-MM-DD-example-candidate
+title: Replace with candidate title
+recorded_on: YYYY-MM-DD
+owner_repo: workspace-governance
+summary: Replace with a short summary of the suspected repeated miss or late discovery.
+status: new
+source_type: conversation
+scope:
+  related_repos: []
+  related_products: []
+  related_components: []
+  change_classes: []
+signals:
+  - id: signal-1
+    title: Replace with the concrete signal title
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+    finding: Replace with the concrete signal or repeated miss.
+    source_refs:
+      - replace-with-chat-thread-pr-or-audit-ref
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: YYYY-MM-DD
+  note: Replace with the next triage or control step.

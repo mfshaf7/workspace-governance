@@ -218,10 +218,15 @@ Only start implementation after that discussion narrows the target design.
   `platform-engineering/security/governed-ai-model-profiles.yaml` and still
   records explicit operator acceptance.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
-  route the learning record to `workspace-governance/reviews/after-action/`
-  instead of leaving it only in chat memory.
+  route it through the self-improvement system, not just chat memory.
+- Record or update a candidate first in
+  `workspace-governance/reviews/improvement-candidates/` when the signal is
+  real but the closure shape is not fully decided yet.
+- If the user explicitly says something is a repeated mistake, that is a
+  mandatory candidate signal.
 - No repeated failure class should stay purely conversational. It should either
-  gain a durable control or remain explicitly open with owner and due date.
+  become an explicit candidate with owner and due date, or close through a
+  linked after-action record or landed durable control.
 
 ## Operating Rules
 
@@ -258,7 +263,9 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_contracts.py --repo-root .`
   - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
+  - `python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`

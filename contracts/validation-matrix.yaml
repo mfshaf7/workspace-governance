@@ -51,6 +51,14 @@ validators:
     script: scripts/audit_stale_content.py
     scope: local-workspace
     requires_workspace_checkout: true
+  improvement-candidates:
+    script: scripts/validate_improvement_candidates.py
+    scope: local-workspace
+    requires_workspace_checkout: true
+  improvement-signals:
+    script: scripts/audit_improvement_signals.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   learning-closure:
     script: scripts/validate_learning_closure.py
     scope: local-workspace

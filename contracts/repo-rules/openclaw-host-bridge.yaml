@@ -45,3 +45,11 @@ security_change_record_requirements:
   required_in_docs:
     - readme
     - agents
+operator_workflow_requirements:
+  workflows:
+    - id: supported-host-deployment
+      summary: Supported host deployment and verification procedure for the bridge.
+      primary_surface_path: docs/host-deployment.md
+      required_in_docs:
+        - readme
+        - agents

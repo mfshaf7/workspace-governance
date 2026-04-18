@@ -2,6 +2,12 @@
 
 Use this directory for governed learning records.
 
+This is the closure layer, not the first signal layer.
+
+If the system has only recognized a likely repeated miss or late discovery and
+the durable control shape is not ready yet, record an improvement candidate
+first under `../improvement-candidates/`.
+
 An after-action review should capture:
 
 - what was discovered too late

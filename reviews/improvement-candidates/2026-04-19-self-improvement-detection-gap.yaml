@@ -1,0 +1,42 @@
+schema_version: 1
+id: 2026-04-19-self-improvement-detection-gap
+title: Self-improvement only reacted after direct operator callout
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The workspace had a governed after-action ledger, but it did not have a
+  real candidate layer or proactive machine-visible signal audit, so repeated
+  misses often stayed invisible until the operator pointed them out directly.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-telegram-enhanced
+    - openclaw-runtime-distribution
+    - openclaw-host-bridge
+  related_products: []
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: repeated-self-improvement-escalation
+    title: The operator had to say the self-improvement system only reacts after direct callout
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+    finding: The self-improvement system recorded lessons only after explicit
+      escalation or retrospective discussion. It did not have a first-class
+      candidate queue or a deterministic audit for machine-visible repeated
+      misses.
+    source_refs:
+      - 'conversation: user explicitly reported that the self-improvement system only triggers after direct mistake callout'
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-proactive-self-improvement-signals.yaml
+  control_refs: []
+  note: Closed through the new candidate layer, proactive signal audit, repo-rule
+    operator workflow enforcement, and updated self-improvement skill doctrine.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

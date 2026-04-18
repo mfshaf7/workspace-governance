@@ -20,8 +20,17 @@
     the active contracts
 - `record_after_action.py`
   - creates a scaffolded after-action review record under `reviews/after-action/`
+- `record_improvement_candidate.py`
+  - creates a scaffolded improvement-candidate record under
+    `reviews/improvement-candidates/`
 - `sync_workspace_root.py`
   - syncs the canonical files in this repo back into `/home/mfshaf7/projects`
+- `validate_improvement_candidates.py`
+  - validates that improvement candidates keep valid lifecycle, follow-up,
+    closure references, and control references
+- `audit_improvement_signals.py`
+  - audits machine-visible self-improvement signals such as missing declared
+    primary operator workflow surfaces across active repos
 - `validate_learning_closure.py`
   - validates that after-action reviews either link real durable controls or
     stay explicitly open with owner and due date
