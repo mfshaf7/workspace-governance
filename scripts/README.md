@@ -27,6 +27,9 @@
   - validates the intake register, explicit out-of-scope/proposed/admitted
     classifications, and the rule that new git repos at the workspace root
     must be classified before they become part of the governed system
+- `validate_developer_integration.py`
+  - validates the shared `dev-integration` lane contracts plus the registered
+    repo-owned profile files and command paths
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata

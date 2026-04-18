@@ -178,6 +178,17 @@ Only start implementation after that discussion narrows the target design.
 - New repos, products, and components must be classified through the intake
   layer before they become part of the governed active model. Not everything
   must be governed, but everything new must be classified.
+- `dev-integration` is the fast local iteration lane. It is standardized at
+  the workspace layer, but it is not a governed runtime lane like `stage` or
+  `prod`.
+- Use `dev-integration` when an operator-facing workflow, cross-repo API
+  contract, or canonical-backend write path is still changing too quickly for
+  governed stage rehearsal.
+- `dev-integration` still needs discipline:
+  - profile defines runtime shape
+  - branch or worktree defines source state
+  - session manifest records both
+  - stage handoff still requires reviewed commits and governed promotion
 - Intake classification can start from operator judgment or an AI suggestion,
   but the recorded workspace decision is still explicit:
   - `out-of-scope`
@@ -227,6 +238,7 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/validate_contracts.py --repo-root .`
   - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`

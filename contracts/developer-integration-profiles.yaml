@@ -1,0 +1,25 @@
+schema_version: 1
+profiles:
+  idea-workflow:
+    owner_repo: operator-orchestration-service
+    summary: Local-k3s dev-integration profile for the broker-owned idea workflow, local OpenProject backlog model, and Telegram command harness.
+    profile_path: dev-integration/profiles/idea-workflow/profile.yaml
+    runtime_owner: platform-engineering
+    security_owner: security-architecture
+    shared_dependencies:
+      - openclaw-telegram-enhanced
+      - platform-engineering
+    source_repos:
+      - operator-orchestration-service
+      - openclaw-telegram-enhanced
+      - platform-engineering
+    stage_handoff:
+      owner_repo: platform-engineering
+      governed_surface: openclaw-stage-idea-workflow
+    actions:
+      - up
+      - status
+      - smoke
+      - down
+      - reset
+      - promote_check

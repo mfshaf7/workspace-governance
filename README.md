@@ -21,6 +21,12 @@ quietly drift into the governed system. The goal is not to govern everything.
 The goal is to make the decision explicit before anything new becomes part of
 the operator-facing control plane by accident.
 
+It also owns the `dev-integration` lane standard for fast local iteration.
+That lane is workspace-standardized but not workspace-operated: profile owners
+provide the concrete runtime shape, while `workspace-governance` defines when
+the lane should be used, what it must never touch, and what artifacts are
+required before a change can move into governed stage rehearsal.
+
 AI may assist that intake decision, but an `ai-suggested` intake entry only
 counts as governed when it references an active approved model profile from
 `platform-engineering` and still records explicit operator acceptance.
@@ -57,7 +63,8 @@ Those stay in the owning repos:
   - canonical copies of the files synced into `/home/mfshaf7/projects`
 - `contracts/`
   - machine-readable repo, product, component, lifecycle, evidence, review, and
-    vocabulary contracts plus intake policy and intake register
+    vocabulary contracts plus intake policy, intake register, and
+    developer-integration lane contracts
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
 - `skills-src/`
@@ -114,6 +121,7 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects

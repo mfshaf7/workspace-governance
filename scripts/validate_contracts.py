@@ -45,6 +45,8 @@ def main() -> int:
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
+        "developer_integration_policy": repo_root / "contracts/developer-integration-policy.yaml",
+        "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
         "repos": repo_root / "contracts/repos.yaml",
         "products": repo_root / "contracts/products.yaml",
@@ -72,6 +74,8 @@ def main() -> int:
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
+    developer_integration_policy = contracts["developer_integration_policy"]
+    developer_integration_profiles = contracts["developer_integration_profiles"]
     intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
     intake_repos = set(intake_register["repos"].keys())
@@ -90,6 +94,44 @@ def main() -> int:
         errors.append(
             "contracts/intake-policy.yaml: statuses must be exactly out-of-scope, proposed, admitted"
         )
+
+    expected_devint_actions = {"up", "status", "smoke", "down", "reset", "promote_check"}
+    lane = developer_integration_policy["lane"]
+    if lane["id"] != "dev-integration":
+        errors.append("contracts/developer-integration-policy.yaml: lane.id must be 'dev-integration'")
+    for owner_key in ("standard_owner", "runtime_owner"):
+        if lane[owner_key] not in active_repos:
+            errors.append(
+                f"contracts/developer-integration-policy.yaml: {owner_key} {lane[owner_key]!r} is not an active repo"
+            )
+    if set(developer_integration_policy["required_actions"]) != expected_devint_actions:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: required_actions must be exactly "
+            + ", ".join(sorted(expected_devint_actions))
+        )
+    for profile_name, payload in developer_integration_profiles["profiles"].items():
+        if payload["owner_repo"] not in active_repos:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} owner_repo {payload['owner_repo']!r} is not an active repo"
+            )
+        for owner_key in ("runtime_owner", "security_owner"):
+            if payload[owner_key] not in active_repos:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} {owner_key} {payload[owner_key]!r} is not an active repo"
+                )
+        for repo_ref in payload["shared_dependencies"] + payload["source_repos"]:
+            if repo_ref not in active_repos:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} references unknown repo {repo_ref!r}"
+                )
+        if payload["stage_handoff"]["owner_repo"] not in active_repos:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff owner_repo {payload['stage_handoff']['owner_repo']!r} is not an active repo"
+            )
+        if set(payload["actions"]) != expected_devint_actions:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
+            )
 
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:

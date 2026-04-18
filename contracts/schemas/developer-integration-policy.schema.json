@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "lane",
+    "source_state",
+    "trigger_guidance",
+    "forbidden_targets",
+    "required_actions",
+    "required_handoff_artifacts",
+    "required_session_fields"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "lane": {
+      "type": "object",
+      "required": [
+        "id",
+        "standard_owner",
+        "runtime_owner",
+        "delivery_model",
+        "runtime_target",
+        "governed_handoff_target"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "standard_owner": { "type": "string", "minLength": 1 },
+        "runtime_owner": { "type": "string", "minLength": 1 },
+        "delivery_model": { "type": "string", "minLength": 1 },
+        "runtime_target": { "type": "string", "minLength": 1 },
+        "governed_handoff_target": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "source_state": {
+      "type": "object",
+      "required": [
+        "allow_dirty_worktrees",
+        "allow_local_only_commits",
+        "allow_branch_inputs",
+        "allow_worktree_path_overrides",
+        "session_manifest_required"
+      ],
+      "properties": {
+        "allow_dirty_worktrees": { "type": "boolean" },
+        "allow_local_only_commits": { "type": "boolean" },
+        "allow_branch_inputs": { "type": "boolean" },
+        "allow_worktree_path_overrides": { "type": "boolean" },
+        "session_manifest_required": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "trigger_guidance": {
+      "type": "object",
+      "required": ["required", "recommended", "optional"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "recommended": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "forbidden_targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_handoff_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_session_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false
+}

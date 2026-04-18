@@ -89,6 +89,9 @@ def main() -> int:
 
     contract_validator = workspace_governance_root / "scripts" / "validate_contracts.py"
     intake_validator = workspace_governance_root / "scripts" / "validate_intake.py"
+    developer_integration_validator = (
+        workspace_governance_root / "scripts" / "validate_developer_integration.py"
+    )
     cross_repo_validator = workspace_governance_root / "scripts" / "validate_cross_repo_truth.py"
     security_binding_validator = (
         workspace_governance_root / "scripts" / "validate_security_bindings.py"
@@ -110,6 +113,22 @@ def main() -> int:
     )
     try:
         output = run(["python3", str(contract_validator), "--repo-root", str(workspace_governance_root)])
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    try:
+        output = run(
+            [
+                "python3",
+                str(developer_integration_validator),
+                "--repo-root",
+                str(workspace_governance_root),
+                "--workspace-root",
+                str(workspace_root),
+            ]
+        )
     except subprocess.CalledProcessError as exc:
         errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
     else:
