@@ -140,6 +140,15 @@ Current model:
 - a new profile request does not become launchable until platform acceptance is
   recorded and any flagged security review references are present
 
+This contract is governance truth, not the primary operator instruction
+surface. If an operator needs to request or use a `dev-integration` profile,
+the owning operator-facing runbook must say how to do it directly and link back
+to these contracts only as supporting detail.
+
+Current operator-facing runbook:
+
+- [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
+
 ## After-Action Reviews
 
 Meaningful misses, late discoveries, or repeated operator pain should be

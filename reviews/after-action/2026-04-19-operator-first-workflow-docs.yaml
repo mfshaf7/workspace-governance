@@ -1,0 +1,60 @@
+schema_version: 1
+id: 2026-04-19-operator-first-workflow-docs
+title: Operator-facing workflow guidance was scattered across governance docs
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The dev-integration profile admission model landed with correct policy
+  and validation, but the operator still had to reconstruct the actual request
+  and usage path from contracts, templates, and standards. That exposed a
+  missing completion rule for operator-facing workflows.
+scope:
+  related_repos:
+  - workspace-governance
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+source_refs:
+- https://github.com/mfshaf7/workspace-governance/pull/18
+- https://github.com/mfshaf7/platform-engineering/pull/105
+lessons:
+- id: operator-facing-workflows-need-one-primary-instruction-surface
+  title: Operator-facing workflow changes need one primary operator instruction surface
+  failure_class: workflow-doctrine-gap
+  trigger: repeated-operator-friction
+  finding: The dev-integration request and usage model existed as valid policy,
+    registry state, and runtime enforcement, but the operator still had to
+    infer the procedure by reading multiple governance files.
+  impact: Repeated operator confusion survived after the control-plane changes
+    were already merged, which delayed adoption and made the workflow feel less
+    complete than it actually was.
+  status: closed
+  expected_control_types:
+  - contract
+  - doc
+  - runbook
+  control_refs:
+  - type: doc
+    path: workspace-governance/AGENTS.md
+    owner_repo: workspace-governance
+    note: Adds the explicit rule that operator-facing workflow work is not
+      complete until one primary operator instruction surface exists.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Propagates the same doctrine into the live workspace root guidance.
+  - type: doc
+    path: workspace-governance/workspace-root/README.md
+    owner_repo: workspace-governance
+    note: Points workspace operators directly at the owning runbook instead of
+      only describing lifecycle policy.
+  - type: runbook
+    path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+    owner_repo: platform-engineering
+    note: Primary operator-facing procedure for requesting and using
+      dev-integration profiles.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null

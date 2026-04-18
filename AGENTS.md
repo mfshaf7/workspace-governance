@@ -79,6 +79,16 @@ Route those changes back to the owner repos.
   Profiles define the environment. Branches or worktrees define which local
   repo state is mounted into that environment. The session manifest must record
   both.
+- If a change creates or materially changes an operator-facing workflow,
+  command family, request path, approval path, or other day-to-day operator
+  procedure, the work is not complete until one primary operator instruction
+  surface exists in the owning repo.
+- Contracts, templates, standards, and policy docs may support that workflow,
+  but they do not replace the primary operator instruction surface.
+- If the operator has to reconstruct the procedure from scattered policy,
+  template, and standards files, the workflow is still incomplete.
+- Workspace-level docs should point to the primary operator instruction
+  surface, not force the operator to infer it from contract internals.
 - AI may assist intake classification, but `decision_source: ai-suggested` is
   only valid when the entry carries governed-profile evidence from the approved
   `platform-engineering` model-profile registry and still records operator
