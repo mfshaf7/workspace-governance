@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 SYNC_MAP = (
-    ("workspace-root/ARCHITECTURE.md", "ARCHITECTURE.md"),
     ("workspace-root/README.md", "README.md"),
     ("workspace-root/AGENTS.md", "AGENTS.md"),
     ("scripts/audit_workspace_layout.py", "_workspace_tools/audit_workspace_layout.py"),

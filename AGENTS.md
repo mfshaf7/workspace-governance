@@ -9,7 +9,6 @@ delivery repo.
 ## Read First
 
 - `README.md`
-- `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
 - `scripts/README.md`

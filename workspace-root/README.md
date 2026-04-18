@@ -10,10 +10,6 @@ current platform and product stack.
 
 Treat it as a governed system, not a loose folder of related repos.
 
-For immediate new-session architecture orientation, read
-[ARCHITECTURE.md](/home/mfshaf7/projects/ARCHITECTURE.md) before diving into
-individual repos.
-
 ## Active Repository Roles
 
 | Repository | Current role | Owns | Does not own |
@@ -174,8 +170,6 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/install_skills.py --
 
 ## Start Here
 
-- Architecture snapshot for new sessions:
-  [ARCHITECTURE.md](/home/mfshaf7/projects/ARCHITECTURE.md)
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
