@@ -168,6 +168,9 @@ Only start implementation after that discussion narrows the target design.
   `~/.codex/skills` are refreshed and the workspace audit confirms they are in
   sync.
 - Skill-source changes affect future sessions only after that install step.
+- If a restart is likely while meaningful workspace-level pending items remain,
+  create or update the latest `workspace-governance/docs/archive/session-handoff-*.md`
+  record before closing the session.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/contracts/repos.yaml`
   - `workspace-governance/contracts/intake-register.yaml` when the entrant is
