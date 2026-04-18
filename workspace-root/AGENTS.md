@@ -197,6 +197,14 @@ Only start implementation after that discussion narrows the target design.
   - branch or worktree defines source state
   - session manifest records both
   - stage handoff still requires reviewed commits and governed promotion
+- If a change creates or materially changes an operator-facing workflow,
+  command family, request path, approval path, or other operator procedure, the
+  work is not complete until one primary operator instruction surface exists in
+  the owning repo.
+- Contracts, templates, and standards may support that workflow, but they do
+  not replace the primary operator instruction surface.
+- If the operator has to reconstruct the procedure from scattered files, the
+  workflow is still incomplete.
 - Intake classification can start from operator judgment or an AI suggestion,
   but the recorded workspace decision is still explicit:
   - `out-of-scope`

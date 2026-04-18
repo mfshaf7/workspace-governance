@@ -33,6 +33,17 @@ and active profiles are not the same thing: a profile may be `proposed`,
 request surface may change over time, while the current adapter can still be a
 tool such as OpenProject.
 
+Operator-facing workflow doctrine is explicit here too: when a change creates
+or materially changes a workflow that an operator is expected to run, the
+owning repo must publish one primary operator instruction surface. Supporting
+contracts, templates, or standards may back that workflow, but they are not a
+substitute for a clear step-by-step operator path.
+
+For the current `dev-integration` request and usage path, that primary surface
+is:
+
+- [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
+
 AI may assist that intake decision, but an `ai-suggested` intake entry only
 counts as governed when it references an active approved model profile from
 `platform-engineering` and still records explicit operator acceptance.

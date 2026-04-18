@@ -1,5 +1,11 @@
 # Developer-Integration Profile Request Template
 
+This template is supporting material, not the primary operator procedure.
+
+For the current operator-facing request and usage path, use:
+
+- [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
+
 Use this template when a team needs a new `dev-integration` profile and there
 is no suitable `active` profile already available.
 

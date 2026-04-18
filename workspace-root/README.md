@@ -97,6 +97,12 @@ Only `active` profiles are self-serve launchable from the shared runner. The
 request/admission model is generic at the workspace layer, even if the current
 request surface adapter is a specific tool such as OpenProject.
 
+For operator-facing workflow changes, one clear operator instruction surface is
+required in the owning repo. Supporting contracts, templates, and standards do
+not count as the primary procedure by themselves. For `dev-integration`,
+operators should use the shared runbook in
+[platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md).
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 
@@ -134,6 +140,7 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_learning_cl
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
 - Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
 - Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
+- Dev-integration request and usage: [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
 - OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/architecture-and-owner-model.md)
 - OpenProject platform model: [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
 - Active OpenClaw runtime composition: [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
