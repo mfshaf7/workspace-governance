@@ -93,6 +93,7 @@ def main() -> int:
         workspace_governance_root / "scripts" / "validate_developer_integration.py"
     )
     cross_repo_validator = workspace_governance_root / "scripts" / "validate_cross_repo_truth.py"
+    skill_install_validator = workspace_governance_root / "scripts" / "install_skills.py"
     security_binding_validator = (
         workspace_governance_root / "scripts" / "validate_security_bindings.py"
     )
@@ -223,6 +224,21 @@ def main() -> int:
         output = run(
             [
                 "python3",
+                str(skill_install_validator),
+                "--workspace-root",
+                str(workspace_root),
+                "--check",
+            ]
+        )
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    try:
+        output = run(
+            [
+                "python3",
                 str(component_contract_validator),
                 "--workspace-root",
                 str(workspace_root),
@@ -280,7 +296,8 @@ def main() -> int:
         f"repos={len(required_repos)} "
         f"repo_guidance={len(required_repos)} "
         "git_auth=ssh "
-        "root_sync=ok"
+        "root_sync=ok "
+        "skills=installed"
     )
     return 0
 

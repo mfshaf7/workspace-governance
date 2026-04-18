@@ -163,6 +163,11 @@ Only start implementation after that discussion narrows the target design.
   - `python3 /home/mfshaf7/projects/workspace-governance/scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
 - A workspace-governance change is not complete until the sync has been run and
   the workspace audit passes against the live root.
+- If the registered skill inventory or any workspace-owned skill source
+  changes, the work is not complete until the live installed skills under
+  `~/.codex/skills` are refreshed and the workspace audit confirms they are in
+  sync.
+- Skill-source changes affect future sessions only after that install step.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/contracts/repos.yaml`
   - `workspace-governance/contracts/intake-register.yaml` when the entrant is
@@ -175,6 +180,9 @@ Only start implementation after that discussion narrows the target design.
   guidance, update `workspace-governance/contracts/vocabulary.yaml` or the
   affected `workspace-governance/contracts/repo-rules/*.yaml` in the same work.
 - If a repo boundary changes, update the owning repo docs in the same work.
+- If a workspace-level validator or audit depends on another repo's remote
+  `main`, sequence the dependency repo merges first and land the dependent
+  control-plane change after them.
 - New repos, products, and components must be classified through the intake
   layer before they become part of the governed active model. Not everything
   must be governed, but everything new must be classified.

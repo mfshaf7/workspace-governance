@@ -54,6 +54,12 @@ If a user explicitly calls out a repeated mistake, that should create or update
 an improvement candidate immediately rather than waiting for a later
 retrospective.
 
+The skill model is explicit now too. Governing skill source is not enough by
+itself. The registered skill source in `contracts/skills.yaml` plus
+`skills-src/` must also be installed into the live Codex skill root under
+`~/.codex/skills`, and the local workspace audit now fails when that live
+install drifts from the governed source.
+
 For Git-tracked docs outside `workspace-root/`, renderer-safe navigation is
 also required. Same-repo docs should use repo-relative links, while cross-repo
 navigation should use web-safe links instead of local filesystem markdown
@@ -123,6 +129,8 @@ Those stay in the owning repos:
 4. Run the workspace audit against `/home/mfshaf7/projects`.
 5. Reinstall or verify the registered skills if skill source or registry state
    changed.
+   The real local install under `~/.codex/skills` matters, not just a temp
+   validation copy.
 6. Validate improvement candidates and learning closure if self-improvement
    records or closure controls changed.
 7. If repo ownership or routing changed, update the owning repo docs in the
@@ -165,6 +173,8 @@ python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/pro
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check

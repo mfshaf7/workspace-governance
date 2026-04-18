@@ -113,6 +113,12 @@ or completion gap, that should create or update an improvement candidate first.
 Only then should the system decide whether the lesson needs a full after-action
 review.
 
+The skill layer is governed too. Updating skill source is not enough by itself.
+If the registered skill inventory or workspace-owned skill source changes, the
+live installed skills under `~/.codex/skills` must be refreshed so future
+sessions actually use the new instructions. The workspace audit now checks that
+live install state directly.
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 
@@ -153,6 +159,13 @@ Supported proactive signal audit entrypoint:
 
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
+```
+
+Supported live-skill sync entrypoints:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/install_skills.py --workspace-root /home/mfshaf7/projects
+python3 /home/mfshaf7/projects/workspace-governance/scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 ```
 
 ## Start Here

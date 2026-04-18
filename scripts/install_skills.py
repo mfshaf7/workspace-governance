@@ -3,11 +3,15 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import json
 from pathlib import Path
 import shutil
 import sys
 
 from contracts_lib import load_contracts
+
+
+MANIFEST_NAME = ".workspace-governance-skills.json"
 
 
 def directories_match(left: Path, right: Path) -> bool:
@@ -18,6 +22,26 @@ def directories_match(left: Path, right: Path) -> bool:
         return False
     return all(
         directories_match(left / subdir, right / subdir) for subdir in comparison.common_dirs
+    )
+
+
+def load_manifest(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text())
+
+
+def write_manifest(path: Path, *, skill_dirs: list[str], registry_names: list[str]) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "managed_skill_dirs": skill_dirs,
+                "registered_skill_names": registry_names,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
     )
 
 
@@ -58,6 +82,7 @@ def main() -> int:
     workspace_root = args.workspace_root.resolve()
     contracts = load_contracts(repo_root)
     target_root = args.target_root.expanduser().resolve()
+    manifest_path = target_root / MANIFEST_NAME
     selected = set(args.skill_names or [])
     registered_skills = contracts["skills"]["skills"]
     errors: list[str] = []
@@ -70,11 +95,14 @@ def main() -> int:
             print(f"ERROR: {error}")
         return 1
 
+    current_skill_dirs: list[str] = []
+
     for skill_name, payload in sorted(registered_skills.items()):
         if selected and skill_name not in selected:
             continue
         source_dir = workspace_root / payload["owner_repo"] / payload["source_path"]
         target_dir = target_root / source_dir.name
+        current_skill_dirs.append(source_dir.name)
         if not source_dir.exists():
             errors.append(f"missing skill source: {source_dir}")
             continue
@@ -85,9 +113,36 @@ def main() -> int:
             if not directories_match(source_dir, target_dir):
                 errors.append(f"skill out of sync: {target_dir}")
             continue
+        target_root.mkdir(parents=True, exist_ok=True)
         if target_dir.exists():
             shutil.rmtree(target_dir)
         shutil.copytree(source_dir, target_dir)
+
+    if args.check and not selected:
+        manifest = load_manifest(manifest_path)
+        managed_dirs = manifest.get("managed_skill_dirs")
+        if not isinstance(managed_dirs, list):
+            errors.append(f"missing or invalid skill manifest: {manifest_path}")
+        else:
+            stale_dirs = sorted(set(managed_dirs) - set(current_skill_dirs))
+            for directory_name in stale_dirs:
+                stale_dir = target_root / directory_name
+                if stale_dir.exists():
+                    errors.append(f"stale managed skill still installed: {stale_dir}")
+    elif not args.check and not selected:
+        previous_manifest = load_manifest(manifest_path)
+        previous_dirs = previous_manifest.get("managed_skill_dirs", [])
+        if isinstance(previous_dirs, list):
+            stale_dirs = sorted(set(previous_dirs) - set(current_skill_dirs))
+            for directory_name in stale_dirs:
+                stale_dir = target_root / directory_name
+                if stale_dir.exists():
+                    shutil.rmtree(stale_dir)
+        write_manifest(
+            manifest_path,
+            skill_dirs=sorted(current_skill_dirs),
+            registry_names=sorted(registered_skills.keys()),
+        )
 
     if errors:
         for error in errors:

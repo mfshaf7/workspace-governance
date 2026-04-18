@@ -100,7 +100,16 @@ Route those changes back to the owner repos.
   changes, update the affected files under `contracts/` and refresh
   `generated/` through `scripts/validate_cross_repo_truth.py --write-generated`.
 - If the registered skill inventory changes, update `contracts/skills.yaml`,
-  the owner repo skill source, and rerun `scripts/install_skills.py`.
+  the owner repo skill source, rerun `scripts/install_skills.py`, and verify
+  that the live installed skills under `~/.codex/skills` are back in sync.
+- Skill-source changes affect future sessions only after the installed skill
+  tree has been refreshed. Do not treat merged skill source alone as a complete
+  runtime behavior change.
+- If a workspace-level validator or audit reads remote `main` from another
+  owner repo, sequence the dependent owner-repo merges first and land the
+  control-plane repo last.
+- If that sequence is violated, fix the merge order and rerun validation
+  honestly. Do not represent a no-op rerun commit as the real fix.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
   do not jump straight from chat to after-action closure.
 - Record or update an improvement candidate under
@@ -142,6 +151,8 @@ python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/pro
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
+python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check

@@ -2,8 +2,8 @@
 
 - `audit_workspace_layout.py`
   - audits the active workspace repo inventory, Git SSH origin shape,
-    workspace-root sync state, contract validity, generated artifact freshness,
-    and cross-repo truth
+    workspace-root sync state, contract validity, live installed skill sync,
+    generated artifact freshness, and cross-repo truth
 - `audit_stale_content.py`
   - audits active documentation against the contract vocabulary and repo-rule
     forbidden ownership language
@@ -14,6 +14,8 @@
 - `install_skills.py`
   - installs or verifies the registered skills declared in `contracts/skills.yaml`
     from their owner repos into a Codex skill directory
+  - tracks the workspace-managed live skill install manifest so stale managed
+    skills do not silently linger in `~/.codex/skills`
 - `scaffold_intake.py`
   - creates a new intake classification entry so a repo, product, or component
     is explicitly marked out-of-scope, proposed, or admitted before it joins
