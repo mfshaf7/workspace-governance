@@ -59,6 +59,18 @@ Route those changes back to the owner repos.
 - New repos, products, and components must be classified through the intake
   layer first. Do not silently let them appear in the workspace and only wire
   them into governance later.
+- `dev-integration` is a workspace-standardized fast-iteration lane, not a
+  governed delivery lane. Use it when operator-facing workflow design,
+  cross-repo API iteration, or canonical-backend write paths are still moving
+  too quickly for governed stage rehearsal.
+- The lane standard lives here, but the runtime is not owned here:
+  - `workspace-governance` owns the standard and handoff rules
+  - `platform-engineering` owns the shared local-k3s runner
+  - the owner repo owns its concrete profile
+- `dev-integration` profiles must capture both runtime shape and source state.
+  Profiles define the environment. Branches or worktrees define which local
+  repo state is mounted into that environment. The session manifest must record
+  both.
 - AI may assist intake classification, but `decision_source: ai-suggested` is
   only valid when the entry carries governed-profile evidence from the approved
   `platform-engineering` model-profile registry and still records operator
@@ -97,6 +109,7 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects

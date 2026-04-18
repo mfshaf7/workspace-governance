@@ -10,6 +10,10 @@ validators:
     script: scripts/validate_intake.py
     scope: local-workspace
     requires_workspace_checkout: true
+  developer-integration:
+    script: scripts/validate_developer_integration.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   cross-repo-truth:
     script: scripts/validate_cross_repo_truth.py
     scope: local-workspace

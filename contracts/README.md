@@ -26,6 +26,12 @@ Use these contracts to declare:
     out-of-scope, proposed, or admitted but not yet in the active contracts;
     the decision may come directly from the operator or from an AI suggestion
     that the operator then records
+- `developer-integration-policy.yaml`
+  - defines the shared `dev-integration` lane semantics, trigger guidance,
+    forbidden targets, required actions, and required handoff artifacts
+- `developer-integration-profiles.yaml`
+  - registers the concrete repo-owned `dev-integration` profiles that may run
+    on the shared local-k3s lane
 - `products.yaml`
   - product maturity, owning repos, and delivery model
 - `components.yaml`
@@ -86,6 +92,29 @@ Repo rules must not:
 - carry ad hoc prose-only exceptions
 
 Use `exceptions.yaml` for temporary waivers instead.
+
+## Developer-Integration Profiles
+
+`dev-integration` is a workspace-standardized fast local iteration lane.
+
+It is:
+
+- ungoverned for delivery
+- contract-aligned for interfaces
+- local-k3s based
+- explicitly separated from governed `stage` and `prod`
+
+The lane standard lives in this repo, but each concrete profile is owned in
+the repo that owns the workflow being iterated.
+
+The registered profiles in `developer-integration-profiles.yaml` must point to
+a repo-local `profile.yaml` that defines:
+
+- runtime shape
+- source repos
+- command paths
+- session-manifest expectations
+- stage handoff expectations
 
 ## After-Action Reviews
 

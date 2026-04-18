@@ -1,0 +1,53 @@
+schema_version: 1
+lane:
+  id: dev-integration
+  standard_owner: workspace-governance
+  runtime_owner: platform-engineering
+  delivery_model: local-ungoverned
+  runtime_target: local-k3s
+  governed_handoff_target: stage
+source_state:
+  allow_dirty_worktrees: true
+  allow_local_only_commits: true
+  allow_branch_inputs: true
+  allow_worktree_path_overrides: true
+  session_manifest_required: true
+trigger_guidance:
+  required:
+    - new-operator-workflow
+    - cross-repo-api-iteration
+    - canonical-backend-write
+    - rapid-operator-ux-iteration
+  recommended:
+    - changing-read-help-list-show-shapes
+    - evolving-runtime-topology-before-stage
+    - cross-repo-contract-rehearsal
+  optional:
+    - single-repo-pure-logic-change
+    - no-external-write-path
+forbidden_targets:
+  - stage-backend-write
+  - prod-backend-write
+  - shared-governed-secrets
+  - governed-stage-or-prod-evidence
+required_actions:
+  - up
+  - status
+  - smoke
+  - down
+  - reset
+  - promote_check
+required_handoff_artifacts:
+  - session_manifest
+  - promotion_report
+  - smoke_summary
+required_session_fields:
+  - session_id
+  - profile_id
+  - operator
+  - namespace
+  - created_at
+  - workspace_root
+  - owner_repo
+  - runtime_owner
+  - source_repos

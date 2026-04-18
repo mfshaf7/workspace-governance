@@ -75,6 +75,17 @@ AI may assist intake classification later, but that suggestion only counts as
 governed when it references an active approved model profile from
 `platform-engineering` and the operator still records explicit acceptance.
 
+The workspace also defines a `dev-integration` lane for fast local iteration.
+Use it when operator-facing workflow design or cross-repo API work is still
+changing too quickly for governed stage rehearsal. It is standardized at the
+workspace level, but it is not a governed delivery lane:
+
+- `workspace-governance` defines when to use it and what it must never touch
+- `platform-engineering` owns the shared local-k3s runner
+- the owner repo supplies the concrete profile
+- local branch, worktree, and dirty-state inputs are allowed there
+- stage still requires reviewed commits and the normal governed path
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 
@@ -95,6 +106,7 @@ Supported contract validation entrypoints:
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_contracts.py --repo-root /home/mfshaf7/projects/workspace-governance
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_developer_integration.py --repo-root /home/mfshaf7/projects/workspace-governance --workspace-root /home/mfshaf7/projects
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
 ```
 
