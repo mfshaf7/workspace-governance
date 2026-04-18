@@ -9,6 +9,7 @@ Use this skill when the task is an audit, review, or consistency check.
 
 ## Read First
 
+- `workspace-root/ARCHITECTURE.md`
 - `contracts/README.md`
 - `contracts/vocabulary.yaml`
 - `contracts/repo-rules/`
@@ -19,6 +20,7 @@ Use this skill when the task is an audit, review, or consistency check.
 ```bash
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
+python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
 ```
@@ -31,5 +33,6 @@ Report:
 - cross-repo ownership drift
 - stale or retired language in active docs
 - generated artifact drift
+- Codex review-control drift
 
 Prefer exact repo and file references over generic summary.

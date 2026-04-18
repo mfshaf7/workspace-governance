@@ -11,7 +11,9 @@ REQUIRED_FILES = (
     ".gitignore",
     "requirements.txt",
     ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
     ".github/workflows/validate.yaml",
+    "docs/codex-github-review-and-automation.md",
     "contracts/README.md",
     "contracts/version.yaml",
     "contracts/repos.yaml",
@@ -65,10 +67,12 @@ REQUIRED_FILES = (
     "scripts/audit_workspace_layout.py",
     "scripts/audit_stale_content.py",
     "scripts/contracts_lib.py",
+    "scripts/check_remote_alignment.py",
     "scripts/install_skills.py",
     "scripts/scaffold_intake.py",
     "scripts/record_after_action.py",
     "scripts/record_improvement_candidate.py",
+    "scripts/validate_codex_review_controls.py",
     "scripts/validate_intake.py",
     "scripts/validate_developer_integration.py",
     "scripts/validate_improvement_candidates.py",
@@ -76,16 +80,22 @@ REQUIRED_FILES = (
     "scripts/validate_learning_closure.py",
     "scripts/validate_component_contracts.py",
     "scripts/validate_security_bindings.py",
+    "scripts/validate_review_coverage.py",
+    "scripts/validate_security_evidence.py",
+    "scripts/validate_security_change_record_lanes.py",
+    "scripts/workspace_control_plane_summary.py",
     "scripts/sync_workspace_root.py",
     "scripts/validate_contracts.py",
     "scripts/validate_cross_repo_truth.py",
     "scripts/validate_repo_structure.py",
+    "workspace-root/ARCHITECTURE.md",
     "workspace-root/README.md",
     "workspace-root/AGENTS.md",
 )
 
 
 WORKSPACE_ROOT_MARKDOWN_FILES = (
+    "workspace-root/ARCHITECTURE.md",
     "workspace-root/README.md",
     "workspace-root/AGENTS.md",
 )
@@ -166,7 +176,7 @@ def main() -> int:
             errors.append(f"missing required directory: {target}")
 
     canonical_note = "Canonical source:"
-    for rel_path in ("workspace-root/README.md", "workspace-root/AGENTS.md"):
+    for rel_path in ("workspace-root/ARCHITECTURE.md", "workspace-root/README.md", "workspace-root/AGENTS.md"):
         target = repo_root / rel_path
         if target.exists() and canonical_note not in target.read_text():
             errors.append(f"{target}: missing canonical source note")

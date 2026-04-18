@@ -132,6 +132,12 @@ Supported audit entrypoint:
 python3 /home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 ```
 
+Supported remote-freshness preflight entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote
+```
+
 Supported stale-content audit entrypoint:
 
 ```bash
@@ -172,10 +178,18 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/install_skills.py --
 python3 /home/mfshaf7/projects/workspace-governance/scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 ```
 
+Supported read-only control-plane summary entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
+```
+
 ## Start Here
 
 - Architecture snapshot for new sessions:
   [ARCHITECTURE.md](/home/mfshaf7/projects/ARCHITECTURE.md)
+- Codex GitHub review and control-plane summary procedure:
+  [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)

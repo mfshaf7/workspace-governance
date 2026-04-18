@@ -10,6 +10,7 @@ workspace root and does not name the owning repo.
 
 ## Read First
 
+- `workspace-root/ARCHITECTURE.md`
 - `contracts/repos.yaml`
 - `contracts/products.yaml`
 - `contracts/components.yaml`
@@ -25,16 +26,19 @@ workspace root and does not name the owning repo.
    - Telegram behavior
    - host enforcement
    - security governance
-2. Pick the owner repo from the contracts, not from convenience.
-3. Check whether the task already has an `active` `dev-integration` profile and
+2. If the request depends on fresh workspace-level truth, run
+   `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
+   before relying on the local control-plane docs.
+3. Pick the owner repo from the contracts, not from convenience.
+4. Check whether the task already has an `active` `dev-integration` profile and
    prefer that lane for fast workflow or API iteration before stage.
-4. Check the product maturity before implying stage or prod flow.
-5. Route to the owner repo's `AGENTS.md` and `README.md`.
-6. If the request changes more than one control plane, name the primary owner
+5. Check the product maturity before implying stage or prod flow.
+6. Route to the owner repo's `AGENTS.md` and `README.md`.
+7. If the request changes more than one control plane, name the primary owner
    and the required secondary updates.
-7. If the request spans multiple repos and one repo's validation or remote
+8. If the request spans multiple repos and one repo's validation or remote
    `main` state will gate another, use `cross-repo-sequencer`.
-8. If the task is changing an operator-facing command family, request path,
+9. If the task is changing an operator-facing command family, request path,
    approval path, or status/help surface, use `operator-workflow-design`.
 
 ## Guardrails
