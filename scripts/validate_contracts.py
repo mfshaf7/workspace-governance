@@ -97,6 +97,8 @@ def main() -> int:
 
     expected_devint_actions = {"up", "status", "smoke", "down", "reset", "promote_check"}
     lane = developer_integration_policy["lane"]
+    profile_lifecycle = developer_integration_policy["profile_lifecycle"]
+    request_admission = developer_integration_policy["request_admission"]
     if lane["id"] != "dev-integration":
         errors.append("contracts/developer-integration-policy.yaml: lane.id must be 'dev-integration'")
     for owner_key in ("standard_owner", "runtime_owner"):
@@ -104,12 +106,36 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-policy.yaml: {owner_key} {lane[owner_key]!r} is not an active repo"
             )
+    expected_devint_statuses = {"proposed", "active", "suspended", "retired"}
+    if set(profile_lifecycle["statuses"]) != expected_devint_statuses:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.statuses must be exactly "
+            + ", ".join(sorted(expected_devint_statuses))
+        )
+    if set(profile_lifecycle["self_serve_statuses"]) != {"active"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.self_serve_statuses must be exactly active"
+        )
+    if set(profile_lifecycle["platform_acceptance_required_for"]) != {"active", "suspended", "retired"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.platform_acceptance_required_for must be exactly active, retired, suspended"
+        )
+    adapter_owner = request_admission["current_request_adapter"]["owner_repo"]
+    if adapter_owner not in active_repos:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: request_admission.current_request_adapter.owner_repo "
+            f"{adapter_owner!r} is not an active repo"
+        )
     if set(developer_integration_policy["required_actions"]) != expected_devint_actions:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
             + ", ".join(sorted(expected_devint_actions))
         )
     for profile_name, payload in developer_integration_profiles["profiles"].items():
+        if payload["lifecycle"] not in profile_lifecycle["statuses"]:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {payload['lifecycle']!r} is not in the declared profile lifecycle set"
+            )
         if payload["owner_repo"] not in active_repos:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} owner_repo {payload['owner_repo']!r} is not an active repo"
@@ -132,6 +158,30 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
             )
+        if profile_lifecycle["request_record_required"]:
+            request_record = payload.get("request_record") or {}
+            if not request_record.get("system") or not request_record.get("ref"):
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} is missing request_record.system or request_record.ref"
+                )
+        admission = payload.get("admission") or {}
+        if payload["lifecycle"] in set(profile_lifecycle["platform_acceptance_required_for"]):
+            for key in ("approved_by", "approved_on", "platform_acceptance_ref"):
+                if not admission.get(key):
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {payload['lifecycle']!r} requires admission.{key}"
+                    )
+        if admission.get("security_review_required"):
+            refs = admission.get("security_review_refs") or []
+            if not refs and profile_lifecycle["security_review_ref_required_when_flagged"]:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one admission.security_review_ref"
+                )
+            for ref in refs:
+                if ref["repo"] not in active_repos:
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} security review repo {ref['repo']!r} is not an active repo"
+                    )
 
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:

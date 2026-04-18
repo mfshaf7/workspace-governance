@@ -1,11 +1,28 @@
 schema_version: 1
 profiles:
   idea-workflow:
+    lifecycle: active
     owner_repo: operator-orchestration-service
     summary: Local-k3s dev-integration profile for the broker-owned idea workflow, local OpenProject backlog model, and Telegram command harness.
+    purpose: Fast local rehearsal of the broker-owned idea workflow before governed stage rehearsal and rollout.
     profile_path: dev-integration/profiles/idea-workflow/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
+    requested_by: mfshaf7
+    requested_on: "2026-04-18"
+    request_record:
+      system: git
+      ref: github://mfshaf7/operator-orchestration-service/pull/11
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-04-18"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/104
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/platform/2026-04-18-dev-integration-local-k3s-lane.md
+        - repo: security-architecture
+          path: docs/reviews/components/2026-04-18-operator-orchestration-service-dev-integration-idea-workflow.md
     shared_dependencies:
       - openclaw-telegram-enhanced
       - platform-engineering

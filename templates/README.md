@@ -9,4 +9,7 @@ enter the governed control plane.
 Use `templates/dev-integration-profile/` when an owner repo needs a reusable
 fast-iteration profile for the shared local-k3s `dev-integration` lane.
 
+Use `templates/dev-integration-request/` when a team needs to request a new
+profile before it becomes an `active` self-serve option.
+
 They are not source of truth and must not become an alternate policy layer.

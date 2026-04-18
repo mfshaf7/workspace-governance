@@ -4,6 +4,8 @@
   "required": [
     "schema_version",
     "lane",
+    "profile_lifecycle",
+    "request_admission",
     "source_state",
     "trigger_guidance",
     "forbidden_targets",
@@ -30,6 +32,67 @@
         "delivery_model": { "type": "string", "minLength": 1 },
         "runtime_target": { "type": "string", "minLength": 1 },
         "governed_handoff_target": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "profile_lifecycle": {
+      "type": "object",
+      "required": [
+        "statuses",
+        "self_serve_statuses",
+        "request_record_required",
+        "platform_acceptance_required_for",
+        "security_review_ref_required_when_flagged"
+      ],
+      "properties": {
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "self_serve_statuses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "request_record_required": { "type": "boolean" },
+        "platform_acceptance_required_for": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "security_review_ref_required_when_flagged": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "request_admission": {
+      "type": "object",
+      "required": [
+        "current_request_adapter",
+        "required_request_fields",
+        "activation_requirements"
+      ],
+      "properties": {
+        "current_request_adapter": {
+          "type": "object",
+          "required": ["system", "owner_repo", "target_ref"],
+          "properties": {
+            "system": { "type": "string", "minLength": 1 },
+            "owner_repo": { "type": "string", "minLength": 1 },
+            "target_ref": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "required_request_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "activation_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
       },
       "additionalProperties": false
     },

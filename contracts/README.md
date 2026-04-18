@@ -31,7 +31,8 @@ Use these contracts to declare:
     forbidden targets, required actions, and required handoff artifacts
 - `developer-integration-profiles.yaml`
   - registers the concrete repo-owned `dev-integration` profiles that may run
-    on the shared local-k3s lane
+    on the shared local-k3s lane, including lifecycle, request record, and
+    admission metadata
 - `products.yaml`
   - product maturity, owning repos, and delivery model
 - `components.yaml`
@@ -115,6 +116,29 @@ a repo-local `profile.yaml` that defines:
 - command paths
 - session-manifest expectations
 - stage handoff expectations
+
+Profiles are not just binary present-or-missing entries anymore.
+
+The shared lifecycle states are:
+
+- `proposed`
+  - request exists, but the profile is not yet self-serve launchable
+- `active`
+  - admitted and self-serve launchable on the shared runner
+- `suspended`
+  - previously admitted, temporarily blocked from normal launch
+- `retired`
+  - no longer part of the active self-serve catalog
+
+Current model:
+
+- the policy and lifecycle truth live in `workspace-governance`
+- the current request surface adapter is OpenProject, but the contract stays
+  generic by recording `request_record.system` and `request_record.ref`
+- the shared runner must only launch profiles whose lifecycle is in
+  `self_serve_statuses`
+- a new profile request does not become launchable until platform acceptance is
+  recorded and any flagged security review references are present
 
 ## After-Action Reviews
 
