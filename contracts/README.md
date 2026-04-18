@@ -147,7 +147,7 @@ to these contracts only as supporting detail.
 
 Current operator-facing runbook:
 
-- [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
+- [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
 
 ## After-Action Reviews
 
