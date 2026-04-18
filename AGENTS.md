@@ -9,6 +9,7 @@ delivery repo.
 ## Read First
 
 - `README.md`
+- `docs/codex-github-review-and-automation.md`
 - `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
@@ -40,6 +41,10 @@ Route those changes back to the owner repos.
 
 - Edit the canonical files here, not the materialized root copies, unless you
   are doing short-lived incident containment.
+- When workspace-level recommendations depend on fresh control-plane truth, run
+  `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
+  first and say explicitly if the checkout is ahead, behind, or diverged from
+  `origin/main`.
 - When a request introduces a new product, shared component, control plane, or
   architecture-shaping feature, the first step is discussion and framing, not
   implementation.
@@ -154,6 +159,22 @@ Route those changes back to the owner repos.
 - Treat `openclaw-isolated-deployment/` as retired unless the retirement
   decision is deliberately reversed. Do not route active work there.
 
+## Review guidelines
+
+For Codex GitHub review, treat the following as `P1` when they plausibly
+regress the workspace control plane:
+
+- contract drift, generated artifact drift, or repo-rule drift that leaves the
+  machine-readable workspace model out of sync with active repo behavior
+- workspace-root sync or architecture-bootstrap regressions that would make a
+  new session read stale control-plane guidance
+- live installed skills or managed-skill sync drift after `skills-src/` or
+  `contracts/skills.yaml` changes
+- missing improvement candidate, after-action, or durable control updates after
+  a repeated mistake or deterministic review/control failure
+- Codex review-control regressions that remove repo-specific review guidance,
+  PR evidence surfaces, or validation coverage from active repos
+
 ## Validation
 
 Run these after structural changes:
@@ -168,8 +189,12 @@ python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_review_coverage.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
@@ -177,5 +202,5 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
 ```

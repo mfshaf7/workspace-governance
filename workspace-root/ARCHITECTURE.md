@@ -173,6 +173,8 @@ operator interaction layer, not just a UI skin.
 
 - workspace routing, repo ownership, or governance drift
   - [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
+- Codex GitHub review, PR flow, or read-only control-plane summary
+  - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration
   - [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
 - OpenClaw governed release path

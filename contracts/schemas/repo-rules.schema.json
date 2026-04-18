@@ -88,6 +88,53 @@
       },
       "additionalProperties": false
     },
+    "review_control_requirements": {
+      "type": "object",
+      "required": [
+        "guidance_files",
+        "required_github_paths",
+        "required_validation_paths",
+        "pr_template_path",
+        "required_pr_template_sections"
+      ],
+      "properties": {
+        "guidance_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["path", "heading", "required_terms"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "heading": { "type": "string", "minLength": 1 },
+              "required_terms": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required_github_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_validation_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "pr_template_path": { "type": "string", "minLength": 1 },
+        "required_pr_template_sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
     "operator_workflow_requirements": {
       "type": "object",
       "required": ["workflows"],

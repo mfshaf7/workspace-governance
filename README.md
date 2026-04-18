@@ -54,6 +54,11 @@ If a user explicitly calls out a repeated mistake, that should create or update
 an improvement candidate immediately rather than waiting for a later
 retrospective.
 
+Workspace-level Codex GitHub review and the read-only daily control-plane
+summary now also have one primary operator instruction surface:
+
+- [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
+
 The skill model is explicit now too. Governing skill source is not enough by
 itself. The registered skill source in `contracts/skills.yaml` plus
 `skills-src/` must also be installed into the live Codex skill root under
@@ -126,19 +131,22 @@ Those stay in the owning repos:
 ## Operating Model
 
 1. Edit the canonical files in this repo.
-2. Land meaningful git-tracked changes through a repo branch and pull request
+2. If workspace-level truth freshness matters, run the remote-alignment
+   preflight against `workspace-governance` before relying on local control
+   plane guidance.
+3. Land meaningful git-tracked changes through a repo branch and pull request
    with a meaningful summary unless the user explicitly asks for direct landing
    or the repo's documented workflow says otherwise.
-3. Sync them into the live workspace root.
-4. Run repo-local validation.
-5. Run the workspace audit against `/home/mfshaf7/projects`.
-6. Reinstall or verify the registered skills if skill source or registry state
+4. Sync them into the live workspace root.
+5. Run repo-local validation.
+6. Run the workspace audit against `/home/mfshaf7/projects`.
+7. Reinstall or verify the registered skills if skill source or registry state
    changed.
    The real local install under `~/.codex/skills` matters, not just a temp
    validation copy.
-7. Validate improvement candidates and learning closure if self-improvement
+8. Validate improvement candidates and learning closure if self-improvement
    records or closure controls changed.
-8. If repo ownership or routing changed, update the owning repo docs in the
+9. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
 ## Sync Model
@@ -178,8 +186,12 @@ python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_review_coverage.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills
@@ -187,12 +199,13 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_security_bindings.py
+python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
 ```
 
 ## Read First
 
 - [AGENTS.md](AGENTS.md)
+- [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
 - [workspace-root/ARCHITECTURE.md](workspace-root/ARCHITECTURE.md)
 - [contracts/README.md](contracts/README.md)
 - [contracts/skills.yaml](contracts/skills.yaml)

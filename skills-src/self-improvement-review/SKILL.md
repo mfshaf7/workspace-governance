@@ -26,6 +26,7 @@ evidence, host drift detection, testing seams, or operator reliability.
    - the user explicitly says this is a repeated mistake
    - the same workflow needs a corrective follow-up in the same task
    - a machine-visible audit flags a doctrine or completion miss
+   - the control-plane summary or review-control validator flags repeated drift
 5. Decide whether the lesson is:
    - still only a candidate that needs triage, or
    - strong enough for a full after-action review now

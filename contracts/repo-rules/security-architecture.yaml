@@ -15,3 +15,25 @@ required_patterns:
 forbidden_patterns:
   readme: []
   agents: []
+review_control_requirements:
+  guidance_files:
+    - path: AGENTS.md
+      heading: "## Review guidelines"
+      required_terms:
+        - concrete artifact
+        - delivery implementation
+        - design intent
+        - operating evidence
+  required_github_paths:
+    - .github/CODEOWNERS
+    - .github/pull_request_template.md
+  required_validation_paths:
+    - .github/workflows/validate-security-evidence.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_pr_template_sections:
+    - "## Summary"
+    - "## Governance Declaration"
+    - "## Documentation Updates"
+    - "## Validation"
+    - "## Codex Review"
+    - "## Review Gates"

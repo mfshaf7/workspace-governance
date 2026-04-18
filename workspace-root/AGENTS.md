@@ -36,6 +36,8 @@ That means:
 
 0. If this is a new workspace-level session, read:
    - `/home/mfshaf7/projects/ARCHITECTURE.md`
+0.5 If workspace-level recommendations depend on fresh control-plane truth, run:
+   - `python3 /home/mfshaf7/projects/workspace-governance/scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -159,6 +161,9 @@ Only start implementation after that discussion narrows the target design.
 
 - The workspace root is not a Git repo. The canonical source for its governance
   files now lives in `workspace-governance/`.
+- For workspace-level Codex GitHub review, PR flow, and the read-only daily
+  control-plane summary, use:
+  - `/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md`
 - Do not hand-maintain long-lived edits directly in:
   - `/home/mfshaf7/projects/ARCHITECTURE.md`
   - `/home/mfshaf7/projects/README.md`
@@ -284,15 +289,18 @@ If that evidence cannot be produced, the work is not complete.
 
 - `workspace-governance/`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/validate_contracts.py --repo-root .`
   - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
+  - `python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
+  - `python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`
 - other repos

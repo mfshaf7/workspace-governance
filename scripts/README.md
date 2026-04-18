@@ -9,6 +9,11 @@
     forbidden ownership language
   - also fails active Git-tracked markdown docs outside `workspace-root/` when
     they use local filesystem navigation links to `/home/mfshaf7/projects/...`
+- `check_remote_alignment.py`
+  - checks whether local active repos are aligned, ahead, behind, or diverged
+    from `origin/main`
+  - use it as the remote-freshness preflight before trusting workspace-level
+    control-plane guidance
 - `contracts_lib.py`
   - shared YAML and generated-artifact loader for the governance scripts
 - `install_skills.py`
@@ -46,6 +51,10 @@
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata
+- `validate_codex_review_controls.py`
+  - validates that active repos keep repo-specific Codex review guidance,
+    required GitHub control surfaces, PR-template evidence sections, and usable
+    review-check workflows
 - `validate_security_evidence.py`
   - runs the security-architecture evidence validator so stale assessment
     metadata and unlinked findings or risks fail at workspace level too
@@ -68,3 +77,7 @@
     regenerates the resolved governance artifacts under `generated/`
 - `validate_repo_structure.py`
   - validates that this repo keeps the expected governance structure
+- `workspace_control_plane_summary.py`
+  - runs a read-only control-plane summary covering remote freshness,
+    workspace-root sync, skill sync, review-control compliance, stale-content
+    drift, workspace audit, and self-improvement health
