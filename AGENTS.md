@@ -108,6 +108,14 @@ Route those changes back to the owner repos.
 - If a broad workspace-level discussion is being resumed after a restart, check
   the latest record under `docs/archive/session-handoff-*.md` before assuming
   the chat thread is the only source of pending context.
+- If a session is likely to restart while meaningful workspace-level pending
+  items remain, create or update a handoff record under
+  `docs/archive/session-handoff-*.md` before closing.
+- This is required especially when:
+  - the user is being told to restart so new skills or instructions will load
+  - cross-repo architecture or workflow discussion remains intentionally
+    deferred
+  - there are explicit pending follow-ups that should survive chat reset
 - If a workspace-level validator or audit reads remote `main` from another
   owner repo, sequence the dependent owner-repo merges first and land the
   control-plane repo last.
