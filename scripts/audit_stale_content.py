@@ -3,7 +3,7 @@ import argparse
 import re
 from pathlib import Path
 
-from contracts_lib import load_contracts
+from contracts_lib import active_repo_names, load_contracts
 
 DEFAULT_EXCLUDES = (
     "/.git/",
@@ -11,6 +11,9 @@ DEFAULT_EXCLUDES = (
     "/docs/records/change-records/",
     "/docs/decisions/adr/",
 )
+
+LOCAL_WORKSPACE_MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\((/home/mfshaf7/projects/[^)]+)\)")
+LOCAL_LINK_ALLOWED_PREFIXES = ("workspace-root/",)
 
 
 def iter_markdown_files(repo_root: Path):
@@ -105,6 +108,23 @@ def main() -> int:
                     errors.append(
                         f"{path}: found repo-rule stale-content pattern matching /{pattern_text}/"
                     )
+
+    for repo_name in active_repo_names(contracts):
+        if selected_repo_names and repo_name not in selected_repo_names:
+            continue
+        repo_root = resolve_repo_root(workspace_root, repo_name, contract_repo)
+        if not repo_root.exists():
+            errors.append(f"missing repo for stale-content audit: {repo_root}")
+            continue
+        for path in iter_markdown_files(repo_root):
+            rel_path = path.relative_to(repo_root).as_posix()
+            if rel_path.startswith(LOCAL_LINK_ALLOWED_PREFIXES):
+                continue
+            text = path.read_text()
+            for match in LOCAL_WORKSPACE_MARKDOWN_LINK_RE.finditer(text):
+                errors.append(
+                    f"{path}: active git-tracked docs outside workspace-root must not use local filesystem markdown links: {match.group(1)!r}"
+                )
 
     if errors:
         raise SystemExit("\n".join(errors))

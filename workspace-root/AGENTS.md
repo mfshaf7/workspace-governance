@@ -205,6 +205,9 @@ Only start implementation after that discussion narrows the target design.
   not replace the primary operator instruction surface.
 - If the operator has to reconstruct the procedure from scattered files, the
   workflow is still incomplete.
+- Git-tracked docs outside `workspace-root/` must not use markdown navigation
+  links to `/home/mfshaf7/projects/...`. Use repo-relative links for same-repo
+  docs and web-safe links for cross-repo docs instead.
 - Intake classification can start from operator judgment or an AI suggestion,
   but the recorded workspace decision is still explicit:
   - `out-of-scope`

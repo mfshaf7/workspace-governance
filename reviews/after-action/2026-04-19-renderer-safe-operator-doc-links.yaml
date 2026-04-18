@@ -1,0 +1,52 @@
+schema_version: 1
+id: 2026-04-19-renderer-safe-operator-doc-links
+title: Renderer-safe operator documentation links were not enforced
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: A newly published operator-facing runbook used local filesystem
+  markdown links that worked in the local renderer but failed in GitHub web.
+  The workspace did not yet enforce a renderer-safe link rule for active
+  Git-tracked docs outside the local workspace-root surface.
+scope:
+  related_repos:
+  - workspace-governance
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+source_refs:
+- https://github.com/mfshaf7/workspace-governance/pull/20
+- https://github.com/mfshaf7/platform-engineering/pull/107
+lessons:
+- id: active-operator-docs-need-renderer-safe-links
+  title: Active operator docs need renderer-safe navigation links
+  failure_class: workflow-doctrine-gap
+  trigger: repeated-operator-friction
+  finding: The operator-doc doctrine required one primary instruction surface,
+    but it did not yet require that active Git-tracked docs outside the local
+    workspace-root surface use repo-safe or web-safe markdown links.
+  impact: The runbook looked complete locally but failed for operators viewing
+    it through GitHub web, creating repeated confusion and avoidable rework.
+  status: closed
+  expected_control_types:
+  - validator
+  - doc
+  control_refs:
+  - type: validator
+    path: workspace-governance/scripts/audit_stale_content.py
+    owner_repo: workspace-governance
+    note: Fails active Git-tracked docs outside workspace-root when they use
+      markdown links to local filesystem paths under /home/mfshaf7/projects.
+  - type: doc
+    path: workspace-governance/AGENTS.md
+    owner_repo: workspace-governance
+    note: Records the renderer-safe operator-doc rule explicitly.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Propagates the same rule into the synced workspace-root guidance.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
