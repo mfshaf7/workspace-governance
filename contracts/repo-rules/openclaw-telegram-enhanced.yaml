@@ -54,3 +54,11 @@ security_change_record_requirements:
   required_in_docs:
     - readme
     - agents
+operator_workflow_requirements:
+  workflows:
+    - id: telegram-operator-commands
+      summary: Telegram-native operator command families such as /platform and /idea.
+      primary_surface_path: docs/operator-commands.md
+      required_in_docs:
+        - readme
+        - agents

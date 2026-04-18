@@ -217,6 +217,29 @@ def main() -> int:
             errors.append(
                 f"contracts/repo-rules/{repo_name}.yaml: missing security_requirements for repo requiring security bindings"
             )
+        operator_workflow_requirements = rule.get("operator_workflow_requirements")
+        if operator_workflow_requirements:
+            seen_workflow_ids: set[str] = set()
+            for workflow in operator_workflow_requirements["workflows"]:
+                workflow_id = workflow["id"]
+                if workflow_id in seen_workflow_ids:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: duplicate operator workflow id {workflow_id!r}"
+                    )
+                seen_workflow_ids.add(workflow_id)
+                primary_surface_path = workflow["primary_surface_path"]
+                if primary_surface_path.startswith("/"):
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: operator workflow {workflow_id!r} primary_surface_path must be repo-relative"
+                    )
+                if "/" not in primary_surface_path:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: operator workflow {workflow_id!r} primary_surface_path should name a concrete repo path"
+                    )
+                if not primary_surface_path.endswith(".md"):
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: operator workflow {workflow_id!r} primary_surface_path should point to a markdown instruction surface"
+                    )
         if not security_requirements:
             continue
         if security_requirements["security_owner"] not in active_repos:

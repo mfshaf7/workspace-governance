@@ -59,8 +59,11 @@ Treat it as a governed system, not a loose folder of related repos.
 `workspace-governance/` owns the canonical copies of the workspace-root files
 plus the machine-readable contract model that defines the active repo map,
 product maturity, component inventory, vocabulary, and cross-repo routing
-rules. It also owns the after-action learning loop that turns major misses into
-reviewable controls or explicit follow-up.
+rules. It also owns the self-improvement loop that now includes:
+
+- machine-visible signal audit
+- improvement-candidate triage
+- after-action closure
 
 It also owns the intake gate. New repos, products, and components are supposed
 to be classified first:
@@ -103,6 +106,13 @@ not count as the primary procedure by themselves. For `dev-integration`,
 operators should use the shared runbook in
 [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md).
 
+The same principle now applies to self-improvement. Do not wait for a later
+retrospective if a repeated miss is already obvious. If the user explicitly
+calls out a repeated mistake, or if the machine-visible audit detects a doctrine
+or completion gap, that should create or update an improvement candidate first.
+Only then should the system decide whether the lesson needs a full after-action
+review.
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 
@@ -131,6 +141,18 @@ Supported learning-closure validation entrypoint:
 
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+```
+
+Supported improvement-candidate validation entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
+```
+
+Supported proactive signal audit entrypoint:
+
+```bash
+python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 ```
 
 ## Start Here

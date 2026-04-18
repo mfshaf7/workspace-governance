@@ -50,3 +50,11 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+operator_workflow_requirements:
+  workflows:
+    - id: dev-integration-profile-usage
+      summary: Shared operator procedure for requesting and using dev-integration profiles.
+      primary_surface_path: docs/runbooks/dev-integration-profiles.md
+      required_in_docs:
+        - readme
+        - agents

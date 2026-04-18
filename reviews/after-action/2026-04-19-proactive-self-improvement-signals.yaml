@@ -1,0 +1,81 @@
+schema_version: 1
+id: 2026-04-19-proactive-self-improvement-signals
+title: Self-improvement system lacked proactive signals and triage
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The workspace had closure validation for after-action reviews, but it
+  still lacked a proactive signal layer and a fast triage record type. That
+  meant repeated misses could survive until the operator called them out
+  directly instead of the system surfacing them earlier.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-telegram-enhanced
+    - openclaw-runtime-distribution
+    - openclaw-host-bridge
+  related_products: []
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly reported that the self-improvement system only triggers after direct mistake callout'
+lessons:
+  - id: self-improvement-needs-signal-and-candidate-layers
+    title: After-action closure alone is not a real self-improvement system
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-manual-retrospective
+    finding: The workspace could validate after-action closure, but it could
+      not proactively detect machine-visible misses or capture conversation-visible
+      repeated failures in a lightweight triage layer before full after-action
+      closure was ready.
+    impact: Repeated misses could survive until the operator pointed them out
+      directly, which made the self-improvement model reactive, slow, and too
+      dependent on human escalation.
+    status: closed
+    expected_control_types:
+      - contract
+      - validator
+      - skill
+      - doc
+    control_refs:
+      - type: validator
+        path: workspace-governance/scripts/validate_improvement_candidates.py
+        owner_repo: workspace-governance
+        note: Validates the new improvement-candidate triage layer.
+      - type: validator
+        path: workspace-governance/scripts/audit_improvement_signals.py
+        owner_repo: workspace-governance
+        note: Audits deterministic machine-visible improvement signals through repo-rule operator workflow requirements.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Requires candidate creation when the user explicitly calls out a repeated mistake or a real signal is already visible.
+      - type: contract
+        path: workspace-governance/contracts/schemas/repo-rules.schema.json
+        owner_repo: workspace-governance
+        note: Adds operator workflow requirement declarations so missing primary surfaces can be enforced deterministically.
+      - type: contract
+        path: workspace-governance/contracts/repo-rules/openclaw-telegram-enhanced.yaml
+        owner_repo: workspace-governance
+        note: Declares the Telegram operator command primary surface.
+      - type: contract
+        path: workspace-governance/contracts/repo-rules/openclaw-runtime-distribution.yaml
+        owner_repo: workspace-governance
+        note: Declares the distribution build procedure primary surface.
+      - type: contract
+        path: workspace-governance/contracts/repo-rules/openclaw-host-bridge.yaml
+        owner_repo: workspace-governance
+        note: Declares the supported host deployment primary surface.
+      - type: contract
+        path: workspace-governance/contracts/repo-rules/platform-engineering.yaml
+        owner_repo: workspace-governance
+        note: Declares the dev-integration operator runbook as a primary surface.
+      - type: doc
+        path: workspace-governance/reviews/improvement-candidates/README.md
+        owner_repo: workspace-governance
+        note: Documents the fast triage layer between signals and after-actions.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

@@ -56,3 +56,11 @@ security_change_record_requirements:
   required_in_docs:
     - readme
     - agents
+operator_workflow_requirements:
+  workflows:
+    - id: distribution-build-procedure
+      summary: Full distribution build and Telegram overlay packaging procedure.
+      primary_surface_path: deployment/operator-build-procedure.md
+      required_in_docs:
+        - readme
+        - agents

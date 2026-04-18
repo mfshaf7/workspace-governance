@@ -149,7 +149,38 @@ Current operator-facing runbook:
 
 - [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
 
-## After-Action Reviews
+## Improvement Candidates And After-Action Reviews
+
+The self-improvement model now has three layers:
+
+- machine-visible signal audit
+- improvement candidates for fast triage
+- after-action reviews for durable closure
+
+Machine-visible signals are enforced through:
+
+- repo-rule declared operator workflow surfaces
+- `scripts/audit_improvement_signals.py`
+
+Improvement candidates live under:
+
+- `../reviews/improvement-candidates/`
+
+Use them when a likely repeated miss or late discovery has been recognized, but
+the durable control shape is not fully decided yet.
+
+Validate them with:
+
+- `scripts/validate_improvement_candidates.py`
+- `scripts/audit_improvement_signals.py`
+
+These are not the same thing as after-action reviews.
+
+Candidates are the fast triage layer. After-actions are the governed closure
+layer.
+
+Use an after-action directly when the lesson and control shape are already
+clear enough to close or explicitly leave open with a real owner and due date.
 
 Meaningful misses, late discoveries, or repeated operator pain should be
 captured under `../reviews/after-action/`.
@@ -163,6 +194,9 @@ that should either:
 Use:
 
 - `scripts/record_after_action.py`
+- `scripts/record_improvement_candidate.py`
+- `scripts/validate_improvement_candidates.py`
+- `scripts/audit_improvement_signals.py`
 - `scripts/validate_learning_closure.py`
 
 ## Generated Artifacts
