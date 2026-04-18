@@ -26,14 +26,22 @@ workspace root and does not name the owning repo.
    - host enforcement
    - security governance
 2. Pick the owner repo from the contracts, not from convenience.
-3. Check the product maturity before implying stage or prod flow.
-4. Route to the owner repo's `AGENTS.md` and `README.md`.
-5. If the request changes more than one control plane, name the primary owner
+3. Check whether the task already has an `active` `dev-integration` profile and
+   prefer that lane for fast workflow or API iteration before stage.
+4. Check the product maturity before implying stage or prod flow.
+5. Route to the owner repo's `AGENTS.md` and `README.md`.
+6. If the request changes more than one control plane, name the primary owner
    and the required secondary updates.
+7. If the request spans multiple repos and one repo's validation or remote
+   `main` state will gate another, use `cross-repo-sequencer`.
+8. If the task is changing an operator-facing command family, request path,
+   approval path, or status/help surface, use `operator-workflow-design`.
 
 ## Guardrails
 
 - Do not route active work to retired repos.
+- Do not skip an active `dev-integration` lane and jump straight to stage when
+  the work is still in fast iteration.
 - Do not invent a governed promotion path for products that do not have one.
 - If the task introduces a new product, shared component, or control plane,
   stop and use the architecture discussion gate first.

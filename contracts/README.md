@@ -63,7 +63,8 @@ Use these contracts to declare:
   - which validator or audit enforces which contract surface
 - `skills.yaml`
   - registered workspace and repo-owned skills, their owner repo, and their
-    source path
+    source path; live installed skills under `~/.codex/skills` must stay
+    aligned with this registry and source tree
 
 ## Repo Rules
 

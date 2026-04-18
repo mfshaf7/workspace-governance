@@ -35,7 +35,9 @@ Make these explicit before implementation:
 - owner repo and control plane
 - trust-boundary impact
 - workflow maturity after the change
+- request surface, adapter boundary, and core model boundary
 - operator surface and visibility model
+- whether a `dev-integration` profile or admission change is needed
 - rollout and rollback shape
 
 Do not begin implementation until those are narrowed enough to choose the owner.

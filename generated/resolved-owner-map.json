@@ -288,6 +288,16 @@
       "scope": "workspace",
       "source_path": "skills-src/contract-drift-check"
     },
+    "cross-repo-sequencer": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/cross-repo-sequencer"
+    },
+    "dev-integration-first": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/dev-integration-first"
+    },
     "done-criteria-enforcer": {
       "owner_repo": "workspace-governance",
       "scope": "workspace",
@@ -297,6 +307,11 @@
       "owner_repo": "platform-engineering",
       "scope": "product",
       "source_path": "products/openclaw/skills-src/openclaw-governed-delivery"
+    },
+    "operator-workflow-design": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/operator-workflow-design"
     },
     "security-governance-review": {
       "owner_repo": "security-architecture",
