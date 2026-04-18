@@ -7,6 +7,8 @@ from contracts_lib import active_repo_names, load_contracts
 
 DEFAULT_EXCLUDES = (
     "/.git/",
+    "/.workspace-ci/",
+    "/.workspace-skills/",
     "/docs/archive/",
     "/docs/records/change-records/",
     "/docs/decisions/adr/",
