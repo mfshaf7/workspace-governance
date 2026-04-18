@@ -42,7 +42,7 @@ substitute for a clear step-by-step operator path.
 For the current `dev-integration` request and usage path, that primary surface
 is:
 
-- [platform-engineering/docs/runbooks/dev-integration-profiles.md](/home/mfshaf7/projects/platform-engineering/docs/runbooks/dev-integration-profiles.md)
+- [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
 
 AI may assist that intake decision, but an `ai-suggested` intake entry only
 counts as governed when it references an active approved model profile from
