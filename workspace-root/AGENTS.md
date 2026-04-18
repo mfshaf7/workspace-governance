@@ -184,6 +184,14 @@ Only start implementation after that discussion narrows the target design.
 - Use `dev-integration` when an operator-facing workflow, cross-repo API
   contract, or canonical-backend write path is still changing too quickly for
   governed stage rehearsal.
+- `dev-integration` profiles use an admission lifecycle:
+  - `proposed`
+  - `active`
+  - `suspended`
+  - `retired`
+- only `active` profiles are self-serve launchable from the shared runner
+- the request/admission contract is generic even if the current request
+  surface adapter is a specific tool such as OpenProject
 - `dev-integration` still needs discipline:
   - profile defines runtime shape
   - branch or worktree defines source state

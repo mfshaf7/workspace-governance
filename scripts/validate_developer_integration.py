@@ -42,6 +42,8 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     registry = contracts["developer_integration_profiles"]
 
     required_actions = set(policy["required_actions"])
+    profile_lifecycle = policy["profile_lifecycle"]
+    request_admission = policy["request_admission"]
     if required_actions != REQUIRED_ACTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
@@ -58,10 +60,28 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-policy.yaml: unknown active repo reference {repo_ref!r}"
             )
+    if set(profile_lifecycle["statuses"]) != {"proposed", "active", "suspended", "retired"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.statuses must be exactly active, proposed, retired, suspended"
+        )
+    if set(profile_lifecycle["self_serve_statuses"]) != {"active"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.self_serve_statuses must be exactly active"
+        )
+    adapter_owner = request_admission["current_request_adapter"]["owner_repo"]
+    if adapter_owner not in active_repos:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: current_request_adapter.owner_repo must reference an active repo"
+        )
 
     checked_profiles = 0
     for profile_name, payload in sorted(registry["profiles"].items()):
         checked_profiles += 1
+        lifecycle = payload["lifecycle"]
+        if lifecycle not in profile_lifecycle["statuses"]:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} is not declared in profile_lifecycle.statuses"
+            )
         if payload["owner_repo"] not in active_repos:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} owner_repo {payload['owner_repo']!r} is not active"
@@ -85,6 +105,37 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
             )
+        request_record = payload.get("request_record") or {}
+        if profile_lifecycle["request_record_required"]:
+            for key in ("system", "ref"):
+                if not request_record.get(key):
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} is missing request_record.{key}"
+                    )
+        admission = payload.get("admission") or {}
+        if lifecycle in set(profile_lifecycle["platform_acceptance_required_for"]):
+            for key in ("approved_by", "approved_on", "platform_acceptance_ref"):
+                if not admission.get(key):
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} requires admission.{key}"
+                    )
+        if admission.get("security_review_required"):
+            refs = admission.get("security_review_refs") or []
+            if not refs and profile_lifecycle["security_review_ref_required_when_flagged"]:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one admission.security_review_ref"
+                )
+            for ref in refs:
+                review_repo = ref["repo"]
+                if review_repo not in active_repos:
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} security review repo {review_repo!r} is not active"
+                    )
+                review_path = workspace_root / review_repo / ref["path"]
+                if not review_path.exists():
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} security review path missing: {review_path}"
+                    )
 
         profile_path = workspace_root / payload["owner_repo"] / payload["profile_path"]
         if not profile_path.exists():
@@ -122,6 +173,8 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 errors.append(
                     f"{profile_path}: command path missing for {action}: {command_path}"
                 )
+        if lifecycle not in profile_lifecycle["self_serve_statuses"]:
+            continue
 
     if not checked_profiles:
         errors.append("contracts/developer-integration-profiles.yaml: at least one profile is required")

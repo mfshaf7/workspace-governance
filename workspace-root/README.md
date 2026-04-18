@@ -86,6 +86,17 @@ workspace level, but it is not a governed delivery lane:
 - local branch, worktree, and dirty-state inputs are allowed there
 - stage still requires reviewed commits and the normal governed path
 
+`dev-integration` profiles also have a lifecycle now:
+
+- `proposed`
+- `active`
+- `suspended`
+- `retired`
+
+Only `active` profiles are self-serve launchable from the shared runner. The
+request/admission model is generic at the workspace layer, even if the current
+request surface adapter is a specific tool such as OpenProject.
+
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.
 

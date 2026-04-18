@@ -27,6 +27,12 @@ provide the concrete runtime shape, while `workspace-governance` defines when
 the lane should be used, what it must never touch, and what artifacts are
 required before a change can move into governed stage rehearsal.
 
+It also owns the `dev-integration` profile admission model. Profile requests
+and active profiles are not the same thing: a profile may be `proposed`,
+`active`, `suspended`, or `retired`. The workspace policy is generic so the
+request surface may change over time, while the current adapter can still be a
+tool such as OpenProject.
+
 AI may assist that intake decision, but an `ai-suggested` intake entry only
 counts as governed when it references an active approved model profile from
 `platform-engineering` and still records explicit operator acceptance.

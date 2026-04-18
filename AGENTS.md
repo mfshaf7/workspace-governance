@@ -63,6 +63,14 @@ Route those changes back to the owner repos.
   governed delivery lane. Use it when operator-facing workflow design,
   cross-repo API iteration, or canonical-backend write paths are still moving
   too quickly for governed stage rehearsal.
+- `dev-integration` profiles now have an admission lifecycle:
+  - `proposed`
+  - `active`
+  - `suspended`
+  - `retired`
+- only `active` profiles are self-serve launchable from the shared runner
+- the profile request/admission model stays generic here, even if the current
+  request surface adapter is OpenProject
 - The lane standard lives here, but the runtime is not owned here:
   - `workspace-governance` owns the standard and handoff rules
   - `platform-engineering` owns the shared local-k3s runner
