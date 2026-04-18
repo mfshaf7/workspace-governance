@@ -39,6 +39,11 @@ owning repo must publish one primary operator instruction surface. Supporting
 contracts, templates, or standards may back that workflow, but they are not a
 substitute for a clear step-by-step operator path.
 
+For Git-tracked docs outside `workspace-root/`, renderer-safe navigation is
+also required. Same-repo docs should use repo-relative links, while cross-repo
+navigation should use web-safe links instead of local filesystem markdown
+targets.
+
 For the current `dev-integration` request and usage path, that primary surface
 is:
 

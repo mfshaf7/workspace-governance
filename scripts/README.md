@@ -7,6 +7,8 @@
 - `audit_stale_content.py`
   - audits active documentation against the contract vocabulary and repo-rule
     forbidden ownership language
+  - also fails active Git-tracked markdown docs outside `workspace-root/` when
+    they use local filesystem navigation links to `/home/mfshaf7/projects/...`
 - `contracts_lib.py`
   - shared YAML and generated-artifact loader for the governance scripts
 - `install_skills.py`

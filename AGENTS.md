@@ -89,6 +89,9 @@ Route those changes back to the owner repos.
   template, and standards files, the workflow is still incomplete.
 - Workspace-level docs should point to the primary operator instruction
   surface, not force the operator to infer it from contract internals.
+- Git-tracked docs outside `workspace-root/` must not use markdown navigation
+  links to `/home/mfshaf7/projects/...`. Use repo-relative links for same-repo
+  docs and web-safe links for cross-repo docs instead.
 - AI may assist intake classification, but `decision_source: ai-suggested` is
   only valid when the entry carries governed-profile evidence from the approved
   `platform-engineering` model-profile registry and still records operator
