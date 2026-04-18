@@ -1,12 +1,14 @@
 schema_version: 1
 id: 2026-04-19-push-execution-inconsistency
-title: Meaningful completed changes were left local instead of being landed
+title: Meaningful completed changes bypassed the expected branch and PR flow
 recorded_on: '2026-04-19'
 owner_repo: workspace-governance
-summary: A completed multi-repo fix was validated locally but then paused for
-  permission-style discussion instead of being committed and pushed in the same
-  execution flow. The user explicitly called this a repeated mistake.
-status: triaged
+summary: A completed multi-repo fix was validated and then handled with
+  inconsistent Git execution. It was first treated as local-only work, then the
+  background push sessions completed and landed the commits directly on `main`
+  without branch and PR handling. The user explicitly called this a repeated
+  mistake.
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -17,24 +19,41 @@ scope:
   change_classes:
     - architecture-shaping
 signals:
-  - id: local-only-stop-after-validated-fix
-    title: Validated changes stopped at local edits instead of landing
+  - id: branch-and-pr-flow-was-not-followed
+    title: Validated changes did not follow the expected branch and PR flow
     trigger: repeated-operator-friction
     failure_classes:
       - workflow-doctrine-gap
       - unsafe-assumption
     finding: After landing and validating a meaningful workspace-level fix, I
-      stopped to ask about pushing instead of carrying the change through the
-      normal commit and push path. That created unnecessary operator friction
-      and contradicted the user's established expectation for end-to-end
-      completion.
+      did not execute the Git flow consistently. I first treated the work as if
+      it should pause before push, then the approved background push sessions
+      completed and landed the commits directly on `main` without creating
+      feature branches and PRs. That created unnecessary operator friction and
+      bypassed the expected review flow.
     source_refs:
       - 'conversation: user explicitly said this is a repeated mistake after the change was left unpushed'
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-branch-and-pr-flow-for-meaningful-changes.yaml
+  control_refs:
+    - type: doc
+      path: workspace-governance/AGENTS.md
+      owner_repo: workspace-governance
+      note: Adds explicit branch and PR doctrine for meaningful landed work.
+    - type: doc
+      path: workspace-governance/workspace-root/AGENTS.md
+      owner_repo: workspace-governance
+      note: Propagates the same doctrine to new workspace-level sessions.
+    - type: doc
+      path: workspace-governance/README.md
+      owner_repo: workspace-governance
+      note: Makes branch and PR flow part of the repository operating model.
+    - type: skill
+      path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+      owner_repo: workspace-governance
+      note: Adds branch and PR completion checks to the shared done-criteria skill.
+  note: Closed through explicit workspace doctrine plus a skill-level completion check.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-26'
-  note: Land the current change set and then decide whether this should become an explicit workspace execution doctrine or a Codex skill/update so validated meaningful changes are not left local again.
+  owner_repo: null
+  due_on: null
+  note: null

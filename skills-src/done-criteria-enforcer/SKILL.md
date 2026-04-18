@@ -30,6 +30,7 @@ or live governed state.
 - one primary operator instruction surface exists when operator workflow shape changed
 - operator-facing docs use the correct renderer-safe link model for their audience
 - cross-repo dependency order is accounted for when one repo's validation depends on another repo landing first
+- if the work is meant to land in Git, a repo branch and meaningful PR summary exist unless the user explicitly asked for direct landing or the repo's documented workflow says otherwise
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
 - if the user is being asked to restart and meaningful workspace-level pending items remain, a session handoff record exists
 - security review is referenced when identity, secrets, delivery, runtime, or

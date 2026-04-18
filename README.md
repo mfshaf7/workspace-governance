@@ -126,16 +126,19 @@ Those stay in the owning repos:
 ## Operating Model
 
 1. Edit the canonical files in this repo.
-2. Sync them into the live workspace root.
-3. Run repo-local validation.
-4. Run the workspace audit against `/home/mfshaf7/projects`.
-5. Reinstall or verify the registered skills if skill source or registry state
+2. Land meaningful git-tracked changes through a repo branch and pull request
+   with a meaningful summary unless the user explicitly asks for direct landing
+   or the repo's documented workflow says otherwise.
+3. Sync them into the live workspace root.
+4. Run repo-local validation.
+5. Run the workspace audit against `/home/mfshaf7/projects`.
+6. Reinstall or verify the registered skills if skill source or registry state
    changed.
    The real local install under `~/.codex/skills` matters, not just a temp
    validation copy.
-6. Validate improvement candidates and learning closure if self-improvement
+7. Validate improvement candidates and learning closure if self-improvement
    records or closure controls changed.
-7. If repo ownership or routing changed, update the owning repo docs in the
+8. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
 ## Sync Model

@@ -170,6 +170,10 @@ Only start implementation after that discussion narrows the target design.
   - `python3 /home/mfshaf7/projects/workspace-governance/scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
 - A workspace-governance change is not complete until the sync has been run and
   the workspace audit passes against the live root.
+- For meaningful git-tracked repo changes that are intended to land, use a repo
+  branch and pull request with a meaningful summary instead of committing
+  directly to `main`, unless the user explicitly asks for direct landing or the
+  repo's documented workflow says otherwise.
 - If the registered skill inventory or any workspace-owned skill source
   changes, the work is not complete until the live installed skills under
   `~/.codex/skills` are refreshed and the workspace audit confirms they are in
@@ -193,6 +197,9 @@ Only start implementation after that discussion narrows the target design.
 - If a workspace-level validator or audit depends on another repo's remote
   `main`, sequence the dependency repo merges first and land the dependent
   control-plane change after them.
+- If multiple repos are landing through PRs, make the merge order explicit and
+  do not treat local commits, background pushes, or unreviewed direct-to-`main`
+  landings as complete.
 - New repos, products, and components must be classified through the intake
   layer before they become part of the governed active model. Not everything
   must be governed, but everything new must be classified.
