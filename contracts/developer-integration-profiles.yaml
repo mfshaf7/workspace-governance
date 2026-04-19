@@ -21,6 +21,11 @@ profiles:
     stage_handoff:
       owner_repo: platform-engineering
       governed_surface: openproject-stage-delivery-art-consumption
+      required_checks:
+        - accepted idea lookup
+        - delivery-art project verification
+        - consume accepted idea
+        - backlink verification
     actions:
       - up
       - status
@@ -61,6 +66,13 @@ profiles:
     stage_handoff:
       owner_repo: platform-engineering
       governed_surface: openclaw-stage-idea-workflow
+      required_checks:
+        - /idea help
+        - /idea <text>
+        - /idea list status <status>
+        - /idea triage <idea-id> <summary>
+        - /idea decide <idea-id> <parked|accepted|rejected> <notes>
+        - /idea show <idea-id> including internal evaluation metadata readback
     actions:
       - up
       - status

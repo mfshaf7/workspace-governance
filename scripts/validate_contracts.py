@@ -154,6 +154,15 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff owner_repo {payload['stage_handoff']['owner_repo']!r} is not an active repo"
             )
+        required_checks = payload["stage_handoff"].get("required_checks") or []
+        if not required_checks:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must not be empty"
+            )
+        elif len(required_checks) != len(set(required_checks)):
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must be unique"
+            )
         if set(payload["actions"]) != expected_devint_actions:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"

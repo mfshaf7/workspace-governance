@@ -93,10 +93,16 @@
           },
           "stage_handoff": {
             "type": "object",
-            "required": ["owner_repo", "governed_surface"],
+            "required": ["owner_repo", "governed_surface", "required_checks"],
             "properties": {
               "owner_repo": { "type": "string", "minLength": 1 },
-              "governed_surface": { "type": "string", "minLength": 1 }
+              "governed_surface": { "type": "string", "minLength": 1 },
+              "required_checks": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "type": "string", "minLength": 1 }
+              }
             },
             "additionalProperties": false
           },

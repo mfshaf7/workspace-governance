@@ -27,6 +27,8 @@ evidence, host drift detection, testing seams, or operator reliability.
    - the same workflow needs a corrective follow-up in the same task
    - a machine-visible audit flags a doctrine or completion miss
    - the control-plane summary or review-control validator flags repeated drift
+   - an active `dev-integration` profile's stage-handoff contract, README, or
+     promote-check expectations lag behind the landed workflow surface
 5. Decide whether the lesson is:
    - still only a candidate that needs triage, or
    - strong enough for a full after-action review now
@@ -49,6 +51,10 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
   candidate.
 - If the user explicitly calls out a repeated mistake, open or update a
   candidate even if the final after-action shape is not ready yet.
+- Treat stale `dev-integration -> stage` closure doctrine as a first-class
+  self-improvement signal. If source-landed work is being mistaken for workflow
+  closure, add a validator, runbook update, and skill update rather than only
+  recording the miss.
 - Do not close a lesson without linking the actual control changes that landed.
 - Do not bury architecture or workflow doctrine changes in the record alone; add
   the ADR, contract, validator, runbook, or skill update too.

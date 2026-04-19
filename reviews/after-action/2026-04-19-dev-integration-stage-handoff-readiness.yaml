@@ -1,0 +1,84 @@
+schema_version: 1
+id: 2026-04-19-dev-integration-stage-handoff-readiness
+title: Active dev-integration profiles need explicit and auditable stage handoff checks
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The workspace had a documented `dev-integration -> stage` handoff
+  model, but it did not force active profiles, shared promote-check output, and
+  self-improvement audits to stay aligned with the actually landed workflow
+  surface. That let a source-landed idea-workflow slice look complete before
+  governed stage closure really existed.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+  related_products:
+    - openclaw
+    - openproject
+  related_components:
+    - operator-orchestration-service
+    - openclaw-telegram-channel
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly said this repeated mistake should become part of the improvement plan for the next dev-integration handoff'
+  - 'conversation: user explicitly called out that self-improvement did not surface this gap on its own'
+lessons:
+  - id: devint-stage-handoff-checks-must-be-first-class
+    title: Stage closure doctrine must live in the profile contract, README, and validator together
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-operator-friction
+    finding: The active `idea-workflow` profile already had a repo-owned
+      `stage_handoff.required_checks` field, but the workspace registry schema
+      ignored it, the profile validator did not enforce it, and the active
+      profile README did not have to document it. That left the handoff model
+      too easy to drift as the workflow surface gained triage, bounded decision,
+      status-filtered lists, and evaluation-metadata readback.
+    impact: A landed local slice could be treated as if it were complete after
+      PR merge even though the governed stage rehearsal still had stale or
+      incomplete closure checks. That delayed the discovery of missing stage
+      evidence and undermined confidence in the self-improvement loop.
+    status: closed
+    expected_control_types:
+      - contract
+      - validator
+      - doc
+      - skill
+    control_refs:
+      - type: contract
+        path: workspace-governance/contracts/developer-integration-profiles.yaml
+        owner_repo: workspace-governance
+        note: Registry entries now carry explicit `stage_handoff.required_checks`.
+      - type: contract
+        path: workspace-governance/contracts/schemas/developer-integration-profiles.schema.json
+        owner_repo: workspace-governance
+        note: Makes non-empty unique handoff checks part of the governed registry schema.
+      - type: validator
+        path: workspace-governance/scripts/validate_developer_integration.py
+        owner_repo: workspace-governance
+        note: Enforces registry/profile/README agreement for profile-owned stage handoff checks.
+      - type: validator
+        path: workspace-governance/scripts/audit_improvement_signals.py
+        owner_repo: workspace-governance
+        note: Turns active profile handoff drift into a proactive machine-visible signal.
+      - type: skill
+        path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+        owner_repo: workspace-governance
+        note: Makes dev-integration handoff completion and governed stage evidence part of done criteria.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Treats stale dev-integration stage-closure doctrine as an explicit self-improvement trigger.
+      - type: doc
+        path: operator-orchestration-service/dev-integration/profiles/idea-workflow/README.md
+        owner_repo: operator-orchestration-service
+        note: Documents the active profile stage handoff checks in the primary profile surface.
+      - type: doc
+        path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+        owner_repo: platform-engineering
+        note: Makes profile-owned stage handoff checks and stage-only closure explicit in the primary operator runbook.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

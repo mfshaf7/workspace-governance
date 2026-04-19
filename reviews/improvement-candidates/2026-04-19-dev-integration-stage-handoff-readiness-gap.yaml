@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-04-19-dev-integration-stage-handoff-readiness-gap
+title: Dev-integration handoff readiness missed the governed stage closure path
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The current dev-integration handoff flow allowed a landed idea-workflow
+  slice to be treated as complete before the governed stage rehearsal happened,
+  and the shared promote-check still advertised the older `/idea` surface rather
+  than the actually landed triage, decision, and evaluation readback behavior.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+    - openclaw-telegram-enhanced
+  related_products:
+    - openclaw
+    - openproject
+  related_components:
+    - operator-orchestration-service
+    - openclaw-telegram-channel
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: stale-devint-handoff-surface
+    title: Promote-check and profile handoff criteria lagged behind the landed workflow surface
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+      - unsafe-assumption
+    finding: The landed `idea-workflow` slice included operator-authored triage,
+      bounded decision, and evaluation metadata readback, but the shared
+      `devint-promote-check` and the profile handoff contract still only listed
+      `/idea help`, capture, list, list all, and show. That made it too easy to
+      stop at source landing and discover the stage-rehearsal obligation only
+      later in conversation.
+    source_refs:
+      - 'conversation: user explicitly said this is a repeated mistake after the stage rehearsal gap surfaced late'
+      - 'command: make -C /home/mfshaf7/projects/platform-engineering devint-promote-check PROFILE=idea-workflow still omitted triage, decision, and evaluation checks'
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-dev-integration-stage-handoff-readiness.yaml
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/developer-integration-profiles.yaml
+      owner_repo: workspace-governance
+      note: Records explicit stage-handoff required checks for each profile.
+    - type: validator
+      path: workspace-governance/scripts/validate_developer_integration.py
+      owner_repo: workspace-governance
+      note: Fails when registry, profile README, and stage-handoff checks drift.
+    - type: validator
+      path: workspace-governance/scripts/audit_improvement_signals.py
+      owner_repo: workspace-governance
+      note: Surfaces active dev-integration handoff drift as a proactive signal.
+    - type: skill
+      path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+      owner_repo: workspace-governance
+      note: Prevents source landing from being mistaken for closure when stage evidence is still required.
+    - type: doc
+      path: operator-orchestration-service/dev-integration/profiles/idea-workflow/README.md
+      owner_repo: operator-orchestration-service
+      note: Publishes the active profile stage-handoff checks in the primary profile surface.
+  note: Closed through explicit registry fields, validator coverage, proactive audit coverage, and updated profile/runbook doctrine.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
