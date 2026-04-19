@@ -1,0 +1,61 @@
+schema_version: 1
+id: 2026-04-19-improvement-candidate-fix-selection-and-approval
+title: Improvement candidates should auto-record, but fix selection stays operator-approved
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: >
+  The self-improvement process needed a clearer split between automatic signal
+  capture and operator-approved closure. Candidates should be recorded
+  automatically, Codex should propose and justify the best fix, and the durable
+  control should only land after operator approval.
+scope:
+  related_repos:
+    - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user asked whether improvement-candidate review must be triggered manually or would be fixed automatically'
+  - 'conversation: user specified that confirmation to fix should come from the operator because a better idea may exist'
+  - 'conversation: user required Codex to propose and justify the best fix instead of waiting for the operator to invent one'
+lessons:
+  - id: candidate-capture-and-fix-approval-must-be-separated
+    title: Automatic candidate capture should not imply automatic control landing
+    failure_class: workflow-doctrine-gap
+    trigger: repeated-manual-retrospective
+    finding: >
+      The workspace documented that repeated mistakes must become improvement
+      candidates, but it did not explicitly state the next decision boundary.
+      That left room for ambiguity about whether Codex should merely record the
+      signal, auto-land a guessed fix, or wait for the operator to suggest the
+      control shape.
+    impact: >
+      Without an explicit rule, the self-improvement loop could either stall and
+      put fix design work back onto the operator, or overreach by landing a
+      durable control without operator approval of the chosen fix shape.
+    status: closed
+    expected_control_types:
+      - doc
+      - skill
+    control_refs:
+      - type: doc
+        path: workspace-governance/AGENTS.md
+        owner_repo: workspace-governance
+        note: Workspace governance rules now require automatic candidate capture, Codex-proposed fix selection with justification, and operator approval before closure work lands.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Workspace-root routing guidance now carries the same operator-approved self-improvement rule for future sessions.
+      - type: doc
+        path: workspace-governance/reviews/improvement-candidates/README.md
+        owner_repo: workspace-governance
+        note: Candidate-process doc now explains automatic capture plus proposed-and-justified fix selection before implementation.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Canonical self-improvement skill now requires proposing and justifying the best fix before seeking operator approval to land it.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

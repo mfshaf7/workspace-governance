@@ -254,6 +254,10 @@ Only start implementation after that discussion narrows the target design.
   real but the closure shape is not fully decided yet.
 - If the user explicitly says something is a repeated mistake, that is a
   mandatory candidate signal.
+- Candidate capture should happen automatically once the signal is real, but
+  the durable fix should not be auto-landed from that signal alone.
+- Propose the best fix shape, justify why it is the best option, and wait for
+  operator approval before implementing the closing control.
 - No repeated failure class should stay purely conversational. It should either
   become an explicit candidate with owner and due date, or close through a
   linked after-action record or landed durable control.

@@ -1,0 +1,52 @@
+schema_version: 1
+id: 2026-04-19-stage-drift-carry-through-gap
+title: Carry source fixes through governed stage once live drift is confirmed
+recorded_on: 2026-04-19
+owner_repo: workspace-governance
+summary: >
+  Once a merged source fix is proven missing from stage, the workflow should
+  automatically continue into the governed stage lane instead of stopping at a
+  diagnosis that stage is stale.
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-telegram-enhanced
+  related_products:
+    - openclaw
+  related_components:
+    - openclaw-telegram-channel
+    - argo-cd
+  change_classes:
+    - platform-contract
+    - runtime-composition
+signals:
+  - id: signal-1
+    title: Stage drift was diagnosed but not carried through automatically
+    trigger: repeated-operator-friction
+    failure_classes:
+      - rollout-evidence-gap
+      - workflow-doctrine-gap
+    finding: >
+      After the Telegram parser fix merged, stage was confirmed to still run the
+      older overlay source. The workflow stopped at telling the operator that
+      stage was older instead of automatically carrying the fix through the
+      governed overlay pin, build, record, and reconciliation path.
+    source_refs:
+      - openclaw-telegram-enhanced#20
+      - platform-engineering#115
+      - platform-engineering#116
+      - conversation:2026-04-19-stage-older-not-fixed-automatically
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: 2026-04-20
+  note: >
+    Decide whether done-criteria and governed-delivery controls should require
+    immediate stage carry-through once a merged source fix is shown to be
+    missing from the live governed rehearsal lane.

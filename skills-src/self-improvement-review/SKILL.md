@@ -29,15 +29,17 @@ evidence, host drift detection, testing seams, or operator reliability.
    - the control-plane summary or review-control validator flags repeated drift
    - an active `dev-integration` profile's stage-handoff contract, README, or
      promote-check expectations lag behind the landed workflow surface
-5. Decide whether the lesson is:
+5. Propose the best fix shape for the candidate, justify why that fix is the
+   best option, and get operator approval before landing the durable control.
+6. Decide whether the lesson is:
    - still only a candidate that needs triage, or
    - strong enough for a full after-action review now
-6. If a full after-action is required, choose the trigger that explains why.
-7. Decide whether the lesson is:
+7. If a full after-action is required, choose the trigger that explains why.
+8. Decide whether the lesson is:
    - closed by durable controls already added, or
    - still open with a real owner and due date
-8. Record the review under `reviews/after-action/` when warranted.
-9. Validate both the candidate layer and learning closure:
+9. Record the review under `reviews/after-action/` when warranted.
+10. Validate both the candidate layer and learning closure:
 
 ```bash
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
@@ -51,6 +53,11 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
   candidate.
 - If the user explicitly calls out a repeated mistake, open or update a
   candidate even if the final after-action shape is not ready yet.
+- Do not make the operator invent the fix from scratch when the likely control
+  improvement is clear. Propose the best fix yourself and explain the
+  reasoning.
+- Do not auto-land the durable control after opening a candidate. The operator
+  still approves the chosen fix shape before closure work starts.
 - Treat stale `dev-integration -> stage` closure doctrine as a first-class
   self-improvement signal. If source-landed work is being mistaken for workflow
   closure, add a validator, runbook update, and skill update rather than only

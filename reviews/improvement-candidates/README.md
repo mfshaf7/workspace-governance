@@ -15,6 +15,16 @@ Use an improvement candidate when:
 - a machine-visible audit detects a doctrine or completion miss
 - the miss looks real, but the durable control is not decided yet
 
+Expected handling:
+
+- record the candidate automatically once the signal is real
+- propose the best fix shape instead of waiting for the operator to invent one
+- explain why that fix is the best option
+- do not implement the durable control until the operator approves the fix
+  shape
+- close the candidate only after the approved control lands or an after-action
+  review links the open follow-up explicitly
+
 Lifecycle:
 
 - `new`
