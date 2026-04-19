@@ -1,101 +1,176 @@
 # Session Handoff 2026-04-19
 
-This record preserves the important workspace-level context from the current
-discussion so a new session can resume without depending on chat memory.
+This record preserves the current workspace-level checkpoint before a deliberate
+session restart.
+
+The immediate goal after restart is to test whether a fresh session can load
+the architecture, workflow model, and owner routing quickly from the durable
+workspace surfaces, not from chat memory alone.
+
+Latest merged PRs before restart:
+
+- `security-architecture#32`
+- `platform-engineering#117`
+- `workspace-governance#33`
 
 ## Current Durable State
 
-These are already real, merged, and governed:
+These are already real, merged, synced, and intended to be the primary startup
+surfaces for a fresh session:
 
-- `dev-integration` exists as the default fast local iteration lane when an
-  active profile is available.
-- `idea-workflow` exists as the first active `dev-integration` profile.
-- `dev-integration` profile lifecycle and admission now exist:
-  - `proposed`
-  - `active`
-  - `suspended`
-  - `retired`
-- operator-facing workflow doctrine now requires one clear primary operator
-  instruction surface in the owning repo.
-- the self-improvement system now has:
-  - machine-visible signal audit
-  - improvement candidates
-  - after-action closure
-- the workspace instruction system now has stronger skills and a live-skill
-  sync control that validates the installed skill tree under `~/.codex/skills`.
+- root bootstrap and routing:
+  - `/home/mfshaf7/projects/ARCHITECTURE.md`
+  - `/home/mfshaf7/projects/AGENTS.md`
+  - `/home/mfshaf7/projects/README.md`
+- repo-specific review and control surfaces:
+  - active repos now carry Codex review guidance and normalized PR surfaces
+- self-improvement model:
+  - repeated real misses become improvement candidates automatically
+  - Codex should propose and justify the best fix shape
+  - durable control landing still requires operator approval
+  - this rule is landed in `workspace-governance`
+  - restart readiness now requires proactive handoff refresh before
+    recommending restart
+- enterprise workflow design controls:
+  - architecture and operator-workflow design now explicitly require blocker
+    and impediment handling
+  - enterprise delivery design must record `remove`, `workaround`,
+    `accept-risk`, or `defer` decisions with justification
+- `idea-workflow` slice:
+  - source-landed through normal PR flow
+  - Telegram reserved-keyword guardrail fix is landed in source and carried
+    through the governed stage overlay lane
+- PM² + one-ART delivery design:
+  - proposal plane remains `Workspace Proposals`
+  - delivery plane is a separate OpenProject ART project
+  - `accepted-idea-delivery` dev-integration profile exists as `proposed`
 
-## Current Skills And Controls
+## Current Live Stage State
 
-Current registered workspace skill set includes:
+The relevant stage runtime is now aligned with the latest Telegram guardrail
+fix.
 
-- `workspace-change-router`
-- `architecture-discussion-gate`
-- `contract-drift-check`
-- `dev-integration-first`
-- `done-criteria-enforcer`
-- `operator-workflow-design`
-- `cross-repo-sequencer`
-- `self-improvement-review`
+- stage app:
+  - `openclaw-gateway-stage`
+  - synced revision: `8986f2ff07725214e7e773963b3c30daedc934ea`
+- live Telegram overlay:
+  - source SHA: `d7390578c440f10a47dcc47881dc72a96af9aa0b`
+  - digest:
+    - `sha256:97084661d3546db76fdc7c43330f79967b8a93688480205f08d66e179c080bda`
+- verified runtime result:
+  - malformed `/idea` command-keyword attempts are now rejected locally in the
+    Telegram layer
+  - they no longer fall through into new idea capture on stage
 
-The local workspace audit now checks that the live installed skills match the
-governed skill source and registry.
+One known visibility limitation still exists:
 
-## Pending Follow-Ups
+- stage gateway logs show `sendMessage` events, but they do not preserve the
+  exact outbound reply body text
 
-These were discussed and intentionally left for later work.
+## Current Open Self-Improvement Item
 
-### 1. Telegram `/idea` Workflow Follow-Ups
+There are still two open candidates related to this session:
 
-Deferred feature ideas for the broker-backed Telegram surface:
+- `workspace-governance/reviews/improvement-candidates/2026-04-19-stage-drift-carry-through-gap.yaml`
+- `workspace-governance/reviews/improvement-candidates/2026-04-19-already-invented-controls-missed-in-plan-pass.yaml`
 
-- accept shorthand record ids such as `/idea show 41` in addition to
-  `/idea show idea-41`
-- support status-filtered list surfaces such as:
-  - `/idea list status <status>`
-  - `/idea list all status <status>`
+Meaning:
 
-These belong primarily to:
+- the signal is already captured durably
+- the fix is not yet selected and closed
+- if resumed later, Codex should propose the best control shape, justify it,
+  and wait for operator approval before implementing it
 
-- `openclaw-telegram-enhanced/`
-- `operator-orchestration-service/`
+## Deferred Productization Thread
 
-### 2. Dev-Integration Productization
+This thread is intentionally deferred while the OpenProject
+`accepted-idea-delivery` workstream takes priority.
 
-Current state is strong enough to use now, but not yet fully productized.
+Deferred topic:
 
-Still deferred:
+- productize the current workspace governance and AI-assisted delivery model as
+  a real enterprise product for customer-local model deployment
 
-- a friendlier catalog or launch surface for approved profiles
-- a richer request surface than the current generic admission model plus
-  current adapter
+Current conclusion before deferral:
 
-Current design choice remains:
+- the current workspace design is a credible internal prototype, not yet a
+  publishable product shape
+- the strongest target architecture is not many bespoke repo-local validators
+  and not many heavy generated validator copies
+- the preferred long-term model is:
+  - central governance engine
+  - tenant or instance-specific contracts and config
+  - thin generated repo-local governance wiring
+  - optional repo-local custom extensions only for true product/runtime seams
+  - local governed agent runtime for customer-hosted models
+- `AGENTS.md`, skills, contracts, and repo rules should remain the authoring
+  layer rather than being replaced
 
-- request a new profile when none fits
-- self-serve sessions from approved `active` profiles
+Non-break constraints already agreed:
 
-### 3. Self-Improvement Detection Beyond Doctrine
+- keep `AGENTS.md`, skills, contracts, and repo rules as source of truth
+- keep existing script entrypoints stable during migration
+- keep current repo-local custom tests and operator workflows working
+- keep workspace audits and current governed flows passing
+- do the migration as a strangler pattern with shadow-parity first, not a
+  rewrite
 
-Current state is much better, but still hybrid:
+Recommended first step when this thread resumes:
 
-- machine-visible signals are audited
-- conversation-visible signals still rely on agent discipline plus doctrine
+- separate reusable governance-engine logic from workspace-instance data
+  without changing current behavior
+- then introduce the central engine in shadow mode before migrating existing
+  repos
+- treat the local-model runtime as a later parallel product track after the
+  governance engine split is stable
 
-A possible future improvement is stronger automatic candidate creation or a
-more explicit signal queue for conversation-visible misses.
+## Current Repo State
 
-## Resume Guidance
+Relevant repo state at the time of restart:
 
-If the next session needs to resume quickly:
+- `workspace-governance`
+  - branch: `main`
+  - local-only modification:
+    - this handoff file
+- `security-architecture`
+  - clean on `main...origin/main`
+- `platform-engineering`
+  - clean on `main...origin/main`
+- `operator-orchestration-service`
+  - clean on `main...origin/main`
+- `openclaw-telegram-enhanced`
+  - clean on `main...origin/main`
 
-1. treat this file as the chat-context handoff
-2. trust the merged contracts, skills, and runbooks as the real system state
-3. start from the highest-priority pending item above instead of re-deriving
-   the whole architecture
+## Restart Test Guidance
 
-## Suggested Next Discussion Order
+For the restart test, the preferred sequence is:
 
-1. decide whether to take the `/idea` follow-ups now or leave them parked
-2. decide how far to productize `dev-integration`
-3. decide whether the self-improvement system needs another step beyond the
-   current candidate-plus-audit model
+1. Start the new session normally.
+2. Let it load the architecture from:
+   - `ARCHITECTURE.md`
+   - then `AGENTS.md`
+   - then the owner repo docs it routes into
+3. Do not rely on this handoff first unless the startup test fails or misses
+   something important.
+4. Use this handoff only as the fallback checkpoint if the fresh session needs
+   to recover context that should already have been present in the durable
+   surfaces.
+
+What the fresh session should be able to recover on its own:
+
+- the workspace control-plane split and repo ownership model
+- current Codex/self-improvement process
+- the `idea-workflow` maturity and current stage posture
+- the PM² + one-ART proposal-to-delivery design direction
+- the existence and deferral state of the enterprise productization thread
+
+## Suggested First Check After Restart
+
+Ask the new session to explain:
+
+- the current workspace architecture
+- the current improvement-candidate handling model
+- the state of the `idea-workflow` and `accepted-idea-delivery` lanes
+
+If it cannot do that accurately from the durable surfaces, treat that as a real
+startup-fidelity gap rather than a conversational miss.

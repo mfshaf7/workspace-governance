@@ -24,6 +24,7 @@ individual repos.
 | `openclaw-telegram-enhanced/` | Canonical Telegram source | Telegram UX, routing, approvals, media delivery behavior, Telegram-specific tests | host enforcement, platform rollout, security governance |
 | `openclaw-host-bridge/` | Canonical host enforcement runtime | allowed roots, typed host operations, audit logs, staging, host-side health and attestation, WSL/Windows bridge behavior | Telegram UX, image composition, GitOps rollout |
 | `security-architecture/` | Security governance owner | standards, trust-boundary judgment, review methodology, findings, ADRs, remediation direction | rollout implementation, product packaging, operator runbooks |
+| `operator-orchestration-service/` | Shared operator workflow service | shared workflow APIs, workflow audit/correlation, bounded AI-assist orchestration, OpenProject workflow adapters | Telegram delivery/chat UX, platform rollout authority, security standards |
 
 ## Retired Repository
 
@@ -198,6 +199,7 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 - Dev-integration request and usage: [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
 - OpenClaw platform model: [platform-engineering/products/openclaw/architecture-and-owner-model.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/architecture-and-owner-model.md)
 - OpenProject platform model: [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+- Shared operator workflow service: [operator-orchestration-service/README.md](/home/mfshaf7/projects/operator-orchestration-service/README.md)
 - Active OpenClaw runtime composition: [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
 - Canonical Telegram source: [openclaw-telegram-enhanced/README.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
 - Canonical host bridge: [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)

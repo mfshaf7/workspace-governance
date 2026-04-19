@@ -73,8 +73,11 @@
     concrete `security-architecture` artifacts, checklist scope, and dated
     review output artifacts instead of directory-level placeholders
 - `validate_cross_repo_truth.py`
-  - validates that active repos still tell the same ownership truth and
-    regenerates the resolved governance artifacts under `generated/`
+  - validates that active repos still tell the same ownership truth, that the
+    canonical `workspace-root/` bootstrap sections cover the full active repo
+    inventory, that `security-architecture` keeps security-view and platform
+    inventory coverage for active security-owned components, and regenerates
+    the resolved governance artifacts under `generated/`
 - `validate_repo_structure.py`
   - validates that this repo keeps the expected governance structure
 - `workspace_control_plane_summary.py`

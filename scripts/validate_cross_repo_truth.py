@@ -25,6 +25,26 @@ DOC_EXCLUDES = (
     "/docs/decisions/adr/",
 )
 
+WORKSPACE_ROOT_REPO_COVERAGE_REQUIREMENTS = {
+    "AGENTS.md": (
+        "## Current Owner Map",
+        "## Routing Rules",
+    ),
+    "README.md": (
+        "## Active Repository Roles",
+        "## Start Here",
+    ),
+    "ARCHITECTURE.md": (
+        "## Active Owner Repos",
+        "## Read Next By Task",
+    ),
+}
+
+SECURITY_ARCHITECTURE_COMPONENT_COVERAGE_REQUIREMENTS = {
+    "docs/architecture/components/README.md": "({component_name}/README.md)",
+    "docs/architecture/platform/component-inventory.md": "../components/{component_name}/README.md",
+}
+
 
 def gather_active_docs(repo_root: Path) -> list[Path]:
     files: list[Path] = []
@@ -34,6 +54,94 @@ def gather_active_docs(repo_root: Path) -> list[Path]:
             continue
         files.append(path)
     return sorted(files)
+
+
+def extract_section(text: str, heading: str) -> str | None:
+    lines = text.splitlines()
+    target = heading.strip().lower()
+    collecting = False
+    collected: list[str] = []
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.lower() == target:
+            collecting = True
+            continue
+        if collecting and stripped.startswith("## "):
+            break
+        if collecting:
+            collected.append(line)
+
+    if not collecting:
+        return None
+    return "\n".join(collected).strip()
+
+
+def validate_workspace_root_repo_coverage(
+    workspace_root_docs: Path,
+    active_repos: list[str],
+    errors: list[str],
+) -> None:
+    for filename, headings in WORKSPACE_ROOT_REPO_COVERAGE_REQUIREMENTS.items():
+        path = workspace_root_docs / filename
+        if not path.exists():
+            errors.append(f"{path}: missing workspace-root doc for active repo coverage check")
+            continue
+
+        text = path.read_text(encoding="utf-8")
+        for heading in headings:
+            section = extract_section(text, heading)
+            if section is None:
+                errors.append(f"{path}: missing section {heading!r} for active repo coverage check")
+                continue
+
+            missing_repos = [repo_name for repo_name in active_repos if repo_name not in section]
+            if missing_repos:
+                missing_text = ", ".join(repr(repo_name) for repo_name in missing_repos)
+                errors.append(
+                    f"{path}: section {heading!r} missing active repos {missing_text}"
+                )
+
+
+def validate_security_architecture_component_coverage(
+    workspace_root: Path,
+    contracts: dict[str, object],
+    errors: list[str],
+) -> None:
+    security_repo_root = workspace_root / "security-architecture"
+    if not security_repo_root.exists():
+        errors.append(f"{security_repo_root}: missing security-architecture repo for component coverage check")
+        return
+
+    active_security_components = sorted(
+        component_name
+        for component_name, payload in contracts["components"]["components"].items()
+        if payload["lifecycle"] == "active" and payload["security_owner"] == "security-architecture"
+    )
+
+    for component_name in active_security_components:
+        component_doc = (
+            security_repo_root / "docs" / "architecture" / "components" / component_name / "README.md"
+        )
+        if not component_doc.exists():
+            errors.append(
+                f"{component_doc}: missing security component view for active component {component_name!r}"
+            )
+
+    for rel_path, pattern in SECURITY_ARCHITECTURE_COMPONENT_COVERAGE_REQUIREMENTS.items():
+        path = security_repo_root / rel_path
+        if not path.exists():
+            errors.append(f"{path}: missing security-architecture component coverage doc")
+            continue
+        text = path.read_text(encoding="utf-8")
+        missing_components = [
+            component_name
+            for component_name in active_security_components
+            if pattern.format(component_name=component_name) not in text
+        ]
+        if missing_components:
+            missing_text = ", ".join(repr(name) for name in missing_components)
+            errors.append(f"{path}: missing security component coverage for {missing_text}")
 
 
 def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> dict[str, object]:
@@ -133,9 +241,10 @@ def main() -> int:
     workspace_root = args.workspace_root.resolve()
     repo_root = Path(__file__).resolve().parents[1]
     contracts = load_contracts(repo_root)
+    active_repos = active_repo_names(contracts)
     errors: list[str] = []
 
-    for repo_name in active_repo_names(contracts):
+    for repo_name in active_repos:
         repo_root_path = workspace_root / repo_name
         if not repo_root_path.exists():
             errors.append(f"missing active repo for cross-repo truth check: {repo_root_path}")
@@ -168,6 +277,9 @@ def main() -> int:
         for pattern in rule["forbidden_patterns"]["agents"]:
             if pattern and re.search(pattern, agents_text, re.MULTILINE):
                 errors.append(f"{agents_path}: found forbidden routing pattern {pattern!r}")
+
+    validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors)
+    validate_security_architecture_component_coverage(workspace_root, contracts, errors)
 
     for product_name in contracts["products"]["products"]:
         product_readme = workspace_root / "platform-engineering" / "products" / product_name / "README.md"
@@ -228,7 +340,7 @@ def main() -> int:
 
     print(
         "cross-repo truth valid: "
-        f"repos={len(active_repo_names(contracts))} "
+        f"repos={len(active_repos)} "
         f"products={len(contracts['products']['products'])} "
         f"components={len(contracts['components']['components'])} "
         f"skills={len(contracts['skills']['skills'])}"
