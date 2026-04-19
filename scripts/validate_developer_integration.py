@@ -34,6 +34,10 @@ def load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text()) or {}
 
 
+def load_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
 def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     errors: list[str] = []
     contracts = load_contracts(repo_root)
@@ -101,6 +105,15 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff owner_repo {stage_owner!r} is not active"
             )
+        registry_required_checks = payload["stage_handoff"].get("required_checks") or []
+        if not registry_required_checks:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must not be empty"
+            )
+        elif len(registry_required_checks) != len(set(registry_required_checks)):
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must be unique"
+            )
         if set(payload["actions"]) != required_actions:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
@@ -155,6 +168,21 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"{profile_path}: profile_id {profile['profile_id']!r} must match registry name {profile_name!r}"
             )
+        profile_stage_handoff = profile.get("stage_handoff") or {}
+        for key in ("owner_repo", "governed_surface"):
+            if profile_stage_handoff.get(key) != payload["stage_handoff"][key]:
+                errors.append(
+                    f"{profile_path}: stage_handoff.{key} must match contracts/developer-integration-profiles.yaml"
+                )
+        profile_required_checks = profile_stage_handoff.get("required_checks") or []
+        if not profile_required_checks:
+            errors.append(f"{profile_path}: stage_handoff.required_checks must not be empty")
+        elif len(profile_required_checks) != len(set(profile_required_checks)):
+            errors.append(f"{profile_path}: stage_handoff.required_checks must be unique")
+        if profile_required_checks != registry_required_checks:
+            errors.append(
+                f"{profile_path}: stage_handoff.required_checks must match contracts/developer-integration-profiles.yaml"
+            )
         source_repos = {
             entry["repo"] if isinstance(entry, dict) else entry
             for entry in profile["source_repos"]
@@ -173,6 +201,20 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 errors.append(
                     f"{profile_path}: command path missing for {action}: {command_path}"
                 )
+        readme_path = profile_path.parent / "README.md"
+        if not readme_path.exists():
+            errors.append(f"{profile_path}: missing profile README: {readme_path}")
+        else:
+            readme_text = load_text(readme_path)
+            if "## Stage Handoff Checks" not in readme_text:
+                errors.append(
+                    f"{readme_path}: missing '## Stage Handoff Checks' heading for profile-owned governed checks"
+                )
+            for check_name in profile_required_checks:
+                if check_name not in readme_text:
+                    errors.append(
+                        f"{readme_path}: stage handoff check {check_name!r} must be documented"
+                    )
         if lifecycle not in profile_lifecycle["self_serve_statuses"]:
             continue
 

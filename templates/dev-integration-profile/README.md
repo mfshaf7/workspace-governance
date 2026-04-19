@@ -18,6 +18,15 @@ Only `active` profiles are launchable from the shared runner.
 The profile file must be owned by the repo that owns the concrete workflow,
 not by `workspace-governance/`.
 
+Profile-owned docs should include, at minimum:
+
+- `## Smoke Scope`
+- `## Stage Handoff Checks`
+
+The `## Stage Handoff Checks` list must mirror
+`stage_handoff.required_checks` from both the repo-owned `profile.yaml` and the
+workspace registry entry in `contracts/developer-integration-profiles.yaml`.
+
 Expected layout:
 
 ```text
@@ -46,6 +55,12 @@ Required profile keys:
 - `commands`
 - `session`
 - `stage_handoff`
+
+`stage_handoff` must include:
+
+- `owner_repo`
+- `governed_surface`
+- `required_checks`
 
 Required command ids:
 

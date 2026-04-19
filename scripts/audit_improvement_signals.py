@@ -5,11 +5,17 @@ import argparse
 from pathlib import Path
 import sys
 
+import yaml
+
 from contracts_lib import load_contracts
 
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def load_yaml(path: Path) -> dict:
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
 def main() -> int:
@@ -35,6 +41,7 @@ def main() -> int:
     contracts = load_contracts(repo_root)
     errors: list[str] = []
     workflow_count = 0
+    profile_count = 0
 
     for repo_name, rule in sorted(contracts["repo_rules"].items()):
         workflow_requirements = rule.get("operator_workflow_requirements")
@@ -80,12 +87,49 @@ def main() -> int:
                         f"primary surface {primary_surface_path!r}"
                     )
 
+    for profile_name, payload in sorted(contracts["developer_integration_profiles"]["profiles"].items()):
+        if payload["lifecycle"] != "active":
+            continue
+        profile_count += 1
+        profile_path = workspace_root / payload["owner_repo"] / payload["profile_path"]
+        if not profile_path.exists():
+            errors.append(f"{profile_name}: active profile file missing at {profile_path}")
+            continue
+        profile = load_yaml(profile_path)
+        registry_checks = payload["stage_handoff"].get("required_checks") or []
+        profile_checks = (profile.get("stage_handoff") or {}).get("required_checks") or []
+        if registry_checks != profile_checks:
+            errors.append(
+                f"{profile_name}: active profile stage_handoff.required_checks drift between registry and profile file"
+            )
+        if not profile_checks:
+            errors.append(f"{profile_name}: active profile must declare non-empty stage_handoff.required_checks")
+            continue
+        readme_path = profile_path.parent / "README.md"
+        if not readme_path.exists():
+            errors.append(f"{profile_name}: active profile README missing at {readme_path}")
+            continue
+        readme_text = read_text(readme_path)
+        if "## Stage Handoff Checks" not in readme_text:
+            errors.append(
+                f"{profile_name}: active profile README must contain '## Stage Handoff Checks'"
+            )
+        for check_name in profile_checks:
+            if check_name not in readme_text:
+                errors.append(
+                    f"{profile_name}: active profile README is missing stage handoff check {check_name!r}"
+                )
+
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
 
-    print(f"improvement signals clean: operator_workflows_checked={workflow_count}")
+    print(
+        "improvement signals clean: "
+        f"operator_workflows_checked={workflow_count} "
+        f"active_devint_profiles_checked={profile_count}"
+    )
     return 0
 
 

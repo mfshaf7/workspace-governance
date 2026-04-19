@@ -34,6 +34,12 @@ or live governed state.
 - if repo review controls exist and the work is landing through a PR, Codex review was requested or explicitly waived and the PR records the result
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
 - if the user is being asked to restart and meaningful workspace-level pending items remain, a session handoff record exists
+- if the work was proven in `dev-integration`, the active profile's
+  `stage_handoff.required_checks` and `devint-promote-check` still match the
+  landed workflow surface before calling the handoff ready
+- if the work is being described as closed after `dev-integration`, the
+  documented handoff path is complete too; source landing alone is not closure
+  when governed `stage` rehearsal is still required
 - security review is referenced when identity, secrets, delivery, runtime, or
   AI controls changed
 - live evidence exists when the change affected governed runtime state
