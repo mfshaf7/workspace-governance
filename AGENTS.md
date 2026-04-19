@@ -140,6 +140,12 @@ Route those changes back to the owner repos.
   `reviews/improvement-candidates/` as soon as the signal is real.
 - If the user explicitly says something is a repeated mistake, that is a
   mandatory candidate signal.
+- Improvement candidate capture should be automatic once the signal is real.
+- Do not automatically implement the durable fix just because the candidate
+  exists.
+- After recording the candidate, propose the best fix shape, justify why that
+  fix is the best option, and wait for operator approval before landing the
+  control change.
 - If the lesson and control shape are already clear, record the after-action
   too and close the candidate through the linked review or direct controls.
 - Do not treat conversational hindsight as a durable fix. Repeated failure
