@@ -1,0 +1,49 @@
+schema_version: 1
+id: 2026-04-19-restart-handoff-proactive-check-gap
+title: Create or refresh session handoff proactively before restart
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: If a restart is likely while meaningful workspace-level local-only state
+  remains, Codex should proactively create or refresh the current session handoff
+  before suggesting a restart instead of waiting for the operator to ask.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: signal-1
+  title: Restart was suggested before proactively refreshing the required handoff
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The workspace rule already requires creating or updating the latest session
+    handoff when a restart is likely and meaningful pending items remain. I suggested
+    restart readiness first and only refreshed the handoff after the operator asked
+    whether it should be written.
+  source_refs:
+  - conversation:2026-04-19-restart-handoff-only-after-operator-ask
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-restart-handoff-readiness-gate.yaml
+  control_refs:
+  - type: doc
+    path: workspace-governance/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace governance now requires an explicit restart-readiness check before recommending restart.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace root routing now carries the same proactive restart-readiness rule for future sessions.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Done-criteria skill now defines a restart-readiness gate and forbids waiting for the operator to ask about handoff creation.
+  note: Closed by the restart-readiness gate controls and linked after-action review.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

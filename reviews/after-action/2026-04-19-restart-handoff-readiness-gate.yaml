@@ -1,0 +1,54 @@
+schema_version: 1
+id: 2026-04-19-restart-handoff-readiness-gate
+title: Restart readiness should require proactive handoff refresh before recommendation
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: Restart readiness should be treated as a decision gate. If meaningful workspace-level
+  local-only state remains, Codex must refresh the current handoff before recommending
+  a restart instead of waiting for the operator to ask.
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+source_refs:
+- conversation:2026-04-19-restart-handoff-only-after-operator-ask
+- workspace-governance/reviews/improvement-candidates/2026-04-19-restart-handoff-proactive-check-gap.yaml
+lessons:
+- id: restart-readiness-must-refresh-handoff-before-recommendation
+  title: Restart readiness requires proactive handoff refresh
+  failure_class: workflow-doctrine-gap
+  trigger: repeated-operator-friction
+  finding: The restart handoff rule existed, but it was phrased as a closure reminder
+    rather than a decision gate. That allowed restart readiness to be stated first
+    and the handoff to be refreshed only after the operator asked.
+  impact: This weakens restart tests and risks losing or obscuring meaningful workspace-level
+    local-only context. It also proves the agent is still relying on operator catch
+    rather than enforcing the restart rule proactively at the decision point.
+  status: closed
+  expected_control_types:
+  - contract
+  - doc
+  - skill
+  control_refs:
+  - type: doc
+    path: workspace-governance/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace governance now requires an explicit restart-readiness check before
+      recommending restart.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace root routing now carries the same proactive restart-readiness
+      rule for future sessions.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Done-criteria skill now defines a restart-readiness gate and forbids waiting
+      for the operator to ask about handoff creation.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null

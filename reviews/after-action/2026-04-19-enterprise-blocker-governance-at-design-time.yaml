@@ -1,0 +1,68 @@
+schema_version: 1
+id: 2026-04-19-enterprise-blocker-governance-at-design-time
+title: Enterprise workflow design should include blocker governance from the start
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: Enterprise workflow and project-management design discussions should explicitly
+  include blocker and impediment governance up front, including remove versus workaround
+  versus accept-risk versus defer, with justification required for the chosen path.
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - architecture-shaping
+source_refs:
+- conversation:2026-04-19-blocker-justification-omitted-in-enterprise-design
+- workspace-governance/reviews/improvement-candidates/2026-04-19-enterprise-blocker-governance-gap.yaml
+lessons:
+- id: blocker-governance-must-be-explicit-in-enterprise-design
+  title: Enterprise delivery design must surface blocker governance at design time
+  failure_class: workflow-doctrine-gap
+  trigger: late-architecture-discovery
+  finding: "The PM\xB2 plus one-ART design discussion covered governance phases, intake,\
+    \ and execution structure, but it did not proactively require blocker or impediment\
+    \ governance. That left a structurally incomplete enterprise design until the\
+    \ operator called out the need to discuss blocker removal, workaround, accepted-risk,\
+    \ and justification."
+  impact: Without explicit blocker governance, an enterprise delivery model can look
+    clean on the happy path while still lacking reviewable exception handling. That
+    weakens both the demonstration story and the real control model for blocked work.
+  status: closed
+  expected_control_types:
+  - contract
+  - doc
+  - skill
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/architecture-discussion-gate/SKILL.md
+    owner_repo: workspace-governance
+    note: Architecture discussions now require blocker and impediment handling plus
+      justification expectations before implementation.
+  - type: skill
+    path: workspace-governance/skills-src/operator-workflow-design/SKILL.md
+    owner_repo: workspace-governance
+    note: Operator workflow design now requires explicit blocker handling, decision
+      path, and justification for enterprise workflows.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace routing doctrine now includes blocker and impediment handling
+      in architecture discussion outputs.
+  - type: doc
+    path: platform-engineering/docs/decisions/adr/ADR-013-openproject-proposal-to-delivery-split-and-one-art-model.md
+    owner_repo: platform-engineering
+    note: "ADR now states that blocker handling and justification are part of the\
+      \ PM\xB2 plus one-ART enterprise model."
+  - type: doc
+    path: platform-engineering/products/openproject/delivery-art-contract.md
+    owner_repo: platform-engineering
+    note: Delivery ART contract now defines blocker or impediment governance and required
+      justification when blocked work is not removed immediately.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null

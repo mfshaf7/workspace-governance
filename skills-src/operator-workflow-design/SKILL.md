@@ -28,10 +28,16 @@ reads as part of a workflow.
    - list or status action when multiple records exist
 4. Make status visibility explicit from the start. Do not hide lifecycle or
    leave the operator guessing what can happen next.
-5. Ensure there is one primary operator instruction surface in the owning repo.
-6. Keep supporting contracts, templates, and standards secondary to that
+5. If the workflow is enterprise delivery or project-management shaped, define
+   blocker handling explicitly from the start:
+   - how a blocker is represented
+   - whether the operator must remove it, use a workaround, accept risk, or defer
+   - what justification is required for the chosen path
+   - who owns the follow-up and when it must be reviewed
+6. Ensure there is one primary operator instruction surface in the owning repo.
+7. Keep supporting contracts, templates, and standards secondary to that
    primary operator surface.
-7. Make cross-repo links renderer-safe unless the doc is intentionally the
+8. Make cross-repo links renderer-safe unless the doc is intentionally the
    local `workspace-root/` surface.
 
 ## Guardrails
@@ -42,3 +48,6 @@ reads as part of a workflow.
   from scattered files.
 - Do not add `help` or `status` behavior as an afterthought if the operator
   needs it to use the workflow safely.
+- Do not treat `blocked` as enough by itself in enterprise workflows. The
+  operator should be able to see the blocker decision path and its
+  justification, not just the blocked status label.

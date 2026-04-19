@@ -20,7 +20,18 @@ or live governed state.
 1. Identify the real change class.
 2. Check the product or repo workflow maturity.
 3. List the minimum evidence that should exist.
-4. Call out what is still missing instead of implying completion.
+4. If you are about to recommend a restart or session close, run the restart-readiness gate first.
+5. Call out what is still missing instead of implying completion.
+
+## Restart-Readiness Gate
+
+Before telling the operator that a restart is safe or recommended:
+
+- check for meaningful workspace-level local-only state that would be lost or harder to rediscover after a restart
+- treat pending architecture/workflow discussion, local-only review or handoff notes, and unlanded workspace-level state as handoff-worthy by default
+- if that state exists, create or refresh the latest `docs/archive/session-handoff-*.md` record first
+- only after the handoff is current should you say the restart is ready
+- do not wait for the operator to ask whether a handoff is needed
 
 ## Minimum Checks
 
@@ -34,6 +45,7 @@ or live governed state.
 - if repo review controls exist and the work is landing through a PR, Codex review was requested or explicitly waived and the PR records the result
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
 - if the user is being asked to restart and meaningful workspace-level pending items remain, a session handoff record exists
+- if a restart is being recommended, the session handoff was refreshed before the recommendation rather than only after the operator asked about it
 - if the work was proven in `dev-integration`, the active profile's
   `stage_handoff.required_checks` and `devint-promote-check` still match the
   landed workflow surface before calling the handoff ready

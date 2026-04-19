@@ -135,6 +135,9 @@ discussion around:
 - trust-boundary impact
 - workflow maturity that would exist after the change
 - operator surface, access path, and visibility model
+- blocker and impediment handling, including whether the workflow records
+  `remove`, `workaround`, `accept-risk`, or `defer` decisions with
+  justification
 - rollout and rollback shape
 
 Only start implementation after that discussion narrows the target design.
@@ -187,6 +190,11 @@ Only start implementation after that discussion narrows the target design.
 - If a restart is likely while meaningful workspace-level pending items remain,
   create or update the latest `workspace-governance/docs/archive/session-handoff-*.md`
   record before closing the session.
+- Before telling the operator that a restart is safe or recommended, run an
+  explicit restart-readiness check.
+- If meaningful workspace-level local-only state remains, refresh the current
+  handoff first and only then recommend the restart.
+- Do not wait for the operator to ask whether a handoff should be written.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/contracts/repos.yaml`
   - `workspace-governance/contracts/intake-register.yaml` when the entrant is
