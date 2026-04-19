@@ -177,6 +177,8 @@ operator interaction layer, not just a UI skin.
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration
   - [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
+- OpenClaw runtime composition and packaging
+  - [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
 - OpenClaw governed release path
   - [platform-engineering/products/openclaw/README.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/README.md)
 - OpenProject runtime or backlog model

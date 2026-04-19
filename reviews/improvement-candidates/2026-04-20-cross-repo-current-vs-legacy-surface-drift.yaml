@@ -1,0 +1,90 @@
+schema_version: 1
+id: 2026-04-20-cross-repo-current-vs-legacy-surface-drift
+title: Active operator surfaces drifted from current ownership and legacy boundaries across repos
+recorded_on: '2026-04-20'
+owner_repo: workspace-governance
+summary: >-
+  Multiple owner repos exposed the same failure pattern: current operator
+  paths, packaged component seams, live-state docs, and legacy fallback
+  material were not separated strongly enough, so operators could still infer
+  the wrong owner, the wrong runtime truth, or the wrong recovery path while
+  browsing ostensibly current documentation.
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-host-bridge
+    - openclaw-telegram-enhanced
+    - openclaw-runtime-distribution
+    - security-architecture
+  related_products:
+    - openclaw
+  related_components:
+    - operator-orchestration-service
+    - host-control-plugin
+  change_classes:
+    - architecture-shaping
+    - platform-contract
+    - runtime-composition
+signals:
+  - id: repeated-cross-repo-operator-surface-drift
+    title: User reported broader inconsistency beyond the initial stage bridge miss
+    trigger: repeated-operator-friction
+    failure_classes:
+      - contract-drift
+      - owner-boundary-miss
+      - workflow-doctrine-gap
+    finding: >-
+      After the stage bridge recovery path was hardened, the user called out
+      that there were "ALOT MORE INCONSISTENCY BEYOND JUST THIS ONE ISSUE" and
+      asked for a repo-by-repo sweep starting from platform. The early sweep
+      already confirmed the same class in multiple places: platform docs mixed
+      target architecture with observed live state, host-bridge exposed legacy
+      tmux paths too close to the current operator surface, and Telegram docs
+      described a packaged component seam like a sibling owner repo.
+    source_refs:
+      - 'conversation:2026-04-20-user-said-there-are-a-lot-more-inconsistency-beyond-just-this-one-issue'
+      - 'conversation:2026-04-20-user-said-legacy-files-should-be-separated-from-current-deployment'
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: validator
+      path: platform-engineering/scripts/validate_operational_docs.py
+      owner_repo: platform-engineering
+      note: Platform docs now distinguish target architecture, declared desired posture, and observed live state, and validation enforces that split.
+    - type: doc
+      path: openclaw-host-bridge/scripts/legacy/README.md
+      owner_repo: openclaw-host-bridge
+      note: Legacy bridge launchers are isolated under a dedicated legacy surface instead of appearing alongside the supported systemd path.
+    - type: validator
+      path: openclaw-telegram-enhanced/scripts/validate_repo_docs.py
+      owner_repo: openclaw-telegram-enhanced
+      note: Telegram repo docs now fail if sibling-owner mapping or required operator-command ownership markers drift.
+    - type: validator
+      path: openclaw-runtime-distribution/scripts/validate_repo_docs.py
+      owner_repo: openclaw-runtime-distribution
+      note: Runtime-distribution now fails if packaged-seam doctrine, build-lane ownership, or plugin-boundary notes drift.
+    - type: validator
+      path: security-architecture/scripts/validate_repo_structure.py
+      owner_repo: security-architecture
+      note: Security architecture validation now enforces design-versus-evidence doctrine markers and requires platform/component coverage for operator-orchestration-service.
+    - type: validator
+      path: workspace-governance/scripts/validate_cross_repo_truth.py
+      owner_repo: workspace-governance
+      note: Workspace cross-repo truth now fails if security-architecture drops coverage for active security-owned components.
+    - type: validator
+      path: operator-orchestration-service/scripts/validate_governance_docs.py
+      owner_repo: operator-orchestration-service
+      note: Broker governance docs now fail on stale proposed-review guidance and on git-tracked change records that use local filesystem markdown links.
+  note: The active owner-repo sweep is now complete, but the broader
+    cross-repo closure shape still needs an after-action or explicit direct
+    closure decision.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-24'
+  note: Decide which residual drift classes now warrant workspace-level
+    validators versus repo-local validators, then publish a formal after-action
+    or close this candidate through the landed controls once that closure shape
+    is explicit.

@@ -1,0 +1,72 @@
+schema_version: 1
+id: 2026-04-19-stage-bridge-bootstrap-path-gap
+title: Stage bridge recovery depended on under-read script bootstrap behavior
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The stage bridge outage was diagnosed quickly, but the first recovery
+  attempts still used the wrong execution path because the primary operator
+  script stalled on interactive `sudo`, the host-recovery service still points
+  at the legacy tmux restart path, and the non-interactive Windows-to-WSL root
+  bootstrap behavior lived in scripts that were not surfaced clearly enough in
+  the primary recovery workflow.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-host-bridge
+    - openclaw-telegram-enhanced
+  related_products:
+    - openclaw
+  related_components: []
+  change_classes:
+    - platform-contract
+signals:
+  - id: stage-bridge-bootstrap-path-under-read
+    title: Correct root-bootstrap recovery path was discovered only after wrong recovery attempts
+    trigger: shell-or-tooling-reliability-miss
+    failure_classes:
+      - unsafe-assumption
+      - shell-reliability-miss
+      - workflow-doctrine-gap
+    finding: The live Telegram host-control failure was correctly traced to the
+      stage bridge being down, but the first recovery pass assumed the supported
+      `set_stage_environment_state.py` path was the only real start path. When
+      that script stalled on interactive `sudo`, the next step drifted into the
+      legacy tmux fallback from `openclaw-host-bridge` instead of immediately
+      checking the actual bootstrap scripts. The real non-interactive path was
+      already present in the Windows bootstrap script through `powershell.exe`
+      plus `wsl.exe -u root`, and the stage bridge could be restored cleanly
+      once that script behavior was inspected directly.
+    source_refs:
+      - 'conversation:2026-04-19-stage-bridge-recovery-first-stalled-on-sudo-then-wrongly-used-tmux'
+      - 'conversation:2026-04-19-user-called-out-that-the-scripts-themselves-needed-inspection'
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: script
+      path: platform-engineering/products/openclaw/scripts/set_stage_environment_state.py
+      owner_repo: platform-engineering
+      note: Stage lifecycle control now prefers the supported Windows-to-WSL root bootstrap path before interactive sudo.
+    - type: validator
+      path: platform-engineering/scripts/validate_operational_docs.py
+      owner_repo: platform-engineering
+      note: Platform operational-doc validation now fails if WSL bootstrap docs or defaults drift back to the legacy tmux stack path.
+    - type: script
+      path: openclaw-host-bridge/scripts/openclaw-host-recovery-server.mjs
+      owner_repo: openclaw-host-bridge
+      note: Host recovery now fails closed when one token matches multiple bridge profiles and the caller omits an explicit target.
+    - type: doc
+      path: openclaw-host-bridge/scripts/legacy/README.md
+      owner_repo: openclaw-host-bridge
+      note: Legacy tmux launchers are now isolated under a dedicated legacy surface so operators browsing the current deployment path do not confuse them with supported runtime controls.
+    - type: script
+      path: openclaw-telegram-enhanced/src/bot-message-dispatch.host-control.ts
+      owner_repo: openclaw-telegram-enhanced
+      note: Telegram host-control recovery requests now carry explicit target profile and bridge url data into the hardened host-recovery selector.
+  note: Closed by direct durable controls across the platform, bridge, and Telegram owner repos.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

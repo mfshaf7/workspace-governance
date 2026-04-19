@@ -1,0 +1,67 @@
+schema_version: 1
+id: 2026-04-19-workspace-root-owner-map-coverage-gap
+title: Workspace-root owner docs could omit an active repo without failing validation
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: The active repo contracts and architecture snapshot already declared
+  `operator-orchestration-service` as active, but the workspace-root
+  `README.md` and `AGENTS.md` omitted it from the primary owner-routing
+  surfaces, and `workspace-root/ARCHITECTURE.md` also lacked an explicit
+  `openclaw-runtime-distribution` entry in one bootstrap section. Green
+  validation still passed because no validator compared the canonical
+  workspace-root sections against the active repo inventory.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - openclaw-runtime-distribution
+    - operator-orchestration-service
+  related_products: []
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: workspace-root-active-repo-coverage-missing
+    title: Workspace-root owner surfaces drifted from the active repo contracts
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - contract-drift
+      - workflow-doctrine-gap
+    finding: The root bootstrap docs that operators and fresh sessions read
+      first were missing an active repo from the owner map, routing rules, and
+      start-here summary even though the contract inventory and architecture
+      snapshot already knew that repo was active. The omission was discovered
+      by manual review after green checks, which means the control plane lacked
+      deterministic validation for workspace-root coverage completeness.
+    source_refs:
+      - conversation:2026-04-19-green-checks-missed-workspace-root-owner-map-gap
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: doc
+      path: workspace-governance/workspace-root/AGENTS.md
+      owner_repo: workspace-governance
+      note: Restores operator-orchestration-service to the root owner map and routing rules.
+    - type: doc
+      path: workspace-governance/workspace-root/README.md
+      owner_repo: workspace-governance
+      note: Restores the active repo role summary and start-here link for operator-orchestration-service.
+    - type: doc
+      path: workspace-governance/workspace-root/ARCHITECTURE.md
+      owner_repo: workspace-governance
+      note: Restores explicit active repo coverage in the bootstrap read-next section for openclaw-runtime-distribution.
+    - type: validator
+      path: workspace-governance/scripts/validate_cross_repo_truth.py
+      owner_repo: workspace-governance
+      note: Enforces active repo coverage across canonical workspace-root bootstrap sections.
+    - type: doc
+      path: workspace-governance/scripts/README.md
+      owner_repo: workspace-governance
+      note: Documents the new workspace-root coverage check in the validator inventory.
+  note: Closed by restoring the missing root owner-routing coverage and adding a deterministic validator that fails when an active repo drops out of the canonical workspace-root bootstrap sections.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

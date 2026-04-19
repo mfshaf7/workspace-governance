@@ -88,6 +88,12 @@ That means:
   - read first:
     - `security-architecture/AGENTS.md`
     - `security-architecture/README.md`
+- `operator-orchestration-service/`
+  - owns shared operator workflow APIs, broker-backed workflow orchestration,
+    bounded AI-assist workflow orchestration, and OpenProject workflow adapters
+  - read first:
+    - `operator-orchestration-service/AGENTS.md`
+    - `operator-orchestration-service/README.md`
 - `openclaw-isolated-deployment/`
   - retired archival stub
   - do not route active work here unless the retirement decision is explicitly
@@ -100,10 +106,11 @@ Before editing, classify the task into one of these buckets:
 1. workspace governance or cross-repo owner-boundary issue
 2. platform contract, GitOps, shared component, or promotion-flow issue
 3. product integration or runtime composition issue
-4. Telegram behavior issue
-5. host enforcement or WSL/Windows bridge issue
-6. security or trust-boundary judgment
-7. live environment drift under `~/.openclaw`, a running pod, or the host
+4. shared operator workflow service, broker, or OpenProject workflow adapter issue
+5. Telegram behavior issue
+6. host enforcement or WSL/Windows bridge issue
+7. security or trust-boundary judgment
+8. live environment drift under `~/.openclaw`, a running pod, or the host
 
 That classification determines the owner.
 
@@ -149,6 +156,9 @@ Only start implementation after that discussion narrows the target design.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.
+- Shared operator workflow APIs, broker-backed workflow orchestration, bounded
+  AI-assist workflow orchestration, and OpenProject workflow adapters belong in
+  `operator-orchestration-service/`.
 - OpenClaw runtime packaging and the active packaged
   `host-control-openclaw-plugin` belong in `openclaw-runtime-distribution/`.
 - Telegram routing, buttons, media delivery, approvals, and Telegram-only UX
