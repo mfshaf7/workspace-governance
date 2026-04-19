@@ -37,6 +37,10 @@ Make these explicit before implementation:
 - workflow maturity after the change
 - request surface, adapter boundary, and core model boundary
 - operator surface and visibility model
+- blocker and impediment handling model, including whether the workflow must
+  explicitly support `remove`, `workaround`, `accept-risk`, and `defer`
+- whether blocker decisions require recorded justification, follow-up owner,
+  and review date when the blocker is not removed immediately
 - whether a `dev-integration` profile or admission change is needed
 - rollout and rollback shape
 

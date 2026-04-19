@@ -121,6 +121,11 @@ Route those changes back to the owner repos.
 - If a session is likely to restart while meaningful workspace-level pending
   items remain, create or update a handoff record under
   `docs/archive/session-handoff-*.md` before closing.
+- Before telling the operator that a restart is safe or recommended, run an
+  explicit restart-readiness check.
+- If meaningful workspace-level local-only state remains, refresh the current
+  handoff first and only then recommend the restart.
+- Do not wait for the operator to ask whether a handoff should be written.
 - This is required especially when:
   - the user is being told to restart so new skills or instructions will load
   - cross-repo architecture or workflow discussion remains intentionally

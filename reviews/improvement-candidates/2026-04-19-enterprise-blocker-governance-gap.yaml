@@ -1,0 +1,62 @@
+schema_version: 1
+id: 2026-04-19-enterprise-blocker-governance-gap
+title: Enterprise workflow design should surface blocker handling and justification
+  up front
+recorded_on: '2026-04-19'
+owner_repo: workspace-governance
+summary: When designing enterprise-grade delivery workflows, Codex should explicitly
+  surface blocker and impediment governance early, including whether to remove the
+  blocker, use a workaround, accept risk, or defer, with justification required for
+  the chosen path.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: signal-1
+  title: PM2 and ART design discussion omitted blocker-governance expectations until
+    the operator asked
+  trigger: late-architecture-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: "The PM\xB2 plus one-ART design discussion covered intake, execution structure,\
+    \ and governance phases, but it did not proactively include blocker or impediment\
+    \ handling rules. The operator had to call out that blockers require discussion,\
+    \ choice of removal versus workaround, and mandatory justification."
+  source_refs:
+  - conversation:2026-04-19-blocker-justification-omitted-in-enterprise-design
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-enterprise-blocker-governance-at-design-time.yaml
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/architecture-discussion-gate/SKILL.md
+    owner_repo: workspace-governance
+    note: Architecture discussions now require blocker and impediment handling plus justification expectations before implementation.
+  - type: skill
+    path: workspace-governance/skills-src/operator-workflow-design/SKILL.md
+    owner_repo: workspace-governance
+    note: Operator workflow design now requires explicit blocker handling, decision path, and justification for enterprise workflows.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace routing doctrine now includes blocker and impediment handling in architecture discussion outputs.
+  - type: doc
+    path: platform-engineering/docs/decisions/adr/ADR-013-openproject-proposal-to-delivery-split-and-one-art-model.md
+    owner_repo: platform-engineering
+    note: ADR now states that blocker handling and justification are part of the PM² plus one-ART enterprise model.
+  - type: doc
+    path: platform-engineering/products/openproject/delivery-art-contract.md
+    owner_repo: platform-engineering
+    note: Delivery ART contract now defines blocker or impediment governance and required justification when blocked work is not removed immediately.
+  note: Closed by skill updates, workspace doctrine, and PM² plus ART design-document updates.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
