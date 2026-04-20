@@ -1,0 +1,67 @@
+schema_version: 1
+id: 2026-04-20-devint-to-live-escalation-discipline-gap
+title: Accepted-idea delivery moved into shared-runtime debugging before the live-boundary problem was classified correctly
+recorded_on: '2026-04-20'
+owner_repo: workspace-governance
+summary: >-
+  The accepted-idea-delivery workflow did use its admitted local
+  dev-integration profile first, but once the first live shared-runtime miss
+  appeared, the investigation stayed inside the governed shared runtime and
+  kept landing narrow broker fixes before the failure class was reframed as a
+  broader OpenProject boundary/read-retry problem. The workspace needs a
+  stronger rule for when a profile-owned workflow must return to the
+  disposable lane, and a clearer distinction between local workflow proof and
+  live boundary proof.
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+    - platform-engineering
+    - security-architecture
+  related_products:
+    - openproject
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - platform-contract
+    - runtime-composition
+signals:
+  - id: accepted-idea-delivery-devint-escalation-miss
+    title: Stage/shared-runtime debugging continued after the first live miss instead of re-grounding on the dev-integration lane
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+      - unsafe-assumption
+    finding: >-
+      The active accepted-idea-delivery profile already existed specifically to
+      prove the proposal-to-delivery workflow in disposable local k3s before
+      any governed stage/shared-runtime rehearsal. That local proof was done,
+      but after the first live consume miss the remaining failures were treated
+      like workflow-step bugs inside the shared runtime rather than being
+      reclassified as a broader live OpenProject boundary problem. This led to
+      repeated trial-and-error against the live shared runtime, even though the
+      profile doctrine explicitly says it exists to avoid using the governed
+      lane to discover project-model, identity-scope, or backlink mistakes.
+    source_refs:
+      - 'conversation:2026-04-20-user-asked-why-dev-integration-was-not-used-to-avoid-stage-trial-and-error'
+      - 'conversation:2026-04-20-accepted-idea-delivery-live-rehearsal-required-multiple-broker-hardening-repins'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Candidate only. The durable closure shape still needs a decision on whether
+    to strengthen dev-integration-to-stage escalation rules in workspace
+    governance, expand the accepted-idea-delivery profile to model the
+    OpenProject boundary more faithfully, or classify some failures as
+    platform/OpenProject boundary issues immediately after the first live miss.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-24'
+  note: >-
+    Decide the closure shape for profile-owned workflow escalation: when a live
+    miss must move back into dev-integration, what evidence promotes a lane
+    from local workflow proof to live boundary proof, and when the remaining
+    miss should be routed to platform/OpenProject boundary investigation
+    instead of more workflow-specific fixes.
