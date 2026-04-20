@@ -117,10 +117,12 @@ Primary operator-facing surfaces that already exist:
 Current real shape:
 
 - shared operator workflow service
-- initial workflow is broker-backed idea capture and bounded read/list/show
+- active workflows are broker-backed idea capture plus the internal accepted
+  proposal handoff into the OpenProject delivery ART plane
 - Telegram `/idea` is a thin adapter to this broker
 - OpenProject is the canonical backlog system for captured ideas and proposals
-- the first active `dev-integration` profile is `idea-workflow`
+- active `dev-integration` profiles are `idea-workflow` and
+  `accepted-idea-delivery`
 
 Current non-goals:
 

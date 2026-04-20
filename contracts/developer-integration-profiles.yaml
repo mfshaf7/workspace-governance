@@ -1,9 +1,9 @@
 schema_version: 1
 profiles:
   accepted-idea-delivery:
-    lifecycle: proposed
+    lifecycle: active
     owner_repo: operator-orchestration-service
-    summary: Local-k3s dev-integration profile reserved for consuming accepted ideas into the separate OpenProject delivery ART project.
+    summary: Local-k3s dev-integration profile for consuming accepted ideas into the separate OpenProject delivery ART project.
     purpose: Fast local rehearsal of accepted-idea consumption into a PM²-governed, one-ART OpenProject delivery model before any governed stage path exists for it.
     profile_path: dev-integration/profiles/accepted-idea-delivery/profile.yaml
     runtime_owner: platform-engineering
@@ -13,6 +13,16 @@ profiles:
     request_record:
       system: doc
       ref: repo://platform-engineering/docs/decisions/adr/ADR-013-openproject-proposal-to-delivery-split-and-one-art-model.md
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-04-20"
+      platform_acceptance_ref: repo://platform-engineering/docs/records/change-records/2026-04-20-accepted-idea-delivery-dev-integration-admission.md
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/platform/2026-04-18-dev-integration-local-k3s-lane.md
+        - repo: security-architecture
+          path: docs/reviews/components/2026-04-20-operator-orchestration-service-dev-integration-accepted-idea-delivery.md
     shared_dependencies:
       - platform-engineering
     source_repos:
