@@ -55,6 +55,14 @@ failure_classes:
       - skill
       - script
       - doc
+  diagnostic-ordering-miss:
+    description: Troubleshooting skipped simpler prerequisite or live-truth checks and expanded into deeper analysis, workaround exploration, or redesign too early.
+    recommended_control_types:
+      - skill
+      - workflow
+      - runbook
+      - validator
+      - doc
   workflow-doctrine-gap:
     description: The documented workflow model was missing a real enterprise control or completion rule.
     recommended_control_types:

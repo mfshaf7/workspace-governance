@@ -39,6 +39,19 @@ owning repo must publish one primary operator instruction surface. Supporting
 contracts, templates, or standards may back that workflow, but they are not a
 substitute for a clear step-by-step operator path.
 
+Troubleshooting doctrine is explicit too. Serious failure diagnosis should use
+one supported order of operations instead of improvising from symptoms:
+
+- preflight
+- live truth
+- contract truth
+- code truth
+- workaround gate
+
+Primary operator surface:
+
+- [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
+
 The self-improvement model is explicit too. It is no longer only:
 
 - after-action record
@@ -53,6 +66,11 @@ It is now:
 If a user explicitly calls out a repeated mistake, that should create or update
 an improvement candidate immediately rather than waiting for a later
 retrospective.
+
+The same applies when a simpler root cause is discovered only after deeper
+debugging expanded. That is not just a debugging anecdote. It is a governed
+self-improvement signal that should route through the improvement-candidate and
+after-action layers.
 
 Workspace-level Codex GitHub review and the read-only daily control-plane
 summary now also have one primary operator instruction surface:
@@ -209,6 +227,7 @@ python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_cont
 - [workspace-root/ARCHITECTURE.md](workspace-root/ARCHITECTURE.md)
 - [contracts/README.md](contracts/README.md)
 - [contracts/skills.yaml](contracts/skills.yaml)
+- [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
 - [reviews/improvement-candidates/README.md](reviews/improvement-candidates/README.md)
 - [reviews/after-action/README.md](reviews/after-action/README.md)
 - [workspace-root/README.md](workspace-root/README.md)

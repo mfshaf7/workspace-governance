@@ -1,0 +1,69 @@
+schema_version: 1
+id: 2026-04-21-broker-openproject-root-cause-preflight-gap
+title: Broker/OpenProject mutation debugging lacked a mandatory root-cause preflight
+recorded_on: '2026-04-21'
+owner_repo: workspace-governance
+summary: A live broker create-path failure spent too long in workaround and
+  adapter analysis because the debugging flow did not force an early check of
+  the automation identity's actual project roles, assignable-principal scope,
+  and form writability in the target OpenProject lane. The real blocker was the
+  missing `Work package structure editor` role in the devint lane, but that was
+  discovered late, after unnecessary workaround exploration had already
+  happened.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+    - platform-engineering
+  related_products:
+    - openproject
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - platform-contract
+signals:
+  - id: late-role-truth-discovery-during-broker-create-repair
+    title: Missing delivery role was discovered only after workaround analysis expanded
+    trigger: late-root-cause-discovery
+    failure_classes:
+      - diagnostic-ordering-miss
+      - unsafe-assumption
+      - workflow-doctrine-gap
+    finding: >-
+      The live broker create failure was investigated first as an API behavior
+      and adapter-shape problem. That allowed unnecessary workaround analysis
+      to expand before anyone forced the simpler root-cause check: whether the
+      automation identity in the active lane actually had the reviewed role
+      set and assignable-principal scope. The real blocker was a missing `Work
+      package structure editor` role in the accepted-idea-delivery lane.
+    source_refs:
+      - 'conversation: user said a serious mistake wasted time because the role assignment was not checked properly'
+      - 'conversation: user said unnecessary dumb workaround work likely happened because the proper role was not there'
+      - 'art: task #62 reopened after live revalidation showed create was not durably proven'
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-21-workspace-troubleshooting-preflight-and-late-root-cause-escalation.yaml
+  control_refs:
+    - type: doc
+      path: workspace-governance/docs/troubleshooting-preflight.md
+      owner_repo: workspace-governance
+      note: Adds the workspace-wide troubleshooting doctrine.
+    - type: skill
+      path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+      owner_repo: workspace-governance
+      note: Adds the troubleshooting-preflight skill for future sessions.
+    - type: contract
+      path: workspace-governance/contracts/failure-taxonomy.yaml
+      owner_repo: workspace-governance
+      note: Adds the diagnostic-ordering-miss failure class.
+    - type: contract
+      path: workspace-governance/contracts/improvement-triggers.yaml
+      owner_repo: workspace-governance
+      note: Adds the late-root-cause-discovery trigger.
+  note: Closed through the broader workspace troubleshooting doctrine and after-action, not just a broker-specific patch.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

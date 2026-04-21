@@ -118,6 +118,19 @@ or completion gap, that should create or update an improvement candidate first.
 Only then should the system decide whether the lesson needs a full after-action
 review.
 
+Troubleshooting doctrine is explicit too. Serious failure diagnosis should use
+one supported order of operations:
+
+- preflight
+- live truth
+- contract truth
+- code truth
+- workaround gate
+
+Primary operator surface:
+
+- [/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md)
+
 This also applies when the operator calls the work half-baked or says the miss
 should have been caught already. Those are mandatory self-improvement signals,
 not optional tone. If active work becomes half-finished at the planning,
@@ -125,6 +138,10 @@ control, or completion layer, the system should record or update the candidate
 before continuing normal execution. If a previously closed lesson regresses,
 the new candidate should explicitly link back to the earlier closed candidate or
 after-action instead of treating the miss as brand-new.
+
+If a simpler root cause is discovered only after deeper debugging expanded, that
+is also a governed self-improvement signal. It should not stay an anecdote
+about a slow debugging session.
 
 The skill layer is governed too. Updating skill source is not enough by itself.
 If the registered skill inventory or workspace-owned skill source changes, the
@@ -202,6 +219,7 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
+- Troubleshooting doctrine: [workspace-governance/docs/troubleshooting-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md)
 - Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
 - Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
 - Dev-integration request and usage: [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)

@@ -328,6 +328,11 @@
       "scope": "workspace",
       "source_path": "skills-src/self-improvement-review"
     },
+    "troubleshooting-preflight": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/troubleshooting-preflight"
+    },
     "workspace-change-router": {
       "owner_repo": "workspace-governance",
       "scope": "workspace",

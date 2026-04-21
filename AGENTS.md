@@ -10,6 +10,7 @@ delivery repo.
 
 - `README.md`
 - `docs/codex-github-review-and-automation.md`
+- `docs/troubleshooting-preflight.md`
 - `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
@@ -93,6 +94,9 @@ Route those changes back to the owner repos.
   command family, request path, approval path, or other day-to-day operator
   procedure, the work is not complete until one primary operator instruction
   surface exists in the owning repo.
+- If a serious failure or unexpected runtime behavior is being diagnosed, use
+  `docs/troubleshooting-preflight.md` before deeper workaround analysis,
+  redesign proposals, or code-level blame.
 - Contracts, templates, standards, and policy docs may support that workflow,
   but they do not replace the primary operator instruction surface.
 - If the operator has to reconstruct the procedure from scattered policy,
@@ -152,6 +156,9 @@ Route those changes back to the owner repos.
 - If active work becomes half-finished at the planning, control, or completion
   layer, record or update the improvement candidate before continuing normal
   execution.
+- If a simpler root cause is discovered late because earlier troubleshooting
+  layers were skipped, treat that as a mandatory self-improvement signal and
+  route it through the improvement-candidate layer.
 - If a lesson that was already treated as closed regresses in active work,
   record the new candidate as a regression and link it to the earlier closed
   candidate or after-action. Do not treat it as an unrelated new miss.
