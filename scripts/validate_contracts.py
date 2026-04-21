@@ -163,9 +163,10 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must be unique"
             )
-        if set(payload["actions"]) != expected_devint_actions:
+        missing_actions = sorted(expected_devint_actions - set(payload["actions"]))
+        if missing_actions:
             errors.append(
-                f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
+                f"contracts/developer-integration-profiles.yaml: {profile_name} actions must include required_actions; missing {', '.join(missing_actions)}"
             )
         if profile_lifecycle["request_record_required"]:
             request_record = payload.get("request_record") or {}

@@ -1,0 +1,66 @@
+schema_version: 1
+id: 2026-04-20-devint-persistence-gap-for-long-running-projects
+title: Separate disposable dev-integration smoke lanes from persistent project-backed execution lanes
+recorded_on: 2026-04-20
+owner_repo: workspace-governance
+summary: The current OpenProject-backed dev-integration profile is intentionally disposable, but it is now also being used as the working delivery lane for a serious long-running project. That mismatch forces destructive rebuilds or risky operator assumptions about data durability.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+  related_products:
+    - openproject
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - architecture-shaping
+    - platform-contract
+signals:
+  - id: signal-devint-disposable-vs-project-work
+    title: Serious project data was rebuilt after using a disposable profile reset path
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - unsafe-assumption
+    finding: The active accepted-idea-delivery profile disables persistence for OpenProject and PostgreSQL, and its destructive lifecycle actions delete the namespace and local state. That was acceptable for short-lived rehearsal, but it becomes operator-hostile once the lane is used as the active execution surface for a large project with accumulating work-package history.
+    source_refs:
+      - conversation:2026-04-20-devint-openproject-persistence-question
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: contract
+      owner_repo: workspace-governance
+      path: workspace-governance/contracts/developer-integration-policy.yaml
+      note: Adds the explicit runtime state-model contract for dev-integration profiles.
+    - type: template
+      owner_repo: workspace-governance
+      path: workspace-governance/templates/dev-integration-profile/README.md
+      note: Makes persistent-versus-disposable profile modeling part of the standard scaffold.
+    - type: doc
+      owner_repo: platform-engineering
+      path: platform-engineering/docs/standards/dev-integration-lane.md
+      note: Documents persistent project-backed dev-integration as a supported lane model instead of assuming all profiles are disposable.
+    - type: runbook
+      owner_repo: platform-engineering
+      path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+      note: Defines the operator semantics for persistent down/up versus destructive reset.
+    - type: contract
+      owner_repo: operator-orchestration-service
+      path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/profile.yaml
+      note: Declares accepted-idea-delivery as a persistent dev-integration profile.
+    - type: script
+      owner_repo: operator-orchestration-service
+      path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+      note: Enables PVC-backed OpenProject and PostgreSQL state for the serious-project lane.
+    - type: script
+      owner_repo: operator-orchestration-service
+      path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/down.sh
+      note: Turns devint-down into suspend semantics for the persistent accepted-idea-delivery lane.
+  note: Persistent dev-integration state is now a documented lane model, accepted-idea-delivery is declared persistent with PVC-backed OpenProject/PostgreSQL state, and a live down/up rehearsal proved the serious project records survived without rebuild.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

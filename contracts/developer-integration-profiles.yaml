@@ -39,6 +39,7 @@ profiles:
     actions:
       - up
       - status
+      - access
       - smoke
       - down
       - reset
@@ -86,6 +87,7 @@ profiles:
     actions:
       - up
       - status
+      - access
       - smoke
       - down
       - reset

@@ -35,12 +35,23 @@ request_admission:
     - owner-profile-file-exists
     - platform-acceptance-ref
     - security-review-ref-when-required
+  persistent_request_requirements:
+    - runtime.state_model
+    - persistence.justification
+    - persistence.retained_data_scope
+    - persistence.suspend_resume_semantics
+    - persistence.storage_size_or_class
+    - persistence.reset_semantics
+    - persistence.cutover_plan_when_upgrading
 source_state:
   allow_dirty_worktrees: true
   allow_local_only_commits: true
   allow_branch_inputs: true
   allow_worktree_path_overrides: true
   session_manifest_required: true
+runtime_state_models:
+  - disposable
+  - persistent
 trigger_guidance:
   required:
     - new-operator-workflow

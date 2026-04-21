@@ -18,6 +18,15 @@ Only `active` profiles are launchable from the shared runner.
 The profile file must be owned by the repo that owns the concrete workflow,
 not by `workspace-governance/`.
 
+Each profile must declare `runtime.state_model` as either:
+
+- `disposable`
+- `persistent`
+
+Use `persistent` only when the local lane is expected to hold a long-running
+project tree whose data should survive normal `devint-down` / `devint-up`
+cycles. `devint-reset` remains the destructive wipe path.
+
 Profile-owned docs should include, at minimum:
 
 - `## Smoke Scope`
@@ -70,6 +79,12 @@ Required command ids:
 - `down`
 - `reset`
 - `promote_check`
+
+Optional command ids:
+
+- `access`
+  - use when the profile exposes a primary inspection surface such as a local
+    OpenProject UI port-forward that an operator is expected to keep open
 
 The shared lane standard lives in:
 
