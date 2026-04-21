@@ -20,8 +20,12 @@ Use this skill when a serious initiative is already running inside
 ## Workflow
 
 1. Start from the ART, not from chat memory.
-   - open the active initiative summary first
-   - run the ART-quality check before treating the ART as the current queue
+   - if the active `Epic` is already known, start with its fast active-front
+     read and a scoped ART-quality check for that `Epic`
+   - use the deep execution read only when the full evidence-grade tree is
+     actually needed
+   - use the portfolio initiative summary only when the active `Epic` is not
+     yet known or when PI/portfolio replanning is happening
    - identify the committed front, stretch work, PI objective state, and ART
      risk state before reading repo code
 2. Keep the truth split explicit:
