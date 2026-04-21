@@ -158,6 +158,14 @@ The self-improvement model now has three layers:
 - improvement candidates for fast triage
 - after-action reviews for durable closure
 
+That model is now regression-aware too:
+
+- if a closed lesson regresses, the new candidate should explicitly link back
+  to the earlier closed candidate or after-action with `regression_of`
+- use trigger `closed-lesson-regression` for that record
+- treat that as evidence that the earlier closure controls were too weak or too
+  narrow, not as a vague unrelated new issue
+
 Machine-visible signals are enforced through:
 
 - repo-rule declared operator workflow surfaces

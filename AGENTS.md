@@ -145,7 +145,16 @@ Route those changes back to the owner repos.
   `reviews/improvement-candidates/` as soon as the signal is real.
 - If the user explicitly says something is a repeated mistake, that is a
   mandatory candidate signal.
+- If the user calls the work half-baked, incomplete, or says the miss should
+  have been caught already, treat that as the same class of mandatory
+  self-improvement signal.
 - Improvement candidate capture should be automatic once the signal is real.
+- If active work becomes half-finished at the planning, control, or completion
+  layer, record or update the improvement candidate before continuing normal
+  execution.
+- If a lesson that was already treated as closed regresses in active work,
+  record the new candidate as a regression and link it to the earlier closed
+  candidate or after-action. Do not treat it as an unrelated new miss.
 - Do not automatically implement the durable fix just because the candidate
   exists.
 - After recording the candidate, propose the best fix shape, justify why that

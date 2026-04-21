@@ -51,3 +51,12 @@ triggers:
       - skill
       - script
       - doc
+  closed-lesson-regression:
+    description: A failure class that had already been treated as closed regressed in active work and now needs an explicit regression record plus stronger controls.
+    requires_after_action: true
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc

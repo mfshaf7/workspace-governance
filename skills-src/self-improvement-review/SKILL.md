@@ -24,22 +24,33 @@ evidence, host drift detection, testing seams, or operator reliability.
 3. Choose the trigger that explains the signal.
 4. Record or update an improvement candidate immediately when:
    - the user explicitly says this is a repeated mistake
+   - the user calls the work half-baked, incomplete, sloppy, or says a miss
+     should have been caught already
    - the same workflow needs a corrective follow-up in the same task
+   - an active work transition is left incomplete, such as closing one
+     feature/task/phase without explicitly recording the next committed
+     work-state
    - a machine-visible audit flags a doctrine or completion miss
    - the control-plane summary or review-control validator flags repeated drift
    - an active `dev-integration` profile's stage-handoff contract, README, or
      promote-check expectations lag behind the landed workflow surface
-5. Propose the best fix shape for the candidate, justify why that fix is the
+5. If the miss regresses a lesson that was already treated as closed:
+   - record it as a regression candidate, not as a vague new issue
+   - set `regression_of` to the earlier closed candidate or after-action
+   - use trigger `closed-lesson-regression`
+   - treat this as evidence that the earlier closure controls were too weak or
+     too narrow
+6. Propose the best fix shape for the candidate, justify why that fix is the
    best option, and get operator approval before landing the durable control.
-6. Decide whether the lesson is:
+7. Decide whether the lesson is:
    - still only a candidate that needs triage, or
    - strong enough for a full after-action review now
-7. If a full after-action is required, choose the trigger that explains why.
-8. Decide whether the lesson is:
+8. If a full after-action is required, choose the trigger that explains why.
+9. Decide whether the lesson is:
    - closed by durable controls already added, or
    - still open with a real owner and due date
-9. Record the review under `reviews/after-action/` when warranted.
-10. Validate both the candidate layer and learning closure:
+10. Record the review under `reviews/after-action/` when warranted.
+11. Validate both the candidate layer and learning closure:
 
 ```bash
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
@@ -53,6 +64,11 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
   candidate.
 - If the user explicitly calls out a repeated mistake, open or update a
   candidate even if the final after-action shape is not ready yet.
+- If active work becomes half-finished at the planning, control, or completion
+  layer, do not continue normally. Record the candidate first and surface the
+  miss.
+- If a supposedly closed lesson regresses, do not represent it as a brand-new
+  unrelated miss. Link the regression explicitly.
 - Do not make the operator invent the fix from scratch when the likely control
   improvement is clear. Propose the best fix yourself and explain the
   reasoning.

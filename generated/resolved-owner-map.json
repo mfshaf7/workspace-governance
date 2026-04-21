@@ -313,6 +313,11 @@
       "scope": "workspace",
       "source_path": "skills-src/operator-workflow-design"
     },
+    "project-delivery-operator": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/project-delivery-operator"
+    },
     "security-governance-review": {
       "owner_repo": "security-architecture",
       "scope": "repo",

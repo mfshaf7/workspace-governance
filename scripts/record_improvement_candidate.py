@@ -29,6 +29,10 @@ def main() -> int:
     parser.add_argument("--title", required=True, help="candidate title")
     parser.add_argument("--owner-repo", required=True, help="active repo that owns the candidate")
     parser.add_argument("--summary", required=True, help="short summary of the candidate")
+    parser.add_argument(
+        "--regression-of",
+        help="workspace-relative path to the earlier closed candidate or after-action if this record is a regression",
+    )
     parser.add_argument("--status", choices=("new", "triaged", "accepted", "dismissed", "closed"), default="new")
     parser.add_argument(
         "--source-type",
@@ -108,6 +112,7 @@ def main() -> int:
         "recorded_on": date.today().isoformat(),
         "owner_repo": args.owner_repo,
         "summary": args.summary,
+        "regression_of": args.regression_of,
         "status": args.status,
         "source_type": args.source_type,
         "scope": {
