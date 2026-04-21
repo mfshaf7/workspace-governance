@@ -61,6 +61,45 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+  delta_review_triggers:
+    - id: broker-runtime-and-caller-surface
+      summary: Broker runtime, auth, secret-delivery, or dev-integration profile changes that alter the shared workflow service boundary.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      path_globs:
+        - src/config.js
+        - src/runtime.js
+        - src/server.js
+        - src/app.js
+        - src/audit.js
+        - dev-integration/profiles/**
+        - Dockerfile
+      review_subjects:
+        - inventory_section: repos
+          name: operator-orchestration-service
+    - id: openproject-delivery-adapter-and-api
+      summary: OpenProject delivery workflow APIs or adapter mappings changed.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      path_globs:
+        - src/openproject-client.js
+        - src/delivery-service.js
+        - src/delivery-model.js
+        - docs/contracts/delivery-workflow-api-v1.md
+        - docs/contracts/openproject-adapter-v1.md
+        - docs/contracts/accepted-idea-delivery-closeout-v1.md
+        - docs/contracts/accepted-idea-delivery-consumption-v1.md
+      review_subjects:
+        - inventory_section: repos
+          name: operator-orchestration-service
+        - inventory_section: products
+          name: openproject
 security_change_record_requirements:
   change_record_readme_path: docs/records/change-records/README.md
   policy_path: docs/records/change-records/policy.yaml

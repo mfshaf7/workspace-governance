@@ -69,6 +69,23 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+  delta_review_triggers:
+    - id: runtime-packaging-and-plugin-composition
+      summary: Runtime packaging, overlay composition, or bundled host-control plugin surfaces changed.
+      review_areas:
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - deployment/**
+        - host-control-openclaw-plugin/**
+      review_subjects:
+        - inventory_section: repos
+          name: openclaw-runtime-distribution
+        - inventory_section: components
+          name: openclaw-runtime-distribution
+        - inventory_section: products
+          name: openclaw
 security_change_record_requirements:
   change_record_readme_path: docs/records/change-records/README.md
   policy_path: docs/records/change-records/policy.yaml

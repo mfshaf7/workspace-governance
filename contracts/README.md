@@ -80,11 +80,22 @@ Repo rules may define:
 - required authoritative repo references
 - required security-architecture artifacts, review checklist, and review-output
   scope for repos that cross security-relevant trust boundaries
+- security-significant path triggers that require a fresh security delta review
+  and identify which review-inventory subjects must be refreshed
 - forbidden ownership or topology language
 - additional stale-content patterns that should never reappear
 
 `security_requirements.review_output_path` must point to a concrete dated
 security review artifact, not a directory `README.md` placeholder.
+
+`security_requirements.delta_review_triggers` should describe the smallest real
+change classes that cross a meaningful trust boundary. They are intentionally
+path-based and machine-enforced so a repo can prove:
+
+- which changes require a fresh security delta review
+- which review areas are implicated
+- which inventory subjects in `security-architecture/registers/review-inventory.yaml`
+  must be refreshed in the same work
 
 Repo rules must not:
 

@@ -269,6 +269,37 @@ def main() -> int:
                 errors.append(
                     f"contracts/repo-rules/{repo_name}.yaml: security artifact {artifact['id']} uses unknown review areas {', '.join(unknown_areas)}"
                 )
+        seen_trigger_ids: set[str] = set()
+        for trigger in security_requirements["delta_review_triggers"]:
+            trigger_id = trigger["id"]
+            if trigger_id in seen_trigger_ids:
+                errors.append(
+                    f"contracts/repo-rules/{repo_name}.yaml: duplicate security delta review trigger id {trigger_id!r}"
+                )
+            seen_trigger_ids.add(trigger_id)
+            unknown_areas = sorted(
+                set(trigger["review_areas"])
+                - set(contracts["review_obligations"]["review_obligations"])
+            )
+            if unknown_areas:
+                errors.append(
+                    f"contracts/repo-rules/{repo_name}.yaml: security delta review trigger {trigger_id!r} uses unknown review areas {', '.join(unknown_areas)}"
+                )
+            for subject in trigger["review_subjects"]:
+                inventory_section = subject["inventory_section"]
+                subject_name = subject["name"]
+                if inventory_section == "repos" and subject_name not in active_repos:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: security delta review trigger {trigger_id!r} references unknown repo subject {subject_name!r}"
+                    )
+                elif inventory_section == "components" and subject_name not in component_names:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: security delta review trigger {trigger_id!r} references unknown component subject {subject_name!r}"
+                    )
+                elif inventory_section == "products" and subject_name not in product_names:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: security delta review trigger {trigger_id!r} references unknown product subject {subject_name!r}"
+                    )
         if security_change_record_requirements and not security_requirements:
             errors.append(
                 f"contracts/repo-rules/{repo_name}.yaml: security_change_record_requirements require security_requirements"
