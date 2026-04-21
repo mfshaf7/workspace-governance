@@ -27,7 +27,7 @@
     },
     "security_requirements": {
       "type": "object",
-      "required": ["security_owner", "review_checklist_path", "review_output_path", "required_artifacts"],
+      "required": ["security_owner", "review_checklist_path", "review_output_path", "required_artifacts", "delta_review_triggers"],
       "properties": {
         "security_owner": { "type": "string", "minLength": 1 },
         "review_checklist_path": { "type": "string", "minLength": 1 },
@@ -52,6 +52,45 @@
                 "items": {
                   "type": "string",
                   "enum": ["readme", "agents"]
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "delta_review_triggers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "summary", "review_areas", "path_globs", "review_subjects"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "summary": { "type": "string", "minLength": 1 },
+              "review_areas": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "path_globs": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "review_subjects": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["inventory_section", "name"],
+                  "properties": {
+                    "inventory_section": {
+                      "type": "string",
+                      "enum": ["repos", "components", "products"]
+                    },
+                    "name": { "type": "string", "minLength": 1 }
+                  },
+                  "additionalProperties": false
                 }
               }
             },

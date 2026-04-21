@@ -88,6 +88,55 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+  delta_review_triggers:
+    - id: openproject-runtime-and-automation-boundary
+      summary: OpenProject runtime, automation identity, delivery workflow, or production hygiene controls changed.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      path_globs:
+        - products/openproject/**
+      review_subjects:
+        - inventory_section: repos
+          name: platform-engineering
+        - inventory_section: products
+          name: openproject
+    - id: openclaw-stage-and-runtime-governance
+      summary: OpenClaw stage or production lifecycle, host-bridge lifecycle, or governed runtime controls changed.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - products/openclaw/**
+      review_subjects:
+        - inventory_section: repos
+          name: platform-engineering
+        - inventory_section: products
+          name: openclaw
+    - id: shared-platform-control-plane-and-secrets
+      summary: Shared platform trust, GitOps, secrets, observability, or cluster control-plane surfaces changed.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      path_globs:
+        - security/**
+        - charts/**
+        - observability/**
+        - terraform/**
+        - docs/architecture/**
+        - docs/standards/**
+        - scripts/bootstrap_*.sh
+        - scripts/migrate_k8s_secret_to_vault.py
+      review_subjects:
+        - inventory_section: repos
+          name: platform-engineering
 operator_workflow_requirements:
   workflows:
     - id: dev-integration-profile-usage

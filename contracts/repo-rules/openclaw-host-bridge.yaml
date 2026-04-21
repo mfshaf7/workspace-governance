@@ -58,6 +58,27 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+  delta_review_triggers:
+    - id: host-bridge-runtime-and-policy-surface
+      summary: Host bridge runtime, command surface, policy, or recovery paths changed.
+      review_areas:
+        - identity
+        - runtime
+        - ai
+      path_globs:
+        - src/**
+        - src/ops/**
+        - config/**
+        - contracts/interface-manifest.json
+        - scripts/run_bridge_operation*.sh
+        - scripts/start-openclaw-host-bridge*.sh
+        - scripts/start-openclaw-host-recovery*.sh
+        - scripts/openclaw-host-recovery-server.mjs
+      review_subjects:
+        - inventory_section: repos
+          name: openclaw-host-bridge
+        - inventory_section: components
+          name: openclaw-host-bridge
 security_change_record_requirements:
   change_record_readme_path: docs/records/change-records/README.md
   policy_path: docs/records/change-records/policy.yaml

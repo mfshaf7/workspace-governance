@@ -14,6 +14,12 @@ from contracts_lib import load_contracts
 ALLOWED_SCOPES = {"platform", "component", "product"}
 ALLOWED_BASELINE_STATUS = {"active", "superseded"}
 ALLOWED_LATEST_CHANGE_STATUS = {"current", "baseline-current", "superseded"}
+ALLOWED_REVIEW_DECISIONS = {
+    "approved",
+    "approved-with-findings",
+    "blocked",
+    "accepted-risk",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -215,6 +221,12 @@ def main() -> int:
                     f"registers/review-inventory.yaml: {section_name}.{subject_name}.baseline_review.status must be one of "
                     + ", ".join(sorted(ALLOWED_BASELINE_STATUS))
                 )
+            baseline_decision = baseline_review.get("decision")
+            if baseline_decision not in ALLOWED_REVIEW_DECISIONS:
+                errors.append(
+                    f"registers/review-inventory.yaml: {section_name}.{subject_name}.baseline_review.decision must be one of "
+                    + ", ".join(sorted(ALLOWED_REVIEW_DECISIONS))
+                )
             baseline_path, baseline_reviewed_on = validate_review_ref(
                 section_name,
                 subject_name,
@@ -251,6 +263,12 @@ def main() -> int:
                     f"registers/review-inventory.yaml: {section_name}.{subject_name}.latest_change_review.status must be one of "
                     + ", ".join(sorted(ALLOWED_LATEST_CHANGE_STATUS))
                 )
+            latest_decision = latest_change_review.get("decision")
+            if latest_decision not in ALLOWED_REVIEW_DECISIONS:
+                errors.append(
+                    f"registers/review-inventory.yaml: {section_name}.{subject_name}.latest_change_review.decision must be one of "
+                    + ", ".join(sorted(ALLOWED_REVIEW_DECISIONS))
+                )
             latest_path, _ = validate_review_ref(
                 section_name,
                 subject_name,
@@ -265,6 +283,20 @@ def main() -> int:
                 errors.append(
                     f"registers/review-inventory.yaml: {section_name}.{subject_name}.latest_change_review must match baseline_review when status is baseline-current"
                 )
+            if latest_status == "baseline-current" and latest_decision != baseline_decision:
+                errors.append(
+                    f"registers/review-inventory.yaml: {section_name}.{subject_name}.latest_change_review.decision must match baseline_review.decision when status is baseline-current"
+                )
+            review_trigger_ids = latest_change_review.get("review_trigger_ids")
+            if review_trigger_ids is not None:
+                if (
+                    not isinstance(review_trigger_ids, list)
+                    or not review_trigger_ids
+                    or any(not isinstance(entry, str) or not entry for entry in review_trigger_ids)
+                ):
+                    errors.append(
+                        f"registers/review-inventory.yaml: {section_name}.{subject_name}.latest_change_review.review_trigger_ids must be a non-empty list of strings when present"
+                    )
 
             if section_name == "repos":
                 repos_checked += 1

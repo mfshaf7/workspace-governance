@@ -67,6 +67,28 @@ security_requirements:
       required_in_docs:
         - readme
         - agents
+  delta_review_triggers:
+    - id: telegram-command-routing-and-approval-surface
+      summary: Telegram routing, approvals, backend invocation, or operator command behavior changed.
+      review_areas:
+        - identity
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - src/**
+        - api.ts
+        - runtime-api.ts
+        - allow-from.ts
+        - docs/operator-commands.md
+        - contracts/interface-manifest.json
+      review_subjects:
+        - inventory_section: repos
+          name: openclaw-telegram-enhanced
+        - inventory_section: components
+          name: openclaw-telegram-channel
+        - inventory_section: products
+          name: openclaw
 security_change_record_requirements:
   change_record_readme_path: docs/records/change-records/README.md
   policy_path: docs/records/change-records/policy.yaml
