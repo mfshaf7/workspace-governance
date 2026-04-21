@@ -1,0 +1,69 @@
+schema_version: 1
+id: 2026-04-21-stage-bridge-coverage-gap-after-reboot
+title: Stage can appear active while the stage host bridge is absent after host restart
+recorded_on: '2026-04-21'
+owner_repo: workspace-governance
+summary: >-
+  OpenClaw stage remained reported as active at the Git-managed and cluster
+  layers, but the stage host bridge was no longer reachable from the stage
+  gateway after a host restart. Telegram still replied, but forced
+  host-control requests failed with `fetch failed` because the gateway bridge
+  URL on `172.27.88.8:48731` was refusing connections. The current stage
+  status surface does not include stage bridge request-path proof, and the
+  stage bridge is disabled by default as an on-demand host service, so stage
+  can look live while the real host-control path is dead.
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - openclaw-host-bridge
+    - openclaw-telegram-enhanced
+  related_products:
+    - openclaw
+  related_components:
+    - openclaw-host-bridge
+    - openclaw-telegram-channel
+  change_classes:
+    - platform-contract
+    - runtime-composition
+signals:
+  - id: stage-bridge-missing-while-stage-active
+    title: Stage host-control path failed even though stage still reported active
+    trigger: late-host-drift-discovery
+    failure_classes:
+      - host-drift-undetected
+      - workflow-doctrine-gap
+    finding: >-
+      On 2026-04-21, prod OpenClaw was intentionally suspended while stage
+      remained the active environment. The stage gateway was healthy and
+      Telegram was still sending replies, but forced host-control dispatch
+      failed because the configured stage bridge URL
+      `http://172.27.88.8:48731/v1/bridge` was refusing connections. The
+      supported stage status command still returned `active:gateway,secrets,version`
+      because it only inspected Git-managed stage resources, not the stage
+      bridge request path. The stage bridge unit is disabled by default and
+      only runs during active stage windows, so after a host restart it did not
+      come back automatically until `set_stage_environment_state.py resume
+      --components gateway,version` was run again.
+    source_refs:
+      - 'conversation:2026-04-21-openclaw-telegram-response-host-control-fetch-failed'
+      - 'journalctl:2026-04-21-openclaw-host-bridge-stage-service-started-only-after-manual-resume'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Candidate only. The durable closure shape still needs a decision on
+    whether stage status must become a full bridge-aware readiness check, stage
+    resume must reconcile bridge state automatically after host restart, or a
+    dedicated validator/smoke must prove the stage bridge request path before
+    stage is treated as active for Telegram host-control traffic.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-25'
+  note: >-
+    Decide the best closure shape for stage bridge survivability and truth
+    surfaces: whether to strengthen `set_stage_environment_state.py status`,
+    add a bridge-aware stage validator, add a host-restart recovery rule for
+    the stage bridge, or combine those controls.
