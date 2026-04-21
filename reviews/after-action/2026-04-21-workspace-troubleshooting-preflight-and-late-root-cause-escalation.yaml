@@ -1,0 +1,100 @@
+schema_version: 1
+id: 2026-04-21-workspace-troubleshooting-preflight-and-late-root-cause-escalation
+title: Workspace troubleshooting now forces preflight order and escalates late simple root causes
+recorded_on: '2026-04-21'
+owner_repo: workspace-governance
+summary: A broker/OpenProject repair exposed a broader workspace failure class.
+  Troubleshooting had no universal order that forced simpler preconditions and
+  live truth to be proven before workaround analysis expanded. The workspace
+  now has an explicit troubleshooting doctrine, a dedicated skill, and
+  self-improvement escalation for late discovery of skipped earlier-layer root
+  causes.
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+    - platform-engineering
+  related_products:
+    - openproject
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user said this gap applies to any troubleshooting step, not only the broker/OpenProject issue'
+  - 'conversation: user asked why there was no proper troubleshooting step for every case'
+  - 'conversation: user required the strongest fix and said it must be capable of self improvement'
+lessons:
+  - id: workspace-troubleshooting-order-must-be-explicit
+    title: Troubleshooting must force preflight and live truth before deeper analysis
+    failure_class: diagnostic-ordering-miss
+    trigger: late-root-cause-discovery
+    finding: The broker/OpenProject debugging flow expanded into API behavior
+      analysis and workaround exploration before the simpler live precondition
+      was proven. The actual blocker was a missing role in the active lane.
+      That showed the workspace lacked a universal troubleshooting order that
+      forces identity, permissions, environment truth, and live backend truth
+      to be checked before code-level reasoning or redesign.
+    impact: Debugging time was wasted, avoidable workaround analysis expanded,
+      and operator confidence dropped because the system looked reactive rather
+      than methodical.
+    status: closed
+    expected_control_types:
+      - skill
+      - workflow
+      - runbook
+      - validator
+      - doc
+    control_refs:
+      - type: doc
+        path: workspace-governance/docs/troubleshooting-preflight.md
+        owner_repo: workspace-governance
+        note: Adds the primary operator troubleshooting doctrine for serious failure diagnosis.
+      - type: skill
+        path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+        owner_repo: workspace-governance
+        note: Teaches future sessions to prove preflight, live truth, contract truth, and code truth in order.
+      - type: contract
+        path: workspace-governance/contracts/failure-taxonomy.yaml
+        owner_repo: workspace-governance
+        note: Adds the diagnostic-ordering-miss failure class.
+      - type: contract
+        path: workspace-governance/contracts/improvement-triggers.yaml
+        owner_repo: workspace-governance
+        note: Adds the late-root-cause-discovery trigger.
+      - type: contract
+        path: workspace-governance/contracts/skills.yaml
+        owner_repo: workspace-governance
+        note: Registers the troubleshooting-preflight skill in the governed skill inventory.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Requires late discovery of skipped earlier-layer checks to route through self-improvement.
+      - type: doc
+        path: workspace-governance/AGENTS.md
+        owner_repo: workspace-governance
+        note: Repo-level doctrine now requires the troubleshooting workflow before deeper workaround analysis.
+      - type: doc
+        path: workspace-governance/README.md
+        owner_repo: workspace-governance
+        note: Repo overview now makes the troubleshooting doctrine explicit and operator-visible.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Workspace-startup guidance now points new sessions to the troubleshooting doctrine when diagnosing failures.
+      - type: doc
+        path: workspace-governance/workspace-root/README.md
+        owner_repo: workspace-governance
+        note: Workspace operator-facing guidance now explains the troubleshooting order and self-improvement route.
+      - type: doc
+        path: workspace-governance/contracts/README.md
+        owner_repo: workspace-governance
+        note: Contract documentation now explains that late simple-root-cause discovery is a first-class learning signal.
+      - type: doc
+        path: workspace-governance/reviews/improvement-candidates/README.md
+        owner_repo: workspace-governance
+        note: Candidate guidance now treats skipped earlier-layer troubleshooting checks as a valid trigger.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

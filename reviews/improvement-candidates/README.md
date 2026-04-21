@@ -13,6 +13,8 @@ Use an improvement candidate when:
 - a user explicitly calls out a repeated mistake
 - the same workflow needs a corrective follow-up in the same session
 - a machine-visible audit detects a doctrine or completion miss
+- the eventual root cause turns out to be a skipped simpler prerequisite or
+  live-truth check that should have been proven before workaround analysis
 - the miss looks real, but the durable control is not decided yet
 
 If the miss is a regression of a lesson that was already treated as closed:

@@ -51,6 +51,15 @@ triggers:
       - skill
       - script
       - doc
+  late-root-cause-discovery:
+    description: A simpler prerequisite, permission, environment, or live-truth failure was discovered only after deeper code, workaround, or redesign analysis had already expanded.
+    requires_after_action: true
+    recommended_control_types:
+      - skill
+      - workflow
+      - runbook
+      - validator
+      - doc
   closed-lesson-regression:
     description: A failure class that had already been treated as closed regressed in active work and now needs an explicit regression record plus stronger controls.
     requires_after_action: true

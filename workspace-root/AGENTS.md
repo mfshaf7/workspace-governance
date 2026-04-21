@@ -38,6 +38,8 @@ That means:
    - `/home/mfshaf7/projects/ARCHITECTURE.md`
 0.5 If workspace-level recommendations depend on fresh control-plane truth, run:
    - `python3 /home/mfshaf7/projects/workspace-governance/scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
+0.6 If a serious failure is being diagnosed, read:
+   - `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -249,6 +251,9 @@ Only start implementation after that discussion narrows the target design.
   command family, request path, approval path, or other operator procedure, the
   work is not complete until one primary operator instruction surface exists in
   the owning repo.
+- If a serious failure or unexpected runtime behavior is being diagnosed, use
+  `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
+  before deeper workaround analysis, redesign proposals, or code-level blame.
 - Contracts, templates, and standards may support that workflow, but they do
   not replace the primary operator instruction surface.
 - If the operator has to reconstruct the procedure from scattered files, the
@@ -275,6 +280,9 @@ Only start implementation after that discussion narrows the target design.
 - If the user calls the work half-baked, incomplete, or says the miss should
   have been caught already, treat that as the same class of mandatory
   self-improvement signal.
+- If a simpler root cause is discovered late because earlier troubleshooting
+  layers were skipped, treat that as a mandatory self-improvement signal and
+  route it through the improvement-candidate layer.
 - Candidate capture should happen automatically once the signal is real, but
   the durable fix should not be auto-landed from that signal alone.
 - If active work becomes half-finished at the planning, control, or completion

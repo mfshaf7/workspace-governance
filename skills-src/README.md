@@ -15,4 +15,5 @@ Workspace-owned skills currently cover:
 - done criteria
 - operator workflow design
 - cross-repo sequencing
+- troubleshooting preflight
 - self-improvement review

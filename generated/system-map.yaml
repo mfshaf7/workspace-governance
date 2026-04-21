@@ -270,6 +270,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/cross-repo-sequencer
     scope: workspace
+  troubleshooting-preflight:
+    owner_repo: workspace-governance
+    source_path: skills-src/troubleshooting-preflight
+    scope: workspace
   self-improvement-review:
     owner_repo: workspace-governance
     source_path: skills-src/self-improvement-review

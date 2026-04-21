@@ -34,6 +34,9 @@ evidence, host drift detection, testing seams, or operator reliability.
    - the control-plane summary or review-control validator flags repeated drift
    - an active `dev-integration` profile's stage-handoff contract, README, or
      promote-check expectations lag behind the landed workflow surface
+   - the eventual root cause turns out to be a skipped simpler precondition,
+     environment truth, permission truth, or contract truth check that should
+     have been proven before workaround analysis
 5. If the miss regresses a lesson that was already treated as closed:
    - record it as a regression candidate, not as a vague new issue
    - set `regression_of` to the earlier closed candidate or after-action
@@ -64,6 +67,9 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
   candidate.
 - If the user explicitly calls out a repeated mistake, open or update a
   candidate even if the final after-action shape is not ready yet.
+- If a simpler root cause is discovered late because earlier troubleshooting
+  layers were skipped, use trigger `late-root-cause-discovery` and classify it
+  as a diagnostic-ordering miss when that matches the case.
 - If active work becomes half-finished at the planning, control, or completion
   layer, do not continue normally. Record the candidate first and surface the
   miss.

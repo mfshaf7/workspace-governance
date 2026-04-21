@@ -11,7 +11,7 @@ summary: A live broker create-path failure spent too long in workaround and
   discovered late, after unnecessary workaround exploration had already
   happened.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -27,8 +27,9 @@ scope:
 signals:
   - id: late-role-truth-discovery-during-broker-create-repair
     title: Missing delivery role was discovered only after workaround analysis expanded
-    trigger: repeated-operator-friction
+    trigger: late-root-cause-discovery
     failure_classes:
+      - diagnostic-ordering-miss
       - unsafe-assumption
       - workflow-doctrine-gap
     finding: >-
@@ -43,13 +44,26 @@ signals:
       - 'conversation: user said unnecessary dumb workaround work likely happened because the proper role was not there'
       - 'art: task #62 reopened after live revalidation showed create was not durably proven'
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-21-workspace-troubleshooting-preflight-and-late-root-cause-escalation.yaml
+  control_refs:
+    - type: doc
+      path: workspace-governance/docs/troubleshooting-preflight.md
+      owner_repo: workspace-governance
+      note: Adds the workspace-wide troubleshooting doctrine.
+    - type: skill
+      path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+      owner_repo: workspace-governance
+      note: Adds the troubleshooting-preflight skill for future sessions.
+    - type: contract
+      path: workspace-governance/contracts/failure-taxonomy.yaml
+      owner_repo: workspace-governance
+      note: Adds the diagnostic-ordering-miss failure class.
+    - type: contract
+      path: workspace-governance/contracts/improvement-triggers.yaml
+      owner_repo: workspace-governance
+      note: Adds the late-root-cause-discovery trigger.
+  note: Closed through the broader workspace troubleshooting doctrine and after-action, not just a broker-specific patch.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-28'
-  note: Propose and, if approved, land a mandatory broker/OpenProject mutation
-    preflight that checks automation identity roles, assignable-principal
-    exposure, and target form writability before workaround analysis or adapter
-    redesign begins.
+  owner_repo: null
+  due_on: null
+  note: null

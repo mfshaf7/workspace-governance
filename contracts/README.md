@@ -199,6 +199,12 @@ These are not the same thing as after-action reviews.
 Candidates are the fast triage layer. After-actions are the governed closure
 layer.
 
+Troubleshooting doctrine is explicit too. Use
+`../docs/troubleshooting-preflight.md` as the primary operator surface for
+serious failure diagnosis. If a simpler root cause is discovered late because
+the earlier preflight or live-truth layers were skipped, treat that as a
+first-class self-improvement signal instead of normal debugging noise.
+
 Use an after-action directly when the lesson and control shape are already
 clear enough to close or explicitly leave open with a real owner and due date.
 
