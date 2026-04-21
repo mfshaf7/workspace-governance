@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-04-20-openproject-safe-pm2-framework-scope-drift
+title: OpenProject delivery ART was activated with only the bounded hierarchy and field model, not the full agreed SAFe plus PM² operating surface
+recorded_on: '2026-04-20'
+owner_repo: workspace-governance
+summary: >-
+  The agreed OpenProject direction was PM² governance plus a SAFe-aligned
+  one-ART delivery model. The current implementation did create the delivery
+  project, hierarchy, statuses, and PM² governance fields, but it stopped short
+  of provisioning PI versions, Kanban boards, or other operator-visible SAFe
+  execution views. The current docs do disclose some of that narrowing, but the
+  operator expectation remained "full SAFe plus PM²", so the effective rollout
+  scope drifted from the agreed framework and left the UI weaker than intended.
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+    - platform-contract
+signals:
+  - id: openproject-delivery-art-framework-scope-drift
+    title: Operator expected full SAFe plus PM² surface, but the live delivery project only exposes the bounded v1 hierarchy and fields
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+      - contract-drift
+    finding: >-
+      The delivery-art contract and user discussion set the expectation of a
+      SAFe-aligned one-ART model with PM² governance. The actual activated
+      project only enables work-package tracking and provisions types, statuses,
+      and PM² fields. It does not create Program Increment versions, Kanban
+      boards, or a board-capable operator surface, so the resulting UI does not
+      match the user's understanding of the agreed framework.
+    source_refs:
+      - 'conversation:2026-04-20-user-asked-where-the-kanban-board-is'
+      - '/home/mfshaf7/projects/platform-engineering/products/openproject/delivery-art-contract.md'
+      - '/home/mfshaf7/projects/platform-engineering/products/openproject/runbooks/configure-delivery-art.md'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Candidate only. Closure still needs an explicit decision on whether the
+    current delivery-art baseline should be expanded to a full SAFe plus PM²
+    operator surface now, or whether the contract and runbooks should be
+    narrowed further until those capabilities are actually provisioned.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-24'
+  note: >-
+    Decide the intended runtime scope for the delivery ART: full SAFe plus PM²
+    operator surface versus bounded v1 hierarchy plus governance fields, and
+    then land the matching control-plane and platform changes so the operator
+    expectation cannot drift again.

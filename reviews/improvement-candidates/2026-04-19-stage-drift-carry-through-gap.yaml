@@ -45,7 +45,7 @@ resolution:
   note: null
 follow_up:
   owner_repo: workspace-governance
-  due_on: 2026-04-20
+  due_on: 2026-04-28
   note: >
     Decide whether done-criteria and governed-delivery controls should require
     immediate stage carry-through once a merged source fix is shown to be

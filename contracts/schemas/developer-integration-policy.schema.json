@@ -7,6 +7,7 @@
     "profile_lifecycle",
     "request_admission",
     "source_state",
+    "runtime_state_models",
     "trigger_guidance",
     "forbidden_targets",
     "required_actions",
@@ -70,7 +71,8 @@
       "required": [
         "current_request_adapter",
         "required_request_fields",
-        "activation_requirements"
+        "activation_requirements",
+        "persistent_request_requirements"
       ],
       "properties": {
         "current_request_adapter": {
@@ -89,6 +91,11 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "activation_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "persistent_request_requirements": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
@@ -113,6 +120,11 @@
         "session_manifest_required": { "type": "boolean" }
       },
       "additionalProperties": false
+    },
+    "runtime_state_models": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
     },
     "trigger_guidance": {
       "type": "object",

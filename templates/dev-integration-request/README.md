@@ -17,6 +17,9 @@ Required request information:
 - requested profile id
 - owner repo
 - purpose
+- requested runtime state model:
+  - `disposable`
+  - `persistent`
 - participating repos
 - runtime dependencies
 - expected canonical backend writes, if any
@@ -25,6 +28,22 @@ Required request information:
 - request record system
 - request record ref
 
+Additional required information for `persistent` requests:
+
+- persistence justification
+  - why a disposable lane is insufficient
+- retained data scope
+  - what data must survive normal `devint-down` / `devint-up`
+- suspend/resume semantics
+  - what operators expect `devint-down` and `devint-up` to preserve
+- storage size or class
+  - expected PVC size, storage class, or other local-runtime assumptions
+- destructive reset semantics
+  - exactly what `devint-reset` is allowed to wipe
+- cutover plan when upgrading
+  - required when an existing disposable profile is being turned into a
+    persistent project-backed lane
+
 Minimum decision path:
 
 1. request recorded
@@ -32,6 +51,12 @@ Minimum decision path:
 3. `platform-engineering` accepts or rejects the shared-lane fit
 4. `security-architecture` reviews it when the request widens risky boundaries
 5. `workspace-governance` records the admitted lifecycle state
+
+For `persistent` requests, the decision path should also confirm:
+
+1. the retained data scope is acceptable for a local ungoverned lane
+2. the storage model is acceptable for the shared local-k3s implementation
+3. the destructive reset boundary is documented before launch
 
 Lifecycle targets:
 

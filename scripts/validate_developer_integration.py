@@ -28,6 +28,16 @@ REQUIRED_PROFILE_KEYS = {
     "session",
     "stage_handoff",
 }
+REQUIRED_RUNTIME_STATE_MODELS = {"disposable", "persistent"}
+REQUIRED_PERSISTENT_REQUEST_REQUIREMENTS = {
+    "runtime.state_model",
+    "persistence.justification",
+    "persistence.retained_data_scope",
+    "persistence.suspend_resume_semantics",
+    "persistence.storage_size_or_class",
+    "persistence.reset_semantics",
+    "persistence.cutover_plan_when_upgrading",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -72,6 +82,19 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         errors.append(
             "contracts/developer-integration-policy.yaml: profile_lifecycle.self_serve_statuses must be exactly active"
         )
+    runtime_state_models = set(policy.get("runtime_state_models") or [])
+    if runtime_state_models != REQUIRED_RUNTIME_STATE_MODELS:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: runtime_state_models must be exactly disposable, persistent"
+        )
+    persistent_request_requirements = set(
+        request_admission.get("persistent_request_requirements") or []
+    )
+    if persistent_request_requirements != REQUIRED_PERSISTENT_REQUEST_REQUIREMENTS:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: request_admission.persistent_request_requirements must be exactly "
+            + ", ".join(sorted(REQUIRED_PERSISTENT_REQUEST_REQUIREMENTS))
+        )
     adapter_owner = request_admission["current_request_adapter"]["owner_repo"]
     if adapter_owner not in active_repos:
         errors.append(
@@ -114,9 +137,11 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} stage_handoff.required_checks must be unique"
             )
-        if set(payload["actions"]) != required_actions:
+        profile_actions = set(payload["actions"])
+        missing_registry_actions = sorted(required_actions - profile_actions)
+        if missing_registry_actions:
             errors.append(
-                f"contracts/developer-integration-profiles.yaml: {profile_name} actions must match required_actions"
+                f"contracts/developer-integration-profiles.yaml: {profile_name} actions must include required_actions; missing {', '.join(missing_registry_actions)}"
             )
         request_record = payload.get("request_record") or {}
         if profile_lifecycle["request_record_required"]:
@@ -168,6 +193,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"{profile_path}: profile_id {profile['profile_id']!r} must match registry name {profile_name!r}"
             )
+        runtime = profile.get("runtime") or {}
+        state_model = runtime.get("state_model")
+        if state_model not in runtime_state_models:
+            errors.append(
+                f"{profile_path}: runtime.state_model must be one of {', '.join(sorted(runtime_state_models))}"
+            )
         profile_stage_handoff = profile.get("stage_handoff") or {}
         for key in ("owner_repo", "governed_surface"):
             if profile_stage_handoff.get(key) != payload["stage_handoff"][key]:
@@ -191,9 +222,15 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"{profile_path}: source_repos must match contracts/developer-integration-profiles.yaml"
             )
-        if set(profile["commands"].keys()) != required_actions:
+        command_actions = set(profile["commands"].keys())
+        missing_command_actions = sorted(required_actions - command_actions)
+        if missing_command_actions:
             errors.append(
-                f"{profile_path}: commands must define exactly {', '.join(sorted(required_actions))}"
+                f"{profile_path}: commands must include required actions {', '.join(sorted(required_actions))}; missing {', '.join(missing_command_actions)}"
+            )
+        if command_actions != profile_actions:
+            errors.append(
+                f"{profile_path}: commands keys must match contracts/developer-integration-profiles.yaml actions"
             )
         for action, rel_path in profile["commands"].items():
             command_path = workspace_root / payload["owner_repo"] / rel_path

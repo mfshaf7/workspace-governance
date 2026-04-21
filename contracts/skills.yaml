@@ -24,6 +24,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/operator-workflow-design
     scope: workspace
+  project-delivery-operator:
+    owner_repo: workspace-governance
+    source_path: skills-src/project-delivery-operator
+    scope: workspace
   cross-repo-sequencer:
     owner_repo: workspace-governance
     source_path: skills-src/cross-repo-sequencer
