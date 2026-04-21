@@ -272,8 +272,17 @@ Only start implementation after that discussion narrows the target design.
   real but the closure shape is not fully decided yet.
 - If the user explicitly says something is a repeated mistake, that is a
   mandatory candidate signal.
+- If the user calls the work half-baked, incomplete, or says the miss should
+  have been caught already, treat that as the same class of mandatory
+  self-improvement signal.
 - Candidate capture should happen automatically once the signal is real, but
   the durable fix should not be auto-landed from that signal alone.
+- If active work becomes half-finished at the planning, control, or completion
+  layer, record or update the improvement candidate before continuing normal
+  execution.
+- If a previously closed lesson regresses, record the new candidate as a
+  regression linked to the earlier closed candidate or after-action instead of
+  treating it as an unrelated new issue.
 - Propose the best fix shape, justify why it is the best option, and wait for
   operator approval before implementing the closing control.
 - No repeated failure class should stay purely conversational. It should either

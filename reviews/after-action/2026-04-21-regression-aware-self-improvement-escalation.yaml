@@ -1,0 +1,92 @@
+schema_version: 1
+id: 2026-04-21-regression-aware-self-improvement-escalation
+title: Self-improvement escalation became regression-aware and proactive for active-work misses
+recorded_on: '2026-04-21'
+owner_repo: workspace-governance
+summary: A previously closed lesson about proactive self-improvement signals
+  regressed during active delivery work. The workspace now treats that class as
+  an explicit regression, requires regression linkage in improvement
+  candidates, and strengthens the doctrine so half-finished active-work misses
+  must trigger self-improvement before normal execution continues.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly asked why repeated mistakes still happened without self-improvement triggering'
+  - 'conversation: user explicitly said we do not want half baked solutions and required the strongest overall control'
+lessons:
+  - id: regression-aware-self-improvement-is-required
+    title: Closed lessons must reopen as regressions when the same failure class returns in active work
+    failure_class: learning-closure-regression
+    trigger: closed-lesson-regression
+    finding: The workspace had already closed an earlier lesson claiming
+      proactive self-improvement signals were fixed, but active delivery work
+      still allowed process misses to survive until direct operator callout.
+      Without an explicit regression model, the system could claim closure while
+      still being too weak in live operation.
+    impact: Repeated workflow misses remained reactive, operator confidence in
+      the self-improvement loop dropped, and supposedly closed lessons could
+      regress without a first-class escalation path.
+    status: closed
+    expected_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc
+    control_refs:
+      - type: contract
+        path: workspace-governance/contracts/failure-taxonomy.yaml
+        owner_repo: workspace-governance
+        note: Adds the learning-closure-regression failure class.
+      - type: contract
+        path: workspace-governance/contracts/improvement-triggers.yaml
+        owner_repo: workspace-governance
+        note: Adds the closed-lesson-regression trigger.
+      - type: contract
+        path: workspace-governance/contracts/schemas/improvement-candidate-record.schema.json
+        owner_repo: workspace-governance
+        note: Improvement candidates can now declare regression_of explicitly.
+      - type: validator
+        path: workspace-governance/scripts/validate_improvement_candidates.py
+        owner_repo: workspace-governance
+        note: Enforces regression linkage and validates that regression targets reference closed lessons.
+      - type: workflow
+        path: workspace-governance/scripts/record_improvement_candidate.py
+        owner_repo: workspace-governance
+        note: Candidate scaffolding now supports regression_of directly.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Requires proactive candidate capture for half-baked active-work misses and explicit regression handling.
+      - type: doc
+        path: workspace-governance/AGENTS.md
+        owner_repo: workspace-governance
+        note: Workspace control-plane doctrine now treats half-baked and regression signals as mandatory self-improvement triggers.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Workspace-root guidance now carries the stronger regression-aware self-improvement rule.
+      - type: doc
+        path: workspace-governance/workspace-root/README.md
+        owner_repo: workspace-governance
+        note: Operator-facing workspace doctrine now states the proactive and regression-aware self-improvement model.
+      - type: doc
+        path: workspace-governance/contracts/README.md
+        owner_repo: workspace-governance
+        note: Contract documentation now explains the regression-aware self-improvement model.
+      - type: doc
+        path: workspace-governance/reviews/improvement-candidates/README.md
+        owner_repo: workspace-governance
+        note: Candidate guidance now documents regression candidate handling.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

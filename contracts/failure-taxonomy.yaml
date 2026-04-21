@@ -62,3 +62,11 @@ failure_classes:
       - adr
       - workflow
       - doc
+  learning-closure-regression:
+    description: A lesson that was previously treated as closed regressed in active work, showing that the earlier closure controls were too weak or too narrow.
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc

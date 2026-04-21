@@ -22,6 +22,7 @@
     "recorded_on": { "type": "string", "format": "date" },
     "owner_repo": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
+    "regression_of": { "type": ["string", "null"] },
     "status": {
       "type": "string",
       "enum": ["new", "triaged", "accepted", "dismissed", "closed"]

@@ -4,6 +4,7 @@ title: Replace with candidate title
 recorded_on: YYYY-MM-DD
 owner_repo: workspace-governance
 summary: Replace with a short summary of the suspected repeated miss or late discovery.
+regression_of: null
 status: new
 source_type: conversation
 scope:

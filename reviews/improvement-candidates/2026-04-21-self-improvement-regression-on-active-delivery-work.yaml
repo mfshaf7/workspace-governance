@@ -1,0 +1,50 @@
+schema_version: 1
+id: 2026-04-21-self-improvement-regression-on-active-delivery-work
+title: Self-improvement still failed to surface active delivery-process misses before operator callout
+recorded_on: '2026-04-21'
+owner_repo: workspace-governance
+summary: The workspace already had a candidate layer and a closed after-action
+  claiming proactive self-improvement signals were fixed, but active delivery
+  work still allowed repeat process misses to survive until the operator called
+  them out directly. The system did not raise a candidate when the ART
+  transition was left incomplete, and it did not proactively escalate the
+  repeated half-baked planning/control slippage on its own.
+regression_of: workspace-governance/reviews/after-action/2026-04-19-proactive-self-improvement-signals.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: active-delivery-miss-was-not-raised-proactively
+    title: Repeated ART/process misses still needed direct operator callout
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - workflow-doctrine-gap
+    finding: The current controls were good enough to capture the lesson after
+      explicit callout, but not good enough to surface the miss while the work
+      was drifting. A feature was closed before the next ART tranche was
+      written, the next-step work-state remained incomplete, and the system did
+      not proactively open or update an improvement candidate until the operator
+      challenged the behavior again.
+    source_refs:
+      - 'conversation: user explicitly asked why many mistakes still happened without self-improvement triggering'
+      - 'conversation: user explicitly said we do not want half baked solutions and called out the missing ART next-slice planning'
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-21-regression-aware-self-improvement-escalation.yaml
+  control_refs: []
+  note: Closed through regression-aware self-improvement controls covering
+    trigger doctrine, candidate linkage, validation, and workspace-root
+    guidance.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

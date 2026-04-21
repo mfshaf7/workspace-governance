@@ -118,6 +118,14 @@ or completion gap, that should create or update an improvement candidate first.
 Only then should the system decide whether the lesson needs a full after-action
 review.
 
+This also applies when the operator calls the work half-baked or says the miss
+should have been caught already. Those are mandatory self-improvement signals,
+not optional tone. If active work becomes half-finished at the planning,
+control, or completion layer, the system should record or update the candidate
+before continuing normal execution. If a previously closed lesson regresses,
+the new candidate should explicitly link back to the earlier closed candidate or
+after-action instead of treating the miss as brand-new.
+
 The skill layer is governed too. Updating skill source is not enough by itself.
 If the registered skill inventory or workspace-owned skill source changes, the
 live installed skills under `~/.codex/skills` must be refreshed so future

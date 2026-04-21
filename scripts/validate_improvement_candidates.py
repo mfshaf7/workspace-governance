@@ -79,15 +79,31 @@ def main() -> int:
     failure_classes = contracts["failure_taxonomy"]["failure_classes"]
     triggers = contracts["improvement_triggers"]["triggers"]
     candidate_dir = repo_root / "reviews" / "improvement-candidates"
+    after_action_dir = repo_root / "reviews" / "after-action"
     schema_path = repo_root / IMPROVEMENT_CANDIDATE_SCHEMA
     errors: list[str] = []
     record_count = 0
     open_candidates = 0
     closed_candidates = 0
+    candidate_paths = sorted(path for path in candidate_dir.glob("*.yaml") if path.name != "TEMPLATE.yaml")
+    candidate_records = {
+        path: validate_schema(errors, path, schema_path)
+        for path in candidate_paths
+    }
+    closed_candidate_paths = {
+        path.relative_to(workspace_root).as_posix()
+        for path, record in candidate_records.items()
+        if record.get("status") == "closed"
+    }
+    after_action_paths = {
+        path.relative_to(workspace_root).as_posix()
+        for path in after_action_dir.glob("*.yaml")
+        if path.name != "TEMPLATE.yaml"
+    }
 
-    for record_path in sorted(path for path in candidate_dir.glob("*.yaml") if path.name != "TEMPLATE.yaml"):
+    for record_path in candidate_paths:
         record_count += 1
-        record = validate_schema(errors, record_path, schema_path)
+        record = candidate_records[record_path]
         if record.get("id") != record_path.stem:
             errors.append(f"{record_path}: id must match filename stem")
 
@@ -108,6 +124,8 @@ def main() -> int:
                 errors.append(f"{record_path}: change_classes includes unknown class {change_class!r}")
 
         parse_iso_date(record["recorded_on"], field_name="recorded_on", record_path=record_path, errors=errors)
+        regression_of = record.get("regression_of")
+        regression_trigger_used = False
 
         seen_signal_ids: set[str] = set()
         for signal in record.get("signals", []):
@@ -117,11 +135,39 @@ def main() -> int:
             seen_signal_ids.add(signal_id)
             if signal["trigger"] not in triggers:
                 errors.append(f"{record_path}: signal {signal_id} uses unknown trigger {signal['trigger']!r}")
+            if signal["trigger"] == "closed-lesson-regression":
+                regression_trigger_used = True
             for failure_class in signal["failure_classes"]:
                 if failure_class not in failure_classes:
                     errors.append(
                         f"{record_path}: signal {signal_id} uses unknown failure_class {failure_class!r}"
                     )
+
+        if regression_trigger_used and not regression_of:
+            errors.append(
+                f"{record_path}: closed-lesson-regression signals require regression_of"
+            )
+        if regression_of and not regression_trigger_used:
+            errors.append(
+                f"{record_path}: regression_of requires at least one signal with trigger 'closed-lesson-regression'"
+            )
+        if regression_of:
+            if regression_of.startswith("/"):
+                errors.append(f"{record_path}: regression_of must be workspace-relative, got {regression_of!r}")
+            elif regression_of.startswith("workspace-governance/reviews/improvement-candidates/"):
+                if regression_of not in closed_candidate_paths:
+                    errors.append(
+                        f"{record_path}: regression_of {regression_of!r} must reference an existing closed improvement candidate"
+                    )
+            elif regression_of.startswith("workspace-governance/reviews/after-action/"):
+                if regression_of not in after_action_paths:
+                    errors.append(
+                        f"{record_path}: regression_of {regression_of!r} must reference an existing after-action record"
+                    )
+            else:
+                errors.append(
+                    f"{record_path}: regression_of must point to workspace-governance/reviews/improvement-candidates/ or workspace-governance/reviews/after-action/"
+                )
 
         resolution = record.get("resolution") or {}
         after_action_ref = resolution.get("after_action_ref")

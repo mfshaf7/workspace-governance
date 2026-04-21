@@ -15,6 +15,14 @@ Use an improvement candidate when:
 - a machine-visible audit detects a doctrine or completion miss
 - the miss looks real, but the durable control is not decided yet
 
+If the miss is a regression of a lesson that was already treated as closed:
+
+- record it as a regression candidate, not as a vague new note
+- set `regression_of` to the earlier closed candidate or after-action record
+- use trigger `closed-lesson-regression`
+- treat that as an automatic signal that the earlier closure was too weak or too
+  narrow
+
 Expected handling:
 
 - record the candidate automatically once the signal is real
@@ -24,6 +32,8 @@ Expected handling:
   shape
 - close the candidate only after the approved control lands or an after-action
   review links the open follow-up explicitly
+- when the candidate is a regression, prefer closing it through a new
+  after-action so the stronger replacement controls are explicit
 
 Lifecycle:
 
