@@ -53,6 +53,13 @@ def parse_iso_date(raw: object, *, field_name: str, record_path: Path, errors: l
         return None
 
 
+def workspace_relative_path(path: Path, *, repo_root: Path, workspace_root: Path) -> str:
+    try:
+        return path.relative_to(workspace_root).as_posix()
+    except ValueError:
+        return f"{repo_root.name}/{path.relative_to(repo_root).as_posix()}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate improvement candidate records for workspace-governance.")
     parser.add_argument(
@@ -91,12 +98,12 @@ def main() -> int:
         for path in candidate_paths
     }
     closed_candidate_paths = {
-        path.relative_to(workspace_root).as_posix()
+        workspace_relative_path(path, repo_root=repo_root, workspace_root=workspace_root)
         for path, record in candidate_records.items()
         if record.get("status") == "closed"
     }
     after_action_paths = {
-        path.relative_to(workspace_root).as_posix()
+        workspace_relative_path(path, repo_root=repo_root, workspace_root=workspace_root)
         for path in after_action_dir.glob("*.yaml")
         if path.name != "TEMPLATE.yaml"
     }
