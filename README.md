@@ -243,6 +243,17 @@ Those stay in the owning repos:
 9. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
+When the workspace is being described as clean, restart-ready, or post-merge
+retired, the stricter branch lifecycle gate must pass too:
+
+```bash
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
+```
+
+That check is what prevents stale local branches, pinned worktrees, and remote
+branches without an open PR or documented exception from lingering after the
+real work is already on `main`.
+
 ## Sync Model
 
 The workspace root is not a Git repo, but local tools and future sessions still
@@ -286,6 +297,9 @@ python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/
 python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
 python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
@@ -293,8 +307,9 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
 ```
 
 ## Read First

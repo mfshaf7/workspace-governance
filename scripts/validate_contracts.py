@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 from pathlib import Path
+import re
 import sys
 
 from jsonschema import Draft202012Validator
@@ -16,6 +17,16 @@ from contracts_lib import (
     load_contracts,
     load_json,
 )
+
+
+BRANCH_LIFECYCLE_TARGET_RE = re.compile(
+    r"^repo:(?P<repo>[^:]+):(?P<kind>remote-branch|local-branch|worktree):(?P<value>.+)$"
+)
+BRANCH_LIFECYCLE_WAIVER_KINDS = {
+    "branch-lifecycle-remote-branch": "remote-branch",
+    "branch-lifecycle-local-branch": "local-branch",
+    "branch-lifecycle-worktree": "worktree",
+}
 
 
 def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -> None:
@@ -83,6 +94,7 @@ def main() -> int:
     intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
     intake_repos = set(intake_register["repos"].keys())
+    retired_repos = set(contracts["repos"].get("retired_repos", {}).keys())
     product_names = set(contracts["products"]["products"].keys())
     intake_products = set(intake_register["products"].keys())
     change_classes = set(contracts["change_classes"]["change_classes"].keys())
@@ -608,6 +620,31 @@ def main() -> int:
     for entry in contracts["exceptions"]["exceptions"]:
         if entry["owner"] not in active_repos:
             errors.append(f"contracts/exceptions.yaml: exception {entry['id']} owner {entry['owner']!r} is not an active repo")
+        branch_lifecycle_waivers = [
+            waiver for waiver in entry["waives"] if waiver in BRANCH_LIFECYCLE_WAIVER_KINDS
+        ]
+        if branch_lifecycle_waivers:
+            target_match = BRANCH_LIFECYCLE_TARGET_RE.fullmatch(entry["target"])
+            if not target_match:
+                errors.append(
+                    f"contracts/exceptions.yaml: exception {entry['id']} target must match "
+                    "'repo:<repo>:<kind>:<value>' for branch-lifecycle waivers"
+                )
+            else:
+                known_repo_refs = active_repos | intake_repos | retired_repos
+                target_repo = target_match.group("repo")
+                target_kind = target_match.group("kind")
+                if target_repo not in known_repo_refs:
+                    errors.append(
+                        f"contracts/exceptions.yaml: exception {entry['id']} references unknown repo {target_repo!r}"
+                    )
+                for waiver in branch_lifecycle_waivers:
+                    expected_kind = BRANCH_LIFECYCLE_WAIVER_KINDS[waiver]
+                    if target_kind != expected_kind:
+                        errors.append(
+                            f"contracts/exceptions.yaml: exception {entry['id']} waiver {waiver!r} "
+                            f"requires target kind {expected_kind!r}, got {target_kind!r}"
+                        )
         try:
             expires_on = date.fromisoformat(entry["expires_on"])
         except ValueError:

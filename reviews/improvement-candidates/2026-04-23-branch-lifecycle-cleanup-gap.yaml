@@ -1,0 +1,68 @@
+schema_version: 1
+id: 2026-04-23-branch-lifecycle-cleanup-gap
+title: Merged work left stale branches and pinned worktrees without branch-lifecycle
+  cleanup
+recorded_on: '2026-04-23'
+owner_repo: workspace-governance
+summary: 'The workspace had doctrine for using branches and PRs, but no real post-merge
+  branch/worktree retirement control. After #181 and #175 landed, stale local branches,
+  pinned /tmp worktrees, and undeleted remote branches remained until a manual sweep
+  removed them. The user explicitly called out the hanging stale branch and asked
+  why the system did not prevent it.'
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-half-baked-callout
+  title: The operator explicitly said the work is half-baked, incomplete, sloppy,
+    or should have been caught already.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Branch creation and PR flow were governed, but branch retirement was not.
+    GitHub head branches were not auto-deleted, local worktrees pinned obsolete codex
+    branches, squash merges left some stale branches outside simple merged-ancestor
+    checks, and no validator or restart-readiness gate audited branch/worktree hygiene.
+    That let stale branch state hang around even after the real work was already on
+    main.
+  source_refs:
+  - 'conversation: user explicitly asked what caused the stale hanging branches and
+    why the system did not prevent them'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: validator
+    path: workspace-governance/scripts/audit_branch_lifecycle.py
+    owner_repo: workspace-governance
+    note: Adds the explicit branch/worktree lifecycle audit and the strict clean-state gate.
+  - type: script
+    path: workspace-governance/scripts/workspace_control_plane_summary.py
+    owner_repo: workspace-governance
+    note: Surfaces remote stale-branch residue in the daily control-plane summary.
+  - type: workflow
+    path: workspace-governance/scripts/audit_workspace_layout.py
+    owner_repo: workspace-governance
+    note: Wires the strict clean-state gate into workspace-level restart-readiness checks.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches restart-readiness to require the clean-state branch lifecycle audit.
+  - type: doc
+    path: workspace-governance/docs/codex-github-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Documents post-merge branch retirement and the new control-plane summary check.
+  note: Closed by the landed branch lifecycle validator, the restart-readiness gate wiring, and the updated operator guidance in workspace-governance.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -31,6 +31,9 @@ Before telling the operator that a restart is safe or recommended:
 - treat pending architecture/workflow discussion, local-only review or handoff notes, and unlanded workspace-level state as handoff-worthy by default
 - if that state exists, create or refresh the latest `docs/archive/session-handoff-*.md` record first
 - only after the handoff is current should you say the restart is ready
+- if the workspace is being described as clean or restart-ready,
+  `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
+  must pass so stale branches, pinned worktrees, and remote branch residue are not left behind
 - do not wait for the operator to ask whether a handoff is needed
 
 ## Minimum Checks
