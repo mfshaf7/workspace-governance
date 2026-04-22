@@ -133,7 +133,7 @@ introduces any of these:
 Examples include:
 
 - introducing Envoy for `k3s`
-- adding a new product beside OpenClaw or OpenProject
+- adding a new product beside the current governed product set
 - introducing a new controller that changes delivery or runtime trust
 
 In those cases, do not jump straight into implementation. First frame the
