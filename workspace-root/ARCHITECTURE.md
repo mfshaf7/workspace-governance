@@ -67,32 +67,34 @@ Retired path:
 - `openproject`
   - platform-integrated
   - real runtime and operator procedures exist
-  - does not have an OpenClaw-style governed source-to-stage-to-prod path
+  - does not yet have its own governed source-to-stage-to-prod path
   - highest real endpoint: platform-integrated runtime
 
-## OpenClaw Flow
+## Current Product Paths
 
-The current OpenClaw path is:
+No single product should be treated as the workspace default.
 
-1. canonical source changes land in:
-   - `openclaw-telegram-enhanced/`
-   - `openclaw-host-bridge/`
-   - `openclaw-runtime-distribution/host-control-openclaw-plugin/`
-2. `openclaw-runtime-distribution/` assembles the governed runtime candidate
-3. `platform-engineering/products/openclaw/` records approved SHAs and digests
-4. Argo reconciles the approved environment state
-5. host-control crosses:
-   - gateway
-   - packaged plugin
-   - `openclaw-host-bridge`
-   - WSL/Windows host
-6. `security-architecture/` governs trust-boundary expectations and review
+- OpenClaw
+  - canonical source changes land in:
+    - `openclaw-telegram-enhanced/`
+    - `openclaw-host-bridge/`
+    - `openclaw-runtime-distribution/host-control-openclaw-plugin/`
+  - `openclaw-runtime-distribution/` assembles the governed runtime candidate
+  - `platform-engineering/products/openclaw/` records approved SHAs and
+    digests, stage verification, readiness, and prod promotion state
+  - `security-architecture/` governs trust-boundary expectations and review
+- OpenProject
+  - platform runtime, access, and operator procedures live in
+    `platform-engineering/products/openproject/`
+  - delivery execution truth lives in the `Workspace Delivery ART`
+  - `operator-orchestration-service/` owns the broker-backed delivery-control
+    APIs and OpenProject workflow adapters
 
 Important operating truth:
 
-- `stage` is not the fast design lane
+- `stage` is the governed rehearsal lane for products that have one
 - `dev-integration` is the fast design lane
-- stage is for governed rehearsal, not loose iteration
+- stage is not the loose iteration lane
 
 ## Operator Workflow Surfaces
 
@@ -179,17 +181,17 @@ operator interaction layer, not just a UI skin.
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration
   - [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
+- OpenProject runtime or delivery execution model
+  - [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+- broker workflow contracts and runtime
+  - [operator-orchestration-service/README.md](/home/mfshaf7/projects/operator-orchestration-service/README.md)
 - OpenClaw runtime composition and packaging
   - [openclaw-runtime-distribution/README.md](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
 - OpenClaw governed release path
   - [platform-engineering/products/openclaw/README.md](/home/mfshaf7/projects/platform-engineering/products/openclaw/README.md)
-- OpenProject runtime or backlog model
-  - [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
 - Telegram behavior or `/platform` and `/idea`
   - [openclaw-telegram-enhanced/README.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
 - host-control or WSL/Windows bridge behavior
   - [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)
-- broker workflow contracts and runtime
-  - [operator-orchestration-service/README.md](/home/mfshaf7/projects/operator-orchestration-service/README.md)
 - trust boundaries, AI governance, or security review posture
   - [security-architecture/README.md](/home/mfshaf7/projects/security-architecture/README.md)

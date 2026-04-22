@@ -6,9 +6,9 @@ This repository is the cross-repo governance and routing layer for the
 It owns the canonical workspace-level guidance and audit tooling that are
 materialized into the local workspace root for day-to-day operator use.
 
-The workspace is multi-product. This repo should not drift into OpenClaw-only
-language when the actual workspace governs shared platform services plus
-multiple products.
+This workspace is multi-product and workspace-governed. Keep the language at
+this layer centered on shared control planes, platform authority, and current
+product maturity instead of treating any one product as the implied default.
 
 It now also owns the machine-readable control-plane contracts that describe the
 active repo map, product maturity, component inventory, dependency semantics,

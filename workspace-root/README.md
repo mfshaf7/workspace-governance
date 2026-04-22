@@ -32,23 +32,30 @@ individual repos.
   - retired to an archival stub
   - not part of the current governed build, promotion, or owner-routing model
 
-## Current OpenClaw Control Flow
+## Current Workspace Runtime And Delivery Paths
 
-1. Source behavior changes land in the canonical owner repo:
-   - `openclaw-telegram-enhanced/`
-   - `openclaw-host-bridge/`
-   - `openclaw-runtime-distribution/host-control-openclaw-plugin/`
-2. `openclaw-runtime-distribution/` assembles the governed runtime candidate.
-3. `platform-engineering/products/openclaw/` records the approved source SHAs
-   and image digest for `stage` or `prod`.
-4. Argo reconciles the approved environment state into the live cluster.
-5. Host-control requests cross the runtime boundary:
-   - gateway
-   - packaged plugin
-   - `openclaw-host-bridge`
-   - WSL/Windows host
-6. `security-architecture/` governs trust-boundary, control, and review
-   expectations across the stack.
+The workspace is not centered on one product. Current governed paths are:
+
+- shared platform and control plane
+  - `platform-engineering/` owns shared environment contracts, Argo state,
+    release truth, and product integration surfaces
+  - `workspace-governance/` owns the routing, contract, audit, and
+    self-improvement control plane
+  - `security-architecture/` owns trust-boundary judgment, security standards,
+    and review posture
+- OpenClaw
+  - fully governed product path with source ownership in the canonical product
+    repos, runtime composition in `openclaw-runtime-distribution/`, governed
+    stage rehearsal, readiness approval, and prod promotion through
+    `platform-engineering/products/openclaw/`
+- OpenProject
+  - platform-integrated product path with runtime, access, and operator
+    procedures in `platform-engineering/products/openproject/`
+  - execution-of-record for delivery work through the `Workspace Delivery ART`
+- shared operator workflow service
+  - `operator-orchestration-service/` owns broker-backed operator workflows,
+    delivery-control APIs, and OpenProject workflow adapters that span product
+    boundaries
 
 ## Current Product Surfaces
 
@@ -58,6 +65,9 @@ individual repos.
 - OpenProject
   - product integration, access, and operations guidance:
     [platform-engineering/products/openproject/README.md](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+- Shared operator workflows
+  - broker-backed workflow APIs and delivery-control surfaces:
+    [operator-orchestration-service/README.md](/home/mfshaf7/projects/operator-orchestration-service/README.md)
 
 ## Workspace Governance And Audit
 
