@@ -47,3 +47,15 @@ operator_workflow_requirements:
       required_in_docs:
         - readme
         - agents
+    - id: delegated-execution-governance
+      summary: Primary operator procedure for governed delegated execution, task packets, write-scope ownership, and journal records.
+      primary_surface_path: docs/delegated-execution.md
+      required_in_docs:
+        - readme
+        - agents
+    - id: self-improvement-escalation
+      summary: Primary operator procedure for in-session self-improvement escalation and fail-closed candidate capture.
+      primary_surface_path: docs/self-improvement-escalation.md
+      required_in_docs:
+        - readme
+        - agents

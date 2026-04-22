@@ -1,0 +1,45 @@
+schema_version: 1
+delegation_id: YYYY-MM-DD-example-delegation
+created_on: "YYYY-MM-DD"
+owner_repo: workspace-governance
+work_item_ref: replace-with-art-ticket-or-local-task-ref
+task_class: cross-repo-delivery
+summary: Replace with a short summary of the delegated execution.
+main_agent:
+  authority_owner: main-agent
+  retained_actions:
+    - work-system mutation
+    - live environment mutation
+    - security decision closure
+    - final proof
+    - final completion
+packets:
+  - packet_id: packet-1
+    delegate_kind: implementation
+    tool_role: worker
+    delegate_agent_id: null
+    target_repo: workspace-governance
+    task_summary: Replace with the bounded delegated task.
+    allowed_write_paths:
+      - replace/with/owned/path
+    expected_outputs:
+      - Replace with expected output.
+    proof_expectation:
+      - Replace with the expected validation or evidence.
+    forbidden_actions:
+      - work-system mutation
+      - live environment mutation
+      - security decision closure
+      - final proof
+      - final completion
+    status: assigned
+    changed_paths: []
+    uncovered_work:
+      classification: none
+      note: null
+integration_outcome:
+  status: integrated
+  integrated_by: main-agent
+  security_review_ref: null
+  evidence_refs: []
+  note: null

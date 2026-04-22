@@ -105,14 +105,15 @@ Typical examples:
 
 In those cases:
 
-1. record or update an improvement candidate
-2. classify it as a diagnostic-ordering miss when that fits
-3. use trigger `late-root-cause-discovery`
+1. run `scripts/check_self_improvement_escalation.py --signal late-root-cause-discovery`
+2. if it fails closed, record or update the improvement candidate before
+   continuing normal troubleshooting
+3. classify it as a diagnostic-ordering miss when that fits
 4. close it only through durable control changes, not chat memory
 
-Use the workspace skill:
+Primary operator surface:
 
-- `self-improvement-review`
+- `docs/self-improvement-escalation.md`
 
 ## Output
 

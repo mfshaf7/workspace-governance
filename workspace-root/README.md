@@ -70,6 +70,10 @@ rules. It also owns the self-improvement loop that now includes:
 - improvement-candidate triage
 - after-action closure
 
+Primary operator surface:
+
+- `/home/mfshaf7/projects/workspace-governance/docs/self-improvement-escalation.md`
+
 It also owns the intake gate. New repos, products, and components are supposed
 to be classified first:
 

@@ -15,6 +15,14 @@ triggers:
       - validator
       - runbook
       - skill
+  machine-visible-workflow-drift:
+    description: A validator, quality gate, or structured workflow read surfaced a doctrine or active-work miss that should force candidate capture before normal execution continues.
+    requires_after_action: true
+    recommended_control_types:
+      - validator
+      - workflow
+      - skill
+      - doc
   post-promotion-evidence-gap:
     description: A rollout reached reconciliation, but completion evidence or prod smoke proof was missing or too weak.
     requires_after_action: true
@@ -62,6 +70,15 @@ triggers:
       - doc
   closed-lesson-regression:
     description: A failure class that had already been treated as closed regressed in active work and now needs an explicit regression record plus stronger controls.
+    requires_after_action: true
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc
+  delegated-execution-control-breach:
+    description: Delegated execution crossed its declared authority boundary, overlapping write scope, live-control restrictions, or work-tracking obligations.
     requires_after_action: true
     recommended_control_types:
       - contract

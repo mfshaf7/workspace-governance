@@ -10,6 +10,7 @@ Use this skill when the root cause is still unproven.
 ## Read First
 
 - `docs/troubleshooting-preflight.md`
+- `docs/self-improvement-escalation.md`
 - `contracts/failure-taxonomy.yaml`
 - `contracts/improvement-triggers.yaml`
 - `skills-src/self-improvement-review/SKILL.md`
@@ -32,8 +33,9 @@ Use this skill when the root cause is still unproven.
    layers are checked.
 7. If the root cause turns out to be a skipped simpler earlier-layer check:
    - treat it as a self-improvement signal
-   - use trigger `late-root-cause-discovery`
-   - record or update an improvement candidate
+   - run `python3 scripts/check_self_improvement_escalation.py --signal late-root-cause-discovery ...`
+   - if it fails closed, record or update the candidate before continuing
+     normal troubleshooting
 
 ## Guardrails
 

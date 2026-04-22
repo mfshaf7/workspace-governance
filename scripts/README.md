@@ -21,6 +21,9 @@
     from their owner repos into a Codex skill directory
   - tracks the workspace-managed live skill install manifest so stale managed
     skills do not silently linger in `~/.codex/skills`
+- `validate_delegation_journal.py`
+  - validates delegated-execution journal records, packet scope discipline,
+    write-scope overlap, and required security-review references
 - `scaffold_intake.py`
   - creates a new intake classification entry so a repo, product, or component
     is explicitly marked out-of-scope, proposed, or admitted before it joins
@@ -30,6 +33,11 @@
 - `record_improvement_candidate.py`
   - creates a scaffolded improvement-candidate record under
     `reviews/improvement-candidates/`
+- `check_self_improvement_escalation.py`
+  - evaluates whether a live self-improvement signal must pause normal work and
+    immediately create a candidate
+  - can also scaffold the candidate directly from the governed
+    `self-improvement-policy` signal catalog
 - `sync_workspace_root.py`
   - syncs the canonical files in this repo back into `/home/mfshaf7/projects`
 - `validate_improvement_candidates.py`

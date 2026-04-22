@@ -1,0 +1,69 @@
+schema_version: 1
+governance:
+  policy_owner_repo: workspace-governance
+  operator_surface_path: docs/self-improvement-escalation.md
+  required_skills:
+    - self-improvement-review
+    - project-delivery-operator
+    - troubleshooting-preflight
+runtime_gate:
+  pause_before_continue: true
+  default_follow_up_days: 3
+  require_candidate_before_continue_for:
+    - operator-repeated-mistake-callout
+    - operator-half-baked-callout
+    - active-work-transition-incomplete
+    - repeated-corrective-follow-up
+    - machine-visible-workflow-drift
+    - late-root-cause-discovery
+    - delegated-execution-control-breach
+signal_catalog:
+  operator-repeated-mistake-callout:
+    description: The operator explicitly said the miss is a repeated mistake and expects the system to learn from it.
+    default_source_type: conversation
+    default_trigger: repeated-operator-friction
+    default_failure_classes:
+      - workflow-doctrine-gap
+    supports_regression_link: true
+  operator-half-baked-callout:
+    description: The operator explicitly said the work is half-baked, incomplete, sloppy, or should have been caught already.
+    default_source_type: conversation
+    default_trigger: repeated-operator-friction
+    default_failure_classes:
+      - workflow-doctrine-gap
+    supports_regression_link: true
+  active-work-transition-incomplete:
+    description: Active work changed phase or status without the next committed work-state, evidence state, or scope transition being recorded cleanly.
+    default_source_type: manual
+    default_trigger: machine-visible-workflow-drift
+    default_failure_classes:
+      - workflow-doctrine-gap
+    supports_regression_link: true
+  repeated-corrective-follow-up:
+    description: The same workflow needed another corrective follow-up in the same task or session.
+    default_source_type: manual
+    default_trigger: repeated-operator-friction
+    default_failure_classes:
+      - workflow-doctrine-gap
+    supports_regression_link: true
+  machine-visible-workflow-drift:
+    description: A validator, quality gate, or delivery read model exposed a workflow or doctrine miss that should stop normal execution.
+    default_source_type: machine-audit
+    default_trigger: machine-visible-workflow-drift
+    default_failure_classes:
+      - workflow-doctrine-gap
+    supports_regression_link: true
+  late-root-cause-discovery:
+    description: A simpler prerequisite, permission, environment, or contract check was proven only after deeper analysis had already expanded.
+    default_source_type: review
+    default_trigger: late-root-cause-discovery
+    default_failure_classes:
+      - diagnostic-ordering-miss
+    supports_regression_link: true
+  delegated-execution-control-breach:
+    description: Delegated execution crossed packet scope, live-control, work-tracking, or write-scope boundaries.
+    default_source_type: review
+    default_trigger: delegated-execution-control-breach
+    default_failure_classes:
+      - delegated-scope-control-miss
+    supports_regression_link: true

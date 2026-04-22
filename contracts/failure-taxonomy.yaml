@@ -70,8 +70,47 @@ failure_classes:
       - adr
       - workflow
       - doc
+  self-improvement-runtime-gate-gap:
+    description: Self-improvement doctrine existed, but there was no deterministic in-session gate that forced candidate capture before normal work continued.
+    recommended_control_types:
+      - contract
+      - validator
+      - workflow
+      - skill
+      - doc
   learning-closure-regression:
     description: A lesson that was previously treated as closed regressed in active work, showing that the earlier closure controls were too weak or too narrow.
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc
+  delegated-scope-control-miss:
+    description: Delegated execution happened without a clear packet, explicit ownership split, or proper main-agent authority boundary.
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc
+  overlapping-delegated-write-scope:
+    description: Two delegated workers were given overlapping write scope, creating avoidable integration or review ambiguity.
+    recommended_control_types:
+      - contract
+      - validator
+      - workflow
+      - doc
+  delegated-live-control-misuse:
+    description: Delegated work crossed into ART mutation, live environment mutation, or another main-agent-only control action.
+    recommended_control_types:
+      - contract
+      - validator
+      - skill
+      - workflow
+      - doc
+  delegated-untracked-scope:
+    description: Delegated workers discovered or implemented meaningful new scope without routing it back through the work system or owner workflow.
     recommended_control_types:
       - contract
       - validator

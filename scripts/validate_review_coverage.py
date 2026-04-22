@@ -134,12 +134,12 @@ def main() -> int:
                 if repo_name == "platform-engineering"
                 else "component"
             ),
-            "baseline_review_path": contracts["repo_rules"][repo_name]["security_requirements"][
-                "review_output_path"
-            ],
+            "baseline_review_path": (
+                contracts["repo_rules"][repo_name].get("security_requirements", {}).get("review_output_path")
+            ),
         }
         for repo_name, payload in contracts["repos"]["repos"].items()
-        if payload["requires_security_bindings"]
+        if payload["requires_security_bindings"] or payload.get("security_review_subject")
     }
     expected_components = {
         component_name: {
@@ -237,7 +237,7 @@ def main() -> int:
                 security_repo_root=security_repo_root,
                 errors=errors,
             )
-            if section_name == "repos" and baseline_path != expected["baseline_review_path"]:
+            if section_name == "repos" and expected.get("baseline_review_path") and baseline_path != expected["baseline_review_path"]:
                 errors.append(
                     f"registers/review-inventory.yaml: repos.{subject_name}.baseline_review.path must match repo-rules review_output_path"
                 )

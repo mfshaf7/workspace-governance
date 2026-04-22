@@ -14,6 +14,7 @@
           "lifecycle": { "type": "string", "minLength": 1 },
           "repo_class": { "type": "string", "minLength": 1 },
           "requires_security_bindings": { "type": "boolean" },
+          "security_review_subject": { "type": "boolean" },
           "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "must_not_own": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } }

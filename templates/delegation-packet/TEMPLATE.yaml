@@ -1,0 +1,15 @@
+work_item_ref: replace-with-art-ticket-or-local-task-ref
+summary: Replace with the delegated task summary.
+owner_repo: workspace-governance
+allowed_write_paths:
+  - replace/with/owned/path
+expected_outputs:
+  - Replace with expected output.
+proof_expectation:
+  - Replace with required validation or evidence.
+forbidden_actions:
+  - work-system mutation
+  - live environment mutation
+  - security decision closure
+  - final proof
+  - final completion

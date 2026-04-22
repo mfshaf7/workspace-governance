@@ -47,6 +47,8 @@ def main() -> int:
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "developer_integration_policy": repo_root / "contracts/developer-integration-policy.yaml",
         "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
+        "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
+        "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
         "repos": repo_root / "contracts/repos.yaml",
         "products": repo_root / "contracts/products.yaml",
@@ -76,6 +78,8 @@ def main() -> int:
     intake_register = contracts["intake_register"]
     developer_integration_policy = contracts["developer_integration_policy"]
     developer_integration_profiles = contracts["developer_integration_profiles"]
+    delegation_policy = contracts["delegation_policy"]
+    self_improvement_policy = contracts["self_improvement_policy"]
     intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
     intake_repos = set(intake_register["repos"].keys())
@@ -88,6 +92,10 @@ def main() -> int:
     improvement_triggers = contracts["improvement_triggers"]["triggers"]
     validator_scripts = contracts["validation_matrix"]["validators"]
     registered_skills = contracts["skills"]["skills"]
+    delegation_task_classes = delegation_policy["task_classes"]
+    self_improvement_governance = self_improvement_policy["governance"]
+    self_improvement_runtime_gate = self_improvement_policy["runtime_gate"]
+    self_improvement_signal_catalog = self_improvement_policy["signal_catalog"]
 
     expected_intake_statuses = {"out-of-scope", "proposed", "admitted"}
     if intake_statuses != expected_intake_statuses:
@@ -131,6 +139,128 @@ def main() -> int:
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
             + ", ".join(sorted(expected_devint_actions))
         )
+    delegation_governance = delegation_policy["governance"]
+    if delegation_governance["policy_owner_repo"] not in active_repos:
+        errors.append(
+            "contracts/delegation-policy.yaml: governance.policy_owner_repo "
+            f"{delegation_governance['policy_owner_repo']!r} is not an active repo"
+        )
+    if delegation_governance["policy_owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/delegation-policy.yaml: governance.policy_owner_repo must be 'workspace-governance'"
+        )
+    for skill_name in delegation_governance["required_skills"]:
+        if skill_name not in registered_skills:
+            errors.append(
+                f"contracts/delegation-policy.yaml: governance.required_skills references unknown skill {skill_name!r}"
+            )
+    if not delegation_governance["operator_surface_path"].endswith(".md"):
+        errors.append(
+            "contracts/delegation-policy.yaml: governance.operator_surface_path must point to a markdown instruction surface"
+        )
+    elif not (repo_root / delegation_governance["operator_surface_path"]).exists():
+        errors.append(
+            "contracts/delegation-policy.yaml: governance.operator_surface_path "
+            f"{delegation_governance['operator_surface_path']!r} does not exist"
+        )
+    if not delegation_governance["journal_root"].startswith("reviews/"):
+        errors.append(
+            "contracts/delegation-policy.yaml: governance.journal_root must live under reviews/"
+        )
+    packet_kinds = set(delegation_policy["packet"]["delegate_kinds"])
+    expected_packet_kinds = {"exploration", "implementation", "verification"}
+    if packet_kinds != expected_packet_kinds:
+        errors.append(
+            "contracts/delegation-policy.yaml: packet.delegate_kinds must be exactly exploration, implementation, verification"
+        )
+    required_packet_fields = set(delegation_policy["packet"]["required_fields"])
+    expected_packet_fields = {
+        "work_item_ref",
+        "summary",
+        "owner_repo",
+        "allowed_write_paths",
+        "expected_outputs",
+        "proof_expectation",
+        "forbidden_actions",
+    }
+    if required_packet_fields != expected_packet_fields:
+        errors.append(
+            "contracts/delegation-policy.yaml: packet.required_fields must be exactly "
+            + ", ".join(sorted(expected_packet_fields))
+        )
+    required_journal_fields = set(delegation_policy["audit_journal"]["required_fields"])
+    expected_journal_fields = {
+        "delegation_id",
+        "created_on",
+        "owner_repo",
+        "work_item_ref",
+        "task_class",
+        "main_agent",
+        "packets",
+        "integration_outcome",
+    }
+    if required_journal_fields != expected_journal_fields:
+        errors.append(
+            "contracts/delegation-policy.yaml: audit_journal.required_fields must be exactly "
+            + ", ".join(sorted(expected_journal_fields))
+        )
+    if "live-control" not in delegation_task_classes:
+        errors.append("contracts/delegation-policy.yaml: task_classes must define 'live-control'")
+    for task_class, payload in delegation_task_classes.items():
+        if payload["max_sub_agents"] == 0 and payload["allows_delegated_write"]:
+            errors.append(
+                f"contracts/delegation-policy.yaml: task_class {task_class!r} cannot allow delegated write with max_sub_agents=0"
+            )
+    if delegation_task_classes.get("live-control", {}).get("max_sub_agents") != 0:
+        errors.append("contracts/delegation-policy.yaml: task_class 'live-control' must keep max_sub_agents=0")
+    if delegation_task_classes.get("live-control", {}).get("allows_delegated_write") is not False:
+        errors.append("contracts/delegation-policy.yaml: task_class 'live-control' must not allow delegated write")
+    if delegation_policy["future_enforcement_boundary"]["parked_architecture_ref"] != "openproject://work_packages/77":
+        errors.append(
+            "contracts/delegation-policy.yaml: future_enforcement_boundary.parked_architecture_ref must point to openproject://work_packages/77"
+        )
+    if self_improvement_governance["policy_owner_repo"] not in active_repos:
+        errors.append(
+            "contracts/self-improvement-policy.yaml: governance.policy_owner_repo "
+            f"{self_improvement_governance['policy_owner_repo']!r} is not an active repo"
+        )
+    if self_improvement_governance["policy_owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/self-improvement-policy.yaml: governance.policy_owner_repo must be 'workspace-governance'"
+        )
+    if not self_improvement_governance["operator_surface_path"].endswith(".md"):
+        errors.append(
+            "contracts/self-improvement-policy.yaml: governance.operator_surface_path must point to a markdown instruction surface"
+        )
+    elif not (repo_root / self_improvement_governance["operator_surface_path"]).exists():
+        errors.append(
+            "contracts/self-improvement-policy.yaml: governance.operator_surface_path "
+            f"{self_improvement_governance['operator_surface_path']!r} does not exist"
+        )
+    for skill_name in self_improvement_governance["required_skills"]:
+        if skill_name not in registered_skills:
+            errors.append(
+                "contracts/self-improvement-policy.yaml: governance.required_skills references unknown "
+                f"skill {skill_name!r}"
+            )
+    for signal_name in self_improvement_runtime_gate["require_candidate_before_continue_for"]:
+        if signal_name not in self_improvement_signal_catalog:
+            errors.append(
+                "contracts/self-improvement-policy.yaml: runtime_gate.require_candidate_before_continue_for "
+                f"references unknown signal {signal_name!r}"
+            )
+    for signal_name, payload in self_improvement_signal_catalog.items():
+        if payload["default_trigger"] not in improvement_triggers:
+            errors.append(
+                "contracts/self-improvement-policy.yaml: signal_catalog "
+                f"{signal_name!r} references unknown trigger {payload['default_trigger']!r}"
+            )
+        for failure_class in payload["default_failure_classes"]:
+            if failure_class not in failure_classes:
+                errors.append(
+                    "contracts/self-improvement-policy.yaml: signal_catalog "
+                    f"{signal_name!r} references unknown failure class {failure_class!r}"
+                )
     for profile_name, payload in developer_integration_profiles["profiles"].items():
         if payload["lifecycle"] not in profile_lifecycle["statuses"]:
             errors.append(
@@ -199,6 +329,10 @@ def main() -> int:
         for ref in payload["allowed_authoritative_refs"]:
             if ref not in active_repos:
                 errors.append(f"contracts/repos.yaml: {repo_name} references unknown repo {ref!r}")
+        if payload.get("security_review_subject") and "security-architecture" not in payload["allowed_authoritative_refs"]:
+            errors.append(
+                f"contracts/repos.yaml: {repo_name} sets security_review_subject but does not allow security-architecture as an authoritative ref"
+            )
 
     for repo_name, payload in contracts["repos"].get("retired_repos", {}).items():
         if payload["lifecycle"] not in lifecycle_states:

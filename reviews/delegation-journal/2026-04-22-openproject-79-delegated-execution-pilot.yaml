@@ -1,0 +1,71 @@
+schema_version: 1
+delegation_id: 2026-04-22-openproject-79-delegated-execution-pilot
+created_on: "2026-04-22"
+owner_repo: workspace-governance
+work_item_ref: openproject://work_packages/79
+task_class: security-significant-delivery
+summary: Pilot delegated execution on ART-backed work by delegating the security-architecture slice while the main agent retained policy, integration, security closure, and final landing judgment.
+main_agent:
+  authority_owner: main-agent
+  retained_actions:
+    - work-system mutation
+    - live environment mutation
+    - security decision closure
+    - final proof
+    - final completion
+    - PI replanning
+    - change classification and scope routing
+packets:
+  - packet_id: security-architecture-delegated-execution-governance
+    delegate_kind: implementation
+    tool_role: worker
+    delegate_agent_id: 019db1cf-c2ef-7a13-896f-b9339913993b
+    target_repo: security-architecture
+    task_summary: Update security delegated-execution guidance and add the fresh delta review artifact for workspace-governance delegated execution governance.
+    allowed_write_paths:
+      - skills-src/security-governance-review/SKILL.md
+      - docs/reviews/components/2026-04-22-workspace-governance-delegated-execution-governance.md
+      - registers/review-inventory.yaml
+      - registers/review-inventory.md
+      - registers/csv/review-inventory.csv
+      - registers/security-change-record-index.yaml
+    expected_outputs:
+      - updated security delegated-execution guidance
+      - dated delegated-execution delta review
+      - refreshed security review inventory surfaces
+    proof_expectation:
+      - python3 scripts/render_register_views.py --repo-root .
+      - python3 scripts/validate_repo_structure.py --repo-root .
+      - python3 scripts/render_security_change_record_index.py --repo-root .
+      - python3 scripts/validate_security_evidence.py --repo-root . --workspace-root /home/mfshaf7/projects
+      - git diff --check
+    forbidden_actions:
+      - work-system mutation
+      - live environment mutation
+      - security decision closure
+      - final proof
+      - final completion
+      - PI replanning
+      - change classification and scope routing
+    status: integrated
+    changed_paths:
+      - skills-src/security-governance-review/SKILL.md
+      - docs/reviews/components/2026-04-22-workspace-governance-delegated-execution-governance.md
+      - registers/review-inventory.yaml
+      - registers/review-inventory.md
+      - registers/csv/review-inventory.csv
+      - registers/security-change-record-index.yaml
+    uncovered_work:
+      classification: none
+      note: null
+integration_outcome:
+  status: integrated
+  integrated_by: main-agent
+  security_review_ref: security-architecture/docs/reviews/components/2026-04-22-workspace-governance-delegated-execution-governance.md
+  evidence_refs:
+    - workspace-governance/contracts/delegation-policy.yaml
+    - workspace-governance/docs/delegated-execution.md
+    - workspace-governance/reviews/delegation-journal/2026-04-22-openproject-79-delegated-execution-pilot.yaml
+    - security-architecture/skills-src/security-governance-review/SKILL.md
+    - security-architecture/docs/reviews/components/2026-04-22-workspace-governance-delegated-execution-governance.md
+  note: The main agent retained security decision closure and final landing judgment while the delegated worker owned the bounded security-architecture update slice.

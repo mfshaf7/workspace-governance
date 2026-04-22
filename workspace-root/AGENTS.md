@@ -272,6 +272,9 @@ Only start implementation after that discussion narrows the target design.
   records explicit operator acceptance.
 - If a major miss, late discovery, or repeated workflow problem is uncovered,
   route it through the self-improvement system, not just chat memory.
+- Use `workspace-governance/docs/self-improvement-escalation.md` as the
+  primary operator surface when a live signal should pause normal work and
+  force immediate candidate capture.
 - Record or update a candidate first in
   `workspace-governance/reviews/improvement-candidates/` when the signal is
   real but the closure shape is not fully decided yet.

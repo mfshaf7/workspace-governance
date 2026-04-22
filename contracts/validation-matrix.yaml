@@ -6,6 +6,10 @@ validators:
   contract-model:
     script: scripts/validate_contracts.py
     scope: workspace-governance
+  delegation-journal:
+    script: scripts/validate_delegation_journal.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   intake-model:
     script: scripts/validate_intake.py
     scope: local-workspace
