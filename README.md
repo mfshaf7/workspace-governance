@@ -62,6 +62,52 @@ This repo is the workspace control plane. It does not deliver products
 directly. It decides how the workspace is classified, routed, audited, and
 corrected when the control model drifts.
 
+## Workflow At A Glance
+
+```mermaid
+flowchart LR
+    Intake[Classify request or new entrant]
+    Proposals[Workspace Proposals]
+    Accepted{Accepted?}
+    ART[Workspace Delivery ART]
+    Owners[Owner repos]
+    DevInt[dev-integration]
+    Stage[stage]
+    Prod[prod]
+    Audit[Audits and validators]
+    Improve[Improvement candidates and after-action]
+
+    Intake --> Proposals
+    Proposals --> Accepted
+    Accepted -->|no| Proposals
+    Accepted -->|yes| ART
+    ART --> Owners
+    Owners --> DevInt
+    Owners --> Stage
+    DevInt --> Stage
+    Stage --> Prod
+    Audit --> Improve
+    Improve --> Audit
+```
+
+Where this repo sits in that flow:
+
+- it governs intake classification before work quietly becomes active
+- it governs the transition from proposal tracking into the
+  [`Workspace Delivery ART`](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/delivery-art-contract.md)
+- it does not replace owner repos as implementation truth
+- it defines the rules for `dev-integration`, stage discipline, and
+  self-improvement when the workflow drifts
+
+If you only need one workflow picture from this repo, use this one. The key
+placement is:
+
+- [`Workspace Proposals`](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/idea-backlog-contract.md)
+  = intake and triage
+- [`Workspace Delivery ART`](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/delivery-art-contract.md)
+  = accepted work and delivery execution
+- owner repos = code, runtime changes, and durable implementation
+
 When a change creates or materially changes a workflow that an operator is
 expected to run, the owning repo must publish one primary instruction surface.
 Supporting contracts and templates can reinforce that workflow, but they do

@@ -59,6 +59,46 @@ Read this as the workspace control map:
 - `operator-orchestration-service` is the shared broker that crosses product
   boundaries.
 
+## Workflow At A Glance
+
+```mermaid
+flowchart LR
+    Operator[Operator or workflow trigger]
+    Broker[operator-orchestration-service<br/>when a brokered path exists]
+    Proposals[Workspace Proposals]
+    Accepted{Accepted for delivery?}
+    ART[Workspace Delivery ART]
+    Repos[Owner repos]
+    DevInt[dev-integration]
+    Stage[Governed stage]
+    Prod[Governed prod]
+    WG[workspace-governance]
+    SA[security-architecture]
+
+    Operator --> Broker
+    Operator --> Proposals
+    Broker --> Proposals
+    WG -. intake, routing, and policy .-> Proposals
+    Proposals --> Accepted
+    Accepted -->|no| Proposals
+    Accepted -->|yes| ART
+    WG -. work-state and control discipline .-> ART
+    SA -. security review and risk posture .-> ART
+    ART --> Repos
+    Repos --> DevInt
+    Repos --> Stage
+    DevInt --> Stage
+    Stage --> Prod
+```
+
+Read this as the workflow path:
+
+- `Workspace Proposals` is the intake and triage plane.
+- `Workspace Delivery ART` is the execution-of-record once work is accepted.
+- owner repos still hold implementation truth.
+- `dev-integration` is the fast local lane before governed rehearsal.
+- `stage` and `prod` remain platform-governed runtime lanes.
+
 ## Active Repository Roles
 
 | Repository | Current role | Owns | Does not own |
