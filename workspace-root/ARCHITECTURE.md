@@ -5,14 +5,14 @@
 > This file is synced into `/home/mfshaf7/projects/ARCHITECTURE.md` by
 > `workspace-governance/scripts/sync_workspace_root.py`.
 
-This file exists so a new Codex session can load the current architecture
-quickly without re-deriving it from every repo.
+This file gives a new session the current system shape without forcing it to
+reconstruct the workspace from every repo.
 
 Use it first for workspace orientation. Then route into the owning repo.
 
 ## Current System Shape
 
-This workspace currently has three durable control planes plus one fast local
+The workspace currently has three durable control planes plus one fast local
 iteration lane:
 
 - workspace governance
@@ -72,23 +72,29 @@ Retired path:
 
 ## Current Product Paths
 
-No single product should be treated as the workspace default.
+No single product should be treated as the workspace default. The current
+product paths differ in maturity and purpose:
 
 - OpenClaw
   - canonical source changes land in:
-    - `openclaw-telegram-enhanced/`
-    - `openclaw-host-bridge/`
-    - `openclaw-runtime-distribution/host-control-openclaw-plugin/`
-  - `openclaw-runtime-distribution/` assembles the governed runtime candidate
-  - `platform-engineering/products/openclaw/` records approved SHAs and
-    digests, stage verification, readiness, and prod promotion state
-  - `security-architecture/` governs trust-boundary expectations and review
+    - [openclaw-telegram-enhanced](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
+    - [openclaw-host-bridge](/home/mfshaf7/projects/openclaw-host-bridge/README.md)
+    - [openclaw-runtime-distribution/host-control-openclaw-plugin](/home/mfshaf7/projects/openclaw-runtime-distribution/host-control-openclaw-plugin)
+  - [openclaw-runtime-distribution](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md)
+    assembles the governed runtime candidate
+  - [platform-engineering/products/openclaw](/home/mfshaf7/projects/platform-engineering/products/openclaw/README.md)
+    records approved SHAs and digests, stage verification, readiness, and prod
+    promotion state
+  - [security-architecture](/home/mfshaf7/projects/security-architecture/README.md)
+    governs trust-boundary expectations and review
 - OpenProject
   - platform runtime, access, and operator procedures live in
-    `platform-engineering/products/openproject/`
-  - delivery execution truth lives in the `Workspace Delivery ART`
-  - `operator-orchestration-service/` owns the broker-backed delivery-control
-    APIs and OpenProject workflow adapters
+    [platform-engineering/products/openproject](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+  - delivery execution truth lives in the
+    [Workspace Delivery ART](/home/mfshaf7/projects/platform-engineering/products/openproject/delivery-art-contract.md)
+  - [operator-orchestration-service](/home/mfshaf7/projects/operator-orchestration-service/README.md)
+    owns the broker-backed delivery-control APIs and OpenProject workflow
+    adapters
 
 Important operating truth:
 
@@ -114,13 +120,15 @@ Primary operator-facing surfaces that already exist:
 
 ## Broker And Idea Workflow
 
-`operator-orchestration-service/` is active now. It is not only a proposal.
+`operator-orchestration-service/` is an active part of the current control
+plane. It is no longer just a proposal.
 
-Current real shape:
+Current role:
 
 - shared operator workflow service
 - active workflows are broker-backed idea capture plus the internal accepted
-  proposal handoff into the OpenProject delivery ART plane
+  proposal handoff into the
+  [OpenProject delivery ART plane](/home/mfshaf7/projects/platform-engineering/products/openproject/delivery-art-contract.md)
 - Telegram `/idea` is a thin adapter to this broker
 - OpenProject is the canonical backlog system for captured ideas and proposals
 - active `dev-integration` profiles are `idea-workflow` and
