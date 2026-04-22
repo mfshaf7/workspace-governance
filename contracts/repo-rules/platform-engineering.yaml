@@ -35,7 +35,7 @@ review_control_requirements:
     - path: products/openproject/AGENTS.md
       heading: "## Review guidelines"
       required_terms:
-        - OpenClaw-style
+        - product-governed
         - platform-integrated
         - backup
         - shared dependency

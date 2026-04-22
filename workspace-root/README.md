@@ -86,7 +86,7 @@ paths:
 machine-readable contract model for the active repo map, product maturity,
 component inventory, vocabulary, and cross-repo routing rules.
 
-It also owns the workspace self-improvement loop:
+The same repo governs the workspace self-improvement loop:
 
 - machine-visible signal audit
 - improvement-candidate triage
@@ -96,8 +96,8 @@ Primary operator surface:
 
 - [workspace-governance/docs/self-improvement-escalation.md](/home/mfshaf7/projects/workspace-governance/docs/self-improvement-escalation.md)
 
-It also owns the intake gate. New repos, products, and components should be
-classified before they become part of the governed model:
+New repos, products, and components enter through the same intake gate and
+should be classified before they become part of the governed model:
 
 - `out-of-scope`
 - `proposed`

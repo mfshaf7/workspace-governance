@@ -17,10 +17,10 @@ The repo carries the machine-readable contract model for the active repo map,
 product maturity, component inventory, dependency semantics, review
 obligations, security bindings, vocabulary, and self-improvement records.
 
-It also owns the intake model for new repos, products, and components. Nothing
-needs to be governed by default, but new entrants should be classified
-explicitly before they drift into the operator-facing control plane by
-accident.
+The same governance layer owns the intake model for new repos, products, and
+components. Nothing needs to be governed by default, but new entrants should
+be classified explicitly before they drift into the operator-facing control
+plane by accident.
 
 `dev-integration` policy lives here as well. The workspace defines when that
 lane is appropriate, what it must never touch, and which artifacts are
