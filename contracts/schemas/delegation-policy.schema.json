@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "governance",
+    "eligibility_gate",
+    "main_agent_only_actions",
+    "task_classes",
+    "packet",
+    "audit_journal",
+    "scope_discovery",
+    "future_enforcement_boundary"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "governance": {
+      "type": "object",
+      "required": [
+        "policy_owner_repo",
+        "operator_surface_path",
+        "journal_root",
+        "required_skills"
+      ],
+      "properties": {
+        "policy_owner_repo": { "type": "string", "minLength": 1 },
+        "operator_surface_path": { "type": "string", "minLength": 1 },
+        "journal_root": { "type": "string", "minLength": 1 },
+        "required_skills": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "eligibility_gate": {
+      "type": "object",
+      "required": [
+        "required_preconditions",
+        "work_item_required_for",
+        "narrative_quality_required_for_active_work",
+        "main_agent_scope_classification_required"
+      ],
+      "properties": {
+        "required_preconditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "work_item_required_for": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "narrative_quality_required_for_active_work": { "type": "boolean" },
+        "main_agent_scope_classification_required": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "main_agent_only_actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "task_classes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "description",
+          "max_sub_agents",
+          "allows_delegated_write",
+          "requires_disjoint_write_scope",
+          "requires_security_delta_review"
+        ],
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "max_sub_agents": { "type": "integer", "minimum": 0 },
+          "allows_delegated_write": { "type": "boolean" },
+          "requires_disjoint_write_scope": { "type": "boolean" },
+          "requires_security_delta_review": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "packet": {
+      "type": "object",
+      "required": [
+        "required_fields",
+        "delegate_kinds",
+        "required_for_delegated_write",
+        "require_write_scope_declaration",
+        "require_conflict_statement"
+      ],
+      "properties": {
+        "required_fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "delegate_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_for_delegated_write": { "type": "boolean" },
+        "require_write_scope_declaration": { "type": "boolean" },
+        "require_conflict_statement": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "audit_journal": {
+      "type": "object",
+      "required": [
+        "required_for_delegated_write",
+        "required_for_security_significant_delivery",
+        "required_fields"
+      ],
+      "properties": {
+        "required_for_delegated_write": { "type": "boolean" },
+        "required_for_security_significant_delivery": { "type": "boolean" },
+        "required_fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scope_discovery": {
+      "type": "object",
+      "required": [
+        "tiny_in_scope_follow_up",
+        "meaningful_in_scope_follow_up",
+        "out_of_scope_follow_up",
+        "main_agent_classification_required"
+      ],
+      "properties": {
+        "tiny_in_scope_follow_up": { "type": "string", "minLength": 1 },
+        "meaningful_in_scope_follow_up": { "type": "string", "minLength": 1 },
+        "out_of_scope_follow_up": { "type": "string", "minLength": 1 },
+        "main_agent_classification_required": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "future_enforcement_boundary": {
+      "type": "object",
+      "required": ["parked_architecture_ref", "not_in_current_scope"],
+      "properties": {
+        "parked_architecture_ref": { "type": "string", "minLength": 1 },
+        "not_in_current_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

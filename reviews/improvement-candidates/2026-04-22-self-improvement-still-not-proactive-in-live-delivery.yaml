@@ -1,0 +1,63 @@
+schema_version: 1
+id: 2026-04-22-self-improvement-still-not-proactive-in-live-delivery
+title: Self-improvement still did not trigger proactively during live ART delivery work
+recorded_on: '2026-04-22'
+owner_repo: workspace-governance
+summary: The workspace already had proactive and regression-aware self-improvement
+  doctrine, but this run still allowed multiple meaningful process mistakes to
+  continue until the operator called them out directly. The controls improved
+  how lessons are recorded after the fact, but they still did not create a
+  deterministic in-session trigger that forces candidate capture during live
+  delivery work.
+regression_of: workspace-governance/reviews/after-action/2026-04-21-regression-aware-self-improvement-escalation.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+    - security-architecture
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: repeated-live-delivery-misses-still-needed-operator-callout
+    title: Live delivery mistakes still survived until direct operator challenge
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - self-improvement-runtime-gate-gap
+      - workflow-doctrine-gap
+    finding: >-
+      This run still relied on the main agent to notice and invoke
+      self-improvement manually. Multiple meaningful misses happened in active
+      ART-backed work, including stale PI/objective/risk normalization and
+      process slips the operator had to challenge explicitly. The doctrine says
+      those signals must trigger candidate capture before normal execution
+      continues, but no deterministic in-session enforcement caught them.
+    source_refs:
+      - 'conversation: user explicitly said many mistakes happened in this run and self-improvement still did not trigger'
+      - 'conversation: user explicitly said a lot of mistakes were made and challenged why the control still failed'
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-22-deterministic-self-improvement-escalation.yaml
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/self-improvement-policy.yaml
+      owner_repo: workspace-governance
+      note: Adds the governed signal catalog and fail-closed runtime gate.
+    - type: script
+      path: workspace-governance/scripts/check_self_improvement_escalation.py
+      owner_repo: workspace-governance
+      note: Adds the deterministic in-session escalation check and candidate scaffold path.
+    - type: doc
+      path: workspace-governance/docs/self-improvement-escalation.md
+      owner_repo: workspace-governance
+      note: Adds the primary operator surface for live self-improvement escalation.
+  note: Closed through the deterministic self-improvement escalation controls and linked after-action review.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

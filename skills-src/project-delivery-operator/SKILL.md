@@ -16,6 +16,8 @@ Use this skill when a serious initiative is already running inside
 - `platform-engineering/products/openproject/runbooks/show-delivery-initiatives.md`
 - `platform-engineering/products/openproject/runbooks/show-delivery-execution.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md`
+- `workspace-governance/docs/delegated-execution.md`
+- `workspace-governance/docs/self-improvement-escalation.md`
 
 ## Workflow
 
@@ -59,6 +61,20 @@ Use this skill when a serious initiative is already running inside
      the operator before continuing that item
    - propose the rewrite shape clearly instead of silently working around weak
      content
+8. If active work becomes half-finished or the operator explicitly calls out a
+   repeated mistake, half-baked state, or missed catch:
+   - run `python3 /home/mfshaf7/projects/workspace-governance/scripts/check_self_improvement_escalation.py ...`
+   - record the candidate before continuing normal execution when the signal is
+     in the fail-closed set
+9. When using delegated execution for ART-backed work:
+   - keep ART mutation, live proof, security closure, and final completion
+     with the main agent
+   - create a bounded packet before spawn
+   - keep delegated write scopes disjoint
+   - record the delegated run in the delegation journal when delegated write is
+     used
+   - classify any newly discovered scope through the ART before treating it as
+     accepted work
 
 ## Guardrails
 
@@ -71,3 +87,7 @@ Use this skill when a serious initiative is already running inside
   the same PI.
 - Do not silently continue on active work whose narrative contract is too weak
   to operate safely.
+- Do not continue active delivery work normally after a fail-closed
+  self-improvement signal.
+- Do not let delegated workers mutate the ART, live environments, security
+  closure, or final proof surfaces.

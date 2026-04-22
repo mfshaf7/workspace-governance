@@ -274,7 +274,8 @@
         "workspace-level skill source"
       ],
       "repo_class": "governance",
-      "requires_security_bindings": false
+      "requires_security_bindings": false,
+      "security_review_subject": true
     }
   },
   "skills": {

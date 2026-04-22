@@ -11,6 +11,8 @@ delivery repo.
 - `README.md`
 - `docs/codex-github-review-and-automation.md`
 - `docs/troubleshooting-preflight.md`
+- `docs/delegated-execution.md`
+- `docs/self-improvement-escalation.md`
 - `workspace-root/ARCHITECTURE.md`
 - `workspace-root/README.md`
 - `workspace-root/AGENTS.md`
@@ -97,6 +99,12 @@ Route those changes back to the owner repos.
 - If a serious failure or unexpected runtime behavior is being diagnosed, use
   `docs/troubleshooting-preflight.md` before deeper workaround analysis,
   redesign proposals, or code-level blame.
+- If a meaningful repeated miss, operator callout, or active-work drift becomes
+  visible, use `docs/self-improvement-escalation.md` before continuing normal
+  execution.
+- If work is going to use delegated execution, use
+  `docs/delegated-execution.md` first and keep the main-agent-only authority,
+  packet, write-scope, and journal rules intact.
 - Contracts, templates, standards, and policy docs may support that workflow,
   but they do not replace the primary operator instruction surface.
 - If the operator has to reconstruct the procedure from scattered policy,
@@ -210,6 +218,7 @@ Run these after structural changes:
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
+python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects

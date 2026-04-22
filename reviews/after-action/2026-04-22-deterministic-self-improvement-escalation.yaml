@@ -1,0 +1,90 @@
+schema_version: 1
+id: 2026-04-22-deterministic-self-improvement-escalation
+title: Self-improvement escalation became deterministic for fail-closed live-work signals
+recorded_on: '2026-04-22'
+owner_repo: workspace-governance
+summary: The workspace already had proactive and regression-aware self-improvement
+  doctrine, but live delivery work still depended too heavily on the main
+  agent noticing and invoking the process manually. The control plane now has a
+  governed in-session escalation surface, signal catalog, and script-backed
+  fail-closed gate so candidate capture can be forced before normal execution
+  continues.
+scope:
+  related_repos:
+    - workspace-governance
+    - platform-engineering
+    - operator-orchestration-service
+    - security-architecture
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+source_refs:
+  - 'conversation: user explicitly said many mistakes happened in this run and self-improvement still did not trigger'
+  - 'conversation: user approved landing the stronger deterministic self-improvement control'
+lessons:
+  - id: deterministic-in-session-self-improvement-gate-is-required
+    title: Self-improvement needs a script-backed fail-closed runtime gate, not only doctrine and retrospective validation
+    failure_class: self-improvement-runtime-gate-gap
+    trigger: closed-lesson-regression
+    finding: The earlier fixes improved self-improvement doctrine, candidate
+      linkage, and closure validation, but they still left live operation too
+      dependent on the main agent remembering to invoke the process. That meant
+      meaningful delivery misses could still survive until direct operator
+      challenge instead of being stopped by a deterministic in-session gate.
+    impact: Operator confidence dropped, repeated misses still felt reactive,
+      and supposedly strengthened self-improvement controls were not strong
+      enough in live delivery work.
+    status: closed
+    expected_control_types:
+      - contract
+      - script
+      - skill
+      - workflow
+      - doc
+    control_refs:
+      - type: contract
+        path: workspace-governance/contracts/self-improvement-policy.yaml
+        owner_repo: workspace-governance
+        note: Adds the governed signal catalog and fail-closed runtime gate.
+      - type: contract
+        path: workspace-governance/contracts/failure-taxonomy.yaml
+        owner_repo: workspace-governance
+        note: Adds the self-improvement-runtime-gate-gap failure class.
+      - type: contract
+        path: workspace-governance/contracts/improvement-triggers.yaml
+        owner_repo: workspace-governance
+        note: Adds the machine-visible-workflow-drift trigger for fail-closed workflow signals.
+      - type: script
+        path: workspace-governance/scripts/check_self_improvement_escalation.py
+        owner_repo: workspace-governance
+        note: Enforces the in-session signal check and can scaffold the candidate immediately.
+      - type: workflow
+        path: workspace-governance/contracts/repo-rules/workspace-governance.yaml
+        owner_repo: workspace-governance
+        note: Declares self-improvement escalation as a primary operator workflow surface.
+      - type: skill
+        path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+        owner_repo: workspace-governance
+        note: Requires using the governed escalation check instead of ad hoc memory.
+      - type: skill
+        path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+        owner_repo: workspace-governance
+        note: Forces ART-backed work to route fail-closed self-improvement signals before continuing.
+      - type: skill
+        path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+        owner_repo: workspace-governance
+        note: Forces late root-cause discoveries through the governed escalation check.
+      - type: doc
+        path: workspace-governance/docs/self-improvement-escalation.md
+        owner_repo: workspace-governance
+        note: Provides the primary operator surface for live signal escalation.
+      - type: doc
+        path: workspace-governance/workspace-root/AGENTS.md
+        owner_repo: workspace-governance
+        note: Carries the stronger operator-facing workspace rule into new sessions.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null

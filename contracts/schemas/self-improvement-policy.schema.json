@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "governance",
+    "runtime_gate",
+    "signal_catalog"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "governance": {
+      "type": "object",
+      "required": [
+        "policy_owner_repo",
+        "operator_surface_path",
+        "required_skills"
+      ],
+      "properties": {
+        "policy_owner_repo": { "type": "string", "minLength": 1 },
+        "operator_surface_path": { "type": "string", "minLength": 1 },
+        "required_skills": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_gate": {
+      "type": "object",
+      "required": [
+        "pause_before_continue",
+        "default_follow_up_days",
+        "require_candidate_before_continue_for"
+      ],
+      "properties": {
+        "pause_before_continue": { "type": "boolean" },
+        "default_follow_up_days": { "type": "integer", "minimum": 1 },
+        "require_candidate_before_continue_for": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "signal_catalog": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "description",
+          "default_source_type",
+          "default_trigger",
+          "default_failure_classes",
+          "supports_regression_link"
+        ],
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "default_source_type": {
+            "type": "string",
+            "enum": ["conversation", "machine-audit", "manual", "review", "rehearsal"]
+          },
+          "default_trigger": { "type": "string", "minLength": 1 },
+          "default_failure_classes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supports_regression_link": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

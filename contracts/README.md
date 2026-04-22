@@ -18,6 +18,9 @@ Use these contracts to declare:
 - `repos.yaml`
   - active and retired repos, lifecycle, ownership scope, and allowed
     authoritative references
+  - may also declare `security_review_subject: true` when a repo needs
+    security review inventory coverage even though it does not use the normal
+    security-binding pattern
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system
@@ -29,6 +32,12 @@ Use these contracts to declare:
 - `developer-integration-policy.yaml`
   - defines the shared `dev-integration` lane semantics, trigger guidance,
     forbidden targets, required actions, and required handoff artifacts
+- `delegation-policy.yaml`
+  - defines the workspace-wide delegated-execution policy, eligibility gate,
+    task classes, packet rules, and audit-journal expectations
+- `self-improvement-policy.yaml`
+  - defines the in-session self-improvement signal catalog, fail-closed runtime
+    gate, and primary escalation surface
 - `developer-integration-profiles.yaml`
   - registers the concrete repo-owned `dev-integration` profiles that may run
     on the shared local-k3s lane, including lifecycle, request record, and
@@ -169,6 +178,10 @@ The self-improvement model now has three layers:
 - improvement candidates for fast triage
 - after-action reviews for durable closure
 
+Primary operator surface:
+
+- `../docs/self-improvement-escalation.md`
+
 That model is now regression-aware too:
 
 - if a closed lesson regresses, the new candidate should explicitly link back
@@ -205,6 +218,11 @@ serious failure diagnosis. If a simpler root cause is discovered late because
 the earlier preflight or live-truth layers were skipped, treat that as a
 first-class self-improvement signal instead of normal debugging noise.
 
+Delegated execution is explicit too. Use
+`../docs/delegated-execution.md` as the primary operator surface for
+workspace-wide sub-agent use, packet design, write-scope ownership, and
+delegation-journal expectations.
+
 Use an after-action directly when the lesson and control shape are already
 clear enough to close or explicitly leave open with a real owner and due date.
 
@@ -219,6 +237,7 @@ that should either:
 
 Use:
 
+- `scripts/check_self_improvement_escalation.py`
 - `scripts/record_after_action.py`
 - `scripts/record_improvement_candidate.py`
 - `scripts/validate_improvement_candidates.py`

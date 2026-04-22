@@ -11,8 +11,10 @@ evidence, host drift detection, testing seams, or operator reliability.
 ## Read First
 
 - `contracts/README.md`
+- `docs/self-improvement-escalation.md`
 - `contracts/failure-taxonomy.yaml`
 - `contracts/improvement-triggers.yaml`
+- `contracts/self-improvement-policy.yaml`
 - `reviews/improvement-candidates/README.md`
 - `reviews/after-action/README.md`
 - `scripts/README.md`
@@ -22,7 +24,11 @@ evidence, host drift detection, testing seams, or operator reliability.
 1. Identify what was discovered too late or failed repeatedly.
 2. Classify it with one or more `failure-taxonomy` classes.
 3. Choose the trigger that explains the signal.
-4. Record or update an improvement candidate immediately when:
+4. Run the signal check from `docs/self-improvement-escalation.md` first.
+   - use `python3 scripts/check_self_improvement_escalation.py ...`
+   - if it exits `2`, candidate capture is mandatory before normal work
+     continues
+5. Record or update an improvement candidate immediately when:
    - the user explicitly says this is a repeated mistake
    - the user calls the work half-baked, incomplete, sloppy, or says a miss
      should have been caught already
@@ -37,23 +43,25 @@ evidence, host drift detection, testing seams, or operator reliability.
    - the eventual root cause turns out to be a skipped simpler precondition,
      environment truth, permission truth, or contract truth check that should
      have been proven before workaround analysis
-5. If the miss regresses a lesson that was already treated as closed:
+   - delegated execution crossed packet scope, write-scope, live-control, or
+     work-tracking boundaries
+6. If the miss regresses a lesson that was already treated as closed:
    - record it as a regression candidate, not as a vague new issue
    - set `regression_of` to the earlier closed candidate or after-action
    - use trigger `closed-lesson-regression`
    - treat this as evidence that the earlier closure controls were too weak or
      too narrow
-6. Propose the best fix shape for the candidate, justify why that fix is the
+7. Propose the best fix shape for the candidate, justify why that fix is the
    best option, and get operator approval before landing the durable control.
-7. Decide whether the lesson is:
+8. Decide whether the lesson is:
    - still only a candidate that needs triage, or
    - strong enough for a full after-action review now
-8. If a full after-action is required, choose the trigger that explains why.
-9. Decide whether the lesson is:
+9. If a full after-action is required, choose the trigger that explains why.
+10. Decide whether the lesson is:
    - closed by durable controls already added, or
    - still open with a real owner and due date
-10. Record the review under `reviews/after-action/` when warranted.
-11. Validate both the candidate layer and learning closure:
+11. Record the review under `reviews/after-action/` when warranted.
+12. Validate both the candidate layer and learning closure:
 
 ```bash
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
@@ -63,6 +71,8 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
 ## Guardrails
 
 - Do not leave a major miss only in chat.
+- Do not rely on memory alone when the signal is in the governed runtime gate;
+  run the escalation check.
 - Do not wait for a user to restate the same problem twice before recording a
   candidate.
 - If the user explicitly calls out a repeated mistake, open or update a
@@ -75,6 +85,9 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
   miss.
 - If a supposedly closed lesson regresses, do not represent it as a brand-new
   unrelated miss. Link the regression explicitly.
+- If delegated execution crosses main-agent-only authority, overlaps write
+  scope, or leaves meaningful scope outside the work system, record that as a
+  control miss instead of treating it as normal task churn.
 - Do not make the operator invent the fix from scratch when the likely control
   improvement is clear. Propose the best fix yourself and explain the
   reasoning.

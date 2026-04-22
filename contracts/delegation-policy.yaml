@@ -1,0 +1,93 @@
+schema_version: 1
+governance:
+  policy_owner_repo: workspace-governance
+  operator_surface_path: docs/delegated-execution.md
+  journal_root: reviews/delegation-journal
+  required_skills:
+    - project-delivery-operator
+    - security-governance-review
+    - self-improvement-review
+eligibility_gate:
+  required_preconditions:
+    - work is already classified in the current system of record or explicitly bounded as local support work
+    - scope and evidence expectations are clear enough to delegate safely
+    - main-agent authority has checked that no unresolved blocker prevents the delegated slice
+    - disjoint write scope is declared before any delegate starts
+    - each delegated packet declares expected outputs and forbidden actions
+  work_item_required_for:
+    - art-backed-delivery
+    - ticket-backed-maintenance
+  narrative_quality_required_for_active_work: true
+  main_agent_scope_classification_required: true
+main_agent_only_actions:
+  - work-system mutation
+  - live environment mutation
+  - security decision closure
+  - final proof
+  - final completion
+  - PI replanning
+  - change classification and scope routing
+task_classes:
+  repo-local-implementation:
+    description: Bounded repo-local code, test, or documentation changes with clean file ownership.
+    max_sub_agents: 2
+    allows_delegated_write: true
+    requires_disjoint_write_scope: true
+    requires_security_delta_review: false
+  cross-repo-delivery:
+    description: One feature or fix spanning more than one repo with main-agent integration and proof.
+    max_sub_agents: 2
+    allows_delegated_write: true
+    requires_disjoint_write_scope: true
+    requires_security_delta_review: false
+  security-significant-delivery:
+    description: Delegated implementation that affects trust boundaries, identity, secrets, privileged runtime, or AI-shaped action paths.
+    max_sub_agents: 2
+    allows_delegated_write: true
+    requires_disjoint_write_scope: true
+    requires_security_delta_review: true
+  live-control:
+    description: Operations that mutate ART state, dev-integration, stage, prod, or other live control planes.
+    max_sub_agents: 0
+    allows_delegated_write: false
+    requires_disjoint_write_scope: false
+    requires_security_delta_review: false
+packet:
+  required_fields:
+    - work_item_ref
+    - summary
+    - owner_repo
+    - allowed_write_paths
+    - expected_outputs
+    - proof_expectation
+    - forbidden_actions
+  delegate_kinds:
+    - exploration
+    - implementation
+    - verification
+  required_for_delegated_write: true
+  require_write_scope_declaration: true
+  require_conflict_statement: true
+audit_journal:
+  required_for_delegated_write: true
+  required_for_security_significant_delivery: true
+  required_fields:
+    - delegation_id
+    - created_on
+    - owner_repo
+    - work_item_ref
+    - task_class
+    - main_agent
+    - packets
+    - integration_outcome
+scope_discovery:
+  tiny_in_scope_follow_up: absorb-into-active-item
+  meaningful_in_scope_follow_up: create-or-update-work-record
+  out_of_scope_follow_up: route-to-owner-or-intake
+  main_agent_classification_required: true
+future_enforcement_boundary:
+  parked_architecture_ref: openproject://work_packages/77
+  not_in_current_scope:
+    - runtime capability envelopes
+    - automatic write-scope collision enforcement
+    - work-system-native delegation state
