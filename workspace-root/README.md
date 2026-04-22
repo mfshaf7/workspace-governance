@@ -20,6 +20,45 @@ For immediate new-session architecture orientation, read
 [ARCHITECTURE.md](/home/mfshaf7/projects/ARCHITECTURE.md) before diving into
 individual repos.
 
+## Architecture At A Glance
+
+```mermaid
+flowchart LR
+    WG[workspace-governance<br/>control plane]
+    SA[security-architecture<br/>security authority]
+    PE[platform-engineering<br/>shared platform and product integration]
+    OOS[operator-orchestration-service<br/>shared workflow broker]
+    OTE[openclaw-telegram-enhanced<br/>Telegram channel source]
+    OHB[openclaw-host-bridge<br/>host enforcement source]
+    OCRD[openclaw-runtime-distribution<br/>OpenClaw runtime assembly]
+    OC[OpenClaw<br/>governed product path]
+    OP[OpenProject<br/>platform-integrated product]
+
+    WG --> PE
+    WG --> OOS
+    WG --> SA
+    SA -. review and risk posture .-> PE
+    SA -. review and risk posture .-> OOS
+    SA -. review and risk posture .-> OCRD
+    OTE --> OCRD
+    OHB --> OCRD
+    OCRD --> OC
+    PE --> OC
+    PE --> OP
+    OOS --> OP
+```
+
+Read this as the workspace control map:
+
+- `workspace-governance` defines routing, contracts, and audit.
+- `security-architecture` governs security decisions and evidence.
+- `platform-engineering` owns the shared platform plus product integration.
+- OpenClaw is assembled through `openclaw-runtime-distribution`.
+- OpenProject stays platform-integrated and doubles as the workflow system of
+  record.
+- `operator-orchestration-service` is the shared broker that crosses product
+  boundaries.
+
 ## Active Repository Roles
 
 | Repository | Current role | Owns | Does not own |
