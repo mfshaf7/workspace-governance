@@ -128,4 +128,4 @@ This wave does not include:
 - broad new skill creation beyond startup-skill wiring
 - new control planes
 - write-capable automation
-- pretending OpenProject has an OpenClaw-style governed promotion flow
+- pretending OpenProject already has its own governed promotion flow
