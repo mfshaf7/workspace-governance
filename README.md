@@ -37,6 +37,31 @@ execution, troubleshooting, and self-improvement. Those controls exist so the
 workspace behaves like a deliberate system of record rather than a set of
 convenient local habits.
 
+## Architecture At A Glance
+
+```mermaid
+flowchart LR
+    Intake[Intake and classification]
+    Contracts[Contracts and owner map]
+    Root[Workspace-root guidance]
+    Audit[Audits and validators]
+    Skills[Live skill install]
+    Improve[Improvement candidates and after-action]
+    Owners[Owner repos]
+
+    Intake --> Contracts
+    Contracts --> Root
+    Contracts --> Audit
+    Contracts --> Skills
+    Contracts --> Owners
+    Audit --> Improve
+    Improve --> Contracts
+```
+
+This repo is the workspace control plane. It does not deliver products
+directly. It decides how the workspace is classified, routed, audited, and
+corrected when the control model drifts.
+
 When a change creates or materially changes a workflow that an operator is
 expected to run, the owning repo must publish one primary instruction surface.
 Supporting contracts and templates can reinforce that workflow, but they do
