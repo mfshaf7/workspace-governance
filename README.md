@@ -3,49 +3,51 @@
 This repository is the cross-repo governance and routing layer for the
 `/home/mfshaf7/projects` workspace.
 
-It owns the canonical workspace-level guidance and audit tooling that are
-materialized into the local workspace root for day-to-day operator use.
+It keeps the shared control model in one place so operators do not have to
+reconstruct cross-repo truth from scattered docs and chat history.
 
-This workspace is multi-product and workspace-governed. Keep the language at
-this layer centered on shared control planes, platform authority, and current
-product maturity instead of treating any one product as the implied default.
+At this layer, the important questions are:
 
-It now also owns the machine-readable control-plane contracts that describe the
-active repo map, product maturity, component inventory, dependency semantics,
-review obligations, security-binding expectations, stale vocabulary, and the
-self-improvement loop.
+- which repo owns the work
+- which products and components are part of the governed system
+- which workflow or review rule applies
+- what evidence is required before the change can be treated as done
 
-It also owns the intake layer that forces new repos, products, and components
-to be explicitly classified as out-of-scope, proposed, or admitted before they
-quietly drift into the governed system. The goal is not to govern everything.
-The goal is to make the decision explicit before anything new becomes part of
-the operator-facing control plane by accident.
+The repo carries the machine-readable contract model for the active repo map,
+product maturity, component inventory, dependency semantics, review
+obligations, security bindings, vocabulary, and self-improvement records.
 
-It also owns the `dev-integration` lane standard for fast local iteration.
-That lane is workspace-standardized but not workspace-operated: profile owners
-provide the concrete runtime shape, while `workspace-governance` defines when
-the lane should be used, what it must never touch, and what artifacts are
-required before a change can move into governed stage rehearsal.
+It also owns the intake model for new repos, products, and components. Nothing
+needs to be governed by default, but new entrants should be classified
+explicitly before they drift into the operator-facing control plane by
+accident.
 
-It also owns the `dev-integration` profile admission model. Profile requests
-and active profiles are not the same thing: a profile may be `proposed`,
-`active`, `suspended`, or `retired`. The workspace policy is generic so the
-request surface may change over time, while the current adapter can still be a
-tool such as OpenProject.
+`dev-integration` policy lives here as well. The workspace defines when that
+lane is appropriate, what it must never touch, and which artifacts are
+required before fast local work can move into governed stage rehearsal. The
+concrete runtime shape still belongs to the profile owner.
 
-Operator-facing workflow doctrine is explicit here too: when a change creates
-or materially changes a workflow that an operator is expected to run, the
-owning repo must publish one primary operator instruction surface. Supporting
-contracts, templates, or standards may back that workflow, but they are not a
-substitute for a clear step-by-step operator path.
+The same split applies to profile admission. A profile request is not the same
+thing as an active profile. Requests may be `proposed`, `active`,
+`suspended`, or `retired`, and the admission policy stays generic even when
+the current request adapter is a tool such as OpenProject.
 
-Delegated execution doctrine is explicit now too. If the main agent wants to
-use bounded sub-agents, the workspace requires a governed packet, disjoint
-write scope, main-agent-only authority boundaries, and an audit journal
-instead of ad hoc parallel work.
+This repo also holds the workspace doctrine for operator workflows, delegated
+execution, troubleshooting, and self-improvement. Those controls exist so the
+workspace behaves like a deliberate system of record rather than a set of
+convenient local habits.
 
-Troubleshooting doctrine is explicit too. Serious failure diagnosis should use
-one supported order of operations instead of improvising from symptoms:
+When a change creates or materially changes a workflow that an operator is
+expected to run, the owning repo must publish one primary instruction surface.
+Supporting contracts and templates can reinforce that workflow, but they do
+not replace a clear operator procedure.
+
+For delegated execution, the workspace expects a governed task packet,
+disjoint write scope, main-agent-only authority boundaries, and an audit
+journal. Parallel work is allowed, but it is not supposed to be improvised.
+
+For serious failure diagnosis, the workspace uses one order of operations
+instead of symptom-driven debugging:
 
 - preflight
 - live truth
@@ -53,26 +55,17 @@ one supported order of operations instead of improvising from symptoms:
 - code truth
 - workaround gate
 
-Primary operator surface:
+Primary operator surfaces:
 
 - [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
-
-Primary operator surface:
-
 - [docs/delegated-execution.md](docs/delegated-execution.md)
 
-The self-improvement model is explicit too. It is no longer only:
-
-- after-action record
-- closure validation
-
-It is now:
+The self-improvement model is no longer only about retrospective closure. It
+now combines:
 
 - deterministic signal audit for machine-visible misses
 - improvement candidates for fast triage
 - after-action reviews for durable closure
-
-Primary operator surface:
 
 - [docs/self-improvement-escalation.md](docs/self-improvement-escalation.md)
 
@@ -85,19 +78,18 @@ debugging expanded. That is not just a debugging anecdote. It is a governed
 self-improvement signal that should route through the improvement-candidate and
 after-action layers.
 
-Workspace-level Codex GitHub review and the read-only daily control-plane
-summary now also have one primary operator instruction surface:
+Workspace-level Codex GitHub review and the read-only control-plane summary
+have their own primary operator surface:
 
 - [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
 
-The skill model is explicit now too. Governing skill source is not enough by
-itself. The registered skill source in `contracts/skills.yaml` plus
-`skills-src/` must also be installed into the live Codex skill root under
-`~/.codex/skills`, and the local workspace audit now fails when that live
-install drifts from the governed source.
+The skill model follows the same rule. Governing skill source is not enough by
+itself. `contracts/skills.yaml` and `skills-src/` must also be installed into
+the live Codex skill root under `~/.codex/skills`, and the workspace audit
+fails when that live install drifts from the governed source.
 
 For Git-tracked docs outside `workspace-root/`, renderer-safe navigation is
-also required. Same-repo docs should use repo-relative links, while cross-repo
+required too. Same-repo docs should use repo-relative links, while cross-repo
 navigation should use web-safe links instead of local filesystem markdown
 targets.
 
@@ -106,7 +98,7 @@ is:
 
 - [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
 
-AI may assist that intake decision, but an `ai-suggested` intake entry only
+AI may assist intake, but an `ai-suggested` intake entry only
 counts as governed when it references an active approved model profile from
 `platform-engineering` and still records explicit operator acceptance.
 

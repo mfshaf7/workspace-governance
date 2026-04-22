@@ -8,6 +8,12 @@
 This workspace is the operator-facing multi-repo source of truth for the
 current platform and product stack.
 
+Use it to answer three things quickly:
+
+- what the workspace currently governs
+- which repo owns the change
+- which product or control plane you should read next
+
 Treat it as a governed system, not a loose folder of related repos.
 
 For immediate new-session architecture orientation, read
@@ -34,28 +40,33 @@ individual repos.
 
 ## Current Workspace Runtime And Delivery Paths
 
-The workspace is not centered on one product. Current governed paths are:
+The workspace is not centered on one product. It currently has four important
+paths:
 
 - shared platform and control plane
-  - `platform-engineering/` owns shared environment contracts, Argo state,
-    release truth, and product integration surfaces
-  - `workspace-governance/` owns the routing, contract, audit, and
-    self-improvement control plane
-  - `security-architecture/` owns trust-boundary judgment, security standards,
-    and review posture
+  - [platform-engineering](/home/mfshaf7/projects/platform-engineering/README.md)
+    owns shared environment contracts, Argo state, release truth, and product
+    integration surfaces
+  - [workspace-governance](/home/mfshaf7/projects/workspace-governance/README.md)
+    owns the routing, contract, audit, and self-improvement control plane
+  - [security-architecture](/home/mfshaf7/projects/security-architecture/README.md)
+    owns trust-boundary judgment, security standards, and review posture
 - OpenClaw
   - fully governed product path with source ownership in the canonical product
-    repos, runtime composition in `openclaw-runtime-distribution/`, governed
-    stage rehearsal, readiness approval, and prod promotion through
-    `platform-engineering/products/openclaw/`
+    repos, runtime composition in
+    [openclaw-runtime-distribution](/home/mfshaf7/projects/openclaw-runtime-distribution/README.md),
+    governed stage rehearsal, readiness approval, and prod promotion through
+    [platform-engineering/products/openclaw](/home/mfshaf7/projects/platform-engineering/products/openclaw/README.md)
 - OpenProject
   - platform-integrated product path with runtime, access, and operator
-    procedures in `platform-engineering/products/openproject/`
-  - execution-of-record for delivery work through the `Workspace Delivery ART`
+    procedures in
+    [platform-engineering/products/openproject](/home/mfshaf7/projects/platform-engineering/products/openproject/README.md)
+  - execution-of-record for delivery work through the
+    [Workspace Delivery ART](/home/mfshaf7/projects/platform-engineering/products/openproject/delivery-art-contract.md)
 - shared operator workflow service
-  - `operator-orchestration-service/` owns broker-backed operator workflows,
-    delivery-control APIs, and OpenProject workflow adapters that span product
-    boundaries
+  - [operator-orchestration-service](/home/mfshaf7/projects/operator-orchestration-service/README.md)
+    owns broker-backed operator workflows, delivery-control APIs, and
+    OpenProject workflow adapters that span product boundaries
 
 ## Current Product Surfaces
 
@@ -71,10 +82,11 @@ The workspace is not centered on one product. Current governed paths are:
 
 ## Workspace Governance And Audit
 
-`workspace-governance/` owns the canonical copies of the workspace-root files
-plus the machine-readable contract model that defines the active repo map,
-product maturity, component inventory, vocabulary, and cross-repo routing
-rules. It also owns the self-improvement loop that now includes:
+`workspace-governance/` owns the canonical workspace-root files plus the
+machine-readable contract model for the active repo map, product maturity,
+component inventory, vocabulary, and cross-repo routing rules.
+
+It also owns the workspace self-improvement loop:
 
 - machine-visible signal audit
 - improvement-candidate triage
@@ -82,25 +94,25 @@ rules. It also owns the self-improvement loop that now includes:
 
 Primary operator surface:
 
-- `/home/mfshaf7/projects/workspace-governance/docs/self-improvement-escalation.md`
+- [workspace-governance/docs/self-improvement-escalation.md](/home/mfshaf7/projects/workspace-governance/docs/self-improvement-escalation.md)
 
-It also owns the intake gate. New repos, products, and components are supposed
-to be classified first:
+It also owns the intake gate. New repos, products, and components should be
+classified before they become part of the governed model:
 
 - `out-of-scope`
 - `proposed`
 - `admitted`
 
-before they quietly become part of the governed active model.
+That keeps expansion explicit instead of letting it happen by drift.
 
 AI may assist intake classification later, but that suggestion only counts as
 governed when it references an active approved model profile from
 `platform-engineering` and the operator still records explicit acceptance.
 
-The workspace also defines a `dev-integration` lane for fast local iteration.
-Use it when operator-facing workflow design or cross-repo API work is still
-changing too quickly for governed stage rehearsal. It is standardized at the
-workspace level, but it is not a governed delivery lane:
+The workspace also defines `dev-integration` for fast local iteration. Use it
+when operator-facing workflow design or cross-repo API work is still changing
+too quickly for governed stage rehearsal. It is standardized at the workspace
+level, but it is not a governed delivery lane:
 
 - `workspace-governance` defines when to use it and what it must never touch
 - `platform-engineering` owns the shared local-k3s runner
@@ -119,21 +131,19 @@ Only `active` profiles are self-serve launchable from the shared runner. The
 request/admission model is generic at the workspace layer, even if the current
 request surface adapter is a specific tool such as OpenProject.
 
-For operator-facing workflow changes, one clear operator instruction surface is
-required in the owning repo. Supporting contracts, templates, and standards do
-not count as the primary procedure by themselves. For `dev-integration`,
-operators should use the shared runbook in
+For operator-facing workflow changes, the owning repo must publish one clear
+operator instruction surface. Supporting contracts and templates do not count
+as the primary procedure by themselves. For `dev-integration`, operators
+should use the shared runbook in
 [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md).
 
-The same principle now applies to self-improvement. Do not wait for a later
+The same principle applies to self-improvement. Do not wait for a later
 retrospective if a repeated miss is already obvious. If the user explicitly
-calls out a repeated mistake, or if the machine-visible audit detects a doctrine
-or completion gap, that should create or update an improvement candidate first.
-Only then should the system decide whether the lesson needs a full after-action
-review.
+calls out a repeated mistake, or if the machine-visible audit detects a
+doctrine or completion gap, create or update an improvement candidate first.
+Then decide whether the lesson needs a full after-action review.
 
-Troubleshooting doctrine is explicit too. Serious failure diagnosis should use
-one supported order of operations:
+Troubleshooting follows one supported order of operations:
 
 - preflight
 - live truth
@@ -150,7 +160,7 @@ should have been caught already. Those are mandatory self-improvement signals,
 not optional tone. If active work becomes half-finished at the planning,
 control, or completion layer, the system should record or update the candidate
 before continuing normal execution. If a previously closed lesson regresses,
-the new candidate should explicitly link back to the earlier closed candidate or
+the new candidate should link back to the earlier closed candidate or
 after-action instead of treating the miss as brand-new.
 
 If a simpler root cause is discovered only after deeper debugging expanded, that
