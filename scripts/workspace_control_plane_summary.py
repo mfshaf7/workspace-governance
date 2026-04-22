@@ -93,6 +93,16 @@ def main() -> int:
             ],
         ),
         (
+            "branch lifecycle audit",
+            [
+                "python3",
+                "scripts/audit_branch_lifecycle.py",
+                "--workspace-root",
+                str(workspace_root),
+                "--include-remote",
+            ],
+        ),
+        (
             "workspace audit",
             [
                 "python3",

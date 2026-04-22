@@ -137,6 +137,11 @@ Route those changes back to the owner repos.
   explicit restart-readiness check.
 - If meaningful workspace-level local-only state remains, refresh the current
   handoff first and only then recommend the restart.
+- If the workspace is being described as clean or restart-ready, require
+  `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
+  to pass before saying so.
+- Remote non-`main` branches are only allowed when they back an open PR or
+  have a documented exception in `contracts/exceptions.yaml`.
 - Do not wait for the operator to ask whether a handoff should be written.
 - This is required especially when:
   - the user is being told to restart so new skills or instructions will load
@@ -207,6 +212,9 @@ regress the workspace control plane:
   `contracts/skills.yaml` changes
 - missing improvement candidate, after-action, or durable control updates after
   a repeated mistake or deterministic review/control failure
+- branch lifecycle control regressions that would let stale local branches,
+  pinned worktrees, or remote branches without an open PR linger after merge or
+  while a clean-state claim is being made
 - Codex review-control regressions that remove repo-specific review guidance,
   PR evidence surfaces, or validation coverage from active repos
 
@@ -230,6 +238,9 @@ python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/
 python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote
+python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
 python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
@@ -237,6 +248,7 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
+python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
 ```

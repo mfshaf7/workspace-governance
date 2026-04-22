@@ -59,6 +59,8 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
    stable automatic review enabled.
 5. Resolve or explicitly acknowledge the findings in the PR before merge.
 6. Merge only after the repo-local checks and required governance checks pass.
+7. After merge, retire the local branch, remote branch, and any temporary
+   worktrees unless an open PR or a documented exception still requires them.
 
 ## Codex GitHub Review Setup
 
@@ -94,6 +96,8 @@ The summary checks:
 - live skill install sync
 - Codex review-control compliance
 - stale-content drift
+- branch lifecycle hygiene, including stale remote branches that no longer back
+  an open PR
 - workspace audit
 - deterministic improvement-signal audit
 - improvement-candidate validity
@@ -101,6 +105,9 @@ The summary checks:
 
 The summary is findings-only. It does not open PRs, change contracts, write
 generated artifacts, or touch governed environments.
+
+The branch lifecycle portion expects authenticated `gh` access so it can tell
+an open-PR remote branch from stale remote residue.
 
 ## Self-Improvement Route
 

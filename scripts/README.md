@@ -4,6 +4,13 @@
   - audits the active workspace repo inventory, Git SSH origin shape,
     workspace-root sync state, contract validity, live installed skill sync,
     generated artifact freshness, and cross-repo truth
+- `audit_branch_lifecycle.py`
+  - audits stale local branches, pinned worktree residue, and, with
+    `--include-remote`, remote branches that do not back an open PR or a
+    documented exception
+  - `--check-clean` is the strict clean-state gate for restart-readiness and
+    post-merge cleanup claims
+  - remote checks require authenticated `gh` access
 - `audit_stale_content.py`
   - audits active documentation against the contract vocabulary and repo-rule
     forbidden ownership language
@@ -91,4 +98,5 @@
 - `workspace_control_plane_summary.py`
   - runs a read-only control-plane summary covering remote freshness,
     workspace-root sync, skill sync, review-control compliance, stale-content
-    drift, workspace audit, and self-improvement health
+    drift, branch lifecycle hygiene, workspace audit, and self-improvement
+    health

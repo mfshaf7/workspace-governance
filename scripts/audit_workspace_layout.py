@@ -38,7 +38,7 @@ def main() -> int:
     parser.add_argument(
         "--check-clean",
         action="store_true",
-        help="also fail if a required repo has a dirty git worktree",
+        help="also fail if the workspace is not clean, including local branch/worktree residue",
     )
     args = parser.parse_args()
 
@@ -117,6 +117,7 @@ def main() -> int:
     learning_closure_validator = (
         workspace_governance_root / "scripts" / "validate_learning_closure.py"
     )
+    branch_lifecycle_audit = workspace_governance_root / "scripts" / "audit_branch_lifecycle.py"
     try:
         output = run(["python3", str(contract_validator), "--repo-root", str(workspace_governance_root)])
     except subprocess.CalledProcessError as exc:
@@ -263,6 +264,21 @@ def main() -> int:
                 str(workspace_root),
             ]
         )
+    except subprocess.CalledProcessError as exc:
+        errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
+    else:
+        print(output)
+
+    branch_lifecycle_cmd = [
+        "python3",
+        str(branch_lifecycle_audit),
+        "--workspace-root",
+        str(workspace_root),
+    ]
+    if args.check_clean:
+        branch_lifecycle_cmd.extend(["--include-remote", "--check-clean"])
+    try:
+        output = run(branch_lifecycle_cmd)
     except subprocess.CalledProcessError as exc:
         errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
     else:

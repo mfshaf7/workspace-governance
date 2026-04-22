@@ -72,6 +72,7 @@ REQUIRED_FILES = (
     "templates/skill/README.md",
     "templates/after-action/README.md",
     "scripts/README.md",
+    "scripts/audit_branch_lifecycle.py",
     "scripts/audit_workspace_layout.py",
     "scripts/audit_stale_content.py",
     "scripts/contracts_lib.py",

@@ -206,6 +206,11 @@ Only start implementation after that discussion narrows the target design.
   explicit restart-readiness check.
 - If meaningful workspace-level local-only state remains, refresh the current
   handoff first and only then recommend the restart.
+- If the workspace is being described as clean or restart-ready, require:
+  - `python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
+  to pass before saying so.
+- Remote non-`main` branches are only allowed when they back an open PR or
+  have a documented exception in `workspace-governance/contracts/exceptions.yaml`.
 - Do not wait for the operator to ask whether a handoff should be written.
 - If the repo inventory, owner map, or routing model changes, update:
   - `workspace-governance/contracts/repos.yaml`
@@ -341,9 +346,13 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote`
+  - `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean`
   - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`
 - other repos
   - follow the local repo `AGENTS.md`
