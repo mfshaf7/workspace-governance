@@ -51,6 +51,17 @@ Use this skill when a serious initiative is already running inside
    - source `x-oos-caller-id` from the first allowed id in
      `CALLER_ALLOWED_IDS`, and source `x-oos-caller-secret` from
      `CALLER_AUTH_SHARED_SECRET`
+   - when the active implementation repo is `operator-orchestration-service`
+     and the route already exists, use the documented broker contract first:
+     `docs/api/openapi.json` or
+     `npm run api:contract -- <METHOD> <PATH>`
+   - when live broker truth matters for an existing documented route in
+     `operator-orchestration-service`, use
+     `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
+     tracing
+   - treat `src/app.js` and service code as runtime-confirmation or drift
+     sources after the contract read, not as the default first read for an
+     existing broker route
    - do not default to Python wrappers, Rails paths, or ad hoc background
      localhost bridges when a direct broker call can do the job
    - use local parsing only after the broker response is captured; parsing is
