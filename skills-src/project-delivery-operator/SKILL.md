@@ -13,8 +13,7 @@ Use this skill when a serious initiative is already running inside
 - `platform-engineering/products/openproject/AGENTS.md`
 - `platform-engineering/products/openproject/README.md`
 - `platform-engineering/products/openproject/delivery-art-contract.md`
-- `platform-engineering/products/openproject/runbooks/show-delivery-initiatives.md`
-- `platform-engineering/products/openproject/runbooks/show-delivery-execution.md`
+- `operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md`
 - `workspace-governance/docs/delegated-execution.md`
 - `workspace-governance/docs/self-improvement-escalation.md`
@@ -24,12 +23,31 @@ Use this skill when a serious initiative is already running inside
 1. Start from the ART, not from chat memory.
    - if the active `Epic` is already known, start with its fast active-front
      read and a scoped ART-quality check for that `Epic`
+   - if the target work item is already known, use the broker work-item
+     continuation read before scanning the full execution tree
    - use the deep execution read only when the full evidence-grade tree is
      actually needed
    - use the portfolio initiative summary only when the active `Epic` is not
      yet known or when PI/portfolio replanning is happening
    - identify the committed front, stretch work, PI objective state, and ART
      risk state before reading repo code
+   - inside local `dev-integration`, default ART reads and writes to direct
+     top-level `k3s kubectl` broker calls against the active profile namespace
+   - use `GET /v1/delivery-work-items/{work_item_id}/continuation-context`
+     as the default ART resume read for one known item
+   - when the active item is not yet known, use
+     `GET /v1/delivery-initiatives/{delivery_id}/planning` first to identify
+     the active front, then fetch continuation context for the chosen item
+   - when the broker image does not carry `curl`, use the broker pod runtime
+     itself with `node` and `fetch(...)` rather than falling back to another
+     access path
+   - source `x-oos-caller-id` from the first allowed id in
+     `CALLER_ALLOWED_IDS`, and source `x-oos-caller-secret` from
+     `CALLER_AUTH_SHARED_SECRET`
+   - do not default to Python wrappers, Rails paths, or ad hoc background
+     localhost bridges when a direct broker call can do the job
+   - use local parsing only after the broker response is captured; parsing is
+     not the access path
 2. Keep the truth split explicit:
    - ART = work-state truth
    - owner repos = implementation and design truth
@@ -81,8 +99,14 @@ Use this skill when a serious initiative is already running inside
 - Do not let meaningful uncovered work live only in chat.
 - Do not reconstruct the work queue from handoff prose when the ART already
   exists.
+- Do not reconstruct prior-done sibling context by manually scanning a giant
+  execution-summary payload when the continuation-context read is available.
 - Do not treat repo code or contracts as the work queue; they are the
   implementation truth, not the planning truth.
+- Do not turn broker access into a wrapper-first workflow; use direct
+  `k3s kubectl` broker read and write calls by default in local delivery work.
+- Do not guess broker caller auth headers during delivery work; reuse the
+  broker pod's own allowed caller id and shared secret from environment.
 - Do not leave stretch work looking committed just because it still exists in
   the same PI.
 - Do not silently continue on active work whose narrative contract is too weak
