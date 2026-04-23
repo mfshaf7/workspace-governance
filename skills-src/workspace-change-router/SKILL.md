@@ -36,9 +36,11 @@ workspace root and does not name the owning repo.
    - if the request is a rehearsal, rollout drill, temporary prod bring-up, or
      restore-to-baseline exercise, classify the drill before implying scope:
      - `product-runtime-drill` when one governed product lane is under test
-     - `full-platform-runtime-drill` when multiple products or shared
-       components must come up together and then return to the captured
+     - `active-stack-runtime-drill` when the current operator-critical
+       mixed-lane stack must come up together and then return to the captured
        baseline
+     - `environment-complete-runtime-drill` only when every admitted lane and
+       product environment in scope is actually exercised
      - `lifecycle-control-drill` when the goal is to exercise lifecycle state
        controls rather than a full runtime bring-up
    - route those drill shapes to `platform-engineering` and the corresponding

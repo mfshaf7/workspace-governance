@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-04-24-full-platform-drill-scope-language-gap
+title: Split full-platform drill scope classes to match actual exercised environments
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The current full-platform-runtime-drill label overstates scope by treating
+  the active operator-critical stack as if every platform environment and product
+  lane were exercised.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openclaw
+  - openproject
+  related_components:
+  - observability
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - workflow-doctrine-gap
+  finding: The completed drill used devint OpenProject and broker plus prod/stage
+    OpenClaw and shared support components, but did not exercise prod OpenProject
+    or the shared non-devint broker lane. The current contract name therefore mismatches
+    operator expectation and overstates what full means.
+  source_refs:
+  - 'conversation: operator called out real mismatch between full-platform drill label
+    and actual exercised scope'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: adr
+    path: platform-engineering/docs/decisions/adr/ADR-014-governed-active-stack-runtime-drill-and-restore.md
+    owner_repo: platform-engineering
+    note: Reclassifies the prior full-platform drill into an active-stack drill and adds environment-complete scope as a separate class.
+  - type: doc
+    path: platform-engineering/docs/standards/governed-runtime-drill-model.md
+    owner_repo: platform-engineering
+    note: Defines active-stack versus environment-complete drill semantics and reserves full-platform wording for estate-complete scope.
+  - type: contract
+    path: platform-engineering/environments/shared/runtime-drills/active-stack-runtime-drill.yaml
+    owner_repo: platform-engineering
+    note: Renames the mixed-lane drill contract so the machine-readable surface matches the real exercised scope.
+  - type: runbook
+    path: platform-engineering/docs/runbooks/active-stack-runtime-drill.md
+    owner_repo: platform-engineering
+    note: Publishes the active-stack runbook and warns operators not to treat it as estate-complete coverage.
+  - type: skill
+    path: workspace-governance/skills-src/workspace-change-router/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires routing to distinguish active-stack versus environment-complete runtime drills.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires ART work to classify active-stack versus environment-complete drill scope before continuing execution.
+  note: The mixed-lane drill is now named active-stack, the workspace routing surfaces teach that distinction, and full-platform wording is reserved for estate-complete scope.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

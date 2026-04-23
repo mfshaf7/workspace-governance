@@ -35,15 +35,15 @@ resolution:
   after_action_ref: null
   control_refs:
   - type: adr
-    path: platform-engineering/docs/decisions/adr/ADR-014-governed-full-platform-runtime-drill-and-restore.md
+    path: platform-engineering/docs/decisions/adr/ADR-014-governed-active-stack-runtime-drill-and-restore.md
     owner_repo: platform-engineering
     note: Defines the governed drill types, scope model, and exact-baseline restore semantics.
   - type: contract
-    path: platform-engineering/environments/shared/runtime-drills/full-platform-runtime-drill.yaml
+    path: platform-engineering/environments/shared/runtime-drills/active-stack-runtime-drill.yaml
     owner_repo: platform-engineering
-    note: Establishes the machine-readable full-platform drill contract and required evidence model.
+    note: Establishes the machine-readable active-stack drill contract and required evidence model.
   - type: runbook
-    path: platform-engineering/docs/runbooks/full-platform-runtime-drill.md
+    path: platform-engineering/docs/runbooks/active-stack-runtime-drill.md
     owner_repo: platform-engineering
     note: Publishes the primary operator surface for snapshot, activate, verify, record, restore, and status.
   - type: script
@@ -65,8 +65,8 @@ resolution:
   - type: doc
     path: workspace-governance/workspace-root/README.md
     owner_repo: workspace-governance
-    note: Workspace operator surfaces now include the shared full-platform runtime drill runbook.
-  note: The platform now has a governed full-platform drill contract and runbook, and the workspace routing surfaces explicitly classify broad rehearsal and restore requests into the drill workflow instead of collapsing them into the most mature product lane.
+    note: Workspace operator surfaces now include the shared active-stack runtime drill runbook.
+  note: The platform now has a governed active-stack drill contract and runbook, and the workspace routing surfaces explicitly classify broad rehearsal and restore requests into the drill workflow instead of collapsing them into the most mature product lane.
 follow_up:
   owner_repo: null
   due_on: null

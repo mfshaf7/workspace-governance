@@ -147,9 +147,10 @@ paths:
     owns broker-backed operator workflows, delivery-control APIs, and
     OpenProject workflow adapters that span product boundaries
   - broad runtime rehearsal and restore requests should be classified as
-    `product-runtime-drill`, `full-platform-runtime-drill`, or
-    `lifecycle-control-drill` and routed to the shared platform drill workflow
-    instead of defaulting to the most mature product-only path
+    `product-runtime-drill`, `active-stack-runtime-drill`,
+    `environment-complete-runtime-drill`, or `lifecycle-control-drill` and
+    routed to the shared platform drill workflow instead of defaulting to the
+    most mature product-only path
 
 ## Current Product Surfaces
 
@@ -162,8 +163,8 @@ paths:
 - Shared operator workflows
   - broker-backed workflow APIs and delivery-control surfaces:
     [operator-orchestration-service/README.md](/home/mfshaf7/projects/operator-orchestration-service/README.md)
-  - shared full-platform runtime drill and restore:
-    [platform-engineering/docs/runbooks/full-platform-runtime-drill.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/full-platform-runtime-drill.md)
+  - shared active-stack runtime drill and restore:
+    [platform-engineering/docs/runbooks/active-stack-runtime-drill.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/active-stack-runtime-drill.md)
 
 ## Workspace Governance And Audit
 
