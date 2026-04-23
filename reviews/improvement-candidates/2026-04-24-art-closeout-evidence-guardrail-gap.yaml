@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-04-24-art-closeout-evidence-guardrail-gap
+title: Fail closed on ART completion evidence format before broker writes
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The ART closeout flow reached a live broker completion write with request
+  content that satisfied the route contract but violated the stricter completion-evidence
+  bullet rules, causing avoidable operator friction and a failed closeout attempt.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: I checked the broker route contract for POST /v1/delivery-work-items/{work_item_id}/complete
+    but did not verify the stricter evidence-format guardrail before posting completion
+    evidence. The broker rejected the write because Test Result Evidence and Validation
+    Evidence require PASS/FAIL/CHECK/NOT APPLICABLE bullet prefixes rather than raw
+    command lines.
+  source_refs:
+  - 'conversation: operator asked whether the guardrails had been checked after the
+    broker rejected the ART closeout write for evidence formatting'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/scripts/validate_completion_evidence.mjs
+    owner_repo: operator-orchestration-service
+    note: Adds a local fail-closed preflight so malformed ART completion evidence
+      is rejected before the broker write.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Makes the exact completion-evidence prefixes and preflight step explicit
+      on the operator-facing broker surface.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires the local completion-evidence preflight before the broker
+      complete write in ART sessions.
+  note: The broker completion path now has a local preflight command, the operator-facing
+    contract states the exact evidence prefixes, and the ART skill requires that
+    preflight before the complete write.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
