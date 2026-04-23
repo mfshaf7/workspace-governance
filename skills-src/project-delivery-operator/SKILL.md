@@ -61,6 +61,17 @@ Use this skill when a serious initiative is already running inside
      `npm run validate:completion-evidence -- <payload.json>`
    - do not let the live broker completion write be the first place malformed
      completion evidence fails
+   - completion-evidence preflight is necessary but not sufficient for done
+     work; the broker now also fail-closes on weak done-state narrative
+     structure
+   - before `complete`, and before `update` when the work item will remain
+     `done`, confirm the description still keeps the required narrative
+     headings for that type and a flat `Execution Context` that matches the
+     stored owner repo, parent item, delivery team, and iteration values when
+     those fields apply
+   - use execution-summary `done_narrative_contract_*` fields as the fast read
+     model for done-state narrative drift instead of rediscovering it from raw
+     OpenProject markdown
    - when live broker truth matters for an existing documented route in
      `operator-orchestration-service`, use
      `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
@@ -176,3 +187,5 @@ Use this skill when a serious initiative is already running inside
   self-improvement signal.
 - Do not let delegated workers mutate the ART, live environments, security
   closure, or final proof surfaces.
+- Do not assume valid completion-evidence bullets mean the done record is
+  acceptable; the done-state narrative contract is a separate hard gate now.
