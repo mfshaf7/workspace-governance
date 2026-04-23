@@ -75,6 +75,19 @@ Use this skill when a serious initiative is already running inside
    - tiny same-slice patch: absorb it into the active work item
    - meaningful work in the same initiative: add a new item under the active
      `Epic`
+   - if the operator asks for a broad stage/prod rehearsal, temporary prod
+     activation, or restore-to-baseline exercise, classify the scope as a
+     governed drill before assuming product scope:
+     - `product-runtime-drill` for one governed product lane
+     - `full-platform-runtime-drill` for multi-product or shared-component
+       bring-up plus restore
+     - `lifecycle-control-drill` for lifecycle-state exercises without full
+       runtime bring-up
+   - route broad runtime drills through the shared platform workflow in
+     `platform-engineering/docs/runbooks/full-platform-runtime-drill.md`
+     instead of defaulting to the most mature product-only path
+   - do not treat a broad platform rehearsal as OpenClaw-only just because
+     OpenClaw already has the most mature governed promotion path
    - before creating a new item, choose the smallest ART structure that still
      preserves real owner, review, and validation boundaries
    - one task is only acceptable when the work is genuinely one execution slice

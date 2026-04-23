@@ -7,7 +7,7 @@ summary: A real runtime drill exposed that the workspace has no explicit full-pl
   drill type, no source-backed local activate-verify-restore path, and no single operator
   surface for scoped rehearsal and restoration.
 regression_of: null
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -33,10 +33,41 @@ signals:
     gap'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: adr
+    path: platform-engineering/docs/decisions/adr/ADR-014-governed-full-platform-runtime-drill-and-restore.md
+    owner_repo: platform-engineering
+    note: Defines the governed drill types, scope model, and exact-baseline restore semantics.
+  - type: contract
+    path: platform-engineering/environments/shared/runtime-drills/full-platform-runtime-drill.yaml
+    owner_repo: platform-engineering
+    note: Establishes the machine-readable full-platform drill contract and required evidence model.
+  - type: runbook
+    path: platform-engineering/docs/runbooks/full-platform-runtime-drill.md
+    owner_repo: platform-engineering
+    note: Publishes the primary operator surface for snapshot, activate, verify, record, restore, and status.
+  - type: script
+    path: platform-engineering/scripts/platform_drill.py
+    owner_repo: platform-engineering
+    note: Implements the governed drill ledger, evidence recording, and restore path.
+  - type: skill
+    path: workspace-governance/skills-src/workspace-change-router/SKILL.md
+    owner_repo: workspace-governance
+    note: Routes broad rehearsal and restore requests through the proper drill type instead of defaulting to the most mature product lane.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires ART-backed rehearsal work to classify drill scope before assuming product-only execution.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace routing layer now directs broad runtime drills to platform-engineering and the shared drill workflow.
+  - type: doc
+    path: workspace-governance/workspace-root/README.md
+    owner_repo: workspace-governance
+    note: Workspace operator surfaces now include the shared full-platform runtime drill runbook.
+  note: The platform now has a governed full-platform drill contract and runbook, and the workspace routing surfaces explicitly classify broad rehearsal and restore requests into the drill workflow instead of collapsing them into the most mature product lane.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-27'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

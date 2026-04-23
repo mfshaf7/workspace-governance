@@ -158,6 +158,12 @@ Only start implementation after that discussion narrows the target design.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.
+- Broad stage/prod rehearsal, temporary prod bring-up, and restore-to-baseline
+  requests belong in `platform-engineering/`; classify them as
+  `product-runtime-drill`, `full-platform-runtime-drill`, or
+  `lifecycle-control-drill` before execution, and do not default a broad
+  platform rehearsal to OpenClaw-only just because OpenClaw has the most mature
+  governed product promotion path.
 - Shared operator workflow APIs, broker-backed workflow orchestration, bounded
   AI-assist workflow orchestration, and OpenProject workflow adapters belong in
   `operator-orchestration-service/`.
