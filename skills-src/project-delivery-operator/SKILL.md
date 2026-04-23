@@ -75,6 +75,21 @@ Use this skill when a serious initiative is already running inside
    - tiny same-slice patch: absorb it into the active work item
    - meaningful work in the same initiative: add a new item under the active
      `Epic`
+   - before creating a new item, choose the smallest ART structure that still
+     preserves real owner, review, and validation boundaries
+   - one task is only acceptable when the work is genuinely one execution slice
+     with one primary owner path and one materially shared done boundary
+   - if the work changes a shared control plane, introduces a new operator
+     workflow, or spans multiple repos with distinct deliverables, do not
+     compress it into one task
+   - represent that class of work as a parent `Feature` or `Enabler` plus
+     child tasks for the concrete owner slices such as:
+     - workflow model or design decision
+     - platform or source implementation
+     - security review
+     - governance closure or skill/routing updates
+   - if a stopgap placeholder item was created just to avoid leaving the work
+     untracked, replace or retire it before normal implementation continues
    - different business outcome: route it through `Workspace Proposals`
    - repeated process or control miss: record or update an improvement
      candidate
@@ -117,6 +132,10 @@ Use this skill when a serious initiative is already running inside
 - Do not let meaningful uncovered work live only in chat.
 - Do not reconstruct the work queue from handoff prose when the ART already
   exists.
+- Do not hide a cross-repo control-plane or workflow change inside one coarse
+  ART task when the real work has distinct owner, review, or validation slices.
+- Do not leave a temporary placeholder item as the lasting execution model once
+  the proper parent-plus-children structure is clear.
 - Do not reconstruct prior-done sibling context by manually scanning a giant
   execution-summary payload when the continuation-context read is available.
 - Do not present a `ready` umbrella item as the next ART front from planning

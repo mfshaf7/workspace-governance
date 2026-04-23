@@ -1,0 +1,42 @@
+schema_version: 1
+id: 2026-04-24-full-platform-runtime-drill-restore-gap
+title: Define a governed full-platform runtime drill and restore workflow
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: A real runtime drill exposed that the workspace has no explicit full-platform
+  drill type, no source-backed local activate-verify-restore path, and no single operator
+  surface for scoped rehearsal and restoration.
+regression_of: null
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: A temporary prod drill defaulted to the only mature governed product path,
+    OpenClaw, because there is no platform-wide drill workflow that distinguishes
+    OpenClaw-only drills from full-platform drills and no deterministic local restore
+    model tied to the pre-drill live state.
+  source_refs:
+  - 'conversation: 2026-04-24 full rehearsal discussion and prod drill restoration
+    gap'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-27'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.

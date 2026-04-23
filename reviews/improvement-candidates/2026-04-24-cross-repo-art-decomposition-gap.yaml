@@ -1,0 +1,49 @@
+schema_version: 1
+id: 2026-04-24-cross-repo-art-decomposition-gap
+title: Require multi-slice ART decomposition for cross-repo control changes
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: A cross-repo control-plane workflow was recorded as one implementation task
+  after the operator explicitly asked that the work be tracked properly in ART, leaving
+  owner, review, and validation boundaries hidden inside a single item.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The full-platform runtime drill and restore workflow spans platform-engineering,
+    security-architecture, and workspace-governance, but it was initially represented
+    as a single task. That over-compressed the execution model and made the ART state
+    less reviewable than the actual work.
+  source_refs:
+  - 'conversation: operator said the new drill workflow should be in ART, then called
+    out that one task was too coarse and asked that this mistake never happen again'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires parent-plus-child ART decomposition for cross-repo control
+      and workflow changes instead of allowing a coarse single-task placeholder
+      to stand as the execution model.
+  note: The ART operator skill now requires parent-plus-child decomposition for
+    cross-repo control-plane and workflow changes instead of allowing a coarse
+    single-task placeholder to stand as the execution model.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
