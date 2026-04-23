@@ -79,12 +79,14 @@ Use this skill when a serious initiative is already running inside
      activation, or restore-to-baseline exercise, classify the scope as a
      governed drill before assuming product scope:
      - `product-runtime-drill` for one governed product lane
-     - `full-platform-runtime-drill` for multi-product or shared-component
-       bring-up plus restore
+     - `active-stack-runtime-drill` for multi-product or shared-component
+       mixed-lane bring-up plus restore
+     - `environment-complete-runtime-drill` only when every admitted lane and
+       product environment in scope is actually exercised
      - `lifecycle-control-drill` for lifecycle-state exercises without full
        runtime bring-up
    - route broad runtime drills through the shared platform workflow in
-     `platform-engineering/docs/runbooks/full-platform-runtime-drill.md`
+     `platform-engineering/docs/runbooks/active-stack-runtime-drill.md`
      instead of defaulting to the most mature product-only path
    - do not treat a broad platform rehearsal as OpenClaw-only just because
      OpenClaw already has the most mature governed promotion path

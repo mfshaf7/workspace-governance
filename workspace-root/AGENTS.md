@@ -160,10 +160,10 @@ Only start implementation after that discussion narrows the target design.
   `platform-engineering/`.
 - Broad stage/prod rehearsal, temporary prod bring-up, and restore-to-baseline
   requests belong in `platform-engineering/`; classify them as
-  `product-runtime-drill`, `full-platform-runtime-drill`, or
-  `lifecycle-control-drill` before execution, and do not default a broad
-  platform rehearsal to OpenClaw-only just because OpenClaw has the most mature
-  governed product promotion path.
+  `product-runtime-drill`, `active-stack-runtime-drill`,
+  `environment-complete-runtime-drill`, or `lifecycle-control-drill` before
+  execution, and do not default a broad platform rehearsal to OpenClaw-only
+  just because OpenClaw has the most mature governed product promotion path.
 - Shared operator workflow APIs, broker-backed workflow orchestration, bounded
   AI-assist workflow orchestration, and OpenProject workflow adapters belong in
   `operator-orchestration-service/`.
