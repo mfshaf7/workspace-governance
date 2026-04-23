@@ -1,0 +1,66 @@
+schema_version: 1
+id: 2026-04-24-art-closeout-evidence-style-quality-gap
+title: Raise ART completion evidence to a consistent operator-grade formatting standard
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The ART completion path now fails closed on invalid evidence prefixes, but
+  it still allows sparse or uneven machine-valid closeout sections that read materially
+  worse than the better examples already stored in the same epic.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-24-art-closeout-evidence-guardrail-gap.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+  - platform-contract
+signals:
+  - id: repeated-evidence-quality-callout
+    title: The operator called out a second ART closeout formatting miss after the
+      strict prefix guardrail was already repaired.
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+      - learning-closure-regression
+    finding: The repaired guardrail prevented invalid evidence bullets, but stored
+      closeout sections for feature `#206` and its children still read materially
+      worse than the clearer pattern used on feature `#198` and its children. The
+      remaining gap is presentation quality and consistency, not machine validity.
+    source_refs:
+    - 'conversation: operator said "entire 206 is bad. look at exam 198 and its
+      child, this is good formatting" after the first guardrail repair'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-narrative.js
+    owner_repo: operator-orchestration-service
+    note: Adds the shared done-state narrative validator that enforces required
+      headings, non-empty sections, and the flat Execution Context contract.
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Fails closed on weak done-state narrative during complete and done-item
+      update writes before OpenProject is patched.
+  - type: script
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Treats weak done-state narrative on completed ART items as a hard
+      scoped quality-gate failure instead of an advisory style issue.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches future ART sessions to treat done-state narrative quality as a
+      separate hard gate beyond completion-evidence bullet validity.
+  note: The earlier evidence-only guard is now backed by a stronger done-state
+    narrative contract at the broker, the platform ART quality gate treats the
+    same drift as a hard failure, and the ART skill teaches the stronger
+    closeout rule for future sessions.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
