@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-04-24-api-response-contract-gap-in-doc-front
+title: Strengthen API response contracts before treating the Redoc front as complete
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The first Redoc API front looked complete because request shapes and route
+  coverage were documented, but many write routes still hid behind GenericObjectResponse
+  and had no explicit response examples, leaving the response side weak and the rendered
+  front visibly incomplete.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: operator-half-baked-callout
+  title: The operator explicitly said the work is half-baked, incomplete, sloppy,
+    or should have been caught already.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The operator called out the API front as bad because endpoint intent and
+    examples were blurry, and a later check showed blank response samples because
+    the response contract was still generic. The slice was closed too early on route
+    coverage and request examples without response-contract adequacy.
+  source_refs:
+  - 'conversation: operator said the API front was bad and response samples were blank'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: doc
+    path: operator-orchestration-service/docs/api/openapi.json
+    owner_repo: operator-orchestration-service
+    note: Strengthens broker response contracts and response examples so the API front
+      documents what the service actually returns.
+  - type: validator
+    path: operator-orchestration-service/scripts/validate_api_docs.mjs
+    owner_repo: operator-orchestration-service
+    note: Fails when broker routes lack response examples and when write routes fall
+      back to GenericObjectResponse.
+  - type: script
+    path: operator-orchestration-service/scripts/show_api_contract.mjs
+    owner_repo: operator-orchestration-service
+    note: Provides a fast route-contract lookup so future broker work starts from
+      the documented API contract instead of source tracing.
+  - type: doc
+    path: operator-orchestration-service/AGENTS.md
+    owner_repo: operator-orchestration-service
+    note: Makes the OpenAPI front and lookup command the default first read for existing
+      broker routes.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches future ART sessions to use the documented broker contract before
+      tracing broker handlers for existing routes.
+  note: The API front now requires response examples, broker write routes can no
+    longer use GenericObjectResponse, a fast route-contract lookup command exists,
+    and the active delivery skill now tells future sessions to start broker
+    route work from the documented contract instead of source tracing.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
