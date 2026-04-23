@@ -50,6 +50,16 @@ resolution:
     owner_repo: operator-orchestration-service
     note: Provides a fast route-contract lookup so future broker work starts from
       the documented API contract instead of source tracing.
+  - type: script
+    path: operator-orchestration-service/scripts/probe_api_contract.mjs
+    owner_repo: operator-orchestration-service
+    note: Adds a live broker probe that validates the active response body against
+      the documented contract from the approved k3s path.
+  - type: test
+    path: operator-orchestration-service/test/api-contract.test.js
+    owner_repo: operator-orchestration-service
+    note: Checks documented examples and representative broker responses against
+      the documented schemas.
   - type: doc
     path: operator-orchestration-service/AGENTS.md
     owner_repo: operator-orchestration-service
@@ -60,10 +70,11 @@ resolution:
     owner_repo: workspace-governance
     note: Teaches future ART sessions to use the documented broker contract before
       tracing broker handlers for existing routes.
-  note: The API front now requires response examples, broker write routes can no
-    longer use GenericObjectResponse, a fast route-contract lookup command exists,
-    and the active delivery skill now tells future sessions to start broker
-    route work from the documented contract instead of source tracing.
+  note: The API front now requires response examples and machine-readable route
+    metadata, broker write routes can no longer use GenericObjectResponse, a fast
+    route-contract lookup and live probe exist, representative contract checks
+    run in test, and the active delivery skill now tells future sessions to start
+    broker route work from the documented contract and probe before source tracing.
 follow_up:
   owner_repo: null
   due_on: null

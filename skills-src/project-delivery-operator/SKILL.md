@@ -55,6 +55,10 @@ Use this skill when a serious initiative is already running inside
      and the route already exists, use the documented broker contract first:
      `docs/api/openapi.json` or
      `npm run api:contract -- <METHOD> <PATH>`
+   - when live broker truth matters for an existing documented route in
+     `operator-orchestration-service`, use
+     `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
+     tracing
    - treat `src/app.js` and service code as runtime-confirmation or drift
      sources after the contract read, not as the default first read for an
      existing broker route
