@@ -1,0 +1,53 @@
+schema_version: 1
+id: 2026-04-23-art-next-front-stale-open-parent-gap
+title: Force item-level continuation checks before naming the next ART front
+recorded_on: '2026-04-23'
+owner_repo: workspace-governance
+summary: The ART workflow let a ready PI objective (#186) be treated as next work
+  even though its child scope was already done, because planning summary was used
+  without the item continuation check.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'A stale-open PI objective remained in ready state after #181 and #187
+    were already done, and I missed it until the operator called it out. The broker
+    continuation context already exposed open_child_count=0 and completed related
+    scope, so the miss was workflow discipline rather than missing system truth.'
+  source_refs:
+  - 'conversation: operator asked why #186 was still open when #181 was already done
+    and required a durable fix'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Require continuation-context confirmation before naming a ready umbrella
+      item as the next ART front.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Make stale-open umbrella-item detection part of the broker operator
+      continuation doctrine.
+  note: Closed by landed workflow doctrine updates in the ART skill and broker
+    operator surface.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

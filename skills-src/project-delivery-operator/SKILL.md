@@ -38,6 +38,13 @@ Use this skill when a serious initiative is already running inside
    - when the active item is not yet known, use
      `GET /v1/delivery-initiatives/{delivery_id}/planning` first to identify
      the active front, then fetch continuation context for the chosen item
+   - when planning surfaces a `ready` `PI Objective`, `Feature`, `Enabler`, or
+     other umbrella item as the candidate next front, do not present it as the
+     next executable work from planning alone; fetch that item's
+     `continuation-context` first
+   - if that continuation packet shows `open_child_count=0` and the related
+     completed scope already satisfies the item, treat it as a stale-open
+     closeout candidate rather than the next active front
    - when the broker image does not carry `curl`, use the broker pod runtime
      itself with `node` and `fetch(...)` rather than falling back to another
      access path
@@ -101,6 +108,9 @@ Use this skill when a serious initiative is already running inside
   exists.
 - Do not reconstruct prior-done sibling context by manually scanning a giant
   execution-summary payload when the continuation-context read is available.
+- Do not present a `ready` umbrella item as the next ART front from planning
+  alone; confirm it still has open execution scope through its own
+  continuation-context first.
 - Do not treat repo code or contracts as the work queue; they are the
   implementation truth, not the planning truth.
 - Do not turn broker access into a wrapper-first workflow; use direct
