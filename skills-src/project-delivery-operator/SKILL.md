@@ -55,6 +55,12 @@ Use this skill when a serious initiative is already running inside
      and the route already exists, use the documented broker contract first:
      `docs/api/openapi.json` or
      `npm run api:contract -- <METHOD> <PATH>`
+   - before `POST /v1/delivery-work-items/{work_item_id}/complete`, run the
+     local completion-evidence preflight in
+     `operator-orchestration-service`:
+     `npm run validate:completion-evidence -- <payload.json>`
+   - do not let the live broker completion write be the first place malformed
+     completion evidence fails
    - when live broker truth matters for an existing documented route in
      `operator-orchestration-service`, use
      `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
