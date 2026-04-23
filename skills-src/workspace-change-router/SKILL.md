@@ -33,6 +33,18 @@ workspace root and does not name the owning repo.
 4. Check whether the task already has an `active` `dev-integration` profile and
    prefer that lane for fast workflow or API iteration before stage.
 5. Check the product maturity before implying stage or prod flow.
+   - if the request is a rehearsal, rollout drill, temporary prod bring-up, or
+     restore-to-baseline exercise, classify the drill before implying scope:
+     - `product-runtime-drill` when one governed product lane is under test
+     - `full-platform-runtime-drill` when multiple products or shared
+       components must come up together and then return to the captured
+       baseline
+     - `lifecycle-control-drill` when the goal is to exercise lifecycle state
+       controls rather than a full runtime bring-up
+   - route those drill shapes to `platform-engineering` and the corresponding
+     platform runbook or contract
+   - do not default a broad stage/prod/restore request to OpenClaw-only just
+     because OpenClaw has the most mature governed product promotion path
 6. Route to the owner repo's `AGENTS.md` and `README.md`.
 7. If the request changes more than one control plane, name the primary owner
    and the required secondary updates.
@@ -47,5 +59,7 @@ workspace root and does not name the owning repo.
 - Do not skip an active `dev-integration` lane and jump straight to stage when
   the work is still in fast iteration.
 - Do not invent a governed promotion path for products that do not have one.
+- Do not treat a broad platform rehearsal as an OpenClaw-only workflow just
+  because OpenClaw currently has the deepest governed product path.
 - If the task introduces a new product, shared component, or control plane,
   stop and use the architecture discussion gate first.
