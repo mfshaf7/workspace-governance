@@ -51,6 +51,9 @@ flowchart LR
 Read this as the workspace control map:
 
 - `workspace-governance` defines routing, contracts, and audit.
+- the current governance-engine boundary, packaging model, and governed AI
+  runtime-sequencing source live in
+  [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
 - `security-architecture` governs security decisions and evidence.
 - `platform-engineering` owns the shared platform plus product integration.
 - OpenClaw is assembled through `openclaw-runtime-distribution`.
@@ -346,6 +349,7 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
+- Governance-engine foundation: [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
 - Troubleshooting doctrine: [workspace-governance/docs/troubleshooting-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md)
 - Workspace audit: [_workspace_tools/audit_workspace_layout.py](/home/mfshaf7/projects/_workspace_tools/audit_workspace_layout.py)
 - Platform authority: [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)

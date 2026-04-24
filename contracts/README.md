@@ -72,8 +72,12 @@ Use these contracts to declare:
   - which validator or audit enforces which contract surface
 - `skills.yaml`
   - registered workspace and repo-owned skills, their owner repo, and their
-    source path; live installed skills under `~/.codex/skills` must stay
-    aligned with this registry and source tree
+  source path; live installed skills under `~/.codex/skills` must stay
+  aligned with this registry and source tree
+- `governance-engine-foundation.yaml`
+  - machine-readable definition of the governance-engine versus tenant-instance
+    boundary, compatibility boundary, packaging model, and governed AI runtime
+    sequencing prerequisites
 
 ## Repo Rules
 

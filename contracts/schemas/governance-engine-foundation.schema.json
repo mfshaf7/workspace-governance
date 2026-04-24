@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governance_engine_foundation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "governance_engine_foundation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "source_of_truth_layers",
+        "tenant_instance_surfaces",
+        "compatibility_boundary",
+        "shadow_parity",
+        "packaging_model",
+        "runtime_foundation"
+      ],
+      "properties": {
+        "owner_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_of_truth_layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/namedSurface"
+          }
+        },
+        "tenant_instance_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "surface",
+              "role"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "surface": {
+                "type": "string",
+                "minLength": 1
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "compatibility_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "stable_entrypoints",
+            "requirements"
+          ],
+          "properties": {
+            "stable_entrypoints": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "requirements": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "shadow_parity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "phases"
+          ],
+          "properties": {
+            "phases": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name",
+                  "outcome"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "packaging_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "central_repo",
+            "generated_repo_local_wiring",
+            "custom_validation_allowed_seams",
+            "custom_validation_forbidden_classes"
+          ],
+          "properties": {
+            "central_repo": {
+              "type": "string",
+              "minLength": 1
+            },
+            "generated_repo_local_wiring": {
+              "$ref": "#/$defs/stringList"
+            },
+            "custom_validation_allowed_seams": {
+              "$ref": "#/$defs/stringList"
+            },
+            "custom_validation_forbidden_classes": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "runtime_foundation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instruction_bundle_authoring",
+            "model_access_and_audit",
+            "sequencing_prerequisites"
+          ],
+          "properties": {
+            "instruction_bundle_authoring": {
+              "$ref": "#/$defs/stringList"
+            },
+            "model_access_and_audit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "profile_registry_ref",
+                "standards_refs",
+                "required_controls",
+                "required_audit_fields"
+              ],
+              "properties": {
+                "profile_registry_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "standards_refs": {
+                  "$ref": "#/$defs/stringList"
+                },
+                "required_controls": {
+                  "$ref": "#/$defs/stringList"
+                },
+                "required_audit_fields": {
+                  "$ref": "#/$defs/stringList"
+                }
+              }
+            },
+            "sequencing_prerequisites": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "namedSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "role"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

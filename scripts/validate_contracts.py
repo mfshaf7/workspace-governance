@@ -74,6 +74,7 @@ def main() -> int:
         "exceptions": repo_root / "contracts/exceptions.yaml",
         "validation_matrix": repo_root / "contracts/validation-matrix.yaml",
         "skills": repo_root / "contracts/skills.yaml",
+        "governance_engine_foundation": repo_root / "contracts/governance-engine-foundation.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -104,6 +105,9 @@ def main() -> int:
     improvement_triggers = contracts["improvement_triggers"]["triggers"]
     validator_scripts = contracts["validation_matrix"]["validators"]
     registered_skills = contracts["skills"]["skills"]
+    governance_engine_foundation = contracts["governance_engine_foundation"][
+        "governance_engine_foundation"
+    ]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
     self_improvement_runtime_gate = self_improvement_policy["runtime_gate"]
@@ -231,6 +235,160 @@ def main() -> int:
         errors.append(
             "contracts/delegation-policy.yaml: future_enforcement_boundary.parked_architecture_ref must point to openproject://work_packages/77"
         )
+    if governance_engine_foundation["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: owner_repo must be 'workspace-governance'"
+        )
+    expected_source_layers = {
+        "workspace-root",
+        "contracts",
+        "skills",
+        "scripts",
+        "generated",
+    }
+    actual_source_layers = {
+        entry["id"] for entry in governance_engine_foundation["source_of_truth_layers"]
+    }
+    if actual_source_layers != expected_source_layers:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: source_of_truth_layers must be exactly "
+            + ", ".join(sorted(expected_source_layers))
+        )
+    expected_tenant_surfaces = {
+        "intake-register",
+        "developer-integration-profiles",
+        "exceptions",
+        "owner-repo-workflows",
+        "security-review-outputs",
+    }
+    actual_tenant_surfaces = {
+        entry["id"] for entry in governance_engine_foundation["tenant_instance_surfaces"]
+    }
+    if actual_tenant_surfaces != expected_tenant_surfaces:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: tenant_instance_surfaces must be exactly "
+            + ", ".join(sorted(expected_tenant_surfaces))
+        )
+    expected_stable_entrypoints = {
+        "workspace-root/AGENTS.md",
+        "workspace-root/README.md",
+        "workspace-root/ARCHITECTURE.md",
+        "scripts/sync_workspace_root.py",
+        "scripts/install_skills.py",
+        "scripts/validate_contracts.py",
+        "scripts/audit_workspace_layout.py",
+    }
+    actual_stable_entrypoints = set(
+        governance_engine_foundation["compatibility_boundary"]["stable_entrypoints"]
+    )
+    if actual_stable_entrypoints != expected_stable_entrypoints:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: compatibility_boundary.stable_entrypoints must be exactly "
+            + ", ".join(sorted(expected_stable_entrypoints))
+        )
+    if governance_engine_foundation["packaging_model"]["central_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: packaging_model.central_repo must be 'workspace-governance'"
+        )
+    expected_allowed_seams = {
+        "product runtime behavior",
+        "component interface contracts",
+        "packaging and build-tooling constraints",
+        "repo-local protocol or artifact formats",
+    }
+    actual_allowed_seams = set(
+        governance_engine_foundation["packaging_model"]["custom_validation_allowed_seams"]
+    )
+    if actual_allowed_seams != expected_allowed_seams:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: packaging_model.custom_validation_allowed_seams must be exactly "
+            + ", ".join(sorted(expected_allowed_seams))
+        )
+    expected_forbidden_validation_classes = {
+        "central owner and routing truth",
+        "central lifecycle and intake semantics",
+        "governed AI model policy",
+        "cross-repo evidence and review obligations",
+    }
+    actual_forbidden_validation_classes = set(
+        governance_engine_foundation["packaging_model"]["custom_validation_forbidden_classes"]
+    )
+    if actual_forbidden_validation_classes != expected_forbidden_validation_classes:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: packaging_model.custom_validation_forbidden_classes must be exactly "
+            + ", ".join(sorted(expected_forbidden_validation_classes))
+        )
+    expected_instruction_bundle_authoring = {
+        "AGENTS.md",
+        "skills-src/",
+        "contracts/skills.yaml",
+        "contracts/repo-rules/",
+    }
+    actual_instruction_bundle_authoring = set(
+        governance_engine_foundation["runtime_foundation"]["instruction_bundle_authoring"]
+    )
+    if actual_instruction_bundle_authoring != expected_instruction_bundle_authoring:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.instruction_bundle_authoring must be exactly "
+            + ", ".join(sorted(expected_instruction_bundle_authoring))
+        )
+    model_access_and_audit = governance_engine_foundation["runtime_foundation"][
+        "model_access_and_audit"
+    ]
+    expected_required_controls = {
+        "approved profile plus governed invocation path",
+        "workload caller identity distinct from operator acceptance identity",
+        "structured output contract for governance assistance",
+        "human approval for governance decisions",
+        "attributable audit emission",
+        "no direct provider credentials in governed workloads",
+    }
+    if set(model_access_and_audit["required_controls"]) != expected_required_controls:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.model_access_and_audit.required_controls must be exactly "
+            + ", ".join(sorted(expected_required_controls))
+        )
+    expected_required_audit_fields = {
+        "caller_id",
+        "operator_identity_or_acceptance_ref",
+        "profile_id",
+        "invocation_path",
+        "decision_id",
+        "event_time",
+        "outcome",
+        "override_reason_when_present",
+    }
+    if set(model_access_and_audit["required_audit_fields"]) != expected_required_audit_fields:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.model_access_and_audit.required_audit_fields must be exactly "
+            + ", ".join(sorted(expected_required_audit_fields))
+        )
+    expected_sequencing_prerequisites = {
+        "governance-engine boundary explicit",
+        "compatibility boundary explicit",
+        "shadow parity path explicit",
+        "packaging model explicit",
+        "governed model-access and audit contract reviewed",
+    }
+    actual_sequencing_prerequisites = set(
+        governance_engine_foundation["runtime_foundation"]["sequencing_prerequisites"]
+    )
+    if actual_sequencing_prerequisites != expected_sequencing_prerequisites:
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.sequencing_prerequisites must be exactly "
+            + ", ".join(sorted(expected_sequencing_prerequisites))
+        )
+    workspace_root = repo_root.parent
+    required_cross_repo_refs = {
+        model_access_and_audit["profile_registry_ref"],
+        *model_access_and_audit["standards_refs"],
+    }
+    for rel_path in sorted(required_cross_repo_refs):
+        if not (workspace_root / rel_path).exists():
+            errors.append(
+                "contracts/governance-engine-foundation.yaml: referenced path does not exist: "
+                + rel_path
+            )
     if self_improvement_governance["policy_owner_repo"] not in active_repos:
         errors.append(
             "contracts/self-improvement-policy.yaml: governance.policy_owner_repo "

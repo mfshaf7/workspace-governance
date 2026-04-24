@@ -1,0 +1,111 @@
+schema_version: 1
+governance_engine_foundation:
+  owner_repo: workspace-governance
+  source_of_truth_layers:
+    - id: workspace-root
+      path: workspace-root/
+      role: canonical workspace bootstrap and routing guidance
+    - id: contracts
+      path: contracts/
+      role: shared routing, lifecycle, evidence, intake, and policy truth
+    - id: skills
+      path: skills-src/
+      role: canonical workspace-managed instruction source
+    - id: scripts
+      path: scripts/
+      role: sync, install, validation, audit, and materialization logic
+    - id: generated
+      path: generated/
+      role: derived governance artifacts generated from canonical truth
+  tenant_instance_surfaces:
+    - id: intake-register
+      surface: contracts/intake-register.yaml
+      role: workspace-instance classification state
+    - id: developer-integration-profiles
+      surface: contracts/developer-integration-profiles.yaml
+      role: admitted local iteration-lane state
+    - id: exceptions
+      surface: contracts/exceptions.yaml
+      role: time-bounded local waivers
+    - id: owner-repo-workflows
+      surface: owner-repo primary operator surfaces
+      role: implementation-local procedures that stay with the owner repo
+    - id: security-review-outputs
+      surface: security-architecture review artifacts
+      role: dated security evidence that remains outside generated workspace copies
+  compatibility_boundary:
+    stable_entrypoints:
+      - workspace-root/AGENTS.md
+      - workspace-root/README.md
+      - workspace-root/ARCHITECTURE.md
+      - scripts/sync_workspace_root.py
+      - scripts/install_skills.py
+      - scripts/validate_contracts.py
+      - scripts/audit_workspace_layout.py
+    requirements:
+      - AGENTS, skills, contracts, and repo rules remain the authoring layer
+      - materialized workspace-root copies remain generated from canonical sources
+      - existing operator entrypoints stay stable during migration
+      - owner-repo operator workflows remain owner-owned
+  shadow_parity:
+    phases:
+      - name: author-engine-source
+        outcome: update canonical engine-owned sources without changing live behavior
+      - name: materialize-instance-output
+        outcome: render workspace-root, skills, and generated outputs from canonical truth
+      - name: compare-parity
+        outcome: compare rendered outputs against the live workspace instance and installed skills
+      - name: resolve-gaps
+        outcome: record and close parity gaps before cutover
+      - name: cutover
+        outcome: switch only after parity is clean and entrypoints remain stable
+  packaging_model:
+    central_repo: workspace-governance
+    generated_repo_local_wiring:
+      - materialized workspace-root bootstrap files
+      - live installed skill tree under ~/.codex/skills
+      - repo-rule driven validation expectations
+      - generated governance artifacts under generated/
+    custom_validation_allowed_seams:
+      - product runtime behavior
+      - component interface contracts
+      - packaging and build-tooling constraints
+      - repo-local protocol or artifact formats
+    custom_validation_forbidden_classes:
+      - central owner and routing truth
+      - central lifecycle and intake semantics
+      - governed AI model policy
+      - cross-repo evidence and review obligations
+  runtime_foundation:
+    instruction_bundle_authoring:
+      - AGENTS.md
+      - skills-src/
+      - contracts/skills.yaml
+      - contracts/repo-rules/
+    model_access_and_audit:
+      profile_registry_ref: platform-engineering/security/governed-ai-model-profiles.yaml
+      standards_refs:
+        - platform-engineering/docs/standards/governed-ai-access-model.md
+        - security-architecture/docs/standards/ai-security-and-governance.md
+      required_controls:
+        - approved profile plus governed invocation path
+        - workload caller identity distinct from operator acceptance identity
+        - structured output contract for governance assistance
+        - human approval for governance decisions
+        - attributable audit emission
+        - no direct provider credentials in governed workloads
+      required_audit_fields:
+        - caller_id
+        - operator_identity_or_acceptance_ref
+        - profile_id
+        - invocation_path
+        - decision_id
+        - event_time
+        - outcome
+        - override_reason_when_present
+    sequencing_prerequisites:
+      - governance-engine boundary explicit
+      - compatibility boundary explicit
+      - shadow parity path explicit
+      - packaging model explicit
+      - governed model-access and audit contract reviewed

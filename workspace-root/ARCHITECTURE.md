@@ -35,6 +35,22 @@ iteration lane:
   - concrete profile owned by the workflow repo
   - local only, not governed rollout evidence
 
+## Workspace Control-Plane Direction
+
+The workspace control plane is no longer treated as a vague repo-local bundle.
+The current target shape is explicit:
+
+- `workspace-governance` remains the central control-plane repo
+- reusable governance-engine logic stays in canonical engine-owned sources
+- tenant-instance state stays explicit instead of being absorbed into the
+  engine layer
+- runtime work stays sequenced behind an explicit governance-engine boundary,
+  packaging model, compatibility boundary, and governed model-access contract
+
+Primary source:
+
+- [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
+
 ## Active Owner Repos
 
 - `workspace-governance/`
@@ -148,6 +164,8 @@ path is still intentionally suspended.
 Current state:
 
 - model-profile registry exists in `platform-engineering/security/`
+- the control-plane runtime foundation now requires an explicit model-access
+  and audit contract before any governed AI runtime activation
 - security review exists for governed intake-assist model profiles
 - the reserved `intake-classifier-v1` profile is `suspended`
 - operator approval is still required for intake, admission, approval, and
