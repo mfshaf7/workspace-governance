@@ -379,16 +379,22 @@ def main() -> int:
             + ", ".join(sorted(expected_sequencing_prerequisites))
         )
     workspace_root = repo_root.parent
+    workspace_has_sibling_repos = any(
+        (workspace_root / repo_name).exists()
+        for repo_name in active_repos
+        if repo_name != "workspace-governance"
+    )
     required_cross_repo_refs = {
         model_access_and_audit["profile_registry_ref"],
         *model_access_and_audit["standards_refs"],
     }
-    for rel_path in sorted(required_cross_repo_refs):
-        if not (workspace_root / rel_path).exists():
-            errors.append(
-                "contracts/governance-engine-foundation.yaml: referenced path does not exist: "
-                + rel_path
-            )
+    if workspace_has_sibling_repos:
+        for rel_path in sorted(required_cross_repo_refs):
+            if not (workspace_root / rel_path).exists():
+                errors.append(
+                    "contracts/governance-engine-foundation.yaml: referenced path does not exist: "
+                    + rel_path
+                )
     if self_improvement_governance["policy_owner_repo"] not in active_repos:
         errors.append(
             "contracts/self-improvement-policy.yaml: governance.policy_owner_repo "
