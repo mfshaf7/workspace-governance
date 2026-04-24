@@ -179,7 +179,25 @@ Use this skill when a serious initiative is already running inside
    - status
    - blocker or risk state
    - PI commitment
-   - completion evidence
+   - PM² phase and initiative-review evidence
+    - completion evidence
+   - initiative closeout now has a governed review sequence:
+     1. record `System Demo Evidence`
+     2. move the initiative `Epic` into PM² `Closing` only after the execution
+        tree is clean
+     3. record `Inspect & Adapt Actions`
+     4. mark the initiative `done` only from PM² `Closing`
+   - initiative `retired` is a separate terminal path, not a PM² phase
+     - use initiative governance to set `status = retired`
+     - only do that after all descendants are already `done` or `retired`
+   - use
+     `platform-engineering/products/openproject/runbooks/review-delivery-initiative.md`
+     as the primary checklist surface for that closeout path
+   - treat
+     `platform-engineering/products/openproject/delivery-art-initiative-review-workflow.json`
+     as the canonical machine-readable initiative-review gate inventory
+   - when PM² closing drift appears, name the exact gate id instead of calling
+     it only a generic closeout problem
 6. Close work only through the supported evidence-backed completion path.
 7. Raise active-slice narrative weakness explicitly.
    - if the ART-quality check reports `rewrite-required` or
