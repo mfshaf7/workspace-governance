@@ -1,0 +1,54 @@
+schema_version: 1
+id: 2026-04-24-art-assignable-principal-discovery-gap
+title: ART assignee and responsible selection relied on ad hoc discovery instead of one fixed assignables preflight
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The assignable-principal rule existed in the delivery contract, but
+  the operator-first ART workflow did not expose one fixed discovery step. That
+  left assignee and responsible selection vulnerable to ad hoc rediscovery and
+  repeated operator friction.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+  - id: repeated-art-assignee-discovery-miss
+    title: Assignee selection kept drifting away from the live assignables list
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+    finding: The operator explicitly called out that the correct step was to
+      just check the assignee list, but the ART workflow still allowed ad hoc
+      rediscovery instead of one fixed preflight before setting `assignee_login`
+      or `responsible_login`.
+    source_refs:
+    - 'conversation: operator said "wth? just check the assignee list" and later "no you keep forgetting about assignee requirement and how to find it"'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/scripts/show_delivery_art_assignables.mjs
+    owner_repo: operator-orchestration-service
+    note: Provides one fixed live command for Workspace Delivery ART assignable-principal discovery.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Makes the assignable-principal lookup an explicit ART preflight before assignee or responsible writes.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches future sessions to read the live assignable-principal list before setting ART assignee or responsible.
+  note: Closed by adding one explicit live assignables preflight and routing the
+    ART skill through it before assignee or responsible writes.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

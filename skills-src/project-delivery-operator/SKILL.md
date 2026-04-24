@@ -51,6 +51,12 @@ Use this skill when a serious initiative is already running inside
    - source `x-oos-caller-id` from the first allowed id in
      `CALLER_ALLOWED_IDS`, and source `x-oos-caller-secret` from
      `CALLER_AUTH_SHARED_SECRET`
+   - before `create` or `update` sets `assignee_login` or
+     `responsible_login`, read the live assignable-principal list first from
+     the active devint broker pod:
+     `k3s kubectl -n <active-devint-namespace> exec deploy/operator-orchestration-service -- node scripts/show_delivery_art_assignables.mjs`
+   - choose the exact login from that list; do not infer assignee or
+     responsible from repo names, board labels, or Rails-admin pages
    - when the active implementation repo is `operator-orchestration-service`
      and the route already exists, use the documented broker contract first:
      `docs/api/openapi.json` or
@@ -179,6 +185,8 @@ Use this skill when a serious initiative is already running inside
   `k3s kubectl` broker read and write calls by default in local delivery work.
 - Do not guess broker caller auth headers during delivery work; reuse the
   broker pod's own allowed caller id and shared secret from environment.
+- Do not guess ART assignee or responsible values; read the live assignable
+  principal list first and use the exact login it returns.
 - Do not leave stretch work looking committed just because it still exists in
   the same PI.
 - Do not silently continue on active work whose narrative contract is too weak
