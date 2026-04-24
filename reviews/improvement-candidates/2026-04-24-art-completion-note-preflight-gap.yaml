@@ -7,7 +7,7 @@ summary: The ART closeout path now preflights the main evidence sections, but a
   later complete write still stored malformed formatting because `completion_note`
   was appended after preflight in a way that violated the same bullet contract.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-24-art-closeout-evidence-guardrail-gap.yaml
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -35,10 +35,25 @@ signals:
     - 'conversation: operator said "why you keep forgetting this?" after `#217` completed with malformed stored evidence despite the new guard'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Validates the final stored closeout body before patching OpenProject and keeps broker-added notes inside Operator work notes.
+  - type: test
+    path: operator-orchestration-service/test/openproject-client.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers both completion and done-item update paths so broker-added notes cannot leak into evidence sections unnoticed.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Makes the final-body validation rule explicit on the operator-facing broker surface.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-04-24-art-completion-note-final-body-guard.md
+    owner_repo: operator-orchestration-service
+    note: Records the evidence-integrity seam and the final-body guard that closed it.
+  note: The broker now validates the final stored closeout body after any broker-added note and keeps those notes inside Operator work notes instead of letting them leak into evidence sections.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-25'
-  note: Fail closed on the full stored closeout body, not just the user-supplied
-    evidence sections, before the broker completion write is allowed.
+  owner_repo: null
+  due_on: null
+  note: null
