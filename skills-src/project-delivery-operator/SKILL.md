@@ -161,6 +161,13 @@ Use this skill when a serious initiative is already running inside
      4. elaborate user stories only for committed features
      5. create tasks only under active user stories or defects
      6. review carryover and decommit work deliberately at PI boundaries
+   - use `platform-engineering/products/openproject/runbooks/plan-delivery-art.md`
+     as the primary checklist surface for those six phases
+   - treat
+     `platform-engineering/products/openproject/delivery-art-planning-workflow.json`
+     as the canonical machine-readable gate inventory
+   - when planning drift appears, name the exact gate id that failed instead of
+     describing it only as a generic planning problem
    - treat backlog as mostly `Epic` + `Feature`
    - do not create `User story` or `Task` forests before PI commitment
    - `PI Objective`, `User story`, `Task`, and `Milestone` work must carry

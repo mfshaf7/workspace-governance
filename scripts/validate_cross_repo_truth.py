@@ -45,6 +45,13 @@ SECURITY_ARCHITECTURE_COMPONENT_COVERAGE_REQUIREMENTS = {
     "docs/architecture/platform/component-inventory.md": "../components/{component_name}/README.md",
 }
 
+DELIVERY_ART_PLANNING_WORKFLOW_CONTRACT_PATHS = {
+    "platform": Path(
+        "platform-engineering/products/openproject/delivery-art-planning-workflow.json"
+    ),
+    "broker": Path("operator-orchestration-service/src/delivery-planning-workflow.json"),
+}
+
 
 def gather_active_docs(repo_root: Path) -> list[Path]:
     files: list[Path] = []
@@ -142,6 +149,35 @@ def validate_security_architecture_component_coverage(
         if missing_components:
             missing_text = ", ".join(repr(name) for name in missing_components)
             errors.append(f"{path}: missing security component coverage for {missing_text}")
+
+
+def validate_delivery_art_planning_workflow_contract(
+    workspace_root: Path,
+    errors: list[str],
+) -> None:
+    resolved_paths = {
+        name: workspace_root / relative_path
+        for name, relative_path in DELIVERY_ART_PLANNING_WORKFLOW_CONTRACT_PATHS.items()
+    }
+
+    missing = [
+        f"{name}={path}"
+        for name, path in resolved_paths.items()
+        if not path.exists()
+    ]
+    if missing:
+        errors.append(
+            "delivery-art planning workflow contract missing: " + ", ".join(missing)
+        )
+        return
+
+    platform_contract = load_json(resolved_paths["platform"])
+    broker_contract = load_json(resolved_paths["broker"])
+    if platform_contract != broker_contract:
+        errors.append(
+            "delivery-art planning workflow drift: "
+            f"{resolved_paths['platform']} does not match {resolved_paths['broker']}"
+        )
 
 
 def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> dict[str, object]:
@@ -280,6 +316,7 @@ def main() -> int:
 
     validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors)
     validate_security_architecture_component_coverage(workspace_root, contracts, errors)
+    validate_delivery_art_planning_workflow_contract(workspace_root, errors)
 
     for product_name in contracts["products"]["products"]:
         product_readme = workspace_root / "platform-engineering" / "products" / product_name / "README.md"
