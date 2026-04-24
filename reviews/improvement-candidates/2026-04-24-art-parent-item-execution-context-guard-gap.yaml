@@ -1,0 +1,54 @@
+schema_version: 1
+id: 2026-04-24-art-parent-item-execution-context-guard-gap
+title: Done-state ART guard rejected the standardized parent-item execution-context style
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The broker's done-state narrative guard required `Parent item` to equal
+  bare `#<id>`, while the standardized ART execution-context template wrote the
+  same reference as `#<id>` plus the parent subject. That mismatch blocked valid
+  ART closeout after the taxonomy migration even though the stored narrative was
+  operator-readable and structurally correct.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+  - id: closeout-blocked-by-parent-item-guard
+    title: ART closeout failed because the parent-item bullet included the parent subject
+    trigger: machine-visible-workflow-drift
+    failure_classes:
+      - workflow-doctrine-gap
+      - contract-drift
+    finding: >-
+      The live completion call for `#269` returned
+      `done_narrative_invalid` with `Execution Context: Parent item must match
+      #265` even though the stored description already used the clean
+      standardized bullet `- Parent item: #265 <subject>`. The validator and
+      the standardizer were enforcing different interpretations of the same
+      execution-context rule.
+    source_refs:
+    - 'conversation: live completion for #269 failed after the taxonomy migration because Parent item included the parent subject'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-narrative.js
+    owner_repo: operator-orchestration-service
+    note: Accepts standardized parent-item execution-context values when they start with the required `#<id>` reference and then append the parent subject.
+  - type: test
+    path: operator-orchestration-service/test/delivery-narrative.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers the standardized parent-item bullet form so future guard changes cannot regress this closeout path silently.
+  note: The broker now accepts the standardized ART execution-context style for parent-item bullets, so closeout uses the same readable format that the standardizer writes.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

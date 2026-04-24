@@ -38,9 +38,10 @@ Use this skill when a serious initiative is already running inside
    - when the active item is not yet known, use
      `GET /v1/delivery-initiatives/{delivery_id}/planning` first to identify
      the active front, then fetch continuation context for the chosen item
-   - when planning surfaces a `ready` `PI Objective`, `Feature`, `Enabler`, or
-     other umbrella item as the candidate next front, do not present it as the
-     next executable work from planning alone; fetch that item's
+   - when planning surfaces a `ready` `PI Objective`, `Feature`, or another
+     umbrella item such as a `Feature` or `User story` classified as
+     `Enabler`, do not present it as the next executable work from planning
+     alone; fetch that item's
      `continuation-context` first
    - if that continuation packet shows `open_child_count=0` and the related
      completed scope already satisfies the item, treat it as a stale-open
@@ -120,12 +121,25 @@ Use this skill when a serious initiative is already running inside
    - if the work changes a shared control plane, introduces a new operator
      workflow, or spans multiple repos with distinct deliverables, do not
      compress it into one task
-   - represent that class of work as a parent `Feature` or `Enabler` plus
+   - represent that class of work as a parent `Feature` plus
      child tasks for the concrete owner slices such as:
      - workflow model or design decision
      - platform or source implementation
      - security review
      - governance closure or skill/routing updates
+   - when the slice is enabling or runway-focused, express that through the
+     real machine metadata:
+     - structural delivery types are:
+       `Epic`, `PI Objective`, `Feature`, `User story`, `Defect`, `Task`,
+       `Milestone`, and `Risk`
+     - use structural `Feature` or `User story`
+     - set `Execution Classification = Enabler`
+     - use structural `Defect` for true defect work instead of title-only
+       tagging it as a `Task`
+     - let visible subject prefixes be derived from machine metadata:
+       `Risk:` from type `Risk`, `Defect:` from type `Defect`,
+       `Enabler:` or `Improvement:` from `Execution Classification`
+     - do not invent a structural `Enabler` type or rely on title-only prefixes
    - if a stopgap placeholder item was created just to avoid leaving the work
      untracked, replace or retire it before normal implementation continues
    - different business outcome: route it through `Workspace Proposals`
