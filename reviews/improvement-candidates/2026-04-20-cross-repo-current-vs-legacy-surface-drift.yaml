@@ -9,7 +9,7 @@ summary: >-
   material were not separated strongly enough, so operators could still infer
   the wrong owner, the wrong runtime truth, or the wrong recovery path while
   browsing ostensibly current documentation.
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -78,13 +78,12 @@ resolution:
       path: operator-orchestration-service/scripts/validate_governance_docs.py
       owner_repo: operator-orchestration-service
       note: Broker governance docs now fail on stale proposed-review guidance and on git-tracked change records that use local filesystem markdown links.
-  note: The active owner-repo sweep is now complete, but the broader
-    cross-repo closure shape still needs an after-action or explicit direct
-    closure decision.
+  note: >-
+    The cross-repo sweep is closed directly through the landed repo-local and
+    workspace-level validators. Current operator surfaces, legacy isolation,
+    owner-boundary documentation, and cross-repo truth checks now fail closed
+    in the owning repos instead of relying on operator memory.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-24'
-  note: Decide which residual drift classes now warrant workspace-level
-    validators versus repo-local validators, then publish a formal after-action
-    or close this candidate through the landed controls once that closure shape
-    is explicit.
+  owner_repo: null
+  due_on: null
+  note: null

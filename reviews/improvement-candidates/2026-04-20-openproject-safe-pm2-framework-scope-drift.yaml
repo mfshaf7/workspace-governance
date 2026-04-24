@@ -11,7 +11,7 @@ summary: >-
   execution views. The current docs do disclose some of that narrowing, but the
   operator expectation remained "full SAFe plus PM²", so the effective rollout
   scope drifted from the agreed framework and left the UI weaker than intended.
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -43,17 +43,35 @@ signals:
       - '/home/mfshaf7/projects/platform-engineering/products/openproject/runbooks/configure-delivery-art.md'
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: contract
+      path: platform-engineering/products/openproject/delivery-art-contract.md
+      owner_repo: platform-engineering
+      note: The delivery-art contract now defines the full consume-to-PI-planning model, canonical PI placement, and the SAFe plus PM² execution shape.
+    - type: runbook
+      path: platform-engineering/products/openproject/runbooks/plan-delivery-art.md
+      owner_repo: platform-engineering
+      note: Operators now have one primary instruction surface for consume, PI planning, rolling-wave elaboration, and carryover discipline.
+    - type: validator
+      path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+      owner_repo: platform-engineering
+      note: The ART quality gate now fail-closes on PI-commitment drift, backlog-story overexpansion, and roadmap projection mismatch.
+    - type: contract
+      path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+      owner_repo: operator-orchestration-service
+      note: The broker contract now enforces the same planning workflow and PI-commitment rules through the operator API.
+    - type: workflow
+      path: operator-orchestration-service/src/openproject-client.js
+      owner_repo: operator-orchestration-service
+      note: Broker create, update, move, and bulk-update paths now reject planning drift instead of allowing a looser bounded hierarchy.
   note: >-
-    Candidate only. Closure still needs an explicit decision on whether the
-    current delivery-art baseline should be expanded to a full SAFe plus PM²
-    operator surface now, or whether the contract and runbooks should be
-    narrowed further until those capabilities are actually provisioned.
+    The delivery ART now has explicit PI versions, roadmap projection from
+    canonical `Target PI`, a machine-enforced SAFe-aligned type taxonomy, one
+    governed planning runbook, and fail-closed broker plus quality-gate
+    enforcement for consume, PI commitment, and rolling-wave elaboration. The
+    operator-facing scope now matches the declared SAFe plus PM² planning
+    model closely enough to close the earlier scope-drift gap directly.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-24'
-  note: >-
-    Decide the intended runtime scope for the delivery ART: full SAFe plus PM²
-    operator surface versus bounded v1 hierarchy plus governance fields, and
-    then land the matching control-plane and platform changes so the operator
-    expectation cannot drift again.
+  owner_repo: null
+  due_on: null
+  note: null

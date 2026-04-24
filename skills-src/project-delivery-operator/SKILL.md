@@ -152,6 +152,22 @@ Use this skill when a serious initiative is already running inside
 4. Keep PI honesty explicit.
    - do not leave work marked committed when it is really stretch or deferred
    - replan the PI when the active front changes materially
+   - when new accepted work enters ART, do not skip straight to deep execution
+     structure
+   - the default planning path is:
+     1. consume into one `Epic` shell
+     2. frame the initiative while it stays backlog-shaped
+     3. create PI objectives and committed features during PI planning
+     4. elaborate user stories only for committed features
+     5. create tasks only under active user stories or defects
+     6. review carryover and decommit work deliberately at PI boundaries
+   - treat backlog as mostly `Epic` + `Feature`
+   - do not create `User story` or `Task` forests before PI commitment
+   - `PI Objective`, `User story`, `Task`, and `Milestone` work must carry
+     `Target PI`
+   - PI-committed non-`Epic` work must also carry non-backlog `Iteration`
+   - backlog `Feature` work may exist without `Target PI`, but it must stay
+     umbrella-shaped until commitment
 5. Update the ART when work-state changes:
    - status
    - blocker or risk state

@@ -58,10 +58,11 @@ resolution:
     platform/OpenProject boundary issues immediately after the first live miss.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-04-24'
+  due_on: '2026-04-30'
   note: >-
-    Decide the closure shape for profile-owned workflow escalation: when a live
-    miss must move back into dev-integration, what evidence promotes a lane
-    from local workflow proof to live boundary proof, and when the remaining
-    miss should be routed to platform/OpenProject boundary investigation
-    instead of more workflow-specific fixes.
+    Decide the closure shape for profile-owned workflow escalation after the
+    consume-to-PI-planning workflow lands: when a live miss must move back
+    into dev-integration, what evidence promotes a lane from local workflow
+    proof to live boundary proof, and when the remaining miss should be routed
+    to platform/OpenProject boundary investigation instead of more
+    workflow-specific fixes.
