@@ -32,6 +32,17 @@ thing as an active profile. Requests may be `proposed`, `active`,
 `suspended`, or `retired`, and the admission policy stays generic even when
 the current request adapter is a tool such as OpenProject.
 
+The current architecture target for the workspace control plane is also
+explicit now:
+
+- the reusable governance-engine layer versus tenant-instance state boundary
+- the enterprise control-plane packaging model
+- the governed AI runtime foundation and its sequencing rules
+
+Primary architecture surface:
+
+- [docs/governance-engine-foundation.md](docs/governance-engine-foundation.md)
+
 This repo also holds the workspace doctrine for operator workflows, delegated
 execution, troubleshooting, and self-improvement. Those controls exist so the
 workspace behaves like a deliberate system of record rather than a set of
@@ -209,6 +220,8 @@ Those stay in the owning repos:
   - machine-readable repo, product, component, lifecycle, evidence, review, and
     vocabulary contracts plus intake policy, intake register, and
     developer-integration lane contracts
+  - includes `governance-engine-foundation.yaml` for the reusable engine
+    boundary, packaging model, and runtime-sequencing contract
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
 - `skills-src/`

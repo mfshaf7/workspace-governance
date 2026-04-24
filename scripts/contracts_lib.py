@@ -31,6 +31,7 @@ CONTRACT_FILES = {
     "exceptions": "contracts/exceptions.yaml",
     "validation_matrix": "contracts/validation-matrix.yaml",
     "skills": "contracts/skills.yaml",
+    "governance_engine_foundation": "contracts/governance-engine-foundation.yaml",
 }
 
 SCHEMA_FILES = {
@@ -56,6 +57,7 @@ SCHEMA_FILES = {
     "exceptions": "contracts/schemas/exceptions.schema.json",
     "validation_matrix": "contracts/schemas/validation-matrix.schema.json",
     "skills": "contracts/schemas/skills.schema.json",
+    "governance_engine_foundation": "contracts/schemas/governance-engine-foundation.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"
