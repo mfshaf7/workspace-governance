@@ -8,6 +8,7 @@
     "request_admission",
     "source_state",
     "runtime_state_models",
+    "testing",
     "trigger_guidance",
     "forbidden_targets",
     "required_actions",
@@ -125,6 +126,39 @@
       "type": "array",
       "minItems": 1,
       "items": { "type": "string", "minLength": 1 }
+    },
+    "testing": {
+      "type": "object",
+      "required": ["smoke"],
+      "properties": {
+        "smoke": {
+          "type": "object",
+          "required": ["allowed_mutation_modes", "persistent_profile_rule"],
+          "properties": {
+            "allowed_mutation_modes": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "persistent_profile_rule": {
+              "type": "object",
+              "required": [
+                "mutation_mode_must_be",
+                "mutating_smoke_requires_separate_disposable_profile"
+              ],
+              "properties": {
+                "mutation_mode_must_be": { "type": "string", "minLength": 1 },
+                "mutating_smoke_requires_separate_disposable_profile": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
     "trigger_guidance": {
       "type": "object",

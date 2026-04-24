@@ -43,6 +43,11 @@ Additional required information for `persistent` requests:
 - cutover plan when upgrading
   - required when an existing disposable profile is being turned into a
     persistent project-backed lane
+- smoke mutation mode
+  - persistent profiles must keep shared `devint-smoke` read-only
+- disposable companion profile, if mutating smoke is still required
+  - mutating smoke must move to a separate disposable profile instead of
+    writing test artifacts into the persistent working lane
 
 Minimum decision path:
 
