@@ -1,0 +1,83 @@
+schema_version: 1
+id: 2026-04-24-art-safe-subject-taxonomy-drift
+title: Restore and enforce machine-readable SAFe-aligned ART taxonomy
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The ART had drifted into conflicting subject-prefix and machine-type
+  taxonomies, including fake structural `Enabler` usage, missing `User story`
+  adoption, title-only `Defect` and `Improvement` conventions, and no
+  fail-closed guard to keep the visible SAFe taxonomy aligned with filterable
+  OpenProject metadata.
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+  - platform-contract
+signals:
+  - id: repeated-safe-title-drift-callout
+    title: The operator called out drift from the earlier SAFe-aligned ART title pattern.
+    trigger: machine-visible-workflow-drift
+    failure_classes:
+      - workflow-doctrine-gap
+      - learning-closure-regression
+    finding: >-
+      Live ART item `#87` and its children still use the older subject taxonomy
+      pattern like `Enabler: ...` and `Risk: ...`, while new work under
+      `#256/#257` was created with structurally valid but plain-English
+      subjects that dropped the visible SAFe execution label. The contracts and
+      validators currently enforce narrative structure and readiness fields,
+      but they do not fail on subject-taxonomy drift, so the ART can gradually
+      stop reading like the model it claims to use.
+    source_refs:
+    - 'conversation: operator said "take a look at 87 and its child... Why are we drifting from that? Didnt I said we to make it aligned with real SAFE??"'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/products/openproject/delivery-art-taxonomy.json
+    owner_repo: platform-engineering
+    note: Defines the canonical structural ART types, classification field, derived prefixes, and allowed parentage.
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_configure_delivery_art_runner.rb
+    owner_repo: platform-engineering
+    note: Reconciles the live OpenProject project type set and execution-classification field to the canonical taxonomy.
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_standardize_delivery_art_runner.rb
+    owner_repo: platform-engineering
+    note: Backfills live ART records to the canonical structural types, classifications, parents, and derived titles in one standardization run.
+  - type: validator
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Fail-closes on machine-type, parentage, classification, and derived-title drift across the ART tree.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-taxonomy.js
+    owner_repo: operator-orchestration-service
+    note: Centralizes the broker's canonical ART type, classification, parentage, and subject-rendering model.
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Canonicalizes create and update writes so broker mutations cannot reintroduce fake Enabler structure or title-only defect drift.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches future ART work to use the canonical structural types plus execution classification instead of title-only conventions.
+  note: The ART now uses a canonical structural type set (`Epic`, `PI Objective`,
+    `Feature`, `User story`, `Defect`, `Task`, `Milestone`, `Risk`) plus
+    `Execution Classification` for `Enabler` and `Improvement` semantics. The
+    OpenProject project model, broker contract, quality gate, standardizer, and
+    operator doctrine all enforce the same machine-readable taxonomy, and the
+    live ART tree in the persistent devint lane was backfilled to zero taxonomy
+    issues.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
