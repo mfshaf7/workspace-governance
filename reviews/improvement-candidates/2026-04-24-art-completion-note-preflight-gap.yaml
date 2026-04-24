@@ -1,0 +1,44 @@
+schema_version: 1
+id: 2026-04-24-art-completion-note-preflight-gap
+title: Completion-note insertion still bypasses ART closeout preflight and breaks stored evidence formatting
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: The ART closeout path now preflights the main evidence sections, but a
+  later complete write still stored malformed formatting because `completion_note`
+  was appended after preflight in a way that violated the same bullet contract.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-24-art-closeout-evidence-guardrail-gap.yaml
+status: new
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+  - id: repeated-closeout-format-regression-after-guard
+    title: A broker completion still stored malformed evidence after the stronger guard was already landed
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - workflow-doctrine-gap
+    finding: >-
+      The operator called out another repeated formatting miss after the
+      stronger ART guard had already been merged. Local preflight passed, but
+      the broker-complete write for `#217` still returned
+      `formattingValid: false` because `completion_note` was inserted into the
+      stored description after preflight and created a nonconforming Validation
+      Evidence line.
+    source_refs:
+    - 'conversation: operator said "why you keep forgetting this?" after `#217` completed with malformed stored evidence despite the new guard'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-04-25'
+  note: Fail closed on the full stored closeout body, not just the user-supplied
+    evidence sections, before the broker completion write is allowed.
