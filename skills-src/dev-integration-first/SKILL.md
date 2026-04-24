@@ -33,6 +33,11 @@ to be the right first lane.
    - source state from the participating repos
 6. Use stage only after the shape is already proven and the change has crossed
    back into reviewed commits plus governed promotion.
+7. When a profile uses `runtime.state_model: persistent`, treat its shared
+   `devint-smoke` action as read-only.
+   - if a workflow still needs mutating smoke, look for or admit a separate
+     disposable companion profile instead of pointing smoke at the persistent
+     working lane
 
 ## Guardrails
 
@@ -42,3 +47,5 @@ to be the right first lane.
   self-serve lanes.
 - Do not treat a dev-integration session as stage evidence.
 - Do not require push or PR for normal dev-integration iteration.
+- Do not let shared smoke or test traffic write into a persistent devint
+  working lane. Use a disposable companion profile for mutating smoke.

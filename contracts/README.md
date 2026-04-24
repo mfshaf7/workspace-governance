@@ -133,6 +133,7 @@ The registered profiles in `developer-integration-profiles.yaml` must point to
 a repo-local `profile.yaml` that defines:
 
 - runtime shape
+- testing posture
 - source repos
 - command paths
 - session-manifest expectations
@@ -160,6 +161,10 @@ Current model:
   `self_serve_statuses`
 - a new profile request does not become launchable until platform acceptance is
   recorded and any flagged security review references are present
+- persistent profiles must keep the shared `devint-smoke` action read-only
+- if a workflow still needs mutating smoke, admit and use a separate
+  disposable companion profile instead of writing test artifacts into the
+  persistent working lane
 
 This contract is governance truth, not the primary operator instruction
 surface. If an operator needs to request or use a `dev-integration` profile,

@@ -23,6 +23,7 @@ REQUIRED_PROFILE_KEYS = {
     "profile_id",
     "summary",
     "runtime",
+    "testing",
     "source_repos",
     "commands",
     "session",
@@ -31,6 +32,7 @@ REQUIRED_PROFILE_KEYS = {
 REQUIRED_RUNTIME_STATE_MODELS = {"disposable", "persistent"}
 REQUIRED_PERSISTENT_REQUEST_REQUIREMENTS = {
     "runtime.state_model",
+    "testing.smoke.mutation_mode",
     "persistence.justification",
     "persistence.retained_data_scope",
     "persistence.suspend_resume_semantics",
@@ -58,6 +60,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     required_actions = set(policy["required_actions"])
     profile_lifecycle = policy["profile_lifecycle"]
     request_admission = policy["request_admission"]
+    testing_policy = policy["testing"]["smoke"]
     if required_actions != REQUIRED_ACTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
@@ -100,8 +103,13 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         errors.append(
             "contracts/developer-integration-policy.yaml: current_request_adapter.owner_repo must reference an active repo"
         )
+    allowed_smoke_mutation_modes = set(testing_policy["allowed_mutation_modes"])
+    persistent_smoke_mutation_mode = testing_policy["persistent_profile_rule"][
+        "mutation_mode_must_be"
+    ]
 
     checked_profiles = 0
+    profile_testing: dict[str, dict[str, str | None]] = {}
     for profile_name, payload in sorted(registry["profiles"].items()):
         checked_profiles += 1
         lifecycle = payload["lifecycle"]
@@ -199,6 +207,24 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"{profile_path}: runtime.state_model must be one of {', '.join(sorted(runtime_state_models))}"
             )
+        testing = profile.get("testing") or {}
+        smoke_testing = testing.get("smoke") or {}
+        mutation_mode = smoke_testing.get("mutation_mode")
+        companion_profile_id = smoke_testing.get("companion_profile_id")
+        if mutation_mode not in allowed_smoke_mutation_modes:
+            errors.append(
+                f"{profile_path}: testing.smoke.mutation_mode must be one of "
+                + ", ".join(sorted(allowed_smoke_mutation_modes))
+            )
+        if state_model == "persistent" and mutation_mode != persistent_smoke_mutation_mode:
+            errors.append(
+                f"{profile_path}: persistent profiles must declare testing.smoke.mutation_mode={persistent_smoke_mutation_mode!r}"
+            )
+        profile_testing[profile_name] = {
+            "state_model": state_model,
+            "mutation_mode": mutation_mode,
+            "companion_profile_id": companion_profile_id,
+        }
         profile_stage_handoff = profile.get("stage_handoff") or {}
         for key in ("owner_repo", "governed_surface"):
             if profile_stage_handoff.get(key) != payload["stage_handoff"][key]:
@@ -257,6 +283,34 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
 
     if not checked_profiles:
         errors.append("contracts/developer-integration-profiles.yaml: at least one profile is required")
+
+    for profile_name, testing in sorted(profile_testing.items()):
+        companion_profile_id = testing["companion_profile_id"]
+        if not companion_profile_id:
+            continue
+        if companion_profile_id == profile_name:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} testing.smoke.companion_profile_id must not point to itself"
+            )
+            continue
+        companion_testing = profile_testing.get(companion_profile_id)
+        if companion_testing is None:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} testing.smoke.companion_profile_id {companion_profile_id!r} is not a registered profile"
+            )
+            continue
+        if testing["state_model"] != "persistent":
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} testing.smoke.companion_profile_id is only allowed on persistent profiles"
+            )
+        if companion_testing["state_model"] != "disposable":
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} companion profile {companion_profile_id!r} must be disposable"
+            )
+        if companion_testing["mutation_mode"] != "mutating":
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} companion profile {companion_profile_id!r} must declare testing.smoke.mutation_mode='mutating'"
+            )
 
     return errors
 

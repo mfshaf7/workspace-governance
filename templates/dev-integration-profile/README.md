@@ -60,10 +60,20 @@ Required profile keys:
 - `profile_id`
 - `summary`
 - `runtime`
+- `testing`
 - `source_repos`
 - `commands`
 - `session`
 - `stage_handoff`
+
+`testing.smoke.mutation_mode` must declare one of:
+
+- `read-only`
+- `mutating`
+
+Persistent profiles must keep shared `devint-smoke` read-only. If a workflow
+still needs mutating smoke, create a separate disposable companion profile
+instead of letting tests write into the persistent working lane.
 
 `stage_handoff` must include:
 

@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-04-24-devint-smoke-artifact-art-cleanup-gap
+title: Devint smoke artifacts can leak into Workspace Delivery ART as open top-level scope
+recorded_on: '2026-04-24'
+owner_repo: workspace-governance
+summary: >-
+  The accepted-idea-delivery smoke flow created a real top-level ART Epic
+  (`#220`) and left it open as `new`. Smoke or rehearsal artifacts should not
+  remain on the live ART board as open execution scope after the smoke has
+  already served its purpose.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - workspace-governance
+  related_products: []
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - source-behavior
+    - platform-contract
+signals:
+  - id: leftover-devint-smoke-artifact-in-art
+    title: A devint smoke artifact was left behind as open ART work
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - unsafe-assumption
+    finding: >-
+      The operator found `#220` still sitting in Workspace Delivery ART even
+      though it was only a local accepted-idea-delivery smoke artifact. The
+      item had been created as a real top-level Epic by the smoke flow and was
+      left at status `new` until manually retired.
+    source_refs:
+      - 'conversation: operator asked "what the hell is 220? you make a smoke test but you didnt delete it afterward??"'
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/developer-integration-policy.yaml
+      owner_repo: workspace-governance
+      note: Persistent dev-integration profiles now declare smoke mutation posture and must keep shared smoke read-only.
+    - type: script
+      path: workspace-governance/scripts/validate_developer_integration.py
+      owner_repo: workspace-governance
+      note: Fails closed when a persistent profile tries to keep mutating smoke on its working lane or when a companion disposable profile contract is missing.
+    - type: script
+      path: platform-engineering/scripts/dev_integration.py
+      owner_repo: platform-engineering
+      note: Shared runner now rejects mutating smoke on persistent profiles and points operators at the disposable companion profile.
+    - type: contract
+      path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/profile.yaml
+      owner_repo: operator-orchestration-service
+      note: The persistent accepted-idea-delivery lane now keeps shared smoke read-only and links to the disposable mutation-smoke companion.
+    - type: contract
+      path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery-mutation-smoke/profile.yaml
+      owner_repo: operator-orchestration-service
+      note: The mutating consume/backlink smoke now runs in an isolated disposable profile instead of the persistent ART lane.
+  note: The persistent accepted-idea-delivery lane is now protected by contract and runner enforcement, and the mutating smoke path has been moved into a disposable isolated companion profile.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

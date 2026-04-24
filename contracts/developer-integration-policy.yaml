@@ -37,6 +37,7 @@ request_admission:
     - security-review-ref-when-required
   persistent_request_requirements:
     - runtime.state_model
+    - testing.smoke.mutation_mode
     - persistence.justification
     - persistence.retained_data_scope
     - persistence.suspend_resume_semantics
@@ -52,6 +53,14 @@ source_state:
 runtime_state_models:
   - disposable
   - persistent
+testing:
+  smoke:
+    allowed_mutation_modes:
+      - read-only
+      - mutating
+    persistent_profile_rule:
+      mutation_mode_must_be: read-only
+      mutating_smoke_requires_separate_disposable_profile: true
 trigger_guidance:
   required:
     - new-operator-workflow
