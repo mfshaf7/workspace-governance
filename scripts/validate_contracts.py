@@ -479,6 +479,125 @@ def main() -> int:
             "contracts/governance-engine-boundary-map.yaml: live_materialized_outputs must be exactly "
             + ", ".join(sorted(expected_live_materialized_outputs))
         )
+    expected_current_coupling_points = {
+        "workspace-root-live-materialization": {
+            "description": "workspace bootstrap files are still materialized directly from this repo into the live workspace root",
+            "impacted_surfaces": {
+                "workspace-root/ARCHITECTURE.md",
+                "workspace-root/README.md",
+                "workspace-root/AGENTS.md",
+                "scripts/sync_workspace_root.py",
+            },
+        },
+        "live-skill-installation": {
+            "description": "managed skills are still installed directly from this repo into the live Codex skill root",
+            "impacted_surfaces": {
+                "skills-src/",
+                "contracts/skills.yaml",
+                "scripts/install_skills.py",
+            },
+        },
+        "contract-driven-generated-artifacts": {
+            "description": "generated ownership, dependency, stale-content, and boundary artifacts are emitted from this repo and consumed across the workspace",
+            "impacted_surfaces": {
+                "generated/",
+                "contracts/governance-engine-output-manifest.yaml",
+                "scripts/validate_cross_repo_truth.py",
+            },
+        },
+        "external-review-and-operator-surfaces": {
+            "description": "extraction decisions still depend on external owner-repo operator surfaces and security review artifacts that remain outside generated copies",
+            "impacted_surfaces": {
+                "owner-repo primary operator surfaces",
+                "security-architecture review artifacts",
+                "contracts/governance-engine-extraction-gate.yaml",
+            },
+        },
+    }
+    actual_current_coupling_points = {
+        entry["coupling_id"]: {
+            "description": entry["description"],
+            "impacted_surfaces": set(entry["impacted_surfaces"]),
+        }
+        for entry in governance_engine_boundary_map["current_coupling_points"]
+    }
+    if set(actual_current_coupling_points) != set(expected_current_coupling_points):
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: current_coupling_points must define the current workspace-root-live-materialization, live-skill-installation, contract-driven-generated-artifacts, and external-review-and-operator-surfaces entries"
+        )
+    else:
+        for coupling_id, expected in expected_current_coupling_points.items():
+            actual = actual_current_coupling_points[coupling_id]
+            if actual["description"] != expected["description"]:
+                errors.append(
+                    f"contracts/governance-engine-boundary-map.yaml: current_coupling_points[{coupling_id}].description must be {expected['description']!r}"
+                )
+            if actual["impacted_surfaces"] != expected["impacted_surfaces"]:
+                errors.append(
+                    "contracts/governance-engine-boundary-map.yaml: "
+                    f"current_coupling_points[{coupling_id}].impacted_surfaces must be exactly "
+                    + ", ".join(sorted(expected["impacted_surfaces"]))
+                )
+    expected_standalone_packaging_prerequisites = {
+        "package-identity-and-versioning": {
+            "threshold": "standalone package identity, versioning authority, and release contract are explicit before extraction starts",
+            "evidence_surfaces": {
+                "contracts/governance-engine-extraction-gate.yaml",
+                "contracts/governance-engine-output-manifest.yaml",
+            },
+        },
+        "install-and-materialization-surface": {
+            "threshold": "installation can materialize workspace-root files, live skills, and generated artifacts without relying on repo-local convenience",
+            "evidence_surfaces": {
+                "scripts/materialize_governance_engine_outputs.py",
+                "contracts/governance-engine-output-manifest.yaml",
+            },
+        },
+        "tenant-consumption-contract": {
+            "threshold": "tenant-instance consumers can declare required inputs and compatibility expectations without redefining engine-owned truth",
+            "evidence_surfaces": {
+                "contracts/governance-engine-boundary-map.yaml",
+                "docs/governance-engine-foundation.md",
+            },
+        },
+        "compatibility-shim-plan": {
+            "threshold": "stable operator entrypoints keep working or have explicit compatibility shims during extraction",
+            "evidence_surfaces": {
+                "contracts/governance-engine-foundation.yaml",
+                "docs/governance-engine-foundation.md",
+            },
+        },
+        "security-delta-refresh": {
+            "threshold": "a fresh security delta review is scheduled for the actual extraction package and trust-boundary change",
+            "evidence_surfaces": {
+                "security-architecture review artifacts",
+            },
+        },
+    }
+    actual_standalone_packaging_prerequisites = {
+        entry["prerequisite_id"]: {
+            "threshold": entry["threshold"],
+            "evidence_surfaces": set(entry["evidence_surfaces"]),
+        }
+        for entry in governance_engine_boundary_map["standalone_packaging_prerequisites"]
+    }
+    if set(actual_standalone_packaging_prerequisites) != set(expected_standalone_packaging_prerequisites):
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: standalone_packaging_prerequisites must define the current package-identity-and-versioning, install-and-materialization-surface, tenant-consumption-contract, compatibility-shim-plan, and security-delta-refresh entries"
+        )
+    else:
+        for prerequisite_id, expected in expected_standalone_packaging_prerequisites.items():
+            actual = actual_standalone_packaging_prerequisites[prerequisite_id]
+            if actual["threshold"] != expected["threshold"]:
+                errors.append(
+                    f"contracts/governance-engine-boundary-map.yaml: standalone_packaging_prerequisites[{prerequisite_id}].threshold must be {expected['threshold']!r}"
+                )
+            if actual["evidence_surfaces"] != expected["evidence_surfaces"]:
+                errors.append(
+                    "contracts/governance-engine-boundary-map.yaml: "
+                    f"standalone_packaging_prerequisites[{prerequisite_id}].evidence_surfaces must be exactly "
+                    + ", ".join(sorted(expected["evidence_surfaces"]))
+                )
     projection = governance_engine_boundary_map["generated_projection"]
     if projection["output_id"] != "governance_engine_boundary_map":
         errors.append(

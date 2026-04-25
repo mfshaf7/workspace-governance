@@ -80,8 +80,9 @@ Use these contracts to declare:
     sequencing prerequisites
 - `governance-engine-boundary-map.yaml`
   - concrete path-level classification of engine-owned authoring surfaces,
-    tenant-instance state, referenced external surfaces, and the generated
-    boundary projection used during parity work
+    tenant-instance state, current coupling points, standalone packaging
+    prerequisites, referenced external surfaces, and the generated boundary
+    projection used during parity work
 - `governance-engine-output-manifest.yaml`
   - machine-readable declaration of which outputs are materialized into the
     live workspace, live Codex skill root, and `generated/`, plus the emitter

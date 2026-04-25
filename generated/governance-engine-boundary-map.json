@@ -5,6 +5,45 @@
     "skills-src/",
     "scripts/"
   ],
+  "current_coupling_points": [
+    {
+      "coupling_id": "workspace-root-live-materialization",
+      "description": "workspace bootstrap files are still materialized directly from this repo into the live workspace root",
+      "impacted_surfaces": [
+        "workspace-root/ARCHITECTURE.md",
+        "workspace-root/README.md",
+        "workspace-root/AGENTS.md",
+        "scripts/sync_workspace_root.py"
+      ]
+    },
+    {
+      "coupling_id": "live-skill-installation",
+      "description": "managed skills are still installed directly from this repo into the live Codex skill root",
+      "impacted_surfaces": [
+        "skills-src/",
+        "contracts/skills.yaml",
+        "scripts/install_skills.py"
+      ]
+    },
+    {
+      "coupling_id": "contract-driven-generated-artifacts",
+      "description": "generated ownership, dependency, stale-content, and boundary artifacts are emitted from this repo and consumed across the workspace",
+      "impacted_surfaces": [
+        "generated/",
+        "contracts/governance-engine-output-manifest.yaml",
+        "scripts/validate_cross_repo_truth.py"
+      ]
+    },
+    {
+      "coupling_id": "external-review-and-operator-surfaces",
+      "description": "extraction decisions still depend on external owner-repo operator surfaces and security review artifacts that remain outside generated copies",
+      "impacted_surfaces": [
+        "owner-repo primary operator surfaces",
+        "security-architecture review artifacts",
+        "contracts/governance-engine-extraction-gate.yaml"
+      ]
+    }
+  ],
   "emitted_output_families": [
     {
       "boundary": "live-workspace-materialization",
@@ -55,6 +94,47 @@
     "~/.codex/skills/"
   ],
   "schema_version": 1,
+  "standalone_packaging_prerequisites": [
+    {
+      "evidence_surfaces": [
+        "contracts/governance-engine-extraction-gate.yaml",
+        "contracts/governance-engine-output-manifest.yaml"
+      ],
+      "prerequisite_id": "package-identity-and-versioning",
+      "threshold": "standalone package identity, versioning authority, and release contract are explicit before extraction starts"
+    },
+    {
+      "evidence_surfaces": [
+        "scripts/materialize_governance_engine_outputs.py",
+        "contracts/governance-engine-output-manifest.yaml"
+      ],
+      "prerequisite_id": "install-and-materialization-surface",
+      "threshold": "installation can materialize workspace-root files, live skills, and generated artifacts without relying on repo-local convenience"
+    },
+    {
+      "evidence_surfaces": [
+        "contracts/governance-engine-boundary-map.yaml",
+        "docs/governance-engine-foundation.md"
+      ],
+      "prerequisite_id": "tenant-consumption-contract",
+      "threshold": "tenant-instance consumers can declare required inputs and compatibility expectations without redefining engine-owned truth"
+    },
+    {
+      "evidence_surfaces": [
+        "contracts/governance-engine-foundation.yaml",
+        "docs/governance-engine-foundation.md"
+      ],
+      "prerequisite_id": "compatibility-shim-plan",
+      "threshold": "stable operator entrypoints keep working or have explicit compatibility shims during extraction"
+    },
+    {
+      "evidence_surfaces": [
+        "security-architecture review artifacts"
+      ],
+      "prerequisite_id": "security-delta-refresh",
+      "threshold": "a fresh security delta review is scheduled for the actual extraction package and trust-boundary change"
+    }
+  ],
   "tenant_instance_paths": [
     "contracts/intake-register.yaml",
     "contracts/developer-integration-profiles.yaml",

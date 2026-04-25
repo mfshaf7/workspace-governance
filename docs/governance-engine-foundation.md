@@ -293,6 +293,22 @@ That means extraction should remain retained-by-default unless:
 - the retain-versus-extract decision is explicitly recorded on the PI
   objective with parity and security evidence cited
 
+The current coupling inventory and standalone packaging prerequisites are now
+captured in the boundary map instead of being left as inferred architecture
+context:
+
+- `contracts/governance-engine-boundary-map.yaml`
+
+That inventory records:
+
+- where the current integrated design is still directly coupled to the live
+  workspace root and live skill installation
+- which generated artifacts and external review/operator surfaces still anchor
+  the integrated control plane
+- which packaging, installation, tenant-consumption, compatibility-shim, and
+  security-refresh prerequisites must exist before a standalone package can be
+  considered complete enough to extract
+
 Explicit non-goals during the parity epic:
 
 - do not extract a standalone governance-engine repo yet
