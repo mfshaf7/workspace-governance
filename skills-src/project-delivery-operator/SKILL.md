@@ -13,8 +13,10 @@ Use this skill when a serious initiative is already running inside
 - `platform-engineering/products/openproject/AGENTS.md`
 - `platform-engineering/products/openproject/README.md`
 - `platform-engineering/products/openproject/delivery-art-contract.md`
+- `platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md`
 - `operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md`
+- `workspace-governance/docs/delivery-art-operator-path.md`
 - `workspace-governance/docs/delegated-execution.md`
 - `workspace-governance/docs/self-improvement-escalation.md`
 
@@ -31,8 +33,12 @@ Use this skill when a serious initiative is already running inside
      yet known or when PI/portfolio replanning is happening
    - identify the committed front, stretch work, PI objective state, and ART
      risk state before reading repo code
-   - inside local `dev-integration`, default ART reads and writes to direct
-     top-level `k3s kubectl` broker calls against the active profile namespace
+   - inside local `dev-integration`, default ART reads and writes to the
+     broker CLI in `operator-orchestration-service`:
+     - `npm run art -- bootstrap`
+     - `npm run art -- workflow-health`
+     - `npm run art -- initiative planning <delivery-id>`
+     - `npm run art -- item continuation <work-item-id>`
    - use `GET /v1/delivery-work-items/{work_item_id}/continuation-context`
      as the default ART resume read for one known item
    - when the active item is not yet known, use
@@ -46,9 +52,9 @@ Use this skill when a serious initiative is already running inside
    - if that continuation packet shows `open_child_count=0` and the related
      completed scope already satisfies the item, treat it as a stale-open
      closeout candidate rather than the next active front
-   - when the broker image does not carry `curl`, use the broker pod runtime
-     itself with `node` and `fetch(...)` rather than falling back to another
-     access path
+   - treat raw `k3s kubectl exec ... node -e ...` broker calls as fallback-only
+     debugging paths when the CLI or broker runtime itself is the thing under
+     test; they are no longer the normal ART operator entrypoint
    - source `x-oos-caller-id` from the first allowed id in
      `CALLER_ALLOWED_IDS`, and source `x-oos-caller-secret` from
      `CALLER_AUTH_SHARED_SECRET`
@@ -86,10 +92,19 @@ Use this skill when a serious initiative is already running inside
    - treat `src/app.js` and service code as runtime-confirmation or drift
      sources after the contract read, not as the default first read for an
      existing broker route
-   - do not default to Python wrappers, Rails paths, or ad hoc background
-     localhost bridges when a direct broker call can do the job
+   - do not default to Python wrappers, Rails paths, direct OpenProject admin
+     paths, or ad hoc background localhost bridges when the broker CLI or a
+     documented broker route can do the job
    - use local parsing only after the broker response is captured; parsing is
      not the access path
+   - if the broker runtime is unavailable, restore the lane through the
+     platform OpenProject or broker runtime runbooks first and return to the
+     broker path before ART mutation resumes
+   - if roadmap or PM² projection drift is suspected, use:
+     1. `npm run art -- workflow-health`
+     2. `make openproject-check-delivery-art-quality ...`
+     3. `make openproject-sync-delivery-art-views ...` only when the
+        compatible view projection itself drifted
 2. Keep the truth split explicit:
    - ART = work-state truth
    - owner repos = implementation and design truth

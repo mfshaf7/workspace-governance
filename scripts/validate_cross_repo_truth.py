@@ -61,6 +61,10 @@ DELIVERY_ART_INITIATIVE_REVIEW_WORKFLOW_CONTRACT_PATHS = {
     ),
 }
 
+DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH = Path(
+    "workspace-governance/contracts/delivery-art-operator-path.yaml"
+)
+
 
 def gather_active_docs(repo_root: Path) -> list[Path]:
     files: list[Path] = []
@@ -219,6 +223,79 @@ def validate_delivery_art_initiative_review_workflow_contract(
         )
 
 
+def validate_delivery_art_operator_path_contract(
+    workspace_root: Path,
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    contract_path = workspace_root / DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH
+    if not contract_path.exists():
+        errors.append(f"{contract_path}: missing delivery-art operator path contract")
+        return
+
+    contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+    operator_path = contract.get("delivery_art_operator_path") or {}
+    canonical_entrypoint = operator_path.get("canonical_entrypoint") or {}
+    if canonical_entrypoint.get("command") != "npm run art":
+        errors.append(
+            f"{contract_path}: canonical entrypoint command must stay 'npm run art'"
+        )
+
+    surface_paths = [
+        workspace_root / canonical_entrypoint.get("primary_operator_surface", ""),
+        workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
+            "workflow_health", ""
+        ),
+        workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
+            "quality_gate", ""
+        ),
+        workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
+            "admin_boundary", ""
+        ),
+        repo_root / operator_path.get("governance_surface", ""),
+    ]
+    for path in surface_paths:
+        if not path.exists():
+            errors.append(f"{path}: missing delivery-art operator-path surface")
+
+    primary_surface_path = workspace_root / canonical_entrypoint.get(
+        "primary_operator_surface", ""
+    )
+    if primary_surface_path.exists():
+        primary_surface_text = primary_surface_path.read_text(encoding="utf-8")
+        for entry in operator_path.get("canonical_read_hierarchy", []):
+            cli = entry.get("cli")
+            if cli and cli not in primary_surface_text:
+                errors.append(
+                    f"{primary_surface_path}: missing canonical ART read command {cli!r}"
+                )
+        for entry in operator_path.get("guided_write_intents", []):
+            cli = entry.get("cli")
+            if cli and cli != "local helper" and cli not in primary_surface_text:
+                errors.append(
+                    f"{primary_surface_path}: missing guided ART write command {cli!r}"
+                )
+
+    skill_path = repo_root / "skills-src/project-delivery-operator/SKILL.md"
+    if skill_path.exists():
+        skill_text = skill_path.read_text(encoding="utf-8")
+        for required in (
+            "npm run art -- bootstrap",
+            "npm run art -- workflow-health",
+            "npm run art -- initiative planning <delivery-id>",
+            "npm run art -- item continuation <work-item-id>",
+        ):
+            if required not in skill_text:
+                errors.append(f"{skill_path}: missing ART operator-path command {required!r}")
+        forbidden = "default ART reads and writes to direct\n     top-level `k3s kubectl` broker calls against the active profile namespace"
+        if forbidden in skill_text:
+            errors.append(
+                f"{skill_path}: still teaches direct kubectl broker calls as the normal ART path"
+            )
+    else:
+        errors.append(f"{skill_path}: missing project-delivery-operator skill")
+
+
 def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> dict[str, object]:
     repos = contracts["repos"]["repos"]
     products = contracts["products"]["products"]
@@ -357,6 +434,7 @@ def main() -> int:
     validate_security_architecture_component_coverage(workspace_root, contracts, errors)
     validate_delivery_art_planning_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)
+    validate_delivery_art_operator_path_contract(workspace_root, repo_root, errors)
 
     for product_name in contracts["products"]["products"]:
         product_readme = workspace_root / "platform-engineering" / "products" / product_name / "README.md"

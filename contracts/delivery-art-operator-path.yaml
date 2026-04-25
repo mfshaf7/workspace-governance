@@ -1,0 +1,101 @@
+schema_version: 1
+delivery_art_operator_path:
+  owner_repo: workspace-governance
+  canonical_entrypoint:
+    repo: operator-orchestration-service
+    command: npm run art
+    primary_operator_surface: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  governance_surface: docs/delivery-art-operator-path.md
+  supporting_platform_surfaces:
+    workflow_health: platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md
+    quality_gate: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
+    admin_boundary: platform-engineering/products/openproject/runbooks/openproject-platform-admin-surface.md
+  canonical_read_hierarchy:
+    - id: session-bootstrap
+      cli: npm run art -- bootstrap
+      route: GET /v1/delivery-session/bootstrap
+      purpose: resume one ART session from the active devint lane
+    - id: workflow-health
+      cli: npm run art -- workflow-health
+      route: GET /v1/delivery-session/workflow-health
+      purpose: confirm roadmap and PM² projection health before deeper repair
+    - id: initiative-review-pack
+      cli: npm run art -- initiative review-pack <delivery-id>
+      route: GET /v1/delivery-initiatives/{delivery_id}/review-pack
+      purpose: decide whether one initiative is clean, stale-open, or review-ready
+    - id: initiative-planning
+      cli: npm run art -- initiative planning <delivery-id>
+      route: GET /v1/delivery-initiatives/{delivery_id}/planning
+      purpose: identify the active committed front when the next item is not already known
+    - id: item-continuation
+      cli: npm run art -- item continuation <work-item-id>
+      route: GET /v1/delivery-work-items/{work_item_id}/continuation-context
+      purpose: resume one concrete work item before repo implementation work
+  guided_write_intents:
+    - id: planning-repair
+      cli: npm run art -- initiative planning-repair <delivery-id> <payload.json>
+      route: POST /v1/delivery-initiatives/{delivery_id}/plan/repair
+      purpose: retarget, decommit, or correct execution posture through one guided repair path
+    - id: item-complete
+      cli: npm run art -- item complete <work-item-id> <payload.json>
+      route: POST /v1/delivery-work-items/{work_item_id}/complete
+      purpose: close one item through evidence-backed completion
+    - id: item-stale-open-close
+      cli: npm run art -- item stale-open-close <work-item-id> <payload.json>
+      route: POST /v1/delivery-work-items/{work_item_id}/stale-open-close
+      purpose: close a stale-open item after continuation truth proves the scope is already satisfied
+    - id: initiative-close
+      cli: npm run art -- initiative close <delivery-id> <payload.json>
+      route: POST /v1/delivery-initiatives/{delivery_id}/close
+      purpose: guided initiative closeout that records system demo, enters Closing, records inspect-and-adapt, and finishes the initiative
+    - id: item-scaffold
+      cli: npm run art -- scaffold item-complete <work-item-id> <output.json> [repo-root...]
+      route: local helper
+      purpose: generate an editable completion-evidence scaffold from repo state
+    - id: initiative-scaffold
+      cli: npm run art -- scaffold initiative-close <delivery-id> <output.json> [repo-root...]
+      route: local helper
+      purpose: generate an editable initiative-close scaffold from repo state
+  fallback_model:
+    normal_rule:
+      - normal ART sessions must use broker CLI or broker HTTP routes
+      - direct Rails query is forbidden for normal ART work
+      - raw kubectl exec plus ad hoc node one-liners are fallback-only, not the default operator path
+    when_broker_runtime_is_unavailable:
+      - use platform runtime or access runbooks to restore the OpenProject and broker lane first
+      - use platform-admin OpenProject controls only for runtime, board, or projection repair
+      - do not mutate ART work-state through Rails-admin or OpenProject-local scripts
+    when_projection_or_board_drift_is_suspected:
+      - start from broker workflow-health
+      - use the scoped ART quality gate next
+      - use platform-admin view repair only when roadmap or PM² projection drift is the real problem
+  compatibility_boundary:
+    broker_owned_normal_art_surfaces:
+      - session bootstrap and workflow health
+      - initiative reads, planning, and review readiness
+      - initiative writes, planning repair, and closeout
+      - work-item reads, writes, and closeout
+      - closeout scaffolding helpers
+    platform_admin_only_surfaces:
+      - OpenProject bootstrap and schema provisioning
+      - board and roadmap projection repair
+      - one-time normalization after contract changes
+      - service identity provisioning
+      - clean-start, backup, restore, and uninstall controls
+  success_metrics:
+    - id: one-command-bootstrap
+      outcome: operator can resume the ART lane with one bootstrap command
+    - id: one-command-workflow-health
+      outcome: operator can see roadmap and PM² projection health with one command
+    - id: one-command-quality-and-review
+      outcome: operator can inspect initiative quality and review readiness without Rails-admin access
+    - id: one-command-planning-repair
+      outcome: PI retarget and decommit work no longer require ad hoc multi-write repair
+    - id: one-command-item-close
+      outcome: item completion and stale-open closeout each have one bounded operator path
+    - id: one-command-initiative-close
+      outcome: initiative closeout no longer requires reconstructing separate system-demo, Closing, inspect-and-adapt, and done writes
+    - id: zero-normal-session-rails
+      outcome: normal ART sessions no longer depend on direct Rails query
+    - id: zero-normal-session-raw-pod-exec
+      outcome: normal ART sessions no longer require raw kubectl exec plus node one-liners
