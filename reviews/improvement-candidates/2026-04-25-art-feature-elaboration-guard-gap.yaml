@@ -1,0 +1,95 @@
+schema_version: 1
+id: 2026-04-25-art-feature-elaboration-guard-gap
+title: Enforce elaborated leaf fronts for PI-committed ART work
+recorded_on: '2026-04-25'
+owner_repo: workspace-governance
+summary: PI-tagged ART work can still remain too shallow, with initiatives holding
+  only Feature items and no PI Objective or executable child stories/defects, while
+  the current quality gates still report the plan as clean. That leaves current-front
+  work ambiguous and makes decomposition drift recur.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - operator-orchestration-service
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - platform-contract
+  - source-behavior
+signals:
+- id: operator-callout-bad-decomposition
+  title: The operator explicitly called out bad ART decomposition and asked for a
+    real working rule and guard.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The current planning doctrine prevents backlog Features from becoming too
+    deep too early, but it does not prevent PI-committed initiatives from
+    staying too shallow too late. Epic #251 currently contains only Feature
+    children, no PI Objective, and no story/defect leaf front, yet the scoped
+    ART quality check still reports `issue_count = 0`.
+  source_refs:
+  - >-
+    conversation: operator said #247 is badly decomposed, suspected #251 might
+    have the same problem, and asked for a clear working rule plus guard
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/products/openproject/delivery-art-planning-workflow.json
+    owner_repo: platform-engineering
+    note: Canonical planning workflow now requires a PI Objective for PI-committed
+      initiative scope and an open User story or Defect leaf front before a Feature
+      can remain PI-committed or active.
+  - type: doc
+    path: platform-engineering/products/openproject/delivery-art-contract.md
+    owner_repo: platform-engineering
+    note: ART contract now states that Milestones remain checkpoint-only and do
+      not replace either a PI Objective or an executable leaf front.
+  - type: doc
+    path: platform-engineering/products/openproject/runbooks/plan-delivery-art.md
+    owner_repo: platform-engineering
+    note: >-
+      Operator planning runbook now teaches the exact transition-based rule:
+      backlog Features may remain umbrella-only, but PI-committed or active
+      Features must already have an open User story or Defect child.
+  - type: validator
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Quality gate now fails on PI-committed initiative scope without a PI Objective
+      and on PI-committed Features that lack an open leaf child.
+  - type: contract
+    path: operator-orchestration-service/src/delivery-planning-workflow.json
+    owner_repo: operator-orchestration-service
+    note: Broker mirror now matches the canonical planning doctrine so operator-facing
+      workflow reads and route documentation use the same gate model.
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Broker create, update, move, and plan/apply paths now reject PI-committed
+      or active Feature state that lacks an executable leaf child and reject PI-committed
+      initiative scope that lacks a PI Objective.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace memory rule now reminds future sessions that backlog Features
+      may stay umbrella-only, but committed/current Features must execute from a
+      real story or defect leaf front.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: ART operator skill now teaches the same PI Objective, Milestone, and leaf-front
+      doctrine before Codex starts planning or execution updates.
+  note: >-
+    Closed by live repair of epic #251 plus canonical planning doctrine,
+    broker enforcement, platform quality gates, and workspace operator-memory
+    updates.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

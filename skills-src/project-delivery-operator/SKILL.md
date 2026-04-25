@@ -194,8 +194,14 @@ Use this skill when a serious initiative is already running inside
      describing it only as a generic planning problem
    - treat backlog as mostly `Epic` + `Feature`
    - do not create `User story` or `Task` forests before PI commitment
+   - a PI-committed initiative must include at least one `PI Objective`
+   - a backlog `Feature` may stay umbrella-only, but a PI-committed or active
+     `Feature` must keep an open `User story` or `Defect` child as its leaf
+     front
    - `PI Objective`, `User story`, `Task`, and `Milestone` work must carry
      `Target PI`
+   - `Milestone` is an `Epic`-level checkpoint only; it does not replace a
+     `PI Objective` or a `Feature` leaf front
    - PI-committed non-`Epic` work must also carry non-backlog `Iteration`
    - backlog `Feature` work may exist without `Target PI`, but it must stay
      umbrella-shaped until commitment
