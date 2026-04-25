@@ -560,6 +560,137 @@ def main() -> int:
             errors.append(
                 f"contracts/governance-engine-extraction-gate.yaml: {key} must be {expected!r}"
             )
+    expected_extraction_decision = {
+        "default_outcome": "retain-integrated-governance-engine",
+        "approved_outcome": "approve-standalone-governance-engine-extraction",
+        "hard_gate_mode": "all_must_pass",
+        "extraction_need_signal_threshold": "all_listed_signals_required",
+    }
+    extraction_decision = governance_engine_extraction_gate["extraction_decision"]
+    for key, expected in expected_extraction_decision.items():
+        if extraction_decision[key] != expected:
+            errors.append(
+                f"contracts/governance-engine-extraction-gate.yaml: extraction_decision.{key} must be {expected!r}"
+            )
+    expected_decision_record_requirements = {
+        "record the retain-versus-extract outcome on the PI objective before extraction work begins",
+        "cite the current parity and security evidence in the decision record",
+        "keep bounded runtime activation deferred to epic #251 even when extraction is approved",
+    }
+    if set(extraction_decision["decision_record_requirements"]) != expected_decision_record_requirements:
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: extraction_decision.decision_record_requirements must be exactly "
+            + ", ".join(sorted(expected_decision_record_requirements))
+        )
+    expected_hard_gate_checks = {
+        "shadow-parity-clean": {
+            "threshold": "active workspace shadow parity validator reads clean and required generated outputs are current",
+            "evidence_sources": {
+                "contracts/governance-engine-shadow-parity.yaml",
+                "scripts/validate_governance_engine_shadow_parity.py",
+            },
+        },
+        "boundary-projection-current": {
+            "threshold": "generated boundary projection matches the current engine-versus-tenant split",
+            "evidence_sources": {
+                "contracts/governance-engine-boundary-map.yaml",
+                "generated/governance-engine-boundary-map.json",
+                "scripts/validate_cross_repo_truth.py",
+            },
+        },
+        "stable-operator-entrypoints": {
+            "threshold": "stable operator entrypoints remain unchanged or explicitly compatibility-shimmed",
+            "evidence_sources": {
+                "contracts/governance-engine-foundation.yaml",
+                "docs/governance-engine-foundation.md",
+                "scripts/validate_contracts.py",
+            },
+        },
+        "security-delta-review-current": {
+            "threshold": "current security review explicitly covers the parity boundary and proposed extraction delta",
+            "evidence_sources": {
+                "security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md",
+            },
+        },
+        "governed-policy-stays-central": {
+            "threshold": "repo-local validators and wiring do not redefine governed AI model-access policy",
+            "evidence_sources": {
+                "contracts/governance-engine-foundation.yaml",
+                "scripts/validate_contracts.py",
+            },
+        },
+    }
+    actual_hard_gate_checks = {
+        entry["gate_id"]: {
+            "threshold": entry["threshold"],
+            "evidence_sources": set(entry["evidence_sources"]),
+        }
+        for entry in governance_engine_extraction_gate["hard_gate_checks"]
+    }
+    if set(actual_hard_gate_checks) != set(expected_hard_gate_checks):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: hard_gate_checks must define the current shadow-parity-clean, boundary-projection-current, stable-operator-entrypoints, security-delta-review-current, and governed-policy-stays-central checks"
+        )
+    else:
+        for gate_id, expected in expected_hard_gate_checks.items():
+            actual = actual_hard_gate_checks[gate_id]
+            if actual["threshold"] != expected["threshold"]:
+                errors.append(
+                    f"contracts/governance-engine-extraction-gate.yaml: hard_gate_checks[{gate_id}].threshold must be {expected['threshold']!r}"
+                )
+            if actual["evidence_sources"] != expected["evidence_sources"]:
+                errors.append(
+                    "contracts/governance-engine-extraction-gate.yaml: "
+                    f"hard_gate_checks[{gate_id}].evidence_sources must be exactly "
+                    + ", ".join(sorted(expected["evidence_sources"]))
+                )
+    expected_extraction_need_signals = {
+        "multi-instance-consumer-demand": {
+            "threshold": "more than one governed workspace or tenant-instance consumer requires the same engine authoring layer",
+            "evidence_sources": {
+                "contracts/governance-engine-foundation.yaml",
+                "contracts/governance-engine-boundary-map.yaml",
+            },
+        },
+        "standalone-release-versioning-need": {
+            "threshold": "standalone versioning or release cadence is required beyond the integrated workspace-governance repo",
+            "evidence_sources": {
+                "docs/governance-engine-foundation.md",
+                "contracts/governance-engine-output-manifest.yaml",
+            },
+        },
+        "bounded-package-and-consumption-contract-ready": {
+            "threshold": "package installation and tenant-consumption contracts can be expressed without breaking stable operator entrypoints",
+            "evidence_sources": {
+                "contracts/governance-engine-output-manifest.yaml",
+                "contracts/governance-engine-boundary-map.yaml",
+            },
+        },
+    }
+    actual_extraction_need_signals = {
+        entry["signal_id"]: {
+            "threshold": entry["threshold"],
+            "evidence_sources": set(entry["evidence_sources"]),
+        }
+        for entry in governance_engine_extraction_gate["extraction_need_signals"]
+    }
+    if set(actual_extraction_need_signals) != set(expected_extraction_need_signals):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: extraction_need_signals must define the current multi-instance-consumer-demand, standalone-release-versioning-need, and bounded-package-and-consumption-contract-ready signals"
+        )
+    else:
+        for signal_id, expected in expected_extraction_need_signals.items():
+            actual = actual_extraction_need_signals[signal_id]
+            if actual["threshold"] != expected["threshold"]:
+                errors.append(
+                    f"contracts/governance-engine-extraction-gate.yaml: extraction_need_signals[{signal_id}].threshold must be {expected['threshold']!r}"
+                )
+            if actual["evidence_sources"] != expected["evidence_sources"]:
+                errors.append(
+                    "contracts/governance-engine-extraction-gate.yaml: "
+                    f"extraction_need_signals[{signal_id}].evidence_sources must be exactly "
+                    + ", ".join(sorted(expected["evidence_sources"]))
+                )
     if set(governance_engine_extraction_gate["deferred_follow_on_refs"]) != {
         "openproject://work_packages/247",
         "openproject://work_packages/251",
