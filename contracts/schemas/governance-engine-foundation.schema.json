@@ -123,12 +123,17 @@
           "additionalProperties": false,
           "required": [
             "central_repo",
+            "output_manifest_ref",
             "generated_repo_local_wiring",
             "custom_validation_allowed_seams",
             "custom_validation_forbidden_classes"
           ],
           "properties": {
             "central_repo": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_manifest_ref": {
               "type": "string",
               "minLength": 1
             },

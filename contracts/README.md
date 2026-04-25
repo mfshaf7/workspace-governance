@@ -78,6 +78,10 @@ Use these contracts to declare:
   - machine-readable definition of the governance-engine versus tenant-instance
     boundary, compatibility boundary, packaging model, and governed AI runtime
     sequencing prerequisites
+- `governance-engine-output-manifest.yaml`
+  - machine-readable declaration of which outputs are materialized into the
+    live workspace, live Codex skill root, and `generated/`, plus the emitter
+    script that owns each output family
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility
@@ -262,4 +266,5 @@ Use:
 Resolved graphs and compiled rule sets belong in `../generated/`.
 
 Do not hand-edit those files. Regenerate them through the validator and audit
-scripts.
+scripts. The exact emitted file set is declared in
+`governance-engine-output-manifest.yaml`.

@@ -16,6 +16,9 @@ At this layer, the important questions are:
 The repo carries the machine-readable contract model for the active repo map,
 product maturity, component inventory, dependency semantics, review
 obligations, security bindings, vocabulary, and self-improvement records.
+It also now owns the explicit governance-engine output manifest and the shared
+materializer implementation that emits workspace-root files, managed live
+skills, and generated governance artifacts from that contract.
 
 The same governance layer owns the intake model for new repos, products, and
 components. Nothing needs to be governed by default, but new entrants should
@@ -222,8 +225,12 @@ Those stay in the owning repos:
     developer-integration lane contracts
   - includes `governance-engine-foundation.yaml` for the reusable engine
     boundary, packaging model, and runtime-sequencing contract
+  - includes `governance-engine-output-manifest.yaml` for the explicit
+    materialized-output and emission-boundary contract
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
+  - exact generated outputs are declared in
+    `contracts/governance-engine-output-manifest.yaml`
 - `skills-src/`
   - workspace-level skill source directories owned here
 - `reviews/`

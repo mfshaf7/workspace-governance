@@ -140,6 +140,14 @@ possible:
 - repo-rule driven validation expectations
 - generated resolved control-plane artifacts under `generated/`
 
+The exact materialized and generated output set is declared in:
+
+- `contracts/governance-engine-output-manifest.yaml`
+
+The current materialization implementation exists as a shared script layer:
+
+- `scripts/materialize_governance_engine_outputs.py`
+
 Repo-local wiring is not the place to re-author central routing or policy
 truth.
 

@@ -23,11 +23,25 @@
     control-plane guidance
 - `contracts_lib.py`
   - shared YAML and generated-artifact loader for the governance scripts
+  - also resolves the governance-engine output manifest so materialized and
+    generated outputs are declared once instead of hard-coded in multiple scripts
+- `governance_engine_materializer.py`
+  - shared materialization layer for workspace-root sync, managed live skill
+    install, and generated governance artifacts
 - `install_skills.py`
   - installs or verifies the registered skills declared in `contracts/skills.yaml`
     from their owner repos into a Codex skill directory
   - tracks the workspace-managed live skill install manifest so stale managed
     skills do not silently linger in `~/.codex/skills`
+  - reads the live-skill emission boundary from
+    `contracts/governance-engine-output-manifest.yaml`
+  - keeps the stable skill-install entrypoint while delegating actual emission
+    work to `governance_engine_materializer.py`
+- `materialize_governance_engine_outputs.py`
+  - explicit materializer entrypoint for the output families declared in
+    `contracts/governance-engine-output-manifest.yaml`
+  - covers live workspace-root sync, managed live skills, and generated
+    governance artifacts through one shared implementation surface
 - `validate_delegation_journal.py`
   - validates delegated-execution journal records, packet scope discipline,
     write-scope overlap, and required security-review references
@@ -47,6 +61,10 @@
     `self-improvement-policy` signal catalog
 - `sync_workspace_root.py`
   - syncs the canonical files in this repo back into `/home/mfshaf7/projects`
+  - reads the workspace-root emission map from
+    `contracts/governance-engine-output-manifest.yaml`
+  - keeps the stable sync entrypoint while delegating actual file emission to
+    `governance_engine_materializer.py`
 - `validate_improvement_candidates.py`
   - validates that improvement candidates keep valid lifecycle, follow-up,
     closure references, and control references
@@ -92,7 +110,10 @@
     canonical `workspace-root/` bootstrap sections cover the full active repo
     inventory, that `security-architecture` keeps security-view and platform
     inventory coverage for active security-owned components, and regenerates
-    the resolved governance artifacts under `generated/`
+    the resolved governance artifacts declared in
+    `contracts/governance-engine-output-manifest.yaml`
+  - now uses the shared materializer layer for generated artifact write/check
+    instead of carrying its own duplicate output-emission logic
 - `validate_repo_structure.py`
   - validates that this repo keeps the expected governance structure
 - `workspace_control_plane_summary.py`

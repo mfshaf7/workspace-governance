@@ -10,11 +10,13 @@ import yaml
 
 from contracts_lib import (
     active_repo_names,
-    dump_json,
-    dump_yaml,
     generated_paths,
     load_contracts,
     load_json,
+)
+from governance_engine_materializer import (
+    check_generated_artifacts,
+    write_generated_artifacts,
 )
 
 
@@ -503,28 +505,12 @@ def main() -> int:
     paths = generated_paths(repo_root)
 
     if args.write_generated:
-        dump_yaml(paths["system_map"], compiled["system_map"])
-        dump_json(paths["resolved_owner_map"], compiled["resolved_owner_map"])
-        dump_json(paths["resolved_dependency_graph"], compiled["resolved_dependency_graph"])
-        dump_json(paths["stale_content_rules"], compiled["stale_content_rules"])
+        write_generated_artifacts(repo_root, compiled, contracts=contracts)
 
     if args.check_generated:
-        if not paths["system_map"].exists():
-            errors.append(f"{paths['system_map']}: missing generated system map")
-        elif yaml.safe_load(paths["system_map"].read_text()) != compiled["system_map"]:
-            errors.append(f"{paths['system_map']}: generated system map is stale")
-        if not paths["resolved_owner_map"].exists():
-            errors.append(f"{paths['resolved_owner_map']}: missing generated owner map")
-        elif load_json(paths["resolved_owner_map"]) != compiled["resolved_owner_map"]:
-            errors.append(f"{paths['resolved_owner_map']}: generated owner map is stale")
-        if not paths["resolved_dependency_graph"].exists():
-            errors.append(f"{paths['resolved_dependency_graph']}: missing generated dependency graph")
-        elif load_json(paths["resolved_dependency_graph"]) != compiled["resolved_dependency_graph"]:
-            errors.append(f"{paths['resolved_dependency_graph']}: generated dependency graph is stale")
-        if not paths["stale_content_rules"].exists():
-            errors.append(f"{paths['stale_content_rules']}: missing generated stale-content rules")
-        elif load_json(paths["stale_content_rules"]) != compiled["stale_content_rules"]:
-            errors.append(f"{paths['stale_content_rules']}: generated stale-content rules are stale")
+        errors.extend(
+            check_generated_artifacts(repo_root, compiled, contracts=contracts)
+        )
 
     if errors:
         for error in errors:
