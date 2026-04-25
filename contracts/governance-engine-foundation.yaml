@@ -34,6 +34,7 @@ governance_engine_foundation:
       surface: security-architecture review artifacts
       role: dated security evidence that remains outside generated workspace copies
   compatibility_boundary:
+    boundary_map_ref: contracts/governance-engine-boundary-map.yaml
     stable_entrypoints:
       - workspace-root/AGENTS.md
       - workspace-root/README.md
@@ -48,6 +49,7 @@ governance_engine_foundation:
       - existing operator entrypoints stay stable during migration
       - owner-repo operator workflows remain owner-owned
   shadow_parity:
+    contract_ref: contracts/governance-engine-shadow-parity.yaml
     phases:
       - name: author-engine-source
         outcome: update canonical engine-owned sources without changing live behavior
@@ -78,6 +80,7 @@ governance_engine_foundation:
       - governed AI model policy
       - cross-repo evidence and review obligations
   runtime_foundation:
+    extraction_gate_ref: contracts/governance-engine-extraction-gate.yaml
     instruction_bundle_authoring:
       - AGENTS.md
       - skills-src/

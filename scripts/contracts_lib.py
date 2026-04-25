@@ -33,6 +33,9 @@ CONTRACT_FILES = {
     "skills": "contracts/skills.yaml",
     "governance_engine_foundation": "contracts/governance-engine-foundation.yaml",
     "governance_engine_output_manifest": "contracts/governance-engine-output-manifest.yaml",
+    "governance_engine_boundary_map": "contracts/governance-engine-boundary-map.yaml",
+    "governance_engine_shadow_parity": "contracts/governance-engine-shadow-parity.yaml",
+    "governance_engine_extraction_gate": "contracts/governance-engine-extraction-gate.yaml",
 }
 
 SCHEMA_FILES = {
@@ -60,6 +63,9 @@ SCHEMA_FILES = {
     "skills": "contracts/schemas/skills.schema.json",
     "governance_engine_foundation": "contracts/schemas/governance-engine-foundation.schema.json",
     "governance_engine_output_manifest": "contracts/schemas/governance-engine-output-manifest.schema.json",
+    "governance_engine_boundary_map": "contracts/schemas/governance-engine-boundary-map.schema.json",
+    "governance_engine_shadow_parity": "contracts/schemas/governance-engine-shadow-parity.schema.json",
+    "governance_engine_extraction_gate": "contracts/schemas/governance-engine-extraction-gate.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"

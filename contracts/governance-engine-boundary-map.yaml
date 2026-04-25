@@ -1,0 +1,31 @@
+schema_version: 1
+governance_engine_boundary_map:
+  owner_repo: workspace-governance
+  authoring_paths:
+    - workspace-root/
+    - contracts/
+    - skills-src/
+    - scripts/
+  generated_paths:
+    - generated/
+  tenant_instance_paths:
+    - contracts/intake-register.yaml
+    - contracts/developer-integration-profiles.yaml
+    - contracts/exceptions.yaml
+  external_instance_surfaces:
+    - owner-repo primary operator surfaces
+    - security-architecture review artifacts
+  live_materialized_outputs:
+    - ARCHITECTURE.md
+    - README.md
+    - AGENTS.md
+    - _workspace_tools/audit_workspace_layout.py
+    - ~/.codex/skills/
+  generated_projection:
+    output_id: governance_engine_boundary_map
+    path: generated/governance-engine-boundary-map.json
+    emitter: scripts/validate_cross_repo_truth.py
+  invariants:
+    - tenant-instance paths may remain under contracts/ but stay explicitly classified as local admitted state
+    - live materialized outputs derive from engine authoring paths instead of tenant-instance copies
+    - external instance surfaces stay referenced instead of duplicated into generated workspace outputs

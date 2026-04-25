@@ -57,3 +57,6 @@ governance_engine_output_manifest:
         - id: stale_content_rules
           format: json
           emitted_path: generated/stale-content-rules.json
+        - id: governance_engine_boundary_map
+          format: json
+          emitted_path: generated/governance-engine-boundary-map.json

@@ -1,0 +1,32 @@
+schema_version: 1
+governance_engine_shadow_parity:
+  owner_repo: workspace-governance
+  foundation_ref: contracts/governance-engine-foundation.yaml
+  boundary_map_ref: contracts/governance-engine-boundary-map.yaml
+  output_manifest_ref: contracts/governance-engine-output-manifest.yaml
+  validator_script: scripts/validate_governance_engine_shadow_parity.py
+  primary_surface_path: docs/governance-engine-foundation.md
+  required_checks:
+    - id: workspace-root-sync
+      command: python3 scripts/materialize_governance_engine_outputs.py workspace-root --check
+      success_condition: live workspace-root files match the canonical governance-engine sources
+    - id: installed-skills
+      command: python3 scripts/materialize_governance_engine_outputs.py skills --check
+      success_condition: installed skills and the managed skill manifest match canonical skill sources and registry truth
+    - id: generated-governance-artifacts
+      command: python3 scripts/materialize_governance_engine_outputs.py generated --check
+      success_condition: generated governance artifacts, including the boundary projection, match the compiled contract truth
+    - id: compatibility-entrypoints
+      command: python3 scripts/validate_governance_engine_shadow_parity.py
+      success_condition: stable compatibility entrypoints remain present while parity work stays integrated
+  cutover_gate:
+    required_clean_checks:
+      - workspace-root-sync
+      - installed-skills
+      - generated-governance-artifacts
+      - compatibility-entrypoints
+    forbidden_conditions:
+      - duplicated workspace control-plane truth in repo-local copies
+      - stale live skill installs or missing managed skill manifest
+      - stale generated boundary projection
+      - missing stable compatibility entrypoints

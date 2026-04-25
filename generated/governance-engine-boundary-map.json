@@ -1,0 +1,63 @@
+{
+  "authoring_paths": [
+    "workspace-root/",
+    "contracts/",
+    "skills-src/",
+    "scripts/"
+  ],
+  "emitted_output_families": [
+    {
+      "boundary": "live-workspace-materialization",
+      "family_id": "workspace-root-sync",
+      "outputs": [
+        "ARCHITECTURE.md",
+        "README.md",
+        "AGENTS.md",
+        "_workspace_tools/audit_workspace_layout.py"
+      ]
+    },
+    {
+      "boundary": "live-skill-installation",
+      "emitted_path_template": "{target_root}/{skill_dir_name}",
+      "family_id": "installed-skills",
+      "managed_manifest_filename": ".workspace-governance-skills.json",
+      "target_root_default": "~/.codex/skills"
+    },
+    {
+      "boundary": "repo-generated-artifact",
+      "family_id": "generated-governance-artifacts",
+      "outputs": [
+        "generated/system-map.yaml",
+        "generated/resolved-owner-map.json",
+        "generated/resolved-dependency-graph.json",
+        "generated/stale-content-rules.json",
+        "generated/governance-engine-boundary-map.json"
+      ]
+    }
+  ],
+  "external_instance_surfaces": [
+    "owner-repo primary operator surfaces",
+    "security-architecture review artifacts"
+  ],
+  "generated_paths": [
+    "generated/"
+  ],
+  "invariants": [
+    "tenant-instance paths may remain under contracts/ but stay explicitly classified as local admitted state",
+    "live materialized outputs derive from engine authoring paths instead of tenant-instance copies",
+    "external instance surfaces stay referenced instead of duplicated into generated workspace outputs"
+  ],
+  "live_materialized_outputs": [
+    "ARCHITECTURE.md",
+    "README.md",
+    "AGENTS.md",
+    "_workspace_tools/audit_workspace_layout.py",
+    "~/.codex/skills/"
+  ],
+  "schema_version": 1,
+  "tenant_instance_paths": [
+    "contracts/intake-register.yaml",
+    "contracts/developer-integration-profiles.yaml",
+    "contracts/exceptions.yaml"
+  ]
+}

@@ -1,0 +1,29 @@
+schema_version: 1
+governance_engine_extraction_gate:
+  owner_repo: workspace-governance
+  foundation_ref: contracts/governance-engine-foundation.yaml
+  shadow_parity_ref: contracts/governance-engine-shadow-parity.yaml
+  boundary_map_ref: contracts/governance-engine-boundary-map.yaml
+  security_review_ref: security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md
+  primary_surface_path: docs/governance-engine-foundation.md
+  extraction_decision_criteria:
+    - shadow parity validator reads clean in the active workspace
+    - generated boundary projection is current and explicit
+    - stable operator entrypoints remain unchanged or compatibility-shimmed
+    - security delta review is current for the parity and extraction boundary
+    - repo-local validators do not redefine governed AI model-access policy
+  extraction_non_goals:
+    - extracting a standalone governance-engine repo before parity proof is clean
+    - introducing a central always-on governance-engine service during parity work
+    - activating bounded governed AI runtime during the parity epic
+  bounded_runtime_readiness_prerequisites:
+    - governed model-access and audit contract remains current
+    - approved profile registry remains platform-owned
+    - governed invocation path exists before activation
+    - workload caller identity stays distinct from operator acceptance identity
+    - required audit fields emit on governed runtime decisions
+    - explicit operator approval boundary remains in place
+    - fresh security review occurs before any runtime activation
+  deferred_follow_on_refs:
+    - openproject://work_packages/247
+    - openproject://work_packages/251

@@ -47,6 +47,10 @@ The following surfaces are the reusable governance-engine authoring layer:
 These are engine-level concerns because they define how the workspace is
 classified, routed, audited, and corrected.
 
+The concrete path-level boundary is also recorded in:
+
+- `contracts/governance-engine-boundary-map.yaml`
+
 ### Tenant-Instance State
 
 The following surfaces stay tenant-instance specific even when the engine split
@@ -117,6 +121,18 @@ cut-over rewrite.
 - the live installed skills still match `contracts/skills.yaml`
 - owner-repo operator surfaces still point at the same primary procedures
 - validation output proves no control-plane truth was duplicated or lost
+
+The fail-closed parity contract and validator are:
+
+- `contracts/governance-engine-shadow-parity.yaml`
+- `scripts/validate_governance_engine_shadow_parity.py`
+
+Primary validation entrypoints:
+
+- `python3 scripts/validate_governance_engine_shadow_parity.py`
+- `python3 scripts/materialize_governance_engine_outputs.py workspace-root --check`
+- `python3 scripts/materialize_governance_engine_outputs.py skills --check`
+- `python3 scripts/materialize_governance_engine_outputs.py generated --check`
 
 ## Enterprise Control-Plane Packaging Model
 
@@ -220,3 +236,29 @@ The runtime track stays blocked until all of these are explicit:
 
 That keeps runtime work behind real control-plane truth instead of letting a
 future agent runtime define the governance model by accident.
+
+## Extraction Gate And Runtime Readiness
+
+The control plane now carries an explicit extraction gate instead of leaving
+repo extraction and future runtime activation as implied follow-on ideas.
+
+The machine-readable gate is:
+
+- `contracts/governance-engine-extraction-gate.yaml`
+
+Extraction remains gated on:
+
+- proven shadow parity in the active workspace
+- an explicit generated boundary projection
+- stable operator entrypoints
+- a current security delta review for the parity and extraction boundary
+
+Explicit non-goals during the parity epic:
+
+- do not extract a standalone governance-engine repo yet
+- do not introduce a central always-on governance-engine service
+- do not activate a bounded governed AI runtime during parity work
+
+The matching security review is:
+
+- `security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md`
