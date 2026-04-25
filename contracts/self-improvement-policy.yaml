@@ -17,6 +17,7 @@ runtime_gate:
     - machine-visible-workflow-drift
     - late-root-cause-discovery
     - delegated-execution-control-breach
+    - live-art-mutation-proof-gap
 signal_catalog:
   operator-repeated-mistake-callout:
     description: The operator explicitly said the miss is a repeated mistake and expects the system to learn from it.
@@ -66,4 +67,11 @@ signal_catalog:
     default_trigger: delegated-execution-control-breach
     default_failure_classes:
       - delegated-scope-control-miss
+    supports_regression_link: true
+  live-art-mutation-proof-gap:
+    description: A live ART mutation or closeout bug was discovered, but normal delivery continued before the exact blocker, smallest faithful regression, and one live repair proof were locked.
+    default_source_type: review
+    default_trigger: machine-visible-workflow-drift
+    default_failure_classes:
+      - workflow-doctrine-gap
     supports_regression_link: true

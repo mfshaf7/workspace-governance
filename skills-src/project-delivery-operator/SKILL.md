@@ -85,6 +85,15 @@ Use this skill when a serious initiative is already running inside
    - use execution-summary `done_narrative_contract_*` fields as the fast read
      model for done-state narrative drift instead of rediscovering it from raw
      OpenProject markdown
+   - when the exact next committed step cannot proceed, stop adjacent ART
+     mutation first and record the blocker through the bounded blocker path:
+     - `npm run art -- item blocker <work-item-id> <payload.json>`
+     - use the generic `update` path neither to enter nor to clear `blocked`
+   - if the blocker is caused by a live system or workflow control bug, open or
+     update a real `Defect` in ART instead of leaving the issue only in chat or
+     a self-improvement candidate
+   - if the blocker creates exposure broader than one blocked work item, open
+     or update a `Risk` with ROAM fields
    - when live broker truth matters for an existing documented route in
      `operator-orchestration-service`, use
      `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
@@ -213,6 +222,10 @@ Use this skill when a serious initiative is already running inside
      as the canonical machine-readable initiative-review gate inventory
    - when PM² closing drift appears, name the exact gate id instead of calling
      it only a generic closeout problem
+   - use
+     `platform-engineering/products/openproject/runbooks/manage-delivery-blockers.md`
+     as the primary checklist surface for blocker trigger, recording, and clear
+     doctrine
 6. Close work only through the supported evidence-backed completion path.
 7. Raise active-slice narrative weakness explicitly.
    - if the ART-quality check reports `rewrite-required` or

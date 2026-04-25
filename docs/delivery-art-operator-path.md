@@ -55,6 +55,7 @@ Use this order:
 
 Normal guided write paths are:
 
+- `npm run art -- item blocker <work-item-id> <payload.json>`
 - `npm run art -- initiative planning-repair <delivery-id> <payload.json>`
 - `npm run art -- item complete <work-item-id> <payload.json>`
 - `npm run art -- item stale-open-close <work-item-id> <payload.json>`
@@ -64,6 +65,16 @@ Normal guided write paths are:
 
 These exist so the operator does not have to reconstruct multi-step ART writes
 from low-level broker calls.
+
+When the active next step cannot proceed, use the blocker workflow before
+continuing adjacent ART mutation:
+
+- state the exact blocker on the affected work item
+- open a real `Defect` when the blocker is caused by a live system or workflow
+  control bug
+- open a `Risk` when the exposure is broader than one blocked item
+- clear the blocker only through the bounded blocker path, not by generic
+  status edits
 
 ## Fallback Model
 
@@ -116,6 +127,7 @@ The operator path is only considered complete when all of these are true:
 - workflow health is one command
 - initiative review readiness is one command
 - planning repair is one guided write path
+- blocker management is one guided write path
 - item completion and stale-open close each have one guided write path
 - initiative closeout is one guided write path
 - normal ART sessions do not use direct Rails query
