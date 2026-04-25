@@ -315,6 +315,12 @@ Only start implementation after that discussion narrows the target design.
 
 - Prefer the owner that should hold the long-lived contract, not the repo where
   the patch is easiest.
+- PI-committed initiative work must include at least one `PI Objective`.
+- A backlog `Feature` may stay umbrella-only, but a PI-committed or active
+  `Feature` must keep an open `User story` or `Defect` child as its leaf
+  front.
+- `Milestone` is an `Epic`-level checkpoint only; it does not replace a
+  `PI Objective` or a `Feature` leaf front.
 - When the request is architecture-shaping rather than implementation-shaped,
   discuss the decision with the user before editing code.
 - When docs and code disagree, fix the immediate problem in the correct owner
