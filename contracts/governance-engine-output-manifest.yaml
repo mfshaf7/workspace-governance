@@ -1,0 +1,59 @@
+schema_version: 1
+governance_engine_output_manifest:
+  owner_repo: workspace-governance
+  emission_families:
+    - id: workspace-root-sync
+      boundary: live-workspace-materialization
+      source_layers:
+        - workspace-root
+        - scripts
+      emitter: scripts/sync_workspace_root.py
+      output_mode: explicit
+      outputs:
+        - id: workspace_root_architecture
+          format: text
+          source_path: workspace-root/ARCHITECTURE.md
+          emitted_path: ARCHITECTURE.md
+        - id: workspace_root_readme
+          format: text
+          source_path: workspace-root/README.md
+          emitted_path: README.md
+        - id: workspace_root_agents
+          format: text
+          source_path: workspace-root/AGENTS.md
+          emitted_path: AGENTS.md
+        - id: workspace_audit_tool
+          format: text
+          source_path: scripts/audit_workspace_layout.py
+          emitted_path: _workspace_tools/audit_workspace_layout.py
+    - id: installed-skills
+      boundary: live-skill-installation
+      source_layers:
+        - skills
+        - contracts
+      emitter: scripts/install_skills.py
+      output_mode: dynamic-from-registry
+      source_contract: contracts/skills.yaml
+      managed_manifest_filename: .workspace-governance-skills.json
+      target_root_default: ~/.codex/skills
+      emitted_path_template: "{target_root}/{skill_dir_name}"
+    - id: generated-governance-artifacts
+      boundary: repo-generated-artifact
+      source_layers:
+        - contracts
+        - scripts
+      emitter: scripts/validate_cross_repo_truth.py
+      output_mode: explicit
+      outputs:
+        - id: system_map
+          format: yaml
+          emitted_path: generated/system-map.yaml
+        - id: resolved_owner_map
+          format: json
+          emitted_path: generated/resolved-owner-map.json
+        - id: resolved_dependency_graph
+          format: json
+          emitted_path: generated/resolved-dependency-graph.json
+        - id: stale_content_rules
+          format: json
+          emitted_path: generated/stale-content-rules.json

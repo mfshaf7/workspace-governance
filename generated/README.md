@@ -2,6 +2,9 @@
 
 These files are derived from the contract source under `../contracts/`.
 
+The exact generated file set is declared in
+`../contracts/governance-engine-output-manifest.yaml`.
+
 Do not hand-edit them. Regenerate them through:
 
 ```bash

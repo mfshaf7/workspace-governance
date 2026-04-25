@@ -61,6 +61,7 @@ governance_engine_foundation:
         outcome: switch only after parity is clean and entrypoints remain stable
   packaging_model:
     central_repo: workspace-governance
+    output_manifest_ref: contracts/governance-engine-output-manifest.yaml
     generated_repo_local_wiring:
       - materialized workspace-root bootstrap files
       - live installed skill tree under ~/.codex/skills

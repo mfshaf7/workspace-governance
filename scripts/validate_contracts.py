@@ -75,6 +75,7 @@ def main() -> int:
         "validation_matrix": repo_root / "contracts/validation-matrix.yaml",
         "skills": repo_root / "contracts/skills.yaml",
         "governance_engine_foundation": repo_root / "contracts/governance-engine-foundation.yaml",
+        "governance_engine_output_manifest": repo_root / "contracts/governance-engine-output-manifest.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -107,6 +108,9 @@ def main() -> int:
     registered_skills = contracts["skills"]["skills"]
     governance_engine_foundation = contracts["governance_engine_foundation"][
         "governance_engine_foundation"
+    ]
+    governance_engine_output_manifest = contracts["governance_engine_output_manifest"][
+        "governance_engine_output_manifest"
     ]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
@@ -290,6 +294,13 @@ def main() -> int:
         errors.append(
             "contracts/governance-engine-foundation.yaml: packaging_model.central_repo must be 'workspace-governance'"
         )
+    if (
+        governance_engine_foundation["packaging_model"]["output_manifest_ref"]
+        != "contracts/governance-engine-output-manifest.yaml"
+    ):
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: packaging_model.output_manifest_ref must point to contracts/governance-engine-output-manifest.yaml"
+        )
     expected_allowed_seams = {
         "product runtime behavior",
         "component interface contracts",
@@ -318,6 +329,83 @@ def main() -> int:
             "contracts/governance-engine-foundation.yaml: packaging_model.custom_validation_forbidden_classes must be exactly "
             + ", ".join(sorted(expected_forbidden_validation_classes))
         )
+    if governance_engine_output_manifest["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: owner_repo must be 'workspace-governance'"
+        )
+    manifest_families = {
+        entry["id"]: entry for entry in governance_engine_output_manifest["emission_families"]
+    }
+    expected_manifest_family_ids = {
+        "workspace-root-sync",
+        "installed-skills",
+        "generated-governance-artifacts",
+    }
+    if set(manifest_families) != expected_manifest_family_ids:
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: emission_families must be exactly "
+            + ", ".join(sorted(expected_manifest_family_ids))
+        )
+    foundation_source_layers = actual_source_layers
+    for family_id, payload in manifest_families.items():
+        source_layers = set(payload["source_layers"])
+        if not source_layers.issubset(foundation_source_layers):
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: "
+                f"{family_id} source_layers must stay within governance-engine source_of_truth_layers"
+            )
+        emitter_path = repo_root / payload["emitter"]
+        if not emitter_path.exists():
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: "
+                f"{family_id} emitter path {payload['emitter']!r} does not exist"
+            )
+    workspace_root_family = manifest_families.get("workspace-root-sync")
+    if workspace_root_family:
+        expected_sync_outputs = {
+            ("workspace-root/ARCHITECTURE.md", "ARCHITECTURE.md", "text"),
+            ("workspace-root/README.md", "README.md", "text"),
+            ("workspace-root/AGENTS.md", "AGENTS.md", "text"),
+            ("scripts/audit_workspace_layout.py", "_workspace_tools/audit_workspace_layout.py", "text"),
+        }
+        actual_sync_outputs = {
+            (entry.get("source_path"), entry.get("emitted_path"), entry.get("format"))
+            for entry in workspace_root_family.get("outputs", [])
+        }
+        if actual_sync_outputs != expected_sync_outputs:
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: workspace-root-sync outputs must match the current canonical workspace-root materialization set"
+            )
+    installed_skills_family = manifest_families.get("installed-skills")
+    if installed_skills_family:
+        if installed_skills_family["source_contract"] != "contracts/skills.yaml":
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: installed-skills.source_contract must be contracts/skills.yaml"
+            )
+        if installed_skills_family["managed_manifest_filename"] != ".workspace-governance-skills.json":
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: installed-skills.managed_manifest_filename must be .workspace-governance-skills.json"
+            )
+        if installed_skills_family["target_root_default"] != "~/.codex/skills":
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: installed-skills.target_root_default must be ~/.codex/skills"
+            )
+    generated_artifacts_family = manifest_families.get("generated-governance-artifacts")
+    if generated_artifacts_family:
+        expected_generated_outputs = {
+            ("system_map", "generated/system-map.yaml", "yaml"),
+            ("resolved_owner_map", "generated/resolved-owner-map.json", "json"),
+            ("resolved_dependency_graph", "generated/resolved-dependency-graph.json", "json"),
+            ("stale_content_rules", "generated/stale-content-rules.json", "json"),
+        }
+        actual_generated_outputs = {
+            (entry["id"], entry.get("emitted_path"), entry.get("format"))
+            for entry in generated_artifacts_family.get("outputs", [])
+        }
+        if actual_generated_outputs != expected_generated_outputs:
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: generated-governance-artifacts outputs must match the current generated artifact set"
+            )
     expected_instruction_bundle_authoring = {
         "AGENTS.md",
         "skills-src/",

@@ -32,6 +32,7 @@ CONTRACT_FILES = {
     "validation_matrix": "contracts/validation-matrix.yaml",
     "skills": "contracts/skills.yaml",
     "governance_engine_foundation": "contracts/governance-engine-foundation.yaml",
+    "governance_engine_output_manifest": "contracts/governance-engine-output-manifest.yaml",
 }
 
 SCHEMA_FILES = {
@@ -58,6 +59,7 @@ SCHEMA_FILES = {
     "validation_matrix": "contracts/schemas/validation-matrix.schema.json",
     "skills": "contracts/schemas/skills.schema.json",
     "governance_engine_foundation": "contracts/schemas/governance-engine-foundation.schema.json",
+    "governance_engine_output_manifest": "contracts/schemas/governance-engine-output-manifest.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"
@@ -105,12 +107,57 @@ def retired_repo_names(contracts: dict[str, Any]) -> list[str]:
     return sorted(contracts["repos"].get("retired_repos", {}).keys())
 
 
-def generated_paths(repo_root: Path) -> dict[str, Path]:
-    repo_root = repo_root.resolve()
-    generated_root = repo_root / "generated"
+def output_manifest_families(contracts: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    manifest = contracts["governance_engine_output_manifest"][
+        "governance_engine_output_manifest"
+    ]
     return {
-        "system_map": generated_root / "system-map.yaml",
-        "resolved_owner_map": generated_root / "resolved-owner-map.json",
-        "resolved_dependency_graph": generated_root / "resolved-dependency-graph.json",
-        "stale_content_rules": generated_root / "stale-content-rules.json",
+        family["id"]: family
+        for family in manifest["emission_families"]
+    }
+
+
+def output_manifest_family(
+    contracts: dict[str, Any], family_id: str
+) -> dict[str, Any]:
+    families = output_manifest_families(contracts)
+    try:
+        return families[family_id]
+    except KeyError as exc:
+        raise KeyError(f"unknown governance-engine output family: {family_id}") from exc
+
+
+def workspace_root_sync_map(contracts: dict[str, Any]) -> tuple[tuple[str, str], ...]:
+    family = output_manifest_family(contracts, "workspace-root-sync")
+    return tuple(
+        (entry["source_path"], entry["emitted_path"])
+        for entry in family["outputs"]
+    )
+
+
+def skill_install_manifest_name(contracts: dict[str, Any]) -> str:
+    family = output_manifest_family(contracts, "installed-skills")
+    return family["managed_manifest_filename"]
+
+
+def generated_output_specs(
+    repo_root: Path, contracts: dict[str, Any] | None = None
+) -> dict[str, dict[str, Any]]:
+    repo_root = repo_root.resolve()
+    if contracts is None:
+        contracts = load_contracts(repo_root)
+    family = output_manifest_family(contracts, "generated-governance-artifacts")
+    return {
+        entry["id"]: {
+            "path": repo_root / entry["emitted_path"],
+            "format": entry["format"],
+        }
+        for entry in family["outputs"]
+    }
+
+
+def generated_paths(repo_root: Path, contracts: dict[str, Any] | None = None) -> dict[str, Path]:
+    return {
+        output_id: payload["path"]
+        for output_id, payload in generated_output_specs(repo_root, contracts).items()
     }
