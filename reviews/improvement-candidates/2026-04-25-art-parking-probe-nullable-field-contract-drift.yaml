@@ -1,0 +1,47 @@
+schema_version: 1
+id: 2026-04-25-art-parking-probe-nullable-field-contract-drift
+title: Allow nullable parking response fields in ART probe contracts
+recorded_on: '2026-04-25'
+owner_repo: operator-orchestration-service
+summary: The supported ART parking probe now reports a contract failure on valid
+  retire responses because the response schema still requires `parking.review_date`
+  and `work_item.targetPi` to be strings, even though retire transitions and
+  uncommitted backlog work legitimately return `null` for those fields.
+regression_of: null
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'During live closeout of ART epic #247, POST /v1/delivery-work-items/{work_item_id}/parking
+    successfully retired work items #343 and #344, but npm run api:probe still failed
+    because the documented DeliveryWorkItemParkingResponse schema rejects `review_date: null`
+    and `targetPi: null`. The route worked, but the supported probe falsely reported
+    failure in the same session and exposed another nullable-response contract gap.'
+  source_refs:
+  - 'conversation: api:probe parking calls for work-item-343 and work-item-344 failed
+    schema validation on nullable review_date and targetPi after successful live retire writes'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-04-26'
+  note: Align the parking-route response contract and probe expectations so valid
+    retire responses on backlog-shaped work do not surface as false failures.
