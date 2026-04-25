@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governance_engine_boundary_map"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "governance_engine_boundary_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "authoring_paths",
+        "generated_paths",
+        "tenant_instance_paths",
+        "external_instance_surfaces",
+        "live_materialized_outputs",
+        "generated_projection",
+        "invariants"
+      ],
+      "properties": {
+        "owner_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authoring_paths": {
+          "$ref": "#/$defs/stringList"
+        },
+        "generated_paths": {
+          "$ref": "#/$defs/stringList"
+        },
+        "tenant_instance_paths": {
+          "$ref": "#/$defs/stringList"
+        },
+        "external_instance_surfaces": {
+          "$ref": "#/$defs/stringList"
+        },
+        "live_materialized_outputs": {
+          "$ref": "#/$defs/stringList"
+        },
+        "generated_projection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "output_id",
+            "path",
+            "emitter"
+          ],
+          "properties": {
+            "output_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "emitter": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "invariants": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governance_engine_shadow_parity"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "governance_engine_shadow_parity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "foundation_ref",
+        "boundary_map_ref",
+        "output_manifest_ref",
+        "validator_script",
+        "primary_surface_path",
+        "required_checks",
+        "cutover_gate"
+      ],
+      "properties": {
+        "owner_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "foundation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary_map_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "output_manifest_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validator_script": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_surface_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "command",
+              "success_condition"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "command": {
+                "type": "string",
+                "minLength": 1
+              },
+              "success_condition": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "cutover_gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_clean_checks",
+            "forbidden_conditions"
+          ],
+          "properties": {
+            "required_clean_checks": {
+              "$ref": "#/$defs/stringList"
+            },
+            "forbidden_conditions": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -76,6 +76,9 @@ def main() -> int:
         "skills": repo_root / "contracts/skills.yaml",
         "governance_engine_foundation": repo_root / "contracts/governance-engine-foundation.yaml",
         "governance_engine_output_manifest": repo_root / "contracts/governance-engine-output-manifest.yaml",
+        "governance_engine_boundary_map": repo_root / "contracts/governance-engine-boundary-map.yaml",
+        "governance_engine_shadow_parity": repo_root / "contracts/governance-engine-shadow-parity.yaml",
+        "governance_engine_extraction_gate": repo_root / "contracts/governance-engine-extraction-gate.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -111,6 +114,15 @@ def main() -> int:
     ]
     governance_engine_output_manifest = contracts["governance_engine_output_manifest"][
         "governance_engine_output_manifest"
+    ]
+    governance_engine_boundary_map = contracts["governance_engine_boundary_map"][
+        "governance_engine_boundary_map"
+    ]
+    governance_engine_shadow_parity = contracts["governance_engine_shadow_parity"][
+        "governance_engine_shadow_parity"
+    ]
+    governance_engine_extraction_gate = contracts["governance_engine_extraction_gate"][
+        "governance_engine_extraction_gate"
     ]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
@@ -273,6 +285,13 @@ def main() -> int:
             "contracts/governance-engine-foundation.yaml: tenant_instance_surfaces must be exactly "
             + ", ".join(sorted(expected_tenant_surfaces))
         )
+    if (
+        governance_engine_foundation["compatibility_boundary"]["boundary_map_ref"]
+        != "contracts/governance-engine-boundary-map.yaml"
+    ):
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: compatibility_boundary.boundary_map_ref must point to contracts/governance-engine-boundary-map.yaml"
+        )
     expected_stable_entrypoints = {
         "workspace-root/AGENTS.md",
         "workspace-root/README.md",
@@ -289,6 +308,13 @@ def main() -> int:
         errors.append(
             "contracts/governance-engine-foundation.yaml: compatibility_boundary.stable_entrypoints must be exactly "
             + ", ".join(sorted(expected_stable_entrypoints))
+        )
+    if (
+        governance_engine_foundation["shadow_parity"]["contract_ref"]
+        != "contracts/governance-engine-shadow-parity.yaml"
+    ):
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: shadow_parity.contract_ref must point to contracts/governance-engine-shadow-parity.yaml"
         )
     if governance_engine_foundation["packaging_model"]["central_repo"] != "workspace-governance":
         errors.append(
@@ -397,6 +423,7 @@ def main() -> int:
             ("resolved_owner_map", "generated/resolved-owner-map.json", "json"),
             ("resolved_dependency_graph", "generated/resolved-dependency-graph.json", "json"),
             ("stale_content_rules", "generated/stale-content-rules.json", "json"),
+            ("governance_engine_boundary_map", "generated/governance-engine-boundary-map.json", "json"),
         }
         actual_generated_outputs = {
             (entry["id"], entry.get("emitted_path"), entry.get("format"))
@@ -406,6 +433,147 @@ def main() -> int:
             errors.append(
                 "contracts/governance-engine-output-manifest.yaml: generated-governance-artifacts outputs must match the current generated artifact set"
             )
+    if governance_engine_boundary_map["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: owner_repo must be 'workspace-governance'"
+        )
+    if set(governance_engine_boundary_map["authoring_paths"]) != {
+        "workspace-root/",
+        "contracts/",
+        "skills-src/",
+        "scripts/",
+    }:
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: authoring_paths must be exactly workspace-root/, contracts/, skills-src/, scripts/"
+        )
+    if set(governance_engine_boundary_map["generated_paths"]) != {"generated/"}:
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: generated_paths must be exactly generated/"
+        )
+    expected_tenant_instance_paths = {
+        "contracts/intake-register.yaml",
+        "contracts/developer-integration-profiles.yaml",
+        "contracts/exceptions.yaml",
+    }
+    if set(governance_engine_boundary_map["tenant_instance_paths"]) != expected_tenant_instance_paths:
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: tenant_instance_paths must be exactly "
+            + ", ".join(sorted(expected_tenant_instance_paths))
+        )
+    if set(governance_engine_boundary_map["external_instance_surfaces"]) != {
+        "owner-repo primary operator surfaces",
+        "security-architecture review artifacts",
+    }:
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: external_instance_surfaces must be exactly owner-repo primary operator surfaces, security-architecture review artifacts"
+        )
+    expected_live_materialized_outputs = {
+        "ARCHITECTURE.md",
+        "README.md",
+        "AGENTS.md",
+        "_workspace_tools/audit_workspace_layout.py",
+        "~/.codex/skills/",
+    }
+    if set(governance_engine_boundary_map["live_materialized_outputs"]) != expected_live_materialized_outputs:
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: live_materialized_outputs must be exactly "
+            + ", ".join(sorted(expected_live_materialized_outputs))
+        )
+    projection = governance_engine_boundary_map["generated_projection"]
+    if projection["output_id"] != "governance_engine_boundary_map":
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: generated_projection.output_id must be governance_engine_boundary_map"
+        )
+    if projection["path"] != "generated/governance-engine-boundary-map.json":
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: generated_projection.path must be generated/governance-engine-boundary-map.json"
+        )
+    if projection["emitter"] != "scripts/validate_cross_repo_truth.py":
+        errors.append(
+            "contracts/governance-engine-boundary-map.yaml: generated_projection.emitter must be scripts/validate_cross_repo_truth.py"
+        )
+    if governance_engine_shadow_parity["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: owner_repo must be 'workspace-governance'"
+        )
+    expected_shadow_parity_refs = {
+        "foundation_ref": "contracts/governance-engine-foundation.yaml",
+        "boundary_map_ref": "contracts/governance-engine-boundary-map.yaml",
+        "output_manifest_ref": "contracts/governance-engine-output-manifest.yaml",
+        "validator_script": "scripts/validate_governance_engine_shadow_parity.py",
+        "primary_surface_path": "docs/governance-engine-foundation.md",
+    }
+    for key, expected in expected_shadow_parity_refs.items():
+        if governance_engine_shadow_parity[key] != expected:
+            errors.append(
+                f"contracts/governance-engine-shadow-parity.yaml: {key} must be {expected!r}"
+            )
+    expected_shadow_check_commands = {
+        "workspace-root-sync": "python3 scripts/materialize_governance_engine_outputs.py workspace-root --check",
+        "installed-skills": "python3 scripts/materialize_governance_engine_outputs.py skills --check",
+        "generated-governance-artifacts": "python3 scripts/materialize_governance_engine_outputs.py generated --check",
+        "compatibility-entrypoints": "python3 scripts/validate_governance_engine_shadow_parity.py",
+    }
+    actual_shadow_checks = {
+        entry["id"]: entry["command"]
+        for entry in governance_engine_shadow_parity["required_checks"]
+    }
+    if actual_shadow_checks != expected_shadow_check_commands:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: required_checks must define the current workspace-root, installed-skills, generated-governance-artifacts, and compatibility-entrypoints commands"
+        )
+    expected_cutover_checks = {
+        "workspace-root-sync",
+        "installed-skills",
+        "generated-governance-artifacts",
+        "compatibility-entrypoints",
+    }
+    if set(governance_engine_shadow_parity["cutover_gate"]["required_clean_checks"]) != expected_cutover_checks:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.required_clean_checks must be exactly "
+            + ", ".join(sorted(expected_cutover_checks))
+        )
+    expected_forbidden_conditions = {
+        "duplicated workspace control-plane truth in repo-local copies",
+        "stale live skill installs or missing managed skill manifest",
+        "stale generated boundary projection",
+        "missing stable compatibility entrypoints",
+    }
+    if set(governance_engine_shadow_parity["cutover_gate"]["forbidden_conditions"]) != expected_forbidden_conditions:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.forbidden_conditions must be exactly "
+            + ", ".join(sorted(expected_forbidden_conditions))
+        )
+    if governance_engine_extraction_gate["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: owner_repo must be 'workspace-governance'"
+        )
+    expected_extraction_refs = {
+        "foundation_ref": "contracts/governance-engine-foundation.yaml",
+        "shadow_parity_ref": "contracts/governance-engine-shadow-parity.yaml",
+        "boundary_map_ref": "contracts/governance-engine-boundary-map.yaml",
+        "primary_surface_path": "docs/governance-engine-foundation.md",
+        "security_review_ref": "security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md",
+    }
+    for key, expected in expected_extraction_refs.items():
+        if governance_engine_extraction_gate[key] != expected:
+            errors.append(
+                f"contracts/governance-engine-extraction-gate.yaml: {key} must be {expected!r}"
+            )
+    if set(governance_engine_extraction_gate["deferred_follow_on_refs"]) != {
+        "openproject://work_packages/247",
+        "openproject://work_packages/251",
+    }:
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: deferred_follow_on_refs must be exactly openproject://work_packages/247 and openproject://work_packages/251"
+        )
+    if (
+        governance_engine_foundation["runtime_foundation"]["extraction_gate_ref"]
+        != "contracts/governance-engine-extraction-gate.yaml"
+    ):
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.extraction_gate_ref must point to contracts/governance-engine-extraction-gate.yaml"
+        )
     expected_instruction_bundle_authoring = {
         "AGENTS.md",
         "skills-src/",
@@ -475,6 +643,7 @@ def main() -> int:
     required_cross_repo_refs = {
         model_access_and_audit["profile_registry_ref"],
         *model_access_and_audit["standards_refs"],
+        governance_engine_extraction_gate["security_review_ref"],
     }
     if workspace_has_sibling_repos:
         for rel_path in sorted(required_cross_repo_refs):

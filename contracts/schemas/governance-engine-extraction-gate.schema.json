@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governance_engine_extraction_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "governance_engine_extraction_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "foundation_ref",
+        "shadow_parity_ref",
+        "boundary_map_ref",
+        "security_review_ref",
+        "primary_surface_path",
+        "extraction_decision_criteria",
+        "extraction_non_goals",
+        "bounded_runtime_readiness_prerequisites",
+        "deferred_follow_on_refs"
+      ],
+      "properties": {
+        "owner_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "foundation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shadow_parity_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary_map_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "security_review_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_surface_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extraction_decision_criteria": {
+          "$ref": "#/$defs/stringList"
+        },
+        "extraction_non_goals": {
+          "$ref": "#/$defs/stringList"
+        },
+        "bounded_runtime_readiness_prerequisites": {
+          "$ref": "#/$defs/stringList"
+        },
+        "deferred_follow_on_refs": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -340,6 +340,12 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
     products = contracts["products"]["products"]
     components = contracts["components"]["components"]
     skills = contracts["skills"]["skills"]
+    boundary_map = contracts["governance_engine_boundary_map"][
+        "governance_engine_boundary_map"
+    ]
+    output_manifest = contracts["governance_engine_output_manifest"][
+        "governance_engine_output_manifest"
+    ]
 
     dependency_edges: list[dict[str, str]] = []
     for repo_name, payload in repos.items():
@@ -386,6 +392,28 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
                     }
                 )
 
+    emitted_outputs: list[dict[str, object]] = []
+    for family in output_manifest["emission_families"]:
+        outputs = family.get("outputs") or []
+        if outputs:
+            emitted_outputs.append(
+                {
+                    "family_id": family["id"],
+                    "boundary": family["boundary"],
+                    "outputs": [entry["emitted_path"] for entry in outputs],
+                }
+            )
+            continue
+        emitted_outputs.append(
+            {
+                "family_id": family["id"],
+                "boundary": family["boundary"],
+                "target_root_default": family.get("target_root_default"),
+                "emitted_path_template": family.get("emitted_path_template"),
+                "managed_manifest_filename": family.get("managed_manifest_filename"),
+            }
+        )
+
     return {
         "system_map": {
             "schema_version": contracts["version"]["schema_version"],
@@ -406,6 +434,16 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
             "edges": dependency_edges,
         },
         "stale_content_rules": stale_rules,
+        "governance_engine_boundary_map": {
+            "schema_version": contracts["version"]["schema_version"],
+            "authoring_paths": boundary_map["authoring_paths"],
+            "generated_paths": boundary_map["generated_paths"],
+            "tenant_instance_paths": boundary_map["tenant_instance_paths"],
+            "external_instance_surfaces": boundary_map["external_instance_surfaces"],
+            "live_materialized_outputs": boundary_map["live_materialized_outputs"],
+            "emitted_output_families": emitted_outputs,
+            "invariants": boundary_map["invariants"],
+        },
     }
 
 

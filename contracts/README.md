@@ -78,10 +78,21 @@ Use these contracts to declare:
   - machine-readable definition of the governance-engine versus tenant-instance
     boundary, compatibility boundary, packaging model, and governed AI runtime
     sequencing prerequisites
+- `governance-engine-boundary-map.yaml`
+  - concrete path-level classification of engine-owned authoring surfaces,
+    tenant-instance state, referenced external surfaces, and the generated
+    boundary projection used during parity work
 - `governance-engine-output-manifest.yaml`
   - machine-readable declaration of which outputs are materialized into the
     live workspace, live Codex skill root, and `generated/`, plus the emitter
     script that owns each output family
+- `governance-engine-shadow-parity.yaml`
+  - fail-closed parity checks and cutover gate for workspace-root, installed
+    skills, generated artifacts, and stable entrypoints during integrated
+    governance-engine work
+- `governance-engine-extraction-gate.yaml`
+  - explicit extraction decision criteria, non-goals, and bounded runtime
+    readiness prerequisites after parity is proven
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility
