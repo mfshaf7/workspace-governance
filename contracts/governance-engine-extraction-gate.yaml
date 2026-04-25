@@ -6,12 +6,58 @@ governance_engine_extraction_gate:
   boundary_map_ref: contracts/governance-engine-boundary-map.yaml
   security_review_ref: security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md
   primary_surface_path: docs/governance-engine-foundation.md
-  extraction_decision_criteria:
-    - shadow parity validator reads clean in the active workspace
-    - generated boundary projection is current and explicit
-    - stable operator entrypoints remain unchanged or compatibility-shimmed
-    - security delta review is current for the parity and extraction boundary
-    - repo-local validators do not redefine governed AI model-access policy
+  extraction_decision:
+    default_outcome: retain-integrated-governance-engine
+    approved_outcome: approve-standalone-governance-engine-extraction
+    hard_gate_mode: all_must_pass
+    extraction_need_signal_threshold: all_listed_signals_required
+    decision_record_requirements:
+      - record the retain-versus-extract outcome on the PI objective before extraction work begins
+      - cite the current parity and security evidence in the decision record
+      - "keep bounded runtime activation deferred to epic #251 even when extraction is approved"
+  hard_gate_checks:
+    - gate_id: shadow-parity-clean
+      threshold: active workspace shadow parity validator reads clean and required generated outputs are current
+      evidence_sources:
+        - contracts/governance-engine-shadow-parity.yaml
+        - scripts/validate_governance_engine_shadow_parity.py
+    - gate_id: boundary-projection-current
+      threshold: generated boundary projection matches the current engine-versus-tenant split
+      evidence_sources:
+        - contracts/governance-engine-boundary-map.yaml
+        - generated/governance-engine-boundary-map.json
+        - scripts/validate_cross_repo_truth.py
+    - gate_id: stable-operator-entrypoints
+      threshold: stable operator entrypoints remain unchanged or explicitly compatibility-shimmed
+      evidence_sources:
+        - contracts/governance-engine-foundation.yaml
+        - docs/governance-engine-foundation.md
+        - scripts/validate_contracts.py
+    - gate_id: security-delta-review-current
+      threshold: current security review explicitly covers the parity boundary and proposed extraction delta
+      evidence_sources:
+        - security-architecture/docs/reviews/platform/2026-04-25-governance-engine-parity-extraction-and-runtime-readiness.md
+    - gate_id: governed-policy-stays-central
+      threshold: repo-local validators and wiring do not redefine governed AI model-access policy
+      evidence_sources:
+        - contracts/governance-engine-foundation.yaml
+        - scripts/validate_contracts.py
+  extraction_need_signals:
+    - signal_id: multi-instance-consumer-demand
+      threshold: more than one governed workspace or tenant-instance consumer requires the same engine authoring layer
+      evidence_sources:
+        - contracts/governance-engine-foundation.yaml
+        - contracts/governance-engine-boundary-map.yaml
+    - signal_id: standalone-release-versioning-need
+      threshold: standalone versioning or release cadence is required beyond the integrated workspace-governance repo
+      evidence_sources:
+        - docs/governance-engine-foundation.md
+        - contracts/governance-engine-output-manifest.yaml
+    - signal_id: bounded-package-and-consumption-contract-ready
+      threshold: package installation and tenant-consumption contracts can be expressed without breaking stable operator entrypoints
+      evidence_sources:
+        - contracts/governance-engine-output-manifest.yaml
+        - contracts/governance-engine-boundary-map.yaml
   extraction_non_goals:
     - extracting a standalone governance-engine repo before parity proof is clean
     - introducing a central always-on governance-engine service during parity work

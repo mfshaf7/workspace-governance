@@ -91,8 +91,9 @@ Use these contracts to declare:
     skills, generated artifacts, and stable entrypoints during integrated
     governance-engine work
 - `governance-engine-extraction-gate.yaml`
-  - explicit extraction decision criteria, non-goals, and bounded runtime
-    readiness prerequisites after parity is proven
+  - threshold-based extraction decision contract with explicit hard gates,
+    extraction-need signals, non-goals, and bounded runtime readiness
+    prerequisites after parity is proven
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility

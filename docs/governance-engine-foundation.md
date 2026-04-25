@@ -246,12 +246,52 @@ The machine-readable gate is:
 
 - `contracts/governance-engine-extraction-gate.yaml`
 
-Extraction remains gated on:
+The extraction decision is no longer just a prose checklist. It now has:
 
-- proven shadow parity in the active workspace
-- an explicit generated boundary projection
-- stable operator entrypoints
-- a current security delta review for the parity and extraction boundary
+- a default outcome:
+  - `retain-integrated-governance-engine`
+- one approval outcome:
+  - `approve-standalone-governance-engine-extraction`
+- a hard-gate rule:
+  - every listed hard gate must pass
+- an extraction-need rule:
+  - every listed need signal must be satisfied before extraction is approved
+
+Hard gates:
+
+- `shadow-parity-clean`
+  - active workspace shadow parity validator reads clean and required generated
+    outputs are current
+- `boundary-projection-current`
+  - generated boundary projection matches the current engine-versus-tenant split
+- `stable-operator-entrypoints`
+  - stable operator entrypoints remain unchanged or are explicitly
+    compatibility-shimmed
+- `security-delta-review-current`
+  - the current security review explicitly covers the parity boundary and the
+    proposed extraction delta
+- `governed-policy-stays-central`
+  - repo-local validators and wiring do not redefine governed AI model-access
+    policy
+
+Extraction-need signals:
+
+- `multi-instance-consumer-demand`
+  - more than one governed workspace or tenant-instance consumer requires the
+    same engine authoring layer
+- `standalone-release-versioning-need`
+  - standalone versioning or release cadence is required beyond the integrated
+    `workspace-governance` repo
+- `bounded-package-and-consumption-contract-ready`
+  - package installation and tenant-consumption contracts can be expressed
+    without breaking stable operator entrypoints
+
+That means extraction should remain retained-by-default unless:
+
+- every hard gate passes
+- every extraction-need signal is satisfied
+- the retain-versus-extract decision is explicitly recorded on the PI
+  objective with parity and security evidence cited
 
 Explicit non-goals during the parity epic:
 
