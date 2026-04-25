@@ -1,0 +1,48 @@
+schema_version: 1
+id: 2026-04-25-art-complete-probe-note-applied-null-contract-drift
+title: Allow nullable note_applied in ART completion probe responses
+recorded_on: '2026-04-25'
+owner_repo: operator-orchestration-service
+summary: The supported ART completion probe now repeatedly reports a contract failure
+  even when the live broker completion write succeeds because the response schema
+  still requires note_applied to be a string while the real route returns null when
+  no extra operator note is applied.
+regression_of: null
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'During live closeout of ART work items #331, #320, and #332, POST /v1/delivery-work-items/{work_item_id}/complete
+    successfully persisted done state and valid completion evidence, but npm run api:probe
+    still failed because the documented DeliveryWorkItemCompleteResponse schema expects
+    note_applied to be a string. The repeated mismatch forces manual readback to prove
+    success and makes the supported closeout probe look broken in the same session.'
+  source_refs:
+  - 'conversation: repeated api:probe complete calls for work-item-331, work-item-320,
+    and work-item-332 failed schema validation on note_applied null after successful
+    live completion writes'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-04-26'
+  note: Align the complete-route response contract and probe expectations so successful
+    completion writes do not surface as false failures.
