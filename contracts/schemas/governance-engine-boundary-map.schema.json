@@ -20,6 +20,8 @@
         "tenant_instance_paths",
         "external_instance_surfaces",
         "live_materialized_outputs",
+        "current_coupling_points",
+        "standalone_packaging_prerequisites",
         "generated_projection",
         "invariants"
       ],
@@ -42,6 +44,20 @@
         },
         "live_materialized_outputs": {
           "$ref": "#/$defs/stringList"
+        },
+        "current_coupling_points": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/couplingPoint"
+          }
+        },
+        "standalone_packaging_prerequisites": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/packagingPrerequisite"
+          }
         },
         "generated_projection": {
           "type": "object",
@@ -79,6 +95,50 @@
       "items": {
         "type": "string",
         "minLength": 1
+      }
+    },
+    "couplingPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coupling_id",
+        "description",
+        "impacted_surfaces"
+      ],
+      "properties": {
+        "coupling_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impacted_surfaces": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "packagingPrerequisite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prerequisite_id",
+        "threshold",
+        "evidence_surfaces"
+      ],
+      "properties": {
+        "prerequisite_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_surfaces": {
+          "$ref": "#/$defs/stringList"
+        }
       }
     }
   }

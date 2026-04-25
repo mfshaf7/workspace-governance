@@ -441,6 +441,10 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
             "tenant_instance_paths": boundary_map["tenant_instance_paths"],
             "external_instance_surfaces": boundary_map["external_instance_surfaces"],
             "live_materialized_outputs": boundary_map["live_materialized_outputs"],
+            "current_coupling_points": boundary_map["current_coupling_points"],
+            "standalone_packaging_prerequisites": boundary_map[
+                "standalone_packaging_prerequisites"
+            ],
             "emitted_output_families": emitted_outputs,
             "invariants": boundary_map["invariants"],
         },
