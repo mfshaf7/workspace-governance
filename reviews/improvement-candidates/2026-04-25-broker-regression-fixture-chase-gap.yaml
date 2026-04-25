@@ -1,0 +1,107 @@
+schema_version: 1
+id: 2026-04-25-broker-regression-fixture-chase-gap
+title: Stop regression proof from drifting into repeated fixture chasing after the real broker bug is already isolated
+recorded_on: 2026-04-25
+owner_repo: workspace-governance
+summary: >
+  While fixing a broker work-item update bug, the production cause was found
+  correctly, but the proof path drifted back into repeated integration-fixture
+  edits instead of locking the smallest faithful failing case first. That
+  repeated the same failure class the operator called out: patching around
+  symptoms instead of switching to the narrowest valid regression seam once the
+  real bug was known.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - workspace-governance
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: operator-repeated-failure-callout
+    title: Operator called the repeated regression chase out directly
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+      - missing-deterministic-test-seam
+    finding: >
+      The operator explicitly identified the behavior as another repeated
+      failure while the validation path was still being patched incrementally.
+    source_refs:
+      - chat://2026-04-25/repeated-regression-chase
+  - id: proof-scope-did-not-collapse
+    title: Validation stayed broad after the root bug was already isolated
+    trigger: late-root-cause-discovery
+    failure_classes:
+      - diagnostic-ordering-miss
+    finding: >
+      Once the implementation bug was isolated, the proof path should have
+      collapsed to the smallest helper seam first before re-expanding to larger
+      integration coverage.
+    source_refs:
+      - repo://operator-orchestration-service/src/openproject-client.js
+      - repo://operator-orchestration-service/test/openproject-client.test.js
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/self-improvement-policy.yaml
+      owner_repo: workspace-governance
+      note: Adds the live ART mutation proof gap as a mandatory self-improvement signal.
+    - type: workflow
+      path: workspace-governance/docs/self-improvement-escalation.md
+      owner_repo: workspace-governance
+      note: Makes ART blocker honesty and stop-work behavior explicit before adjacent mutation continues.
+    - type: skill
+      path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+      owner_repo: workspace-governance
+      note: Instructs future ART sessions to record blockers through the bounded blocker workflow instead of continuing mutation around them.
+    - type: contract
+      path: workspace-governance/contracts/delivery-art-operator-path.yaml
+      owner_repo: workspace-governance
+      note: Registers the blocker workflow as a first-class guided write intent.
+    - type: validator
+      path: workspace-governance/scripts/validate_cross_repo_truth.py
+      owner_repo: workspace-governance
+      note: Fails if the platform blocker workflow contract and broker mirror drift.
+    - type: contract
+      path: platform-engineering/products/openproject/delivery-art-blocker-workflow.json
+      owner_repo: platform-engineering
+      note: Defines the canonical blocker trigger, response, and follow-up doctrine.
+    - type: runbook
+      path: platform-engineering/products/openproject/runbooks/manage-delivery-blockers.md
+      owner_repo: platform-engineering
+      note: Provides the primary operator checklist for when to record a blocker and when to open a linked Defect or Risk.
+    - type: validator
+      path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+      owner_repo: platform-engineering
+      note: Detects blocked items missing blocker records and non-blocked items retaining active blocker state.
+    - type: contract
+      path: operator-orchestration-service/src/delivery-blocker-workflow.json
+      owner_repo: operator-orchestration-service
+      note: Mirrors the canonical blocker doctrine inside the broker.
+    - type: workflow
+      path: operator-orchestration-service/src/openproject-client.js
+      owner_repo: operator-orchestration-service
+      note: Prevents generic create and update paths from entering or clearing blocked state outside the bounded blocker workflow.
+    - type: test
+      path: operator-orchestration-service/test/openproject-client.test.js
+      owner_repo: operator-orchestration-service
+      note: Proves the blocker workflow remains bounded and generic ART mutation cannot bypass it.
+    - type: doc
+      path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+      owner_repo: operator-orchestration-service
+      note: Documents the blocker workflow as the only supported path for blocked status transitions.
+  note: >
+    The blocker doctrine is now first-class across skill, contract, broker enforcement,
+    quality validation, and operator runbook surfaces. The repeated regression-chase
+    failure is no longer left as a conversational warning.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

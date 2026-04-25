@@ -32,6 +32,10 @@ delivery_art_operator_path:
       route: GET /v1/delivery-work-items/{work_item_id}/continuation-context
       purpose: resume one concrete work item before repo implementation work
   guided_write_intents:
+    - id: item-blocker
+      cli: npm run art -- item blocker <work-item-id> <payload.json>
+      route: POST /v1/delivery-work-items/{work_item_id}/blocker
+      purpose: record or clear the exact blocker on one active work item through the bounded blocker workflow
     - id: planning-repair
       cli: npm run art -- initiative planning-repair <delivery-id> <payload.json>
       route: POST /v1/delivery-initiatives/{delivery_id}/plan/repair
@@ -91,6 +95,8 @@ delivery_art_operator_path:
       outcome: operator can inspect initiative quality and review readiness without Rails-admin access
     - id: one-command-planning-repair
       outcome: PI retarget and decommit work no longer require ad hoc multi-write repair
+    - id: one-command-blocker
+      outcome: active blockers can be recorded and cleared through one bounded operator path instead of chat memory or generic status edits
     - id: one-command-item-close
       outcome: item completion and stale-open closeout each have one bounded operator path
     - id: one-command-initiative-close

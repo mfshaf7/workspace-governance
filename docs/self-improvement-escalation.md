@@ -18,6 +18,8 @@ Use this workflow when any of these happen:
 - the same workflow needs another corrective follow-up in the same task or
   session
 - a validator, quality gate, or structured read model exposes workflow drift
+- a live ART mutation, closeout, or review seam fails and the exact blocker is
+  not yet recorded in ART
 - a simpler root cause is discovered late after deeper analysis had already
   expanded
 - delegated execution crosses packet scope, write scope, live-control, or
@@ -79,6 +81,7 @@ treated as closed and has clearly regressed again.
 - `active-work-transition-incomplete`
 - `repeated-corrective-follow-up`
 - `machine-visible-workflow-drift`
+- `live-art-mutation-proof-gap`
 - `late-root-cause-discovery`
 - `delegated-execution-control-breach`
 
@@ -91,6 +94,20 @@ After the candidate exists:
 3. get operator approval for that fix
 4. land the control change
 5. close through an after-action when warranted
+
+## ART Blocker Honesty
+
+When the signal is an active ART blocker rather than only a workflow lesson:
+
+1. stop adjacent ART mutation on the same initiative
+2. state the exact blocked step and exact blocker
+3. record the blocker in ART on the affected work item
+4. open or update a real `Defect` when the blocker is caused by a live system
+   or control bug
+5. open or update a `Risk` when the exposure is broader than one blocked item
+
+Do not keep the blocker only in chat, only in a candidate record, or only in a
+status label.
 
 ## Guardrails
 

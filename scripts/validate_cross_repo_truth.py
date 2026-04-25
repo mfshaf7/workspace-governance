@@ -61,6 +61,13 @@ DELIVERY_ART_INITIATIVE_REVIEW_WORKFLOW_CONTRACT_PATHS = {
     ),
 }
 
+DELIVERY_ART_BLOCKER_WORKFLOW_CONTRACT_PATHS = {
+    "platform": Path(
+        "platform-engineering/products/openproject/delivery-art-blocker-workflow.json"
+    ),
+    "broker": Path("operator-orchestration-service/src/delivery-blocker-workflow.json"),
+}
+
 DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH = Path(
     "workspace-governance/contracts/delivery-art-operator-path.yaml"
 )
@@ -219,6 +226,36 @@ def validate_delivery_art_initiative_review_workflow_contract(
     if platform_contract != broker_contract:
         errors.append(
             "delivery-art initiative-review workflow drift: "
+            f"{resolved_paths['platform']} does not match {resolved_paths['broker']}"
+        )
+
+
+def validate_delivery_art_blocker_workflow_contract(
+    workspace_root: Path,
+    errors: list[str],
+) -> None:
+    resolved_paths = {
+        name: workspace_root / relative_path
+        for name, relative_path in DELIVERY_ART_BLOCKER_WORKFLOW_CONTRACT_PATHS.items()
+    }
+
+    missing = [
+        f"{name}={path}"
+        for name, path in resolved_paths.items()
+        if not path.exists()
+    ]
+    if missing:
+        errors.append(
+            "delivery-art blocker workflow contract missing: "
+            + ", ".join(missing)
+        )
+        return
+
+    platform_contract = load_json(resolved_paths["platform"])
+    broker_contract = load_json(resolved_paths["broker"])
+    if platform_contract != broker_contract:
+        errors.append(
+            "delivery-art blocker workflow drift: "
             f"{resolved_paths['platform']} does not match {resolved_paths['broker']}"
         )
 
@@ -434,6 +471,7 @@ def main() -> int:
     validate_security_architecture_component_coverage(workspace_root, contracts, errors)
     validate_delivery_art_planning_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)
+    validate_delivery_art_blocker_workflow_contract(workspace_root, errors)
     validate_delivery_art_operator_path_contract(workspace_root, repo_root, errors)
 
     for product_name in contracts["products"]["products"]:
