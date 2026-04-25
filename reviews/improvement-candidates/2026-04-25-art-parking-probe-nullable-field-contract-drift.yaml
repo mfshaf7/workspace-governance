@@ -8,7 +8,7 @@ summary: The supported ART parking probe now reports a contract failure on valid
   and `work_item.targetPi` to be strings, even though retire transitions and
   uncommitted backlog work legitimately return `null` for those fields.
 regression_of: null
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -38,10 +38,25 @@ signals:
     schema validation on nullable review_date and targetPi after successful live retire writes'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: doc
+    path: operator-orchestration-service/docs/api/openapi.json
+    owner_repo: operator-orchestration-service
+    note: The documented parking and projection schemas now allow nullable `review_date`, `targetPi`, and note-application fields that the live broker can legitimately return.
+  - type: script
+    path: operator-orchestration-service/scripts/validate_api_docs.mjs
+    owner_repo: operator-orchestration-service
+    note: Fails closed if the documented nullable projection and note-application fields drift back to non-null-only schemas.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Documents that parking responses can return null review dates, null PI commitments, and null note application.
+  - type: doc
+    path: operator-orchestration-service/docs/records/change-records/2026-04-25-art-probe-nullable-response-contracts.md
+    owner_repo: operator-orchestration-service
+    note: Records the nullable-response contract correction and its live probe proof after merge.
+  note: Closed by merged `operator-orchestration-service#61` at commit `ba2f614`.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-04-26'
-  note: Align the parking-route response contract and probe expectations so valid
-    retire responses on backlog-shaped work do not surface as false failures.
+  owner_repo: null
+  due_on: null
+  note: null
