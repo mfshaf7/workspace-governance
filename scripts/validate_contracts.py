@@ -701,6 +701,43 @@ def main() -> int:
             "contracts/governance-engine-extraction-gate.yaml: extraction_decision.decision_record_requirements must be exactly "
             + ", ".join(sorted(expected_decision_record_requirements))
         )
+    current_decision = governance_engine_extraction_gate["current_decision"]
+    recorded_on = current_decision["recorded_on"]
+    if isinstance(recorded_on, date):
+        recorded_on_value = recorded_on.isoformat()
+    elif isinstance(recorded_on, str):
+        recorded_on_value = recorded_on
+    else:
+        recorded_on_value = None
+    if recorded_on_value is None:
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.recorded_on must be an ISO date"
+        )
+    else:
+        try:
+            date.fromisoformat(recorded_on_value)
+        except ValueError:
+            errors.append(
+                "contracts/governance-engine-extraction-gate.yaml: current_decision.recorded_on must be an ISO date"
+            )
+    expected_current_decision_refs = {
+        "recorded_by_work_item_ref": "openproject://work_packages/338",
+        "recorded_from_feature_ref": "openproject://work_packages/339",
+    }
+    for key, expected in expected_current_decision_refs.items():
+        if current_decision[key] != expected:
+            errors.append(
+                f"contracts/governance-engine-extraction-gate.yaml: current_decision.{key} must be {expected!r}"
+            )
+    allowed_current_outcomes = {
+        extraction_decision["default_outcome"],
+        extraction_decision["approved_outcome"],
+    }
+    if current_decision["outcome"] not in allowed_current_outcomes:
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.outcome must be one of "
+            + ", ".join(sorted(allowed_current_outcomes))
+        )
     expected_hard_gate_checks = {
         "shadow-parity-clean": {
             "threshold": "active workspace shadow parity validator reads clean and required generated outputs are current",
@@ -763,6 +800,25 @@ def main() -> int:
                     f"hard_gate_checks[{gate_id}].evidence_sources must be exactly "
                     + ", ".join(sorted(expected["evidence_sources"]))
                 )
+    actual_current_hard_gate_results = {
+        entry["gate_id"]: entry["status"]
+        for entry in current_decision["hard_gate_results"]
+    }
+    if set(actual_current_hard_gate_results) != set(expected_hard_gate_checks):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.hard_gate_results must define the current shadow-parity-clean, boundary-projection-current, stable-operator-entrypoints, security-delta-review-current, and governed-policy-stays-central results"
+        )
+    else:
+        invalid_hard_gate_statuses = {
+            gate_id: status
+            for gate_id, status in actual_current_hard_gate_results.items()
+            if status not in {"passed", "failed"}
+        }
+        for gate_id, status in invalid_hard_gate_statuses.items():
+            errors.append(
+                "contracts/governance-engine-extraction-gate.yaml: "
+                f"current_decision.hard_gate_results[{gate_id}].status must be 'passed' or 'failed', got {status!r}"
+            )
     expected_extraction_need_signals = {
         "multi-instance-consumer-demand": {
             "threshold": "more than one governed workspace or tenant-instance consumer requires the same engine authoring layer",
@@ -810,6 +866,63 @@ def main() -> int:
                     f"extraction_need_signals[{signal_id}].evidence_sources must be exactly "
                     + ", ".join(sorted(expected["evidence_sources"]))
                 )
+    actual_current_signal_results = {
+        entry["signal_id"]: {
+            "status": entry["status"],
+            "rationale": entry["rationale"],
+        }
+        for entry in current_decision["extraction_need_signal_results"]
+    }
+    if set(actual_current_signal_results) != set(expected_extraction_need_signals):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.extraction_need_signal_results must define the current multi-instance-consumer-demand, standalone-release-versioning-need, and bounded-package-and-consumption-contract-ready results"
+        )
+    else:
+        invalid_signal_statuses = {
+            signal_id: entry["status"]
+            for signal_id, entry in actual_current_signal_results.items()
+            if entry["status"] not in {"met", "not_met"}
+        }
+        for signal_id, status in invalid_signal_statuses.items():
+            errors.append(
+                "contracts/governance-engine-extraction-gate.yaml: "
+                f"current_decision.extraction_need_signal_results[{signal_id}].status must be 'met' or 'not_met', got {status!r}"
+            )
+        empty_signal_rationales = [
+            signal_id
+            for signal_id, entry in actual_current_signal_results.items()
+            if not entry["rationale"].strip()
+        ]
+        for signal_id in empty_signal_rationales:
+            errors.append(
+                "contracts/governance-engine-extraction-gate.yaml: "
+                f"current_decision.extraction_need_signal_results[{signal_id}].rationale must be non-empty"
+            )
+    if not current_decision["rationale"].strip():
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.rationale must be non-empty"
+        )
+    if not current_decision["deferred_follow_on_action"].strip():
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision.deferred_follow_on_action must be non-empty"
+        )
+    current_hard_gate_statuses = set(actual_current_hard_gate_results.values())
+    current_signal_statuses = {entry["status"] for entry in actual_current_signal_results.values()}
+    if (
+        current_decision["outcome"] == extraction_decision["approved_outcome"]
+        and (current_hard_gate_statuses != {"passed"} or current_signal_statuses != {"met"})
+    ):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision cannot approve standalone extraction unless every hard gate passes and every extraction-need signal is met"
+        )
+    if (
+        current_decision["outcome"] == extraction_decision["default_outcome"]
+        and current_hard_gate_statuses == {"passed"}
+        and current_signal_statuses == {"met"}
+    ):
+        errors.append(
+            "contracts/governance-engine-extraction-gate.yaml: current_decision cannot retain the integrated engine once every hard gate passes and every extraction-need signal is met"
+        )
     if set(governance_engine_extraction_gate["deferred_follow_on_refs"]) != {
         "openproject://work_packages/247",
         "openproject://work_packages/251",

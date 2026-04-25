@@ -293,6 +293,22 @@ That means extraction should remain retained-by-default unless:
 - the retain-versus-extract decision is explicitly recorded on the PI
   objective with parity and security evidence cited
 
+Current recorded decision:
+
+- recorded on `2026-04-25` from feature `#339` onto PI objective `#338`
+- outcome:
+  - `retain-integrated-governance-engine`
+- why:
+  - the hard gates are currently satisfied, but the extraction-need signals are
+    not all met in the current workspace
+- unmet signals:
+  - `multi-instance-consumer-demand`
+  - `standalone-release-versioning-need`
+  - `bounded-package-and-consumption-contract-ready`
+- effect:
+  - extraction-only follow-on work stays out of active scope until a future
+    decision record changes the outcome
+
 The current coupling inventory and standalone packaging prerequisites are now
 captured in the boundary map instead of being left as inferred architecture
 context:

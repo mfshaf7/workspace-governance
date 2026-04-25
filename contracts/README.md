@@ -93,8 +93,9 @@ Use these contracts to declare:
     governance-engine work
 - `governance-engine-extraction-gate.yaml`
   - threshold-based extraction decision contract with explicit hard gates,
-    extraction-need signals, non-goals, and bounded runtime readiness
-    prerequisites after parity is proven
+    extraction-need signals, the current machine-recorded retain-versus-extract
+    decision, non-goals, and bounded runtime readiness prerequisites after
+    parity is proven
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility

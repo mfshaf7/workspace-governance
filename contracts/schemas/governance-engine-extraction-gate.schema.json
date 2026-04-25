@@ -21,6 +21,7 @@
         "security_review_ref",
         "primary_surface_path",
         "extraction_decision",
+        "current_decision",
         "hard_gate_checks",
         "extraction_need_signals",
         "extraction_non_goals",
@@ -84,6 +85,58 @@
             }
           }
         },
+        "current_decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recorded_on",
+            "recorded_by_work_item_ref",
+            "recorded_from_feature_ref",
+            "outcome",
+            "rationale",
+            "hard_gate_results",
+            "extraction_need_signal_results",
+            "deferred_follow_on_action"
+          ],
+          "properties": {
+            "recorded_on": {
+              "type": "string",
+              "format": "date"
+            },
+            "recorded_by_work_item_ref": {
+              "$ref": "#/$defs/openprojectRef"
+            },
+            "recorded_from_feature_ref": {
+              "$ref": "#/$defs/openprojectRef"
+            },
+            "outcome": {
+              "type": "string",
+              "minLength": 1
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hard_gate_results": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/thresholdResult"
+              }
+            },
+            "extraction_need_signal_results": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/thresholdSignalResult"
+              }
+            },
+            "deferred_follow_on_action": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
         "hard_gate_checks": {
           "type": "array",
           "minItems": 1,
@@ -119,6 +172,10 @@
         "minLength": 1
       }
     },
+    "openprojectRef": {
+      "type": "string",
+      "pattern": "^openproject://work_packages/[0-9]+$"
+    },
     "thresholdCheck": {
       "type": "object",
       "additionalProperties": false,
@@ -141,6 +198,27 @@
         }
       }
     },
+    "thresholdResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_id",
+        "status"
+      ],
+      "properties": {
+        "gate_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        }
+      }
+    },
     "thresholdSignal": {
       "type": "object",
       "additionalProperties": false,
@@ -160,6 +238,32 @@
         },
         "evidence_sources": {
           "$ref": "#/$defs/stringList"
+        }
+      }
+    },
+    "thresholdSignalResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal_id",
+        "status",
+        "rationale"
+      ],
+      "properties": {
+        "signal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "met",
+            "not_met"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }
