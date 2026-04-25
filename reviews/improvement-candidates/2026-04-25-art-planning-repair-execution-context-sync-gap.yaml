@@ -1,0 +1,61 @@
+schema_version: 1
+id: 2026-04-25-art-planning-repair-execution-context-sync-gap
+title: Planning repair leaves ART execution-context narrative drift that closeout
+  later rejects
+recorded_on: '2026-04-25'
+owner_repo: workspace-governance
+summary: The governed planning-repair path can update machine fields like Delivery
+  Team without synchronizing the Execution Context bullets in the work-item description.
+  Closeout then correctly fails on done-state narrative drift, which means the earlier
+  workflow left the item in a half-repaired state.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'During #304 closeout, planning-repair successfully filled the missing
+    Delivery Team fields on #313-#315, but the same path did not update the corresponding
+    Execution Context bullets. The broker later rejected completion with done_narrative_invalid
+    because Delivery team and Iteration were missing from the stored narrative. This
+    is a repeated control seam: the guard exists, but one governed mutation path can
+    still create the drift that the later guard blocks.'
+  source_refs:
+  - 'conversation: operator explicitly called out the repeated closeout mistake after
+    #313-#315 failed with done_narrative_invalid following planning-repair'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Synchronizes the Execution Context section against the stored owner, parent, delivery-team, and iteration fields before a planning-repair write is patched back into OpenProject.
+  - type: test
+    path: operator-orchestration-service/test/openproject-client.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers planning-repair governance-field restatement so missing Execution Context bullets are repaired before later closeout.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-service.js
+    owner_repo: operator-orchestration-service
+    note: Keeps initiative planning-repair on the governed broker path instead of requiring ad hoc per-item narrative fixes.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Documents planning-repair as the supported posture-correction path instead of leaving closeout to discover narrative drift later.
+  note: Planning repair now re-synchronizes the stored Execution Context whenever governance fields are restated, so the broker no longer leaves a half-repaired item that later closeout rejects.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

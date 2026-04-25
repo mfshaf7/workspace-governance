@@ -1,0 +1,61 @@
+schema_version: 1
+id: 2026-04-25-art-planning-repair-risk-posture-gap
+title: Planning repair accepts risk posture fields at the API edge but drops them
+  before the governed repair write
+recorded_on: '2026-04-25'
+owner_repo: workspace-governance
+summary: The governed ART planning-repair route parses risk posture fields such as
+  Risk Owner, Risk Review Date, Risk Disposition, and ROAM State, but the delivery
+  service did not forward them into the bounded work-item update. Risk correction
+  then fell back to an ad hoc update route instead of staying inside one governed
+  planning-repair workflow.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the risk path also needs a real fix, not another
+    guess.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: During `#304` closeout cleanup, the only way to repair risk item `#317`
+    was a fallback generic update even though the planning-repair API already accepted
+    `risk_owner`, `risk_review_date`, `risk_disposition`, and `roam_state`. The
+    broker service was silently dropping those fields before the bounded repair write,
+    so the advertised governed planning-repair path was incomplete for risks.
+  source_refs:
+  - 'conversation: operator explicitly called out that the risk path also needs a
+    real fix rather than another guessed closeout retry'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-service.js
+    owner_repo: operator-orchestration-service
+    note: Forwards risk posture fields through initiative planning-repair so risk correction stays inside the governed repair workflow.
+  - type: test
+    path: operator-orchestration-service/test/delivery-service.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves that planning-repair now carries `risk_owner`, `risk_review_date`, `risk_disposition`, and `roam_state` into the bounded update path.
+  - type: test
+    path: operator-orchestration-service/test/http.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves that the API edge forwards risk posture fields into the delivery-service repair input.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Makes risk posture correction an explicit supported planning-repair capability on the operator-facing broker contract.
+  note: Risk posture correction no longer requires a fallback generic item update; the governed planning-repair path now carries the full risk posture fields end to end.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

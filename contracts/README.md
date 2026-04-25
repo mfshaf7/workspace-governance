@@ -78,6 +78,10 @@ Use these contracts to declare:
   - machine-readable definition of the governance-engine versus tenant-instance
     boundary, compatibility boundary, packaging model, and governed AI runtime
     sequencing prerequisites
+- `delivery-art-operator-path.yaml`
+  - machine-readable definition of the canonical ART operator entrypoint,
+    read hierarchy, guided closeout intents, fallback model, compatibility
+    boundary, and success metrics
 
 ## Repo Rules
 
