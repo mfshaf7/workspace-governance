@@ -15,6 +15,34 @@ governance_engine_extraction_gate:
       - record the retain-versus-extract outcome on the PI objective before extraction work begins
       - cite the current parity and security evidence in the decision record
       - "keep bounded runtime activation deferred to epic #251 even when extraction is approved"
+  current_decision:
+    recorded_on: "2026-04-25"
+    recorded_by_work_item_ref: openproject://work_packages/338
+    recorded_from_feature_ref: openproject://work_packages/339
+    outcome: retain-integrated-governance-engine
+    rationale: extraction remains retained because the hard gates are satisfied but the required extraction-need signals are not all met in the current workspace
+    hard_gate_results:
+      - gate_id: shadow-parity-clean
+        status: passed
+      - gate_id: boundary-projection-current
+        status: passed
+      - gate_id: stable-operator-entrypoints
+        status: passed
+      - gate_id: security-delta-review-current
+        status: passed
+      - gate_id: governed-policy-stays-central
+        status: passed
+    extraction_need_signal_results:
+      - signal_id: multi-instance-consumer-demand
+        status: not_met
+        rationale: the current governed system still has one integrated workspace control-plane consumer
+      - signal_id: standalone-release-versioning-need
+        status: not_met
+        rationale: no separate release cadence or versioning authority is required beyond workspace-governance today
+      - signal_id: bounded-package-and-consumption-contract-ready
+        status: not_met
+        rationale: package and tenant-consumption follow-on features remain backlog-shaped and intentionally unapproved
+    deferred_follow_on_action: keep conditional extraction-only follow-on features out of active scope until a future decision record changes the outcome
   hard_gate_checks:
     - gate_id: shadow-parity-clean
       threshold: active workspace shadow parity validator reads clean and required generated outputs are current
