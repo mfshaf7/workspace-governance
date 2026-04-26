@@ -70,6 +70,15 @@ DELIVERY_ART_BLOCKER_WORKFLOW_CONTRACT_PATHS = {
     "broker": Path("operator-orchestration-service/src/delivery-blocker-workflow.json"),
 }
 
+DELIVERY_ART_INITIATIVE_LINEAGE_CONTRACT_PATHS = {
+    "platform": Path(
+        "platform-engineering/products/openproject/delivery-art-initiative-lineage.json"
+    ),
+    "broker": Path(
+        "operator-orchestration-service/src/delivery-initiative-lineage.json"
+    ),
+}
+
 DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH = Path(
     "workspace-governance/contracts/delivery-art-operator-path.yaml"
 )
@@ -262,6 +271,36 @@ def validate_delivery_art_blocker_workflow_contract(
         )
 
 
+def validate_delivery_art_initiative_lineage_contract(
+    workspace_root: Path,
+    errors: list[str],
+) -> None:
+    resolved_paths = {
+        name: workspace_root / relative_path
+        for name, relative_path in DELIVERY_ART_INITIATIVE_LINEAGE_CONTRACT_PATHS.items()
+    }
+
+    missing = [
+        f"{name}={path}"
+        for name, path in resolved_paths.items()
+        if not path.exists()
+    ]
+    if missing:
+        errors.append(
+            "delivery-art initiative-lineage contract missing: "
+            + ", ".join(missing)
+        )
+        return
+
+    platform_contract = load_json(resolved_paths["platform"])
+    broker_contract = load_json(resolved_paths["broker"])
+    if platform_contract != broker_contract:
+        errors.append(
+            "delivery-art initiative-lineage drift: "
+            f"{resolved_paths['platform']} does not match {resolved_paths['broker']}"
+        )
+
+
 def validate_delivery_art_operator_path_contract(
     workspace_root: Path,
     repo_root: Path,
@@ -326,6 +365,11 @@ def validate_delivery_art_operator_path_contract(
         ):
             if required not in skill_text:
                 errors.append(f"{skill_path}: missing ART operator-path command {required!r}")
+        for required in ("Initiative Family", "Lineage Role"):
+            if required not in skill_text:
+                errors.append(
+                    f"{skill_path}: missing initiative-lineage reminder {required!r}"
+                )
         forbidden = "default ART reads and writes to direct\n     top-level `k3s kubectl` broker calls against the active profile namespace"
         if forbidden in skill_text:
             errors.append(
@@ -516,6 +560,7 @@ def main() -> int:
     validate_delivery_art_planning_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)
     validate_delivery_art_blocker_workflow_contract(workspace_root, errors)
+    validate_delivery_art_initiative_lineage_contract(workspace_root, errors)
     validate_delivery_art_operator_path_contract(workspace_root, repo_root, errors)
 
     for product_name in contracts["products"]["products"]:
