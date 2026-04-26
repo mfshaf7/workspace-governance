@@ -316,6 +316,12 @@ Only start implementation after that discussion narrows the target design.
 - Prefer the owner that should hold the long-lived contract, not the repo where
   the patch is easiest.
 - PI-committed initiative work must include at least one `PI Objective`.
+- A top-level `Epic` may remain unclassified only while it is the brand-new
+  `new` + `Initiating` shell with blank `Target PI`.
+- Once a top-level `Epic` leaves that shell posture, it must carry
+  `Initiative Family` and `Lineage Role`.
+- Follow-on top-level epics must use `Architecture Anchor Ref` and
+  `Required Upstream Ref` when their lineage role requires them.
 - A backlog `Feature` may stay umbrella-only, but a PI-committed or active
   `Feature` must keep an open `User story` or `Defect` child as its leaf
   front.

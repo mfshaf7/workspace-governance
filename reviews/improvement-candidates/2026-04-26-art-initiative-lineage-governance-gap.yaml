@@ -1,0 +1,115 @@
+schema_version: 1
+id: 2026-04-26-art-initiative-lineage-governance-gap
+title: Add first-class initiative family and lineage governance to the ART
+recorded_on: '2026-04-26'
+owner_repo: workspace-governance
+summary: >-
+  The ART currently holds multiple valid initiative families in one portfolio,
+  but top-level epics do not carry first-class family or lineage metadata.
+  That leaves chains like `#38 -> #227 -> #247 -> #251` dependent on human
+  memory and narrative drift instead of machine-readable control, and makes
+  unrelated ART-control hardening work look like part of the same storyline.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - platform-contract
+  - source-behavior
+  - architecture-shaping
+signals:
+- id: operator-callout-mixed-art-lineage
+  title: The operator explicitly called out mixed unrelated items in ART and asked
+    for a real contract and control model.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - contract-drift
+  finding: >-
+    The cleaned ART portfolio is structurally valid, but it still lacks a
+    machine-readable initiative-family and lineage model. `#38` and its chained
+    follow-ons are only coherent because we remember the story, while ART
+    hardening epics and `#87` share the same portfolio without a first-class
+    family classification or anchor/upstream metadata.
+  source_refs:
+  - >-
+    conversation: operator said ART still mixes unrelated items, asked whether
+    ART is being used wrong, and requested a solid future control/guideline/contract
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/products/openproject/delivery-art-initiative-lineage.json
+    owner_repo: platform-engineering
+    note: Canonical initiative-family and lineage contract now defines the shell
+      exception, allowed family and role values, and the anchor or upstream gate
+      requirements for top-level Epic work.
+  - type: runbook
+    path: platform-engineering/products/openproject/runbooks/manage-delivery-initiative-lineage.md
+    owner_repo: platform-engineering
+    note: Primary operator checklist now explains how to classify new top-level
+      initiatives, anchors, follow-on epics, and family-specific portfolio views.
+  - type: validator
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: ART quality now fails when a top-level epic leaves the new Initiating
+      shell without lineage, when anchor family coherence drifts, or when required
+      upstream refs are missing or invalid.
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_sync_delivery_art_views_runner.rb
+    owner_repo: platform-engineering
+    note: OpenProject now maintains managed Initiative Family queries plus the
+      Initiative Family Board so unrelated top-level stories stop looking like one flat chain.
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_configure_delivery_art_runner.rb
+    owner_repo: platform-engineering
+    note: The canonical ART project model now provisions Initiative Family, Lineage
+      Role, Architecture Anchor Ref, and Required Upstream Ref as Epic-only custom fields.
+  - type: contract
+    path: operator-orchestration-service/src/delivery-initiative-lineage.json
+    owner_repo: operator-orchestration-service
+    note: Broker mirror now matches the canonical lineage doctrine so operator-facing
+      initiative reads and writes use the same family and anchor model.
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: The bounded initiative-governance route now validates lineage state and
+      reference coherence, mirrors it into Execution Context, and exposes family or role
+      counts through workflow health.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: The broker contract now documents initiative_family, lineage_role,
+      architecture_anchor_ref, and required_upstream_ref as the only supported lineage fields.
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: Cross-repo truth now fails if the canonical lineage contract and broker
+      mirror drift or if the project-delivery skill loses its lineage reminders.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Workspace memory now reminds future sessions that top-level Epics may
+      remain unclassified only as brand-new Initiating shells and must carry family or
+      lineage once they move beyond that posture.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: The ART operator skill now teaches initiative-family classification,
+      anchor and upstream lineage, and the shell exception before planning or repair work starts.
+  note: >-
+    Closed by canonical lineage contract, broker enforcement, OpenProject family
+    views, workspace operator-memory updates, and live backfill of all 11
+    top-level ART initiatives including `#87`. The full ART sweep now returns
+    `issue_count = 0` across 313 work packages with truthful roadmap and PM² projection.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

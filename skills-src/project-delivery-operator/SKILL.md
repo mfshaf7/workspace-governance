@@ -194,6 +194,12 @@ Use this skill when a serious initiative is already running inside
      describing it only as a generic planning problem
    - treat backlog as mostly `Epic` + `Feature`
    - do not create `User story` or `Task` forests before PI commitment
+   - a top-level `Epic` may stay unclassified only while it remains the new
+     `Initiating` shell with blank `Target PI`
+   - once a top-level `Epic` leaves that shell posture, it must carry
+     `Initiative Family` and `Lineage Role`
+   - follow-on top-level epics must also carry `Architecture Anchor Ref` and
+     `Required Upstream Ref` when their lineage role requires them
    - a PI-committed initiative must include at least one `PI Objective`
    - a backlog `Feature` may stay umbrella-only, but a PI-committed or active
      `Feature` must keep an open `User story` or `Defect` child as its leaf
