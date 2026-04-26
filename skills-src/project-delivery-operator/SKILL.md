@@ -13,6 +13,7 @@ Use this skill when a serious initiative is already running inside
 - `platform-engineering/products/openproject/AGENTS.md`
 - `platform-engineering/products/openproject/README.md`
 - `platform-engineering/products/openproject/delivery-art-contract.md`
+- `platform-engineering/products/openproject/runbooks/start-delivery-initiative.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md`
 - `operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md`
@@ -178,6 +179,8 @@ Use this skill when a serious initiative is already running inside
    - replan the PI when the active front changes materially
    - when new accepted work enters ART, do not skip straight to deep execution
      structure
+   - for the first accepted-idea shaping decision, start with
+     `platform-engineering/products/openproject/runbooks/start-delivery-initiative.md`
    - the default planning path is:
      1. consume into one `Epic` shell
      2. frame the initiative while it stays backlog-shaped
@@ -186,7 +189,8 @@ Use this skill when a serious initiative is already running inside
      5. create tasks only under active user stories or defects
      6. review carryover and decommit work deliberately at PI boundaries
    - use `platform-engineering/products/openproject/runbooks/plan-delivery-art.md`
-     as the primary checklist surface for those six phases
+     as the detailed checklist surface for those six phases after the initial
+     entry-shape decision is made
    - treat
      `platform-engineering/products/openproject/delivery-art-planning-workflow.json`
      as the canonical machine-readable gate inventory

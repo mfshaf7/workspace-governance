@@ -36,6 +36,11 @@ That means:
 - normal sessions do not start from direct Rails query
 - normal sessions do not start from raw `kubectl exec ... node -e ...`
 
+When accepted work is first entering `Workspace Delivery ART`, use the
+OpenProject start-here planning surface first:
+
+- [platform-engineering OpenProject start-delivery-initiative](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/start-delivery-initiative.md)
+
 ## Read Hierarchy
 
 Use this order:
@@ -136,5 +141,6 @@ The operator path is only considered complete when all of these are true:
 ## Related References
 
 - [operator-orchestration-service delivery operator surface](https://github.com/mfshaf7/operator-orchestration-service/blob/main/docs/operations/delivery-workflow-operator-surface.md)
+- [platform-engineering OpenProject start-delivery-initiative](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/start-delivery-initiative.md)
 - [platform-engineering OpenProject workflow health](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/check-delivery-art-workflow-health.md)
 - [platform-engineering OpenProject admin boundary](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/openproject-platform-admin-surface.md)
