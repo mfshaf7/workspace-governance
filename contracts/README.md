@@ -38,6 +38,10 @@ Use these contracts to declare:
 - `self-improvement-policy.yaml`
   - defines the in-session self-improvement signal catalog, fail-closed runtime
     gate, and primary escalation surface
+- `work-home-routing.yaml`
+  - defines proportional routing for meaningful work, including when to use the
+    ART, owner-repo maintenance, Workspace Proposals, or blocker/risk paths,
+    and how ART records relate to owner-repo change records
 - `developer-integration-profiles.yaml`
   - registers the concrete repo-owned `dev-integration` profiles that may run
     on the shared local-k3s lane, including lifecycle, request record, and

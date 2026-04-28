@@ -60,6 +60,7 @@ def main() -> int:
         "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
+        "work_home_routing": repo_root / "contracts/work-home-routing.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
         "repos": repo_root / "contracts/repos.yaml",
         "products": repo_root / "contracts/products.yaml",
@@ -96,6 +97,7 @@ def main() -> int:
     developer_integration_profiles = contracts["developer_integration_profiles"]
     delegation_policy = contracts["delegation_policy"]
     self_improvement_policy = contracts["self_improvement_policy"]
+    work_home_routing = contracts["work_home_routing"]["work_home_routing"]
     intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
     intake_repos = set(intake_register["repos"].keys())
@@ -128,6 +130,8 @@ def main() -> int:
     self_improvement_governance = self_improvement_policy["governance"]
     self_improvement_runtime_gate = self_improvement_policy["runtime_gate"]
     self_improvement_signal_catalog = self_improvement_policy["signal_catalog"]
+    work_home_classes = work_home_routing["classes"]
+    work_home_routing_homes = set(work_home_routing["routing_homes"].keys())
 
     expected_intake_statuses = {"out-of-scope", "proposed", "admitted"}
     if intake_statuses != expected_intake_statuses:
@@ -251,6 +255,30 @@ def main() -> int:
         errors.append(
             "contracts/delegation-policy.yaml: future_enforcement_boundary.parked_architecture_ref must point to openproject://work_packages/77"
         )
+    if work_home_routing["owner_repo"] != "workspace-governance":
+        errors.append("contracts/work-home-routing.yaml: owner_repo must be 'workspace-governance'")
+    expected_work_home_classes = set(work_home_classes.keys())
+    if set(work_home_routing["classification_order"]) != expected_work_home_classes:
+        errors.append(
+            "contracts/work-home-routing.yaml: classification_order must list every class exactly once"
+        )
+    for class_id, payload in work_home_classes.items():
+        if payload["routing_home"] not in work_home_routing_homes:
+            errors.append(
+                "contracts/work-home-routing.yaml: class "
+                f"{class_id!r} references unknown routing_home {payload['routing_home']!r}"
+            )
+    for example in work_home_routing["examples"]:
+        if example["class"] not in work_home_classes:
+            errors.append(
+                "contracts/work-home-routing.yaml: example scenario "
+                f"{example['scenario']!r} references unknown class {example['class']!r}"
+            )
+        if example["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/work-home-routing.yaml: example scenario "
+                f"{example['scenario']!r} references inactive owner_repo {example['owner_repo']!r}"
+            )
     if governance_engine_foundation["owner_repo"] != "workspace-governance":
         errors.append(
             "contracts/governance-engine-foundation.yaml: owner_repo must be 'workspace-governance'"
