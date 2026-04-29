@@ -38,6 +38,11 @@ workspace root and does not name the owning repo.
      decomposition
    - route repeated workflow misses to improvement candidates
    - classify plumbing by impact, not by name
+   - for source-backed work, choose the Landing Unit separately from the ART
+     item; ART decomposition, Git branches, and completion evidence are not
+     one-to-one
+   - close source-backed ART items only after a finalized Review Packet maps
+     landed or explicitly accepted evidence to those items
 3. If the request depends on fresh workspace-level truth, run
    `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
    before relying on the local control-plane docs.

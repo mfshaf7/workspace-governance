@@ -41,7 +41,8 @@ Use these contracts to declare:
 - `work-home-routing.yaml`
   - defines proportional routing for meaningful work, including when to use the
     ART, owner-repo maintenance, Workspace Proposals, or blocker/risk paths,
-    and how ART records relate to owner-repo change records
+    how ART records relate to owner-repo change records, and how ART items map
+    to Landing Units and Review Packets
 - `developer-integration-profiles.yaml`
   - registers the concrete repo-owned `dev-integration` profiles that may run
     on the shared local-k3s lane, including lifecycle, request record, and
