@@ -125,6 +125,110 @@ work_home_routing:
     owner_repo_change_record: Implementation, runtime, security, or behavior evidence.
     improvement_candidate: Repeated workflow miss or control failure signal.
     handoff: Session continuity when meaningful pending work remains.
+  reconciliation_policy:
+    principles:
+      - Preserve important work; do not discard a useful change solely because
+        the work-home gate was missed.
+      - Do not fabricate history; late reconciliation records when the miss was
+        discovered and which evidence proves the actual work.
+      - Use the same classification order after discovery that would have been
+        used before execution.
+      - Reconcile before adjacent planned ART mutation continues when the
+        skipped classification affects the active initiative, blocker state,
+        risk state, security posture, or completion evidence.
+    backfill_scope:
+      - Backfill is selective and evidence-driven, not a mass recreation of all
+        historical work as ART items.
+      - Mandatory backfill covers active initiative work, active blockers or
+        risks, source or runtime changes needed for current completion, and
+        repeated control misses.
+      - Closed historical work is backfilled only when it is needed to explain
+        current state, security evidence, auditability, or an active follow-up.
+    triggers:
+      - A human operator performs important plumbing or runtime repair without
+        creating the expected ART, proposal, blocker, risk, or owner-repo
+        record first.
+      - An agent discovers meaningful work during implementation that is not
+        covered by the active item.
+      - A merged PR, local branch, live environment change, or generated
+        artifact is found without the expected work-state home.
+      - A repeated workflow miss shows that the classification gate was skipped.
+    resolution_paths:
+      attach_to_active_item:
+        description: Record the work as part of the current ART item's evidence.
+        use_when: >
+          The work is genuinely same-slice, shares the same owner and validation
+          boundary, and does not change scope, risk, or review ownership.
+        required_evidence:
+          - active ART item reference
+          - change summary
+          - commit, PR, live check, or file reference proving the work
+          - statement that no separate owner, risk, or validation boundary exists
+      create_compensating_art_item:
+        description: Create or use a new ART item after discovery.
+        use_when: >
+          The work has independent scope, owner repo, review path, blocker,
+          risk, validation proof, or completion evidence.
+        required_evidence:
+          - parent initiative or feature reference
+          - owner repo and delivery team
+          - reason the work was not covered by the active item
+          - completion or remaining-work evidence
+      route_owner_repo_maintenance:
+        description: Keep the work in the owner repo without creating ART noise.
+        use_when: >
+          The work is outside accepted ART scope and does not affect shared
+          workflow, platform, security, or workspace governance behavior.
+        required_evidence:
+          - owner repo branch or PR reference
+          - validation evidence
+          - statement that the work is outside accepted initiative scope
+      create_workspace_proposal:
+        description: Route the discovered work to intake before delivery.
+        use_when: >
+          The work is a new business outcome, architecture direction, product,
+          shared component, or major control-plane capability not yet accepted.
+        required_evidence:
+          - proposal reference
+          - classification rationale
+          - operator acceptance or rejection decision when available
+      record_improvement_candidate:
+        description: Capture the skipped gate as a learning/control miss.
+        use_when: >
+          The miss is repeated, operator-called-out, machine-visible, or caused
+          by a weak workflow control.
+        required_evidence:
+          - improvement candidate reference
+          - signal and failure-class rationale
+          - owner and due date for follow-up control
+      open_defect_or_risk:
+        description: Record active broken-control or exposure state in ART.
+        use_when: >
+          The discovered work or missed gate blocks execution, exposes broader
+          delivery risk, or requires repair before honest completion.
+        required_evidence:
+          - affected work item reference
+          - defect or risk reference
+          - blocker or ROAM fields when applicable
+    required_decision_record:
+      - discovered_on
+      - discovered_by
+      - actor_or_source_of_change
+      - change_summary
+      - authoritative_evidence_refs
+      - classification_result
+      - selected_resolution_path
+      - owner_repo
+      - art_or_proposal_or_candidate_refs
+      - security_or_risk_review_needed
+      - operator_acceptance_when_required
+    forbidden_outcomes:
+      - backdating an ART item or pretending approval existed before it did
+      - discarding useful work solely because classification was late
+      - hiding accepted initiative work in an owner-repo-only note
+      - closing an active item while known unclassified work still affects its
+        scope, risk, blocker state, or completion evidence
+      - treating urgent human bypass as normal process instead of reconciling it
   examples:
     - scenario: Fix a typo in one owner-repo README outside active initiative work.
       class: owner_repo_maintenance
