@@ -7,7 +7,7 @@ summary: >
   Once a merged source fix is proven missing from stage, the workflow should
   automatically continue into the governed stage lane instead of stopping at a
   diagnosis that stage is stale.
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -40,13 +40,31 @@ signals:
       - platform-engineering#116
       - conversation:2026-04-19-stage-older-not-fixed-automatically
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-04-19-dev-integration-stage-handoff-readiness.yaml
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/developer-integration-profiles.yaml
+      owner_repo: workspace-governance
+      note: Active profile entries now carry explicit stage handoff checks.
+    - type: validator
+      path: workspace-governance/scripts/validate_developer_integration.py
+      owner_repo: workspace-governance
+      note: Enforces registry, profile, and README agreement for stage handoff checks.
+    - type: validator
+      path: workspace-governance/scripts/audit_improvement_signals.py
+      owner_repo: workspace-governance
+      note: Turns active profile stage-handoff drift into a machine-visible signal.
+    - type: skill
+      path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+      owner_repo: workspace-governance
+      note: Requires governed stage evidence before calling dev-integration work complete.
+    - type: doc
+      path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+      owner_repo: platform-engineering
+      note: Documents profile-owned stage handoff and stage-only closure.
+  note: Closed by the dev-integration stage handoff after-action and its linked
+    contract, validator, skill, and runbook controls.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: 2026-04-28
-  note: >
-    Decide whether done-criteria and governed-delivery controls should require
-    immediate stage carry-through once a merged source fix is shown to be
-    missing from the live governed rehearsal lane.
+  owner_repo: null
+  due_on: null
+  note: null

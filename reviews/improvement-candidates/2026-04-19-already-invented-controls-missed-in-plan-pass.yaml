@@ -41,7 +41,10 @@ resolution:
   note: null
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-04-26'
-  note: Finish the deep sweep, then update future recommendation doctrine so any workspace-level
-    Codex plan explicitly checks existing skills, repo-rule primary operator surfaces,
-    dev-integration docs, and Codex-adjacent runtime hooks before proposing new capabilities.
+  due_on: '2026-05-03'
+  note: >-
+    Still open; re-triaged during PR #78 because the original due date had
+    become a merge-blocking stale promise. Closure still requires a real future
+    recommendation-doctrine control that checks existing skills, repo-rule
+    primary operator surfaces, dev-integration docs, and Codex-adjacent runtime
+    hooks before proposing new capabilities.
