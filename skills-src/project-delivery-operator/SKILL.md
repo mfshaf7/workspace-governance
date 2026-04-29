@@ -190,6 +190,20 @@ Use this skill when a serious initiative is already running inside
    - if important work already happened without this classification, reconcile
      it through the same work-home contract instead of discarding the work or
      leaving the skipped classification invisible
+   - branch by Landing Unit, not by ART child and not automatically by Epic
+   - treat a Landing Unit as the smallest source change that should be reviewed,
+     merged, deployed, and rolled back together
+   - use a Review Packet to bind landed or explicitly accepted evidence back to
+     one or more ART items
+   - do not mark source-backed ART children `done` until a finalized Review
+     Packet covers them with merged PR evidence, approved direct-land evidence,
+     or equivalent durable source evidence
+   - allow one Review Packet to close several ART children when they share the
+     same Landing Unit and rollback boundary
+   - close non-source ART items with non-source evidence, such as live
+     verification, planning decision, risk disposition, or metadata repair proof
+   - require Feature and Epic closeout to prove every child is covered by a
+     finalized Review Packet or explicitly marked as non-source evidence only
    - backfill is selective and evidence-driven; do not recreate all historical
      work as ART items just because the rule now exists
    - urgent human/operator bypass can be treated as containment only; reconcile

@@ -16,6 +16,9 @@ Use `templates/delegation-packet/` when the main agent is preparing a bounded
 delegated write and needs a reusable packet shape before the run is recorded in
 the delegation journal.
 
+Use `templates/review-packet/` when one Landing Unit, direct-land decision,
+live-only repair, or non-source evidence packet covers one or more ART items.
+
 Use `templates/improvement-candidate/` when the system has a real signal for a
 repeated miss or late discovery, but the durable control shape is not ready for
 a full after-action review yet.

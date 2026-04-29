@@ -73,6 +73,33 @@ If important work was already done without classification, reconcile it after
 discovery. Do not throw away useful work, and do not leave the skipped
 classification invisible.
 
+## Landing Evidence
+
+Do not treat ART child items, Git branches, and merge evidence as one-to-one.
+
+- ART decomposition tracks delivery state.
+- Landing Units track source review, merge, deployment, and rollback state.
+- Review Packets bind landed or accepted evidence back to one or more ART
+  items.
+
+For source-backed work, choose a Landing Unit before implementation. One
+Landing Unit can cover several ART children when they share the same review and
+rollback boundary. Several Landing Units can exist under one Feature or Epic
+when owner repo, validation, security, deployment, or rollback boundaries
+differ.
+
+Do not mark source-backed ART children `done` just because code exists on a
+branch. Keep them open with work notes such as `implemented pending landing`
+until the finalized Review Packet provides merged PR evidence, approved
+direct-land evidence, or equivalent durable source evidence.
+
+Non-source work, such as risk disposition, live verification, planning, or ART
+metadata repair, closes with non-source evidence and should not invent merge
+evidence.
+
+Feature and Epic closeout must verify coverage: every child is either covered
+by a finalized Review Packet or explicitly marked as non-source evidence only.
+
 ## Read Hierarchy
 
 Use this order:

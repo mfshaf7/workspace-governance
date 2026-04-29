@@ -123,8 +123,108 @@ work_home_routing:
   evidence_relationship:
     art_record: Work-state, scope, blocker, risk, and completion truth.
     owner_repo_change_record: Implementation, runtime, security, or behavior evidence.
+    landing_unit: Source review, merge, rollback, and deployment truth.
+    review_packet: Evidence bridge from landed or accepted work back to one or more ART items.
     improvement_candidate: Repeated workflow miss or control failure signal.
     handoff: Session continuity when meaningful pending work remains.
+  landing_and_review_policy:
+    purpose: >
+      Keep ART decomposition, Git branching, and completion evidence efficient
+      by separating delivery state from source landing and evidence mapping.
+    principles:
+      - ART items track delivery intent, work state, blockers, risks, and
+        completion truth.
+      - Landing Units track the smallest source change that should be reviewed,
+        merged, deployed, and rolled back together.
+      - Review Packets bind landed or explicitly accepted evidence back to one
+        or more ART items.
+      - ART items, Landing Units, and Review Packets are related but are not
+        required to be one-to-one.
+      - Branching and merge timing are based on the Landing Unit, not on every
+        child story and not automatically on the whole Epic.
+    records:
+      art_item: Workspace Delivery ART item such as Feature, User story, Defect, Risk, PI Objective, or Epic.
+      landing_unit: Branch, PR, direct-land decision, or live-only execution unit that carries one review and rollback boundary.
+      review_packet: Evidence record that lists covered ART items, source refs, validation, merge/direct-land/live proof, rollback scope, and exceptions.
+    landing_unit_rules:
+      - One Landing Unit may cover one ART child, several children, one Feature,
+        or a small cohesive Epic when review and rollback boundaries are shared.
+      - Do not create a branch solely because a new ART child exists.
+      - Do not force a whole Epic into one branch when the Epic spans repos,
+        owners, review paths, security boundaries, or rollback scopes.
+      - Long-running work may use an early pushed draft PR for backup, CI, and
+        review visibility while still merging only when the Landing Unit is
+        complete.
+      - Cross-repo Landing Units must record merge order and final SHA evidence
+        for every repo they touch.
+      - A Landing Unit is not valid when one covered child must be rolled back
+        independently from the others.
+    completion_rules:
+      - Source-backed ART children remain open until covered by a finalized
+        Review Packet with merged PR, approved direct-land, or equivalent
+        durable source evidence.
+      - Several source-backed ART children may close from the same finalized
+        Review Packet.
+      - Non-source ART items may close with non-merge evidence, such as live
+        verification, risk disposition, planning decision, or ART metadata
+        repair proof.
+      - Work implemented on a branch but not landed is not terminal done; record
+        it as in-progress with work notes such as implemented pending landing.
+      - Completion evidence must state either the Review Packet reference or
+        the reason the item is non-source evidence only.
+    exception_paths:
+      direct_land:
+        use_when: >
+          The operator explicitly approves direct-to-main landing or the owning
+          repo's documented workflow allows it.
+        required_evidence:
+          - operator approval or repo workflow reference
+          - final commit SHA
+          - validation evidence
+          - rollback or recovery note
+      live_only:
+        use_when: >
+          The work changes live state but no source artifact is expected, such
+          as runtime repair, projection sync, or manual operational recovery.
+        required_evidence:
+          - live command or broker route used
+          - before and after state when available
+          - reconciliation note if source or ART truth is affected
+          - follow-up owner when a durable source fix is still needed
+      non_source:
+        use_when: >
+          The ART item is planning, analysis, risk disposition, review, or
+          metadata-only work with no source landing requirement.
+        required_evidence:
+          - decision or review summary
+          - authoritative record reference
+          - validation or readback evidence
+    defect_handling:
+      - Unexpected defects stop adjacent closeout when they affect completion
+        truth, safety, runtime behavior, security posture, or evidence.
+      - A same-cause, same-owner, same-validation defect may be fixed inside
+        the current Landing Unit and Review Packet.
+      - A defect with a distinct cause, owner, review path, rollback boundary,
+        or validation burden gets its own ART Defect and, when source-backed,
+        its own or explicitly shared Landing Unit.
+      - Defects outside the active Epic but caused by current work must be
+        linked and assessed for blocker or risk impact before parent closeout.
+    parent_coverage_gate:
+      - A Feature or Epic may close only when every child is covered by a
+        finalized Review Packet or explicitly marked as non-source evidence
+        only.
+      - Parent closeout evidence must summarize Review Packet coverage instead
+        of duplicating every child item's full merge evidence.
+      - Open draft packets, unmerged branches, unresolved direct-land
+        exceptions, or live-only follow-ups that affect scope or risk block
+        parent closeout.
+    cleanup_policy:
+      - Retire draft PRs, branches, temporary worktrees, and draft Review
+        Packets after merge, direct-land acceptance, retirement, or abandonment.
+      - Branch lifecycle residue is a control failure when it is not tied to an
+        open PR or documented exception.
+      - Review Packets should remain as evidence records only when they support
+        active completion, audit, rollback, or future troubleshooting.
   reconciliation_policy:
     principles:
       - Preserve important work; do not discard a useful change solely because
@@ -246,3 +346,15 @@ work_home_routing:
       class: late_discovered_unclassified_work
       owner_repo: workspace-governance
       result: Reconcile the work into the active item evidence or create a compensating item; do not ignore the work because the rule was missed.
+    - scenario: One PR implements three source-backed user stories under the same Feature.
+      class: active_art_slice
+      owner_repo: operator-orchestration-service
+      result: Use one Landing Unit and one finalized Review Packet to close all three stories after merge.
+    - scenario: A Risk item is closed after live ART readback proves mitigation state with no source change.
+      class: active_art_slice
+      owner_repo: workspace-governance
+      result: Close with non-source evidence only; do not require or invent merge evidence.
+    - scenario: A defect found during implementation has a different rollback boundary from the current branch.
+      class: meaningful_same_initiative_expansion
+      owner_repo: workspace-governance
+      result: Create or use a Defect item and separate Landing Unit instead of hiding it inside the current Review Packet.

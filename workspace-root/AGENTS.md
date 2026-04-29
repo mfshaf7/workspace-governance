@@ -222,6 +222,21 @@ Only start implementation after that discussion narrows the target design.
   branch and pull request with a meaningful summary instead of committing
   directly to `main`, unless the user explicitly asks for direct landing or the
   repo's documented workflow says otherwise.
+- Branch by Landing Unit, not by ART child and not automatically by Epic. A
+  Landing Unit is the smallest source change that should be reviewed, merged,
+  deployed, and rolled back together.
+- ART items track delivery state. Landing Units track source landing and
+  rollback truth. Review Packets bind landed or explicitly accepted evidence
+  back to one or more ART items.
+- Source-backed ART children should not be marked `done` until a finalized
+  Review Packet covers them with merged PR evidence, approved direct-land
+  evidence, or equivalent durable source evidence. Multiple children may close
+  from the same Review Packet.
+- Non-source ART items such as planning, risk disposition, live verification,
+  or metadata repair close with the relevant non-source evidence instead of
+  fake merge evidence.
+- A Feature or Epic may close only when every child is covered by a finalized
+  Review Packet or explicitly marked as non-source evidence only.
 - If the registered skill inventory or any workspace-owned skill source
   changes, the work is not complete until the live installed skills under
   `~/.codex/skills` are refreshed and the workspace audit confirms they are in

@@ -50,17 +50,52 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
 
 ## Standard PR Flow
 
-1. Create a repo branch for the meaningful change.
-2. Update docs, contracts, or evidence in the owner repo at the same time as
+1. Choose the Landing Unit: the smallest source change that should be
+   reviewed, merged, deployed, and rolled back together.
+2. Create one repo branch for the Landing Unit, not one branch for every ART
+   child item.
+3. Update docs, contracts, or evidence in the owner repo at the same time as
    the code or workflow change.
-3. Open a PR with the repo's required governance declaration and meaningful
-   summary.
-4. Request Codex review manually with `@codex review` until the repo has
+4. Open a PR with the repo's required governance declaration, meaningful
+   summary, and Review Packet coverage for the ART items it supports.
+5. Request Codex review manually with `@codex review` until the repo has
    stable automatic review enabled.
-5. Resolve or explicitly acknowledge the findings in the PR before merge.
-6. Merge only after the repo-local checks and required governance checks pass.
-7. After merge, retire the local branch, remote branch, and any temporary
+6. Resolve or explicitly acknowledge the findings in the PR before merge.
+7. Merge only after the repo-local checks and required governance checks pass.
+8. After merge, finalize the Review Packet with PR, commit, validation, and
+   rollback evidence before closing covered source-backed ART items.
+9. After closeout, retire the local branch, remote branch, and any temporary
    worktrees unless an open PR or a documented exception still requires them.
+
+## Landing Units And Review Packets
+
+A Landing Unit may cover one ART item, several child items, one Feature, or a
+small cohesive Epic. It should split when the work has separate repo ownership,
+review path, security impact, validation burden, deployment timing, or rollback
+scope.
+
+The Review Packet is the evidence bridge from Git or live work back to ART. It
+records:
+
+- covered ART items
+- repo branches and PRs
+- final commit SHAs or direct-land evidence
+- validation results
+- rollback scope
+- live-only or non-source exceptions
+
+Source-backed ART children should close only after a finalized Review Packet
+covers them. Several children can close from the same packet. Analysis,
+planning, risk handling, live verification, or ART metadata repair can close
+with non-source evidence instead of merge evidence.
+
+Direct-to-main landing is allowed only when the operator explicitly approves it
+or the owning repo documents it. Record that exception in the Review Packet;
+do not pretend it followed the PR path.
+
+The Review Packet template lives at:
+
+- `templates/review-packet/TEMPLATE.md`
 
 ## Codex GitHub Review Setup
 

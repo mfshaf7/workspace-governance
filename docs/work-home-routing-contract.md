@@ -56,6 +56,43 @@ boundaries.
 - Use Workspace Proposals before decomposing a new business or architecture
   idea.
 
+## Landing Units And Review Packets
+
+ART decomposition, Git branches, and completion evidence are related, but they
+are not one-to-one.
+
+- An ART item tracks delivery intent, work state, blockers, risks, and
+  completion truth.
+- A Landing Unit tracks the source change that should be reviewed, merged,
+  deployed, and rolled back together.
+- A Review Packet binds landed or explicitly accepted evidence back to one or
+  more ART items.
+
+Branch by Landing Unit, not by ART child and not automatically by Epic. One
+Landing Unit can cover one story, several stories, a Feature, or a small
+cohesive Epic when review and rollback boundaries are shared. Split the Landing
+Unit when the work crosses repos, owners, security posture, validation burden,
+or rollback boundaries.
+
+Source-backed ART children should not be marked `done` until they are covered
+by a finalized Review Packet with merged PR evidence, approved direct-land
+evidence, or an equivalent durable landing record. Multiple children may close
+from the same Review Packet. Non-source children, such as planning, risk
+disposition, live verification, or metadata repair, close with the relevant
+non-source evidence instead of fake merge evidence.
+
+For long-running work, push an early draft PR when useful for backup, CI, or
+review visibility. That does not make the work done. It remains open until the
+Landing Unit is landed or the operator explicitly accepts a direct-land or
+non-source exception.
+
+Parent closeout must prove coverage, not duplicate every child record. A
+Feature or Epic can close only when every child is covered by a finalized Review
+Packet or explicitly marked as non-source evidence only.
+
+Use [`templates/review-packet/TEMPLATE.md`](../templates/review-packet/TEMPLATE.md)
+when a packet needs a durable artifact outside the ART completion note.
+
 ## Plumbing Work
 
 Plumbing is classified by impact, not by name.
