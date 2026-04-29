@@ -41,6 +41,38 @@ OpenProject start-here planning surface first:
 
 - [platform-engineering OpenProject start-delivery-initiative](https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/start-delivery-initiative.md)
 
+## Work-Home Classification
+
+Before doing meaningful work that is not already covered by the active ART
+item, classify its home through the workspace work-home routing contract:
+
+- [workspace-governance work-home routing contract](work-home-routing-contract.md)
+
+Use that contract before execution, not as a retrospective clean-up step.
+
+The normal decisions are:
+
+- keep accepted initiative work, blockers, risks, scope changes, and
+  completion truth in `Workspace Delivery ART`
+- absorb a tiny same-slice correction into the active item and record it in
+  completion evidence
+- create a new ART child when the work has a distinct owner repo, scope,
+  review path, risk, blocker, or validation proof
+- use owner-repo tracking only for local maintenance outside accepted ART work
+- use `Workspace Proposals` before decomposing a new business or architecture
+  idea
+- record an improvement candidate when the missed classification is a repeated
+  control failure
+
+Plumbing work is classified by impact, not by name. Platform observability
+plumbing, broker ART adapter repair, security-review plumbing, and
+workspace-control plumbing can land in different homes depending on whether
+they are accepted initiative work, owner-repo maintenance, or a new idea.
+
+If important work was already done without classification, reconcile it after
+discovery. Do not throw away useful work, and do not leave the skipped
+classification invisible.
+
 ## Read Hierarchy
 
 Use this order:
@@ -91,6 +123,11 @@ Normal rule:
 
 Fallback is allowed only when the broker runtime or compatible OpenProject
 projection is unhealthy.
+
+Do not turn a wrapper or tooling failure into a named root cause until live
+truth proves it. A deployment name, pod name, route, work item, owner, or
+control name used in an operator update or completion record must come from the
+authoritative source for that layer, or be explicitly marked as unverified.
 
 If broker runtime is unavailable:
 

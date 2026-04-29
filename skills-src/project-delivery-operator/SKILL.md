@@ -18,6 +18,7 @@ Use this skill when a serious initiative is already running inside
 - `operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md`
 - `platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md`
 - `workspace-governance/docs/delivery-art-operator-path.md`
+- `workspace-governance/docs/work-home-routing-contract.md`
 - `workspace-governance/docs/delegated-execution.md`
 - `workspace-governance/docs/self-improvement-escalation.md`
 
@@ -115,12 +116,24 @@ Use this skill when a serious initiative is already running inside
      2. `make openproject-check-delivery-art-quality ...`
      3. `make openproject-sync-delivery-art-views ...` only when the
         compatible view projection itself drifted
+   - before using a deployment name, pod name, route, work item ID, owner,
+     control name, gate ID, root-cause label, branch, PR, merge state, or
+     completion fact in an operator update or completion record, prove it from
+     the authoritative source for that layer; if it has not been proven, mark
+     it as unverified
 2. Keep the truth split explicit:
    - ART = work-state truth
    - owner repos = implementation and design truth
    - `workspace-governance` = workspace-control truth
 3. If the request is not already covered by the active ART, classify it before
    doing the work:
+   - use `workspace-governance/docs/work-home-routing-contract.md` as the
+     primary classification surface
+   - apply the contract's classification order before execution:
+     `active_incident_or_blocker`, `active_art_slice`,
+     `meaningful_same_initiative_expansion`, `owner_repo_maintenance`,
+     `new_business_or_architecture_idea`,
+     `late_discovered_unclassified_work`
    - tiny same-slice patch: absorb it into the active work item
    - meaningful work in the same initiative: add a new item under the active
      `Epic`
@@ -174,6 +187,9 @@ Use this skill when a serious initiative is already running inside
      `security-architecture` and reflect any blocking impact back in the ART
    - pure owner-repo maintenance outside the initiative: track it in the owner
      repo only
+   - if important work already happened without this classification, reconcile
+     it through the same work-home contract instead of discarding the work or
+     leaving the skipped classification invisible
 4. Keep PI honesty explicit.
    - do not leave work marked committed when it is really stretch or deferred
    - replan the PI when the active front changes materially

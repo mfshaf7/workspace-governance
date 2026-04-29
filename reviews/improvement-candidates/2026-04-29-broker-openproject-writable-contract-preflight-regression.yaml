@@ -1,0 +1,116 @@
+schema_version: 1
+id: 2026-04-29-broker-openproject-writable-contract-preflight-regression
+title: Broker/OpenProject fixes regressed into patch-first troubleshooting before
+  live-truth and writable-contract proof
+recorded_on: '2026-04-29'
+owner_repo: workspace-governance
+summary: 'During ART #362 work, broker patches for Target PI roadmap projection were
+  implemented before proving the live OpenProject form writability contract for the
+  roadmap version field, and a later platform sync failure was described as the
+  wrong OpenProject deployment name before proving live cluster truth. The operator
+  then called out the same wrong-name/reference pattern again. That repeated the
+  earlier closed lesson: preflight, live truth, and contract truth must be proven
+  before adapter changes or named root-cause claims, and named references used in
+  execution or operator updates must come from authoritative truth rather than
+  memory or inference.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-21-broker-openproject-root-cause-preflight-gap.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: The operator called out that troubleshooting kept patching symptoms and
+    only then finding another bug. The concrete miss was implementing a broker roadmap-version
+    projection patch before proving that the live OpenProject work-package form exposed
+    version as writable; the live API later showed version allowed values exist but
+    the field is read-only and rejects writes with PropertyIsReadOnly.
+  source_refs:
+  - 'conversation: operator said troubleshooting keeps patching things just to find
+    another bug every time'
+  - 'art: #362 / #375 Target PI roadmap projection defect exposed read-only OpenProject
+    version form contract'
+  - 'repo: operator-orchestration-service PR #70 merged a patch assuming generic broker
+    writes could set roadmap version'
+  - 'live: OpenProject form schema showed version._embedded.allowedValues but writable=false
+    and write validation returned PropertyIsReadOnly'
+- id: unverified-runtime-cause-name-callout
+  title: A wrapper failure was converted into the wrong named runtime cause before
+    live truth was proven.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  - unsafe-assumption
+  finding: >-
+    During ART #375 live repair, the platform sync wrapper failed to resolve the
+    OpenProject web pod. I described the cause as a wrong deployment name before
+    proving live cluster truth. Direct `k3s kubectl` checks later showed the
+    deployment name was correct and the failure was in the sandboxed platform
+    sync adapter/pod-resolution path, so the named root cause was unsupported.
+  source_refs:
+  - 'conversation:2026-04-29-user-called-out-wrong-name-wasted-token'
+  - 'live: direct k3s kubectl showed deployment/devint-accepted-idea-delivery-openproject-web
+    and matching web pods existed'
+  - 'tooling: platform sync wrapper initially failed to resolve the OpenProject web
+    pod until rerun through the approved/escalated path'
+- id: unverified-named-reference-repeat-callout
+  title: A named work reference was used again before authoritative truth was proven.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    The operator called out another wrong-name/reference miss and token waste. This
+    shows the control gap is broader than one OpenProject deployment name: before
+    using a specific deployment name, work-item number, route, owner, control name,
+    or root-cause label as a fact in execution or operator updates, the agent needs
+    to prove it against the authoritative source for that layer or state clearly
+    that it is still unverified.
+  source_refs:
+  - 'conversation:2026-04-29-user-called-out-another-wrong-name-reference-miss'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/troubleshooting-preflight.md
+    owner_repo: workspace-governance
+    note: Adds named-reference proof before root-cause or operator-update claims.
+  - type: skill
+    path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes named-reference proof part of troubleshooting workflow.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires authoritative proof before ART operator updates or completion records.
+  note: >-
+    Initial doctrine controls are being landed with ART #369; a follow-up
+    after-action or validator-level closure is still required before this lesson
+    can be marked closed.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-02'
+  note: Approve and land a durable gate that makes broker/OpenProject mutation changes
+    prove live form writability and one smallest faithful contract fixture before
+    implementation or merge, and makes named runtime/work-item/control references
+    cite authoritative live or control-plane truth before they are used as facts.

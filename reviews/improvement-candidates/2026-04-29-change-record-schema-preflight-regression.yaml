@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-04-29-change-record-schema-preflight-regression
+title: Enforce record schema before continuing delivery work
+recorded_on: '2026-04-29'
+owner_repo: workspace-governance
+summary: Codex again edited structured delivery records without immediate
+  parse/schema preflight. First, a change record failed the repo's required
+  heading format and was corrected only after validation. Later, an improvement
+  candidate YAML edit introduced an invalid scalar containing `#369`; that was
+  also caught only when the full candidate validator ran.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: Change-record schema miss repeated during active delivery work.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >
+    During ART #362 broker-control work, the new change record omitted the
+    required headings "Artifact And Deployment Evidence" and "Live
+    Verification"; the user identified this as a repeated issue.
+  source_refs:
+  - 'conversation: operator explicitly said the record format error is also a repeated
+    issue'
+- id: yaml-record-format-repeat-callout
+  title: YAML improvement-candidate formatting repeated during active delivery work.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - learning-closure-regression
+  - unsafe-assumption
+  finding: >-
+    During ART #369 doctrine publication, an improvement-candidate record edit used
+    an unquoted scalar containing `#369`, which made the YAML invalid. The mistake
+    was caught by validation, but only after continuing to other checks instead of
+    immediately parsing the edited record.
+  source_refs:
+  - 'conversation: operator asked whether YAML formatting is another repeated error'
+  - 'repo: reviews/improvement-candidates/2026-04-29-broker-openproject-writable-contract-preflight-regression.yaml'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-02'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed. The candidate now covers structured YAML records as well as markdown
+    change-record headings.

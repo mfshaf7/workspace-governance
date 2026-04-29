@@ -23,15 +23,22 @@ Use this skill when the root cause is still unproven.
    - secrets, config, flags, readiness, and reachability
    - environment or lane selection
 3. Prove live truth from the authoritative backend.
-4. Prove contract truth:
+4. Prove named references before using them as facts:
+   - deployment, pod, namespace, service, and route names
+   - work item IDs, subjects, parent links, and owners
+   - control names, validator names, workflow gate IDs, and root-cause labels
+   - completion facts, branch names, PR numbers, and merge state
+   - if a reference is not proven from the authoritative source for that
+     layer, state that it is unverified instead of using it as fact
+5. Prove contract truth:
    - writable fields
    - allowed values
    - supported mutation shape
    - operator doctrine
-5. Only then inspect code truth.
-6. Do not expand into workaround or redesign analysis before those earlier
+6. Only then inspect code truth.
+7. Do not expand into workaround or redesign analysis before those earlier
    layers are checked.
-7. If the root cause turns out to be a skipped simpler earlier-layer check:
+8. If the root cause turns out to be a skipped simpler earlier-layer check:
    - treat it as a self-improvement signal
    - run `python3 scripts/check_self_improvement_escalation.py --signal late-root-cause-discovery ...`
    - if it fails closed, record or update the candidate before continuing
@@ -42,5 +49,7 @@ Use this skill when the root cause is still unproven.
 - Do not start with code just because the symptom appears in code.
 - Do not call backend or permission reality an adapter mystery before proving
   the live state.
+- Do not turn a wrapper failure, memory, or inference into a named root-cause
+  claim.
 - Do not represent late discovery of a simpler precondition as normal bad luck.
 - Do not continue workaround analysis once an earlier failed layer is proven.

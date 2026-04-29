@@ -56,6 +56,28 @@ Use the authoritative system to prove the current behavior directly:
 
 Do not substitute documentation, memory, or assumed behavior for live truth.
 
+## Named-Reference Proof
+
+Treat specific names and references as claims that need proof before they are
+used as facts.
+
+This includes:
+
+- deployment, pod, namespace, service, and route names
+- work item IDs, subjects, parent links, and owner fields
+- control names, validator names, and workflow gate IDs
+- root-cause labels and completion facts
+
+Use the authoritative source for the layer:
+
+- live runtime APIs for deployed object names and state
+- broker continuation context or planning reads for ART item truth
+- owner-repo contracts and docs for workflow or control names
+- local git status and PR metadata for source and merge state
+
+If the reference has not been proven yet, say it is unverified. Do not turn a
+wrapper failure, memory, or inference into a named root cause.
+
 ## Contract Truth
 
 After preflight and live truth are proven, check the declared interface:
