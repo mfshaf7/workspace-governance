@@ -68,6 +68,11 @@
 - `validate_improvement_candidates.py`
   - validates that improvement candidates keep valid lifecycle, follow-up,
     closure references, and control references
+- `validate_structured_record.py`
+  - validates one touched structured governance record immediately and then
+    delegates to the owning full validator
+  - use it after editing improvement candidates, after-actions, delegation
+    journals, workspace contracts, or owner-repo change records
 - `audit_improvement_signals.py`
   - audits machine-visible self-improvement signals such as missing declared
     primary operator workflow surfaces across active repos

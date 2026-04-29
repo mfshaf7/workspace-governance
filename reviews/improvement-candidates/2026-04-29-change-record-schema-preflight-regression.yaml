@@ -3,11 +3,14 @@ id: 2026-04-29-change-record-schema-preflight-regression
 title: Enforce record schema before continuing delivery work
 recorded_on: '2026-04-29'
 owner_repo: workspace-governance
-summary: Codex again edited structured delivery records without immediate
-  parse/schema preflight. First, a change record failed the repo's required
-  heading format and was corrected only after validation. Later, an improvement
-  candidate YAML edit introduced an invalid scalar containing `#369`; that was
-  also caught only when the full candidate validator ran.
+summary: >-
+  Codex again edited structured delivery records without immediate parse/schema
+  preflight. First, a change record failed the repo's required heading format
+  and was corrected only after validation. Later, an improvement candidate YAML
+  edit introduced an invalid scalar containing `#369`; that was also caught only
+  when the full candidate validator ran. The same change-record heading miss
+  repeated during ART #378/#392 closeout-quality repair when an OOS change
+  record omitted `Artifact And Deployment Evidence`.
 regression_of: null
 status: triaged
 source_type: conversation
@@ -47,6 +50,21 @@ signals:
   source_refs:
   - 'conversation: operator asked whether YAML formatting is another repeated error'
   - 'repo: reviews/improvement-candidates/2026-04-29-broker-openproject-writable-contract-preflight-regression.yaml'
+- id: change-record-heading-repeat-during-closeout-quality-repair
+  title: 'Change-record required-heading miss repeated during #392 repair.'
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - learning-closure-regression
+  finding: >-
+    During ART #378/#392 closeout-quality repair, the OOS change record
+    `docs/records/change-records/2026-04-29-art-closeout-surface-quality-guard.md`
+    omitted the required `Artifact And Deployment Evidence` heading. The
+    repository validator caught the miss before merge, but only after the record
+    was authored from memory instead of from the required record shape.
+  source_refs:
+  - 'conversation: operator asked whether governance docs write is also a repeated error during #392'
+  - 'repo: operator-orchestration-service/docs/records/change-records/2026-04-29-art-closeout-surface-quality-guard.md'
 resolution:
   after_action_ref: null
   control_refs: []
@@ -54,6 +72,8 @@ resolution:
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-05-02'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed. The candidate now covers structured YAML records as well as markdown
-    change-record headings.
+  note: >-
+    Review and approve the strongest durable control before treating this lesson
+    as closed. The candidate now covers structured YAML records as well as
+    markdown change-record headings, and it has repeated again during ART
+    #378/#392.
