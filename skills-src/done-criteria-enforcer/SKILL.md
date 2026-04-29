@@ -29,7 +29,8 @@ Before telling the operator that a restart is safe or recommended:
 
 - check for meaningful workspace-level local-only state that would be lost or harder to rediscover after a restart
 - treat pending architecture/workflow discussion, local-only review or handoff notes, and unlanded workspace-level state as handoff-worthy by default
-- if that state exists, create or refresh the latest `docs/archive/session-handoff-*.md` record first
+- if that state exists, create or refresh the single local-only `docs/archive/session-handoff-current.md` record first
+- keep zero or one session handoff at a time; remove stale `docs/archive/session-handoff-*.md` records instead of accumulating dated files
 - only after the handoff is current should you say the restart is ready
 - if the workspace is being described as clean or restart-ready,
   `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
@@ -55,7 +56,7 @@ Before telling the operator that a restart is safe or recommended:
   Review Packet or explicitly marked as non-source evidence only
 - if repo review controls exist and the work is landing through a PR, Codex review was requested or explicitly waived and the PR records the result
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
-- if the user is being asked to restart and meaningful workspace-level pending items remain, a session handoff record exists
+- if the user is being asked to restart and meaningful workspace-level pending items remain, `docs/archive/session-handoff-current.md` exists and is current
 - if a restart is being recommended, the session handoff was refreshed before the recommendation rather than only after the operator asked about it
 - if the work was proven in `dev-integration`, the active profile's
   `stage_handoff.required_checks` and `devint-promote-check` still match the

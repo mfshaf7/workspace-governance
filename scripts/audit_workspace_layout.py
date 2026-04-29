@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import fnmatch
 import subprocess
 from pathlib import Path
 
@@ -23,6 +24,40 @@ def compare_files(expected: Path, actual: Path, errors: list[str]) -> None:
         return
     if expected.read_text() != actual.read_text():
         errors.append(f"workspace file out of sync: {actual} != {expected}")
+
+
+def audit_session_handoff_lifecycle(repo_root: Path, errors: list[str]) -> None:
+    archive_dir = repo_root / "docs" / "archive"
+    if not archive_dir.exists():
+        return
+
+    handoffs = sorted(archive_dir.glob("session-handoff-*.md"))
+    tracked_files = run(["git", "-C", str(repo_root), "ls-files"]).splitlines()
+    tracked_handoffs = sorted(
+        path
+        for path in tracked_files
+        if fnmatch.fnmatch(path, "docs/archive/session-handoff-*.md")
+        and (repo_root / path).exists()
+    )
+
+    if tracked_handoffs:
+        errors.append(
+            "session handoffs must be ignored local continuity state, not tracked Git files: "
+            + ", ".join(tracked_handoffs)
+        )
+
+    if len(handoffs) > 1:
+        errors.append(
+            "stale session handoffs present; keep zero or one "
+            "docs/archive/session-handoff-current.md and remove stale files: "
+            + ", ".join(str(path.relative_to(repo_root)) for path in handoffs)
+        )
+
+    if handoffs and handoffs[0].name != "session-handoff-current.md":
+        errors.append(
+            "session handoff must use docs/archive/session-handoff-current.md, got "
+            f"{handoffs[0].relative_to(repo_root)}"
+        )
 
 
 def main() -> int:
@@ -69,6 +104,7 @@ def main() -> int:
             dirty_repos.append(repo_name)
 
     if workspace_governance_root.exists():
+        audit_session_handoff_lifecycle(workspace_governance_root, errors)
         compare_files(
             workspace_governance_root / "workspace-root" / "ARCHITECTURE.md",
             workspace_root / "ARCHITECTURE.md",

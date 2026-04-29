@@ -291,6 +291,11 @@ That check is what prevents stale local branches, pinned worktrees, and remote
 branches without an open PR or documented exception from lingering after the
 real work is already on `main`.
 
+Session handoffs are handled separately from durable Git state. If pending
+workspace-level context must survive a restart, use the single ignored local
+file `docs/archive/session-handoff-current.md`. Keep zero or one handoff at a
+time, remove stale dated handoffs, and do not commit handoff records.
+
 ## Sync Model
 
 The workspace root is not a Git repo, but local tools and future sessions still
