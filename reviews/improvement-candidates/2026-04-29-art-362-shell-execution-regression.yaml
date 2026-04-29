@@ -1,0 +1,86 @@
+schema_version: 1
+id: 2026-04-29-art-362-shell-execution-regression
+title: Fail closed when an ART Epic shell is treated as executable before decomposition
+recorded_on: '2026-04-29'
+owner_repo: workspace-governance
+summary: 'ART item #362 was created only as a top-level Epic shell for universal governed
+  work-tracking home controls, but execution was allowed to start before lineage,
+  PI planning, child decomposition, or an executable leaf front existed.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-25-art-feature-elaboration-guard-gap.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - architecture-shaping
+  - platform-contract
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'The live broker continuation read for work item #362 shows a new Epic
+    with open_child_count=0, no active items, no next-ready items, blank Target PI,
+    and no delivery metadata. Despite the start-delivery doctrine saying a shell that
+    remains in Initiating should stop there, the session moved toward implementation
+    work from that shell.'
+  source_refs:
+  - 'conversation: operator called out that #362 was not expanded/decomposed before
+    implementation and asked where the control failed'
+  - openproject://work_packages/362
+  - repo://platform-engineering/products/openproject/runbooks/start-delivery-initiative.md
+  - repo://workspace-governance/skills-src/project-delivery-operator/SKILL.md
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-service.js
+    owner_repo: operator-orchestration-service
+    note: >
+      Broker continuation context now rejects top-level delivery Epic shells
+      with `initiative_epic_not_executable` instead of returning an executable
+      work-item packet.
+  - type: test
+    path: operator-orchestration-service/test/delivery-service.test.js
+    owner_repo: operator-orchestration-service
+    note: >
+      Regression coverage proves top-level Epic shells are not valid
+      continuation targets.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: >
+      API contract documents the fail-closed Epic-shell continuation behavior
+      and routes shell work through initiative planning, governance, or
+      review-pack surfaces first.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-04-29-art-epic-shell-continuation-guard.md
+    owner_repo: operator-orchestration-service
+    note: >
+      Durable change record links the shell guard to #362, #366, and #367 and
+      records the runtime verification expectation.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: >
+      ART operator guidance now requires planning or continuation reads before
+      choosing executable work and prevents treating an Epic shell as the
+      active work front.
+  note: >
+    Closed by the #362 shell-to-execution controls. The broker now blocks
+    direct continuation on top-level Epic shells, while operator guidance
+    requires initiative planning/governance or child continuation before
+    execution starts.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -1,0 +1,111 @@
+schema_version: 1
+id: 2026-04-26-art-untracked-small-change-gap
+title: Fail closed when meaningful ART-related repo changes are about to land without an ART item or explicit exemption
+recorded_on: 2026-04-26
+owner_repo: workspace-governance
+summary: >
+  A meaningful broker delivery-workflow change was implemented, validated,
+  merged, and only afterward called out for not being represented in ART even
+  though it was real tracked delivery work. The current doctrine says
+  uncovered work must be classified before execution, but there is still no
+  strong enough stop-work or pre-merge control to prevent small-but-real ART
+  workflow fixes from landing without an explicit ART record or approved
+  exemption.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - workspace-governance
+    - platform-engineering
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: operator-art-tracking-gap-callout
+    title: Operator called out that the merged continuation-context fix was not recorded in ART
+    trigger: repeated-manual-retrospective
+    failure_classes:
+      - workflow-doctrine-gap
+      - unsafe-assumption
+    finding: >
+      The continuation-context drift fix was a real workflow/control-plane
+      change with code, docs, tests, and a merged PR, but it was not absorbed
+      into an active ART item and no new small ART task or defect was created
+      before landing it.
+    source_refs:
+      - chat://2026-04-26/art-change-not-recorded-in-art
+      - repo://operator-orchestration-service/src/openproject-client.js
+      - repo://operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+      - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  - id: doctrine-exists-but-did-not-stop-work
+    title: Existing ART operator doctrine did not stop the merge when no ART item covered the change
+    trigger: machine-visible-workflow-drift
+    failure_classes:
+      - workflow-doctrine-gap
+    finding: >
+      The current skill and runbook language says uncovered work must be
+      classified before execution, but there is no explicit guard that forces
+      the operator to supply an active ART item or an approved no-ART
+      exemption before merging a meaningful ART workflow change.
+    source_refs:
+      - repo://workspace-governance/skills-src/project-delivery-operator/SKILL.md
+      - repo://platform-engineering/products/openproject/AGENTS.md
+      - repo://workspace-governance/docs/delivery-art-operator-path.md
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/work-home-routing.yaml
+      owner_repo: workspace-governance
+      note: >
+        Defines the proportional work-home routing model, including mandatory
+        ART routing for accepted initiative work and meaningful platform or
+        workflow plumbing, plus late-discovery reconciliation paths.
+    - type: doc
+      path: workspace-governance/docs/work-home-routing-contract.md
+      owner_repo: workspace-governance
+      note: >
+        Publishes the operator-readable work-home rule: meaningful accepted
+        work cannot bypass ART by being called plumbing, while low-risk
+        owner-repo maintenance stays proportional.
+    - type: skill
+      path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+      owner_repo: workspace-governance
+      note: >
+        Teaches future ART delivery sessions to classify uncovered work before
+        execution, create a compensating ART item when scope is distinct, and
+        bind source-backed closure through Review Packets.
+    - type: skill
+      path: workspace-governance/skills-src/workspace-change-router/SKILL.md
+      owner_repo: workspace-governance
+      note: >
+        Routes workspace-level plumbing by impact instead of by name and keeps
+        accepted initiative work in Workspace Delivery ART.
+    - type: workflow
+      path: operator-orchestration-service/src/art-workflow-artifacts.js
+      owner_repo: operator-orchestration-service
+      note: >
+        Provides managed mutation draft and Review Packet artifact workflows
+        so ART writes and source-backed closeout evidence no longer depend on
+        loose local payloads or chat memory.
+    - type: doc
+      path: operator-orchestration-service/docs/records/change-records/2026-04-29-art-mutation-drafts-and-review-packets.md
+      owner_repo: operator-orchestration-service
+      note: >
+        Records the landed broker-owned mutation draft and Review Packet
+        workflow that supports durable evidence mapping back to ART items.
+  note: >
+    Closed by the approved #362 proportional work-home controls and the
+    broker-owned mutation draft / Review Packet workflow. The control is not a
+    purely static Git pre-merge hook because correct classification depends on
+    live ART state and proportionality. The durable fix is the work-home
+    contract, ART operator skill routing, and review-packet-backed source
+    closure path, proven again by #393 before this candidate was closed.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
