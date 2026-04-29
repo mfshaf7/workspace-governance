@@ -175,6 +175,11 @@ Route those changes back to the owner repos.
 - If a lesson that was already treated as closed regresses in active work,
   record the new candidate as a regression and link it to the earlier closed
   candidate or after-action. Do not treat it as an unrelated new miss.
+- After creating or editing any structured governance record, run:
+  - `python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects`
+  before continuing normal work. This applies to improvement candidates,
+  after-actions, delegation journals, workspace contracts, and owner-repo
+  change records.
 - Do not automatically implement the durable fix just because the candidate
   exists.
 - After recording the candidate, propose the best fix shape, justify why that
@@ -230,6 +235,7 @@ python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/pr
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
@@ -250,5 +256,5 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects -
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```

@@ -74,6 +74,17 @@ python3 scripts/check_self_improvement_escalation.py \
 Use `--regression-of <closed-record-path>` when the same lesson was already
 treated as closed and has clearly regressed again.
 
+After creating or editing any structured self-improvement record, validate that
+exact record before continuing:
+
+```bash
+python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects
+```
+
+This is a stop-the-line preflight. Do not rely on a later full-repo validator
+to discover YAML parse errors, missing schema fields, or missing change-record
+headings after additional work has already continued.
+
 ## Recommended Signal IDs
 
 - `operator-repeated-mistake-callout`

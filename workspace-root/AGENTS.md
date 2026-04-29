@@ -346,6 +346,11 @@ Only start implementation after that discussion narrows the target design.
 - If a previously closed lesson regresses, record the new candidate as a
   regression linked to the earlier closed candidate or after-action instead of
   treating it as an unrelated new issue.
+- After creating or editing any structured governance record, run:
+  - `python3 /home/mfshaf7/projects/workspace-governance/scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects`
+  before continuing normal work. This applies to improvement candidates,
+  after-actions, delegation journals, workspace contracts, and owner-repo
+  change records.
 - Propose the best fix shape, justify why it is the best option, and wait for
   operator approval before implementing the closing control.
 - No repeated failure class should stay purely conversational. It should either
@@ -404,6 +409,7 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
   - `python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects`

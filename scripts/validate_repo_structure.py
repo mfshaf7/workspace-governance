@@ -86,6 +86,7 @@ REQUIRED_FILES = (
     "scripts/validate_intake.py",
     "scripts/validate_developer_integration.py",
     "scripts/validate_improvement_candidates.py",
+    "scripts/validate_structured_record.py",
     "scripts/audit_improvement_signals.py",
     "scripts/validate_learning_closure.py",
     "scripts/validate_component_contracts.py",

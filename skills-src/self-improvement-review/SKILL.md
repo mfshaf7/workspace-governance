@@ -45,6 +45,9 @@ evidence, host drift detection, testing seams, or operator reliability.
      have been proven before workaround analysis
    - delegated execution crossed packet scope, write-scope, live-control, or
      work-tracking boundaries
+   - after creating or editing a structured record, immediately run
+     `python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects`
+     before continuing normal work
 6. If the miss regresses a lesson that was already treated as closed:
    - record it as a regression candidate, not as a vague new issue
    - set `regression_of` to the earlier closed candidate or after-action
@@ -64,6 +67,7 @@ evidence, host drift detection, testing seams, or operator reliability.
 12. Validate both the candidate layer and learning closure:
 
 ```bash
+python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
 ```
@@ -100,5 +104,8 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
 - Do not close a lesson without linking the actual control changes that landed.
 - Do not bury architecture or workflow doctrine changes in the record alone; add
   the ADR, contract, validator, runbook, or skill update too.
+- Do not author improvement candidates, after-actions, delegation journals, or
+  change records from memory and wait for broad validation later; run the
+  structured-record preflight on the touched file immediately.
 - Open lessons are allowed, but only with an explicit owner, due date, and next
   control to land.

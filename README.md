@@ -268,6 +268,18 @@ Those stay in the owning repos:
 9. If repo ownership or routing changed, update the owning repo docs in the
    same work.
 
+When a structured record is created or edited, validate that exact file before
+continuing broader work:
+
+```bash
+python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects
+```
+
+Use this for improvement candidates, after-actions, delegation journals,
+workspace contracts, and owner-repo change records. It exists to stop
+memory-authored record mistakes before they turn into repeated validation
+failures later in the task.
+
 When the workspace is being described as clean, restart-ready, or post-merge
 retired, the stricter branch lifecycle gate must pass too:
 
@@ -314,6 +326,7 @@ python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/pr
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
 python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
@@ -334,7 +347,7 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects -
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```
 
 ## Read First
