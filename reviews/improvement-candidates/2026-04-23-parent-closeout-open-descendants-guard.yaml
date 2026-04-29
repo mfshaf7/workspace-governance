@@ -7,7 +7,7 @@ summary: A parent ART item was closed while child work remained open because the
   completion path did not validate descendants and the broker execution summary skipped
   later work packages after the first OpenProject page.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -38,10 +38,26 @@ signals:
     after completion'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Completion now rejects parent work-item closeout while descendants remain outside done or retired.
+  - type: test
+    path: operator-orchestration-service/test/openproject-client.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers `completion_open_descendants` rejection for parent completion with open descendants.
+  - type: validator
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: ART quality now flags done work items and initiatives that still hide open descendants.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Documents parent completion fail-closed behavior for descendants outside done or retired.
+  note: Closed after broker completion, tests, ART quality checks, and API contract
+    docs all enforce parent-closeout descendant honesty.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-26'
-  note: Land fail-closed broker completion and ART validator controls, then confirm
-    parent work cannot close with descendants outside done or retired.
+  owner_repo: null
+  due_on: null
+  note: null

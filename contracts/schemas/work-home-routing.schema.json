@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "work_home_routing"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "work_home_routing": {
+      "type": "object",
+      "required": [
+        "owner_repo",
+        "purpose",
+        "applies_to",
+        "non_goals",
+        "classification_order",
+        "routing_homes",
+        "classes",
+        "evidence_relationship",
+        "examples"
+      ],
+      "properties": {
+        "owner_repo": { "type": "string" },
+        "purpose": { "type": "string", "minLength": 1 },
+        "applies_to": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "non_goals": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "classification_order": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "routing_homes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["description", "system_of_record"],
+            "properties": {
+              "description": { "type": "string", "minLength": 1 },
+              "system_of_record": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "classes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "routing_home",
+              "trigger",
+              "required_action",
+              "proportionality_rule"
+            ],
+            "properties": {
+              "routing_home": { "type": "string", "minLength": 1 },
+              "trigger": { "type": "string", "minLength": 1 },
+              "required_action": { "type": "string", "minLength": 1 },
+              "proportionality_rule": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "evidence_relationship": {
+          "type": "object",
+          "required": [
+            "art_record",
+            "owner_repo_change_record",
+            "improvement_candidate",
+            "handoff"
+          ],
+          "properties": {
+            "art_record": { "type": "string", "minLength": 1 },
+            "owner_repo_change_record": { "type": "string", "minLength": 1 },
+            "improvement_candidate": { "type": "string", "minLength": 1 },
+            "handoff": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["scenario", "class", "owner_repo", "result"],
+            "properties": {
+              "scenario": { "type": "string", "minLength": 1 },
+              "class": { "type": "string", "minLength": 1 },
+              "owner_repo": { "type": "string", "minLength": 1 },
+              "result": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

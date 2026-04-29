@@ -1,0 +1,144 @@
+schema_version: 1
+work_home_routing:
+  owner_repo: workspace-governance
+  purpose: >
+    Classify meaningful workspace work before execution so the work lands in the
+    right home without forcing every small repo-local change into the ART.
+  applies_to:
+    - meaningful source, runtime, platform, workflow, governance, or security work
+    - late-discovered work that was already performed but was not classified first
+    - plumbing work that changes shared controls, environments, operators, or evidence
+  non_goals:
+    - replace owner-repo change records
+    - force trivial local edits into Workspace Delivery ART
+    - let accepted initiative work bypass ART because it is called plumbing
+  classification_order:
+    - active_incident_or_blocker
+    - active_art_slice
+    - meaningful_same_initiative_expansion
+    - platform_or_workflow_plumbing
+    - owner_repo_maintenance
+    - new_business_or_architecture_idea
+    - late_discovered_unclassified_work
+  routing_homes:
+    art:
+      description: Workspace Delivery ART work item under the accepted initiative.
+      system_of_record: Workspace Delivery ART
+    owner_repo:
+      description: Owner-repo branch, PR, and local evidence without a new ART item.
+      system_of_record: owning Git repository
+    workspace_proposals:
+      description: Workspace Proposals intake before acceptance into delivery.
+      system_of_record: Workspace Proposals
+    blocker_or_risk:
+      description: ART blocker, defect, or risk record before adjacent execution continues.
+      system_of_record: Workspace Delivery ART
+  classes:
+    active_art_slice:
+      routing_home: art
+      trigger: >
+        Work is already inside an accepted ART initiative and materially changes
+        the initiative outcome, controls, runtime behavior, or completion evidence.
+      required_action: >
+        Use the existing ART item when the change is within the same done
+        boundary; otherwise create or use the smallest child item with the real
+        owner repo, delivery team, Target PI, and iteration.
+      proportionality_rule: >
+        Do not create a new item for a tiny same-slice correction, but do not
+        hide a distinct owner, review, or validation boundary inside another
+        item.
+    meaningful_same_initiative_expansion:
+      routing_home: art
+      trigger: >
+        A new defect, control gap, or follow-on slice is discovered while
+        executing an accepted initiative and it is required for honest
+        completion.
+      required_action: >
+        Add a Defect, User story, or Feature under the active Epic according to
+        the real delivery shape before continuing adjacent execution.
+      proportionality_rule: >
+        Expansion must be explicit when it changes scope, owner, review path,
+        or validation evidence; otherwise absorb it into the active item and
+        mention it in completion evidence.
+    owner_repo_maintenance:
+      routing_home: owner_repo
+      trigger: >
+        Work is repo-local maintenance outside an accepted ART initiative and
+        does not change shared platform, operator, security, or workspace
+        governance behavior.
+      required_action: >
+        Use the owner repo's normal branch, PR, validation, and change-record
+        discipline when required by that repo.
+      proportionality_rule: >
+        Do not create ART structure just to track low-risk local maintenance;
+        ART is for accepted delivery work, not every commit.
+    platform_or_workflow_plumbing:
+      routing_home: art
+      trigger: >
+        Plumbing changes shared runtime, OpenProject/ART adapters, workflow
+        surfaces, control-plane behavior, observability, identity, secrets,
+        promotion, or operator evidence paths.
+      required_action: >
+        If tied to an accepted initiative, represent it in ART with the owning
+        repo and validation boundary. If not tied to accepted work, route it
+        through Workspace Proposals or architecture discussion first.
+      proportionality_rule: >
+        The word plumbing does not make work invisible. Classify by operational
+        impact, owner boundary, and validation burden.
+    new_business_or_architecture_idea:
+      routing_home: workspace_proposals
+      trigger: >
+        The work is a new business outcome, architecture direction, product,
+        shared component, or major control-plane capability not already accepted
+        into ART.
+      required_action: >
+        Capture and classify through Workspace Proposals before decomposing into
+        delivery items.
+      proportionality_rule: >
+        Do not create execution stories before the idea has an accepted home.
+    active_incident_or_blocker:
+      routing_home: blocker_or_risk
+      trigger: >
+        Execution cannot proceed honestly because a live dependency, workflow
+        control, environment, or safety concern blocks the current item.
+      required_action: >
+        Record the blocker on the affected item. Use a Defect for the fix when
+        there is a concrete broken control, and a Risk when exposure is broader
+        than one item.
+      proportionality_rule: >
+        Do not keep adjacent mutation going while the current front is blocked;
+        record the blocker first, then repair with context.
+    late_discovered_unclassified_work:
+      routing_home: art
+      trigger: >
+        A human or agent already performed meaningful work without applying this
+        classification first.
+      required_action: >
+        Reconcile by classifying the work after discovery, then either attach it
+        to the active item evidence, create a compensating ART item, or route it
+        to owner-repo maintenance according to the same classes.
+      proportionality_rule: >
+        Important unclassified work is not discarded, but its late discovery is
+        evidence that the classification gate was skipped.
+  evidence_relationship:
+    art_record: Work-state, scope, blocker, risk, and completion truth.
+    owner_repo_change_record: Implementation, runtime, security, or behavior evidence.
+    improvement_candidate: Repeated workflow miss or control failure signal.
+    handoff: Session continuity when meaningful pending work remains.
+  examples:
+    - scenario: Fix a typo in one owner-repo README outside active initiative work.
+      class: owner_repo_maintenance
+      owner_repo: workspace-governance
+      result: Owner-repo PR only; no ART item unless the typo is part of accepted ART scope.
+    - scenario: Repair the platform observability stack.
+      class: platform_or_workflow_plumbing
+      owner_repo: platform-engineering
+      result: ART item if this is accepted initiative work; otherwise Workspace Proposal or architecture discussion before execution.
+    - scenario: Broker ART adapter drops Target PI during active #362 execution.
+      class: meaningful_same_initiative_expansion
+      owner_repo: operator-orchestration-service
+      result: Defect child under the active ART Feature with live repair proof.
+    - scenario: Human operator makes important plumbing changes without recording the work home.
+      class: late_discovered_unclassified_work
+      owner_repo: workspace-governance
+      result: Reconcile the work into the active item evidence or create a compensating item; do not ignore the work because the rule was missed.

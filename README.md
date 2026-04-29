@@ -131,6 +131,11 @@ For delegated execution, the workspace expects a governed task packet,
 disjoint write scope, main-agent-only authority boundaries, and an audit
 journal. Parallel work is allowed, but it is not supposed to be improvised.
 
+For deciding where meaningful work belongs before execution, use the
+proportional work-home routing contract:
+
+- [docs/work-home-routing-contract.md](docs/work-home-routing-contract.md)
+
 For serious failure diagnosis, the workspace uses one order of operations
 instead of symptom-driven debugging:
 
