@@ -215,6 +215,11 @@ restart-ready, the branch lifecycle audit must pass in strict clean mode so
 stale branches, pinned worktrees, and remote branches without an open PR or
 documented exception do not linger behind the real work.
 
+Session handoffs are local restart-continuity state. Use only
+`workspace-governance/docs/archive/session-handoff-current.md`, keep zero or
+one handoff at a time, and remove stale handoffs when the checkpoint is no
+longer current.
+
 `dev-integration` profiles also have a lifecycle now:
 
 - `proposed`

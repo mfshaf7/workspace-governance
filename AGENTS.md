@@ -128,11 +128,16 @@ Route those changes back to the owner repos.
   tree has been refreshed. Do not treat merged skill source alone as a complete
   runtime behavior change.
 - If a broad workspace-level discussion is being resumed after a restart, check
-  the latest record under `docs/archive/session-handoff-*.md` before assuming
+  local `docs/archive/session-handoff-current.md` if it exists before assuming
   the chat thread is the only source of pending context.
 - If a session is likely to restart while meaningful workspace-level pending
-  items remain, create or update a handoff record under
-  `docs/archive/session-handoff-*.md` before closing.
+  items remain, create or refresh the single local-only handoff record at
+  `docs/archive/session-handoff-current.md` before closing.
+- Session handoffs are ignored local continuity state, not durable Git-tracked
+  archive records.
+- Keep zero or one session handoff at a time. Remove stale
+  `docs/archive/session-handoff-*.md` records instead of accumulating dated
+  files.
 - Before telling the operator that a restart is safe or recommended, run an
   explicit restart-readiness check.
 - If meaningful workspace-level local-only state remains, refresh the current

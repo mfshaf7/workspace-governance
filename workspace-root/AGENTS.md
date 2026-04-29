@@ -243,8 +243,14 @@ Only start implementation after that discussion narrows the target design.
   sync.
 - Skill-source changes affect future sessions only after that install step.
 - If a restart is likely while meaningful workspace-level pending items remain,
-  create or update the latest `workspace-governance/docs/archive/session-handoff-*.md`
-  record before closing the session.
+  create or refresh the single local-only
+  `workspace-governance/docs/archive/session-handoff-current.md` record before
+  closing the session.
+- Session handoffs are ignored local continuity state, not durable Git-tracked
+  archive records.
+- Keep zero or one session handoff at a time. Remove stale
+  `workspace-governance/docs/archive/session-handoff-*.md` records instead of
+  accumulating dated files.
 - Before telling the operator that a restart is safe or recommended, run an
   explicit restart-readiness check.
 - If meaningful workspace-level local-only state remains, refresh the current
