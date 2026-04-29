@@ -1,0 +1,107 @@
+schema_version: 1
+governed_intake_assist:
+  owner_repo: workspace-governance
+  primary_operator_surface: docs/governed-intake-assist.md
+  platform_contract_refs:
+    profile_registry:
+      repo: platform-engineering
+      path: security/governed-ai-model-profiles.yaml
+    access_plane:
+      repo: platform-engineering
+      path: security/governed-ai-access-plane.yaml
+    runtime_assist_contract:
+      repo: platform-engineering
+      path: security/governed-ai-runtime-assist-contract.yaml
+    security_review:
+      repo: security-architecture
+      path: docs/reviews/platform/2026-04-29-bounded-governed-ai-runtime-assist-activation.md
+  consumer:
+    caller_id: workspace-governance/intake-assist
+    caller_repo: workspace-governance
+    caller_workflow: governed-intake-assist
+    purpose: workspace-intake-assist
+    profile_id: intake-classifier-v1
+    invocation_path: governed-ai-gateway
+    output_schema_ref:
+      repo: workspace-governance
+      path: contracts/schemas/intake-ai-suggestion.schema.json
+    allowed_data_scope:
+      - repo metadata
+      - top-level manifests
+      - README excerpts
+      - AGENTS excerpts
+      - operator-supplied intake notes
+  activation_state:
+    source_contract_status: source-defined
+    live_consumption_allowed: false
+    reason: >
+      The workspace consumer contract is defined, but live AI-assisted intake
+      remains blocked until the platform profile is active, the governed access
+      plane is deployed, caller identity and audit emission are live, provider
+      bypass is blocked, and security review approves activation.
+    required_live_gates:
+      - profile-active
+      - access-plane-live
+      - identity-boundary-live
+      - audit-retention-live
+      - provider-egress-blocked
+      - security-delta-review-current
+  suggestion_contract:
+    authority: suggestion-only
+    autonomous_mutation_allowed: false
+    structured_output_schema_ref:
+      repo: workspace-governance
+      path: contracts/schemas/intake-ai-suggestion.schema.json
+    allowed_decisions:
+      - out-of-scope
+      - proposed
+      - admitted
+    denied_actions:
+      - model-output-direct-mutation
+      - direct-provider-client
+      - repo-local-provider-secret
+      - unaudited-operator-acceptance
+      - rejected-suggestion-register-write
+  operator_acceptance:
+    human_approval_required: true
+    acceptance_required_before_workspace_truth_update: true
+    allowed_acceptance_states_for_truth_update:
+      - accepted
+      - overridden
+    override_requires_reason: true
+    required_fields:
+      - accepted_by
+      - accepted_at
+      - decision_id
+      - suggested_decision
+      - operator_decision
+      - acceptance_state
+      - audit_ref
+  workspace_truth_updates:
+    allowed_targets:
+      - contracts/intake-register.yaml
+    allowed_decision_sources:
+      - operator
+      - ai-suggested
+    ai_suggested_requires_active_profile: true
+    ai_suggested_requires_operator_acceptance: true
+    write_authority: governed workflow after operator approval
+    forbidden_actions:
+      - direct model write to canonical contracts
+      - provider credentials in workspace-governance
+      - unaccepted AI suggestion in intake-register.yaml
+      - bypassing intake-policy.yaml status semantics
+  audit_contract:
+    required_fields:
+      - event_time
+      - correlation_id
+      - caller_identity
+      - operator_identity
+      - approved_profile_id
+      - invocation_path
+      - purpose
+      - output_schema_ref
+      - policy_decision
+      - outcome
+      - operator_acceptance_state
+      - override_reason

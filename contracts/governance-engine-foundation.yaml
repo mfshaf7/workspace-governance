@@ -88,11 +88,13 @@ governance_engine_foundation:
       - contracts/repo-rules/
     model_access_and_audit:
       profile_registry_ref: platform-engineering/security/governed-ai-model-profiles.yaml
+      governed_intake_assist_contract_ref: workspace-governance/contracts/governed-intake-assist.yaml
       standards_refs:
         - platform-engineering/docs/standards/governed-ai-access-model.md
         - security-architecture/docs/standards/ai-security-and-governance.md
       required_controls:
         - approved profile plus governed invocation path
+        - workspace consumer contract before intake-assist use
         - workload caller identity distinct from operator acceptance identity
         - structured output contract for governance assistance
         - human approval for governance decisions
@@ -113,3 +115,4 @@ governance_engine_foundation:
       - shadow parity path explicit
       - packaging model explicit
       - governed model-access and audit contract reviewed
+      - governed intake-assist consumer contract explicit

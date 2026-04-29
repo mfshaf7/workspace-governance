@@ -373,6 +373,7 @@ python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_
 - [contracts/README.md](contracts/README.md)
 - [contracts/skills.yaml](contracts/skills.yaml)
 - [docs/delegated-execution.md](docs/delegated-execution.md)
+- [docs/governed-intake-assist.md](docs/governed-intake-assist.md)
 - [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
 - [reviews/improvement-candidates/README.md](reviews/improvement-candidates/README.md)
 - [reviews/after-action/README.md](reviews/after-action/README.md)

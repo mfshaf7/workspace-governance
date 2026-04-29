@@ -209,6 +209,8 @@ contract:
 
 - approved profile registry:
   - `platform-engineering/security/governed-ai-model-profiles.yaml`
+- workspace consumer contract:
+  - `contracts/governed-intake-assist.yaml`
 - governed access standard:
   - `platform-engineering/docs/standards/governed-ai-access-model.md`
 - security baseline:
@@ -217,6 +219,7 @@ contract:
 Required controls for any governed model path:
 
 - approved profile plus governed invocation path
+- workspace consumer contract before intake-assist use
 - workload caller identity distinct from operator acceptance identity
 - structured output contract for governance assistance
 - explicit human approval for governance decisions
@@ -233,9 +236,28 @@ The runtime track stays blocked until all of these are explicit:
 - shadow-parity path
 - packaging model
 - governed model-access and audit contract
+- governed intake-assist consumer contract
 
 That keeps runtime work behind real control-plane truth instead of letting a
 future agent runtime define the governance model by accident.
+
+### Governed Intake-Assist Consumer
+
+`workspace-governance` now defines the bounded intake-assist consumer contract
+separately from platform model access:
+
+- `contracts/governed-intake-assist.yaml`
+- `docs/governed-intake-assist.md`
+
+That contract binds the workspace caller identity, profile, purpose, output
+schema, operator-acceptance fields, workspace-truth update target, and audit
+minimum. It intentionally keeps live consumption disabled until the platform
+profile, governed access plane, audit sink, caller identity, provider-egress
+block, and security review gates are proven.
+
+This keeps AI assistance as a governed suggestion path. It does not let a model
+write `contracts/intake-register.yaml` directly, and it does not move provider
+credential custody into `workspace-governance`.
 
 ## Extraction Gate And Runtime Readiness
 
