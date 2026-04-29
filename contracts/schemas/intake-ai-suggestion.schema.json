@@ -8,8 +8,14 @@
     "decision_id",
     "generated_at",
     "confidence",
+    "caller_id",
+    "invocation_path",
+    "suggested_decision",
+    "operator_decision",
+    "acceptance_state",
     "accepted_by",
-    "accepted_at"
+    "accepted_at",
+    "audit_ref"
   ],
   "properties": {
     "profile_id": { "type": "string", "minLength": 1 },
@@ -17,8 +23,24 @@
     "decision_id": { "type": "string", "minLength": 1 },
     "generated_at": { "type": "string", "format": "date-time" },
     "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "caller_id": { "type": "string", "minLength": 1 },
+    "invocation_path": { "type": "string", "minLength": 1 },
+    "suggested_decision": {
+      "type": "string",
+      "enum": ["out-of-scope", "proposed", "admitted"]
+    },
+    "operator_decision": {
+      "type": "string",
+      "enum": ["out-of-scope", "proposed", "admitted"]
+    },
+    "acceptance_state": {
+      "type": "string",
+      "enum": ["accepted", "overridden"]
+    },
     "accepted_by": { "type": "string", "minLength": 1 },
-    "accepted_at": { "type": "string", "format": "date-time" }
+    "accepted_at": { "type": "string", "format": "date-time" },
+    "audit_ref": { "type": "string", "minLength": 1 },
+    "override_reason": { "type": "string", "minLength": 1 }
   },
   "additionalProperties": false
 }

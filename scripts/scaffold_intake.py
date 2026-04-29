@@ -12,10 +12,17 @@ DEFAULT_SECURITY_OWNER = "security-architecture"
 DEFAULT_DECISION_SOURCE = "operator"
 AI_POLICY_STATUS_CHOICES = ("active", "suspended", "retired", "exception")
 AI_CONFIDENCE_CHOICES = ("low", "medium", "high")
+INTAKE_STATUS_CHOICES = ("out-of-scope", "proposed", "admitted")
+AI_ACCEPTANCE_STATE_CHOICES = ("accepted", "overridden")
 
 
 def load_intake(repo_root: Path) -> dict:
     return load_yaml(repo_root / "contracts" / "intake-register.yaml")
+
+
+def load_governed_intake_assist(repo_root: Path) -> dict:
+    payload = load_yaml(repo_root / "contracts" / "governed-intake-assist.yaml")
+    return payload["governed_intake_assist"]
 
 
 def write_intake(repo_root: Path, payload: dict) -> None:
@@ -25,6 +32,13 @@ def write_intake(repo_root: Path, payload: dict) -> None:
 def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     if args.decision_source != "ai-suggested":
         return None
+    consumer = args.governed_intake_assist["consumer"]
+    suggested_decision = args.ai_suggested_decision or args.status
+    operator_decision = args.operator_decision or args.status
+    acceptance_state = args.acceptance_state
+    if acceptance_state is None:
+        acceptance_state = "accepted" if suggested_decision == operator_decision else "overridden"
+    audit_ref = args.ai_audit_ref or f"intake-register:{args.kind}:{args.name}:{args.ai_decision_id}"
     missing = [
         flag
         for flag, value in (
@@ -40,14 +54,35 @@ def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     ]
     if missing:
         raise SystemExit(" ".join(missing) + " required when --decision-source ai-suggested")
-    return {
+    if acceptance_state == "accepted" and suggested_decision != operator_decision:
+        raise SystemExit("accepted AI suggestions require --ai-suggested-decision to match --operator-decision/status")
+    if acceptance_state == "overridden" and suggested_decision == operator_decision:
+        raise SystemExit("overridden AI suggestions require --ai-suggested-decision to differ from --operator-decision/status")
+    if acceptance_state == "overridden" and not args.override_reason:
+        raise SystemExit("--override-reason required when --acceptance-state overridden")
+    if operator_decision != args.status:
+        raise SystemExit("--operator-decision must match the recorded --status for intake-register truth")
+    suggestion = {
         "profile_id": args.ai_profile_id,
         "policy_status": args.ai_policy_status,
         "decision_id": args.ai_decision_id,
         "generated_at": args.ai_generated_at,
         "confidence": args.ai_confidence,
+        "caller_id": args.ai_caller_id or consumer["caller_id"],
+        "invocation_path": args.ai_invocation_path or consumer["invocation_path"],
+        "suggested_decision": suggested_decision,
+        "operator_decision": operator_decision,
+        "acceptance_state": acceptance_state,
         "accepted_by": args.accepted_by,
         "accepted_at": args.accepted_at,
+        "audit_ref": audit_ref,
+    }
+    if args.override_reason:
+        suggestion["override_reason"] = args.override_reason
+    return {
+        key: value
+        for key, value in suggestion.items()
+        if value is not None
     }
 
 
@@ -144,6 +179,13 @@ def add_ai_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--ai-decision-id")
     parser.add_argument("--ai-generated-at")
     parser.add_argument("--ai-confidence", choices=AI_CONFIDENCE_CHOICES)
+    parser.add_argument("--ai-caller-id")
+    parser.add_argument("--ai-invocation-path")
+    parser.add_argument("--ai-suggested-decision", choices=INTAKE_STATUS_CHOICES)
+    parser.add_argument("--operator-decision", choices=INTAKE_STATUS_CHOICES)
+    parser.add_argument("--acceptance-state", choices=AI_ACCEPTANCE_STATE_CHOICES)
+    parser.add_argument("--override-reason")
+    parser.add_argument("--ai-audit-ref")
     parser.add_argument("--accepted-by")
     parser.add_argument("--accepted-at")
 
@@ -162,7 +204,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     repo_parser = subparsers.add_parser("repo", help="scaffold a repo intake entry")
     repo_parser.add_argument("--name", required=True)
-    repo_parser.add_argument("--status", choices=("out-of-scope", "proposed", "admitted"), default="proposed")
+    repo_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
     repo_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
     repo_parser.add_argument("--repo-class")
     repo_parser.add_argument("--requires-security-bindings", action="store_true")
@@ -173,7 +215,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     product_parser = subparsers.add_parser("product", help="scaffold a product intake entry")
     product_parser.add_argument("--name", required=True)
-    product_parser.add_argument("--status", choices=("out-of-scope", "proposed", "admitted"), default="proposed")
+    product_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
     product_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
     product_parser.add_argument("--platform-owner", default="platform-engineering")
     product_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
@@ -186,7 +228,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     component_parser = subparsers.add_parser("component", help="scaffold a component intake entry")
     component_parser.add_argument("--name", required=True)
-    component_parser.add_argument("--status", choices=("out-of-scope", "proposed", "admitted"), default="proposed")
+    component_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
     component_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
     component_parser.add_argument("--component-class")
     component_parser.add_argument("--owner-repo")
@@ -204,6 +246,7 @@ def main() -> int:
     args = parser.parse_args()
 
     repo_root = args.repo_root.resolve()
+    args.governed_intake_assist = load_governed_intake_assist(repo_root)
     register = load_intake(repo_root)
     entry_id = args.handler(register, args)
     write_intake(repo_root, register)

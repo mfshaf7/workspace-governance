@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governed_intake_assist"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "governed_intake_assist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "primary_operator_surface",
+        "platform_contract_refs",
+        "consumer",
+        "activation_state",
+        "suggestion_contract",
+        "operator_acceptance",
+        "workspace_truth_updates",
+        "audit_contract"
+      ],
+      "properties": {
+        "owner_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_operator_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform_contract_refs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile_registry",
+            "access_plane",
+            "runtime_assist_contract",
+            "security_review"
+          ],
+          "properties": {
+            "profile_registry": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "access_plane": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "runtime_assist_contract": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "security_review": {
+              "$ref": "#/$defs/repoPathRef"
+            }
+          }
+        },
+        "consumer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "caller_id",
+            "caller_repo",
+            "caller_workflow",
+            "purpose",
+            "profile_id",
+            "invocation_path",
+            "output_schema_ref",
+            "allowed_data_scope"
+          ],
+          "properties": {
+            "caller_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "caller_repo": {
+              "type": "string",
+              "minLength": 1
+            },
+            "caller_workflow": {
+              "type": "string",
+              "minLength": 1
+            },
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "invocation_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "output_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "allowed_data_scope": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "activation_state": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_contract_status",
+            "live_consumption_allowed",
+            "reason",
+            "required_live_gates"
+          ],
+          "properties": {
+            "source_contract_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "live_consumption_allowed": {
+              "type": "boolean"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required_live_gates": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "suggestion_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authority",
+            "autonomous_mutation_allowed",
+            "structured_output_schema_ref",
+            "allowed_decisions",
+            "denied_actions"
+          ],
+          "properties": {
+            "authority": {
+              "type": "string",
+              "minLength": 1
+            },
+            "autonomous_mutation_allowed": {
+              "type": "boolean"
+            },
+            "structured_output_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "allowed_decisions": {
+              "$ref": "#/$defs/stringList"
+            },
+            "denied_actions": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "operator_acceptance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "human_approval_required",
+            "acceptance_required_before_workspace_truth_update",
+            "allowed_acceptance_states_for_truth_update",
+            "override_requires_reason",
+            "required_fields"
+          ],
+          "properties": {
+            "human_approval_required": {
+              "type": "boolean"
+            },
+            "acceptance_required_before_workspace_truth_update": {
+              "type": "boolean"
+            },
+            "allowed_acceptance_states_for_truth_update": {
+              "$ref": "#/$defs/stringList"
+            },
+            "override_requires_reason": {
+              "type": "boolean"
+            },
+            "required_fields": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "workspace_truth_updates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "allowed_targets",
+            "allowed_decision_sources",
+            "ai_suggested_requires_active_profile",
+            "ai_suggested_requires_operator_acceptance",
+            "write_authority",
+            "forbidden_actions"
+          ],
+          "properties": {
+            "allowed_targets": {
+              "$ref": "#/$defs/stringList"
+            },
+            "allowed_decision_sources": {
+              "$ref": "#/$defs/stringList"
+            },
+            "ai_suggested_requires_active_profile": {
+              "type": "boolean"
+            },
+            "ai_suggested_requires_operator_acceptance": {
+              "type": "boolean"
+            },
+            "write_authority": {
+              "type": "string",
+              "minLength": 1
+            },
+            "forbidden_actions": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        },
+        "audit_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_fields"
+          ],
+          "properties": {
+            "required_fields": {
+              "$ref": "#/$defs/stringList"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "repoPathRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "path"
+      ],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

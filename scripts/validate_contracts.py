@@ -56,6 +56,7 @@ def main() -> int:
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
+        "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
         "developer_integration_policy": repo_root / "contracts/developer-integration-policy.yaml",
         "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
@@ -93,6 +94,7 @@ def main() -> int:
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
+    governed_intake_assist = contracts["governed_intake_assist"]["governed_intake_assist"]
     developer_integration_policy = contracts["developer_integration_policy"]
     developer_integration_profiles = contracts["developer_integration_profiles"]
     delegation_policy = contracts["delegation_policy"]
@@ -137,6 +139,187 @@ def main() -> int:
     if intake_statuses != expected_intake_statuses:
         errors.append(
             "contracts/intake-policy.yaml: statuses must be exactly out-of-scope, proposed, admitted"
+        )
+    expected_governed_intake_assist_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/governed-intake-assist.yaml",
+    }
+    actual_governed_intake_assist_ref = intake_policy["ai_suggestions"][
+        "governed_intake_assist_contract"
+    ]
+    if actual_governed_intake_assist_ref != expected_governed_intake_assist_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: ai_suggestions.governed_intake_assist_contract "
+            "must point to workspace-governance/contracts/governed-intake-assist.yaml"
+        )
+    if governed_intake_assist["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: owner_repo must be 'workspace-governance'"
+        )
+    primary_operator_surface = repo_root / governed_intake_assist["primary_operator_surface"]
+    if primary_operator_surface.suffix != ".md" or not primary_operator_surface.exists():
+        errors.append(
+            "contracts/governed-intake-assist.yaml: primary_operator_surface must point to an existing markdown operator surface"
+        )
+    governed_intake_consumer = governed_intake_assist["consumer"]
+    governed_output_schema_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/schemas/intake-ai-suggestion.schema.json",
+    }
+    if governed_intake_consumer["caller_id"] != "workspace-governance/intake-assist":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.caller_id must be workspace-governance/intake-assist"
+        )
+    if governed_intake_consumer["caller_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.caller_repo must be workspace-governance"
+        )
+    if governed_intake_consumer["purpose"] != "workspace-intake-assist":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.purpose must be workspace-intake-assist"
+        )
+    if governed_intake_consumer["profile_id"] != "intake-classifier-v1":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.profile_id must be intake-classifier-v1"
+        )
+    if governed_intake_consumer["invocation_path"] != "governed-ai-gateway":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.invocation_path must be governed-ai-gateway"
+        )
+    if governed_intake_consumer["output_schema_ref"] != governed_output_schema_ref:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.output_schema_ref must point to contracts/schemas/intake-ai-suggestion.schema.json"
+        )
+    if not (repo_root / governed_output_schema_ref["path"]).exists():
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.output_schema_ref path does not exist"
+        )
+    governed_contract_refs = governed_intake_assist["platform_contract_refs"]
+    if (
+        governed_contract_refs["profile_registry"]
+        != intake_policy["ai_suggestions"]["governed_profile_registry"]
+    ):
+        errors.append(
+            "contracts/governed-intake-assist.yaml: platform_contract_refs.profile_registry must match intake-policy governed_profile_registry"
+        )
+    expected_required_live_gates = {
+        "profile-active",
+        "access-plane-live",
+        "identity-boundary-live",
+        "audit-retention-live",
+        "provider-egress-blocked",
+        "security-delta-review-current",
+    }
+    activation_state = governed_intake_assist["activation_state"]
+    if activation_state["source_contract_status"] != "source-defined":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: activation_state.source_contract_status must be source-defined"
+        )
+    if activation_state["live_consumption_allowed"] is not False:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: activation_state.live_consumption_allowed must remain false until live gates are proven"
+        )
+    if set(activation_state["required_live_gates"]) != expected_required_live_gates:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: activation_state.required_live_gates must match the platform runtime-assist gate ids"
+        )
+    suggestion_contract = governed_intake_assist["suggestion_contract"]
+    if suggestion_contract["authority"] != "suggestion-only":
+        errors.append(
+            "contracts/governed-intake-assist.yaml: suggestion_contract.authority must be suggestion-only"
+        )
+    if suggestion_contract["autonomous_mutation_allowed"] is not False:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: suggestion_contract.autonomous_mutation_allowed must be false"
+        )
+    if suggestion_contract["structured_output_schema_ref"] != governed_output_schema_ref:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: suggestion_contract.structured_output_schema_ref must match the consumer output schema"
+        )
+    if set(suggestion_contract["allowed_decisions"]) != expected_intake_statuses:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: suggestion_contract.allowed_decisions must match intake-policy statuses"
+        )
+    for denied_action in (
+        "model-output-direct-mutation",
+        "direct-provider-client",
+        "repo-local-provider-secret",
+        "unaudited-operator-acceptance",
+        "rejected-suggestion-register-write",
+    ):
+        if denied_action not in suggestion_contract["denied_actions"]:
+            errors.append(
+                "contracts/governed-intake-assist.yaml: suggestion_contract.denied_actions "
+                f"must include {denied_action!r}"
+            )
+    operator_acceptance = governed_intake_assist["operator_acceptance"]
+    if operator_acceptance["human_approval_required"] is not True:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: operator_acceptance.human_approval_required must be true"
+        )
+    if operator_acceptance["acceptance_required_before_workspace_truth_update"] is not True:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: operator_acceptance.acceptance_required_before_workspace_truth_update must be true"
+        )
+    if set(operator_acceptance["allowed_acceptance_states_for_truth_update"]) != {
+        "accepted",
+        "overridden",
+    }:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: operator_acceptance.allowed_acceptance_states_for_truth_update must be exactly accepted and overridden"
+        )
+    if operator_acceptance["override_requires_reason"] is not True:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: operator_acceptance.override_requires_reason must be true"
+        )
+    expected_operator_acceptance_fields = {
+        "accepted_by",
+        "accepted_at",
+        "decision_id",
+        "suggested_decision",
+        "operator_decision",
+        "acceptance_state",
+        "audit_ref",
+    }
+    if set(operator_acceptance["required_fields"]) != expected_operator_acceptance_fields:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: operator_acceptance.required_fields must be exactly "
+            + ", ".join(sorted(expected_operator_acceptance_fields))
+        )
+    workspace_truth_updates = governed_intake_assist["workspace_truth_updates"]
+    if set(workspace_truth_updates["allowed_targets"]) != {"contracts/intake-register.yaml"}:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: workspace_truth_updates.allowed_targets must be exactly contracts/intake-register.yaml"
+        )
+    if set(workspace_truth_updates["allowed_decision_sources"]) != {"operator", "ai-suggested"}:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: workspace_truth_updates.allowed_decision_sources must be exactly operator and ai-suggested"
+        )
+    if workspace_truth_updates["ai_suggested_requires_active_profile"] is not True:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: workspace_truth_updates.ai_suggested_requires_active_profile must be true"
+        )
+    if workspace_truth_updates["ai_suggested_requires_operator_acceptance"] is not True:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: workspace_truth_updates.ai_suggested_requires_operator_acceptance must be true"
+        )
+    expected_governed_audit_fields = {
+        "event_time",
+        "correlation_id",
+        "caller_identity",
+        "operator_identity",
+        "approved_profile_id",
+        "invocation_path",
+        "purpose",
+        "output_schema_ref",
+        "policy_decision",
+        "outcome",
+        "operator_acceptance_state",
+        "override_reason",
+    }
+    if set(governed_intake_assist["audit_contract"]["required_fields"]) != expected_governed_audit_fields:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: audit_contract.required_fields must match the platform governed-AI audit minimum"
         )
 
     expected_devint_actions = {"up", "status", "smoke", "down", "reset", "promote_check"}
@@ -988,8 +1171,16 @@ def main() -> int:
     model_access_and_audit = governance_engine_foundation["runtime_foundation"][
         "model_access_and_audit"
     ]
+    if (
+        model_access_and_audit["governed_intake_assist_contract_ref"]
+        != "workspace-governance/contracts/governed-intake-assist.yaml"
+    ):
+        errors.append(
+            "contracts/governance-engine-foundation.yaml: runtime_foundation.model_access_and_audit.governed_intake_assist_contract_ref must point to workspace-governance/contracts/governed-intake-assist.yaml"
+        )
     expected_required_controls = {
         "approved profile plus governed invocation path",
+        "workspace consumer contract before intake-assist use",
         "workload caller identity distinct from operator acceptance identity",
         "structured output contract for governance assistance",
         "human approval for governance decisions",
@@ -1022,6 +1213,7 @@ def main() -> int:
         "shadow parity path explicit",
         "packaging model explicit",
         "governed model-access and audit contract reviewed",
+        "governed intake-assist consumer contract explicit",
     }
     actual_sequencing_prerequisites = set(
         governance_engine_foundation["runtime_foundation"]["sequencing_prerequisites"]
@@ -1039,9 +1231,12 @@ def main() -> int:
     )
     required_cross_repo_refs = {
         model_access_and_audit["profile_registry_ref"],
+        model_access_and_audit["governed_intake_assist_contract_ref"],
         *model_access_and_audit["standards_refs"],
         governance_engine_extraction_gate["security_review_ref"],
     }
+    for ref in governed_contract_refs.values():
+        required_cross_repo_refs.add(f"{ref['repo']}/{ref['path']}")
     if workspace_has_sibling_repos:
         for rel_path in sorted(required_cross_repo_refs):
             if not (workspace_root / rel_path).exists():

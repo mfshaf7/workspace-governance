@@ -37,6 +37,7 @@
       "required": [
         "enabled",
         "governed_profile_registry",
+        "governed_intake_assist_contract",
         "required_profile_status",
         "required_purposes",
         "require_human_approval"
@@ -44,6 +45,15 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "governed_profile_registry": {
+          "type": "object",
+          "required": ["repo", "path"],
+          "properties": {
+            "repo": { "type": "string", "minLength": 1 },
+            "path": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "governed_intake_assist_contract": {
           "type": "object",
           "required": ["repo", "path"],
           "properties": {

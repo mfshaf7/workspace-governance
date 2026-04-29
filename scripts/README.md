@@ -49,6 +49,10 @@
   - creates a new intake classification entry so a repo, product, or component
     is explicitly marked out-of-scope, proposed, or admitted before it joins
     the active contracts
+  - when `--decision-source ai-suggested` is used, records the governed
+    intake-assist profile, caller, invocation path, suggested decision,
+    operator decision, acceptance state, and audit reference required by
+    `contracts/governed-intake-assist.yaml`
 - `record_after_action.py`
   - creates a scaffolded after-action review record under `reviews/after-action/`
 - `record_improvement_candidate.py`
@@ -92,6 +96,9 @@
   - validates the intake register, explicit out-of-scope/proposed/admitted
     classifications, and the rule that new git repos at the workspace root
     must be classified before they become part of the governed system
+  - also validates that any AI-suggested intake entry is backed by the
+    workspace governed-intake-assist contract, platform governed-AI contracts,
+    active profile policy, and explicit operator acceptance
 - `validate_developer_integration.py`
   - validates the shared `dev-integration` lane contracts plus the registered
     repo-owned profile files and command paths

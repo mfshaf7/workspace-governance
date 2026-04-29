@@ -178,14 +178,19 @@
             "model_access_and_audit": {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "profile_registry_ref",
-                "standards_refs",
-                "required_controls",
-                "required_audit_fields"
+                "required": [
+                  "profile_registry_ref",
+                  "governed_intake_assist_contract_ref",
+                  "standards_refs",
+                  "required_controls",
+                  "required_audit_fields"
               ],
               "properties": {
                 "profile_registry_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "governed_intake_assist_contract_ref": {
                   "type": "string",
                   "minLength": 1
                 },

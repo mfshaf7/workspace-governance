@@ -17,6 +17,9 @@ ai_suggestions:
   governed_profile_registry:
     repo: platform-engineering
     path: security/governed-ai-model-profiles.yaml
+  governed_intake_assist_contract:
+    repo: workspace-governance
+    path: contracts/governed-intake-assist.yaml
   required_profile_status: active
   required_purposes:
     - workspace-intake-assist
