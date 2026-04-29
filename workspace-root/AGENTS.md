@@ -40,6 +40,9 @@ That means:
    - `python3 /home/mfshaf7/projects/workspace-governance/scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
 0.6 If a serious failure is being diagnosed, read:
    - `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
+0.7 Before doing meaningful work whose home is not already proven, classify it
+   through:
+   - `/home/mfshaf7/projects/workspace-governance/docs/work-home-routing-contract.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -115,6 +118,25 @@ Before editing, classify the task into one of these buckets:
 8. live environment drift under `~/.openclaw`, a running pod, or the host
 
 That classification determines the owner.
+
+Before executing meaningful work, also classify its work-tracking home through
+`workspace-governance/docs/work-home-routing-contract.md`:
+
+- accepted initiative work, blockers, risks, scope changes, and completion
+  truth belong in the `Workspace Delivery ART`
+- owner-repo-only maintenance belongs in the owner repo when it is outside an
+  accepted initiative and does not affect shared workflow, platform, security,
+  or workspace governance behavior
+- new business or architecture ideas start in `Workspace Proposals` before
+  decomposition
+- repeated workflow misses or control failures are recorded as improvement
+  candidates
+- plumbing work is classified by impact, not by the word `plumbing`
+
+Use the smallest home that preserves real owner, review, and validation
+boundaries. If important work was already done without this classification,
+reconcile it after discovery instead of pretending the skipped classification
+did not happen.
 
 ## Architecture Discussion Gate
 
@@ -265,6 +287,10 @@ Only start implementation after that discussion narrows the target design.
 - If a serious failure or unexpected runtime behavior is being diagnosed, use
   `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
   before deeper workaround analysis, redesign proposals, or code-level blame.
+- Do not state a named deployment, pod, route, work item, owner, control name,
+  root-cause label, or completion fact as true until it has been proven from
+  the authoritative source for that layer. If it has not been proven yet, say
+  it is unverified.
 - Contracts, templates, and standards may support that workflow, but they do
   not replace the primary operator instruction surface.
 - If the operator has to reconstruct the procedure from scattered files, the
@@ -315,6 +341,9 @@ Only start implementation after that discussion narrows the target design.
 
 - Prefer the owner that should hold the long-lived contract, not the repo where
   the patch is easiest.
+- Before meaningful work starts, use the work-home routing contract to decide
+  whether the work belongs in ART, an owner repo, Workspace Proposals, or the
+  blocker/risk/improvement path.
 - PI-committed initiative work must include at least one `PI Objective`.
 - A top-level `Epic` may remain unclassified only while it is the brand-new
   `new` + `Initiating` shell with blank `Target PI`.

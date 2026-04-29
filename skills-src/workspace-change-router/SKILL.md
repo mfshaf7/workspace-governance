@@ -15,6 +15,8 @@ workspace root and does not name the owning repo.
 - `contracts/products.yaml`
 - `contracts/components.yaml`
 - `contracts/task-types.yaml`
+- `contracts/work-home-routing.yaml`
+- `docs/work-home-routing-contract.md`
 - `workspace-root/AGENTS.md`
 
 ## Workflow
@@ -26,13 +28,23 @@ workspace root and does not name the owning repo.
    - Telegram behavior
    - host enforcement
    - security governance
-2. If the request depends on fresh workspace-level truth, run
+2. Classify the work-tracking home before execution:
+   - use `docs/work-home-routing-contract.md`
+   - route accepted initiative work, blockers, risks, scope changes, and
+     completion truth to `Workspace Delivery ART`
+   - route owner-repo-only maintenance to the owner repo when it is outside
+     accepted initiative work
+   - route new business or architecture ideas to `Workspace Proposals` before
+     decomposition
+   - route repeated workflow misses to improvement candidates
+   - classify plumbing by impact, not by name
+3. If the request depends on fresh workspace-level truth, run
    `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
    before relying on the local control-plane docs.
-3. Pick the owner repo from the contracts, not from convenience.
-4. Check whether the task already has an `active` `dev-integration` profile and
+4. Pick the owner repo from the contracts, not from convenience.
+5. Check whether the task already has an `active` `dev-integration` profile and
    prefer that lane for fast workflow or API iteration before stage.
-5. Check the product maturity before implying stage or prod flow.
+6. Check the product maturity before implying stage or prod flow.
    - if the request is a rehearsal, rollout drill, temporary prod bring-up, or
      restore-to-baseline exercise, classify the drill before implying scope:
      - `product-runtime-drill` when one governed product lane is under test
@@ -47,12 +59,12 @@ workspace root and does not name the owning repo.
      platform runbook or contract
    - do not default a broad stage/prod/restore request to OpenClaw-only just
      because OpenClaw has the most mature governed product promotion path
-6. Route to the owner repo's `AGENTS.md` and `README.md`.
-7. If the request changes more than one control plane, name the primary owner
+7. Route to the owner repo's `AGENTS.md` and `README.md`.
+8. If the request changes more than one control plane, name the primary owner
    and the required secondary updates.
-8. If the request spans multiple repos and one repo's validation or remote
+9. If the request spans multiple repos and one repo's validation or remote
    `main` state will gate another, use `cross-repo-sequencer`.
-9. If the task is changing an operator-facing command family, request path,
+10. If the task is changing an operator-facing command family, request path,
    approval path, or status/help surface, use `operator-workflow-design`.
 
 ## Guardrails
@@ -63,5 +75,7 @@ workspace root and does not name the owning repo.
 - Do not invent a governed promotion path for products that do not have one.
 - Do not treat a broad platform rehearsal as an OpenClaw-only workflow just
   because OpenClaw currently has the deepest governed product path.
+- Do not hide meaningful accepted work in owner-repo maintenance just because
+  it is plumbing.
 - If the task introduces a new product, shared component, or control plane,
   stop and use the architecture discussion gate first.
