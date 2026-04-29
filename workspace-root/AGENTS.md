@@ -64,6 +64,16 @@ That means:
   - read first:
     - `workspace-governance/AGENTS.md`
     - `workspace-governance/README.md`
+- `workspace-governance-control-fabric/`
+  - owns runtime implementation for the Workspace Governance Control Fabric,
+    including governance graph, validation planning, admission/readiness
+    evaluation, receipts, ledger, and control-fabric API/worker/CLI surfaces
+  - does not own workspace contracts, workspace-root guidance, platform
+    deployment authority, security standards, or Workspace Delivery ART
+    work-state truth
+  - read first:
+    - `workspace-governance-control-fabric/AGENTS.md`
+    - `workspace-governance-control-fabric/README.md`
 - `platform-engineering/`
   - owns shared platform structure, environment contracts, Argo-managed state,
     release governance, and product integration docs
@@ -180,6 +190,10 @@ Only start implementation after that discussion narrows the target design.
 
 - Cross-repo routing, workspace repo inventory, workspace-root guidance, and
   audit tooling belong in `workspace-governance/`.
+- Governance graph, validation planner, admission/readiness runtime, receipt
+  ledger implementation, and control-fabric API/worker/CLI surfaces belong in
+  `workspace-governance-control-fabric/` after the governing contracts exist in
+  `workspace-governance/`.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.

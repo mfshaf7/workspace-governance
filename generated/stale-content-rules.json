@@ -118,5 +118,27 @@
     "targets": [
       "README.md"
     ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "workspace-governance-control-fabric-readme-forbidden",
+    "pattern": "owns workspace contracts|owns platform deployment|owns security standards",
+    "repo_names": [
+      "workspace-governance-control-fabric"
+    ],
+    "targets": [
+      "README.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "workspace-governance-control-fabric-agents-forbidden",
+    "pattern": "owns workspace contracts|owns platform deployment|owns security standards",
+    "repo_names": [
+      "workspace-governance-control-fabric"
+    ],
+    "targets": [
+      "AGENTS.md"
+    ]
   }
 ]

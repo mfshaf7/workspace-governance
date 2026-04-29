@@ -37,6 +37,7 @@ delivery repo.
 - platform rollout logic
 - product or component code
 - product-specific runbooks
+- governance control-fabric runtime implementation
 - security standards or review evidence
 
 Route those changes back to the owner repos.
