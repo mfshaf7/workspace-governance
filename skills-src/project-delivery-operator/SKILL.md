@@ -190,6 +190,14 @@ Use this skill when a serious initiative is already running inside
    - if important work already happened without this classification, reconcile
      it through the same work-home contract instead of discarding the work or
      leaving the skipped classification invisible
+   - backfill is selective and evidence-driven; do not recreate all historical
+     work as ART items just because the rule now exists
+   - urgent human/operator bypass can be treated as containment only; reconcile
+     it before adjacent planned ART mutation continues when it affects scope,
+     blocker state, risk state, security posture, or completion evidence
+   - reconciliation must record the discovered change, authoritative evidence,
+     selected resolution path, owner repo, any ART/proposal/candidate refs, and
+     operator acceptance when required
 4. Keep PI honesty explicit.
    - do not leave work marked committed when it is really stretch or deferred
    - replan the PI when the active front changes materially

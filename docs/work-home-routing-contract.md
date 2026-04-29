@@ -32,9 +32,10 @@ Use the contract's `classification_order` before execution:
 1. `active_incident_or_blocker`
 2. `active_art_slice`
 3. `meaningful_same_initiative_expansion`
-4. `owner_repo_maintenance`
-5. `new_business_or_architecture_idea`
-6. `late_discovered_unclassified_work`
+4. `platform_or_workflow_plumbing`
+5. `owner_repo_maintenance`
+6. `new_business_or_architecture_idea`
+7. `late_discovered_unclassified_work`
 
 The order matters. A live blocker must be recorded before adjacent mutation
 continues. Accepted initiative work must stay in ART even when it feels like
@@ -88,6 +89,68 @@ Reconcile it by applying the same classes after discovery:
 
 Late reconciliation preserves useful work while still making the skipped
 classification visible.
+
+## Backfill And Bypass Reconciliation
+
+Backfill is selective and evidence-driven. Do not recreate all historical work
+as ART items just because the rule now exists.
+
+Mandatory reconciliation applies when late-discovered work affects:
+
+- the active initiative
+- an active blocker or risk
+- source or runtime state needed for current completion
+- security posture or auditability
+- a repeated control miss
+
+Closed historical work is reconciled only when it is needed to explain current
+state, security evidence, auditability, or an active follow-up.
+
+Human/operator bypass is allowed as urgent containment when the system is down
+or safety would be worse if work waited for full routing. That bypass is not a
+normal delivery path. Reconcile it before adjacent planned ART mutation
+continues when the bypass affects scope, blocker state, risk state, security
+posture, or completion evidence.
+
+Use these resolution paths:
+
+- `attach_to_active_item`: same-slice work with the same owner and validation
+  boundary; record it in the active item's evidence.
+- `create_compensating_art_item`: independent scope, owner repo, review path,
+  blocker, risk, validation proof, or completion evidence; create or use the
+  smallest honest ART item.
+- `route_owner_repo_maintenance`: local maintenance outside accepted ART scope;
+  keep it in the owner repo with normal validation and PR evidence.
+- `create_workspace_proposal`: new business or architecture work not yet
+  accepted; route it to intake before execution decomposition.
+- `record_improvement_candidate`: repeated, operator-called-out, or
+  machine-visible missed gate; capture the control failure with owner and due
+  date.
+- `open_defect_or_risk`: active broken-control or exposure state; record the
+  blocker, defect, or risk before continuing adjacent mutation.
+
+Every reconciliation decision should record:
+
+- when it was discovered
+- who discovered it
+- who or what made the original change
+- what changed
+- authoritative evidence refs
+- classification result
+- selected resolution path
+- owner repo
+- ART, proposal, candidate, defect, or risk refs
+- whether security or risk review is needed
+- operator acceptance when required
+
+Forbidden outcomes:
+
+- backdating ART or pretending approval existed before it did
+- discarding useful work solely because classification was late
+- hiding accepted initiative work in an owner-repo-only note
+- closing active work while known unclassified work still affects scope, risk,
+  blocker state, or completion evidence
+- treating urgent human bypass as normal process instead of reconciling it
 
 ## Boundary With Later Doctrine
 
