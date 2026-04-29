@@ -47,6 +47,31 @@
       "type": "authoritative-reference"
     },
     {
+      "from": "workspace-governance",
+      "to": "workspace-governance-control-fabric",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-governance-control-fabric",
+      "to": "workspace-governance",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-governance-control-fabric",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-governance-control-fabric",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-governance-control-fabric",
+      "to": "operator-orchestration-service",
+      "type": "authoritative-reference"
+    },
+    {
       "from": "platform-engineering",
       "to": "security-architecture",
       "type": "authoritative-reference"

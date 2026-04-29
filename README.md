@@ -214,15 +214,18 @@ counts as governed when it references an active approved model profile from
 - platform manifests, Argo apps, or environment contracts
 - product source, runtime packaging, or host-runtime implementation
 - repo-local operator runbooks
+- governance control-fabric runtime implementation
 - security standards or review outputs
 
 Those stay in the owning repos:
 
+- `workspace-governance-control-fabric/`
 - `platform-engineering/`
 - `openclaw-runtime-distribution/`
 - `openclaw-telegram-enhanced/`
 - `openclaw-host-bridge/`
 - `security-architecture/`
+- `operator-orchestration-service/`
 
 ## Repository Layout
 

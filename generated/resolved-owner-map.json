@@ -258,7 +258,8 @@
     "workspace-governance": {
       "allowed_authoritative_refs": [
         "platform-engineering",
-        "security-architecture"
+        "security-architecture",
+        "workspace-governance-control-fabric"
       ],
       "lifecycle": "active",
       "must_not_own": [
@@ -276,6 +277,31 @@
       "repo_class": "governance",
       "requires_security_bindings": false,
       "security_review_subject": true
+    },
+    "workspace-governance-control-fabric": {
+      "allowed_authoritative_refs": [
+        "workspace-governance",
+        "platform-engineering",
+        "security-architecture",
+        "operator-orchestration-service"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "canonical workspace contracts",
+        "workspace-root guidance",
+        "platform deployment authority",
+        "security standards",
+        "Workspace Delivery ART work-state truth"
+      ],
+      "owns": [
+        "governance control-fabric runtime implementation",
+        "governance graph and validation planning runtime",
+        "admission, readiness, receipt, and ledger runtime surfaces",
+        "policy and projection adapters for existing governance rules",
+        "control-fabric API, worker, and CLI implementation"
+      ],
+      "repo_class": "governance-runtime",
+      "requires_security_bindings": false
     }
   },
   "skills": {

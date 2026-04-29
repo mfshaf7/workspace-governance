@@ -12,13 +12,20 @@ Use it first for workspace orientation. Then route into the owning repo.
 
 ## Current System Shape
 
-The workspace currently has three durable control planes plus one fast local
-iteration lane:
+The workspace currently has three durable authority planes, one admitted
+governance runtime implementation fabric, plus one fast local iteration lane:
 
 - workspace governance
   - `workspace-governance/`
   - owns routing, contracts, workspace-root guidance, skills, audit tooling,
     intake classification, and self-improvement controls
+- workspace governance control fabric
+  - `workspace-governance-control-fabric/`
+  - owns runtime implementation for governance graph, validation planning,
+    admission/readiness evaluation, receipts, ledger, and control-fabric
+    API/worker/CLI surfaces
+  - consumes `workspace-governance` truth without owning contracts or
+    workspace-root guidance
 - shared platform and release authority
   - `platform-engineering/`
   - owns environment contracts, pinned SHAs and digests, Argo state, product
@@ -41,6 +48,8 @@ The workspace control plane is no longer treated as a vague repo-local bundle.
 The current target shape is explicit:
 
 - `workspace-governance` remains the central control-plane repo
+- `workspace-governance-control-fabric` is the admitted runtime implementation
+  repo for the governance control fabric, not a replacement source of truth
 - reusable governance-engine logic stays in canonical engine-owned sources
 - tenant-instance state stays explicit instead of being absorbed into the
   engine layer
@@ -55,6 +64,8 @@ Primary source:
 
 - `workspace-governance/`
   - workspace control plane
+- `workspace-governance-control-fabric/`
+  - governance runtime implementation fabric
 - `platform-engineering/`
   - shared platform and release authority
 - `security-architecture/`
@@ -203,6 +214,9 @@ operator interaction layer, not just a UI skin.
 
 - workspace routing, repo ownership, or governance drift
   - [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
+- governance graph, validation planning runtime, admission/readiness runtime,
+  receipt ledger, or control-fabric API/worker/CLI implementation
+  - [workspace-governance-control-fabric/README.md](/home/mfshaf7/projects/workspace-governance-control-fabric/README.md)
 - Codex GitHub review, PR flow, or read-only control-plane summary
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration
