@@ -285,6 +285,11 @@ workspace contracts, and owner-repo change records. It exists to stop
 memory-authored record mistakes before they turn into repeated validation
 failures later in the task.
 
+For owner-repo change records with `security_evidence`, the same preflight also
+checks that `security-architecture/registers/security-change-record-index.yaml`
+is current. Treat that generated security register as a dependency landing unit,
+not as a late audit cleanup.
+
 When the workspace is being described as clean, restart-ready, or post-merge
 retired, the stricter branch lifecycle gate must pass too:
 

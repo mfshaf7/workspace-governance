@@ -186,6 +186,9 @@ Route those changes back to the owner repos.
   before continuing normal work. This applies to improvement candidates,
   after-actions, delegation journals, workspace contracts, and owner-repo
   change records.
+- If an owner-repo change record declares `security_evidence`, that preflight
+  must also prove the generated `security-architecture` change-record index is
+  current before closure or merge sequencing continues.
 - Do not automatically implement the durable fix just because the candidate
   exists.
 - After recording the candidate, propose the best fix shape, justify why that

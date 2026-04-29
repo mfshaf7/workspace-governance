@@ -368,6 +368,9 @@ Only start implementation after that discussion narrows the target design.
   before continuing normal work. This applies to improvement candidates,
   after-actions, delegation journals, workspace contracts, and owner-repo
   change records.
+- If an owner-repo change record declares `security_evidence`, that preflight
+  must also prove the generated `security-architecture` change-record index is
+  current before closure or merge sequencing continues.
 - Propose the best fix shape, justify why it is the best option, and wait for
   operator approval before implementing the closing control.
 - No repeated failure class should stay purely conversational. It should either

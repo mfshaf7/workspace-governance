@@ -74,6 +74,12 @@ cohesive Epic when review and rollback boundaries are shared. Split the Landing
 Unit when the work crosses repos, owners, security posture, validation burden,
 or rollback boundaries.
 
+Security-evidenced owner-repo change records create a dependent security
+landing unit. If a change record declares `security_evidence`, the generated
+`security-architecture/registers/security-change-record-index.yaml` update must
+be checked and landed in the cross-repo sequence before workspace closure is
+claimed clean.
+
 Source-backed ART children should not be marked `done` until they are covered
 by a finalized Review Packet with merged PR evidence, approved direct-land
 evidence, or an equivalent durable landing record. Multiple children may close

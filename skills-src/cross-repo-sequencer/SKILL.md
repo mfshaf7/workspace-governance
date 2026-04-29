@@ -24,9 +24,14 @@ doctrine depends on another repo being merged first.
    - shared audits that read remote `main`
 3. Merge dependency repos first when a later repo's CI or validation reads
    those repos from remote `main`.
-4. If a dependent PR already failed for sequencing reasons, retrigger it only
+4. When an owner-repo change record declares `security_evidence`, treat the
+   generated `security-architecture/registers/security-change-record-index.yaml`
+   update as a required dependency landing unit. Run the structured-record
+   preflight for the change record and merge the security-architecture update
+   before claiming workspace audit or closure is clean.
+5. If a dependent PR already failed for sequencing reasons, retrigger it only
    after the dependency repos are actually merged.
-5. State the merge order explicitly in the user-facing progress updates and the
+6. State the merge order explicitly in the user-facing progress updates and the
    final close-out.
 
 ## Guardrails
@@ -36,3 +41,5 @@ doctrine depends on another repo being merged first.
   sequencing.
 - Do not hide dependency ordering in chat memory only; make it explicit while
   the work is in flight.
+- Do not treat a security-evidenced owner-repo record as complete while the
+  security-architecture generated change-record index is stale or unmerged.

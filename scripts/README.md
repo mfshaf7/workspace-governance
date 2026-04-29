@@ -73,6 +73,9 @@
     delegates to the owning full validator
   - use it after editing improvement candidates, after-actions, delegation
     journals, workspace contracts, or owner-repo change records
+  - when an owner-repo change record declares `security_evidence`, it also
+    requires the generated `security-architecture` change-record index to be
+    current before the record preflight can pass
 - `preflight_touched_records.py`
   - scans changed or explicit paths for structured governance records and
     owner-repo change records, then runs `validate_structured_record.py` on
