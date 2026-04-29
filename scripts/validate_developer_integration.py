@@ -40,6 +40,23 @@ REQUIRED_PERSISTENT_REQUEST_REQUIREMENTS = {
     "persistence.reset_semantics",
     "persistence.cutover_plan_when_upgrading",
 }
+REQUIRED_LIVE_MISS_KEYS = {
+    "owner_repo",
+    "purpose",
+    "return_to_dev_integration_when",
+    "route_to_platform_or_backend_boundary_when",
+    "governed_rehearsal_allowed_when",
+    "required_record_fields",
+}
+REQUIRED_LIVE_MISS_RECORD_FIELDS = {
+    "failed_operation",
+    "lane_where_seen",
+    "local_profile_evidence",
+    "live_boundary_evidence",
+    "selected_route",
+    "owner_repo",
+    "follow_up_record",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -61,6 +78,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     profile_lifecycle = policy["profile_lifecycle"]
     request_admission = policy["request_admission"]
     testing_policy = policy["testing"]["smoke"]
+    live_miss_escalation = policy.get("live_miss_escalation") or {}
     if required_actions != REQUIRED_ACTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
@@ -103,6 +121,32 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         errors.append(
             "contracts/developer-integration-policy.yaml: current_request_adapter.owner_repo must reference an active repo"
         )
+    missing_live_miss_keys = sorted(REQUIRED_LIVE_MISS_KEYS - set(live_miss_escalation))
+    if missing_live_miss_keys:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: live_miss_escalation missing keys "
+            + ", ".join(missing_live_miss_keys)
+        )
+    elif live_miss_escalation["owner_repo"] not in active_repos:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: live_miss_escalation.owner_repo must reference an active repo"
+        )
+    else:
+        for key in (
+            "return_to_dev_integration_when",
+            "route_to_platform_or_backend_boundary_when",
+            "governed_rehearsal_allowed_when",
+        ):
+            if not isinstance(live_miss_escalation.get(key), list) or not live_miss_escalation[key]:
+                errors.append(
+                    f"contracts/developer-integration-policy.yaml: live_miss_escalation.{key} must be a non-empty list"
+                )
+        record_fields = set(live_miss_escalation.get("required_record_fields") or [])
+        if record_fields != REQUIRED_LIVE_MISS_RECORD_FIELDS:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: live_miss_escalation.required_record_fields must be exactly "
+                + ", ".join(sorted(REQUIRED_LIVE_MISS_RECORD_FIELDS))
+            )
     allowed_smoke_mutation_modes = set(testing_policy["allowed_mutation_modes"])
     persistent_smoke_mutation_mode = testing_policy["persistent_profile_rule"][
         "mutation_mode_must_be"

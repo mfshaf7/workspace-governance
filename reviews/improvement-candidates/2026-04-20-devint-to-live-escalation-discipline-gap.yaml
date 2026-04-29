@@ -12,7 +12,7 @@ summary: >-
   stronger rule for when a profile-owned workflow must return to the
   disposable lane, and a clearer distinction between local workflow proof and
   live boundary proof.
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -49,20 +49,29 @@ signals:
       - 'conversation:2026-04-20-accepted-idea-delivery-live-rehearsal-required-multiple-broker-hardening-repins'
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/developer-integration-policy.yaml
+      owner_repo: workspace-governance
+      note: Adds live_miss_escalation routing for return-to-devint, platform/backend-boundary, or governed-rehearsal decisions.
+    - type: validator
+      path: workspace-governance/scripts/validate_developer_integration.py
+      owner_repo: workspace-governance
+      note: Fails the dev-integration contract when live_miss_escalation is missing or incomplete.
+    - type: doc
+      path: workspace-governance/docs/work-home-routing-contract.md
+      owner_repo: workspace-governance
+      note: Publishes the operator-facing classification rule for live misses after dev-integration proof.
+    - type: skill
+      path: workspace-governance/skills-src/dev-integration-first/SKILL.md
+      owner_repo: workspace-governance
+      note: Teaches future sessions to classify first serious live/shared-runtime misses before patching.
   note: >-
-    Candidate only. The durable closure shape still needs a decision on whether
-    to strengthen dev-integration-to-stage escalation rules in workspace
-    governance, expand the accepted-idea-delivery profile to model the
-    OpenProject boundary more faithfully, or classify some failures as
-    platform/OpenProject boundary issues immediately after the first live miss.
+    Still relevant, and closed by adding first-class live-miss escalation rules
+    to the dev-integration lane contract. The selected design is not to force
+    every miss back into devint; it classifies whether the miss belongs to the
+    profile-owned workflow, the platform/backend boundary, or governed rehearsal.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-30'
-  note: >-
-    Decide the closure shape for profile-owned workflow escalation after the
-    consume-to-PI-planning workflow lands: when a live miss must move back
-    into dev-integration, what evidence promotes a lane from local workflow
-    proof to live boundary proof, and when the remaining miss should be routed
-    to platform/OpenProject boundary investigation instead of more
-    workflow-specific fixes.
+  owner_repo: null
+  due_on: null
+  note: null

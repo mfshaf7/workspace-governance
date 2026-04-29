@@ -136,6 +136,11 @@ proportional work-home routing contract:
 
 - [docs/work-home-routing-contract.md](docs/work-home-routing-contract.md)
 
+Before proposing a new workspace-level control, workflow, validator, skill,
+product surface, or architecture capability, use:
+
+- [docs/recommendation-preflight.md](docs/recommendation-preflight.md)
+
 For serious failure diagnosis, the workspace uses one order of operations
 instead of symptom-driven debugging:
 

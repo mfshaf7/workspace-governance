@@ -10,6 +10,7 @@ delivery repo.
 
 - `README.md`
 - `docs/codex-github-review-and-automation.md`
+- `docs/recommendation-preflight.md`
 - `docs/troubleshooting-preflight.md`
 - `docs/delegated-execution.md`
 - `docs/self-improvement-escalation.md`

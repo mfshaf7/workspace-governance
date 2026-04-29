@@ -43,6 +43,9 @@ That means:
 0.7 Before doing meaningful work whose home is not already proven, classify it
    through:
    - `/home/mfshaf7/projects/workspace-governance/docs/work-home-routing-contract.md`
+0.8 If a new workspace-level control, workflow, validator, skill, product
+    surface, or architecture capability is being proposed, read:
+   - `/home/mfshaf7/projects/workspace-governance/docs/recommendation-preflight.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -308,6 +311,10 @@ Only start implementation after that discussion narrows the target design.
 - If a serious failure or unexpected runtime behavior is being diagnosed, use
   `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
   before deeper workaround analysis, redesign proposals, or code-level blame.
+- If a new workspace-level control, workflow, validator, skill, product
+  surface, or architecture capability is being recommended, run the
+  recommendation preflight first and state whether the result is `reuse`,
+  `extend`, `replace`, or `new`.
 - Do not state a named deployment, pod, route, work item, owner, control name,
   root-cause label, or completion fact as true until it has been proven from
   the authoritative source for that layer. If it has not been proven yet, say
@@ -349,6 +356,10 @@ Only start implementation after that discussion narrows the target design.
 - If active work becomes half-finished at the planning, control, or completion
   layer, record or update the improvement candidate before continuing normal
   execution.
+- After creating or editing several structured records or owner-repo change
+  records, run
+  `python3 /home/mfshaf7/projects/workspace-governance/scripts/preflight_touched_records.py --workspace-root /home/mfshaf7/projects --include-untracked`
+  before continuing normal execution.
 - If a previously closed lesson regresses, record the new candidate as a
   regression linked to the earlier closed candidate or after-action instead of
   treating it as an unrelated new issue.

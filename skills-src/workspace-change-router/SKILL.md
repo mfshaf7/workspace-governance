@@ -46,10 +46,13 @@ workspace root and does not name the owning repo.
 3. If the request depends on fresh workspace-level truth, run
    `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
    before relying on the local control-plane docs.
-4. Pick the owner repo from the contracts, not from convenience.
-5. Check whether the task already has an `active` `dev-integration` profile and
+4. Before proposing a new control, workflow, validator, skill, product surface,
+   or architecture capability, run `docs/recommendation-preflight.md` and state
+   whether the posture is `reuse`, `extend`, `replace`, or `new`.
+5. Pick the owner repo from the contracts, not from convenience.
+6. Check whether the task already has an `active` `dev-integration` profile and
    prefer that lane for fast workflow or API iteration before stage.
-6. Check the product maturity before implying stage or prod flow.
+7. Check the product maturity before implying stage or prod flow.
    - if the request is a rehearsal, rollout drill, temporary prod bring-up, or
      restore-to-baseline exercise, classify the drill before implying scope:
      - `product-runtime-drill` when one governed product lane is under test
@@ -64,12 +67,12 @@ workspace root and does not name the owning repo.
      platform runbook or contract
    - do not default a broad stage/prod/restore request to OpenClaw-only just
      because OpenClaw has the most mature governed product promotion path
-7. Route to the owner repo's `AGENTS.md` and `README.md`.
-8. If the request changes more than one control plane, name the primary owner
+8. Route to the owner repo's `AGENTS.md` and `README.md`.
+9. If the request changes more than one control plane, name the primary owner
    and the required secondary updates.
-9. If the request spans multiple repos and one repo's validation or remote
+10. If the request spans multiple repos and one repo's validation or remote
    `main` state will gate another, use `cross-repo-sequencer`.
-10. If the task is changing an operator-facing command family, request path,
+11. If the task is changing an operator-facing command family, request path,
    approval path, or status/help surface, use `operator-workflow-design`.
 
 ## Guardrails
@@ -82,5 +85,8 @@ workspace root and does not name the owning repo.
   because OpenClaw currently has the deepest governed product path.
 - Do not hide meaningful accepted work in owner-repo maintenance just because
   it is plumbing.
+- Do not propose a brand-new control surface before checking the existing skill
+  inventory, repo-rule primary surfaces, dev-integration profile docs, and
+  architecture/routing contracts.
 - If the task introduces a new product, shared component, or control plane,
   stop and use the architecture discussion gate first.

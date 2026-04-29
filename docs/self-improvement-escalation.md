@@ -81,6 +81,12 @@ exact record before continuing:
 python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects
 ```
 
+When several records were touched, or when the touched set is not obvious, run:
+
+```bash
+python3 scripts/preflight_touched_records.py --workspace-root /home/mfshaf7/projects --include-untracked
+```
+
 This is a stop-the-line preflight. Do not rely on a later full-repo validator
 to discover YAML parse errors, missing schema fields, or missing change-record
 headings after additional work has already continued.

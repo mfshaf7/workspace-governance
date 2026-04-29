@@ -35,6 +35,8 @@ Use this skill when the root cause is still unproven.
    - allowed values
    - supported mutation shape
    - operator doctrine
+   - for OpenProject broker mutation changes, prove the live form schema and
+     smallest faithful contract fixture before implementation or merge
 6. Only then inspect code truth.
 7. Do not expand into workaround or redesign analysis before those earlier
    layers are checked.
@@ -51,5 +53,7 @@ Use this skill when the root cause is still unproven.
   the live state.
 - Do not turn a wrapper failure, memory, or inference into a named root-cause
   claim.
+- Do not implement broker/OpenProject mutation changes before proving whether
+  the target live form field is writable or read-only.
 - Do not represent late discovery of a simpler precondition as normal bad luck.
 - Do not continue workaround analysis once an earlier failed layer is proven.

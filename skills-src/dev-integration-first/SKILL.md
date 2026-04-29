@@ -33,7 +33,19 @@ to be the right first lane.
    - source state from the participating repos
 6. Use stage only after the shape is already proven and the change has crossed
    back into reviewed commits plus governed promotion.
-7. When a profile uses `runtime.state_model: persistent`, treat its shared
+7. When a miss appears after local proof, classify it through
+   `contracts/developer-integration-policy.yaml` `live_miss_escalation` before
+   patching:
+   - return to `dev-integration` when workflow shape, operator inputs, or
+     backend write semantics are still changing and the profile can reproduce
+     the issue
+   - route to the platform or backend boundary when local proof already passed
+     and the remaining failure is identity, networking, persistence, form
+     writability, or platform projection behavior
+   - continue governed rehearsal only when reviewed commits and handoff
+     evidence exist and blocker, defect, or risk state has been recorded where
+     needed
+8. When a profile uses `runtime.state_model: persistent`, treat its shared
    `devint-smoke` action as read-only.
    - if a workflow still needs mutating smoke, look for or admit a separate
      disposable companion profile instead of pointing smoke at the persistent
@@ -43,6 +55,9 @@ to be the right first lane.
 
 - Do not route straight to stage when an active profile already exists for the
   same class of work.
+- Do not keep patching inside a live/shared runtime after the first serious
+  miss until the miss has been classified as profile-owned workflow work,
+  platform/backend boundary work, or governed rehearsal work.
 - Do not use `proposed`, `suspended`, or `retired` profiles as normal
   self-serve lanes.
 - Do not treat a dev-integration session as stage evidence.

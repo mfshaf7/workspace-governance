@@ -110,6 +110,31 @@ Examples:
   maintenance. A normal owner-repo PR is enough unless the repo rules require
   extra evidence.
 
+When plumbing is proposed because an existing workflow appears insufficient,
+run the recommendation preflight first:
+
+- [recommendation-preflight.md](recommendation-preflight.md)
+
+That preflight decides whether the right posture is `reuse`, `extend`,
+`replace`, or `new` before another control surface is invented.
+
+## Dev-Integration Live Misses
+
+When a workflow has an active `dev-integration` profile and a failure appears
+only after local proof, do not keep patching in the live/shared runtime by
+default.
+
+Use `contracts/developer-integration-policy.yaml` `live_miss_escalation` to
+choose one of three routes:
+
+- return to `dev-integration` when workflow shape, operator inputs, or backend
+  write semantics are still changing and the profile can reproduce the issue
+- route to the platform or backend boundary when local workflow proof already
+  passed and the remaining failure is identity, networking, persistence, form
+  writability, or platform projection behavior
+- continue governed rehearsal only when reviewed commits and handoff evidence
+  exist and blocker, defect, or risk state has been recorded where needed
+
 ## Late Discovery
 
 If a human operator or agent already performed important work without applying

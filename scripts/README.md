@@ -73,6 +73,12 @@
     delegates to the owning full validator
   - use it after editing improvement candidates, after-actions, delegation
     journals, workspace contracts, or owner-repo change records
+- `preflight_touched_records.py`
+  - scans changed or explicit paths for structured governance records and
+    owner-repo change records, then runs `validate_structured_record.py` on
+    every match
+  - use it after editing multiple records or when you need to prove no touched
+    record was skipped
 - `audit_improvement_signals.py`
   - audits machine-visible self-improvement signals such as missing declared
     primary operator workflow surfaces across active repos

@@ -7,7 +7,7 @@ summary: The first Codex-oriented recommendation pass under-read existing worksp
   skills, operator surfaces, and Telegram/Codex integration seams, which led to at
   least one redundant proposal and an incomplete view of what the workspace had already
   built.
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -37,14 +37,29 @@ signals:
     functionality may have been missed'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-03'
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/recommendation-preflight.md
+    owner_repo: workspace-governance
+    note: Requires existing-control inventory and an explicit reuse/extend/replace/new posture before recommending new workspace controls.
+  - type: skill
+    path: workspace-governance/skills-src/workspace-change-router/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes recommendation preflight part of workspace routing before new control proposals.
+  - type: skill
+    path: workspace-governance/skills-src/architecture-discussion-gate/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires architecture-shaping proposals to check existing controls before inventing new surfaces.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Adds recommendation-preflight to the workspace-root startup guidance for new sessions.
   note: >-
-    Still open; re-triaged during PR #78 because the original due date had
-    become a merge-blocking stale promise. Closure still requires a real future
-    recommendation-doctrine control that checks existing skills, repo-rule
-    primary operator surfaces, dev-integration docs, and Codex-adjacent runtime
-    hooks before proposing new capabilities.
+    Still relevant, but now closed by a durable recommendation preflight. Future
+    broad recommendations must prove existing contracts, skills, repo-rule
+    operator surfaces, dev-integration profiles, and architecture/routing docs
+    before proposing a new control surface.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

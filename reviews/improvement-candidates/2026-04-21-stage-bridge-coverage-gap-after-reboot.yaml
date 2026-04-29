@@ -12,7 +12,7 @@ summary: >-
   status surface does not include stage bridge request-path proof, and the
   stage bridge is disabled by default as an on-demand host service, so stage
   can look live while the real host-control path is dead.
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -52,18 +52,28 @@ signals:
       - 'journalctl:2026-04-21-openclaw-host-bridge-stage-service-started-only-after-manual-resume'
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: script
+      path: platform-engineering/products/openclaw/scripts/set_stage_environment_state.py
+      owner_repo: platform-engineering
+      note: Stage status and resume now validate the on-demand stage bridge service, health endpoint, and authenticated request path.
+    - type: runbook
+      path: platform-engineering/products/openclaw/runbooks/access-openclaw.md
+      owner_repo: platform-engineering
+      note: Documents bridge-aware stage resume/status and says degraded bridge state makes status fail.
+    - type: runbook
+      path: platform-engineering/products/openclaw/runbooks/promote-stage-to-prod.md
+      owner_repo: platform-engineering
+      note: Documents the stage bridge request-path readiness expectation before promotion.
+    - type: doc
+      path: platform-engineering/docs/runbooks/access-platform-uis.md
+      owner_repo: platform-engineering
+      note: Points operators at bridge-aware stage status rather than cluster-only state.
   note: >-
-    Candidate only. The durable closure shape still needs a decision on
-    whether stage status must become a full bridge-aware readiness check, stage
-    resume must reconcile bridge state automatically after host restart, or a
-    dedicated validator/smoke must prove the stage bridge request path before
-    stage is treated as active for Telegram host-control traffic.
+    Relevance check found this was stale rather than still open. Platform
+    controls now make OpenClaw stage status bridge-aware and fail when the
+    host-control request path is degraded while gateway is active.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-04-30'
-  note: >-
-    Decide the best closure shape for stage bridge survivability and truth
-    surfaces: whether to strengthen `set_stage_environment_state.py status`,
-    add a bridge-aware stage validator, add a host-restart recovery rule for
-    the stage bridge, or combine those controls.
+  owner_repo: null
+  due_on: null
+  note: null
