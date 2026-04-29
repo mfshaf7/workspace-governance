@@ -34,6 +34,7 @@ profiles:
       required_checks:
         - broker readiness
         - proposal backlog list read
+        - delivery artifact mutation draft workflow
         - proposal project verification
         - delivery-art project verification
     actions:
