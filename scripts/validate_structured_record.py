@@ -78,6 +78,24 @@ def is_change_record(path: Path, repo_root: Path) -> bool:
     )
 
 
+def markdown_front_matter(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return {}
+    parts = text.split("\n---\n", 1)
+    if len(parts) != 2:
+        return {}
+    loaded = yaml.safe_load(parts[0][4:]) or {}
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{path}: front matter must be a mapping")
+    return loaded
+
+
+def change_record_has_security_evidence(path: Path) -> bool:
+    metadata = markdown_front_matter(path)
+    return bool(metadata.get("security_evidence"))
+
+
 def validate_path(path: Path, *, workspace_root: Path, workspace_governance_root: Path) -> int:
     if not path.exists():
         print(f"{path}: path does not exist", file=sys.stderr)
@@ -174,6 +192,30 @@ def validate_path(path: Path, *, workspace_root: Path, workspace_governance_root
                 issues.append(
                     f"{path}: owning repo has no scripts/validate_governance_docs.py for change-record preflight",
                 )
+            if change_record_has_security_evidence(path):
+                security_repo = workspace_root / "security-architecture"
+                security_index_renderer = (
+                    security_repo / "scripts" / "render_security_change_record_index.py"
+                )
+                if not security_index_renderer.exists():
+                    issues.append(
+                        f"{path}: security_evidence requires {security_index_renderer}",
+                    )
+                else:
+                    commands.append(
+                        (
+                            [
+                                sys.executable,
+                                str(security_index_renderer),
+                                "--repo-root",
+                                str(security_repo),
+                                "--workspace-root",
+                                str(workspace_root),
+                                "--check",
+                            ],
+                            security_repo,
+                        ),
+                    )
     except (OSError, ValueError, yaml.YAMLError) as error:
         issues.append(str(error))
 

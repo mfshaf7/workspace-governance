@@ -29,6 +29,11 @@ Stop and discuss first when the request introduces:
 
 ## Discussion Outputs
 
+Before recommending a new control plane, product surface, workflow, or
+architecture capability, run the recommendation preflight in
+`docs/recommendation-preflight.md` and state whether the design should `reuse`,
+`extend`, `replace`, or create something `new`.
+
 Make these explicit before implementation:
 
 - target role in the platform

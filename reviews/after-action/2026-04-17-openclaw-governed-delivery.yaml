@@ -129,15 +129,29 @@ lessons:
     impact: >
       Rehearsal time was spent diagnosing host drift instead of validating the
       candidate, and late discovery increased rollout friction.
-    status: open
+    status: closed
     expected_control_types:
       - validator
       - workflow
       - runbook
-    control_refs: []
+    control_refs:
+      - type: script
+        path: platform-engineering/products/openclaw/scripts/set_stage_environment_state.py
+        owner_repo: platform-engineering
+        note: Stage resume/status validates the on-demand bridge service, health endpoint, and authenticated request path when gateway is active.
+      - type: runbook
+        path: platform-engineering/products/openclaw/runbooks/access-openclaw.md
+        owner_repo: platform-engineering
+        note: Documents bridge-aware stage resume and truthful status behavior for operators.
+      - type: runbook
+        path: platform-engineering/products/openclaw/runbooks/promote-stage-to-prod.md
+        owner_repo: platform-engineering
+        note: Requires stage bridge request-path readiness as part of stage promotion expectations.
+      - type: doc
+        path: platform-engineering/docs/runbooks/access-platform-uis.md
+        owner_repo: platform-engineering
+        note: Directs platform operators to the bridge-aware stage status command.
     follow_up:
-      owner_repo: platform-engineering
-      due_on: 2026-05-01
-      note: >
-        Add a stage preflight that checks bridge audit and media staging
-        writability before stage rehearsal begins.
+      owner_repo: null
+      due_on: null
+      note: null

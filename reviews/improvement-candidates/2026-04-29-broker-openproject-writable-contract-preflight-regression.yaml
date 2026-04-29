@@ -16,7 +16,7 @@ summary: 'During ART #362 work, broker patches for Target PI roadmap projection 
   references used in execution or operator updates must come from authoritative truth
   rather than memory, inference, or Makefile defaults.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-21-broker-openproject-root-cause-preflight-gap.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -125,17 +125,24 @@ resolution:
     path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
     owner_repo: workspace-governance
     note: Requires authoritative proof before ART operator updates or completion records.
+  - type: validator
+    path: operator-orchestration-service/scripts/validate_openproject_mutation_contracts.py
+    owner_repo: operator-orchestration-service
+    note: Fails future OpenProject mutation-surface PRs without changed tests and change-record evidence for live form contract proof.
+  - type: workflow
+    path: operator-orchestration-service/.github/workflows/validate-governance-docs.yaml
+    owner_repo: operator-orchestration-service
+    note: Runs the OpenProject mutation contract gate on pull requests.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-04-29-openproject-mutation-contract-gate.md
+    owner_repo: operator-orchestration-service
+    note: Records the gate and its validation evidence.
   note: >-
-    Initial doctrine controls are being landed with ART #369; a follow-up
-    after-action or validator-level closure is still required before this lesson
-    can be marked closed.
+    Still relevant beyond the fixed roadmap-version bug. Closed by combining
+    workspace named-reference and contract-truth doctrine with an OOS PR-time
+    mutation gate that requires changed tests and change-record evidence for
+    live OpenProject form writability before future mutation surface changes land.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-02'
-  note: Approve and land a durable gate that makes broker/OpenProject mutation changes
-    prove live form writability and one smallest faithful contract fixture before
-    implementation or merge, and makes named runtime/work-item/control references
-    cite authoritative live or control-plane truth before they are used as facts.
-    The gate must also require OpenProject platform-admin repair commands to bind
-    namespace/deployment from active ART runtime discovery instead of accepting
-    generic Makefile defaults in devint work.
+  owner_repo: null
+  due_on: null
+  note: null

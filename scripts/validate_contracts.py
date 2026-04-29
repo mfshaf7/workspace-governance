@@ -143,6 +143,7 @@ def main() -> int:
     lane = developer_integration_policy["lane"]
     profile_lifecycle = developer_integration_policy["profile_lifecycle"]
     request_admission = developer_integration_policy["request_admission"]
+    live_miss_escalation = developer_integration_policy["live_miss_escalation"]
     if lane["id"] != "dev-integration":
         errors.append("contracts/developer-integration-policy.yaml: lane.id must be 'dev-integration'")
     for owner_key in ("standard_owner", "runtime_owner"):
@@ -169,6 +170,11 @@ def main() -> int:
         errors.append(
             "contracts/developer-integration-policy.yaml: request_admission.current_request_adapter.owner_repo "
             f"{adapter_owner!r} is not an active repo"
+        )
+    if live_miss_escalation["owner_repo"] not in active_repos:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: live_miss_escalation.owner_repo "
+            f"{live_miss_escalation['owner_repo']!r} is not an active repo"
         )
     if set(developer_integration_policy["required_actions"]) != expected_devint_actions:
         errors.append(

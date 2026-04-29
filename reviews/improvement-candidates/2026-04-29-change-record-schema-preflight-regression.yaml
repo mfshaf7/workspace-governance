@@ -12,7 +12,7 @@ summary: >-
   repeated during ART #378/#392 closeout-quality repair when an OOS change
   record omitted `Artifact And Deployment Evidence`.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -67,13 +67,28 @@ signals:
   - 'repo: operator-orchestration-service/docs/records/change-records/2026-04-29-art-closeout-surface-quality-guard.md'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-02'
+  control_refs:
+  - type: script
+    path: workspace-governance/scripts/validate_structured_record.py
+    owner_repo: workspace-governance
+    note: Validates individual structured records and owner-repo change records immediately.
+  - type: script
+    path: workspace-governance/scripts/preflight_touched_records.py
+    owner_repo: workspace-governance
+    note: Scans changed or explicit paths and validates every touched structured record/change record before normal work continues.
+  - type: doc
+    path: workspace-governance/docs/self-improvement-escalation.md
+    owner_repo: workspace-governance
+    note: Makes touched-record preflight a stop-the-line instruction when several records may have changed.
+  - type: skill
+    path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+    owner_repo: workspace-governance
+    note: Teaches future sessions to use exact or touched-record preflight before continuing after record edits.
   note: >-
-    Review and approve the strongest durable control before treating this lesson
-    as closed. The candidate now covers structured YAML records as well as
-    markdown change-record headings, and it has repeated again during ART
-    #378/#392.
+    Still relevant. Closed by adding the missing aggregate touched-record
+    preflight so YAML/schema and owner-repo change-record heading errors are
+    caught immediately after record edits, not later through broad validation.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

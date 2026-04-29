@@ -100,6 +100,10 @@ Use this skill when a serious initiative is already running inside
      `operator-orchestration-service`, use
      `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
      tracing
+   - before changing an OpenProject mutation surface in
+     `operator-orchestration-service`, prove live form writability or read-only
+     posture and run `npm run validate:openproject-mutation-contracts` in that
+     repo before merge
    - treat `src/app.js` and service code as runtime-confirmation or drift
      sources after the contract read, not as the default first read for an
      existing broker route

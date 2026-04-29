@@ -1,0 +1,77 @@
+schema_version: 1
+id: 2026-04-29-security-change-record-index-sequencing-regression
+title: Security change-record index was missed as a required landing unit
+recorded_on: '2026-04-29'
+owner_repo: workspace-governance
+summary: A security-evidenced owner-repo change record landed in operator-orchestration-service,
+  but the dependent security-architecture change-record index update was not planned
+  before workspace closure.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-19-already-invented-controls-missed-in-plan-pass.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+  - platform-contract
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - routing-miss
+  - workflow-doctrine-gap
+  finding: 'After operator-orchestration-service PR #80 merged a security-evidenced
+    change record, normal closure continued until the workspace audit later reported
+    security-architecture/registers/security-change-record-index.yaml was stale. The
+    security register update should have been a planned cross-repo dependency, not
+    a late audit surprise.'
+  source_refs:
+  - 'conversation: operator explicitly called out that security-related items keep
+    being missed'
+  - 'machine-audit: workspace audit reported generated security change-record index
+    out of date'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: validator
+    path: workspace-governance/scripts/validate_structured_record.py
+    owner_repo: workspace-governance
+    note: Security-evidenced owner-repo change records now require the generated security-architecture change-record index to be current during immediate record preflight.
+  - type: skill
+    path: workspace-governance/skills-src/cross-repo-sequencer/SKILL.md
+    owner_repo: workspace-governance
+    note: Cross-repo sequencing now treats the security change-record index as a dependency landing unit for security-evidenced owner-repo change records.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Landing-unit doctrine now names the dependent security landing unit created by security-evidenced change records.
+  - type: doc
+    path: workspace-governance/scripts/README.md
+    owner_repo: workspace-governance
+    note: Script guidance now documents the security index check performed by structured-record preflight.
+  - type: skill
+    path: security-architecture/skills-src/security-governance-review/SKILL.md
+    owner_repo: security-architecture
+    note: Security review workflow now requires the generated security change-record index dependency before final closure.
+  - type: doc
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: The missing operator-orchestration-service OpenProject mutation contract gate security evidence entry is now landed on security-architecture main.
+  note: >-
+    Closed by a deterministic preflight guard plus the landed
+    security-architecture index update. The actual OOS change record now passes
+    structured-record preflight only after the security index is current.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -255,6 +255,15 @@ Primary operator surface:
 
 - [/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md)
 
+Before proposing a new workspace-level control, workflow, validator, skill,
+product surface, or architecture capability, use:
+
+- [/home/mfshaf7/projects/workspace-governance/docs/recommendation-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/recommendation-preflight.md)
+
+That preflight forces a `reuse`, `extend`, `replace`, or `new` decision after
+checking existing contracts, skills, repo-rule surfaces, and dev-integration
+profiles.
+
 This also applies when the operator calls the work half-baked or says the miss
 should have been caught already. Those are mandatory self-improvement signals,
 not optional tone. If active work becomes half-finished at the planning,

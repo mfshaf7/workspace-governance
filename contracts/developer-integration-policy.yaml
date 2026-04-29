@@ -79,6 +79,32 @@ forbidden_targets:
   - prod-backend-write
   - shared-governed-secrets
   - governed-stage-or-prod-evidence
+live_miss_escalation:
+  owner_repo: workspace-governance
+  purpose: >
+    Decide whether a failure discovered after local dev-integration proof should
+    return to the fast lane, route to the platform/backend boundary, or continue
+    in governed rehearsal.
+  return_to_dev_integration_when:
+    - the workflow shape, operator inputs, or backend write semantics are still changing
+    - the failure can be reproduced without governed stage or prod state
+    - the active profile owns a faithful disposable or persistent local model for the failing path
+  route_to_platform_or_backend_boundary_when:
+    - the local workflow proof already passed and the remaining failure is identity, networking, persistence, form writability, or platform projection behavior
+    - the failure depends on shared runtime state that the profile deliberately does not own
+    - continuing inside the workflow repo would only patch around a platform-owned contract
+  governed_rehearsal_allowed_when:
+    - reviewed commits and promotion or handoff evidence exist
+    - the target lane owns the runtime boundary under test
+    - blocker, defect, or risk state is recorded before adjacent mutation continues
+  required_record_fields:
+    - failed_operation
+    - lane_where_seen
+    - local_profile_evidence
+    - live_boundary_evidence
+    - selected_route
+    - owner_repo
+    - follow_up_record
 required_actions:
   - up
   - status
