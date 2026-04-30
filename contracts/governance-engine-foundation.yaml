@@ -121,3 +121,4 @@ governance_engine_foundation:
       - packaging model explicit
       - governed model-access and audit contract reviewed
       - governed intake-assist consumer contract explicit
+      - control-fabric operator workflow explicit

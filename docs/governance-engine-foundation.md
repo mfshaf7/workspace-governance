@@ -15,6 +15,12 @@ This document is the primary architectural surface for:
 - the enterprise control-plane packaging model
 - the governed AI runtime foundation and its sequencing rules
 
+The operator workflow for the future control-fabric runtime is defined
+separately so implementation cannot drift from the approved workflow shape:
+
+- `contracts/governance-control-fabric-operator-surface.yaml`
+- `docs/governance-control-fabric-operator-surface.md`
+
 ## Current Direction
 
 `workspace-governance` is still the active workspace control plane today, but it
@@ -319,6 +325,7 @@ The runtime track stays blocked until all of these are explicit:
 - packaging model
 - governed model-access and audit contract
 - governed intake-assist consumer contract
+- control-fabric operator workflow
 
 That keeps runtime work behind real control-plane truth instead of letting a
 future agent runtime define the governance model by accident.

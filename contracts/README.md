@@ -106,6 +106,10 @@ Use these contracts to declare:
     extraction-need signals, the current machine-recorded retain-versus-extract
     decision, non-goals, and bounded runtime readiness prerequisites after
     parity is proven
+- `governance-control-fabric-operator-surface.yaml`
+  - machine-readable operator workflow, minimum CLI and API surface, record
+    contracts, profiles, blocker triggers, denied actions, and sequencing
+    rules for the future Workspace Governance Control Fabric runtime
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility

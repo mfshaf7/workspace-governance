@@ -81,6 +81,7 @@ def main() -> int:
         "governance_engine_boundary_map": repo_root / "contracts/governance-engine-boundary-map.yaml",
         "governance_engine_shadow_parity": repo_root / "contracts/governance-engine-shadow-parity.yaml",
         "governance_engine_extraction_gate": repo_root / "contracts/governance-engine-extraction-gate.yaml",
+        "governance_control_fabric_operator_surface": repo_root / "contracts/governance-control-fabric-operator-surface.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -128,6 +129,9 @@ def main() -> int:
     governance_engine_extraction_gate = contracts["governance_engine_extraction_gate"][
         "governance_engine_extraction_gate"
     ]
+    governance_control_fabric_operator_surface = contracts[
+        "governance_control_fabric_operator_surface"
+    ]["governance_control_fabric_operator_surface"]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
     self_improvement_runtime_gate = self_improvement_policy["runtime_gate"]
@@ -1231,6 +1235,7 @@ def main() -> int:
         "packaging model explicit",
         "governed model-access and audit contract reviewed",
         "governed intake-assist consumer contract explicit",
+        "control-fabric operator workflow explicit",
     }
     actual_sequencing_prerequisites = set(
         governance_engine_foundation["runtime_foundation"]["sequencing_prerequisites"]
@@ -1240,6 +1245,195 @@ def main() -> int:
             "contracts/governance-engine-foundation.yaml: runtime_foundation.sequencing_prerequisites must be exactly "
             + ", ".join(sorted(expected_sequencing_prerequisites))
         )
+    if governance_control_fabric_operator_surface["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: owner_repo must be 'workspace-governance'"
+        )
+    if (
+        governance_control_fabric_operator_surface["runtime_repo"]
+        != "workspace-governance-control-fabric"
+    ):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: runtime_repo must be 'workspace-governance-control-fabric'"
+        )
+    if (
+        governance_control_fabric_operator_surface["foundation_ref"]
+        != "contracts/governance-engine-foundation.yaml"
+    ):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: foundation_ref must point to contracts/governance-engine-foundation.yaml"
+        )
+    if (
+        repo_root
+        / governance_control_fabric_operator_surface["governance_surface_path"]
+    ).suffix != ".md" or not (
+        repo_root
+        / governance_control_fabric_operator_surface["governance_surface_path"]
+    ).exists():
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: governance_surface_path must point to an existing workspace-governance markdown surface"
+        )
+    expected_cli_command_ids = {
+        "status",
+        "sources-snapshot",
+        "plan",
+        "run",
+        "inspect",
+        "readiness",
+        "ledger-tail",
+        "explain",
+    }
+    actual_cli_command_ids = {
+        entry["command_id"]
+        for entry in governance_control_fabric_operator_surface["minimum_cli_surface"][
+            "commands"
+        ]
+    }
+    if not expected_cli_command_ids.issubset(actual_cli_command_ids):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: minimum_cli_surface.commands must include "
+            + ", ".join(sorted(expected_cli_command_ids))
+        )
+    expected_api_endpoint_ids = {
+        "healthz",
+        "readyz",
+        "status",
+        "source-snapshots-create",
+        "validation-plans-create",
+        "validation-runs-create",
+        "receipts-get",
+        "readiness-evaluate",
+        "ledger-events-list",
+        "decisions-explain",
+    }
+    actual_api_endpoint_ids = {
+        entry["endpoint_id"]
+        for entry in governance_control_fabric_operator_surface["minimum_api_surface"][
+            "endpoints"
+        ]
+    }
+    if not expected_api_endpoint_ids.issubset(actual_api_endpoint_ids):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: minimum_api_surface.endpoints must include "
+            + ", ".join(sorted(expected_api_endpoint_ids))
+        )
+    expected_record_ids = {
+        "source-snapshot",
+        "validation-plan",
+        "validation-run",
+        "control-receipt",
+        "readiness-decision",
+        "ledger-event",
+        "authority-reference",
+        "escalation-record",
+    }
+    actual_record_ids = {
+        entry["record_id"]
+        for entry in governance_control_fabric_operator_surface["record_contracts"]
+    }
+    if not expected_record_ids.issubset(actual_record_ids):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: record_contracts must include "
+            + ", ".join(sorted(expected_record_ids))
+        )
+    expected_profile_ids = {"local-read-only", "dev-integration", "governed-stage"}
+    actual_profile_ids = {
+        entry["profile_id"]
+        for entry in governance_control_fabric_operator_surface["profiles"]
+    }
+    if not expected_profile_ids.issubset(actual_profile_ids):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: profiles must include local-read-only, dev-integration, and governed-stage"
+        )
+    expected_blocker_triggers = {
+        "unknown-authority-source",
+        "stale-source-snapshot",
+        "shadow-parity-failed",
+        "missing-owner-boundary",
+        "security-delta-required",
+        "platform-release-gate-required",
+    }
+    actual_blocker_triggers = {
+        entry["trigger_id"]
+        for entry in governance_control_fabric_operator_surface["blocker_triggers"]
+    }
+    if not expected_blocker_triggers.issubset(actual_blocker_triggers):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: blocker_triggers must include "
+            + ", ".join(sorted(expected_blocker_triggers))
+        )
+    expected_denied_actions = {
+        "mutate-workspace-governance-contracts",
+        "mutate-platform-approved-deployment-state",
+        "make-security-acceptance-decision",
+        "mutate-delivery-art-directly",
+        "execute-ai-autonomous-governance-decision",
+        "hide-raw-validation-output-in-chat-only",
+    }
+    actual_denied_actions = set(
+        governance_control_fabric_operator_surface["denied_actions"]
+    )
+    if not expected_denied_actions.issubset(actual_denied_actions):
+        errors.append(
+            "contracts/governance-control-fabric-operator-surface.yaml: denied_actions must include "
+            + ", ".join(sorted(expected_denied_actions))
+        )
+    fabric_phase_ids = {
+        entry["phase_id"]
+        for entry in governance_control_fabric_operator_surface["operator_workflow"][
+            "phases"
+        ]
+    }
+    fabric_record_ids = actual_record_ids
+    fabric_entrypoint_ids = actual_cli_command_ids | actual_api_endpoint_ids
+    for phase in governance_control_fabric_operator_surface["operator_workflow"][
+        "phases"
+    ]:
+        unknown_entrypoints = set(phase["entrypoint_ids"]) - fabric_entrypoint_ids
+        if unknown_entrypoints:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"operator_workflow phase {phase['phase_id']!r} references unknown entrypoints "
+                + ", ".join(sorted(unknown_entrypoints))
+            )
+        unknown_records = set(phase["produced_record_ids"]) - fabric_record_ids
+        if unknown_records:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"operator_workflow phase {phase['phase_id']!r} references unknown record ids "
+                + ", ".join(sorted(unknown_records))
+            )
+    for command in governance_control_fabric_operator_surface["minimum_cli_surface"][
+        "commands"
+    ]:
+        if command["phase_id"] not in fabric_phase_ids:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"CLI command {command['command_id']!r} references unknown phase_id {command['phase_id']!r}"
+            )
+        if command["mutates_authority"] is not False:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"CLI command {command['command_id']!r} must not mutate authority"
+            )
+    for endpoint in governance_control_fabric_operator_surface["minimum_api_surface"][
+        "endpoints"
+    ]:
+        if endpoint["phase_id"] not in fabric_phase_ids:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"API endpoint {endpoint['endpoint_id']!r} references unknown phase_id {endpoint['phase_id']!r}"
+            )
+        if endpoint["response_record_id"] not in fabric_record_ids:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"API endpoint {endpoint['endpoint_id']!r} references unknown response_record_id {endpoint['response_record_id']!r}"
+            )
+        if endpoint["mutates_authority"] is not False:
+            errors.append(
+                "contracts/governance-control-fabric-operator-surface.yaml: "
+                f"API endpoint {endpoint['endpoint_id']!r} must not mutate authority"
+            )
     workspace_root = repo_root.parent
     workspace_has_sibling_repos = any(
         (workspace_root / repo_name).exists()
@@ -1251,6 +1445,9 @@ def main() -> int:
         model_access_and_audit["governed_intake_assist_contract_ref"],
         *model_access_and_audit["standards_refs"],
         governance_engine_extraction_gate["security_review_ref"],
+        governance_control_fabric_operator_surface[
+            "runtime_primary_operator_surface_ref"
+        ],
     }
     for ref in governed_contract_refs.values():
         required_cross_repo_refs.add(f"{ref['repo']}/{ref['path']}")
