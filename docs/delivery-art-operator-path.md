@@ -163,6 +163,23 @@ continuing adjacent ART mutation:
 - clear the blocker only through the bounded blocker path, not by generic
   status edits
 
+When a new defect is discovered while active ART work is already moving,
+contain the immediate drift or live issue first, then classify the defect before
+implementation:
+
+- `immediate_blocker`: safe continuation is impossible because quality remains
+  unhealthy, the next mutation would corrupt state, evidence cannot be trusted,
+  the runtime path is down, or an open security/trust exposure exists.
+- `deferred_defect`: containment restored safe continuation; record the defect
+  or follow-up and continue the active committed front.
+- `absorbed_same_slice_fix`: the defect has the same cause, owner, validation,
+  review, and rollback boundary as the active Landing Unit.
+- `risk`: the exposure is broader than one work item or needs ROAM handling.
+
+Do not context-switch into an unplanned defect fix after containment unless the
+classification is `immediate_blocker` or the operator explicitly approves
+absorbing the fix into the current slice.
+
 ## Fallback Model
 
 Normal rule:

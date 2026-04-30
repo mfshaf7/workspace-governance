@@ -256,6 +256,22 @@ Use these resolution paths:
 - `open_defect_or_risk`: active broken-control or exposure state; record the
   blocker, defect, or risk before continuing adjacent mutation.
 
+When a defect is discovered during active ART work, contain the immediate drift
+or runtime issue first if needed, then classify it before fixing it:
+
+- `immediate_blocker`: safe continuation is impossible because quality remains
+  unhealthy, the next mutation would corrupt state, evidence cannot be trusted,
+  the runtime path is down, or an open security/trust exposure exists.
+- `deferred_defect`: containment restored safe continuation, so record the
+  defect or follow-up and continue the active committed front.
+- `absorbed_same_slice_fix`: same cause, owner, validation, review, and rollback
+  boundary as the active Landing Unit.
+- `risk`: exposure is broader than one work item or needs ROAM handling.
+
+Do not treat every real defect as an immediate blocker after containment.
+Conversely, do not continue when the exact next committed ART step remains
+unsafe or blocked.
+
 Every reconciliation decision should record:
 
 - when it was discovered

@@ -226,6 +226,16 @@ work_home_routing:
           - authoritative record reference
           - validation or readback evidence
     defect_handling:
+      - After containment of a newly discovered defect, classify it before
+        implementation as one of immediate_blocker, deferred_defect,
+        absorbed_same_slice_fix, or risk.
+      - A discovered defect is an immediate blocker only when safe continuation
+        is impossible because active quality remains unhealthy, the next
+        mutation would corrupt state, evidence cannot be trusted, the runtime
+        path is down, or an open security/trust exposure exists.
+      - If containment restores safe continuation, record the defect or follow-up
+        and continue the active committed front instead of context-switching
+        into an unplanned fix.
       - Unexpected defects stop adjacent closeout when they affect completion
         truth, safety, runtime behavior, security posture, or evidence.
       - A same-cause, same-owner, same-validation defect may be fixed inside
