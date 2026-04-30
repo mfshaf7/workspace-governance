@@ -27,6 +27,23 @@ The next architecture step is not a rewrite. It is a controlled separation that
 keeps the current operator experience working while making the reusable engine
 boundary explicit.
 
+## Non-Goals
+
+The control-fabric foundation does not authorize these changes by itself:
+
+- replacing `workspace-governance` as the source of truth for contracts,
+  workspace-root guidance, repo rules, or managed skill source
+- moving platform release authority, approved deployment state, version pins,
+  or promotion gates out of `platform-engineering`
+- moving security standards, trust-boundary review, findings, or security
+  acceptance decisions out of `security-architecture`
+- turning owner-repo operator workflows, templates, or runtime docs into
+  generated workspace copies without a later explicit contract
+- introducing a custom LLM gateway, scanner, observability backend, object
+  store, or approval runtime as part of this foundation slice
+- activating governed AI runtime behavior before the model-access, audit,
+  caller identity, approval, and security-review gates are explicit and clean
+
 ## Governance-Engine Boundary
 
 ### Shared Engine Authoring Layer
@@ -217,6 +234,36 @@ Repo-local validation must not duplicate:
 - central lifecycle or intake semantics
 - governed AI model policy
 - cross-repo evidence or review obligations
+
+## Rollout And Rollback Expectations
+
+Rollout is staged by evidence, not by convenience:
+
+1. Keep authoring in the current canonical `workspace-governance` sources.
+2. Keep current operator entrypoints stable while contracts and generated
+   projections make the boundary explicit.
+3. Run shadow parity against workspace-root materialization, installed skills,
+   generated artifacts, and compatibility entrypoints before any cutover.
+4. Introduce `workspace-governance-control-fabric` implementation behind the
+   approved contracts only after the foundation, operator workflow, and
+   security-delta slices are complete.
+5. Let `platform-engineering` own deployment state, version pinning, release
+   gates, and promotion when the runtime moves beyond local proof.
+
+Rollback must preserve current operator usability:
+
+- If a runtime implementation fails, disable the runtime consumer and fall back
+  to the existing `workspace-governance` scripts and operator entrypoints.
+- If a generated projection is wrong, fix the canonical contract or generator
+  and re-materialize; do not hand-patch generated or live materialized outputs
+  as the durable fix.
+- If a new template, repo, product, or component is misclassified, revert or
+  correct the intake or repo-rule contract and rerun the workspace audits.
+- If governed AI activation creates uncertainty, return to disabled/suggestion
+  mode and keep human operator approval as the only decision boundary.
+- If platform deployment is involved, rollback follows the
+  `platform-engineering` approved deployment state and promotion controls, not
+  local `workspace-governance` edits.
 
 ## Governed AI Runtime Foundation
 
