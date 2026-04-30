@@ -249,6 +249,11 @@ Only start implementation after that discussion narrows the target design.
   Review Packet covers them with merged PR evidence, approved direct-land
   evidence, or equivalent durable source evidence. Multiple children may close
   from the same Review Packet.
+- Before merging source-backed work, fetch the PR base and run the local
+  command or command set that is CI-equivalent for the changed surface. When CI
+  uses a base-aware validator, the local proof must use the same base-ref shape
+  after fetching the base, such as `--against-ref origin/main`. Record the
+  command, base ref, and result in the Review Packet validation evidence.
 - Non-source ART items such as planning, risk disposition, live verification,
   or metadata repair close with the relevant non-source evidence instead of
   fake merge evidence.
@@ -325,6 +330,10 @@ Only start implementation after that discussion narrows the target design.
 - If a serious failure or unexpected runtime behavior is being diagnosed, use
   `/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md`
   before deeper workaround analysis, redesign proposals, or code-level blame.
+- If the blocked next step requires operator-side credentials, package
+  installation, sudo, a GUI action, approval, or account permission outside
+  Codex's safe tool boundary, prompt the operator immediately. Do not silently
+  replace that blocked proof with CI-only evidence, guesswork, or a workaround.
 - If a new workspace-level control, workflow, validator, skill, product
   surface, or architecture capability is being recommended, run the
   recommendation preflight first and state whether the result is `reuse`,

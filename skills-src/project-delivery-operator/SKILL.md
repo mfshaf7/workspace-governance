@@ -96,6 +96,10 @@ Use this skill when a serious initiative is already running inside
      a self-improvement candidate
    - if the blocker creates exposure broader than one blocked work item, open
      or update a `Risk` with ROAM fields
+   - if the blocked next step requires operator-side credentials, package
+     installation, sudo, a GUI action, approval, or account permission outside
+     Codex's safe tool boundary, stop and prompt the operator immediately; do
+     not silently substitute CI-only proof, guesswork, or a workaround
    - when live broker truth matters for an existing documented route in
      `operator-orchestration-service`, use
      `npm run api:probe -- <METHOD> <PATH>` before falling back to handler
@@ -218,6 +222,15 @@ Use this skill when a serious initiative is already running inside
    - before merge, the draft Review Packet must include the PR URL, changed
      surfaces with explanations, test results, validation results, rollback
      boundary, and one `completion_mapping` entry per covered work item
+   - before merge, fetch the PR base and run the local command or command set
+     that is CI-equivalent for the changed surface; when required CI uses a
+     base-aware validator, use the same base-ref shape after fetching the base,
+     such as `--against-ref origin/main`
+   - record the CI-equivalent command, base ref, and result in Review Packet
+     validation evidence; if the proof needs operator-side action outside
+     Codex's safe tool boundary, prompt immediately and record the blocker or
+     operator-approved exception instead of relying on GitHub CI as the first
+     proof
    - after the PR is open and before it is merged, run:
      `npm run art -- review-packet readiness <packet.json>`
    - do not merge while readiness fails; fix the same PR or explicitly split the

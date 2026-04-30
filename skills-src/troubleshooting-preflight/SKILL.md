@@ -40,7 +40,16 @@ Use this skill when the root cause is still unproven.
 6. Only then inspect code truth.
 7. Do not expand into workaround or redesign analysis before those earlier
    layers are checked.
-8. If the root cause turns out to be a skipped simpler earlier-layer check:
+8. If the blocked next step requires operator-side credentials, package
+   installation, sudo, a GUI action, approval, or account permission outside
+   Codex's safe tool boundary:
+   - stop at that layer and state the exact blocked step
+   - prompt the operator immediately for the required action
+   - do not silently substitute weaker CI-only proof, guesswork, or workaround
+     evidence
+   - if active ART work is affected, record the blocker, Defect, or Risk before
+     adjacent mutation continues
+9. If the root cause turns out to be a skipped simpler earlier-layer check:
    - treat it as a self-improvement signal
    - run `python3 scripts/check_self_improvement_escalation.py --signal late-root-cause-discovery ...`
    - if it fails closed, record or update the candidate before continuing
@@ -57,3 +66,5 @@ Use this skill when the root cause is still unproven.
   the target live form field is writable or read-only.
 - Do not represent late discovery of a simpler precondition as normal bad luck.
 - Do not continue workaround analysis once an earlier failed layer is proven.
+- Do not downgrade an operator-side blocker into CI-only proof or a workaround
+  without explicit operator acceptance recorded in the affected workflow.

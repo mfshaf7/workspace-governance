@@ -7,7 +7,7 @@ summary: A local validation blocker depended on operator-side host package and s
   authentication action, but the workflow initially downgraded to CI-only proof instead
   of stopping immediately to ask the operator for the required action.
 regression_of: null
-status: triaged
+status: closed
 source_type: manual
 scope:
   related_repos:
@@ -34,10 +34,40 @@ signals:
     next time'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/troubleshooting-preflight.md
+    owner_repo: workspace-governance
+    note: Adds an operator-side blocker section that requires immediate prompt instead of weaker proof or workaround.
+  - type: doc
+    path: workspace-governance/docs/self-improvement-escalation.md
+    owner_repo: workspace-governance
+    note: Requires immediate operator prompt when an active ART blocker is operator-side.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Adds operator-side blocker handling to the routing and review-packet doctrine.
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Makes immediate operator prompt behavior part of the machine-readable routing contract.
+  - type: skill
+    path: workspace-governance/skills-src/troubleshooting-preflight/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes future troubleshooting sessions stop and prompt on operator-side blockers.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes future ART delivery sessions prompt immediately instead of downgrading proof.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Propagates the blocker-prompt rule into the workspace-root session guidance after sync.
+  note: >-
+    Closed by governance doctrine and live-skill controls requiring immediate
+    operator prompt when the next required proof/action is outside Codex's safe
+    tool boundary, plus ART blocker recording when active work is affected.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-03'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

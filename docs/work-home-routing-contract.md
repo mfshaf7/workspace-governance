@@ -38,8 +38,12 @@ Use the contract's `classification_order` before execution:
 7. `late_discovered_unclassified_work`
 
 The order matters. A live blocker must be recorded before adjacent mutation
-continues. Accepted initiative work must stay in ART even when it feels like
-plumbing. Pure owner-repo maintenance should not create ART noise.
+continues. If the blocked next step needs operator-side credentials, package
+installation, sudo, a GUI action, approval, or account permission outside
+Codex's safe tool boundary, prompt the operator immediately instead of silently
+choosing a weaker proof path. Accepted initiative work must stay in ART even
+when it feels like plumbing. Pure owner-repo maintenance should not create ART
+noise.
 
 ## Proportionality Rule
 
@@ -104,6 +108,15 @@ npm run art -- review-packet readiness <packet.json>
 Do this after the PR is open and before it is merged. A readiness failure means
 the Landing Unit is not ready to merge; fix the same PR or deliberately split
 the Landing Unit instead of planning a corrective PR after merge.
+
+Before merge, fetch the PR base and run the local command or command set that
+is CI-equivalent for the changed surface. When the repo CI uses a base-aware
+validator, the local proof must use the same base-ref shape, such as
+`--against-ref origin/main`, after fetching the base. Record the command, base
+ref, and result in Review Packet validation evidence. If the proof cannot run
+because it needs operator-side credentials, package installation, sudo, a GUI
+action, approval, or account permission, stop and prompt the operator
+immediately; do not silently replace it with weaker CI-only proof.
 
 After merge, change the packet to `merged_pr`, add the merge commit, finalize
 the packet, and use the finalized digest in ART completion evidence.

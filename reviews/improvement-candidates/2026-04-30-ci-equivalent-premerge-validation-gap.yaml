@@ -7,7 +7,7 @@ summary: A PR reached GitHub CI with a mutation-contract evidence failure becaus
   the local pre-merge flow did not prove the exact CI command against the current
   base before Review Packet readiness and merge.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -32,10 +32,36 @@ signals:
   - 'conversation: operator asked why CI keeps failing and where the flow is missing'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/codex-github-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Requires pre-merge CI-equivalent local proof with base-ref parity before source-backed PR merge.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Adds CI-equivalent proof and operator-side blocker prompt rules to the work-home routing surface.
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Makes CI-equivalent proof and immediate operator prompt behavior machine-readable doctrine.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Adds the same proof requirement to the primary ART operator path.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes future ART delivery sessions run base-aware CI-equivalent proof before merge.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Propagates the rule into the workspace-root session guidance after sync.
+  note: >-
+    Closed by workspace governance doctrine and live-skill controls requiring
+    source-backed PRs to fetch the base and record CI-equivalent local proof
+    before merge, or explicitly record an operator-approved blocker/exception.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-03'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null
