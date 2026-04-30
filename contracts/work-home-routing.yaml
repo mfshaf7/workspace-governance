@@ -107,7 +107,12 @@ work_home_routing:
         than one item.
       proportionality_rule: >
         Do not keep adjacent mutation going while the current front is blocked;
-        record the blocker first, then repair with context.
+        record the blocker first, then repair with context. If the next
+        required validation, package install, credential, sudo, GUI, approval,
+        or account-permission action is outside Codex's safe tool boundary,
+        pause the adjacent workflow, state the exact blocked step, and prompt
+        the operator immediately instead of substituting weaker CI-only proof
+        or a workaround.
     late_discovered_unclassified_work:
       routing_home: art
       trigger: >
@@ -159,6 +164,17 @@ work_home_routing:
         Packet while the PR is still open, using `open_pr` evidence, concrete
         changed-surface explanations, test and validation results, rollback
         boundary, and one completion mapping per covered ART item.
+      - Before merge, fetch the PR base and run the local command or command
+        set that is CI-equivalent for the changed surface. When required CI
+        uses a base-aware validator, the local proof must use the same base-ref
+        shape, such as `--against-ref origin/main`, after fetching the base.
+        Record the command, base ref, and result in Review Packet validation
+        evidence.
+      - If CI-equivalent proof cannot run because the next step needs
+        operator-side credentials, package installation, sudo, a GUI action,
+        approval, or account permission, stop and prompt the operator
+        immediately; do not treat GitHub CI as the first proof unless the
+        operator explicitly accepts that as a blocker or exception.
       - Run the broker Review Packet readiness gate after the PR is open and
         before merge; a readiness failure blocks merge until the same PR is
         fixed or the Landing Unit is deliberately split.

@@ -113,6 +113,26 @@ Do not invent workarounds, redesigns, or alternate flows until:
 
 If those layers were skipped, the troubleshooting sequence is incomplete.
 
+## Operator-Side Blockers
+
+Some failures are not technical mysteries. They require an operator action
+outside Codex's safe tool boundary.
+
+Examples:
+
+- host package installation
+- sudo authentication
+- credential, token, or account permission changes
+- GUI or browser action
+- approval that only the operator can grant
+
+When that is the blocked next step, stop there. State the exact blocked step,
+ask the operator for the required action immediately, and do not silently
+replace the missing proof with weaker CI-only evidence, guesswork, or a
+workaround. If the blocked step affects active ART work, record the blocker,
+Defect, or Risk through the bounded ART path before adjacent mutation
+continues.
+
 ## Self-Improvement Route
 
 If the eventual root cause turns out to be a simpler precondition that should

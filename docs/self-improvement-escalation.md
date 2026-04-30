@@ -123,6 +123,11 @@ When the signal is an active ART blocker rather than only a workflow lesson:
    or control bug
 5. open or update a `Risk` when the exposure is broader than one blocked item
 
+If the exact blocker is an operator-side action outside Codex's safe tool
+boundary, such as credentials, package installation, sudo authentication, GUI
+action, approval, or account permission, prompt the operator immediately before
+choosing any weaker proof path.
+
 Do not keep the blocker only in chat, only in a candidate record, or only in a
 status label.
 

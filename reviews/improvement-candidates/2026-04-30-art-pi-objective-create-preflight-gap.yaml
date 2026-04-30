@@ -7,7 +7,7 @@ summary: PI Objective create payload reached the live broker before a local guar
   caught the required active narrative headings, and api:probe hid the 422 validation
   body because the create route did not document validation failure.
 regression_of: null
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -32,10 +32,36 @@ signals:
   - openproject://work_packages/470
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/work-item-create-preflight.js
+    owner_repo: operator-orchestration-service
+    note: Adds deterministic active PI Objective create preflight for required fields and narrative headings.
+  - type: script
+    path: operator-orchestration-service/scripts/validate_work_item_create.mjs
+    owner_repo: operator-orchestration-service
+    note: Provides local work-item create payload validation before broker writes.
+  - type: validator
+    path: operator-orchestration-service/scripts/validate_api_docs.mjs
+    owner_repo: operator-orchestration-service
+    note: Verifies the PI Objective create schema branch mirrors broker preflight rules.
+  - type: workflow
+    path: operator-orchestration-service/src/art-workflow-artifacts.js
+    owner_repo: operator-orchestration-service
+    note: Applies mutation-draft validation to active PI Objective plan items before submission.
+  - type: doc
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Documents the PI Objective create and mutation-draft validation contract.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-04-30-plan-apply-pi-objective-contract.md
+    owner_repo: operator-orchestration-service
+    note: Records the landed broker and validation controls for the active PI Objective gap.
+  note: >-
+    Closed by OOS PRs #83, #84, and #88: local work-item create preflight,
+    PI Objective schema guard, mutation-draft validation, and the plan-apply
+    fail-closed repair are now on operator-orchestration-service main.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-04-30'
-  note: 'Close through #470 by landing preflight, probe, contract, and test controls
-    before resuming #426 activation.'
+  owner_repo: null
+  due_on: null
+  note: null

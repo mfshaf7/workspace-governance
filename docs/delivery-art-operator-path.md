@@ -96,7 +96,11 @@ direct-land evidence, or equivalent durable source evidence.
 Before merging source-backed work, create or refresh the draft Review Packet
 while the PR is still open. The packet must use `open_pr` evidence and include
 the PR URL, changed-surface explanations, tests, validations, rollback
-boundary, and item-level completion mapping. Run:
+boundary, and item-level completion mapping. Fetch the PR base and run the
+local command or command set that is CI-equivalent for the changed surface. If
+required CI uses a base-aware validator, use the same base-ref shape after
+fetching the base, such as `--against-ref origin/main`. Record the command,
+base ref, and result in validation evidence. Then run:
 
 ```bash
 npm run art -- review-packet readiness <packet.json>
@@ -106,6 +110,11 @@ Merge only after readiness passes. If it fails, fix the same PR or split the
 Landing Unit; do not merge first and repair the evidence later. After merge,
 set the packet to `merged_pr`, add the merge commit, finalize it, and use the
 final digest in ART completion evidence.
+
+If CI-equivalent proof cannot run because it needs operator-side credentials,
+package installation, sudo, a GUI action, approval, or account permission,
+prompt the operator immediately. Do not use GitHub CI as the first proof unless
+the operator explicitly accepts that blocker or exception.
 
 Non-source work, such as risk disposition, live verification, planning, or ART
 metadata repair, closes with non-source evidence and should not invent merge

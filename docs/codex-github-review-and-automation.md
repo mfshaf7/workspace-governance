@@ -61,17 +61,24 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
 5. Fill the Review Packet with `open_pr` evidence, changed-surface
    explanations, tests, validations, rollback boundary, and item-level
    completion mapping.
-6. Run `npm run art -- review-packet readiness <packet.json>` before merge.
+6. Fetch the PR base and run the local command or command set that is
+   CI-equivalent for the changed surface before merge. If CI runs a validator
+   with a base ref, such as `--against-ref origin/main`, the local proof must
+   use the same base-ref shape after `git fetch`.
+7. Record the CI-equivalent command, base ref, and result in the Review Packet
+   validation evidence. Do not substitute "CI will catch it" for local proof
+   unless the operator explicitly accepts that as a blocker or exception.
+8. Run `npm run art -- review-packet readiness <packet.json>` before merge.
    Do not merge while readiness fails; fix the same PR or explicitly split the
    Landing Unit.
-7. Request Codex review manually with `@codex review` until the repo has
+9. Request Codex review manually with `@codex review` until the repo has
    stable automatic review enabled.
-8. Resolve or explicitly acknowledge the findings in the PR before merge.
-9. Merge only after readiness, repo-local checks, and required governance checks
+10. Resolve or explicitly acknowledge the findings in the PR before merge.
+11. Merge only after readiness, repo-local checks, and required governance checks
    pass.
-10. After merge, finalize the Review Packet with PR, commit, validation, and
+12. After merge, finalize the Review Packet with PR, commit, validation, and
    rollback evidence before closing covered source-backed ART items.
-11. After closeout, retire the local branch, remote branch, and any temporary
+13. After closeout, retire the local branch, remote branch, and any temporary
    worktrees unless an open PR or a documented exception still requires them.
 
 ## Landing Units And Review Packets
@@ -100,6 +107,14 @@ Pre-merge readiness is separate from post-merge finalization. Use `open_pr`
 evidence and `npm run art -- review-packet readiness <packet.json>` while the
 PR is still open. After merge, update the packet to `merged_pr`, add the merge
 commit, and finalize it.
+
+CI-equivalent proof is also pre-merge evidence. Run the same local validator
+shape that the required GitHub check will run for the changed surface, including
+the same base-ref semantics after fetching the base branch. If the exact check
+cannot run locally because it requires operator-side credentials, packages,
+sudo, a GUI action, or account permission, stop and prompt the operator
+immediately. Record the blocker or the operator-approved exception in the
+Review Packet before merge instead of relying on GitHub CI as the first proof.
 
 Direct-to-main landing is allowed only when the operator explicitly approves it
 or the owning repo documents it. Record that exception in the Review Packet;
