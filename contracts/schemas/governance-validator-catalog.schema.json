@@ -20,6 +20,7 @@
         "profiles",
         "safety_classes",
         "command_surfaces",
+        "retirement_register",
         "entries"
       ],
       "properties": {
@@ -75,6 +76,11 @@
           "type": "array",
           "minItems": 1,
           "items": { "$ref": "#/$defs/commandSurface" }
+        },
+        "retirement_register": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/retirementRegisterEntry" }
         },
         "entries": {
           "type": "object",
@@ -188,6 +194,28 @@
         },
         "wgcf_posture": { "type": "string", "minLength": 1 },
         "retirement_posture": { "type": "string", "minLength": 1 }
+      }
+    },
+    "retirementRegisterEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "register_id",
+        "owner_repo",
+        "entry_refs",
+        "current_posture",
+        "retirement_allowed",
+        "retirement_gate",
+        "rollback_requirement"
+      ],
+      "properties": {
+        "register_id": { "type": "string", "minLength": 1 },
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "entry_refs": { "$ref": "#/$defs/stringList" },
+        "current_posture": { "type": "string", "minLength": 1 },
+        "retirement_allowed": { "type": "boolean" },
+        "retirement_gate": { "type": "string", "minLength": 1 },
+        "rollback_requirement": { "type": "string", "minLength": 1 }
       }
     }
   }

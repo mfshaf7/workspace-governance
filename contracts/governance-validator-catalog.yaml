@@ -108,6 +108,108 @@ governance_validator_catalog:
       wgcf_role: target runtime surface after catalog ingestion and shadow parity
       safety_class: local-read-only
       mutation_boundary: fabric-local receipts, artifacts, and ledger only
+  retirement_register:
+    - register_id: workspace-governance-read-validators
+      owner_repo: workspace-governance
+      entry_refs:
+        - repo-structure
+        - contract-model
+        - delegation-journal
+        - intake-model
+        - developer-integration
+        - cross-repo-truth
+        - governance-engine-shadow-parity
+        - security-bindings
+        - review-coverage
+        - security-delta-reviews
+        - security-evidence
+        - security-change-record-lanes
+        - component-contracts
+        - workspace-layout
+        - stale-content
+        - improvement-candidates
+        - improvement-signals
+        - learning-closure
+        - codex-review-controls
+        - structured-record
+        - touched-records-preflight
+      current_posture: direct commands are retained as compatibility entrypoints while WGCF learns to plan and receipt them
+      retirement_allowed: true
+      retirement_gate: shadow parity must prove WGCF selected the same checks, reported equivalent pass/fail posture, preserved artifact refs, and produced rollback instructions
+      rollback_requirement: direct python entrypoints and validation-matrix coverage remain available until the replacement WGCF profile has passed representative repo, ART, platform, and security scopes
+    - register_id: workspace-governance-remote-read-audits
+      owner_repo: workspace-governance
+      entry_refs:
+        - branch-lifecycle
+        - remote-alignment
+        - workspace-control-plane-summary
+      current_posture: remote-read audits require explicit profile gating because they may call GitHub or other network-backed sources
+      retirement_allowed: true
+      retirement_gate: shadow parity must prove WGCF remote-read profile identity, timeout, retry, cache, stale-result behavior, and equivalent direct-command findings before replacing direct commands
+      rollback_requirement: direct remote-read commands remain documented and executable for restart-readiness and clean-state claims
+    - register_id: materialized-output-writers
+      owner_repo: workspace-governance
+      entry_refs:
+        - sync-workspace-root
+        - install-skills
+        - materialize-governance-engine-outputs
+        - governance-engine-materializer
+      current_posture: materializers are authority-adjacent write surfaces and are not default WGCF execution targets
+      retirement_allowed: false
+      retirement_gate: none; WGCF may recommend or check materialization, but actual write entrypoints stay explicit until a separate approved materializer design exists
+      rollback_requirement: current direct materializer commands remain the rollback path
+    - register_id: structured-record-writers
+      owner_repo: workspace-governance
+      entry_refs:
+        - scaffold-intake
+        - record-improvement-candidate
+        - record-after-action
+        - check-self-improvement-escalation
+      current_posture: record writers create or update governance authority records and must stay recommendation-only for WGCF
+      retirement_allowed: false
+      retirement_gate: none under this initiative; record mutation remains human or broker-guided until a separate approval runtime is designed
+      rollback_requirement: direct scaffolders remain the authoritative controlled write path
+    - register_id: delivery-art-broker-surface
+      owner_repo: operator-orchestration-service
+      entry_refs:
+        - delivery-art-broker-read
+        - delivery-art-broker-mutation
+        - delivery-art-api-probe-read
+        - delivery-art-api-probe-mutation
+      current_posture: OOS remains the canonical ART read and write surface; WGCF may consume reads and emit recommendations or draft refs
+      retirement_allowed: false
+      retirement_gate: none; WGCF must never replace OOS as ART mutation authority
+      rollback_requirement: OOS broker CLI and API remain the rollback and authority path
+    - register_id: platform-owned-runtime-surfaces
+      owner_repo: platform-engineering
+      entry_refs:
+        - openproject-quality-check
+        - openproject-projection-sync
+        - devint-runner-read
+        - devint-runner-lifecycle
+        - kubernetes-runtime-read
+        - kubernetes-runtime-mutation
+      current_posture: platform runtime commands stay platform-owned and profile-gated
+      retirement_allowed: false
+      retirement_gate: none under workspace-governance; platform-engineering owns any runtime command replacement decision
+      rollback_requirement: platform-owned make and k3s command paths remain the rollback path
+    - register_id: github-command-surface
+      owner_repo: workspace-governance
+      entry_refs:
+        - github-remote-read
+        - github-remote-mutation
+      current_posture: GitHub reads may become profile-gated evidence inputs; GitHub writes stay explicit repo workflow actions
+      retirement_allowed: false
+      retirement_gate: none under this initiative; future GitHub App integration would need its own authority and security review
+      rollback_requirement: direct gh commands and GitHub UI remain the rollback path
+    - register_id: support-libraries
+      owner_repo: workspace-governance
+      entry_refs:
+        - contracts-lib
+      current_posture: support libraries are imported by validators and materializers, not invoked as checks
+      retirement_allowed: false
+      retirement_gate: none; library extraction or replacement belongs to governance-engine packaging work
+      rollback_requirement: direct library imports remain part of the current validators
   entries:
     repo-structure:
       kind: validator

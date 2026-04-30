@@ -1531,6 +1531,7 @@ def main() -> int:
                 f"{surface['surface_id']!r} references unknown safety_class {surface['safety_class']!r}"
             )
     catalog_entries = governance_validator_catalog["entries"]
+    retirement_register = governance_validator_catalog["retirement_register"]
     surface_id_set = set(surface_ids)
     validation_matrix_ids = set(validator_scripts)
     catalog_validation_matrix_ids = {
@@ -1611,6 +1612,52 @@ def main() -> int:
                 "contracts/governance-validator-catalog.yaml: entry "
                 f"{entry_id!r} writes materialized outputs but is not materialized-output-write"
             )
+    retirement_register_ids = [
+        entry["register_id"] for entry in retirement_register
+    ]
+    duplicate_retirement_register_ids = sorted(
+        register_id
+        for register_id in set(retirement_register_ids)
+        if retirement_register_ids.count(register_id) > 1
+    )
+    if duplicate_retirement_register_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: duplicate retirement register ids: "
+            + ", ".join(duplicate_retirement_register_ids)
+        )
+    covered_retirement_refs: set[str] = set()
+    for retirement_entry in retirement_register:
+        if retirement_entry["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} owner_repo {retirement_entry['owner_repo']!r} is not an active repo"
+            )
+        unknown_entry_refs = sorted(
+            set(retirement_entry["entry_refs"]) - set(catalog_entries)
+        )
+        if unknown_entry_refs:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} references unknown entries "
+                + ", ".join(unknown_entry_refs)
+            )
+        covered_retirement_refs.update(retirement_entry["entry_refs"])
+        if retirement_entry["retirement_allowed"] and "shadow parity" not in retirement_entry["retirement_gate"].lower():
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} allows retirement but does not require shadow parity"
+            )
+        if not retirement_entry["rollback_requirement"].strip():
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} must include rollback_requirement"
+            )
+    missing_retirement_coverage = sorted(set(catalog_entries) - covered_retirement_refs)
+    if missing_retirement_coverage:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: entries missing retirement register coverage: "
+            + ", ".join(missing_retirement_coverage)
+        )
     workspace_root = repo_root.parent
     workspace_has_sibling_repos = any(
         (workspace_root / repo_name).exists()

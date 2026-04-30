@@ -79,6 +79,20 @@ No direct validator path may be removed because WGCF exists. Retirement needs:
 
 Until that exists, direct commands stay as compatibility entrypoints.
 
+The machine-readable `retirement_register` groups entries by ownership and
+replacement posture. It distinguishes:
+
+- direct validators that may retire only after shadow parity
+- remote-read audits that need explicit profile identity and cache behavior
+- materializers and record writers that remain explicit write surfaces
+- OOS ART mutation surfaces that WGCF must never replace
+- platform runtime commands that stay platform-owned
+- GitHub and Kubernetes mutation surfaces that stay recommendation-only for
+  WGCF
+
+Every catalog entry must appear in that retirement register. Missing coverage
+is a contract validation failure.
+
 ## Current Boundaries
 
 The catalog intentionally includes both local scripts and external command
