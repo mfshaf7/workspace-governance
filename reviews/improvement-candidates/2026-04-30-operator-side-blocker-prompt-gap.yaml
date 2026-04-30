@@ -1,0 +1,43 @@
+schema_version: 1
+id: 2026-04-30-operator-side-blocker-prompt-gap
+title: Prompt immediately for operator-side blockers
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: A local validation blocker depended on operator-side host package and sudo
+  authentication action, but the workflow initially downgraded to CI-only proof instead
+  of stopping immediately to ask the operator for the required action.
+regression_of: null
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - platform-contract
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'When a required validation, install, credential, approval, or host action
+    is outside Codex''s safe tool boundary, Codex must stop and prompt the operator
+    immediately rather than silently choosing a weaker proof path or workaround. This
+    surfaced during #432 when local FastAPI validation needed host pip/venv support
+    and sudo authentication.'
+  source_refs:
+  - 'conversation: operator said a blocker from my end must be prompted immediately
+    next time'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-03'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
