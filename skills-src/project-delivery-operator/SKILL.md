@@ -96,6 +96,20 @@ Use this skill when a serious initiative is already running inside
      a self-improvement candidate
    - if the blocker creates exposure broader than one blocked work item, open
      or update a `Risk` with ROAM fields
+   - when a new defect is discovered during active ART work, contain immediate
+     drift first if needed, then classify it before fixing:
+     `immediate_blocker`, `deferred_defect`, `absorbed_same_slice_fix`, or
+     `risk`
+   - classify as `immediate_blocker` only when safe continuation is impossible:
+     active quality remains unhealthy, the next mutation would corrupt state,
+     evidence cannot be trusted, the runtime path is down, or an open
+     security/trust exposure exists
+   - if containment restores safe continuation, record the defect or follow-up
+     and continue the active committed front instead of context-switching into
+     an unplanned fix
+   - absorb a discovered defect into the current Landing Unit only when cause,
+     owner, validation, review, and rollback boundary match the active slice or
+     the operator explicitly approves the absorption
    - if the blocked next step requires operator-side credentials, package
      installation, sudo, a GUI action, approval, or account permission outside
      Codex's safe tool boundary, stop and prompt the operator immediately; do

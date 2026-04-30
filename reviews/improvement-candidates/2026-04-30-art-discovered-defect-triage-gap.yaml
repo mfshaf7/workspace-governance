@@ -1,0 +1,74 @@
+schema_version: 1
+id: 2026-04-30-art-discovered-defect-triage-gap
+title: Require discovered ART defects to be triaged before interrupting active work
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: 'During #420 execution, a plan.apply projection-signal defect was discovered
+  after activating #439/#440. Projection drift was contained and quality passed, but
+  the session almost context-switched into fixing the new defect immediately instead
+  of classifying it as blocker, deferred defect, or absorbed same-slice work. The
+  workflow needs a durable triage gate so discovered defects do not hijack active
+  ART execution after containment.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-25-broker-regression-fixture-chase-gap.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'The active ART workflow did not force a blocker-versus-deferred-defect
+    decision after containment. That let a real but non-blocking OOS control defect
+    be treated as an immediate blocker even though scoped quality was healthy and
+    #440 could safely continue.'
+  source_refs:
+  - conversation:2026-04-30-user-called-out-projection-sync-doctrine
+  - art:420-activation-created-480-and-committed-439-440-441-442
+  - repo:operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Adds the discovered-defect triage gate and the immediate-blocker threshold to the machine-readable work-home routing contract.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Documents immediate_blocker, deferred_defect, absorbed_same_slice_fix, and risk classifications after containment.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Adds the operator-facing rule to record/defer non-blocking defects and continue the active committed front.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Installs the future-session ART rule that discovered defects must be classified before interrupting active work.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: OOS PR #92 records the same broker/operator surface rule for discovered ART-control defects.
+  - type: contract
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: OOS PR #92 records the API-contract doctrine for classifying contained discovered defects before fixing.
+  note: >
+    Closed by adding the discovered-defect triage gate to workspace governance,
+    the live ART operator skill source, and the OOS broker operator surface.
+    OOS PR #92 merged at eefb48dffce4533a227f4df2dffb9545464576e5.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
