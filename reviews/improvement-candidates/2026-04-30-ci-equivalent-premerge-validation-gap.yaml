@@ -1,0 +1,41 @@
+schema_version: 1
+id: 2026-04-30-ci-equivalent-premerge-validation-gap
+title: Require CI-equivalent pre-merge validation proof
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: A PR reached GitHub CI with a mutation-contract evidence failure because
+  the local pre-merge flow did not prove the exact CI command against the current
+  base before Review Packet readiness and merge.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - platform-contract
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'PR #88 failed validate-governance-docs on validate_openproject_mutation_contracts.py
+    --against-ref origin/main after local work treated validation as complete. The
+    missing control is a mandatory CI-equivalent validation proof after fetching the
+    PR base before source-backed ART completion can proceed.'
+  source_refs:
+  - 'conversation: operator asked why CI keeps failing and where the flow is missing'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-03'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
