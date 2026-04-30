@@ -151,6 +151,67 @@ work_home_routing:
       art_item: Workspace Delivery ART item such as Feature, User story, Defect, Risk, PI Objective, or Epic.
       landing_unit: Branch, PR, direct-land decision, or live-only execution unit that carries one review and rollback boundary.
       review_packet: Evidence record that lists covered ART items, source refs, validation, merge/direct-land/live proof, rollback scope, and exceptions.
+    landing_unit_decision_gate:
+      purpose: >
+        Force the branch and PR boundary decision before source-backed ART work
+        starts, so execution does not silently fall back to per-child PRs or an
+        over-broad Epic branch.
+      required_before:
+        - creating or switching to a source branch for active ART work
+        - opening a PR for source-backed ART work
+        - implementing the first source-backed child under an active Feature
+      decisions:
+        feature_single_landing_unit:
+          use_when: >
+            The active Feature's executable children share the same owner repo,
+            review path, validation surface, deployment timing, security posture,
+            and rollback boundary.
+          effect: >
+            Use one branch, one PR, and one Review Packet that maps every covered
+            child; do not close source-backed children until the packet is
+            finalized after merge.
+        child_isolated_landing_unit:
+          use_when: >
+            A child must be reviewed, merged, deployed, validated, or rolled back
+            independently.
+          required_reason:
+            - different owner repo or owner boundary
+            - independent rollback or deployment boundary
+            - distinct security, trust, or credential boundary
+            - materially different validation surface or CI-equivalent proof
+            - urgent blocker or defect that cannot wait for the Feature branch
+            - diff size or review risk makes one PR unreviewable
+            - explicit operator-approved split
+          effect: >
+            Record the split reason and use a separate branch, PR, and Review
+            Packet or an explicitly shared packet when the rollback boundary still
+            matches.
+        non_source_child:
+          use_when: >
+            The child is planning, risk disposition, live verification, metadata
+            repair, or another non-source evidence item.
+          effect: >
+            Close with non-source evidence only; do not create fake merge evidence
+            or a branch just to satisfy closeout.
+        defer_decision_blocked:
+          use_when: >
+            The Feature's executable children, owner boundaries, rollback boundary,
+            or validation burden are not understood well enough to select a
+            Landing Unit safely.
+          effect: >
+            Stop source work, read the needed ART/repo context, and record a
+            blocker or clarification note before implementation continues.
+      required_record:
+        - selected decision id
+        - covered ART item ids or explicit non-source scope
+        - owner repo and branch/PR plan when source-backed
+        - reason for any child-isolated split
+        - Review Packet path or draft path once source work begins
+      default_rule: >
+        When same-Feature children share owner repo, rollback boundary, validation
+        surface, deployment timing, and security posture, default to
+        feature_single_landing_unit. Per-child PRs are the exception, not the
+        default.
     landing_unit_rules:
       - One Landing Unit may cover one ART child, several children, one Feature,
         or a small cohesive Epic when review and rollback boundaries are shared.

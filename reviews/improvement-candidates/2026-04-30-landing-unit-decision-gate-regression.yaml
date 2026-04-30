@@ -1,0 +1,75 @@
+schema_version: 1
+id: 2026-04-30-landing-unit-decision-gate-regression
+title: Landing Unit decision was not forced before source work
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: During active ART delivery, source-backed child work kept being evaluated
+  as separate PR work even though the Feature shared one likely review and rollback
+  boundary. The existing Landing Unit doctrine was passive and did not force a pre-work
+  decision before branch, PR, or child execution.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-30-art-premature-merge-landing-unit-gap.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'The control failed at the transition from ART child selection to source
+    work: no explicit Landing Unit decision was required before starting implementation,
+    so Codex defaulted back to per-story PR behavior and burned unnecessary review,
+    validation, projection, and token cost.'
+  source_refs:
+  - 'conversation: operator said Codex keeps making mistakes evaluating Landing Units
+    and that it costs too much'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Adds a mandatory Landing Unit Decision Gate with explicit decisions,
+      split criteria, default rule, and required record fields before
+      source-backed ART work begins.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Explains the pre-work Landing Unit decisions and makes per-child PRs
+      an exception that requires a concrete split reason.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Adds the Landing Unit Decision Gate to the primary ART operator path
+      before source branch or implementation work starts.
+  - type: doc
+    path: workspace-governance/docs/codex-github-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Updates the standard PR flow so the Landing Unit decision happens
+      before branch creation, PR creation, and source work.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Forces future ART sessions to name the Landing Unit decision before
+      source-backed child work begins.
+  - type: doc
+    path: workspace-governance/workspace-root/AGENTS.md
+    owner_repo: workspace-governance
+    note: Adds the same decision gate to the canonical workspace root guidance
+      that new sessions read before routing work.
+  note: Closed by converting the passive Landing Unit doctrine into a mandatory
+    pre-work decision gate across contract, operator docs, Codex skill source,
+    and workspace-root guidance.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

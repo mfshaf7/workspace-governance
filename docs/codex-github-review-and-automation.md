@@ -50,35 +50,41 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
 
 ## Standard PR Flow
 
-1. Choose the Landing Unit: the smallest source change that should be
-   reviewed, merged, deployed, and rolled back together.
-2. Create one repo branch for the Landing Unit, not one branch for every ART
+1. Run the Landing Unit Decision Gate before source work starts:
+   `feature_single_landing_unit`, `child_isolated_landing_unit`,
+   `non_source_child`, or `defer_decision_blocked`.
+2. Choose the Landing Unit: the smallest source change that should be
+   reviewed, merged, deployed, and rolled back together. Default to one
+   Feature-level Landing Unit when same-Feature children share owner repo,
+   validation surface, security posture, deployment timing, and rollback
+   boundary.
+3. Create one repo branch for the Landing Unit, not one branch for every ART
    child item.
-3. Update docs, contracts, or evidence in the owner repo at the same time as
+4. Update docs, contracts, or evidence in the owner repo at the same time as
    the code or workflow change.
-4. Open a PR with the repo's required governance declaration, meaningful
+5. Open a PR with the repo's required governance declaration, meaningful
    summary, and draft Review Packet coverage for the ART items it supports.
-5. Fill the Review Packet with `open_pr` evidence, changed-surface
+6. Fill the Review Packet with `open_pr` evidence, changed-surface
    explanations, tests, validations, rollback boundary, and item-level
    completion mapping.
-6. Fetch the PR base and run the local command or command set that is
+7. Fetch the PR base and run the local command or command set that is
    CI-equivalent for the changed surface before merge. If CI runs a validator
    with a base ref, such as `--against-ref origin/main`, the local proof must
    use the same base-ref shape after `git fetch`.
-7. Record the CI-equivalent command, base ref, and result in the Review Packet
+8. Record the CI-equivalent command, base ref, and result in the Review Packet
    validation evidence. Do not substitute "CI will catch it" for local proof
    unless the operator explicitly accepts that as a blocker or exception.
-8. Run `npm run art -- review-packet readiness <packet.json>` before merge.
+9. Run `npm run art -- review-packet readiness <packet.json>` before merge.
    Do not merge while readiness fails; fix the same PR or explicitly split the
    Landing Unit.
-9. Request Codex review manually with `@codex review` until the repo has
+10. Request Codex review manually with `@codex review` until the repo has
    stable automatic review enabled.
-10. Resolve or explicitly acknowledge the findings in the PR before merge.
-11. Merge only after readiness, repo-local checks, and required governance checks
+11. Resolve or explicitly acknowledge the findings in the PR before merge.
+12. Merge only after readiness, repo-local checks, and required governance checks
    pass.
-12. After merge, finalize the Review Packet with PR, commit, validation, and
+13. After merge, finalize the Review Packet with PR, commit, validation, and
    rollback evidence before closing covered source-backed ART items.
-13. After closeout, retire the local branch, remote branch, and any temporary
+14. After closeout, retire the local branch, remote branch, and any temporary
    worktrees unless an open PR or a documented exception still requires them.
 
 ## Landing Units And Review Packets
@@ -87,6 +93,14 @@ A Landing Unit may cover one ART item, several child items, one Feature, or a
 small cohesive Epic. It should split when the work has separate repo ownership,
 review path, security impact, validation burden, deployment timing, or rollback
 scope.
+
+The Landing Unit Decision Gate must happen before branch creation or source
+implementation. Use `feature_single_landing_unit` for same-Feature children
+that share owner repo, validation, security posture, deployment timing, and
+rollback boundary. Use `child_isolated_landing_unit` only with a recorded split
+reason. Use `non_source_child` for planning, risk, live verification, and
+metadata work. Use `defer_decision_blocked` when the context is not yet known
+well enough to pick safely.
 
 The Review Packet is the evidence bridge from Git or live work back to ART. It
 records:

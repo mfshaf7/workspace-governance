@@ -78,6 +78,32 @@ cohesive Epic when review and rollback boundaries are shared. Split the Landing
 Unit when the work crosses repos, owners, security posture, validation burden,
 or rollback boundaries.
 
+Before source-backed implementation starts, make the Landing Unit Decision
+explicit. This is a hard pre-work gate, not a closeout cleanup step.
+
+Allowed decisions:
+
+- `feature_single_landing_unit`: the active Feature's executable children share
+  the same owner repo, review path, validation surface, deployment timing,
+  security posture, and rollback boundary. Use one branch, one PR, and one
+  Review Packet that maps all covered children.
+- `child_isolated_landing_unit`: one child must be reviewed, merged, deployed,
+  validated, or rolled back independently. Record the split reason before
+  creating a separate branch or PR.
+- `non_source_child`: the child is planning, risk disposition, live
+  verification, metadata repair, or another non-source evidence item. Close it
+  with non-source evidence, not fake merge evidence.
+- `defer_decision_blocked`: the owner, sibling scope, validation surface, or
+  rollback boundary is not understood well enough to proceed. Stop and gather
+  the missing ART/repo context before implementation continues.
+
+When same-Feature children share the same owner repo, rollback boundary,
+validation surface, deployment timing, and security posture, default to
+`feature_single_landing_unit`. Per-child PRs are the exception and need a real
+reason such as a repo/owner split, independent rollback, distinct security
+boundary, materially different validation, urgent blocker, unreviewable diff
+size, or explicit operator-approved split.
+
 Security-evidenced owner-repo change records create a dependent security
 landing unit. If a change record declares `security_evidence`, the generated
 `security-architecture/registers/security-change-record-index.yaml` update must
