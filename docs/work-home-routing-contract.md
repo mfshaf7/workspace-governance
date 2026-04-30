@@ -92,6 +92,22 @@ review visibility. That does not make the work done. It remains open until the
 Landing Unit is landed or the operator explicitly accepts a direct-land or
 non-source exception.
 
+For source-backed work, create or refresh the draft Review Packet while the PR
+is still open. It must carry `landing_unit.evidence_kind: open_pr`, the PR URL,
+concrete changed-surface explanations, test and validation evidence, rollback
+boundary, and one completion mapping per covered ART item. Then run:
+
+```bash
+npm run art -- review-packet readiness <packet.json>
+```
+
+Do this after the PR is open and before it is merged. A readiness failure means
+the Landing Unit is not ready to merge; fix the same PR or deliberately split
+the Landing Unit instead of planning a corrective PR after merge.
+
+After merge, change the packet to `merged_pr`, add the merge commit, finalize
+the packet, and use the finalized digest in ART completion evidence.
+
 Parent closeout must prove coverage, not duplicate every child record. A
 Feature or Epic can close only when every child is covered by a finalized Review
 Packet or explicitly marked as non-source evidence only.

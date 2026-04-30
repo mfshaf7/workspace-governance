@@ -1,0 +1,94 @@
+schema_version: 1
+id: 2026-04-30-art-premature-merge-landing-unit-gap
+title: ART source-backed work merged before item-level completeness preflight
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: 'During #427 work, one logical landing unit split into two PRs because item-level
+  evidence completeness was checked only after the first PR merged. The workflow relied
+  on agent memory instead of a durable pre-merge ART evidence gate.'
+regression_of: null
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The control gap is that PR creation and merge can proceed after repo validators
+    pass even when the active ART item's evidence expectation has not been checked
+    as complete across changed surfaces, generated artifacts, rollback, and Review
+    Packet readiness.
+  source_refs:
+  - 'conversation: operator said too many PRs/steps and asked where the workflow failed'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/art-workflow-artifacts.js
+    owner_repo: operator-orchestration-service
+    note: Adds the broker-owned pre-merge Review Packet readiness validator for
+      source-backed ART landing units.
+  - type: workflow
+    path: operator-orchestration-service/src/app.js
+    owner_repo: operator-orchestration-service
+    note: Exposes POST /v1/delivery-art/review-packets/readiness as the
+      caller-authenticated broker readiness route.
+  - type: workflow
+    path: operator-orchestration-service/src/art-cli.js
+    owner_repo: operator-orchestration-service
+    note: Adds npm run art -- review-packet readiness as the normal operator CLI
+      gate before merge.
+  - type: validator
+    path: operator-orchestration-service/scripts/validate_openproject_mutation_contracts.py
+    owner_repo: operator-orchestration-service
+    note: Prevents artifact-only delivery-art routes from being misclassified as
+      OpenProject mutation-surface changes.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Documents the pre-merge readiness sequence in the broker-owned primary
+      operator surface.
+  - type: doc
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: Records the security-evidenced OOS readiness-gate change in the
+      generated security change-record index.
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Makes pre-merge Review Packet readiness part of the Landing Unit and
+      Review Packet contract.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Explains the readiness gate in the proportional work-home routing
+      operator contract.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Adds the readiness command to the workspace Delivery ART operator path.
+  - type: doc
+    path: workspace-governance/docs/codex-github-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Updates the standard PR flow so readiness runs before merge and
+      finalization runs after merge.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Future ART sessions now carry the same pre-merge readiness sequence
+      before source-backed ART work is merged.
+  note: Closed by an executable broker readiness gate, validator precision fix,
+    security index sequencing, and workspace-level contract/doc/skill controls.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
