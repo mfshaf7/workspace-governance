@@ -9,6 +9,18 @@ import sys
 from contracts_lib import active_repo_names, load_contracts
 
 
+CHANGE_RECORD_REQUIRED_HEADINGS = {
+    "## Summary",
+    "## Classification",
+    "## Ownership",
+    "## Root Cause",
+    "## Source Changes",
+    "## Artifact And Deployment Evidence",
+    "## Live Verification",
+    "## Follow-Up",
+}
+
+
 def build_reference_tokens(rel_path: str) -> set[str]:
     return {
         rel_path,
@@ -70,6 +82,23 @@ def main() -> int:
             if not absolute_path.exists():
                 errors.append(
                     f"contracts/repo-rules/{repo_name}.yaml: {key} references missing path {repo_name}/{rel_path}"
+                )
+
+        template_path = repo_root / Path(requirements["change_record_readme_path"]).parent / "TEMPLATE.md"
+        if not template_path.exists():
+            errors.append(
+                f"contracts/repo-rules/{repo_name}.yaml: change-record lane missing template {template_path.relative_to(workspace_root)}"
+            )
+        else:
+            template_text = template_path.read_text(encoding="utf-8")
+            missing_template_headings = sorted(
+                heading
+                for heading in CHANGE_RECORD_REQUIRED_HEADINGS
+                if heading not in template_text
+            )
+            if missing_template_headings:
+                errors.append(
+                    f"{template_path}: missing change-record template headings: {', '.join(missing_template_headings)}"
                 )
 
         tokens = build_reference_tokens(requirements["change_record_readme_path"])
