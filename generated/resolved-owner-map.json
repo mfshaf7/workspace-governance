@@ -301,7 +301,8 @@
         "control-fabric API, worker, and CLI implementation"
       ],
       "repo_class": "governance-runtime",
-      "requires_security_bindings": false
+      "requires_security_bindings": false,
+      "security_review_subject": true
     }
   },
   "skills": {

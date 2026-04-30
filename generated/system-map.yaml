@@ -23,6 +23,7 @@ repos:
     lifecycle: active
     repo_class: governance-runtime
     requires_security_bindings: false
+    security_review_subject: true
     owns:
     - governance control-fabric runtime implementation
     - governance graph and validation planning runtime
