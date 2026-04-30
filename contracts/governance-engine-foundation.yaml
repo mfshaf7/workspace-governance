@@ -33,6 +33,9 @@ governance_engine_foundation:
     - id: security-review-outputs
       surface: security-architecture review artifacts
       role: dated security evidence that remains outside generated workspace copies
+    - id: owner-repo-template-records
+      surface: owner-repo TEMPLATE.* records
+      role: repo-owned record skeletons consumed by validation planning without becoming generated workspace copies
   compatibility_boundary:
     boundary_map_ref: contracts/governance-engine-boundary-map.yaml
     stable_entrypoints:
@@ -48,6 +51,7 @@ governance_engine_foundation:
       - materialized workspace-root copies remain generated from canonical sources
       - existing operator entrypoints stay stable during migration
       - owner-repo operator workflows remain owner-owned
+      - owner-repo template records remain owner-owned but become validation-planner inputs
   shadow_parity:
     contract_ref: contracts/governance-engine-shadow-parity.yaml
     phases:
@@ -68,6 +72,7 @@ governance_engine_foundation:
       - materialized workspace-root bootstrap files
       - live installed skill tree under ~/.codex/skills
       - repo-rule driven validation expectations
+      - template-family and record-skeleton validation expectations
       - generated governance artifacts under generated/
     custom_validation_allowed_seams:
       - product runtime behavior

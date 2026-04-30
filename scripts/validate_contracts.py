@@ -491,6 +491,7 @@ def main() -> int:
         "intake-register",
         "developer-integration-profiles",
         "exceptions",
+        "owner-repo-template-records",
         "owner-repo-workflows",
         "security-review-outputs",
     }
@@ -679,10 +680,11 @@ def main() -> int:
         )
     if set(governance_engine_boundary_map["external_instance_surfaces"]) != {
         "owner-repo primary operator surfaces",
+        "owner-repo template records",
         "security-architecture review artifacts",
     }:
         errors.append(
-            "contracts/governance-engine-boundary-map.yaml: external_instance_surfaces must be exactly owner-repo primary operator surfaces, security-architecture review artifacts"
+            "contracts/governance-engine-boundary-map.yaml: external_instance_surfaces must be exactly owner-repo primary operator surfaces, owner-repo template records, security-architecture review artifacts"
         )
     expected_live_materialized_outputs = {
         "ARCHITECTURE.md",
@@ -730,6 +732,14 @@ def main() -> int:
                 "contracts/governance-engine-extraction-gate.yaml",
             },
         },
+        "owner-repo-template-record-surfaces": {
+            "description": "validation planning must consume repo-owned TEMPLATE.* records without turning them into generated workspace copies",
+            "impacted_surfaces": {
+                "owner-repo TEMPLATE.* records",
+                "contracts/repo-rules/",
+                "docs/governance-engine-foundation.md",
+            },
+        },
     }
     actual_current_coupling_points = {
         entry["coupling_id"]: {
@@ -740,7 +750,7 @@ def main() -> int:
     }
     if set(actual_current_coupling_points) != set(expected_current_coupling_points):
         errors.append(
-            "contracts/governance-engine-boundary-map.yaml: current_coupling_points must define the current workspace-root-live-materialization, live-skill-installation, contract-driven-generated-artifacts, and external-review-and-operator-surfaces entries"
+            "contracts/governance-engine-boundary-map.yaml: current_coupling_points must define the current workspace-root-live-materialization, live-skill-installation, contract-driven-generated-artifacts, external-review-and-operator-surfaces, and owner-repo-template-record-surfaces entries"
         )
     else:
         for coupling_id, expected in expected_current_coupling_points.items():
@@ -790,6 +800,13 @@ def main() -> int:
                 "security-architecture review artifacts",
             },
         },
+        "template-family-consumption-contract": {
+            "threshold": "record-template family ownership, expected shape, unknown-template handling, and validation-planner consumption rules are explicit before runtime extraction",
+            "evidence_surfaces": {
+                "contracts/repo-rules/",
+                "docs/governance-engine-foundation.md",
+            },
+        },
     }
     actual_standalone_packaging_prerequisites = {
         entry["prerequisite_id"]: {
@@ -800,7 +817,7 @@ def main() -> int:
     }
     if set(actual_standalone_packaging_prerequisites) != set(expected_standalone_packaging_prerequisites):
         errors.append(
-            "contracts/governance-engine-boundary-map.yaml: standalone_packaging_prerequisites must define the current package-identity-and-versioning, install-and-materialization-surface, tenant-consumption-contract, compatibility-shim-plan, and security-delta-refresh entries"
+            "contracts/governance-engine-boundary-map.yaml: standalone_packaging_prerequisites must define the current package-identity-and-versioning, install-and-materialization-surface, tenant-consumption-contract, compatibility-shim-plan, security-delta-refresh, and template-family-consumption-contract entries"
         )
     else:
         for prerequisite_id, expected in expected_standalone_packaging_prerequisites.items():
