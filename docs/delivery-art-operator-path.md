@@ -93,6 +93,20 @@ branch. Keep them open with work notes such as `implemented pending landing`
 until the finalized Review Packet provides merged PR evidence, approved
 direct-land evidence, or equivalent durable source evidence.
 
+Before merging source-backed work, create or refresh the draft Review Packet
+while the PR is still open. The packet must use `open_pr` evidence and include
+the PR URL, changed-surface explanations, tests, validations, rollback
+boundary, and item-level completion mapping. Run:
+
+```bash
+npm run art -- review-packet readiness <packet.json>
+```
+
+Merge only after readiness passes. If it fails, fix the same PR or split the
+Landing Unit; do not merge first and repair the evidence later. After merge,
+set the packet to `merged_pr`, add the merge commit, finalize it, and use the
+final digest in ART completion evidence.
+
 Non-source work, such as risk disposition, live verification, planning, or ART
 metadata repair, closes with non-source evidence and should not invent merge
 evidence.

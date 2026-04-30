@@ -57,14 +57,21 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
 3. Update docs, contracts, or evidence in the owner repo at the same time as
    the code or workflow change.
 4. Open a PR with the repo's required governance declaration, meaningful
-   summary, and Review Packet coverage for the ART items it supports.
-5. Request Codex review manually with `@codex review` until the repo has
+   summary, and draft Review Packet coverage for the ART items it supports.
+5. Fill the Review Packet with `open_pr` evidence, changed-surface
+   explanations, tests, validations, rollback boundary, and item-level
+   completion mapping.
+6. Run `npm run art -- review-packet readiness <packet.json>` before merge.
+   Do not merge while readiness fails; fix the same PR or explicitly split the
+   Landing Unit.
+7. Request Codex review manually with `@codex review` until the repo has
    stable automatic review enabled.
-6. Resolve or explicitly acknowledge the findings in the PR before merge.
-7. Merge only after the repo-local checks and required governance checks pass.
-8. After merge, finalize the Review Packet with PR, commit, validation, and
+8. Resolve or explicitly acknowledge the findings in the PR before merge.
+9. Merge only after readiness, repo-local checks, and required governance checks
+   pass.
+10. After merge, finalize the Review Packet with PR, commit, validation, and
    rollback evidence before closing covered source-backed ART items.
-9. After closeout, retire the local branch, remote branch, and any temporary
+11. After closeout, retire the local branch, remote branch, and any temporary
    worktrees unless an open PR or a documented exception still requires them.
 
 ## Landing Units And Review Packets
@@ -88,6 +95,11 @@ Source-backed ART children should close only after a finalized Review Packet
 covers them. Several children can close from the same packet. Analysis,
 planning, risk handling, live verification, or ART metadata repair can close
 with non-source evidence instead of merge evidence.
+
+Pre-merge readiness is separate from post-merge finalization. Use `open_pr`
+evidence and `npm run art -- review-packet readiness <packet.json>` while the
+PR is still open. After merge, update the packet to `merged_pr`, add the merge
+commit, and finalize it.
 
 Direct-to-main landing is allowed only when the operator explicitly approves it
 or the owning repo documents it. Record that exception in the Review Packet;

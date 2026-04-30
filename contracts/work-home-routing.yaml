@@ -155,6 +155,13 @@ work_home_routing:
       - Long-running work may use an early pushed draft PR for backup, CI, and
         review visibility while still merging only when the Landing Unit is
         complete.
+      - Source-backed Landing Units must create or refresh a draft Review
+        Packet while the PR is still open, using `open_pr` evidence, concrete
+        changed-surface explanations, test and validation results, rollback
+        boundary, and one completion mapping per covered ART item.
+      - Run the broker Review Packet readiness gate after the PR is open and
+        before merge; a readiness failure blocks merge until the same PR is
+        fixed or the Landing Unit is deliberately split.
       - Cross-repo Landing Units must record merge order and final SHA evidence
         for every repo they touch.
       - A Landing Unit is not valid when one covered child must be rolled back
@@ -170,6 +177,9 @@ work_home_routing:
         repair proof.
       - Work implemented on a branch but not landed is not terminal done; record
         it as in-progress with work notes such as implemented pending landing.
+      - Pre-merge readiness is not final completion evidence. After merge,
+        update the Review Packet to `merged_pr`, record the merge commit, then
+        finalize it before source-backed ART completion.
       - Completion evidence must state either the Review Packet reference or
         the reason the item is non-source evidence only.
     exception_paths:
@@ -218,6 +228,8 @@ work_home_routing:
       - Open draft packets, unmerged branches, unresolved direct-land
         exceptions, or live-only follow-ups that affect scope or risk block
         parent closeout.
+      - Failed or skipped pre-merge readiness blocks parent closeout because it
+        proves the Landing Unit was not checked before merge.
     cleanup_policy:
       - Retire draft PRs, branches, temporary worktrees, and draft Review
         Packets after merge, direct-land acceptance, retirement, or abandonment.

@@ -208,6 +208,18 @@ Use this skill when a serious initiative is already running inside
      merged, deployed, and rolled back together
    - use a Review Packet to bind landed or explicitly accepted evidence back to
      one or more ART items
+   - for source-backed ART work, create or refresh the draft Review Packet
+     while the PR is still open and set `landing_unit.evidence_kind` to
+     `open_pr`
+   - before merge, the draft Review Packet must include the PR URL, changed
+     surfaces with explanations, test results, validation results, rollback
+     boundary, and one `completion_mapping` entry per covered work item
+   - after the PR is open and before it is merged, run:
+     `npm run art -- review-packet readiness <packet.json>`
+   - do not merge while readiness fails; fix the same PR or explicitly split the
+     Landing Unit instead of planning a corrective PR after merge
+   - after merge, update the Review Packet to `merged_pr`, add the merge commit,
+     finalize it, and use the finalized digest in ART completion evidence
    - do not mark source-backed ART children `done` until a finalized Review
      Packet covers them with merged PR evidence, approved direct-land evidence,
      or equivalent durable source evidence
