@@ -1,0 +1,78 @@
+schema_version: 1
+id: 2026-04-30-pr-diff-validation-and-edit-discipline-regression
+title: 'PR diff validation and edit discipline regressed during #477'
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: 'During #477, local validation was treated as sufficient before the committed
+  PR diff existed, CI caught the missing change record, and an earlier manual temp-payload
+  edit bypassed the apply_patch discipline. The source blocker was fixed, but the
+  broader workflow lesson must not stay in chat memory.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-30-ci-equivalent-premerge-validation-gap.yaml
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'The operator called out multiple failures in the round. The concrete misses
+    were: plan.apply draft validation was narrower than live submit, change-record
+    requirement validation was first run before the source commit so it missed the
+    committed diff, and a temp ART payload was edited outside apply_patch discipline
+    during planning repair.'
+  source_refs:
+  - 'conversation: operator said there were multiple failures in this round and asked
+    whether they would all be addressed'
+  - 'art: #477 source defect closed by operator-orchestration-service PR #89'
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The round required several corrective loops after the initial plan.apply
+    planning repair: source defect #477 had to be opened after live submit
+    rejected locally accepted drafts; PR #89 then needed a change record only
+    after CI caught the committed diff; Review Packet readiness caught weak
+    changed-surface explanations; completion-evidence preflight caught evidence
+    formatting only after the first raw-input rerun. These guards worked, but
+    they triggered late and should be sequenced earlier.
+  source_refs:
+  - 'repo: operator-orchestration-service PR #89'
+  - 'review-packet: 223fcd8c13466ce4fac8a023a8a50fd99b624168818530d94c0b06d6b9019294'
+  - 'command: npm run validate:change-record-requirement passed only after the change record was committed'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/work-item-create-preflight.js
+    owner_repo: operator-orchestration-service
+    note: PR #89 closed the concrete plan.apply draft/live-submit parity gap for unsupported keys and ready leaf execution contracts.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-04-30-plan-apply-draft-preflight-parity.md
+    owner_repo: operator-orchestration-service
+    note: Records delivery/runtime evidence for the #477 broker preflight hardening.
+  note: >-
+    Concrete source defect #477 is closed. The remaining candidate is about the
+    broader workflow control: validation must prove the committed PR diff and
+    artifact-edit discipline before CI or live submit becomes the first
+    enforcement point.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-03'
+  note: 'Define the durable control that forces source-backed ART validation after
+    the PR diff exists and preserves apply_patch/file-edit discipline for temp ART
+    payloads before continuing broad #420 execution.'
