@@ -67,9 +67,43 @@ is explicit:
 - security review outputs
   - review records stay with `security-architecture` and the reviewed owner
     repo, not in a generated workspace copy
+- owner-repo template records
+  - repo-local `TEMPLATE.*` skeletons remain owner-owned, but their family,
+    required shape, and admission posture must be discoverable by the
+    governance validation planner
 
 The reusable engine may validate or consume this state, but it must not erase
 the distinction between shared policy logic and local admitted state.
+
+## Template And Record-Skeleton Governance
+
+Template records are governed artifact families, not informal examples. They
+shape future change records, ADRs, workflow docs, review packets, delegation
+packets, improvement candidates, after-actions, and owner-repo evidence
+records. If a template drifts, new records can keep recreating an obsolete
+control shape even after schemas and validators are corrected.
+
+The target control-fabric model is:
+
+- `workspace-governance` owns the family contract, routing rule, and validation
+  planning semantics for templates.
+- Owner repos own their concrete repo-local templates and must keep them aligned
+  with the declared family shape.
+- The control fabric inventories active `TEMPLATE.*` records as validation
+  planner inputs, classifies them by family, and treats unknown template
+  records as unclassified artifacts until a repo rule or contract admits them.
+- Runtime validation should produce receipts and drift findings for stale,
+  unknown, or shape-incomplete templates instead of relying on agent memory or
+  ad hoc repo-local checks.
+- The control fabric must not replace owner repos by generating authoritative
+  repo-local templates unless a later contract explicitly makes that an emitted
+  output family.
+
+The current workspace sweep found the active template records structurally
+aligned, so #420 should not add a temporary standalone template validator only
+for today's files. The durable requirement is that the validation planner treats
+template records as first-class governed inputs before runtime extraction or
+admission checks depend on them.
 
 ## Compatibility Boundary
 
@@ -154,6 +188,7 @@ possible:
 - materialized workspace-root bootstrap files
 - live installed skill tree under `~/.codex/skills`
 - repo-rule driven validation expectations
+- template-family and record-skeleton validation expectations
 - generated resolved control-plane artifacts under `generated/`
 
 The exact materialized and generated output set is declared in:

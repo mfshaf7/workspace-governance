@@ -14,6 +14,7 @@ governance_engine_boundary_map:
     - contracts/exceptions.yaml
   external_instance_surfaces:
     - owner-repo primary operator surfaces
+    - owner-repo template records
     - security-architecture review artifacts
   live_materialized_outputs:
     - ARCHITECTURE.md
@@ -47,6 +48,12 @@ governance_engine_boundary_map:
         - owner-repo primary operator surfaces
         - security-architecture review artifacts
         - contracts/governance-engine-extraction-gate.yaml
+    - coupling_id: owner-repo-template-record-surfaces
+      description: validation planning must consume repo-owned TEMPLATE.* records without turning them into generated workspace copies
+      impacted_surfaces:
+        - owner-repo TEMPLATE.* records
+        - contracts/repo-rules/
+        - docs/governance-engine-foundation.md
   standalone_packaging_prerequisites:
     - prerequisite_id: package-identity-and-versioning
       threshold: standalone package identity, versioning authority, and release contract are explicit before extraction starts
@@ -72,6 +79,11 @@ governance_engine_boundary_map:
       threshold: a fresh security delta review is scheduled for the actual extraction package and trust-boundary change
       evidence_surfaces:
         - security-architecture review artifacts
+    - prerequisite_id: template-family-consumption-contract
+      threshold: record-template family ownership, expected shape, unknown-template handling, and validation-planner consumption rules are explicit before runtime extraction
+      evidence_surfaces:
+        - contracts/repo-rules/
+        - docs/governance-engine-foundation.md
   generated_projection:
     output_id: governance_engine_boundary_map
     path: generated/governance-engine-boundary-map.json
@@ -80,3 +92,4 @@ governance_engine_boundary_map:
     - tenant-instance paths may remain under contracts/ but stay explicitly classified as local admitted state
     - live materialized outputs derive from engine authoring paths instead of tenant-instance copies
     - external instance surfaces stay referenced instead of duplicated into generated workspace outputs
+    - owner-repo template records stay owner-owned and are consumed as validation-planner inputs, not silently copied into generated workspace outputs
