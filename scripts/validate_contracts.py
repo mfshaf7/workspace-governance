@@ -82,6 +82,7 @@ def main() -> int:
         "governance_engine_shadow_parity": repo_root / "contracts/governance-engine-shadow-parity.yaml",
         "governance_engine_extraction_gate": repo_root / "contracts/governance-engine-extraction-gate.yaml",
         "governance_control_fabric_operator_surface": repo_root / "contracts/governance-control-fabric-operator-surface.yaml",
+        "governance_validator_catalog": repo_root / "contracts/governance-validator-catalog.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -132,6 +133,9 @@ def main() -> int:
     governance_control_fabric_operator_surface = contracts[
         "governance_control_fabric_operator_surface"
     ]["governance_control_fabric_operator_surface"]
+    governance_validator_catalog = contracts["governance_validator_catalog"][
+        "governance_validator_catalog"
+    ]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
     self_improvement_runtime_gate = self_improvement_policy["runtime_gate"]
@@ -1434,6 +1438,349 @@ def main() -> int:
                 "contracts/governance-control-fabric-operator-surface.yaml: "
                 f"API endpoint {endpoint['endpoint_id']!r} must not mutate authority"
             )
+    if governance_validator_catalog["owner_repo"] != "workspace-governance":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: owner_repo must be 'workspace-governance'"
+        )
+    if governance_validator_catalog["runtime_repo"] != "workspace-governance-control-fabric":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: runtime_repo must be 'workspace-governance-control-fabric'"
+        )
+    if governance_validator_catalog["runtime_repo"] not in active_repos:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: runtime_repo must be an active repo"
+        )
+    if governance_validator_catalog["defining_epic_ref"] != "openproject://work_packages/498":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: defining_epic_ref must point to openproject://work_packages/498"
+        )
+    if governance_validator_catalog["defining_feature_ref"] != "openproject://work_packages/500":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: defining_feature_ref must point to openproject://work_packages/500"
+        )
+    if governance_validator_catalog["inventory_work_item_ref"] != "openproject://work_packages/501":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: inventory_work_item_ref must point to openproject://work_packages/501"
+        )
+    validator_catalog_surface = repo_root / governance_validator_catalog["primary_surface_path"]
+    if validator_catalog_surface.suffix != ".md" or not validator_catalog_surface.exists():
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: primary_surface_path must point to an existing markdown surface"
+        )
+    expected_catalog_profiles = {
+        "local-read-only",
+        "dev-integration",
+        "governed-stage",
+        "break-glass",
+    }
+    catalog_profiles = set(governance_validator_catalog["profiles"])
+    if catalog_profiles != expected_catalog_profiles:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: profiles must be exactly "
+            + ", ".join(sorted(expected_catalog_profiles))
+        )
+    expected_safety_classes = {
+        "local-read-only",
+        "workspace-cross-repo-read",
+        "remote-read",
+        "live-runtime-read",
+        "materialized-output-write",
+        "structured-record-write",
+        "authority-mutation",
+    }
+    catalog_safety_classes = set(governance_validator_catalog["safety_classes"])
+    if catalog_safety_classes != expected_safety_classes:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: safety_classes must be exactly "
+            + ", ".join(sorted(expected_safety_classes))
+        )
+    catalog_surfaces = governance_validator_catalog["command_surfaces"]
+    surface_ids = [surface["surface_id"] for surface in catalog_surfaces]
+    duplicate_surface_ids = sorted(
+        surface_id for surface_id in set(surface_ids) if surface_ids.count(surface_id) > 1
+    )
+    if duplicate_surface_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: duplicate command surface ids: "
+            + ", ".join(duplicate_surface_ids)
+        )
+    expected_surface_ids = {
+        "workspace-governance-python-scripts",
+        "workspace-delivery-art-broker",
+        "oos-api-probe",
+        "platform-openproject-make",
+        "platform-devint-runner",
+        "github-cli",
+        "k3s-kubectl",
+        "wgcf-runtime",
+    }
+    if set(surface_ids) != expected_surface_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: command_surfaces must define "
+            + ", ".join(sorted(expected_surface_ids))
+        )
+    for surface in catalog_surfaces:
+        if surface["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: command surface "
+                f"{surface['surface_id']!r} owner_repo {surface['owner_repo']!r} is not an active repo"
+            )
+        if surface["safety_class"] not in catalog_safety_classes:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: command surface "
+                f"{surface['surface_id']!r} references unknown safety_class {surface['safety_class']!r}"
+            )
+    catalog_entries = governance_validator_catalog["entries"]
+    retirement_register = governance_validator_catalog["retirement_register"]
+    surface_id_set = set(surface_ids)
+    validation_matrix_ids = set(validator_scripts)
+    catalog_validation_matrix_ids = {
+        entry_id
+        for entry_id, payload in catalog_entries.items()
+        if payload["included_in_validation_matrix"]
+    }
+    missing_catalog_matrix_entries = sorted(validation_matrix_ids - catalog_validation_matrix_ids)
+    if missing_catalog_matrix_entries:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: validation-matrix validators missing from catalog or not marked included: "
+            + ", ".join(missing_catalog_matrix_entries)
+        )
+    extra_catalog_matrix_entries = sorted(catalog_validation_matrix_ids - validation_matrix_ids)
+    if extra_catalog_matrix_entries:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: catalog entries marked included_in_validation_matrix but absent from validation-matrix: "
+            + ", ".join(extra_catalog_matrix_entries)
+        )
+    for entry_id, payload in catalog_entries.items():
+        if payload["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} owner_repo {payload['owner_repo']!r} is not an active repo"
+            )
+        if payload["surface_id"] not in surface_id_set:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} references unknown surface_id {payload['surface_id']!r}"
+            )
+        if payload["safety_class"] not in catalog_safety_classes:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} references unknown safety_class {payload['safety_class']!r}"
+            )
+        unknown_profiles = sorted(set(payload["allowed_profiles"]) - catalog_profiles)
+        if unknown_profiles:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} references unknown allowed_profiles "
+                + ", ".join(unknown_profiles)
+            )
+        executable_path = payload.get("executable_path")
+        if executable_path and not (repo_root / executable_path).exists():
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} references missing executable_path {executable_path!r}"
+            )
+        for rel_path in payload.get("generated_outputs", []):
+            if not (repo_root / rel_path).exists():
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} expects missing generated artifact {rel_path}"
+                )
+        if payload["included_in_validation_matrix"]:
+            matrix_payload = validator_scripts.get(entry_id)
+            if matrix_payload:
+                matrix_script = matrix_payload["script"]
+                if executable_path != matrix_script:
+                    errors.append(
+                        "contracts/governance-validator-catalog.yaml: entry "
+                        f"{entry_id!r} executable_path must match validation-matrix script {matrix_script!r}"
+                    )
+                matrix_outputs = set(matrix_payload.get("generated_outputs", []))
+                catalog_outputs = set(payload.get("generated_outputs", []))
+                if matrix_outputs != catalog_outputs:
+                    errors.append(
+                        "contracts/governance-validator-catalog.yaml: entry "
+                        f"{entry_id!r} generated_outputs must match validation-matrix"
+                    )
+        if payload["mutates_authority"] and "local-read-only" in payload["allowed_profiles"]:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} mutates authority but allows local-read-only profile"
+            )
+        if payload["writes_materialized_outputs"] and payload["safety_class"] != "materialized-output-write":
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: entry "
+                f"{entry_id!r} writes materialized outputs but is not materialized-output-write"
+            )
+    retirement_register_ids = [
+        entry["register_id"] for entry in retirement_register
+    ]
+    duplicate_retirement_register_ids = sorted(
+        register_id
+        for register_id in set(retirement_register_ids)
+        if retirement_register_ids.count(register_id) > 1
+    )
+    if duplicate_retirement_register_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: duplicate retirement register ids: "
+            + ", ".join(duplicate_retirement_register_ids)
+        )
+    covered_retirement_refs: set[str] = set()
+    for retirement_entry in retirement_register:
+        if retirement_entry["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} owner_repo {retirement_entry['owner_repo']!r} is not an active repo"
+            )
+        unknown_entry_refs = sorted(
+            set(retirement_entry["entry_refs"]) - set(catalog_entries)
+        )
+        if unknown_entry_refs:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} references unknown entries "
+                + ", ".join(unknown_entry_refs)
+            )
+        covered_retirement_refs.update(retirement_entry["entry_refs"])
+        if retirement_entry["retirement_allowed"] and "shadow parity" not in retirement_entry["retirement_gate"].lower():
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} allows retirement but does not require shadow parity"
+            )
+        if not retirement_entry["rollback_requirement"].strip():
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: retirement register "
+                f"{retirement_entry['register_id']!r} must include rollback_requirement"
+            )
+    missing_retirement_coverage = sorted(set(catalog_entries) - covered_retirement_refs)
+    if missing_retirement_coverage:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: entries missing retirement register coverage: "
+            + ", ".join(missing_retirement_coverage)
+        )
+    validation_behavior_policy = intake_policy["validation_behavior"]
+    if validation_behavior_policy["enabled"] is not True:
+        errors.append("contracts/intake-policy.yaml: validation_behavior.enabled must remain true")
+    if validation_behavior_policy["defining_work_item_ref"] != "openproject://work_packages/504":
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.defining_work_item_ref must point to openproject://work_packages/504"
+        )
+    expected_validation_catalog_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/governance-validator-catalog.yaml",
+    }
+    if validation_behavior_policy["catalog_ref"] != expected_validation_catalog_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.catalog_ref must point to workspace-governance/contracts/governance-validator-catalog.yaml"
+        )
+    allowed_validation_postures = set(validation_behavior_policy["allowed_postures"])
+    expected_validation_postures = {
+        "catalog-owner",
+        "runtime-consumer",
+        "profile-gated-external-owner",
+        "covered-by-owner-repo",
+        "interface-contract-backed",
+        "proposed-profile-gated",
+    }
+    if allowed_validation_postures != expected_validation_postures:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.allowed_postures must be exactly "
+            + ", ".join(sorted(expected_validation_postures))
+        )
+    allowed_validation_graph_roles = set(validation_behavior_policy["allowed_graph_roles"])
+    expected_validation_graph_roles = {
+        "catalog-authority-source",
+        "wgcf-runtime-source",
+        "platform-authority-source",
+        "security-authority-source",
+        "product-runtime-source",
+        "runtime-enforcement-source",
+        "product-channel-source",
+        "operator-workflow-source",
+        "shared-platform-component",
+        "shared-governance-runtime-component",
+        "product-runtime-component",
+        "product-channel-component",
+        "product-plugin-component",
+        "operator-workflow-component",
+        "proposed-shared-platform-component",
+    }
+    if allowed_validation_graph_roles != expected_validation_graph_roles:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.allowed_graph_roles must be exactly "
+            + ", ".join(sorted(expected_validation_graph_roles))
+        )
+    direct_invocation_postures = set(validation_behavior_policy["direct_invocation_postures"])
+    expected_direct_invocation_postures = {
+        "catalog-owner",
+        "profile-gated-external-owner",
+        "interface-contract-backed",
+    }
+    if direct_invocation_postures != expected_direct_invocation_postures:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.direct_invocation_postures must be exactly "
+            + ", ".join(sorted(expected_direct_invocation_postures))
+        )
+    admission_contract = governance_validator_catalog["admission_contract"]
+    if admission_contract["work_item_ref"] != "openproject://work_packages/504":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: admission_contract.work_item_ref must point to openproject://work_packages/504"
+        )
+    expected_admission_refs = {
+        "intake_policy_ref": "contracts/intake-policy.yaml",
+        "active_repo_inventory_ref": "contracts/repos.yaml",
+        "active_component_inventory_ref": "contracts/components.yaml",
+        "intake_register_ref": "contracts/intake-register.yaml",
+    }
+    for key, rel_path in expected_admission_refs.items():
+        if admission_contract[key] != rel_path:
+            errors.append(
+                f"contracts/governance-validator-catalog.yaml: admission_contract.{key} must be {rel_path!r}"
+            )
+        if not (repo_root / rel_path).exists():
+            errors.append(
+                f"contracts/governance-validator-catalog.yaml: admission_contract.{key} references missing path {rel_path!r}"
+            )
+    expected_behavior_fields = {"posture", "wgcf_graph_role", "catalog_refs", "notes"}
+    if set(admission_contract["required_behavior_fields"]) != expected_behavior_fields:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: admission_contract.required_behavior_fields must be posture, wgcf_graph_role, catalog_refs, notes"
+        )
+
+    def validate_validation_behavior(label: str, payload: dict, *, required: bool) -> None:
+        behavior = payload.get("validation_behavior")
+        if behavior is None:
+            if required:
+                errors.append(f"{label}: missing validation_behavior")
+            return
+        posture = behavior["posture"]
+        graph_role = behavior["wgcf_graph_role"]
+        catalog_refs = behavior["catalog_refs"]
+        if posture not in allowed_validation_postures:
+            errors.append(f"{label}: validation_behavior.posture {posture!r} is not allowed")
+        if graph_role not in allowed_validation_graph_roles:
+            errors.append(
+                f"{label}: validation_behavior.wgcf_graph_role {graph_role!r} is not allowed"
+            )
+        unknown_catalog_refs = sorted(set(catalog_refs) - set(catalog_entries))
+        if unknown_catalog_refs:
+            errors.append(
+                f"{label}: validation_behavior.catalog_refs references unknown catalog entries "
+                + ", ".join(unknown_catalog_refs)
+            )
+        if (
+            validation_behavior_policy["require_catalog_refs_for_direct_invocation"]
+            and posture in direct_invocation_postures
+            and not catalog_refs
+        ):
+            errors.append(
+                f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
+            )
+        if posture == "proposed-profile-gated" and graph_role != "proposed-shared-platform-component":
+            errors.append(
+                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component graph role"
+            )
+
     workspace_root = repo_root.parent
     workspace_has_sibling_repos = any(
         (workspace_root / repo_name).exists()
@@ -1565,6 +1912,11 @@ def main() -> int:
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/repos.yaml: {repo_name} uses unknown lifecycle {payload['lifecycle']!r}")
+        validate_validation_behavior(
+            f"contracts/repos.yaml: {repo_name}",
+            payload,
+            required=validation_behavior_policy["repos"]["require_for_active"],
+        )
         for ref in payload["allowed_authoritative_refs"]:
             if ref not in active_repos:
                 errors.append(f"contracts/repos.yaml: {repo_name} references unknown repo {ref!r}")
@@ -1691,6 +2043,11 @@ def main() -> int:
     for component_name, payload in contracts["components"]["components"].items():
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/components.yaml: {component_name} uses unknown lifecycle {payload['lifecycle']!r}")
+        validate_validation_behavior(
+            f"contracts/components.yaml: {component_name}",
+            payload,
+            required=validation_behavior_policy["components"]["require_for_active"],
+        )
         if payload["owner_repo"] not in active_repos:
             errors.append(f"contracts/components.yaml: {component_name} owner_repo {payload['owner_repo']!r} is not an active repo")
         if payload["security_owner"] not in active_repos:
@@ -1726,6 +2083,14 @@ def main() -> int:
             errors.append(
                 f"contracts/intake-register.yaml: repo {repo_name} uses unknown status {payload['status']!r}"
             )
+        validate_validation_behavior(
+            f"contracts/intake-register.yaml: repo {repo_name}",
+            payload,
+            required=(
+                payload["status"] in in_scope_statuses
+                and validation_behavior_policy["repos"]["require_for_in_scope_intake"]
+            ),
+        )
         if payload["decision_source"] not in {"operator", "ai-suggested"}:
             errors.append(
                 f"contracts/intake-register.yaml: repo {repo_name} decision_source must be operator or ai-suggested"
@@ -1791,6 +2156,14 @@ def main() -> int:
             errors.append(
                 f"contracts/intake-register.yaml: component {component_name} uses unknown status {payload['status']!r}"
             )
+        validate_validation_behavior(
+            f"contracts/intake-register.yaml: component {component_name}",
+            payload,
+            required=(
+                payload["status"] in in_scope_statuses
+                and validation_behavior_policy["components"]["require_for_in_scope_intake"]
+            ),
+        )
         if payload["decision_source"] not in {"operator", "ai-suggested"}:
             errors.append(
                 f"contracts/intake-register.yaml: component {component_name} decision_source must be operator or ai-suggested"

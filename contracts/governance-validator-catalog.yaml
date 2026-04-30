@@ -1,0 +1,1086 @@
+schema_version: 1
+governance_validator_catalog:
+  owner_repo: workspace-governance
+  runtime_repo: workspace-governance-control-fabric
+  defining_epic_ref: openproject://work_packages/498
+  defining_feature_ref: openproject://work_packages/500
+  inventory_work_item_ref: openproject://work_packages/501
+  primary_surface_path: docs/governance-validator-catalog.md
+  purpose: inventory and classify current workspace governance validators, audits, materializers, scaffolding commands, and external operator command surfaces before WGCF starts invoking them
+  authority_model:
+    catalog_authority: workspace-governance owns validator identity, command posture, safety class, profile eligibility, and retirement posture.
+    runtime_consumption_rule: workspace-governance-control-fabric may consume this catalog to plan, invoke, cache, and receipt checks, but must not redefine catalog truth locally.
+    art_mutation_boundary: operator-orchestration-service remains the only Delivery ART mutation authority; WGCF may emit recommendations and receipts for OOS.
+    retirement_rule: no direct validator or command path may be removed until shadow parity, rollback, and replacement receipt evidence are recorded.
+    evidence_rule: compact receipts are operator-facing evidence; raw command output must be captured as artifact references when retained.
+  admission_contract:
+    work_item_ref: openproject://work_packages/504
+    intake_policy_ref: contracts/intake-policy.yaml
+    active_repo_inventory_ref: contracts/repos.yaml
+    active_component_inventory_ref: contracts/components.yaml
+    intake_register_ref: contracts/intake-register.yaml
+    rule: new active or in-scope repos and components must declare WGCF validation behavior before they can become governed workspace surfaces
+    required_behavior_fields:
+      - posture
+      - wgcf_graph_role
+      - catalog_refs
+      - notes
+    denied_without_behavior:
+      - active repo inventory entry
+      - active component inventory entry
+      - proposed or admitted intake repo
+      - proposed or admitted intake component
+  profiles:
+    local-read-only:
+      description: local checkout validation without live runtime mutation, external writes, or authority mutation
+    dev-integration:
+      description: local-k3s or broker-backed validation for active dev-integration profiles after platform and security gates allow that specific command
+    governed-stage:
+      description: governed stage-readiness validation requiring reviewed source, approved runtime profile, and release-gate evidence
+    break-glass:
+      description: explicit operator-approved diagnostic posture for live incidents; never a default WGCF plan output
+  safety_classes:
+    local-read-only:
+      description: reads local files and emits bounded terminal output only
+      may_run_by_default: true
+      requires_explicit_operator_gate: false
+    workspace-cross-repo-read:
+      description: reads sibling repos or generated workspace state under a declared workspace root
+      may_run_by_default: true
+      requires_explicit_operator_gate: false
+    remote-read:
+      description: reads remote GitHub, branch, workflow, or other network-backed state
+      may_run_by_default: false
+      requires_explicit_operator_gate: true
+    live-runtime-read:
+      description: reads live Kubernetes, broker, or platform runtime state
+      may_run_by_default: false
+      requires_explicit_operator_gate: true
+    materialized-output-write:
+      description: writes generated or materialized outputs such as workspace-root files, installed skills, or generated maps
+      may_run_by_default: false
+      requires_explicit_operator_gate: true
+    structured-record-write:
+      description: creates or updates governance records, intake records, or scaffolded review artifacts
+      may_run_by_default: false
+      requires_explicit_operator_gate: true
+    authority-mutation:
+      description: mutates an upstream authority store and must stay outside WGCF autonomous execution
+      may_run_by_default: false
+      requires_explicit_operator_gate: true
+  command_surfaces:
+    - surface_id: workspace-governance-python-scripts
+      owner_repo: workspace-governance
+      command_family: python3 scripts/<script>.py ...
+      current_use: local workspace governance validation, audit, materialization, and record scaffolding
+      wgcf_role: primary source of local validator commands after catalog and safety checks are loaded
+      safety_class: local-read-only
+      mutation_boundary: individual catalog entries declare whether they write materialized output or structured records
+    - surface_id: workspace-delivery-art-broker
+      owner_repo: operator-orchestration-service
+      command_family: npm run art -- <command>
+      current_use: canonical Delivery ART read, planning, blocker, completion, projection, and review-packet workflow
+      wgcf_role: recommendation target only; WGCF may emit receipt refs or draft payloads for OOS but must not mutate ART directly
+      safety_class: live-runtime-read
+      mutation_boundary: OOS owns all ART mutations
+    - surface_id: oos-api-probe
+      owner_repo: operator-orchestration-service
+      command_family: npm run api:probe -- <METHOD> <PATH>
+      current_use: live broker API probing and contract confirmation
+      wgcf_role: live-read or smoke input after dev-integration profile gates are active
+      safety_class: live-runtime-read
+      mutation_boundary: OOS API decides write permissions; WGCF must not bypass OOS identity and profile gates
+    - surface_id: platform-openproject-make
+      owner_repo: platform-engineering
+      command_family: make openproject-*
+      current_use: OpenProject workflow quality checks and compatible-view projection sync
+      wgcf_role: external platform-owned validator or reconciler invoked only through approved profiles
+      safety_class: live-runtime-read
+      mutation_boundary: platform-engineering owns runtime target selection and reconciliation scripts
+    - surface_id: platform-devint-runner
+      owner_repo: platform-engineering
+      command_family: make devint-*
+      current_use: shared local-k3s dev-integration lifecycle actions
+      wgcf_role: future runtime health and profile evidence source after platform gates
+      safety_class: live-runtime-read
+      mutation_boundary: platform-engineering owns dev-integration runtime lifecycle
+    - surface_id: github-cli
+      owner_repo: workspace-governance
+      command_family: gh <resource> <action>
+      current_use: branch, PR, workflow, and review-control evidence
+      wgcf_role: remote-read evidence source when a profile allows GitHub access
+      safety_class: remote-read
+      mutation_boundary: write operations require explicit operator and repo workflow authority
+    - surface_id: k3s-kubectl
+      owner_repo: platform-engineering
+      command_family: k3s kubectl ...
+      current_use: live runtime truth and emergency diagnostic fallback
+      wgcf_role: live-read evidence source only after profile gates; not a default ART access path
+      safety_class: live-runtime-read
+      mutation_boundary: platform-engineering owns runtime access and namespace posture
+    - surface_id: wgcf-runtime
+      owner_repo: workspace-governance-control-fabric
+      command_family: wgcf <command>
+      current_use: future compact-by-default validation planning, execution, readiness, receipts, and ledger
+      wgcf_role: target runtime surface after catalog ingestion and shadow parity
+      safety_class: local-read-only
+      mutation_boundary: fabric-local receipts, artifacts, and ledger only
+  retirement_register:
+    - register_id: workspace-governance-read-validators
+      owner_repo: workspace-governance
+      entry_refs:
+        - repo-structure
+        - contract-model
+        - delegation-journal
+        - intake-model
+        - developer-integration
+        - cross-repo-truth
+        - governance-engine-shadow-parity
+        - security-bindings
+        - review-coverage
+        - security-delta-reviews
+        - security-evidence
+        - security-change-record-lanes
+        - component-contracts
+        - workspace-layout
+        - stale-content
+        - improvement-candidates
+        - improvement-signals
+        - learning-closure
+        - codex-review-controls
+        - structured-record
+        - touched-records-preflight
+      current_posture: direct commands are retained as compatibility entrypoints while WGCF learns to plan and receipt them
+      retirement_allowed: true
+      retirement_gate: shadow parity must prove WGCF selected the same checks, reported equivalent pass/fail posture, preserved artifact refs, and produced rollback instructions
+      rollback_requirement: direct python entrypoints and validation-matrix coverage remain available until the replacement WGCF profile has passed representative repo, ART, platform, and security scopes
+    - register_id: workspace-governance-remote-read-audits
+      owner_repo: workspace-governance
+      entry_refs:
+        - branch-lifecycle
+        - remote-alignment
+        - workspace-control-plane-summary
+      current_posture: remote-read audits require explicit profile gating because they may call GitHub or other network-backed sources
+      retirement_allowed: true
+      retirement_gate: shadow parity must prove WGCF remote-read profile identity, timeout, retry, cache, stale-result behavior, and equivalent direct-command findings before replacing direct commands
+      rollback_requirement: direct remote-read commands remain documented and executable for restart-readiness and clean-state claims
+    - register_id: materialized-output-writers
+      owner_repo: workspace-governance
+      entry_refs:
+        - sync-workspace-root
+        - install-skills
+        - materialize-governance-engine-outputs
+        - governance-engine-materializer
+      current_posture: materializers are authority-adjacent write surfaces and are not default WGCF execution targets
+      retirement_allowed: false
+      retirement_gate: none; WGCF may recommend or check materialization, but actual write entrypoints stay explicit until a separate approved materializer design exists
+      rollback_requirement: current direct materializer commands remain the rollback path
+    - register_id: structured-record-writers
+      owner_repo: workspace-governance
+      entry_refs:
+        - scaffold-intake
+        - record-improvement-candidate
+        - record-after-action
+        - check-self-improvement-escalation
+      current_posture: record writers create or update governance authority records and must stay recommendation-only for WGCF
+      retirement_allowed: false
+      retirement_gate: none under this initiative; record mutation remains human or broker-guided until a separate approval runtime is designed
+      rollback_requirement: direct scaffolders remain the authoritative controlled write path
+    - register_id: delivery-art-broker-surface
+      owner_repo: operator-orchestration-service
+      entry_refs:
+        - delivery-art-broker-read
+        - delivery-art-broker-mutation
+        - delivery-art-api-probe-read
+        - delivery-art-api-probe-mutation
+      current_posture: OOS remains the canonical ART read and write surface; WGCF may consume reads and emit recommendations or draft refs
+      retirement_allowed: false
+      retirement_gate: none; WGCF must never replace OOS as ART mutation authority
+      rollback_requirement: OOS broker CLI and API remain the rollback and authority path
+    - register_id: platform-owned-runtime-surfaces
+      owner_repo: platform-engineering
+      entry_refs:
+        - openproject-quality-check
+        - openproject-projection-sync
+        - devint-runner-read
+        - devint-runner-lifecycle
+        - kubernetes-runtime-read
+        - kubernetes-runtime-mutation
+      current_posture: platform runtime commands stay platform-owned and profile-gated
+      retirement_allowed: false
+      retirement_gate: none under workspace-governance; platform-engineering owns any runtime command replacement decision
+      rollback_requirement: platform-owned make and k3s command paths remain the rollback path
+    - register_id: github-command-surface
+      owner_repo: workspace-governance
+      entry_refs:
+        - github-remote-read
+        - github-remote-mutation
+      current_posture: GitHub reads may become profile-gated evidence inputs; GitHub writes stay explicit repo workflow actions
+      retirement_allowed: false
+      retirement_gate: none under this initiative; future GitHub App integration would need its own authority and security review
+      rollback_requirement: direct gh commands and GitHub UI remain the rollback path
+    - register_id: support-libraries
+      owner_repo: workspace-governance
+      entry_refs:
+        - contracts-lib
+      current_posture: support libraries are imported by validators and materializers, not invoked as checks
+      retirement_allowed: false
+      retirement_gate: none; library extraction or replacement belongs to governance-engine packaging work
+      rollback_requirement: direct library imports remain part of the current validators
+  entries:
+    repo-structure:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_repo_structure.py
+      command: python3 scripts/validate_repo_structure.py --repo-root .
+      purpose: validate required workspace-governance files, directories, canonical root notes, and repository origin shape
+      scope: repo-local
+      safety_class: local-read-only
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    contract-model:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_contracts.py
+      command: python3 scripts/validate_contracts.py --repo-root .
+      purpose: validate workspace contracts, schemas, repo rules, semantic relationships, and source references
+      scope: repo-local
+      safety_class: local-read-only
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    delegation-journal:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_delegation_journal.py
+      command: python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/projects
+      purpose: validate delegated-execution journal records, task packets, write-scope discipline, and security-review references
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    intake-model:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_intake.py
+      command: python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+      purpose: validate explicit intake decisions for repos, products, components, and AI-suggested intake acceptance evidence
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    developer-integration:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_developer_integration.py
+      command: python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
+      purpose: validate dev-integration lane policy, profile lifecycle, profile references, and owner-repo profile files
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    cross-repo-truth:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_cross_repo_truth.py
+      command: python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated
+      purpose: validate cross-repo owner truth, OpenProject workflow contract references, security coverage references, and generated governance artifacts
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      generated_outputs:
+        - generated/system-map.yaml
+        - generated/resolved-owner-map.json
+        - generated/resolved-dependency-graph.json
+        - generated/stale-content-rules.json
+        - generated/governance-engine-boundary-map.json
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    governance-engine-shadow-parity:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_governance_engine_shadow_parity.py
+      command: python3 scripts/validate_governance_engine_shadow_parity.py
+      purpose: validate workspace-root, installed-skill, generated-artifact, and compatibility-entrypoint parity for governance-engine work
+      scope: repo-local
+      safety_class: local-read-only
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      generated_outputs:
+        - generated/governance-engine-boundary-map.json
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    security-bindings:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_security_bindings.py
+      command: python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/projects
+      purpose: validate security-binding references for repos with security-relevant trust boundaries
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    review-coverage:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_review_coverage.py
+      command: python3 scripts/validate_review_coverage.py --workspace-root /home/mfshaf7/projects
+      purpose: validate baseline security review coverage for active security-owned repos, components, and products
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    security-delta-reviews:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_security_delta_reviews.py
+      command: python3 scripts/validate_security_delta_reviews.py --workspace-root /home/mfshaf7/projects
+      purpose: validate that security-delta review triggers and review outputs stay linked for changed security-relevant surfaces
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    security-evidence:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_security_evidence.py
+      command: python3 scripts/validate_security_evidence.py --repo-root . --workspace-root /home/mfshaf7/projects
+      purpose: delegate to security-architecture evidence validation so stale assessment metadata and unlinked risks fail at workspace level
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    security-change-record-lanes:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_security_change_record_lanes.py
+      command: python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/mfshaf7/projects
+      purpose: validate security change-record lane references, templates, PR workflows, and diff-aware validators
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    component-contracts:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_component_contracts.py
+      command: python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
+      purpose: execute component interface validation commands declared in the component contract
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    workspace-layout:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/audit_workspace_layout.py
+      command: python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
+      purpose: audit active workspace repo inventory, root sync, skill sync, generated freshness, review coverage, and cross-repo truth
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    stale-content:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/audit_stale_content.py
+      command: python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
+      purpose: audit active docs for retired vocabulary, forbidden ownership language, and invalid local navigation links
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    improvement-candidates:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_improvement_candidates.py
+      command: python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects
+      purpose: validate improvement-candidate lifecycle, follow-up, closure refs, and control refs
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    improvement-signals:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/audit_improvement_signals.py
+      command: python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
+      purpose: audit machine-visible self-improvement signals such as missing declared operator workflow surfaces
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    learning-closure:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_learning_closure.py
+      command: python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
+      purpose: validate after-action reviews either link durable controls or remain explicitly open with owner and due date
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    branch-lifecycle:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/audit_branch_lifecycle.py
+      command: python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote
+      purpose: audit stale local branches, pinned worktrees, and remote branches that lack open PRs or documented exceptions
+      scope: workspace-remote
+      safety_class: remote-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: true
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    remote-alignment:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/check_remote_alignment.py
+      command: python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name <repo> --refresh-remote
+      purpose: prove local repo alignment with origin/main before trusting local control-plane guidance
+      scope: workspace-remote
+      safety_class: remote-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: true
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    codex-review-controls:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_codex_review_controls.py
+      command: python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
+      purpose: validate repo-specific Codex review guidance, GitHub control surfaces, PR-template evidence sections, and review-check workflows
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: true
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    structured-record:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/validate_structured_record.py
+      command: python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects
+      purpose: validate one touched governance or owner-repo change record before continuing normal work
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    touched-records-preflight:
+      kind: validator
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/preflight_touched_records.py
+      command: python3 scripts/preflight_touched_records.py --workspace-root /home/mfshaf7/projects
+      purpose: discover changed structured records and run the exact per-record preflight so touched record validation is not missed
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    workspace-control-plane-summary:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/workspace_control_plane_summary.py
+      command: python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote
+      purpose: run read-only workspace summary covering remote freshness, sync, skill, review, stale-content, branch, layout, and learning health
+      scope: workspace-remote
+      safety_class: remote-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: true
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-wgcf-invocation
+      retirement_posture: keep-direct-until-shadow-parity
+    sync-workspace-root:
+      kind: materializer
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/sync_workspace_root.py
+      command: python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
+      purpose: materialize canonical workspace-root files from workspace-governance into the live workspace root
+      scope: materialized-output
+      safety_class: materialized-output-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: true
+      included_in_validation_matrix: false
+      wgcf_posture: do-not-autoinvoke-through-wgcf
+      retirement_posture: keep-direct-compatibility-entrypoint
+    install-skills:
+      kind: materializer
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/install_skills.py
+      command: python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
+      purpose: install or verify registered workspace-managed skills under the live Codex skill root
+      scope: materialized-output
+      safety_class: materialized-output-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: true
+      included_in_validation_matrix: false
+      wgcf_posture: do-not-autoinvoke-through-wgcf
+      retirement_posture: keep-direct-compatibility-entrypoint
+    materialize-governance-engine-outputs:
+      kind: materializer
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/materialize_governance_engine_outputs.py
+      command: python3 scripts/materialize_governance_engine_outputs.py <workspace-root|skills|generated> [--check]
+      purpose: materialize or verify output families declared by governance-engine output manifest
+      scope: materialized-output
+      safety_class: materialized-output-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: true
+      included_in_validation_matrix: false
+      wgcf_posture: check-mode-only-before-explicit-write-gate
+      retirement_posture: keep-direct-compatibility-entrypoint
+    scaffold-intake:
+      kind: scaffolder
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/scaffold_intake.py
+      command: python3 scripts/scaffold_intake.py <repo|product|component> ...
+      purpose: scaffold explicit intake classification records for new entrants before they join active governance
+      scope: structured-record
+      safety_class: structured-record-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-direct-authority-entrypoint
+    record-improvement-candidate:
+      kind: scaffolder
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/record_improvement_candidate.py
+      command: python3 scripts/record_improvement_candidate.py ...
+      purpose: create governed improvement-candidate records when a real repeated miss or late discovery signal exists
+      scope: structured-record
+      safety_class: structured-record-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-direct-authority-entrypoint
+    record-after-action:
+      kind: scaffolder
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/record_after_action.py
+      command: python3 scripts/record_after_action.py ...
+      purpose: create after-action review records for durable learning closure
+      scope: structured-record
+      safety_class: structured-record-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-direct-authority-entrypoint
+    check-self-improvement-escalation:
+      kind: audit
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/check_self_improvement_escalation.py
+      command: python3 scripts/check_self_improvement_escalation.py --signal <signal-id>
+      purpose: evaluate whether a live self-improvement signal requires candidate capture before normal work continues
+      scope: structured-record
+      safety_class: structured-record-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-direct-authority-entrypoint
+    contracts-lib:
+      kind: support-library
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/contracts_lib.py
+      command: import-only
+      purpose: shared contract loader and generated-output manifest resolver for validators and materializers
+      scope: repo-local
+      safety_class: local-read-only
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: authority-input-only
+      retirement_posture: keep-direct-library
+    governance-engine-materializer:
+      kind: support-library
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/governance_engine_materializer.py
+      command: import-only
+      purpose: shared implementation for workspace-root sync, installed skills, and generated governance artifact emission
+      scope: materialized-output
+      safety_class: materialized-output-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: true
+      included_in_validation_matrix: false
+      wgcf_posture: authority-input-only
+      retirement_posture: keep-direct-library
+    delivery-art-broker-read:
+      kind: external-command
+      owner_repo: operator-orchestration-service
+      surface_id: workspace-delivery-art-broker
+      command: npm run art -- <bootstrap|workflow-health|initiative planning|item continuation|projection status>
+      purpose: canonical ART workflow read surface for planning, health, continuation, and projection checkpoint context
+      scope: delivery-art-runtime
+      safety_class: live-runtime-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-read-only
+      retirement_posture: never-retire-through-wgcf
+    delivery-art-broker-mutation:
+      kind: external-command
+      owner_repo: operator-orchestration-service
+      surface_id: workspace-delivery-art-broker
+      command: npm run art -- <item blocker|item complete|initiative close|projection sync|draft submit>
+      purpose: canonical ART mutation surface for blockers, completion, projection reconciliation, and Review Packet workflow writes
+      scope: delivery-art-runtime
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: never-retire-through-wgcf
+    delivery-art-api-probe-read:
+      kind: external-command
+      owner_repo: operator-orchestration-service
+      surface_id: oos-api-probe
+      command: npm run api:probe -- GET <PATH>
+      purpose: prove live broker read-route behavior and response schema posture before changing or relying on OOS routes
+      scope: delivery-art-runtime
+      safety_class: live-runtime-read
+      allowed_profiles:
+        - dev-integration
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-read-only
+      retirement_posture: never-retire-through-wgcf
+    delivery-art-api-probe-mutation:
+      kind: external-command
+      owner_repo: operator-orchestration-service
+      surface_id: oos-api-probe
+      command: npm run api:probe -- <POST|PATCH|DELETE> <PATH>
+      purpose: prove live broker write-route behavior only when the operator intentionally exercises a mutating API path
+      scope: delivery-art-runtime
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: never-retire-through-wgcf
+    openproject-quality-check:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: platform-openproject-make
+      command: make openproject-check-delivery-art-quality
+      purpose: run platform-owned OpenProject ART quality checks against selected PI or target epic
+      scope: delivery-art-runtime
+      safety_class: live-runtime-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-wgcf-invocation
+      retirement_posture: keep-platform-owned
+    openproject-projection-sync:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: platform-openproject-make
+      command: make openproject-sync-delivery-art-views
+      purpose: reconcile OpenProject compatible roadmap and PM2 projections after broker-visible projection checkpoints
+      scope: delivery-art-runtime
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-platform-owned
+    devint-runner-read:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: platform-devint-runner
+      command: make devint-<status|smoke|promote-check>
+      purpose: verify admitted dev-integration profiles through read or smoke actions on the platform-owned local-k3s runner
+      scope: live-runtime
+      safety_class: live-runtime-read
+      allowed_profiles:
+        - dev-integration
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-wgcf-invocation
+      retirement_posture: keep-platform-owned
+    devint-runner-lifecycle:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: platform-devint-runner
+      command: make devint-<up|down|reset>
+      purpose: start, stop, or reset admitted dev-integration profiles through the platform-owned local-k3s runner
+      scope: live-runtime
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-platform-owned
+    github-remote-read:
+      kind: external-command
+      owner_repo: workspace-governance
+      surface_id: github-cli
+      command: gh <pr|run|repo|workflow> <view|list|checks>
+      purpose: inspect GitHub pull requests, workflow runs, repository metadata, and branch lifecycle evidence
+      scope: workspace-remote
+      safety_class: remote-read
+      allowed_profiles:
+        - dev-integration
+        - governed-stage
+      requires_workspace_root: true
+      requires_network: true
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: read-only-by-default
+      retirement_posture: keep-direct-until-github-app-integration
+    github-remote-mutation:
+      kind: external-command
+      owner_repo: workspace-governance
+      surface_id: github-cli
+      command: gh <pr|run|workflow> <create|merge|rerun|comment|download>
+      purpose: mutate or download GitHub pull request, workflow, or artifact state under explicit repo workflow authority
+      scope: workspace-remote
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: true
+      requires_network: true
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-direct-until-github-app-integration
+    kubernetes-runtime-read:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: k3s-kubectl
+      command: k3s kubectl <get|describe|logs>
+      purpose: inspect live local-k3s runtime truth for platform-approved diagnostics
+      scope: live-runtime
+      safety_class: live-runtime-read
+      allowed_profiles:
+        - dev-integration
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: profile-gated-read-only-by-default
+      retirement_posture: keep-platform-owned
+    kubernetes-runtime-mutation:
+      kind: external-command
+      owner_repo: platform-engineering
+      surface_id: k3s-kubectl
+      command: k3s kubectl <apply|delete|scale|rollout|exec>
+      purpose: mutate or execute inside live local-k3s runtime only under explicit platform-approved operational intent
+      scope: live-runtime
+      safety_class: authority-mutation
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: keep-platform-owned

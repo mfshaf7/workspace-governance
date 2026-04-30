@@ -6,42 +6,97 @@ components:
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - devint-runner-read
+        - kubernetes-runtime-read
+        - security-bindings
+      notes: Platform runtime state is visible to WGCF only through platform-owned profile gates and security bindings.
   vault:
     lifecycle: active
     component_class: shared-platform
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - devint-runner-read
+        - kubernetes-runtime-read
+        - security-bindings
+      notes: Secret infrastructure must stay platform-owned; WGCF reads status only through explicit live-runtime profiles.
   external-secrets:
     lifecycle: active
     component_class: shared-platform
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - devint-runner-read
+        - kubernetes-runtime-read
+        - security-bindings
+      notes: Secret delivery validation remains platform-owned and security-reviewed before WGCF may consume runtime evidence.
   observability:
     lifecycle: active
     component_class: shared-platform
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - devint-runner-read
+        - kubernetes-runtime-read
+        - security-bindings
+      notes: Observability runtime checks are platform-owned inputs, not WGCF-owned validators.
   platform-postgresql:
     lifecycle: active
     component_class: shared-platform
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - devint-runner-read
+        - kubernetes-runtime-read
+        - security-bindings
+      notes: Persistent platform storage evidence must pass platform and security gates before WGCF may use it for readiness.
   workspace-governance-control-fabric:
     lifecycle: active
     component_class: shared-governance-runtime
     owner_repo: workspace-governance-control-fabric
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: runtime-consumer
+      wgcf_graph_role: shared-governance-runtime-component
+      catalog_refs:
+        - contract-model
+        - developer-integration
+      notes: WGCF is the runtime consumer of governance catalog truth and must expose receipts rather than owning source contracts.
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime
     owner_repo: openclaw-host-bridge
     product: openclaw
     security_owner: security-architecture
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: product-runtime-component
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Host bridge readiness must remain interface-contract and security evidence backed.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm run test:interface-contract
@@ -51,6 +106,14 @@ components:
     owner_repo: openclaw-telegram-enhanced
     product: openclaw
     security_owner: security-architecture
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: product-channel-component
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Telegram channel readiness must remain interface-contract and security evidence backed.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm run test:host-control-contract
@@ -60,12 +123,27 @@ components:
     owner_repo: openclaw-runtime-distribution
     product: openclaw
     security_owner: security-architecture
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-runtime-component
+      catalog_refs:
+        - security-bindings
+        - review-coverage
+      notes: Runtime distribution validation is owner-repo and security-review backed; WGCF consumes summarized readiness, not raw rollout authority.
   host-control-plugin:
     lifecycle: active
     component_class: product-plugin
     owner_repo: openclaw-runtime-distribution
     product: openclaw
     security_owner: security-architecture
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: product-plugin-component
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: The packaged host-control plugin must keep interface-contract evidence before WGCF may use its readiness posture.
     interface_contract:
       path: host-control-openclaw-plugin/contracts/interface-manifest.json
       validation_command: npm --prefix host-control-openclaw-plugin run test:interface-contract
@@ -75,6 +153,14 @@ components:
     owner_repo: operator-orchestration-service
     product: null
     security_owner: security-architecture
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: operator-workflow-component
+      catalog_refs:
+        - component-contracts
+        - delivery-art-broker-read
+        - delivery-art-api-probe-read
+      notes: OOS interface validation and broker read probes are WGCF inputs, while ART mutations remain OOS-owned.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm test

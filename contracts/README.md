@@ -18,12 +18,17 @@ Use these contracts to declare:
 - `repos.yaml`
   - active and retired repos, lifecycle, ownership scope, and allowed
     authoritative references
+  - active repos must declare `validation_behavior` so WGCF knows whether the
+    repo owns catalog truth, consumes WGCF runtime truth, or is profile-gated
+    external validation
   - may also declare `security_review_subject: true` when a repo needs
     security review inventory coverage even though it does not use the normal
     security-binding pattern
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system
+  - requires in-scope repos and components to declare WGCF validation behavior
+    before they can be admitted into active governance
 - `intake-register.yaml`
   - explicit intake decisions for new repos, products, and components that are
     out-of-scope, proposed, or admitted but not yet in the active contracts;
@@ -57,6 +62,8 @@ Use these contracts to declare:
 - `components.yaml`
   - shared and product-linked components, operator surface, owner repo, and
     any published interface contract path plus validation entrypoint
+  - active components must declare WGCF graph participation and the catalog
+    entries that inspect or prove their validation posture
 - `task-types.yaml`
   - workspace-level routing and discussion gates by task type
 - `lifecycle.yaml`
@@ -110,6 +117,12 @@ Use these contracts to declare:
   - machine-readable operator workflow, minimum CLI and API surface, record
     contracts, profiles, blocker triggers, denied actions, and sequencing
     rules for the future Workspace Governance Control Fabric runtime
+- `governance-validator-catalog.yaml`
+  - source-owned inventory of current workspace governance validators, audits,
+    materializers, scaffolding commands, and external operator command surfaces,
+    including safety class, profile eligibility, mutation posture, WGCF
+    invocation posture, no-removal-before-parity retirement posture, and the
+    repo/component admission contract for validation behavior
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility

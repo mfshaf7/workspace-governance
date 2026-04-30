@@ -64,6 +64,7 @@
         "requires_security_bindings": { "type": ["boolean", "null"] },
         "security_owner": { "type": ["string", "null"] },
         "notes": { "type": "string", "minLength": 1 },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
         "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
       },
       "allOf": [
@@ -139,6 +140,7 @@
         "security_owner": { "type": ["string", "null"] },
         "product": { "type": ["string", "null"] },
         "notes": { "type": "string", "minLength": 1 },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
         "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
       },
       "allOf": [
@@ -153,6 +155,21 @@
           }
         }
       ],
+      "additionalProperties": false
+    },
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "type": "string", "minLength": 1 },
+        "wgcf_graph_role": { "type": "string", "minLength": 1 },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      },
       "additionalProperties": false
     }
   },
