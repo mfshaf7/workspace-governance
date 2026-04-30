@@ -57,6 +57,20 @@ REQUIRED_LIVE_MISS_RECORD_FIELDS = {
     "owner_repo",
     "follow_up_record",
 }
+REQUIRED_RUNTIME_LANE_DECISION_KEYS = {
+    "required_for_new_repos",
+    "decisions",
+    "component_inventory_required_repo_classes",
+    "dev_integration_required_repo_classes",
+    "waiver_decisions",
+    "waivers",
+}
+REQUIRED_RUNTIME_LANE_DECISIONS = {
+    "no-runtime",
+    "local-only",
+    "dev-integration-required",
+    "stage-direct",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -79,6 +93,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     request_admission = policy["request_admission"]
     testing_policy = policy["testing"]["smoke"]
     live_miss_escalation = policy.get("live_miss_escalation") or {}
+    runtime_lane_decision = policy.get("runtime_lane_decision") or {}
     if required_actions != REQUIRED_ACTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
@@ -147,6 +162,49 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "contracts/developer-integration-policy.yaml: live_miss_escalation.required_record_fields must be exactly "
                 + ", ".join(sorted(REQUIRED_LIVE_MISS_RECORD_FIELDS))
             )
+    missing_runtime_lane_keys = sorted(
+        REQUIRED_RUNTIME_LANE_DECISION_KEYS - set(runtime_lane_decision)
+    )
+    if missing_runtime_lane_keys:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: runtime_lane_decision missing keys "
+            + ", ".join(missing_runtime_lane_keys)
+        )
+    else:
+        if runtime_lane_decision["required_for_new_repos"] is not True:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: runtime_lane_decision.required_for_new_repos must be true"
+            )
+        decisions = set(runtime_lane_decision.get("decisions") or [])
+        if decisions != REQUIRED_RUNTIME_LANE_DECISIONS:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: runtime_lane_decision.decisions must be exactly "
+                + ", ".join(sorted(REQUIRED_RUNTIME_LANE_DECISIONS))
+            )
+        waiver_decisions = set(runtime_lane_decision.get("waiver_decisions") or [])
+        if not waiver_decisions or not waiver_decisions.issubset(decisions):
+            errors.append(
+                "contracts/developer-integration-policy.yaml: runtime_lane_decision.waiver_decisions must be a non-empty subset of decisions"
+            )
+        for class_key in (
+            "component_inventory_required_repo_classes",
+            "dev_integration_required_repo_classes",
+        ):
+            if not runtime_lane_decision.get(class_key):
+                errors.append(
+                    f"contracts/developer-integration-policy.yaml: runtime_lane_decision.{class_key} must not be empty"
+                )
+        for waiver in runtime_lane_decision.get("waivers") or []:
+            waiver_repo = waiver.get("repo")
+            waiver_decision = waiver.get("decision")
+            if waiver_repo not in active_repos:
+                errors.append(
+                    f"contracts/developer-integration-policy.yaml: runtime lane waiver references unknown repo {waiver_repo!r}"
+                )
+            if waiver_decision not in waiver_decisions:
+                errors.append(
+                    f"contracts/developer-integration-policy.yaml: runtime lane waiver for {waiver_repo!r} uses unsupported decision {waiver_decision!r}"
+                )
     allowed_smoke_mutation_modes = set(testing_policy["allowed_mutation_modes"])
     persistent_smoke_mutation_mode = testing_policy["persistent_profile_rule"][
         "mutation_mode_must_be"
@@ -324,6 +382,49 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                     )
         if lifecycle not in profile_lifecycle["self_serve_statuses"]:
             continue
+
+    if not missing_runtime_lane_keys:
+        repo_contracts = contracts["repos"]["repos"]
+        component_required_classes = set(
+            runtime_lane_decision.get("component_inventory_required_repo_classes") or []
+        )
+        devint_required_classes = set(
+            runtime_lane_decision.get("dev_integration_required_repo_classes") or []
+        )
+        component_owner_repos = {
+            payload["owner_repo"]
+            for payload in contracts["components"]["components"].values()
+            if payload.get("lifecycle") == "active"
+        }
+        profile_owner_repos = {
+            payload["owner_repo"]
+            for payload in registry["profiles"].values()
+            if payload.get("lifecycle") in profile_lifecycle["statuses"]
+        }
+        waiver_repos = {
+            waiver["repo"]
+            for waiver in runtime_lane_decision.get("waivers") or []
+            if waiver.get("repo")
+        }
+        for repo_name, repo_payload in sorted(repo_contracts.items()):
+            repo_class = repo_payload.get("repo_class")
+            if (
+                repo_class in component_required_classes
+                and repo_name not in component_owner_repos
+            ):
+                errors.append(
+                    "contracts/components.yaml: active repo "
+                    f"{repo_name!r} with repo_class {repo_class!r} must have an active component inventory entry"
+                )
+            if (
+                repo_class in devint_required_classes
+                and repo_name not in profile_owner_repos
+                and repo_name not in waiver_repos
+            ):
+                errors.append(
+                    "contracts/developer-integration-profiles.yaml: active repo "
+                    f"{repo_name!r} with repo_class {repo_class!r} must have a proposed, active, suspended, or retired dev-integration profile entry or a runtime-lane waiver"
+                )
 
     if not checked_profiles:
         errors.append("contracts/developer-integration-profiles.yaml: at least one profile is required")

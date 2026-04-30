@@ -157,6 +157,36 @@ choose one of three routes:
 - continue governed rehearsal only when reviewed commits and handoff evidence
   exist and blocker, defect, or risk state has been recorded where needed
 
+## Runtime-Lane Decision Gate
+
+Do not assume every new project needs a `dev-integration` profile. Do require
+every new repo or component to make a runtime-lane decision before source
+implementation proceeds far enough to create API, worker, database, service,
+operator workflow, or deployment assumptions.
+
+Allowed decisions:
+
+- `no-runtime`: governance docs, schemas, policy records, or static contracts
+  with no executable runtime.
+- `local-only`: local CLI or library tooling with no shared service or backend
+  integration lane.
+- `dev-integration-required`: API, worker, database-backed component, operator
+  workflow, broker adapter, cross-repo runtime, or evolving topology that needs
+  fast local proof before governed stage.
+- `stage-direct`: rare exception where the component already has mature
+  platform deployment, security review, smoke, rollback, runbook, and release
+  ownership before implementation proceeds.
+
+Runtime/control-plane repos do not get to skip this as "just source work".
+When the repo class requires dev-integration, the repo must have a registered
+profile in `contracts/developer-integration-profiles.yaml` with at least
+`proposed` lifecycle, or a recorded runtime-lane waiver with a review date.
+
+`proposed` means the lane is not self-serve launchable. It records the intended
+runtime shape early enough to keep implementation from drifting. `active` is
+reserved for profiles that have platform acceptance, required security review,
+owner repo commands, and runnable smoke behavior.
+
 ## Late Discovery
 
 If a human operator or agent already performed important work without applying

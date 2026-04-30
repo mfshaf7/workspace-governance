@@ -219,6 +219,12 @@ components:
     owner_repo: platform-engineering
     product: null
     security_owner: security-architecture
+  workspace-governance-control-fabric:
+    lifecycle: active
+    component_class: shared-governance-runtime
+    owner_repo: workspace-governance-control-fabric
+    product: null
+    security_owner: security-architecture
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime

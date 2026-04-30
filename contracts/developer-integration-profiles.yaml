@@ -85,6 +85,47 @@ profiles:
       - down
       - reset
       - promote_check
+  governance-control-fabric:
+    lifecycle: proposed
+    owner_repo: workspace-governance-control-fabric
+    summary: Proposed local-k3s dev-integration profile for the Workspace Governance
+      Control Fabric API, worker, graph, receipt, and ledger runtime.
+    purpose: Record the runtime-lane decision before the control-fabric source
+      implementation proceeds into database, worker, and service integration work.
+      The profile is not self-serve launchable until platform acceptance and any
+      required security review are recorded.
+    profile_path: dev-integration/profiles/governance-control-fabric/profile.yaml
+    runtime_owner: platform-engineering
+    security_owner: security-architecture
+    requested_by: mfshaf7
+    requested_on: "2026-04-30"
+    request_record:
+      system: openproject
+      ref: openproject://work_packages/475
+    shared_dependencies:
+      - platform-engineering
+      - workspace-governance
+    source_repos:
+      - workspace-governance-control-fabric
+      - workspace-governance
+      - platform-engineering
+    stage_handoff:
+      owner_repo: platform-engineering
+      governed_surface: workspace-governance-control-fabric-stage
+      required_checks:
+        - API readiness
+        - component inventory read
+        - authority contract load
+        - validation planner dry run
+        - receipt and ledger smoke
+    actions:
+      - up
+      - status
+      - access
+      - smoke
+      - down
+      - reset
+      - promote_check
   idea-workflow:
     lifecycle: active
     owner_repo: operator-orchestration-service
