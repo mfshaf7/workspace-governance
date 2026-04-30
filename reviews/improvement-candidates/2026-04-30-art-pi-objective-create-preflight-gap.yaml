@@ -1,0 +1,41 @@
+schema_version: 1
+id: 2026-04-30-art-pi-objective-create-preflight-gap
+title: ART PI Objective create preflight gap
+recorded_on: '2026-04-30'
+owner_repo: operator-orchestration-service
+summary: PI Objective create payload reached the live broker before a local guard
+  caught the required active narrative headings, and api:probe hid the 422 validation
+  body because the create route did not document validation failure.
+regression_of: null
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: late-root-cause-discovery
+  title: A simpler prerequisite, permission, environment, or contract check was proven
+    only after deeper analysis had already expanded.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - missing-deterministic-test-seam
+  finding: Add deterministic work-item create preflight and mutation-draft validation
+    for active PI Objective payloads, and make api:probe print undocumented validation
+    responses before failing.
+  source_refs:
+  - openproject://work_packages/470
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-04-30'
+  note: 'Close through #470 by landing preflight, probe, contract, and test controls
+    before resuming #426 activation.'
