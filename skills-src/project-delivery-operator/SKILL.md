@@ -225,6 +225,24 @@ Use this skill when a serious initiative is already running inside
    - if important work already happened without this classification, reconcile
      it through the same work-home contract instead of discarding the work or
      leaving the skipped classification invisible
+   - before creating a branch, opening a PR, or implementing source-backed ART
+     work, run the Landing Unit Decision Gate and name one decision:
+     `feature_single_landing_unit`, `child_isolated_landing_unit`,
+     `non_source_child`, or `defer_decision_blocked`
+   - choose `feature_single_landing_unit` when same-Feature children share the
+     same owner repo, review path, validation surface, deployment timing,
+     security posture, and rollback boundary; use one branch, one PR, and one
+     Review Packet that maps all covered children
+   - choose `child_isolated_landing_unit` only when a child has a real split
+     reason such as different owner repo, independent rollback or deployment,
+     distinct security/trust boundary, materially different validation, urgent
+     blocker, unreviewable diff size, or explicit operator-approved split
+   - choose `non_source_child` for planning, risk disposition, live
+     verification, metadata repair, or other non-source evidence work; do not
+     create fake merge evidence for it
+   - choose `defer_decision_blocked` when sibling scope, owner boundaries,
+     validation surface, or rollback boundary is not understood well enough;
+     stop source work and read the needed ART/repo context before continuing
    - branch by Landing Unit, not by ART child and not automatically by Epic
    - treat a Landing Unit as the smallest source change that should be reviewed,
      merged, deployed, and rolled back together

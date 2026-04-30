@@ -88,6 +88,22 @@ rollback boundary. Several Landing Units can exist under one Feature or Epic
 when owner repo, validation, security, deployment, or rollback boundaries
 differ.
 
+Before creating a branch or implementing source-backed work, record the
+Landing Unit Decision:
+
+- `feature_single_landing_unit`: one branch, one PR, and one Review Packet for
+  the active Feature's covered source-backed children.
+- `child_isolated_landing_unit`: one child needs an independent source landing;
+  record the concrete split reason before branching.
+- `non_source_child`: close with non-source evidence and no fake branch or PR.
+- `defer_decision_blocked`: stop and gather the missing ART/repo context before
+  source work continues.
+
+Default to `feature_single_landing_unit` when same-Feature children share the
+same owner repo, rollback boundary, validation surface, deployment timing, and
+security posture. A per-child PR is an exception that needs a real split reason,
+not the default working model.
+
 Do not mark source-backed ART children `done` just because code exists on a
 branch. Keep them open with work notes such as `implemented pending landing`
 until the finalized Review Packet provides merged PR evidence, approved

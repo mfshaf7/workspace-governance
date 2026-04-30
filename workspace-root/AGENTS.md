@@ -242,6 +242,14 @@ Only start implementation after that discussion narrows the target design.
 - Branch by Landing Unit, not by ART child and not automatically by Epic. A
   Landing Unit is the smallest source change that should be reviewed, merged,
   deployed, and rolled back together.
+- Before creating a branch, opening a PR, or implementing source-backed ART
+  work, record the Landing Unit Decision:
+  `feature_single_landing_unit`, `child_isolated_landing_unit`,
+  `non_source_child`, or `defer_decision_blocked`.
+- Default to `feature_single_landing_unit` when same-Feature children share the
+  same owner repo, review path, validation surface, deployment timing, security
+  posture, and rollback boundary. Per-child PRs are the exception and require a
+  real split reason.
 - ART items track delivery state. Landing Units track source landing and
   rollback truth. Review Packets bind landed or explicitly accepted evidence
   back to one or more ART items.
