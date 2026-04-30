@@ -86,14 +86,14 @@ profiles:
       - reset
       - promote_check
   governance-control-fabric:
-    lifecycle: proposed
+    lifecycle: active
     owner_repo: workspace-governance-control-fabric
-    summary: Proposed local-k3s dev-integration profile for the Workspace Governance
-      Control Fabric API, worker, graph, receipt, and ledger runtime.
-    purpose: Record the runtime-lane decision before the control-fabric source
-      implementation proceeds into database, worker, and service integration work.
-      The profile is not self-serve launchable until platform acceptance and any
-      required security review are recorded.
+    summary: Persistent local-k3s dev-integration profile for the Workspace
+      Governance Control Fabric API runtime and PostgreSQL metadata store.
+    purpose: Provide a real local-k3s API Service and persistent PostgreSQL
+      metadata store for WGCF contract and Governance Operations Console
+      consumption work while keeping governed stage/prod deployment and worker
+      activation gated.
     profile_path: dev-integration/profiles/governance-control-fabric/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -102,6 +102,14 @@ profiles:
     request_record:
       system: openproject
       ref: openproject://work_packages/475
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-04-30"
+      platform_acceptance_ref: repo://platform-engineering/docs/records/change-records/2026-04-30-wgcf-devint-runtime-access.md
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/components/2026-04-30-workspace-governance-control-fabric-devint-runtime.md
     shared_dependencies:
       - platform-engineering
       - workspace-governance
@@ -116,8 +124,9 @@ profiles:
         - API readiness
         - component inventory read
         - authority contract load
+        - database migration
         - validation planner dry run
-        - receipt and ledger smoke
+        - receipt and ledger metadata read
     actions:
       - up
       - status
