@@ -1,0 +1,419 @@
+schema_version: 1
+governance_control_fabric_operator_surface:
+  owner_repo: workspace-governance
+  runtime_repo: workspace-governance-control-fabric
+  foundation_ref: contracts/governance-engine-foundation.yaml
+  parent_feature_ref: openproject://work_packages/426
+  defining_work_item_ref: openproject://work_packages/428
+  governance_surface_path: docs/governance-control-fabric-operator-surface.md
+  runtime_primary_operator_surface_ref: workspace-governance-control-fabric/docs/operations/operator-surface.md
+  purpose: define the minimum operator workflow, CLI surface, API surface, records, profiles, blocker triggers, and denied actions for the Workspace Governance Control Fabric before runtime implementation begins
+  authority_boundaries:
+    - repo: workspace-governance
+      owns: contracts, schemas, workspace-root guidance, maturity rules, routing rules, repo rules, and generated governance artifacts
+      control_fabric_behavior: consume as authority input and emit receipts; do not mutate these sources directly
+    - repo: workspace-governance-control-fabric
+      owns: runtime implementation for validation planning, readiness evaluation, receipts, ledger events, API, worker, and CLI
+      control_fabric_behavior: implement this operator surface without redefining upstream policy truth
+    - repo: platform-engineering
+      owns: approved deployment state, release gates, version pinning, promotion, and runtime adoption
+      control_fabric_behavior: report platform gate requirements and evidence refs; do not approve or mutate deployment state
+    - repo: security-architecture
+      owns: security standards, trust-boundary review, findings, and security acceptance posture
+      control_fabric_behavior: surface security-delta requirements and evidence refs; do not make security acceptance decisions
+    - repo: operator-orchestration-service
+      owns: broker-backed workflow APIs, OpenProject adapters, ART writes, blockers, review packets, and completion evidence transport
+      control_fabric_behavior: route ART and workflow-state mutation requests through the broker-owned surface
+  operator_workflow:
+    workflow_posture: compact-by-default operator workflow that produces durable receipts and ledger events instead of raw validation dumps
+    phases:
+      - phase_id: discover-status
+        operator_goal: confirm control-fabric health, configured source roots, source freshness, and last decision state
+        entrypoint_ids:
+          - status
+          - healthz
+          - readyz
+        produced_record_ids:
+          - authority-reference
+        mutation_boundary: read-only
+      - phase_id: capture-source-snapshot
+        operator_goal: capture digest-linked references to the current upstream authority sources before planning validation
+        entrypoint_ids:
+          - sources-snapshot
+          - source-snapshots-create
+        produced_record_ids:
+          - source-snapshot
+          - ledger-event
+        mutation_boundary: fabric-local receipt and ledger only
+      - phase_id: plan-validation
+        operator_goal: convert source truth and requested scope into an explainable validation plan before running checks
+        entrypoint_ids:
+          - plan
+          - validation-plans-create
+        produced_record_ids:
+          - validation-plan
+          - ledger-event
+        mutation_boundary: fabric-local planning artifacts only
+      - phase_id: execute-validation
+        operator_goal: run a selected validation plan, collect bounded evidence, and summarize findings without flooding the operator or model context
+        entrypoint_ids:
+          - run
+          - validation-runs-create
+        produced_record_ids:
+          - validation-run
+          - control-receipt
+          - ledger-event
+        mutation_boundary: fabric-local execution artifacts only
+      - phase_id: inspect-receipt
+        operator_goal: show one receipt, its pass/fail posture, suppressed detail, artifacts, and next required action
+        entrypoint_ids:
+          - inspect
+          - receipts-get
+        produced_record_ids:
+          - control-receipt
+        mutation_boundary: read-only
+      - phase_id: evaluate-readiness
+        operator_goal: evaluate whether a workspace, repo, component, or operator surface is admitted and ready under the selected profile
+        entrypoint_ids:
+          - readiness
+          - readiness-evaluate
+        produced_record_ids:
+          - readiness-decision
+          - ledger-event
+        mutation_boundary: fabric-local decision record only
+      - phase_id: review-ledger
+        operator_goal: list recent fabric events and decision ids for audit and handoff
+        entrypoint_ids:
+          - ledger-tail
+          - ledger-events-list
+        produced_record_ids:
+          - ledger-event
+        mutation_boundary: read-only
+      - phase_id: explain-decision
+        operator_goal: explain one readiness or denial decision, including authority refs, blocked controls, and escalation target
+        entrypoint_ids:
+          - explain
+          - decisions-explain
+        produced_record_ids:
+          - readiness-decision
+          - escalation-record
+        mutation_boundary: read-only
+  minimum_cli_surface:
+    binary: wgcf
+    default_output_mode: compact human-readable summary with --json for automation and receipt paths for full evidence
+    commands:
+      - command_id: status
+        syntax: wgcf status
+        phase_id: discover-status
+        purpose: show fabric health, configured source roots, source freshness, active profile, and last ledger event
+        output_contract: compact status plus authority-reference summary
+        mutates_authority: false
+      - command_id: sources-snapshot
+        syntax: wgcf sources snapshot --workspace-root <path>
+        phase_id: capture-source-snapshot
+        purpose: digest workspace-governance, platform, security, OOS, and registered owner-repo source refs for a validation run
+        output_contract: source-snapshot id, digest, included refs, excluded refs, and ledger event id
+        mutates_authority: false
+      - command_id: plan
+        syntax: wgcf plan --scope workspace|repo|component|operator-surface --target <id> --profile <profile>
+        phase_id: plan-validation
+        purpose: build an explainable validation plan from source truth before executing checks
+        output_contract: validation-plan id, planned checks, required authority refs, blockers, and estimated evidence volume
+        mutates_authority: false
+      - command_id: run
+        syntax: wgcf run --plan <plan-id-or-file> --emit-receipt
+        phase_id: execute-validation
+        purpose: execute one validation plan and emit a receipt plus ledger event
+        output_contract: validation-run id, receipt path, status, top findings, suppressed output count, and ledger event id
+        mutates_authority: false
+      - command_id: inspect
+        syntax: wgcf inspect --receipt <receipt-id-or-path>
+        phase_id: inspect-receipt
+        purpose: inspect a receipt without rereading raw validation output
+        output_contract: receipt summary, authority refs, findings, artifacts, suppressed sections, and next action
+        mutates_authority: false
+      - command_id: readiness
+        syntax: wgcf readiness --target workspace|repo:<name>|component:<name>|operator-surface:<id> --profile <profile>
+        phase_id: evaluate-readiness
+        purpose: evaluate admission or readiness posture under a named profile
+        output_contract: readiness-decision id, outcome, deny reasons, escalation target, and receipt refs
+        mutates_authority: false
+      - command_id: ledger-tail
+        syntax: wgcf ledger tail --limit <n>
+        phase_id: review-ledger
+        purpose: show recent fabric-local events for audit and handoff
+        output_contract: bounded list of ledger events with ids, timestamps, actors, actions, outcomes, and receipt refs
+        mutates_authority: false
+      - command_id: explain
+        syntax: wgcf explain --decision <decision-id>
+        phase_id: explain-decision
+        purpose: explain one readiness decision and the exact authority refs or controls that caused it
+        output_contract: decision explanation, blocked controls, evidence refs, and escalation path
+        mutates_authority: false
+  minimum_api_surface:
+    service_posture: local-first API surface for future runtime integration; day-one implementation may expose CLI only until security and platform gates approve service runtime
+    endpoints:
+      - endpoint_id: healthz
+        method: GET
+        path: /healthz
+        phase_id: discover-status
+        purpose: liveness check for process supervision
+        response_record_id: authority-reference
+        mutates_authority: false
+      - endpoint_id: readyz
+        method: GET
+        path: /readyz
+        phase_id: discover-status
+        purpose: readiness check for configured source roots and local storage
+        response_record_id: authority-reference
+        mutates_authority: false
+      - endpoint_id: status
+        method: GET
+        path: /v1/status
+        phase_id: discover-status
+        purpose: operator and automation status view
+        response_record_id: authority-reference
+        mutates_authority: false
+      - endpoint_id: source-snapshots-create
+        method: POST
+        path: /v1/source-snapshots
+        phase_id: capture-source-snapshot
+        purpose: create a source snapshot from declared roots and authority refs
+        response_record_id: source-snapshot
+        mutates_authority: false
+      - endpoint_id: validation-plans-create
+        method: POST
+        path: /v1/validation-plans
+        phase_id: plan-validation
+        purpose: create a validation plan from a source snapshot, scope, target, and profile
+        response_record_id: validation-plan
+        mutates_authority: false
+      - endpoint_id: validation-runs-create
+        method: POST
+        path: /v1/validation-runs
+        phase_id: execute-validation
+        purpose: execute a validation plan and emit receipt and ledger records
+        response_record_id: validation-run
+        mutates_authority: false
+      - endpoint_id: receipts-get
+        method: GET
+        path: /v1/receipts/{receipt_id}
+        phase_id: inspect-receipt
+        purpose: retrieve one control receipt by id
+        response_record_id: control-receipt
+        mutates_authority: false
+      - endpoint_id: readiness-evaluate
+        method: POST
+        path: /v1/readiness/evaluate
+        phase_id: evaluate-readiness
+        purpose: evaluate readiness or admission posture under a profile
+        response_record_id: readiness-decision
+        mutates_authority: false
+      - endpoint_id: ledger-events-list
+        method: GET
+        path: /v1/ledger/events
+        phase_id: review-ledger
+        purpose: list bounded ledger events for audit and handoff
+        response_record_id: ledger-event
+        mutates_authority: false
+      - endpoint_id: decisions-explain
+        method: GET
+        path: /v1/decisions/{decision_id}/explain
+        phase_id: explain-decision
+        purpose: explain a readiness or denial decision using source refs and receipts
+        response_record_id: readiness-decision
+        mutates_authority: false
+  record_contracts:
+    - record_id: source-snapshot
+      purpose: immutable digest-linked view of upstream authority sources consumed by a plan
+      minimum_fields:
+        - snapshot_id
+        - created_at
+        - actor
+        - source_roots
+        - authority_refs
+        - digests
+        - excluded_refs
+    - record_id: validation-plan
+      purpose: planned checks for a source snapshot, target scope, and profile before execution
+      minimum_fields:
+        - plan_id
+        - snapshot_id
+        - scope
+        - target
+        - profile_id
+        - planned_checks
+        - required_authority_refs
+        - blocked_controls
+    - record_id: validation-run
+      purpose: executed validation plan result with bounded output and artifact refs
+      minimum_fields:
+        - run_id
+        - plan_id
+        - started_at
+        - completed_at
+        - status
+        - check_results
+        - artifact_refs
+        - receipt_id
+    - record_id: control-receipt
+      purpose: compact operator-safe proof packet for one validation or readiness action
+      minimum_fields:
+        - receipt_id
+        - source_snapshot_id
+        - target
+        - profile_id
+        - outcome
+        - findings
+        - suppressed_output_summary
+        - artifact_refs
+        - next_required_action
+    - record_id: readiness-decision
+      purpose: explicit admit, deny, warn, or blocked decision for a target under a profile
+      minimum_fields:
+        - decision_id
+        - target
+        - profile_id
+        - outcome
+        - reasons
+        - authority_refs
+        - receipt_refs
+        - escalation_path_when_blocked
+    - record_id: ledger-event
+      purpose: append-only local/runtime event that ties operator action to source refs, receipt refs, and outcome
+      minimum_fields:
+        - event_id
+        - event_time
+        - actor
+        - action
+        - target
+        - source_snapshot_id
+        - outcome
+        - receipt_refs
+    - record_id: authority-reference
+      purpose: normalized reference to upstream source of truth used by the control fabric
+      minimum_fields:
+        - authority_id
+        - repo
+        - path
+        - ref
+        - digest
+        - freshness_status
+    - record_id: escalation-record
+      purpose: bounded handoff record for blockers, risks, or defects that must be routed outside the fabric
+      minimum_fields:
+        - escalation_id
+        - trigger_id
+        - target_system
+        - owner_repo
+        - required_record
+        - evidence_refs
+        - operator_action_required
+  profiles:
+    - profile_id: local-read-only
+      posture: default local operator posture for source snapshots, planning, validation, receipts, and readiness reads without external mutation
+      allowed_actions:
+        - read authority sources
+        - create fabric-local source snapshots
+        - create validation plans
+        - run local validation checks
+        - emit receipts and ledger events
+      denied_actions:
+        - mutate upstream authority sources
+        - mutate ART work state
+        - approve deployment or security gates
+    - profile_id: dev-integration
+      posture: future local-k3s integration posture after platform and security gates approve runtime service use
+      allowed_actions:
+        - serve local API
+        - consume active dev-integration profile state
+        - emit integration receipts
+        - route workflow-state mutation requests through OOS
+      denied_actions:
+        - mutate workspace contracts directly
+        - bypass OOS for ART writes
+        - claim governed stage readiness
+    - profile_id: governed-stage
+      posture: future governed deployment posture requiring platform release authority and security review evidence before activation
+      allowed_actions:
+        - evaluate governed readiness
+        - emit deployment-gate receipts
+        - publish platform-consumed decision artifacts
+      denied_actions:
+        - self-promote deployment state
+        - make security acceptance decisions
+        - activate AI-assisted mutation without approved model profile and audit path
+  default_decision_rules:
+    - rule_id: deny-unknown-authority
+      behavior: if a source, owner, repo, component, or contract cannot be tied to explicit authority, deny readiness and emit an escalation record instead of passing best-effort
+    - rule_id: stale-snapshot-blocks-readiness
+      behavior: if the source snapshot is stale relative to the selected profile, block readiness and require a fresh snapshot
+    - rule_id: receipt-before-operator-claim
+      behavior: operator-facing success claims must cite a control receipt or explicitly state that no fabric proof exists yet
+    - rule_id: compact-output-default
+      behavior: default output is bounded and summary-oriented; full artifacts remain local/runtime evidence referenced by digest or path
+    - rule_id: no-direct-authority-mutation
+      behavior: control-fabric commands and APIs do not mutate upstream authority stores; they route required mutations to the owning system
+  blocker_triggers:
+    - trigger_id: unknown-authority-source
+      condition: requested target cannot be mapped to a workspace-governance contract, repo rule, intake record, platform state, security record, or owner-repo surface
+      required_operator_action: create or update the appropriate intake, ART, owner-repo, or improvement record before using readiness output as evidence
+    - trigger_id: stale-source-snapshot
+      condition: source snapshot is older than the profile permits or no longer matches upstream digests
+      required_operator_action: refresh the source snapshot and rerun planning before executing or citing readiness
+    - trigger_id: shadow-parity-failed
+      condition: governance-engine shadow parity fails or generated outputs are stale
+      required_operator_action: route through workspace-governance parity repair before runtime cutover or fabric readiness claims
+    - trigger_id: missing-owner-boundary
+      condition: validation plan finds a repo, component, operator surface, or template without an explicit owner boundary
+      required_operator_action: record the missing owner boundary in workspace-governance or the owning repo before completing readiness
+    - trigger_id: security-delta-required
+      condition: target crosses identity, secrets, trust boundary, privileged runtime, evidence integrity, or AI-enabled action paths without current security review evidence
+      required_operator_action: route to security-architecture and reflect any active delivery impact as ART blocker, defect, or risk through OOS
+    - trigger_id: platform-release-gate-required
+      condition: runtime adoption, deployment, version pinning, promotion, or environment state requires platform approval
+      required_operator_action: route to platform-engineering release authority before using the fabric decision as deployment approval
+  escalation_paths:
+    - path_id: art-blocker-or-defect
+      target_system: operator-orchestration-service
+      when_used: active ART work is blocked by control-fabric, validator, or operator workflow failure
+      record_required: ART blocker, Defect, Risk, or Review Packet evidence through broker-owned surfaces
+    - path_id: workspace-contract-update
+      target_system: workspace-governance
+      when_used: authority boundary, routing rule, schema, validator, or maturity rule is missing or stale
+      record_required: workspace-governance PR plus Review Packet when tied to source-backed ART work
+    - path_id: platform-release-decision
+      target_system: platform-engineering
+      when_used: runtime deployment, version pinning, promotion, dev-integration admission, or environment adoption must change
+      record_required: platform-owned deployment or release evidence
+    - path_id: security-delta-review
+      target_system: security-architecture
+      when_used: trust-boundary, identity, secrets, privileged runtime, evidence integrity, or AI-enabled action path changes
+      record_required: dated security review or review-inventory update
+    - path_id: improvement-candidate
+      target_system: workspace-governance
+      when_used: repeated workflow failure, late discovery, half-baked plan, or missed control signal is found
+      record_required: improvement candidate or linked after-action closure
+  denied_actions:
+    - mutate-workspace-governance-contracts
+    - mutate-platform-approved-deployment-state
+    - make-security-acceptance-decision
+    - mutate-delivery-art-directly
+    - execute-ai-autonomous-governance-decision
+    - hide-raw-validation-output-in-chat-only
+    - use-fabric-readiness-as-review-packet-replacement
+    - treat-compact-output-as-full-evidence
+  day_one_non_goals:
+    - no dashboard implementation
+    - no always-on central service until security and platform gates approve runtime posture
+    - no replacement of workspace-governance validators as source truth
+    - no replacement of OOS ART mutation or review-packet surfaces
+    - no custom LLM gateway or AI execution boundary
+    - no platform deployment authority
+  sequencing:
+    before_runtime_implementation:
+      - openproject://work_packages/429
+      - security delta review covers operator surface, receipt integrity, local ledger, and future API boundary
+      - workspace-governance contract and runtime operator surface are merged
+      - runtime implementation PR references this contract instead of redefining the workflow
+    implementation_authority_rule: implementation in workspace-governance-control-fabric must consume this contract and route any policy change back to workspace-governance before coding against a changed meaning
