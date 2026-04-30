@@ -33,3 +33,44 @@ products:
   require_owner_metadata_when_in_scope: true
 components:
   require_owner_metadata_when_in_scope: true
+validation_behavior:
+  enabled: true
+  defining_work_item_ref: openproject://work_packages/504
+  catalog_ref:
+    repo: workspace-governance
+    path: contracts/governance-validator-catalog.yaml
+  repos:
+    require_for_active: true
+    require_for_in_scope_intake: true
+  components:
+    require_for_active: true
+    require_for_in_scope_intake: true
+  allowed_postures:
+    - catalog-owner
+    - runtime-consumer
+    - profile-gated-external-owner
+    - covered-by-owner-repo
+    - interface-contract-backed
+    - proposed-profile-gated
+  allowed_graph_roles:
+    - catalog-authority-source
+    - wgcf-runtime-source
+    - platform-authority-source
+    - security-authority-source
+    - product-runtime-source
+    - runtime-enforcement-source
+    - product-channel-source
+    - operator-workflow-source
+    - shared-platform-component
+    - shared-governance-runtime-component
+    - product-runtime-component
+    - product-channel-component
+    - product-plugin-component
+    - operator-workflow-component
+    - proposed-shared-platform-component
+  direct_invocation_postures:
+    - catalog-owner
+    - profile-gated-external-owner
+    - interface-contract-backed
+  require_catalog_refs_for_direct_invocation: true
+  notes: New repos and components that enter the workspace must declare how WGCF will see, plan, or suppress their validation before they can be admitted into active governance.

@@ -13,6 +13,23 @@ governance_validator_catalog:
     art_mutation_boundary: operator-orchestration-service remains the only Delivery ART mutation authority; WGCF may emit recommendations and receipts for OOS.
     retirement_rule: no direct validator or command path may be removed until shadow parity, rollback, and replacement receipt evidence are recorded.
     evidence_rule: compact receipts are operator-facing evidence; raw command output must be captured as artifact references when retained.
+  admission_contract:
+    work_item_ref: openproject://work_packages/504
+    intake_policy_ref: contracts/intake-policy.yaml
+    active_repo_inventory_ref: contracts/repos.yaml
+    active_component_inventory_ref: contracts/components.yaml
+    intake_register_ref: contracts/intake-register.yaml
+    rule: new active or in-scope repos and components must declare WGCF validation behavior before they can become governed workspace surfaces
+    required_behavior_fields:
+      - posture
+      - wgcf_graph_role
+      - catalog_refs
+      - notes
+    denied_without_behavior:
+      - active repo inventory entry
+      - active component inventory entry
+      - proposed or admitted intake repo
+      - proposed or admitted intake component
   profiles:
     local-read-only:
       description: local checkout validation without live runtime mutation, external writes, or authority mutation

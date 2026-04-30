@@ -19,6 +19,16 @@ repos:
       - platform-engineering
       - security-architecture
       - workspace-governance-control-fabric
+    validation_behavior:
+      posture: catalog-owner
+      wgcf_graph_role: catalog-authority-source
+      catalog_refs:
+        - contract-model
+        - intake-model
+        - component-contracts
+        - workspace-layout
+        - codex-review-controls
+      notes: Owns validator identity, admission policy, and catalog truth consumed by WGCF.
   workspace-governance-control-fabric:
     lifecycle: active
     repo_class: governance-runtime
@@ -41,6 +51,13 @@ repos:
       - platform-engineering
       - security-architecture
       - operator-orchestration-service
+    validation_behavior:
+      posture: runtime-consumer
+      wgcf_graph_role: wgcf-runtime-source
+      catalog_refs:
+        - contract-model
+        - developer-integration
+      notes: Implements WGCF runtime planning and receipts from workspace-governance catalog truth without redefining validator authority.
   platform-engineering:
     lifecycle: active
     repo_class: platform
@@ -61,6 +78,17 @@ repos:
       - openclaw-telegram-enhanced
       - openclaw-host-bridge
       - workspace-governance
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: platform-authority-source
+      catalog_refs:
+        - openproject-quality-check
+        - openproject-projection-sync
+        - devint-runner-read
+        - devint-runner-lifecycle
+        - kubernetes-runtime-read
+        - kubernetes-runtime-mutation
+      notes: Owns platform runtime and reconciliation commands; WGCF may only invoke or recommend them through explicit profile gates.
   security-architecture:
     lifecycle: active
     repo_class: security-governance
@@ -80,6 +108,16 @@ repos:
       - openclaw-host-bridge
       - openclaw-runtime-distribution
       - openclaw-telegram-enhanced
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: security-authority-source
+      catalog_refs:
+        - security-bindings
+        - review-coverage
+        - security-delta-reviews
+        - security-evidence
+        - security-change-record-lanes
+      notes: Security posture remains authority-owned here; WGCF surfaces missing review evidence but does not approve or replace security decisions.
   openclaw-runtime-distribution:
     lifecycle: active
     repo_class: product-runtime
@@ -99,6 +137,14 @@ repos:
       - openclaw-host-bridge
       - platform-engineering
       - security-architecture
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-runtime-source
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Runtime distribution validation stays source-owned and is represented to WGCF through component and security catalog coverage.
   openclaw-host-bridge:
     lifecycle: active
     repo_class: runtime-enforcement
@@ -119,6 +165,14 @@ repos:
       - security-architecture
       - openclaw-runtime-distribution
       - openclaw-telegram-enhanced
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: runtime-enforcement-source
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Host enforcement validation must remain interface-contract and security-review backed before WGCF can treat results as readiness evidence.
   openclaw-telegram-enhanced:
     lifecycle: active
     repo_class: product-channel
@@ -137,6 +191,14 @@ repos:
       - openclaw-host-bridge
       - platform-engineering
       - security-architecture
+    validation_behavior:
+      posture: interface-contract-backed
+      wgcf_graph_role: product-channel-source
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Telegram channel validation stays source-owned and is admitted to WGCF through interface-contract and security evidence coverage.
   operator-orchestration-service:
     lifecycle: active
     repo_class: shared-operator-service
@@ -156,6 +218,16 @@ repos:
       - platform-engineering
       - security-architecture
       - openclaw-telegram-enhanced
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: operator-workflow-source
+      catalog_refs:
+        - delivery-art-broker-read
+        - delivery-art-broker-mutation
+        - delivery-art-api-probe-read
+        - delivery-art-api-probe-mutation
+        - component-contracts
+      notes: OOS remains ART workflow authority; WGCF may read or recommend through broker-owned gates but must not directly mutate ART.
 retired_repos:
   openclaw-isolated-deployment:
     lifecycle: retired

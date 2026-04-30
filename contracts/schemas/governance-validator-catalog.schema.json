@@ -17,6 +17,7 @@
         "primary_surface_path",
         "purpose",
         "authority_model",
+        "admission_contract",
         "profiles",
         "safety_classes",
         "command_surfaces",
@@ -47,6 +48,30 @@
             "art_mutation_boundary": { "type": "string", "minLength": 1 },
             "retirement_rule": { "type": "string", "minLength": 1 },
             "evidence_rule": { "type": "string", "minLength": 1 }
+          }
+        },
+        "admission_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "work_item_ref",
+            "intake_policy_ref",
+            "active_repo_inventory_ref",
+            "active_component_inventory_ref",
+            "intake_register_ref",
+            "rule",
+            "required_behavior_fields",
+            "denied_without_behavior"
+          ],
+          "properties": {
+            "work_item_ref": { "$ref": "#/$defs/openprojectRef" },
+            "intake_policy_ref": { "type": "string", "minLength": 1 },
+            "active_repo_inventory_ref": { "type": "string", "minLength": 1 },
+            "active_component_inventory_ref": { "type": "string", "minLength": 1 },
+            "intake_register_ref": { "type": "string", "minLength": 1 },
+            "rule": { "type": "string", "minLength": 1 },
+            "required_behavior_fields": { "$ref": "#/$defs/stringList" },
+            "denied_without_behavior": { "$ref": "#/$defs/stringList" }
           }
         },
         "profiles": {

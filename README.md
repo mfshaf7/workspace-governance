@@ -241,7 +241,8 @@ Those stay in the owning repos:
   - includes `governance-engine-output-manifest.yaml` for the explicit
     materialized-output and emission-boundary contract
   - includes `governance-validator-catalog.yaml` for the source-owned validator
-    and command-surface inventory consumed by WGCF planning
+    and command-surface inventory consumed by WGCF planning, including the
+    repo/component admission contract for WGCF validation behavior
 - `generated/`
   - resolved owner map, dependency graph, stale-content rules, and system map
   - exact generated outputs are declared in

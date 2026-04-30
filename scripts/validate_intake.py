@@ -360,6 +360,9 @@ def main() -> int:
     contracts = load_contracts(repo_root)
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
+    governance_validator_catalog = contracts["governance_validator_catalog"][
+        "governance_validator_catalog"
+    ]
 
     errors: list[str] = []
 
@@ -367,6 +370,42 @@ def main() -> int:
     retired_repos = set(retired_repo_names(contracts))
     intake_repos = set(intake_register["repos"].keys())
     allowed_workspace_repos = active_repos | retired_repos | intake_repos
+    in_scope_statuses = {"proposed", "admitted"}
+    validation_behavior_policy = intake_policy["validation_behavior"]
+    catalog_entries = set(governance_validator_catalog["entries"])
+    allowed_validation_postures = set(validation_behavior_policy["allowed_postures"])
+    allowed_validation_graph_roles = set(validation_behavior_policy["allowed_graph_roles"])
+    direct_invocation_postures = set(validation_behavior_policy["direct_invocation_postures"])
+
+    def validate_validation_behavior(label: str, payload: dict, *, required: bool) -> None:
+        behavior = payload.get("validation_behavior")
+        if behavior is None:
+            if required:
+                errors.append(f"{label}: missing validation_behavior")
+            return
+        posture = behavior.get("posture")
+        graph_role = behavior.get("wgcf_graph_role")
+        catalog_refs = behavior.get("catalog_refs") or []
+        if posture not in allowed_validation_postures:
+            errors.append(f"{label}: validation_behavior.posture {posture!r} is not allowed")
+        if graph_role not in allowed_validation_graph_roles:
+            errors.append(
+                f"{label}: validation_behavior.wgcf_graph_role {graph_role!r} is not allowed"
+            )
+        unknown_catalog_refs = sorted(set(catalog_refs) - catalog_entries)
+        if unknown_catalog_refs:
+            errors.append(
+                f"{label}: validation_behavior.catalog_refs references unknown catalog entries "
+                + ", ".join(unknown_catalog_refs)
+            )
+        if (
+            validation_behavior_policy["require_catalog_refs_for_direct_invocation"]
+            and posture in direct_invocation_postures
+            and not catalog_refs
+        ):
+            errors.append(
+                f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
+            )
 
     if intake_policy["workspace_inventory"]["scan_workspace_root_git_repos"]:
         discovered_git_repos = git_repo_names(workspace_root)
@@ -414,6 +453,16 @@ def main() -> int:
 
     for collection_name in ("repos", "products", "components"):
         for entry_name, payload in intake_register[collection_name].items():
+            if collection_name in {"repos", "components"}:
+                scope_policy = validation_behavior_policy[collection_name]
+                validate_validation_behavior(
+                    label=f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}",
+                    payload=payload,
+                    required=(
+                        payload["status"] in in_scope_statuses
+                        and scope_policy["require_for_in_scope_intake"]
+                    ),
+                )
             validate_ai_suggestion(
                 label=f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}",
                 payload=payload,

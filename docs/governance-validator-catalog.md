@@ -68,6 +68,32 @@ WGCF must use the catalog in this order:
 The default is deny-by-absence. A command that is not in the catalog is not a
 valid WGCF execution target.
 
+## Admission Rules For New Repos And Components
+
+The intake layer now treats validation behavior as part of admission, not as a
+cleanup task after a repo or component is already active.
+
+Every active repo and active component must declare:
+
+- `posture`: whether the subject owns catalog truth, consumes WGCF runtime
+  truth, is profile-gated external validation, is covered by owner-repo
+  validation, or is interface-contract backed.
+- `wgcf_graph_role`: how WGCF should represent the subject in the governance
+  graph.
+- `catalog_refs`: the validator catalog entries that prove or inspect the
+  subject.
+- `notes`: the operator-readable rationale for the posture.
+
+The same `validation_behavior` shape is required for proposed or admitted
+repos and components in the intake register. If that field is missing, the
+intake validator must fail before the entrant can silently become part of the
+governed workspace model.
+
+This is intentionally strict at the contract boundary. It prevents a new
+component from landing first and only later asking "which validator owns this?"
+WGCF can then plan from declared graph participation instead of guessing from
+repo names, terminal history, or broad command lists.
+
 ## Retirement Rule
 
 No direct validator path may be removed because WGCF exists. Retirement needs:

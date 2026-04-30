@@ -5,14 +5,34 @@
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "devint-runner-read",
+          "kubernetes-runtime-read",
+          "security-bindings"
+        ],
+        "notes": "Platform runtime state is visible to WGCF only through platform-owned profile gates and security bindings.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
     },
     "external-secrets": {
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "devint-runner-read",
+          "kubernetes-runtime-read",
+          "security-bindings"
+        ],
+        "notes": "Secret delivery validation remains platform-owned and security-reviewed before WGCF may consume runtime evidence.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
     },
     "host-control-plugin": {
       "component_class": "product-plugin",
@@ -23,14 +43,34 @@
       "lifecycle": "active",
       "owner_repo": "openclaw-runtime-distribution",
       "product": "openclaw",
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "The packaged host-control plugin must keep interface-contract evidence before WGCF may use its readiness posture.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "product-plugin-component"
+      }
     },
     "observability": {
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "devint-runner-read",
+          "kubernetes-runtime-read",
+          "security-bindings"
+        ],
+        "notes": "Observability runtime checks are platform-owned inputs, not WGCF-owned validators.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
     },
     "openclaw-host-bridge": {
       "component_class": "product-runtime",
@@ -41,14 +81,33 @@
       "lifecycle": "active",
       "owner_repo": "openclaw-host-bridge",
       "product": "openclaw",
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Host bridge readiness must remain interface-contract and security evidence backed.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "product-runtime-component"
+      }
     },
     "openclaw-runtime-distribution": {
       "component_class": "product-runtime",
       "lifecycle": "active",
       "owner_repo": "openclaw-runtime-distribution",
       "product": "openclaw",
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Runtime distribution validation is owner-repo and security-review backed; WGCF consumes summarized readiness, not raw rollout authority.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "product-runtime-component"
+      }
     },
     "openclaw-telegram-channel": {
       "component_class": "product-channel",
@@ -59,7 +118,17 @@
       "lifecycle": "active",
       "owner_repo": "openclaw-telegram-enhanced",
       "product": "openclaw",
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Telegram channel readiness must remain interface-contract and security evidence backed.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "product-channel-component"
+      }
     },
     "operator-orchestration-service": {
       "component_class": "shared-platform",
@@ -70,28 +139,67 @@
       "lifecycle": "active",
       "owner_repo": "operator-orchestration-service",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "delivery-art-broker-read",
+          "delivery-art-api-probe-read"
+        ],
+        "notes": "OOS interface validation and broker read probes are WGCF inputs, while ART mutations remain OOS-owned.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "operator-workflow-component"
+      }
     },
     "platform-postgresql": {
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "devint-runner-read",
+          "kubernetes-runtime-read",
+          "security-bindings"
+        ],
+        "notes": "Persistent platform storage evidence must pass platform and security gates before WGCF may use it for readiness.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
     },
     "vault": {
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "devint-runner-read",
+          "kubernetes-runtime-read",
+          "security-bindings"
+        ],
+        "notes": "Secret infrastructure must stay platform-owned; WGCF reads status only through explicit live-runtime profiles.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
     },
     "workspace-governance-control-fabric": {
       "component_class": "shared-governance-runtime",
       "lifecycle": "active",
       "owner_repo": "workspace-governance-control-fabric",
       "product": null,
-      "security_owner": "security-architecture"
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "contract-model",
+          "developer-integration"
+        ],
+        "notes": "WGCF is the runtime consumer of governance catalog truth and must expose receipts rather than owning source contracts.",
+        "posture": "runtime-consumer",
+        "wgcf_graph_role": "shared-governance-runtime-component"
+      }
     }
   },
   "products": {
@@ -145,7 +253,17 @@
         "WSL and Windows bridge behavior"
       ],
       "repo_class": "runtime-enforcement",
-      "requires_security_bindings": true
+      "requires_security_bindings": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Host enforcement validation must remain interface-contract and security-review backed before WGCF can treat results as readiness evidence.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "runtime-enforcement-source"
+      }
     },
     "openclaw-runtime-distribution": {
       "allowed_authoritative_refs": [
@@ -168,7 +286,17 @@
         "runtime-required workspace templates"
       ],
       "repo_class": "product-runtime",
-      "requires_security_bindings": true
+      "requires_security_bindings": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Runtime distribution validation stays source-owned and is represented to WGCF through component and security catalog coverage.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "product-runtime-source"
+      }
     },
     "openclaw-telegram-enhanced": {
       "allowed_authoritative_refs": [
@@ -190,7 +318,17 @@
         "Telegram packaging and tests"
       ],
       "repo_class": "product-channel",
-      "requires_security_bindings": true
+      "requires_security_bindings": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Telegram channel validation stays source-owned and is admitted to WGCF through interface-contract and security evidence coverage.",
+        "posture": "interface-contract-backed",
+        "wgcf_graph_role": "product-channel-source"
+      }
     },
     "operator-orchestration-service": {
       "allowed_authoritative_refs": [
@@ -213,7 +351,19 @@
         "OpenProject workflow adapters"
       ],
       "repo_class": "shared-operator-service",
-      "requires_security_bindings": true
+      "requires_security_bindings": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "delivery-art-broker-read",
+          "delivery-art-broker-mutation",
+          "delivery-art-api-probe-read",
+          "delivery-art-api-probe-mutation",
+          "component-contracts"
+        ],
+        "notes": "OOS remains ART workflow authority; WGCF may read or recommend through broker-owned gates but must not directly mutate ART.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "operator-workflow-source"
+      }
     },
     "platform-engineering": {
       "allowed_authoritative_refs": [
@@ -237,7 +387,20 @@
         "product integration docs and runbooks"
       ],
       "repo_class": "platform",
-      "requires_security_bindings": true
+      "requires_security_bindings": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "openproject-quality-check",
+          "openproject-projection-sync",
+          "devint-runner-read",
+          "devint-runner-lifecycle",
+          "kubernetes-runtime-read",
+          "kubernetes-runtime-mutation"
+        ],
+        "notes": "Owns platform runtime and reconciliation commands; WGCF may only invoke or recommend them through explicit profile gates.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "platform-authority-source"
+      }
     },
     "security-architecture": {
       "allowed_authoritative_refs": [
@@ -260,7 +423,19 @@
         "product security overlays"
       ],
       "repo_class": "security-governance",
-      "requires_security_bindings": false
+      "requires_security_bindings": false,
+      "validation_behavior": {
+        "catalog_refs": [
+          "security-bindings",
+          "review-coverage",
+          "security-delta-reviews",
+          "security-evidence",
+          "security-change-record-lanes"
+        ],
+        "notes": "Security posture remains authority-owned here; WGCF surfaces missing review evidence but does not approve or replace security decisions.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "security-authority-source"
+      }
     },
     "workspace-governance": {
       "allowed_authoritative_refs": [
@@ -283,7 +458,19 @@
       ],
       "repo_class": "governance",
       "requires_security_bindings": false,
-      "security_review_subject": true
+      "security_review_subject": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "contract-model",
+          "intake-model",
+          "component-contracts",
+          "workspace-layout",
+          "codex-review-controls"
+        ],
+        "notes": "Owns validator identity, admission policy, and catalog truth consumed by WGCF.",
+        "posture": "catalog-owner",
+        "wgcf_graph_role": "catalog-authority-source"
+      }
     },
     "workspace-governance-control-fabric": {
       "allowed_authoritative_refs": [
@@ -309,7 +496,16 @@
       ],
       "repo_class": "governance-runtime",
       "requires_security_bindings": false,
-      "security_review_subject": true
+      "security_review_subject": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "contract-model",
+          "developer-integration"
+        ],
+        "notes": "Implements WGCF runtime planning and receipts from workspace-governance catalog truth without redefining validator authority.",
+        "posture": "runtime-consumer",
+        "wgcf_graph_role": "wgcf-runtime-source"
+      }
     }
   },
   "skills": {

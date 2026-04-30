@@ -10,5 +10,13 @@ components:
     owner_repo: platform-engineering
     security_owner: security-architecture
     product: null
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: proposed-shared-platform-component
+      catalog_refs:
+        - developer-integration
+        - security-bindings
+        - review-coverage
+      notes: Proposed AI access-plane work must declare profile-gated validation and security review posture before admission into the active component inventory.
     notes: Proposed internal AI gateway and approved model-profile control plane;
       not yet live or admitted into the active component inventory.

@@ -1658,6 +1658,129 @@ def main() -> int:
             "contracts/governance-validator-catalog.yaml: entries missing retirement register coverage: "
             + ", ".join(missing_retirement_coverage)
         )
+    validation_behavior_policy = intake_policy["validation_behavior"]
+    if validation_behavior_policy["enabled"] is not True:
+        errors.append("contracts/intake-policy.yaml: validation_behavior.enabled must remain true")
+    if validation_behavior_policy["defining_work_item_ref"] != "openproject://work_packages/504":
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.defining_work_item_ref must point to openproject://work_packages/504"
+        )
+    expected_validation_catalog_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/governance-validator-catalog.yaml",
+    }
+    if validation_behavior_policy["catalog_ref"] != expected_validation_catalog_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.catalog_ref must point to workspace-governance/contracts/governance-validator-catalog.yaml"
+        )
+    allowed_validation_postures = set(validation_behavior_policy["allowed_postures"])
+    expected_validation_postures = {
+        "catalog-owner",
+        "runtime-consumer",
+        "profile-gated-external-owner",
+        "covered-by-owner-repo",
+        "interface-contract-backed",
+        "proposed-profile-gated",
+    }
+    if allowed_validation_postures != expected_validation_postures:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.allowed_postures must be exactly "
+            + ", ".join(sorted(expected_validation_postures))
+        )
+    allowed_validation_graph_roles = set(validation_behavior_policy["allowed_graph_roles"])
+    expected_validation_graph_roles = {
+        "catalog-authority-source",
+        "wgcf-runtime-source",
+        "platform-authority-source",
+        "security-authority-source",
+        "product-runtime-source",
+        "runtime-enforcement-source",
+        "product-channel-source",
+        "operator-workflow-source",
+        "shared-platform-component",
+        "shared-governance-runtime-component",
+        "product-runtime-component",
+        "product-channel-component",
+        "product-plugin-component",
+        "operator-workflow-component",
+        "proposed-shared-platform-component",
+    }
+    if allowed_validation_graph_roles != expected_validation_graph_roles:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.allowed_graph_roles must be exactly "
+            + ", ".join(sorted(expected_validation_graph_roles))
+        )
+    direct_invocation_postures = set(validation_behavior_policy["direct_invocation_postures"])
+    expected_direct_invocation_postures = {
+        "catalog-owner",
+        "profile-gated-external-owner",
+        "interface-contract-backed",
+    }
+    if direct_invocation_postures != expected_direct_invocation_postures:
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.direct_invocation_postures must be exactly "
+            + ", ".join(sorted(expected_direct_invocation_postures))
+        )
+    admission_contract = governance_validator_catalog["admission_contract"]
+    if admission_contract["work_item_ref"] != "openproject://work_packages/504":
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: admission_contract.work_item_ref must point to openproject://work_packages/504"
+        )
+    expected_admission_refs = {
+        "intake_policy_ref": "contracts/intake-policy.yaml",
+        "active_repo_inventory_ref": "contracts/repos.yaml",
+        "active_component_inventory_ref": "contracts/components.yaml",
+        "intake_register_ref": "contracts/intake-register.yaml",
+    }
+    for key, rel_path in expected_admission_refs.items():
+        if admission_contract[key] != rel_path:
+            errors.append(
+                f"contracts/governance-validator-catalog.yaml: admission_contract.{key} must be {rel_path!r}"
+            )
+        if not (repo_root / rel_path).exists():
+            errors.append(
+                f"contracts/governance-validator-catalog.yaml: admission_contract.{key} references missing path {rel_path!r}"
+            )
+    expected_behavior_fields = {"posture", "wgcf_graph_role", "catalog_refs", "notes"}
+    if set(admission_contract["required_behavior_fields"]) != expected_behavior_fields:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: admission_contract.required_behavior_fields must be posture, wgcf_graph_role, catalog_refs, notes"
+        )
+
+    def validate_validation_behavior(label: str, payload: dict, *, required: bool) -> None:
+        behavior = payload.get("validation_behavior")
+        if behavior is None:
+            if required:
+                errors.append(f"{label}: missing validation_behavior")
+            return
+        posture = behavior["posture"]
+        graph_role = behavior["wgcf_graph_role"]
+        catalog_refs = behavior["catalog_refs"]
+        if posture not in allowed_validation_postures:
+            errors.append(f"{label}: validation_behavior.posture {posture!r} is not allowed")
+        if graph_role not in allowed_validation_graph_roles:
+            errors.append(
+                f"{label}: validation_behavior.wgcf_graph_role {graph_role!r} is not allowed"
+            )
+        unknown_catalog_refs = sorted(set(catalog_refs) - set(catalog_entries))
+        if unknown_catalog_refs:
+            errors.append(
+                f"{label}: validation_behavior.catalog_refs references unknown catalog entries "
+                + ", ".join(unknown_catalog_refs)
+            )
+        if (
+            validation_behavior_policy["require_catalog_refs_for_direct_invocation"]
+            and posture in direct_invocation_postures
+            and not catalog_refs
+        ):
+            errors.append(
+                f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
+            )
+        if posture == "proposed-profile-gated" and graph_role != "proposed-shared-platform-component":
+            errors.append(
+                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component graph role"
+            )
+
     workspace_root = repo_root.parent
     workspace_has_sibling_repos = any(
         (workspace_root / repo_name).exists()
@@ -1789,6 +1912,11 @@ def main() -> int:
     for repo_name, payload in contracts["repos"]["repos"].items():
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/repos.yaml: {repo_name} uses unknown lifecycle {payload['lifecycle']!r}")
+        validate_validation_behavior(
+            f"contracts/repos.yaml: {repo_name}",
+            payload,
+            required=validation_behavior_policy["repos"]["require_for_active"],
+        )
         for ref in payload["allowed_authoritative_refs"]:
             if ref not in active_repos:
                 errors.append(f"contracts/repos.yaml: {repo_name} references unknown repo {ref!r}")
@@ -1915,6 +2043,11 @@ def main() -> int:
     for component_name, payload in contracts["components"]["components"].items():
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/components.yaml: {component_name} uses unknown lifecycle {payload['lifecycle']!r}")
+        validate_validation_behavior(
+            f"contracts/components.yaml: {component_name}",
+            payload,
+            required=validation_behavior_policy["components"]["require_for_active"],
+        )
         if payload["owner_repo"] not in active_repos:
             errors.append(f"contracts/components.yaml: {component_name} owner_repo {payload['owner_repo']!r} is not an active repo")
         if payload["security_owner"] not in active_repos:
@@ -1950,6 +2083,14 @@ def main() -> int:
             errors.append(
                 f"contracts/intake-register.yaml: repo {repo_name} uses unknown status {payload['status']!r}"
             )
+        validate_validation_behavior(
+            f"contracts/intake-register.yaml: repo {repo_name}",
+            payload,
+            required=(
+                payload["status"] in in_scope_statuses
+                and validation_behavior_policy["repos"]["require_for_in_scope_intake"]
+            ),
+        )
         if payload["decision_source"] not in {"operator", "ai-suggested"}:
             errors.append(
                 f"contracts/intake-register.yaml: repo {repo_name} decision_source must be operator or ai-suggested"
@@ -2015,6 +2156,14 @@ def main() -> int:
             errors.append(
                 f"contracts/intake-register.yaml: component {component_name} uses unknown status {payload['status']!r}"
             )
+        validate_validation_behavior(
+            f"contracts/intake-register.yaml: component {component_name}",
+            payload,
+            required=(
+                payload["status"] in in_scope_statuses
+                and validation_behavior_policy["components"]["require_for_in_scope_intake"]
+            ),
+        )
         if payload["decision_source"] not in {"operator", "ai-suggested"}:
             errors.append(
                 f"contracts/intake-register.yaml: component {component_name} decision_source must be operator or ai-suggested"

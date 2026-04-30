@@ -9,7 +9,7 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["lifecycle", "repo_class", "requires_security_bindings", "owns", "must_not_own", "allowed_authoritative_refs"],
+        "required": ["lifecycle", "repo_class", "requires_security_bindings", "owns", "must_not_own", "allowed_authoritative_refs", "validation_behavior"],
         "properties": {
           "lifecycle": { "type": "string", "minLength": 1 },
           "repo_class": { "type": "string", "minLength": 1 },
@@ -17,7 +17,8 @@
           "security_review_subject": { "type": "boolean" },
           "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "must_not_own": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-          "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
         },
         "additionalProperties": false
       }
@@ -37,6 +38,23 @@
         },
         "additionalProperties": false
       }
+    }
+  },
+  "$defs": {
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "type": "string", "minLength": 1 },
+        "wgcf_graph_role": { "type": "string", "minLength": 1 },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
