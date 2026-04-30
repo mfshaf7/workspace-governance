@@ -120,6 +120,15 @@ Use this skill when a serious initiative is already running inside
      2. `make openproject-check-delivery-art-quality ...`
      3. `make openproject-sync-delivery-art-views ...` only when the
         compatible view projection itself drifted
+   - after any ART mutation that can change OpenProject roadmap `version`
+     projection, run platform view sync before treating the quality gate as
+     final; this includes Target PI assignment or clearing, carryover,
+     decommit, parking, retirement, completion, and status changes that move
+     work between backlog, committed, active, done, parked, or retired roadmap
+     buckets
+   - when ART delivery work requires an owner-repo change record, start the
+     record from that repo's `docs/records/change-records/TEMPLATE.md` and run
+     the touched-record preflight before normal ART execution continues
    - before using a deployment name, pod name, route, work item ID, owner,
      control name, gate ID, root-cause label, branch, PR, merge state, or
      completion fact in an operator update or completion record, prove it from

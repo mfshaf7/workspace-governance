@@ -73,6 +73,11 @@ delivery_art_operator_path:
       - start from broker workflow-health
       - use the scoped ART quality gate next
       - use platform-admin view repair only when roadmap or PM² projection drift is the real problem
+    projection_reconciliation_after_mutation:
+      - after any ART mutation that can change OpenProject roadmap version projection, run platform view sync before treating the quality gate as final
+      - applies to Target PI assignment, clearing, or retargeting
+      - applies to carryover, decommit, parking, retirement, completion, and status changes that move work between roadmap buckets
+      - applies to platform-admin repair that changes expected roadmap placement
   compatibility_boundary:
     broker_owned_normal_art_surfaces:
       - session bootstrap and workflow health

@@ -170,6 +170,17 @@ If roadmap or PM² projection drift is suspected:
 3. `make openproject-sync-delivery-art-views ...` only when the projection
    itself is the problem
 
+After any ART mutation that can change OpenProject roadmap `version`
+projection, projection reconciliation is part of the workflow rather than an
+exceptional repair. Run platform view sync with the proven active ART runtime
+context before treating the quality gate as final. This applies to:
+
+- assigning, clearing, or retargeting `Target PI`
+- carryover, decommit, parking, retirement, or completion
+- status changes that move work between backlog, committed, active, done,
+  parked, or retired roadmap buckets
+- platform-admin repair that changes expected roadmap placement
+
 ## Compatibility Boundary
 
 Broker-owned normal ART surfaces:

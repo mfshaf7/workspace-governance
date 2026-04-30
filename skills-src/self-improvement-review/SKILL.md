@@ -45,6 +45,9 @@ evidence, host drift detection, testing seams, or operator reliability.
      have been proven before workaround analysis
    - delegated execution crossed packet scope, write-scope, live-control, or
      work-tracking boundaries
+   - before creating an owner-repo change record, start from that repo's
+     `docs/records/change-records/TEMPLATE.md`; do not write the section shape
+     from memory
    - after creating or editing a structured record, immediately run
      `python3 scripts/validate_structured_record.py <record-path> --workspace-root /home/mfshaf7/projects`
      before continuing normal work
@@ -109,8 +112,9 @@ python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/proj
 - Do not bury architecture or workflow doctrine changes in the record alone; add
   the ADR, contract, validator, runbook, or skill update too.
 - Do not author improvement candidates, after-actions, delegation journals, or
-  change records from memory and wait for broad validation later; run the
-  structured-record preflight on the touched file immediately, or run the
+  change records from memory and wait for broad validation later; for
+  owner-repo change records, copy the repo-local `TEMPLATE.md` first, then run
+  the structured-record preflight on the touched file immediately, or run the
   touched-record preflight when the changed record set is broader than one
   obvious file.
 - Open lessons are allowed, but only with an explicit owner, due date, and next

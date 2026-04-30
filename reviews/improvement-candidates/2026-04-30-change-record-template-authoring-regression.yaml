@@ -1,0 +1,93 @@
+schema_version: 1
+id: 2026-04-30-change-record-template-authoring-regression
+title: Change-record authoring still bypassed the validated template shape
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: >-
+  A closed lesson about change-record schema preflight regressed: validation
+  caught the malformed platform change record before merge, but the first draft
+  was still authored from memory instead of from a validated repo-local
+  template. The OOS change-record template was also stale and lacked the
+  required closure headings, proving the authoring control was still too late
+  and too dependent on broad validation.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-29-change-record-schema-preflight-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - platform-engineering
+    - workspace-governance
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - source-behavior
+signals:
+  - id: change-record-authoring-template-bypass
+    title: Change-record closure headings still failed before preflight.
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+      - learning-closure-regression
+    finding: >-
+      During the ART version-projection workflow repair, a platform-engineering
+      change record was first written with `## Validation` instead of the
+      required `## Artifact And Deployment Evidence`, `## Live Verification`,
+      and `## Follow-Up` headings. The touched-record preflight caught it, but
+      first-draft authoring still bypassed the template discipline needed to
+      avoid the error before validation.
+    source_refs:
+      - 'conversation: operator asked why this closure gap still existed and whether the schema was not updated'
+      - 'repo: platform-engineering/docs/records/change-records/2026-04-30-art-version-projection-workflow-step.md'
+  - id: stale-oos-change-record-template
+    title: OOS change-record template did not match the validator-required headings.
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+      - learning-closure-regression
+    finding: >-
+      `operator-orchestration-service/docs/records/change-records/TEMPLATE.md`
+      still used an older Summary/Why/Scope/Validation shape even though real
+      change records require Classification, Ownership, Root Cause, Source
+      Changes, Artifact And Deployment Evidence, Live Verification, and
+      Follow-Up. The repo validator checked real records but did not check the
+      template itself.
+    source_refs:
+      - 'repo: operator-orchestration-service/docs/records/change-records/TEMPLATE.md'
+      - 'repo: operator-orchestration-service/scripts/validate_governance_docs.py'
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: template
+      path: operator-orchestration-service/docs/records/change-records/TEMPLATE.md
+      owner_repo: operator-orchestration-service
+      note: OOS change-record template now carries the required closure headings.
+    - type: validator
+      path: operator-orchestration-service/scripts/validate_governance_docs.py
+      owner_repo: operator-orchestration-service
+      note: OOS validator now fails when the change-record template lacks required headings.
+    - type: validator
+      path: platform-engineering/scripts/validate_governance_docs.py
+      owner_repo: platform-engineering
+      note: Platform validator now fails when the change-record template lacks required headings.
+    - type: validator
+      path: workspace-governance/scripts/validate_security_change_record_lanes.py
+      owner_repo: workspace-governance
+      note: Workspace lane validation now verifies security change-record templates carry the required closure headings.
+    - type: skill
+      path: workspace-governance/skills-src/self-improvement-review/SKILL.md
+      owner_repo: workspace-governance
+      note: Self-improvement workflow now requires owner-repo change records to start from the repo-local template.
+    - type: skill
+      path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+      owner_repo: workspace-governance
+      note: ART delivery workflow now requires owner-repo change records to start from the repo-local template and pass touched-record preflight.
+  note: >-
+    Closed by moving the control earlier than broad validation: templates are
+    now validated, the stale OOS template was corrected, and the active skills
+    require template-first authoring before record preflight.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -116,6 +116,9 @@
   - validates that repos with contract-declared security change-record lanes
     keep their README/AGENTS reference, policy file, PR workflow/template, and
     diff-aware validator intact
+  - also verifies the lane's `TEMPLATE.md` carries the same required closure
+    headings as real change records so scaffolding cannot teach a stale record
+    shape
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks

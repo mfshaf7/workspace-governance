@@ -1,0 +1,95 @@
+schema_version: 1
+id: 2026-04-30-art-version-projection-workflow-step-gap
+title: Make ART version projection reconciliation a required workflow step
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: 'During #420/#426 activation, plan/apply correctly committed ART work to
+  PI-2026-03 but OpenProject version projection needed the platform sync step before
+  quality passed. The operator clarified that version projection reconciliation is
+  not a surprise gap and must be treated as a normal required workflow step for any
+  mutation that can leave derived roadmap version projection stale.'
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The active operator workflow still let projection reconciliation be discovered
+    after the quality gate instead of requiring sync and verification immediately
+    after projection-affecting ART mutations.
+  source_refs:
+  - conversation:2026-04-30-user-version-projection-workflow-clarification
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/products/openproject/delivery-art-planning-workflow.json
+    owner_repo: platform-engineering
+    note: Canonical ART planning workflow now has a projection-affecting mutation
+      control gate requiring platform view sync before final quality verification.
+  - type: contract
+    path: operator-orchestration-service/src/delivery-planning-workflow.json
+    owner_repo: operator-orchestration-service
+    note: Broker planning-workflow mirror carries the same projection reconciliation
+      gate and verification commands.
+  - type: doc
+    path: platform-engineering/products/openproject/README.md
+    owner_repo: platform-engineering
+    note: Product overview now states projection reconciliation is part of the
+      ART workflow after any roadmap-bucket-affecting mutation.
+  - type: doc
+    path: platform-engineering/products/openproject/delivery-art-contract.md
+    owner_repo: platform-engineering
+    note: Delivery ART contract now defines projection reconciliation as required
+      after mutations that can move work between roadmap buckets.
+  - type: doc
+    path: platform-engineering/products/openproject/runbooks/plan-delivery-art.md
+    owner_repo: platform-engineering
+    note: Planning runbook now requires view sync after any projection-affecting
+      ART mutation, not only direct Target PI assignment.
+  - type: doc
+    path: platform-engineering/products/openproject/runbooks/sync-delivery-art-views.md
+    owner_repo: platform-engineering
+    note: View-sync runbook now defines the full trigger set for projection reconciliation.
+  - type: doc
+    path: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
+    owner_repo: platform-engineering
+    note: Quality runbook now directs projection-only failures to the normal sync
+      then quality-gate sequence.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Broker operator surface now defines the post-mutation projection reconciliation
+      sequence.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Workspace ART operator path now requires projection reconciliation after
+      any projection-affecting mutation.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Future ART sessions now carry the same projection reconciliation rule
+      before treating quality as final.
+  note: Closed by making projection reconciliation a first-class workflow step
+    across the canonical platform workflow, broker mirror and operator surface,
+    workspace operator path, and installed ART delivery skill source.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
