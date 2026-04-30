@@ -184,16 +184,20 @@ If roadmap or PM² projection drift is suspected:
 3. `make openproject-sync-delivery-art-views ...` only when the projection
    itself is the problem
 
-After any ART mutation that can change OpenProject roadmap `version`
-projection, projection reconciliation is part of the workflow rather than an
-exceptional repair. Run platform view sync with the proven active ART runtime
-context before treating the quality gate as final. This applies to:
+After any ART mutation that returns
+`roadmap_version_projection.status=external_reconciler_required`, projection
+reconciliation is a broker-visible checkpoint rather than a per-mutation sync
+reflex.
 
-- assigning, clearing, or retargeting `Target PI`
-- carryover, decommit, parking, retirement, or completion
-- status changes that move work between backlog, committed, active, done,
-  parked, or retired roadmap buckets
-- platform-admin repair that changes expected roadmap placement
+Use this sequence:
+
+1. inspect `npm run art -- projection status`
+2. batch only related same-burst closeouts while dirty state is visible
+3. run `npm run art -- projection sync --pi-names "<known-pis>" --target-epic-id <epic-id> --quality`
+   before treating roadmap projection health or scoped quality as final
+
+Do not defer dirty projection sync until the whole Epic is finished. Run it at
+parent closeout, final evidence, or roadmap/quality checkpoints.
 
 ## Compatibility Boundary
 

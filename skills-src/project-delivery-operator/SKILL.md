@@ -120,12 +120,16 @@ Use this skill when a serious initiative is already running inside
      2. `make openproject-check-delivery-art-quality ...`
      3. `make openproject-sync-delivery-art-views ...` only when the
         compatible view projection itself drifted
-   - after any ART mutation that can change OpenProject roadmap `version`
-     projection, run platform view sync before treating the quality gate as
-     final; this includes Target PI assignment or clearing, carryover,
-     decommit, parking, retirement, completion, and status changes that move
-     work between backlog, committed, active, done, parked, or retired roadmap
-     buckets
+   - after any ART mutation that returns
+     `roadmap_version_projection.status=external_reconciler_required`, treat
+     projection reconciliation as a broker-visible checkpoint, not an immediate
+     per-mutation sync reflex:
+     1. inspect `npm run art -- projection status`
+     2. batch only related same-burst closeouts while the dirty state is known
+     3. run `npm run art -- projection sync --pi-names "<known-pis>" --target-epic-id <epic-id> --quality`
+        before treating roadmap projection health or scoped quality as final
+   - do not defer dirty projection sync until the whole Epic is finished; run
+     it at parent closeout, final evidence, or roadmap/quality checkpoints
    - when ART delivery work requires an owner-repo change record, start the
      record from that repo's `docs/records/change-records/TEMPLATE.md` and run
      the touched-record preflight before normal ART execution continues

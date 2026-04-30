@@ -74,10 +74,10 @@ delivery_art_operator_path:
       - use the scoped ART quality gate next
       - use platform-admin view repair only when roadmap or PM² projection drift is the real problem
     projection_reconciliation_after_mutation:
-      - after any ART mutation that can change OpenProject roadmap version projection, run platform view sync before treating the quality gate as final
-      - applies to Target PI assignment, clearing, or retargeting
-      - applies to carryover, decommit, parking, retirement, completion, and status changes that move work between roadmap buckets
-      - applies to platform-admin repair that changes expected roadmap placement
+      - after any ART mutation that returns roadmap_version_projection.status=external_reconciler_required, treat projection reconciliation as a broker-visible checkpoint
+      - inspect npm run art -- projection status before deciding whether to continue related same-burst closeouts
+      - batch only related dirty events; do not defer dirty projection sync until the whole Epic is finished
+      - run npm run art -- projection sync --pi-names "<known-pis>" --target-epic-id <epic-id> --quality before treating roadmap projection health or scoped quality as final
   compatibility_boundary:
     broker_owned_normal_art_surfaces:
       - session bootstrap and workflow health
