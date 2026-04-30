@@ -110,6 +110,11 @@ Use these contracts to declare:
   - machine-readable operator workflow, minimum CLI and API surface, record
     contracts, profiles, blocker triggers, denied actions, and sequencing
     rules for the future Workspace Governance Control Fabric runtime
+- `governance-validator-catalog.yaml`
+  - source-owned inventory of current workspace governance validators, audits,
+    materializers, scaffolding commands, and external operator command surfaces,
+    including safety class, profile eligibility, mutation posture, WGCF
+    invocation posture, and no-removal-before-parity retirement posture
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     read hierarchy, guided closeout intents, fallback model, compatibility

@@ -42,6 +42,10 @@ validators:
     script: scripts/validate_review_coverage.py
     scope: local-workspace
     requires_workspace_checkout: true
+  codex-review-controls:
+    script: scripts/validate_codex_review_controls.py
+    scope: local-workspace
+    requires_workspace_checkout: true
   security-delta-reviews:
     script: scripts/validate_security_delta_reviews.py
     scope: local-workspace

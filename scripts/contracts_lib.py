@@ -39,6 +39,7 @@ CONTRACT_FILES = {
     "governance_engine_shadow_parity": "contracts/governance-engine-shadow-parity.yaml",
     "governance_engine_extraction_gate": "contracts/governance-engine-extraction-gate.yaml",
     "governance_control_fabric_operator_surface": "contracts/governance-control-fabric-operator-surface.yaml",
+    "governance_validator_catalog": "contracts/governance-validator-catalog.yaml",
 }
 
 SCHEMA_FILES = {
@@ -72,6 +73,7 @@ SCHEMA_FILES = {
     "governance_engine_shadow_parity": "contracts/schemas/governance-engine-shadow-parity.schema.json",
     "governance_engine_extraction_gate": "contracts/schemas/governance-engine-extraction-gate.schema.json",
     "governance_control_fabric_operator_surface": "contracts/schemas/governance-control-fabric-operator-surface.schema.json",
+    "governance_validator_catalog": "contracts/schemas/governance-validator-catalog.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"

@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "governance_validator_catalog"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "governance_validator_catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "runtime_repo",
+        "defining_epic_ref",
+        "defining_feature_ref",
+        "inventory_work_item_ref",
+        "primary_surface_path",
+        "purpose",
+        "authority_model",
+        "profiles",
+        "safety_classes",
+        "command_surfaces",
+        "entries"
+      ],
+      "properties": {
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "runtime_repo": { "type": "string", "minLength": 1 },
+        "defining_epic_ref": { "$ref": "#/$defs/openprojectRef" },
+        "defining_feature_ref": { "$ref": "#/$defs/openprojectRef" },
+        "inventory_work_item_ref": { "$ref": "#/$defs/openprojectRef" },
+        "primary_surface_path": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "authority_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "catalog_authority",
+            "runtime_consumption_rule",
+            "art_mutation_boundary",
+            "retirement_rule",
+            "evidence_rule"
+          ],
+          "properties": {
+            "catalog_authority": { "type": "string", "minLength": 1 },
+            "runtime_consumption_rule": { "type": "string", "minLength": 1 },
+            "art_mutation_boundary": { "type": "string", "minLength": 1 },
+            "retirement_rule": { "type": "string", "minLength": 1 },
+            "evidence_rule": { "type": "string", "minLength": 1 }
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/described" }
+        },
+        "safety_classes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "description",
+              "may_run_by_default",
+              "requires_explicit_operator_gate"
+            ],
+            "properties": {
+              "description": { "type": "string", "minLength": 1 },
+              "may_run_by_default": { "type": "boolean" },
+              "requires_explicit_operator_gate": { "type": "boolean" }
+            }
+          }
+        },
+        "command_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/commandSurface" }
+        },
+        "entries": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/catalogEntry" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "openprojectRef": {
+      "type": "string",
+      "pattern": "^openproject://work_packages/[0-9]+$"
+    },
+    "described": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description"],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "commandSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "owner_repo",
+        "command_family",
+        "current_use",
+        "wgcf_role",
+        "safety_class",
+        "mutation_boundary"
+      ],
+      "properties": {
+        "surface_id": { "type": "string", "minLength": 1 },
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "command_family": { "type": "string", "minLength": 1 },
+        "current_use": { "type": "string", "minLength": 1 },
+        "wgcf_role": { "type": "string", "minLength": 1 },
+        "safety_class": { "type": "string", "minLength": 1 },
+        "mutation_boundary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "catalogEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "owner_repo",
+        "surface_id",
+        "command",
+        "purpose",
+        "scope",
+        "safety_class",
+        "allowed_profiles",
+        "requires_workspace_root",
+        "requires_network",
+        "mutates_authority",
+        "writes_materialized_outputs",
+        "included_in_validation_matrix",
+        "wgcf_posture",
+        "retirement_posture"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "validator",
+            "audit",
+            "materializer",
+            "scaffolder",
+            "support-library",
+            "external-command"
+          ]
+        },
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "surface_id": { "type": "string", "minLength": 1 },
+        "executable_path": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "repo-local",
+            "workspace-cross-repo",
+            "workspace-remote",
+            "materialized-output",
+            "structured-record",
+            "delivery-art-runtime",
+            "live-runtime"
+          ]
+        },
+        "safety_class": { "type": "string", "minLength": 1 },
+        "allowed_profiles": { "$ref": "#/$defs/stringList" },
+        "requires_workspace_root": { "type": "boolean" },
+        "requires_network": { "type": "boolean" },
+        "mutates_authority": { "type": "boolean" },
+        "writes_materialized_outputs": { "type": "boolean" },
+        "included_in_validation_matrix": { "type": "boolean" },
+        "generated_outputs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "wgcf_posture": { "type": "string", "minLength": 1 },
+        "retirement_posture": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

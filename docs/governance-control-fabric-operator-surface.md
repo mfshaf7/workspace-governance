@@ -14,6 +14,10 @@ ad hoc validators, raw Git reads, or chat-only evidence. It must become a
 bounded operator workflow that turns authority truth into receipts, decisions,
 and audit events.
 
+Validator and command inventory:
+
+- [Governance Validator Catalog](governance-validator-catalog.md)
+
 ## Authority Split
 
 The control fabric is an execution layer, not the policy source of truth.
