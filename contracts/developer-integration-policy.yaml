@@ -67,6 +67,7 @@ trigger_guidance:
     - cross-repo-api-iteration
     - canonical-backend-write
     - rapid-operator-ux-iteration
+    - new-runtime-control-plane
   recommended:
     - changing-read-help-list-show-shapes
     - evolving-runtime-topology-before-stage
@@ -74,6 +75,26 @@ trigger_guidance:
   optional:
     - single-repo-pure-logic-change
     - no-external-write-path
+runtime_lane_decision:
+  required_for_new_repos: true
+  decisions:
+    - no-runtime
+    - local-only
+    - dev-integration-required
+    - stage-direct
+  component_inventory_required_repo_classes:
+    - governance-runtime
+    - shared-operator-service
+    - product-runtime
+    - runtime-enforcement
+  dev_integration_required_repo_classes:
+    - governance-runtime
+    - shared-operator-service
+  waiver_decisions:
+    - local-only
+    - no-runtime
+    - stage-direct
+  waivers: []
 forbidden_targets:
   - stage-backend-write
   - prod-backend-write

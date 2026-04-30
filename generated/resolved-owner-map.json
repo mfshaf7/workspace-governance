@@ -85,6 +85,13 @@
       "owner_repo": "platform-engineering",
       "product": null,
       "security_owner": "security-architecture"
+    },
+    "workspace-governance-control-fabric": {
+      "component_class": "shared-governance-runtime",
+      "lifecycle": "active",
+      "owner_repo": "workspace-governance-control-fabric",
+      "product": null,
+      "security_owner": "security-architecture"
     }
   },
   "products": {

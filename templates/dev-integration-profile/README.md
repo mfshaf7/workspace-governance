@@ -6,6 +6,20 @@ for fast local iteration before governed stage rehearsal.
 Before a new profile becomes self-serve launchable, record a request first and
 admit it through the workspace contract model.
 
+Do not require a profile for every new project by default. Require a
+runtime-lane decision first:
+
+- `no-runtime` for governance records, schemas, contracts, or docs.
+- `local-only` for CLI or library tooling with no shared runtime lane.
+- `dev-integration-required` for API, worker, database-backed, operator
+  workflow, broker adapter, cross-repo runtime, or evolving topology work.
+- `stage-direct` only when mature platform deployment, security, smoke,
+  rollback, and release ownership already exist.
+
+When a repo class is governed as dev-integration-required, the profile may
+start as `proposed` so the runtime shape is recorded before implementation
+drifts into API, worker, storage, or service assumptions.
+
 Current lifecycle:
 
 - `proposed`

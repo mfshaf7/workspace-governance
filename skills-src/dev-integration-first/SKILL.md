@@ -19,6 +19,15 @@ to be the right first lane.
 ## Workflow
 
 1. Check whether a suitable profile already exists and is `active`.
+   - for a new runtime/control-plane repo, first check the runtime-lane
+     decision in `contracts/developer-integration-policy.yaml`
+   - do not require dev-integration for pure docs, schemas, policy records,
+     local-only CLI tooling, or source-only libraries
+   - require a registered profile or recorded waiver before API, worker,
+     database-backed, operator workflow, broker adapter, cross-repo runtime, or
+     evolving topology work proceeds
+   - a `proposed` profile records the intended runtime shape but is not
+     self-serve launchable
 2. If an active profile exists, prefer that lane before stage for:
    - operator-facing workflow iteration
    - cross-repo API iteration

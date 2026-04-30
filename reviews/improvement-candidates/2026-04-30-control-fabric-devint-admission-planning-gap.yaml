@@ -1,0 +1,76 @@
+schema_version: 1
+id: 2026-04-30-control-fabric-devint-admission-planning-gap
+title: Require runtime admission checks before control-fabric implementation slices
+recorded_on: '2026-04-30'
+owner_repo: workspace-governance
+summary: The control-fabric implementation plan started source-foundation work before
+  explicitly recording the component inventory and dev-integration profile/admission
+  slice that the runtime will need before it can mature toward stage.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components:
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-half-baked-callout
+  title: The operator explicitly said the work is half-baked, incomplete, sloppy,
+    or should have been caught already.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'During #420/#430 planning, the runtime role was documented in repo and
+    architecture guidance, but the execution sequence did not force a checkpoint for
+    component inventory registration and dedicated dev-integration profile admission
+    before continuing implementation slices like #433. That allowed the deployment/runtime
+    lane shape to be discovered conversationally instead of being an explicit ART/control-fabric
+    planning gate.'
+  source_refs:
+  - 'conversation: operator asked why the dev-integration/component runtime placement
+    was missed in the first place'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-policy.yaml
+    owner_repo: workspace-governance
+    note: Declares runtime-lane decisions and the repo classes that require component inventory or dev-integration profile coverage.
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-profiles.yaml
+    owner_repo: workspace-governance
+    note: Registers the proposed governance-control-fabric dev-integration profile before further runtime implementation proceeds.
+  - type: contract
+    path: workspace-governance/contracts/components.yaml
+    owner_repo: workspace-governance
+    note: Records workspace-governance-control-fabric as an active shared governance runtime component.
+  - type: validator
+    path: workspace-governance/scripts/validate_developer_integration.py
+    owner_repo: workspace-governance
+    note: Fails when required runtime repo classes lack component inventory or dev-integration profile/waiver coverage.
+  - type: skill
+    path: workspace-governance/skills-src/dev-integration-first/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes future sessions check the runtime-lane decision before source work drifts into API, worker, database, or service assumptions.
+  - type: workflow
+    path: workspace-governance-control-fabric/dev-integration/profiles/governance-control-fabric/profile.yaml
+    owner_repo: workspace-governance-control-fabric
+    note: Adds the owner-repo proposed profile surface with fail-closed command placeholders until platform acceptance.
+  - type: doc
+    path: security-architecture/docs/architecture/components/workspace-governance-control-fabric/README.md
+    owner_repo: security-architecture
+    note: Adds security component coverage for the newly active runtime component inventory entry.
+  note: >-
+    The gate is now explicit before #433 starts. The profile is proposed, not
+    active, so it records the runtime shape without claiming a runnable
+    self-serve lane before platform acceptance and required security review.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

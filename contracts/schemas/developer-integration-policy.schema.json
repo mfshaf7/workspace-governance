@@ -10,6 +10,7 @@
     "runtime_state_models",
     "testing",
     "trigger_guidance",
+    "runtime_lane_decision",
     "forbidden_targets",
     "live_miss_escalation",
     "required_actions",
@@ -176,6 +177,62 @@
         "optional": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime_lane_decision": {
+      "type": "object",
+      "required": [
+        "required_for_new_repos",
+        "decisions",
+        "component_inventory_required_repo_classes",
+        "dev_integration_required_repo_classes",
+        "waiver_decisions",
+        "waivers"
+      ],
+      "properties": {
+        "required_for_new_repos": { "type": "boolean" },
+        "decisions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "component_inventory_required_repo_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "dev_integration_required_repo_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "waiver_decisions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "waivers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["repo", "decision", "reason", "review_due_on"],
+            "properties": {
+              "repo": { "type": "string", "minLength": 1 },
+              "decision": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "review_due_on": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
