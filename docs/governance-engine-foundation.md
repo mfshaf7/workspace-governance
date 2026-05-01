@@ -244,6 +244,11 @@ validator-invocation scopes is catalog-backed WGCF:
 - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:delivery-art --profile dev-integration --tier scoped --operator-approved`
 - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:platform-runtime --profile dev-integration --tier smoke --operator-approved`
 - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:security-review --profile local-read-only --tier smoke`
+- `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved`
+
+Direct clean-state validators remain rollback/source-authority paths, not the
+normal post-cutover proof path. If WGCF cannot run the clean-state scope, record
+the blocker or defect before falling back to direct commands.
 
 The direct commands above remain source-authority and rollback entrypoints.
 They are no longer the preferred operator evidence format for a proven WGCF

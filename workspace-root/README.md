@@ -222,9 +222,11 @@ level, but it is not a governed delivery lane:
 
 Those local branch and worktree inputs are allowed only while the iteration is
 active. Once a repo or the workspace is being described as clean or
-restart-ready, the branch lifecycle audit must pass in strict clean mode so
-stale branches, pinned worktrees, and remote branches without an open PR or
-documented exception do not linger behind the real work.
+restart-ready, the WGCF clean-state scope must pass so stale branches, pinned
+worktrees, and remote branches without an open PR or documented exception do
+not linger behind the real work. Direct branch-lifecycle or workspace-layout
+commands are rollback paths; if WGCF cannot run them, record the blocker or
+defect before using a direct command as final evidence.
 
 Session handoffs are local restart-continuity state. Use only
 `workspace-governance/docs/archive/session-handoff-current.md`, keep zero or
@@ -319,7 +321,7 @@ Supported branch-lifecycle audit entrypoints:
 ```bash
 python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects
 python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote
-python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
+wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved
 ```
 
 The remote-aware modes require authenticated `gh` access because the workspace

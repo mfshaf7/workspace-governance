@@ -267,7 +267,17 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: true
-      wgcf_posture: candidate-for-wgcf-invocation
+      wgcf_invocation:
+        enabled: true
+        validation_tier: smoke
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:workspace-governance
+          - repo:workspace-governance
+          - authority:workspace-clean-state
+        timeout_seconds: 120
+        output_budget_bytes: 20000
+      wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     contract-model:
       kind: validator
@@ -571,7 +581,17 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: true
-      wgcf_posture: candidate-for-wgcf-invocation
+      wgcf_invocation:
+        enabled: true
+        command: python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
+        validation_tier: scoped
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:workspace-governance
+          - authority:workspace-clean-state
+        timeout_seconds: 180
+        output_budget_bytes: 60000
+      wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     stale-content:
       kind: audit
@@ -670,6 +690,16 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: false
+      wgcf_invocation:
+        enabled: true
+        command: python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
+        validation_tier: scoped
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:workspace-governance
+          - authority:workspace-clean-state
+        timeout_seconds: 180
+        output_budget_bytes: 30000
       wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     remote-alignment:

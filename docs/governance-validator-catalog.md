@@ -145,6 +145,11 @@ The catalog also defines representative scopes for shadow parity:
 - `component:platform-runtime`
 - `component:security-review`
 
+After #536, workspace clean-state proof uses the explicit
+`authority:workspace-clean-state` scope. That scope exists so restart-ready or post-merge
+claims do not fall back to direct `repo-structure`, `workspace-layout`, or
+`branch-lifecycle` calls by operator memory.
+
 These scopes mirror the representative scopes in
 `contracts/governance-engine-shadow-parity.yaml`. WGCF uses them to prove
 catalog-backed invocation against the actual control surfaces before any

@@ -144,9 +144,12 @@ Route those changes back to the owner repos.
   explicit restart-readiness check.
 - If meaningful workspace-level local-only state remains, refresh the current
   handoff first and only then recommend the restart.
-- If the workspace is being described as clean or restart-ready, require
-  `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
-  to pass before saying so.
+- If the workspace is being described as clean or restart-ready, require the
+  WGCF clean-state scope to pass before saying so:
+  `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved`
+- Direct branch-lifecycle or workspace-layout validator commands are rollback
+  paths after #536. If WGCF cannot run them, record the blocker or defect before
+  using the direct command as evidence.
 - Remote non-`main` branches are only allowed when they back an open PR or
   have a documented exception in `contracts/exceptions.yaml`.
 - Do not wait for the operator to ask whether a handoff should be written.
