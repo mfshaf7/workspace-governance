@@ -894,16 +894,98 @@ def main() -> int:
             "contracts/governance-engine-shadow-parity.yaml: cutover_gate.required_clean_checks must be exactly "
             + ", ".join(sorted(expected_cutover_checks))
         )
+    if (
+        governance_engine_shadow_parity["cutover_gate"]["platform_gate_ref"]
+        != "platform-engineering/docs/components/workspace-governance-control-fabric/validator-invocation-gates.md"
+    ):
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.platform_gate_ref must point to the platform WGCF validator invocation gates"
+        )
+    if (
+        governance_engine_shadow_parity["cutover_gate"]["security_review_ref"]
+        != "security-architecture/docs/reviews/components/2026-05-01-wgcf-validator-invocation-and-artifact-custody.md"
+    ):
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.security_review_ref must point to the current WGCF validator invocation security delta"
+        )
+    expected_required_evidence = {
+        "platform-profile-gates",
+        "security-delta-current",
+        "receipt-parity",
+        "direct-rollback-retained",
+        "raw-artifact-deny-by-default",
+    }
+    if set(governance_engine_shadow_parity["cutover_gate"]["required_evidence"]) != expected_required_evidence:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.required_evidence must be exactly "
+            + ", ".join(sorted(expected_required_evidence))
+        )
     expected_forbidden_conditions = {
         "duplicated workspace control-plane truth in repo-local copies",
         "stale live skill installs or missing managed skill manifest",
         "stale generated boundary projection",
         "missing stable compatibility entrypoints",
+        "WGCF receipt parity missing for the target scope",
+        "raw artifact custody enabled without security approval",
+        "direct validator rollback removed before retirement eligibility",
+        "WGCF mutation of ART, platform release, security acceptance, or workspace contracts",
     }
     if set(governance_engine_shadow_parity["cutover_gate"]["forbidden_conditions"]) != expected_forbidden_conditions:
         errors.append(
             "contracts/governance-engine-shadow-parity.yaml: cutover_gate.forbidden_conditions must be exactly "
             + ", ".join(sorted(expected_forbidden_conditions))
+        )
+    expected_profile_gates = {
+        "devint-shadow",
+        "stage-readiness",
+        "prod-readiness",
+        "break-glass",
+    }
+    actual_profile_gates = {
+        entry["id"] for entry in governance_engine_shadow_parity["cutover_gate"]["profile_gates"]
+    }
+    if actual_profile_gates != expected_profile_gates:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.profile_gates must define devint-shadow, stage-readiness, prod-readiness, and break-glass"
+        )
+    expected_representative_scopes = {
+        "workspace-governance",
+        "delivery-art",
+        "platform-runtime",
+        "security-review",
+    }
+    actual_representative_scopes = {
+        entry["id"]
+        for entry in governance_engine_shadow_parity["cutover_gate"]["representative_scopes"]
+    }
+    if actual_representative_scopes != expected_representative_scopes:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.representative_scopes must define workspace-governance, delivery-art, platform-runtime, and security-review"
+        )
+    expected_cutover_states = {
+        "shadow-only": False,
+        "limited-cutover": False,
+        "retirement-eligible": True,
+    }
+    actual_cutover_states = {
+        entry["id"]: entry["may_retire_direct"]
+        for entry in governance_engine_shadow_parity["cutover_gate"]["cutover_states"]
+    }
+    if actual_cutover_states != expected_cutover_states:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.cutover_states must define shadow-only, limited-cutover, and retirement-eligible with only retirement-eligible able to retire direct validators"
+        )
+    expected_retirement_eligibility = {
+        "catalog_ref": "contracts/governance-validator-catalog.yaml",
+        "requires_register_retirement_allowed": True,
+        "receipt_parity_required": True,
+        "direct_validator_rollback_required": True,
+        "owner_closeout_required": True,
+        "raw_artifact_custody_default": "deny",
+    }
+    if governance_engine_shadow_parity["cutover_gate"]["retirement_eligibility"] != expected_retirement_eligibility:
+        errors.append(
+            "contracts/governance-engine-shadow-parity.yaml: cutover_gate.retirement_eligibility must require catalog retirement allowance, receipt parity, rollback, owner closeout, and raw artifact custody default deny"
         )
     if governance_engine_extraction_gate["owner_repo"] != "workspace-governance":
         errors.append(

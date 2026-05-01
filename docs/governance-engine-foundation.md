@@ -184,6 +184,52 @@ The fail-closed parity contract and validator are:
 - `contracts/governance-engine-shadow-parity.yaml`
 - `scripts/validate_governance_engine_shadow_parity.py`
 
+### WGCF Validator Invocation Cutover
+
+WGCF validator invocation is a separate cutover gate on top of baseline
+governance-engine shadow parity.
+
+The cutover contract requires:
+
+- platform profile gates from
+  `platform-engineering/docs/components/workspace-governance-control-fabric/validator-invocation-gates.md`
+- current security review from
+  `security-architecture/docs/reviews/components/2026-05-01-wgcf-validator-invocation-and-artifact-custody.md`
+- receipt parity between direct validators and WGCF receipts
+- retained direct-validator rollback
+- raw artifact custody defaulting to deny
+
+Representative parity must cover these scopes before normal operator or CI
+cutover:
+
+- `workspace-governance`
+  - local validators, materializers, generated projections, and skill/root
+    sync checks
+- `delivery-art`
+  - broker planning, workflow-health, completion evidence, and projection
+    status while OOS remains the only mutation authority
+- `platform-runtime`
+  - dev-integration, platform quality, GitHub, and Kubernetes read gates under
+    platform-owned profiles
+- `security-review`
+  - review inventory, evidence validation, and concrete delta review posture
+
+Cutover states are explicit:
+
+- `shadow-only`
+  - direct validators remain primary and WGCF receipts are advisory evidence
+- `limited-cutover`
+  - WGCF may become the normal invocation path for a proven scope while direct
+    rollback remains available
+- `retirement-eligible`
+  - direct validator removal may be proposed only when the validator catalog
+    marks the register retirement-allowed and receipt parity plus owner
+    closeout evidence exists
+
+No direct validator path is retired by platform deployment alone. Retirement is
+a workspace-governance contract decision backed by parity evidence, rollback,
+and owner closeout.
+
 Primary validation entrypoints:
 
 - `python3 scripts/validate_governance_engine_shadow_parity.py`
