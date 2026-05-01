@@ -120,11 +120,23 @@ governance_control_fabric_operator_surface:
         purpose: build an explainable validation plan from source truth before executing checks
         output_contract: validation-plan id, planned checks, required authority refs, blockers, and estimated evidence volume
         mutates_authority: false
+      - command_id: catalog-plan
+        syntax: wgcf catalog plan --workspace-root <path> --scope <scope> --profile <profile>
+        phase_id: plan-validation
+        purpose: build an explainable validation plan from the workspace-owned governance validator catalog instead of repo-local hardcoded manifests
+        output_contract: catalog authority refs, selected catalog entries, suppressed catalog entries, validation-plan id, and required profile/operator gates
+        mutates_authority: false
       - command_id: run
         syntax: wgcf run --plan <plan-id-or-file> --emit-receipt
         phase_id: execute-validation
         purpose: execute one validation plan and emit a receipt plus ledger event
         output_contract: validation-run id, receipt path, status, top findings, suppressed output count, and ledger event id
+        mutates_authority: false
+      - command_id: catalog-check
+        syntax: wgcf catalog check --workspace-root <path> --scope <scope> --profile <profile> [--operator-approved]
+        phase_id: execute-validation
+        purpose: execute catalog-authorized checks through WGCF, with compact receipts and no upstream authority mutation
+        output_contract: selected catalog entries, suppressed catalog entries, receipt path, artifact refs, ledger event id, and denied or blocked checks
         mutates_authority: false
       - command_id: inspect
         syntax: wgcf inspect --receipt <receipt-id-or-path>

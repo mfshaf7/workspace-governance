@@ -237,6 +237,19 @@ Primary validation entrypoints:
 - `python3 scripts/materialize_governance_engine_outputs.py skills --check`
 - `python3 scripts/materialize_governance_engine_outputs.py generated --check`
 
+After #536 shadow parity, the normal compact operator path for proven
+validator-invocation scopes is catalog-backed WGCF:
+
+- `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:workspace-governance --profile local-read-only --tier smoke`
+- `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:delivery-art --profile dev-integration --tier scoped --operator-approved`
+- `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:platform-runtime --profile dev-integration --tier smoke --operator-approved`
+- `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:security-review --profile local-read-only --tier smoke`
+
+The direct commands above remain source-authority and rollback entrypoints.
+They are no longer the preferred operator evidence format for a proven WGCF
+catalog scope unless WGCF is blocked, the target scope is not admitted, or the
+owner repo is being validated before a source landing.
+
 ## Enterprise Control-Plane Packaging Model
 
 ### Central Repo

@@ -5,6 +5,7 @@ import argparse
 from datetime import date
 from pathlib import Path
 import re
+import shlex
 import sys
 
 from jsonschema import Draft202012Validator
@@ -27,6 +28,37 @@ BRANCH_LIFECYCLE_WAIVER_KINDS = {
     "branch-lifecycle-local-branch": "local-branch",
     "branch-lifecycle-worktree": "worktree",
 }
+WGCF_PLANNER_SCOPE_PREFIXES = (
+    "authority:",
+    "component:",
+    "projection:",
+    "profile:",
+    "repo:",
+    "validator:",
+    "art:",
+    "release:",
+    "changed-file:",
+)
+
+
+def _is_wgcf_planner_scope(value: str) -> bool:
+    scope = str(value or "").strip()
+    if scope == "workspace":
+        return True
+    return any(
+        scope.startswith(prefix) and scope.removeprefix(prefix).strip()
+        for prefix in WGCF_PLANNER_SCOPE_PREFIXES
+    )
+
+
+def _has_shell_control_token(command: str) -> bool:
+    if "$(" in command:
+        return True
+    try:
+        parts = shlex.split(command)
+    except ValueError:
+        return True
+    return any(part in {"&&", "||", "|", ";"} for part in parts)
 
 
 def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -> None:
@@ -1612,6 +1644,44 @@ def main() -> int:
                 "contracts/governance-validator-catalog.yaml: command surface "
                 f"{surface['surface_id']!r} references unknown safety_class {surface['safety_class']!r}"
             )
+    representative_scopes = governance_validator_catalog["representative_scopes"]
+    representative_scope_ids = [scope["scope_id"] for scope in representative_scopes]
+    duplicate_representative_scope_ids = sorted(
+        scope_id
+        for scope_id in set(representative_scope_ids)
+        if representative_scope_ids.count(scope_id) > 1
+    )
+    if duplicate_representative_scope_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: duplicate representative scope ids: "
+            + ", ".join(duplicate_representative_scope_ids)
+        )
+    shadow_parity_scope_ids = {
+        scope["id"]
+        for scope in governance_engine_shadow_parity["cutover_gate"]["representative_scopes"]
+    }
+    if set(representative_scope_ids) != shadow_parity_scope_ids:
+        errors.append(
+            "contracts/governance-validator-catalog.yaml: representative_scopes must match shadow-parity representative scopes "
+            + ", ".join(sorted(shadow_parity_scope_ids))
+        )
+    representative_planner_scopes = {scope["planner_scope"] for scope in representative_scopes}
+    for scope in representative_scopes:
+        if scope["owner_repo"] not in active_repos:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: representative scope "
+                f"{scope['scope_id']!r} owner_repo {scope['owner_repo']!r} is not an active repo"
+            )
+        if scope["parity_contract_scope_ref"] != scope["scope_id"]:
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: representative scope "
+                f"{scope['scope_id']!r} must keep parity_contract_scope_ref equal to scope_id"
+            )
+        if not _is_wgcf_planner_scope(scope["planner_scope"]):
+            errors.append(
+                "contracts/governance-validator-catalog.yaml: representative scope "
+                f"{scope['scope_id']!r} has invalid planner_scope {scope['planner_scope']!r}"
+            )
     catalog_entries = governance_validator_catalog["entries"]
     retirement_register = governance_validator_catalog["retirement_register"]
     surface_id_set = set(surface_ids)
@@ -1667,6 +1737,52 @@ def main() -> int:
                 errors.append(
                     "contracts/governance-validator-catalog.yaml: entry "
                     f"{entry_id!r} expects missing generated artifact {rel_path}"
+                )
+        invocation = payload.get("wgcf_invocation")
+        if invocation:
+            if invocation["working_directory_repo"] not in active_repos:
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation.working_directory_repo "
+                    f"{invocation['working_directory_repo']!r} is not an active repo"
+                )
+            invocation_scopes = set(invocation["scopes"])
+            invalid_invocation_scopes = sorted(
+                scope
+                for scope in invocation_scopes
+                if not _is_wgcf_planner_scope(scope)
+            )
+            if invalid_invocation_scopes:
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} has invalid wgcf_invocation.scopes "
+                    + ", ".join(invalid_invocation_scopes)
+                )
+            if not (invocation_scopes & (representative_planner_scopes | {"workspace"})):
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation must include workspace or one representative planner_scope"
+                )
+            effective_command = invocation.get("command") or payload["command"]
+            if "<" in effective_command or ">" in effective_command:
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation effective command must not contain unresolved placeholders"
+                )
+            if _has_shell_control_token(effective_command):
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation effective command must not require shell control operators"
+                )
+            if invocation["enabled"] and payload["kind"] == "support-library":
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} support libraries cannot be WGCF invocation targets"
+                )
+            if invocation["enabled"] and (payload["mutates_authority"] or payload["writes_materialized_outputs"]):
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} mutating or materializing entries cannot be enabled for WGCF invocation"
                 )
         if payload["included_in_validation_matrix"]:
             matrix_payload = validator_scripts.get(entry_id)

@@ -76,7 +76,9 @@ commands are initially no-ops or local-only while service runtime is blocked:
 wgcf status
 wgcf sources snapshot --workspace-root <path>
 wgcf plan --scope workspace|repo|component|operator-surface --target <id> --profile <profile>
+wgcf catalog plan --workspace-root <path> --scope <scope> --profile <profile>
 wgcf run --plan <plan-id-or-file> --emit-receipt
+wgcf catalog check --workspace-root <path> --scope <scope> --profile <profile> [--operator-approved]
 wgcf inspect --receipt <receipt-id-or-path>
 wgcf readiness --target workspace|repo:<name>|component:<name>|operator-surface:<id> --profile <profile>
 wgcf ledger tail --limit <n>
@@ -86,6 +88,14 @@ wgcf explain --decision <decision-id>
 The CLI should show a compact human-readable summary by default and provide
 `--json` for automation. When full evidence exists, it should return receipt
 and artifact references instead of printing raw validation output by default.
+
+Catalog-backed planning is the normal cutover path for validator invocation.
+`wgcf catalog plan` and `wgcf catalog check` must load
+`contracts/governance-validator-catalog.yaml` from `workspace-governance`,
+apply catalog profile and safety rules, and emit selected and suppressed
+catalog entries. Broad command-family placeholders are not executable until
+the catalog defines a concrete `wgcf_invocation` command for the target
+profile and representative scope.
 
 ## Minimum API
 
