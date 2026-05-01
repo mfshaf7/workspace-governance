@@ -136,6 +136,38 @@ replacement posture. It distinguishes:
 Every catalog entry must appear in that retirement register. Missing coverage
 is a contract validation failure.
 
+## Representative Invocation Scope
+
+The catalog also defines representative scopes for shadow parity:
+
+- `component:workspace-governance`
+- `component:delivery-art`
+- `component:platform-runtime`
+- `component:security-review`
+
+These scopes mirror the representative scopes in
+`contracts/governance-engine-shadow-parity.yaml`. WGCF uses them to prove
+catalog-backed invocation against the actual control surfaces before any
+normal operator or CI cutover. This keeps the proof target explicit and avoids
+hardcoded "recommended next action" logic in the runtime repo.
+
+Catalog entries may include `wgcf_invocation` metadata. That metadata is the
+only authority-approved way to turn a broad command family such as
+`npm run art -- <...>` or `make devint-<...>` into a concrete WGCF invocation.
+If a catalog command still contains placeholders and does not provide a
+concrete `wgcf_invocation.command`, WGCF must suppress it instead of guessing.
+
+The invocation metadata records:
+
+- concrete command, when the catalog command is a family placeholder
+- repo that owns the working directory
+- planner scopes that may select the command
+- validation tier
+- timeout and output budget
+
+WGCF still owns execution mechanics, receipts, artifacts, and ledger events.
+The catalog owns which commands are admitted for that execution.
+
 ## Current Boundaries
 
 The catalog intentionally includes both local scripts and external command

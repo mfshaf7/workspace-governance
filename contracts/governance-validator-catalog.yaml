@@ -125,6 +125,27 @@ governance_validator_catalog:
       wgcf_role: target runtime surface after catalog ingestion and shadow parity
       safety_class: local-read-only
       mutation_boundary: fabric-local receipts, artifacts, and ledger only
+  representative_scopes:
+    - scope_id: workspace-governance
+      planner_scope: component:workspace-governance
+      owner_repo: workspace-governance
+      parity_contract_scope_ref: workspace-governance
+      purpose: prove WGCF can consume the workspace-owned validator catalog and receipt local workspace validators without duplicating policy truth
+    - scope_id: delivery-art
+      planner_scope: component:delivery-art
+      owner_repo: operator-orchestration-service
+      parity_contract_scope_ref: delivery-art
+      purpose: prove WGCF can receipt broker read posture while OOS remains the only Delivery ART mutation authority
+    - scope_id: platform-runtime
+      planner_scope: component:platform-runtime
+      owner_repo: platform-engineering
+      parity_contract_scope_ref: platform-runtime
+      purpose: prove WGCF can receipt platform-owned runtime read gates under an explicit dev-integration profile
+    - scope_id: security-review
+      planner_scope: component:security-review
+      owner_repo: security-architecture
+      parity_contract_scope_ref: security-review
+      purpose: prove WGCF can cite current security posture without accepting security risk or replacing security-architecture authority
   retirement_register:
     - register_id: workspace-governance-read-validators
       owner_repo: workspace-governance
@@ -266,6 +287,15 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: true
+      wgcf_invocation:
+        enabled: true
+        validation_tier: smoke
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:workspace-governance
+          - repo:workspace-governance
+        timeout_seconds: 120
+        output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     delegation-journal:
@@ -374,6 +404,15 @@ governance_validator_catalog:
       included_in_validation_matrix: true
       generated_outputs:
         - generated/governance-engine-boundary-map.json
+      wgcf_invocation:
+        enabled: true
+        validation_tier: smoke
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:workspace-governance
+          - repo:workspace-governance
+        timeout_seconds: 120
+        output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     security-bindings:
@@ -434,6 +473,15 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: true
+      wgcf_invocation:
+        enabled: true
+        validation_tier: smoke
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:security-review
+          - repo:security-architecture
+        timeout_seconds: 120
+        output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     security-evidence:
@@ -441,7 +489,7 @@ governance_validator_catalog:
       owner_repo: workspace-governance
       surface_id: workspace-governance-python-scripts
       executable_path: scripts/validate_security_evidence.py
-      command: python3 scripts/validate_security_evidence.py --repo-root . --workspace-root /home/mfshaf7/projects
+      command: python3 scripts/validate_security_evidence.py --workspace-root /home/mfshaf7/projects
       purpose: delegate to security-architecture evidence validation so stale assessment metadata and unlinked risks fail at workspace level
       scope: workspace-cross-repo
       safety_class: workspace-cross-repo-read
@@ -454,6 +502,15 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: true
+      wgcf_invocation:
+        enabled: true
+        validation_tier: smoke
+        working_directory_repo: workspace-governance
+        scopes:
+          - component:security-review
+          - repo:security-architecture
+        timeout_seconds: 120
+        output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     security-change-record-lanes:
@@ -893,6 +950,16 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: false
+      wgcf_invocation:
+        enabled: true
+        command: npm run art -- workflow-health --json
+        validation_tier: smoke
+        working_directory_repo: operator-orchestration-service
+        scopes:
+          - component:delivery-art
+          - art:delivery-498
+        timeout_seconds: 120
+        output_budget_bytes: 40000
       wgcf_posture: profile-gated-read-only
       retirement_posture: never-retire-through-wgcf
     delivery-art-broker-mutation:
@@ -962,6 +1029,16 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: false
+      wgcf_invocation:
+        enabled: true
+        command: OPENPROJECT_NAMESPACE=devint-accepted-idea-delivery-mfshaf7 make openproject-check-delivery-art-quality TARGET_EPIC_ID=498
+        validation_tier: scoped
+        working_directory_repo: platform-engineering
+        scopes:
+          - component:delivery-art
+          - art:delivery-498
+        timeout_seconds: 180
+        output_budget_bytes: 50000
       wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-platform-owned
     openproject-projection-sync:
@@ -996,6 +1073,16 @@ governance_validator_catalog:
       mutates_authority: false
       writes_materialized_outputs: false
       included_in_validation_matrix: false
+      wgcf_invocation:
+        enabled: true
+        command: make devint-status PROFILE=governance-control-fabric
+        validation_tier: smoke
+        working_directory_repo: platform-engineering
+        scopes:
+          - component:platform-runtime
+          - profile:governance-control-fabric
+        timeout_seconds: 120
+        output_budget_bytes: 30000
       wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-platform-owned
     devint-runner-lifecycle:

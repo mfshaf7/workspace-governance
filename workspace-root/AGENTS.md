@@ -452,6 +452,15 @@ If that evidence cannot be produced, the work is not complete.
 
 ## Validation Entry Points
 
+- Normal compact validation evidence for #536-proven scopes should come from
+  `workspace-governance-control-fabric` catalog receipts:
+  - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:workspace-governance --profile local-read-only --tier smoke`
+  - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:delivery-art --profile dev-integration --tier scoped --operator-approved`
+  - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:platform-runtime --profile dev-integration --tier smoke --operator-approved`
+  - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:security-review --profile local-read-only --tier smoke`
+- The direct commands below remain source-authority, owner-repo, and rollback
+  entrypoints. Use them when WGCF is blocked, the target scope is not admitted
+  to WGCF, or the owner repo needs pre-landing validation.
 - `workspace-governance/`
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
