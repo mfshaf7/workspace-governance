@@ -79,15 +79,153 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
+            "platform_gate_ref",
+            "security_review_ref",
             "required_clean_checks",
-            "forbidden_conditions"
+            "required_evidence",
+            "forbidden_conditions",
+            "profile_gates",
+            "representative_scopes",
+            "cutover_states",
+            "retirement_eligibility"
           ],
           "properties": {
+            "platform_gate_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "security_review_ref": {
+              "type": "string",
+              "minLength": 1
+            },
             "required_clean_checks": {
+              "$ref": "#/$defs/stringList"
+            },
+            "required_evidence": {
               "$ref": "#/$defs/stringList"
             },
             "forbidden_conditions": {
               "$ref": "#/$defs/stringList"
+            },
+            "profile_gates": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "allowed",
+                  "denied"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "allowed": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "denied": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "representative_scopes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "owner_repo",
+                  "direct_evidence",
+                  "wgcf_evidence"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "owner_repo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "direct_evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "wgcf_evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "cutover_states": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "rule",
+                  "may_retire_direct"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rule": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "may_retire_direct": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "retirement_eligibility": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "catalog_ref",
+                "requires_register_retirement_allowed",
+                "receipt_parity_required",
+                "direct_validator_rollback_required",
+                "owner_closeout_required",
+                "raw_artifact_custody_default"
+              ],
+              "properties": {
+                "catalog_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "requires_register_retirement_allowed": {
+                  "type": "boolean"
+                },
+                "receipt_parity_required": {
+                  "type": "boolean"
+                },
+                "direct_validator_rollback_required": {
+                  "type": "boolean"
+                },
+                "owner_closeout_required": {
+                  "type": "boolean"
+                },
+                "raw_artifact_custody_default": {
+                  "enum": [
+                    "deny"
+                  ]
+                }
+              }
             }
           }
         }

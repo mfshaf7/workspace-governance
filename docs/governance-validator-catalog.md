@@ -99,11 +99,28 @@ repo names, terminal history, or broad command lists.
 No direct validator path may be removed because WGCF exists. Retirement needs:
 
 - shadow parity between direct command output and WGCF receipt posture
+- platform profile gates for the intended invocation lane
+- current security review for validator invocation and artifact custody
 - rollback path
 - replacement receipt evidence
 - explicit ART or owner-repo closeout evidence
 
 Until that exists, direct commands stay as compatibility entrypoints.
+
+The workspace shadow-parity contract defines the only valid cutover states:
+
+- `shadow-only`
+  - direct validators remain primary and WGCF receipts are advisory
+- `limited-cutover`
+  - WGCF may become the normal invocation path for a proven scope while direct
+    rollback remains available
+- `retirement-eligible`
+  - direct removal may be proposed only for catalog registers where
+    `retirement_allowed: true`
+
+Raw artifact custody remains denied by default. A compact WGCF receipt may
+support operator or CI evidence, but it must not copy raw command output,
+secrets, environment dumps, or full artifacts into the operator-facing packet.
 
 The machine-readable `retirement_register` groups entries by ownership and
 replacement posture. It distinguishes:

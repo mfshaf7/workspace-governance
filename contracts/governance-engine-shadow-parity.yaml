@@ -20,13 +20,72 @@ governance_engine_shadow_parity:
       command: python3 scripts/validate_governance_engine_shadow_parity.py
       success_condition: stable compatibility entrypoints remain present while parity work stays integrated
   cutover_gate:
+    platform_gate_ref: platform-engineering/docs/components/workspace-governance-control-fabric/validator-invocation-gates.md
+    security_review_ref: security-architecture/docs/reviews/components/2026-05-01-wgcf-validator-invocation-and-artifact-custody.md
     required_clean_checks:
       - workspace-root-sync
       - installed-skills
       - generated-governance-artifacts
       - compatibility-entrypoints
+    required_evidence:
+      - platform-profile-gates
+      - security-delta-current
+      - receipt-parity
+      - direct-rollback-retained
+      - raw-artifact-deny-by-default
     forbidden_conditions:
       - duplicated workspace control-plane truth in repo-local copies
       - stale live skill installs or missing managed skill manifest
       - stale generated boundary projection
       - missing stable compatibility entrypoints
+      - WGCF receipt parity missing for the target scope
+      - raw artifact custody enabled without security approval
+      - direct validator rollback removed before retirement eligibility
+      - WGCF mutation of ART, platform release, security acceptance, or workspace contracts
+    profile_gates:
+      - id: devint-shadow
+        allowed: local and dev-integration shadow comparison with compact receipts
+        denied: governed stage or prod claims
+      - id: stage-readiness
+        allowed: governed rehearsal after platform and security gates approve the lane
+        denied: production use or raw artifact custody by default
+      - id: prod-readiness
+        allowed: normal production validation invocation after stage evidence and support-readiness
+        denied: break-glass behavior as default operation
+      - id: break-glass
+        allowed: explicit operator-approved diagnostic invocation with receipt and expiry
+        denied: silent default execution or broad recursive validation
+    representative_scopes:
+      - id: workspace-governance
+        owner_repo: workspace-governance
+        direct_evidence: local workspace validators and materialization checks
+        wgcf_evidence: WGCF receipt shows selected checks, pass/fail posture, suppressed output, and artifact refs
+      - id: delivery-art
+        owner_repo: operator-orchestration-service
+        direct_evidence: broker CLI planning, workflow-health, completion-evidence, and projection status
+        wgcf_evidence: WGCF receipt remains recommendation-only and cites OOS as mutation authority
+      - id: platform-runtime
+        owner_repo: platform-engineering
+        direct_evidence: platform dev-integration, OpenProject quality, projection, GitHub, and Kubernetes read gates
+        wgcf_evidence: WGCF receipt proves profile-gated live or remote reads without platform mutation
+      - id: security-review
+        owner_repo: security-architecture
+        direct_evidence: security review inventory, evidence validation, and concrete delta review artifacts
+        wgcf_evidence: WGCF receipt cites current security posture without accepting risk
+    cutover_states:
+      - id: shadow-only
+        rule: direct validators remain primary; WGCF receipts are advisory evidence only
+        may_retire_direct: false
+      - id: limited-cutover
+        rule: WGCF may become the normal invocation path for a scope after all required evidence is present and direct rollback remains available
+        may_retire_direct: false
+      - id: retirement-eligible
+        rule: direct validator removal may be proposed only for catalog retirement entries that allow retirement and have receipt parity plus rollback evidence
+        may_retire_direct: true
+    retirement_eligibility:
+      catalog_ref: contracts/governance-validator-catalog.yaml
+      requires_register_retirement_allowed: true
+      receipt_parity_required: true
+      direct_validator_rollback_required: true
+      owner_closeout_required: true
+      raw_artifact_custody_default: deny
