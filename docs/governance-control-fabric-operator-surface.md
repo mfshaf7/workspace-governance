@@ -97,6 +97,11 @@ catalog entries. Broad command-family placeholders are not executable until
 the catalog defines a concrete `wgcf_invocation` command for the target
 profile and representative scope.
 
+Clean-state claims use the `authority:workspace-clean-state` catalog scope after #536.
+Operators should not manually run direct repo-structure, workspace-layout, or
+branch-lifecycle validators as final proof unless WGCF is blocked and the
+blocker or defect is recorded first.
+
 ## Minimum API
 
 The API is a future runtime integration surface, not day-one proof that a

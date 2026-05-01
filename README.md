@@ -297,13 +297,19 @@ is current. Treat that generated security register as a dependency landing unit,
 not as a late audit cleanup.
 
 When the workspace is being described as clean, restart-ready, or post-merge
-retired, the stricter branch lifecycle gate must pass too:
+retired, the WGCF clean-state scope is the normal post-#536 proof path:
 
 ```bash
-python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean
+wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved
 ```
 
-That check is what prevents stale local branches, pinned worktrees, and remote
+That scope receipts repo-structure, workspace-layout, and strict branch
+lifecycle checks through the catalog-backed control fabric. Direct
+`audit_branch_lifecycle.py` or `audit_workspace_layout.py` calls remain
+rollback/source-authority paths only; if WGCF cannot run them, record the
+blocker or defect before using a direct command as final evidence.
+
+The strict branch lifecycle check is what prevents stale local branches, pinned worktrees, and remote
 branches without an open PR or documented exception from lingering after the
 real work is already on `main`.
 
