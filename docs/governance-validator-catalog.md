@@ -29,8 +29,8 @@ authority. WGCF can produce ART recommendations and receipt references, but OOS
 performs the ART write.
 
 `platform-engineering` owns runtime and deployment command surfaces such as
-OpenProject quality checks, projection sync, dev-integration runner commands,
-and Kubernetes access.
+OpenProject quality checks, ART PI lifecycle/iteration alignment checks,
+projection sync, dev-integration runner commands, and Kubernetes access.
 
 `security-architecture` owns security review acceptance. WGCF may surface
 required security evidence and missing review posture, but it does not approve

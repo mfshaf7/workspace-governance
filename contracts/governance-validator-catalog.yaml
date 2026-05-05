@@ -1053,7 +1053,7 @@ governance_validator_catalog:
       owner_repo: platform-engineering
       surface_id: platform-openproject-make
       command: make openproject-check-delivery-art-quality
-      purpose: run platform-owned OpenProject ART quality checks against selected PI or target epic
+      purpose: run platform-owned OpenProject ART quality checks against selected PI or target epic, including roadmap projection, PI objective, lifecycle/iteration alignment, and done-state evidence gates
       scope: delivery-art-runtime
       safety_class: live-runtime-read
       allowed_profiles:
@@ -1072,7 +1072,7 @@ governance_validator_catalog:
         scopes:
           - component:delivery-art
           - art:delivery-498
-        timeout_seconds: 180
+        timeout_seconds: 120
         output_budget_bytes: 50000
       wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-platform-owned
