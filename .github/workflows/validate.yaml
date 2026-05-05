@@ -32,7 +32,7 @@ jobs:
       - name: Validate contract model
         run: python3 scripts/validate_contracts.py --repo-root .
 
-      - name: Materialize active repos
+      - name: Materialize active and admitted repos
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -52,7 +52,13 @@ jobs:
           )
 
           repos = yaml.safe_load((repo_root / "contracts" / "repos.yaml").read_text())["repos"]
-          owner_repos = sorted(repos.keys())
+          intake_repos = yaml.safe_load((repo_root / "contracts" / "intake-register.yaml").read_text()).get("repos", {})
+          admitted_repos = {
+              repo_name
+              for repo_name, payload in intake_repos.items()
+              if payload.get("status") == "admitted"
+          }
+          owner_repos = sorted(set(repos.keys()) | admitted_repos)
 
           for repo_name in owner_repos:
               if repo_name == "workspace-governance":
