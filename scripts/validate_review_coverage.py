@@ -141,6 +141,16 @@ def main() -> int:
         for repo_name, payload in contracts["repos"]["repos"].items()
         if payload["requires_security_bindings"] or payload.get("security_review_subject")
     }
+    for repo_name, payload in (contracts["intake_register"].get("repos") or {}).items():
+        if (
+            payload.get("status") == "admitted"
+            and payload.get("requires_security_bindings")
+        ):
+            expected_repos[repo_name] = {
+                "owner_repo": repo_name,
+                "scope": "component",
+                "baseline_review_path": None,
+            }
     expected_components = {
         component_name: {
             "owner_repo": payload["owner_repo"],
@@ -149,6 +159,15 @@ def main() -> int:
         for component_name, payload in contracts["components"]["components"].items()
         if payload["security_owner"] == "security-architecture" and payload["lifecycle"] == "active"
     }
+    for component_name, payload in (contracts["intake_register"].get("components") or {}).items():
+        if (
+            payload.get("status") == "admitted"
+            and payload.get("security_owner") == "security-architecture"
+        ):
+            expected_components[component_name] = {
+                "owner_repo": payload["owner_repo"],
+                "scope": "component",
+            }
     expected_products = {
         product_name: {
             "owner_repo": payload["platform_owner"],
