@@ -26,6 +26,7 @@ individual repos.
 flowchart LR
     WG[workspace-governance<br/>control plane]
     WGCF[workspace-governance-control-fabric<br/>governance runtime fabric]
+    CGG[context-governance-gateway<br/>context admission runtime]
     SA[security-architecture<br/>security authority]
     PE[platform-engineering<br/>shared platform and product integration]
     OOS[operator-orchestration-service<br/>shared workflow broker]
@@ -39,9 +40,14 @@ flowchart LR
     WG --> OOS
     WG --> SA
     WG --> WGCF
+    WG --> CGG
     WGCF --> WG
+    CGG --> WG
+    CGG -. context packets and receipts .-> WGCF
     PE -. deployment authority .-> WGCF
+    PE -. profile and deployment authority .-> CGG
     SA -. review and risk posture .-> WGCF
+    SA -. review and risk posture .-> CGG
     SA -. review and risk posture .-> PE
     SA -. review and risk posture .-> OOS
     SA -. review and risk posture .-> OCRD
@@ -61,6 +67,9 @@ Read this as the workspace control map:
   [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
 - `workspace-governance-control-fabric` implements the governance runtime
   fabric and consumes workspace governance truth without owning that truth.
+- `context-governance-gateway` implements operational context admission and
+  context-packet generation; service mode remains blocked behind proposed
+  `dev-integration`, platform, and security gates.
 - `security-architecture` governs security decisions and evidence.
 - `platform-engineering` owns the shared platform plus product integration.
 - OpenClaw is assembled through `openclaw-runtime-distribution`.
@@ -115,24 +124,13 @@ Read this as the workflow path:
 | --- | --- | --- | --- |
 | `workspace-governance/` | Workspace control plane | workspace-root guidance, cross-repo routing, workspace audit tooling | platform rollout, product delivery, security standards |
 | `workspace-governance-control-fabric/` | Governance runtime fabric | governance graph, validation planning runtime, admission/readiness/receipt/ledger implementation, control-fabric API/worker/CLI | workspace contracts, workspace-root guidance, platform deployment authority, security standards |
+| `context-governance-gateway/` | Context admission runtime implementation | context capture, redaction, projection, model-safe/operator-safe packets, receipts, artifact digests, local ledger behavior, future service implementation after runtime admission | workspace contracts, WGCF readiness, ART mutation, platform release authority, security acceptance, custom LLM/scanner/storage/observability backends |
 | `platform-engineering/` | Release and platform authority | environment contracts, pinned SHAs, image digests, Argo state, shared component docs, product integration runbooks | Telegram behavior, bridge implementation, security governance |
 | `openclaw-runtime-distribution/` | Active OpenClaw runtime composition | bundled runtime assembly, packaging checks, active `host-control-openclaw-plugin` package, runtime-required workspace templates | environment approval, Argo state, host runtime policy |
 | `openclaw-telegram-enhanced/` | Canonical Telegram source | Telegram UX, routing, approvals, media delivery behavior, Telegram-specific tests | host enforcement, platform rollout, security governance |
 | `openclaw-host-bridge/` | Canonical host enforcement runtime | allowed roots, typed host operations, audit logs, staging, host-side health and attestation, WSL/Windows bridge behavior | Telegram UX, image composition, GitOps rollout |
 | `security-architecture/` | Security governance owner | standards, trust-boundary judgment, review methodology, findings, ADRs, remediation direction | rollout implementation, product packaging, operator runbooks |
 | `operator-orchestration-service/` | Shared operator workflow service | shared workflow APIs, workflow audit/correlation, bounded AI-assist orchestration, OpenProject workflow adapters | Telegram delivery/chat UX, platform rollout authority, security standards |
-
-## Admitted But Not Active Entrants
-
-- `context-governance-gateway/`
-  - admitted implementation home for operational context admission control
-  - current ART scope is Phase 1 local-only context capture, redaction,
-    projection, packets, receipts, and ledger behavior
-  - not yet an active governed runtime, platform deployment, security
-    acceptance surface, or WGCF replacement
-  - service mode, API, worker, database-backed storage, dashboard, broker
-    adapter, or cross-repo runtime work requires a `dev-integration` profile
-    before implementation continues
 
 ## Retired Repository
 
@@ -154,6 +152,9 @@ paths:
   - [workspace-governance-control-fabric](/home/mfshaf7/projects/workspace-governance-control-fabric/README.md)
     owns the admitted runtime implementation path for the governance control
     fabric
+  - [context-governance-gateway](/home/mfshaf7/projects/context-governance-gateway/README.md)
+    owns context admission implementation and proposed service-mode profile
+    shape, while service mode remains blocked behind admission gates
   - [security-architecture](/home/mfshaf7/projects/security-architecture/README.md)
     owns trust-boundary judgment, security standards, and review posture
 - OpenClaw
@@ -389,6 +390,8 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace governance control fabric:
   [workspace-governance-control-fabric/README.md](/home/mfshaf7/projects/workspace-governance-control-fabric/README.md)
+- Context governance gateway:
+  [context-governance-gateway/README.md](/home/mfshaf7/projects/context-governance-gateway/README.md)
 - Workspace contracts: [workspace-governance/contracts/README.md](/home/mfshaf7/projects/workspace-governance/contracts/README.md)
 - Governance-engine foundation: [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
 - Troubleshooting doctrine: [workspace-governance/docs/troubleshooting-preflight.md](/home/mfshaf7/projects/workspace-governance/docs/troubleshooting-preflight.md)

@@ -75,15 +75,17 @@ That means:
     - `workspace-governance-control-fabric/AGENTS.md`
     - `workspace-governance-control-fabric/README.md`
 - `context-governance-gateway/`
-  - admitted but not yet active implementation home for Operational Context
-    Governance and Context Admission Control
+  - active implementation home for Operational Context Governance and Context
+    Admission Control
   - owns Phase 1 local-only context capture, normalization, classification,
     redaction, slicing, budgeting, projection, model-safe/operator-safe
     packets, receipts, and local ledger implementation
   - does not own workspace contracts, WGCF validation/readiness, ART mutation,
     platform release authority, security acceptance, or a custom LLM gateway
   - API, worker, database-backed storage, dashboard, broker adapter, or
-    cross-repo runtime behavior requires `dev-integration` admission first
+    cross-repo runtime behavior remains blocked until the proposed
+    `dev-integration` profile is admitted and platform/security gates approve
+    service mode
   - read first:
     - `context-governance-gateway/AGENTS.md`
     - `context-governance-gateway/README.md`

@@ -159,6 +159,54 @@ profiles:
       - down
       - reset
       - promote_check
+  context-governance-gateway:
+    lifecycle: proposed
+    owner_repo: context-governance-gateway
+    summary: Proposed local-k3s dev-integration lane for Context Governance Gateway service-mode admission.
+    purpose: Record the intended CGG service-mode API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger runtime shape before shared runtime implementation starts.
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: context-packet-provider
+      catalog_refs:
+        - developer-integration
+        - security-bindings
+        - review-coverage
+      notes: The proposed CGG profile is an admission contract only; it is not self-serve launchable and must fail closed for runtime start/access until platform and security gates admit service mode.
+    profile_path: dev-integration/profiles/context-governance-gateway/profile.yaml
+    runtime_owner: platform-engineering
+    security_owner: security-architecture
+    requested_by: mfshaf7
+    requested_on: "2026-05-05"
+    request_record:
+      system: openproject
+      ref: openproject://work_packages/583
+    shared_dependencies:
+      - workspace-governance
+      - platform-engineering
+      - security-architecture
+    source_repos:
+      - context-governance-gateway
+      - workspace-governance
+      - platform-engineering
+      - security-architecture
+    stage_handoff:
+      owner_repo: platform-engineering
+      governed_surface: context-governance-gateway-stage
+      required_checks:
+        - dev-integration profile admission
+        - API readiness contract
+        - artifact custody model
+        - redaction policy gate
+        - packet receipt compatibility
+        - security custody review
+    actions:
+      - up
+      - status
+      - access
+      - smoke
+      - down
+      - reset
+      - promote_check
   idea-workflow:
     lifecycle: active
     owner_repo: operator-orchestration-service

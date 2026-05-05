@@ -12,8 +12,9 @@ Use it first for workspace orientation. Then route into the owning repo.
 
 ## Current System Shape
 
-The workspace currently has three durable authority planes, one admitted
-governance runtime implementation fabric, plus one fast local iteration lane:
+The workspace currently has three durable authority planes, two active
+governance runtime implementation components, plus one fast local iteration
+lane:
 
 - workspace governance
   - `workspace-governance/`
@@ -26,6 +27,15 @@ governance runtime implementation fabric, plus one fast local iteration lane:
     API/worker/CLI surfaces
   - consumes `workspace-governance` truth without owning contracts or
     workspace-root guidance
+- context governance gateway
+  - `context-governance-gateway/`
+  - owns implementation for operational context admission, redaction,
+    projection, model-safe/operator-safe packets, receipts, and local ledger
+    behavior
+  - service-mode runtime remains blocked behind proposed `dev-integration`,
+    platform, and security admission gates
+  - does not replace WGCF, OOS, platform release authority, security
+    acceptance, or any governed AI access path
 - shared platform and release authority
   - `platform-engineering/`
   - owns environment contracts, pinned SHAs and digests, Argo state, product
@@ -66,6 +76,8 @@ Primary source:
   - workspace control plane
 - `workspace-governance-control-fabric/`
   - governance runtime implementation fabric
+- `context-governance-gateway/`
+  - operational context admission implementation
 - `platform-engineering/`
   - shared platform and release authority
 - `security-architecture/`
@@ -78,19 +90,6 @@ Primary source:
   - canonical host enforcement and runtime attestation
 - `operator-orchestration-service/`
   - active shared operator workflow service
-
-## Admitted But Not Active Entrants
-
-- `context-governance-gateway/`
-  - admitted implementation home for operational context admission control
-  - current target is Phase 1 local-only CLI and library foundation
-  - may later provide model-safe/operator-safe context packets and receipts to
-    operators, agents, OOS, or WGCF
-  - does not replace WGCF, OOS, platform release authority, security
-    acceptance, or any governed AI access path
-  - API, worker, database-backed storage, dashboard, broker adapter, or
-    cross-repo runtime behavior requires `dev-integration` admission before it
-    becomes runnable shared infrastructure
 
 Retired path:
 

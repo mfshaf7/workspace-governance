@@ -17,6 +17,23 @@
         "wgcf_graph_role": "shared-platform-component"
       }
     },
+    "context-governance-gateway": {
+      "component_class": "shared-governance-runtime",
+      "lifecycle": "active",
+      "owner_repo": "context-governance-gateway",
+      "product": null,
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "developer-integration",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.",
+        "posture": "proposed-profile-gated",
+        "wgcf_graph_role": "context-packet-provider"
+      }
+    },
     "external-secrets": {
       "component_class": "shared-platform",
       "lifecycle": "active",
@@ -251,6 +268,44 @@
     }
   },
   "repos": {
+    "context-governance-gateway": {
+      "allowed_authoritative_refs": [
+        "workspace-governance",
+        "workspace-governance-control-fabric",
+        "platform-engineering",
+        "security-architecture",
+        "operator-orchestration-service"
+      ],
+      "lifecycle": "active",
+      "must_not_own": [
+        "workspace contracts",
+        "Workspace Governance Control Fabric validation planning or readiness authority",
+        "Workspace Delivery ART mutation authority",
+        "platform deployment authority",
+        "security standards or security acceptance",
+        "custom LLM gateway, custom scanner, custom observability backend, or custom object store"
+      ],
+      "owns": [
+        "operational context admission implementation",
+        "context capture, normalization, classification, redaction, slicing, budgeting, and projection",
+        "model-safe and operator-safe packet generation",
+        "context manifests, redaction reports, operator receipts, artifact digests, and local ledger behavior",
+        "future API, worker, storage-adapter, and downstream adapter implementation after runtime admission"
+      ],
+      "repo_class": "governance-runtime",
+      "requires_security_bindings": true,
+      "security_review_subject": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "developer-integration",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Active implementation repo for context packet production; service-mode runtime remains blocked until the proposed dev-integration profile is admitted and security/platform gates approve expansion.",
+        "posture": "proposed-profile-gated",
+        "wgcf_graph_role": "context-packet-provider"
+      }
+    },
     "openclaw-host-bridge": {
       "allowed_authoritative_refs": [
         "platform-engineering",
