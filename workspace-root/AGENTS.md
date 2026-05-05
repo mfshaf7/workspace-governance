@@ -74,6 +74,19 @@ That means:
   - read first:
     - `workspace-governance-control-fabric/AGENTS.md`
     - `workspace-governance-control-fabric/README.md`
+- `context-governance-gateway/`
+  - admitted but not yet active implementation home for Operational Context
+    Governance and Context Admission Control
+  - owns Phase 1 local-only context capture, normalization, classification,
+    redaction, slicing, budgeting, projection, model-safe/operator-safe
+    packets, receipts, and local ledger implementation
+  - does not own workspace contracts, WGCF validation/readiness, ART mutation,
+    platform release authority, security acceptance, or a custom LLM gateway
+  - API, worker, database-backed storage, dashboard, broker adapter, or
+    cross-repo runtime behavior requires `dev-integration` admission first
+  - read first:
+    - `context-governance-gateway/AGENTS.md`
+    - `context-governance-gateway/README.md`
 - `platform-engineering/`
   - owns shared platform structure, environment contracts, Argo-managed state,
     release governance, and product integration docs
@@ -194,6 +207,11 @@ Only start implementation after that discussion narrows the target design.
   ledger implementation, and control-fabric API/worker/CLI surfaces belong in
   `workspace-governance-control-fabric/` after the governing contracts exist in
   `workspace-governance/`.
+- Operational context admission implementation, including context capture,
+  normalization, classification, redaction, slicing, budgeting, projection,
+  model-safe/operator-safe packets, receipts, and artifact ledger behavior,
+  belongs in `context-governance-gateway/`; it must not replace WGCF, OOS,
+  platform release authority, or security acceptance.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.

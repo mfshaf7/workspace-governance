@@ -122,6 +122,18 @@ Read this as the workflow path:
 | `security-architecture/` | Security governance owner | standards, trust-boundary judgment, review methodology, findings, ADRs, remediation direction | rollout implementation, product packaging, operator runbooks |
 | `operator-orchestration-service/` | Shared operator workflow service | shared workflow APIs, workflow audit/correlation, bounded AI-assist orchestration, OpenProject workflow adapters | Telegram delivery/chat UX, platform rollout authority, security standards |
 
+## Admitted But Not Active Entrants
+
+- `context-governance-gateway/`
+  - admitted implementation home for operational context admission control
+  - current ART scope is Phase 1 local-only context capture, redaction,
+    projection, packets, receipts, and ledger behavior
+  - not yet an active governed runtime, platform deployment, security
+    acceptance surface, or WGCF replacement
+  - service mode, API, worker, database-backed storage, dashboard, broker
+    adapter, or cross-repo runtime work requires a `dev-integration` profile
+    before implementation continues
+
 ## Retired Repository
 
 - `openclaw-isolated-deployment/`
