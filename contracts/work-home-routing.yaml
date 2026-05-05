@@ -239,6 +239,11 @@ work_home_routing:
       - Run the broker Review Packet readiness gate after the PR is open and
         before merge; a readiness failure blocks merge until the same PR is
         fixed or the Landing Unit is deliberately split.
+      - Generated ART payloads, Review Packets, and other source-backed
+        evidence artifacts must be edited through a patchable diff path such
+        as `apply_patch` or an equivalent reviewed file patch. Do not use
+        ad hoc heredocs, raw redirection, or script-generated overwrites as the
+        final edit path unless the generator itself is the reviewed control.
       - Cross-repo Landing Units must record merge order and final SHA evidence
         for every repo they touch.
       - A Landing Unit is not valid when one covered child must be rolled back

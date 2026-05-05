@@ -8,7 +8,7 @@ summary: 'During #477, local validation was treated as sufficient before the com
   edit bypassed the apply_patch discipline. The source blocker was fixed, but the
   broader workflow lesson must not stay in chat memory.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-30-ci-equivalent-premerge-validation-gap.yaml
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -65,14 +65,28 @@ resolution:
     path: operator-orchestration-service/docs/records/change-records/2026-04-30-plan-apply-draft-preflight-parity.md
     owner_repo: operator-orchestration-service
     note: Records delivery/runtime evidence for the #477 broker preflight hardening.
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Requires source-backed ART payloads, Review Packets, and evidence artifacts to use patchable reviewed edits rather than ad hoc final overwrites.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Documents the CI-equivalent proof gate and patchable evidence-edit discipline in the work-home routing operator contract.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Adds the same evidence-edit discipline to the Delivery ART operator path.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Future ART sessions now carry the patchable payload and Review Packet edit rule before broker submission.
   note: >-
-    Concrete source defect #477 is closed. The remaining candidate is about the
-    broader workflow control: validation must prove the committed PR diff and
-    artifact-edit discipline before CI or live submit becomes the first
-    enforcement point.
+    Concrete source defect #477 is closed. The broader workflow controls now
+    require base-aware CI-equivalent proof after PR diff exists, pre-merge
+    Review Packet readiness, and patchable reviewed edits for generated ART
+    payloads, Review Packets, and completion evidence before broker submission.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-03'
-  note: 'Define the durable control that forces source-backed ART validation after
-    the PR diff exists and preserves apply_patch/file-edit discipline for temp ART
-    payloads before continuing broad #420 execution.'
+  owner_repo: null
+  due_on: null
+  note: null

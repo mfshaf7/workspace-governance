@@ -144,6 +144,13 @@ because it needs operator-side credentials, package installation, sudo, a GUI
 action, approval, or account permission, stop and prompt the operator
 immediately; do not silently replace it with weaker CI-only proof.
 
+Generated ART payloads, Review Packets, and source-backed evidence artifacts
+must remain reviewable as file diffs. Edit them through a patchable path such as
+`apply_patch` or an equivalent reviewed file patch. Do not use ad hoc heredocs,
+raw shell redirection, or one-off script overwrites as the final edit path
+unless the generator itself is the reviewed control and its output is
+validated before use.
+
 After merge, change the packet to `merged_pr`, add the merge commit, finalize
 the packet, and use the finalized digest in ART completion evidence.
 

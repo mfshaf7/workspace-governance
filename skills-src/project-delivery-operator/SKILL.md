@@ -267,6 +267,11 @@ Use this skill when a serious initiative is already running inside
      `npm run art -- review-packet readiness <packet.json>`
    - do not merge while readiness fails; fix the same PR or explicitly split the
      Landing Unit instead of planning a corrective PR after merge
+   - when editing generated ART payloads, Review Packets, or completion
+     evidence files, use `apply_patch` or an equivalent reviewed file patch and
+     rerun the relevant local preflight before broker submission; do not make
+     final evidence edits with heredocs, raw redirection, or one-off overwrites
+     unless the generator itself is the reviewed control
    - after merge, update the Review Packet to `merged_pr`, add the merge commit,
      finalize it, and use the finalized digest in ART completion evidence
    - do not mark source-backed ART children `done` until a finalized Review

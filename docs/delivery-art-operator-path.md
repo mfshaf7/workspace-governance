@@ -127,6 +127,13 @@ Landing Unit; do not merge first and repair the evidence later. After merge,
 set the packet to `merged_pr`, add the merge commit, finalize it, and use the
 final digest in ART completion evidence.
 
+Generated ART payloads, Review Packets, and completion evidence files must stay
+reviewable. Edit them through a patchable diff path such as `apply_patch` or an
+equivalent reviewed file patch, then rerun the relevant broker preflight before
+using the payload. Do not make final evidence edits through ad hoc heredocs,
+raw shell redirection, or one-off overwrites unless the generator itself is the
+reviewed control.
+
 If CI-equivalent proof cannot run because it needs operator-side credentials,
 package installation, sudo, a GUI action, approval, or account permission,
 prompt the operator immediately. Do not use GitHub CI as the first proof unless
