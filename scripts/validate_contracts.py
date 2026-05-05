@@ -70,6 +70,19 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
         errors.append(f"{instance_path}: {path}: {error.message}")
 
 
+def has_required_scalar(payload: dict, key: str) -> bool:
+    if key not in payload:
+        return False
+    value = payload[key]
+    if value is None:
+        return False
+    if isinstance(value, str) and not value.strip():
+        return False
+    if isinstance(value, list) and not value:
+        return False
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate workspace governance contracts.")
     parser.add_argument(
@@ -374,19 +387,40 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-policy.yaml: {owner_key} {lane[owner_key]!r} is not an active repo"
             )
-    expected_devint_statuses = {"proposed", "active", "suspended", "retired"}
+    expected_devint_statuses = {
+        "proposed",
+        "build-admitted",
+        "active",
+        "suspended",
+        "retired",
+    }
     if set(profile_lifecycle["statuses"]) != expected_devint_statuses:
         errors.append(
             "contracts/developer-integration-policy.yaml: profile_lifecycle.statuses must be exactly "
             + ", ".join(sorted(expected_devint_statuses))
         )
+    if set(profile_lifecycle["implementation_statuses"]) != {"build-admitted", "active"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.implementation_statuses must be exactly active, build-admitted"
+        )
     if set(profile_lifecycle["self_serve_statuses"]) != {"active"}:
         errors.append(
             "contracts/developer-integration-policy.yaml: profile_lifecycle.self_serve_statuses must be exactly active"
         )
-    if set(profile_lifecycle["platform_acceptance_required_for"]) != {"active", "suspended", "retired"}:
+    if set(profile_lifecycle["build_admission_required_for"]) != {"build-admitted"}:
         errors.append(
-            "contracts/developer-integration-policy.yaml: profile_lifecycle.platform_acceptance_required_for must be exactly active, retired, suspended"
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.build_admission_required_for must be exactly build-admitted"
+        )
+    expected_platform_acceptance_statuses = {
+        "build-admitted",
+        "active",
+        "suspended",
+        "retired",
+    }
+    if set(profile_lifecycle["platform_acceptance_required_for"]) != expected_platform_acceptance_statuses:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.platform_acceptance_required_for must be exactly "
+            + ", ".join(sorted(expected_platform_acceptance_statuses))
         )
     adapter_owner = request_admission["current_request_adapter"]["owner_repo"]
     if adapter_owner not in active_repos:
@@ -1912,6 +1946,7 @@ def main() -> int:
         "covered-by-owner-repo",
         "interface-contract-backed",
         "proposed-profile-gated",
+        "build-admitted-profile-gated",
     }
     if allowed_validation_postures != expected_validation_postures:
         errors.append(
@@ -2018,6 +2053,10 @@ def main() -> int:
         }:
             errors.append(
                 f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component or context-packet-provider graph role"
+            )
+        if posture == "build-admitted-profile-gated" and graph_role != "context-packet-provider":
+            errors.append(
+                f"{label}: build-admitted-profile-gated posture must use context-packet-provider graph role"
             )
 
     workspace_root = repo_root.parent
@@ -2135,17 +2174,50 @@ def main() -> int:
                     f"contracts/developer-integration-profiles.yaml: {profile_name} is missing request_record.system or request_record.ref"
                 )
         admission = payload.get("admission") or {}
-        if payload["lifecycle"] in set(profile_lifecycle["platform_acceptance_required_for"]):
+        build_admission = payload.get("build_admission") or {}
+        if payload["lifecycle"] in set(profile_lifecycle["build_admission_required_for"]):
+            for key in (
+                "approved_by",
+                "approved_on",
+                "platform_acceptance_ref",
+                "security_review_required",
+                "security_review_refs",
+                "implementation_allowed",
+                "self_serve_launch_allowed",
+                "work_item_ref",
+            ):
+                if not has_required_scalar(build_admission, key):
+                    errors.append(
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {payload['lifecycle']!r} requires build_admission.{key}"
+                    )
+            if build_admission.get("implementation_allowed") is not True:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} build_admission.implementation_allowed must be true"
+                )
+            if build_admission.get("self_serve_launch_allowed") is not False:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} build_admission.self_serve_launch_allowed must be false"
+                )
+        active_admission_statuses = (
+            set(profile_lifecycle["platform_acceptance_required_for"])
+            - set(profile_lifecycle["build_admission_required_for"])
+        )
+        if payload["lifecycle"] in active_admission_statuses:
             for key in ("approved_by", "approved_on", "platform_acceptance_ref"):
                 if not admission.get(key):
                     errors.append(
                         f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {payload['lifecycle']!r} requires admission.{key}"
                     )
+        security_payloads = []
         if admission.get("security_review_required"):
-            refs = admission.get("security_review_refs") or []
+            security_payloads.append(("admission", admission))
+        if build_admission.get("security_review_required"):
+            security_payloads.append(("build_admission", build_admission))
+        for payload_name, security_payload in security_payloads:
+            refs = security_payload.get("security_review_refs") or []
             if not refs and profile_lifecycle["security_review_ref_required_when_flagged"]:
                 errors.append(
-                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one admission.security_review_ref"
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one {payload_name}.security_review_ref"
                 )
             for ref in refs:
                 if ref["repo"] not in active_repos:

@@ -29,8 +29,8 @@
           "security-bindings",
           "review-coverage"
         ],
-        "notes": "Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.",
-        "posture": "proposed-profile-gated",
+        "notes": "Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF after build-admitted implementation; it still does not own WGCF validation, ART mutation, platform release, or security acceptance.",
+        "posture": "build-admitted-profile-gated",
         "wgcf_graph_role": "context-packet-provider"
       }
     },
@@ -301,8 +301,8 @@
           "security-bindings",
           "review-coverage"
         ],
-        "notes": "Active implementation repo for context packet production; service-mode runtime remains blocked until the proposed dev-integration profile is admitted and security/platform gates approve expansion.",
-        "posture": "proposed-profile-gated",
+        "notes": "Active implementation repo for context packet production; service-mode implementation is build-admitted, while self-serve runtime launch remains blocked until the dev-integration profile becomes active.",
+        "posture": "build-admitted-profile-gated",
         "wgcf_graph_role": "context-packet-provider"
       }
     },

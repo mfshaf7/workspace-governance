@@ -71,6 +71,32 @@ REQUIRED_RUNTIME_LANE_DECISIONS = {
     "dev-integration-required",
     "stage-direct",
 }
+EXPECTED_PROFILE_LIFECYCLE_STATUSES = {
+    "proposed",
+    "build-admitted",
+    "active",
+    "suspended",
+    "retired",
+}
+EXPECTED_IMPLEMENTATION_STATUSES = {"build-admitted", "active"}
+EXPECTED_SELF_SERVE_STATUSES = {"active"}
+EXPECTED_BUILD_ADMISSION_STATUSES = {"build-admitted"}
+EXPECTED_PLATFORM_ACCEPTANCE_STATUSES = {
+    "build-admitted",
+    "active",
+    "suspended",
+    "retired",
+}
+REQUIRED_BUILD_ADMISSION_KEYS = {
+    "approved_by",
+    "approved_on",
+    "platform_acceptance_ref",
+    "security_review_required",
+    "security_review_refs",
+    "implementation_allowed",
+    "self_serve_launch_allowed",
+    "work_item_ref",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -79,6 +105,19 @@ def load_yaml(path: Path) -> dict:
 
 def load_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def has_required_scalar(payload: dict, key: str) -> bool:
+    if key not in payload:
+        return False
+    value = payload[key]
+    if value is None:
+        return False
+    if isinstance(value, str) and not value.strip():
+        return False
+    if isinstance(value, list) and not value:
+        return False
+    return True
 
 
 def validate(repo_root: Path, workspace_root: Path) -> list[str]:
@@ -150,13 +189,28 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-policy.yaml: unknown active repo reference {repo_ref!r}"
             )
-    if set(profile_lifecycle["statuses"]) != {"proposed", "active", "suspended", "retired"}:
+    if set(profile_lifecycle["statuses"]) != EXPECTED_PROFILE_LIFECYCLE_STATUSES:
         errors.append(
-            "contracts/developer-integration-policy.yaml: profile_lifecycle.statuses must be exactly active, proposed, retired, suspended"
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.statuses must be exactly "
+            + ", ".join(sorted(EXPECTED_PROFILE_LIFECYCLE_STATUSES))
         )
-    if set(profile_lifecycle["self_serve_statuses"]) != {"active"}:
+    if set(profile_lifecycle["implementation_statuses"]) != EXPECTED_IMPLEMENTATION_STATUSES:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.implementation_statuses must be exactly "
+            + ", ".join(sorted(EXPECTED_IMPLEMENTATION_STATUSES))
+        )
+    if set(profile_lifecycle["self_serve_statuses"]) != EXPECTED_SELF_SERVE_STATUSES:
         errors.append(
             "contracts/developer-integration-policy.yaml: profile_lifecycle.self_serve_statuses must be exactly active"
+        )
+    if set(profile_lifecycle["build_admission_required_for"]) != EXPECTED_BUILD_ADMISSION_STATUSES:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.build_admission_required_for must be exactly build-admitted"
+        )
+    if set(profile_lifecycle["platform_acceptance_required_for"]) != EXPECTED_PLATFORM_ACCEPTANCE_STATUSES:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: profile_lifecycle.platform_acceptance_required_for must be exactly "
+            + ", ".join(sorted(EXPECTED_PLATFORM_ACCEPTANCE_STATUSES))
         )
     runtime_state_models = set(policy.get("runtime_state_models") or [])
     if runtime_state_models != REQUIRED_RUNTIME_STATE_MODELS:
@@ -306,17 +360,41 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                         f"contracts/developer-integration-profiles.yaml: {profile_name} is missing request_record.{key}"
                     )
         admission = payload.get("admission") or {}
-        if lifecycle in set(profile_lifecycle["platform_acceptance_required_for"]):
+        build_admission = payload.get("build_admission") or {}
+        if lifecycle in set(profile_lifecycle["build_admission_required_for"]):
+            missing_keys = sorted(
+                key
+                for key in REQUIRED_BUILD_ADMISSION_KEYS
+                if not has_required_scalar(build_admission, key)
+            )
+            if missing_keys:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} requires build_admission.{', build_admission.'.join(missing_keys)}"
+                )
+            if build_admission.get("implementation_allowed") is not True:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} build_admission.implementation_allowed must be true"
+                )
+            if build_admission.get("self_serve_launch_allowed") is not False:
+                errors.append(
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} build_admission.self_serve_launch_allowed must be false"
+                )
+        if lifecycle in (set(profile_lifecycle["platform_acceptance_required_for"]) - set(profile_lifecycle["build_admission_required_for"])):
             for key in ("approved_by", "approved_on", "platform_acceptance_ref"):
                 if not admission.get(key):
                     errors.append(
                         f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} requires admission.{key}"
                     )
+        security_payloads = []
         if admission.get("security_review_required"):
-            refs = admission.get("security_review_refs") or []
+            security_payloads.append(("admission", admission))
+        if build_admission.get("security_review_required"):
+            security_payloads.append(("build_admission", build_admission))
+        for payload_name, security_payload in security_payloads:
+            refs = security_payload.get("security_review_refs") or []
             if not refs and profile_lifecycle["security_review_ref_required_when_flagged"]:
                 errors.append(
-                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one admission.security_review_ref"
+                    f"contracts/developer-integration-profiles.yaml: {profile_name} requires at least one {payload_name}.security_review_ref"
                 )
             for ref in refs:
                 review_repo = ref["repo"]
@@ -468,7 +546,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             ):
                 errors.append(
                     "contracts/developer-integration-profiles.yaml: active repo "
-                    f"{repo_name!r} with repo_class {repo_class!r} must have a proposed, active, suspended, or retired dev-integration profile entry or a runtime-lane waiver"
+                    f"{repo_name!r} with repo_class {repo_class!r} must have a proposed, build-admitted, active, suspended, or retired dev-integration profile entry or a runtime-lane waiver"
                 )
 
     if not checked_profiles:

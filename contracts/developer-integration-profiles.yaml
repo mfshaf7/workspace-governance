@@ -160,18 +160,18 @@ profiles:
       - reset
       - promote_check
   context-governance-gateway:
-    lifecycle: proposed
+    lifecycle: build-admitted
     owner_repo: context-governance-gateway
-    summary: Proposed local-k3s dev-integration lane for Context Governance Gateway service-mode admission.
-    purpose: Record the intended CGG service-mode API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger runtime shape before shared runtime implementation starts.
+    summary: Build-admitted local-k3s dev-integration lane for Context Governance Gateway service-mode implementation.
+    purpose: Authorize bounded CGG service-mode API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger implementation after platform and security gates, without making the profile self-serve launchable before runtime proof exists.
     validation_behavior:
-      posture: proposed-profile-gated
+      posture: build-admitted-profile-gated
       wgcf_graph_role: context-packet-provider
       catalog_refs:
         - developer-integration
         - security-bindings
         - review-coverage
-      notes: The proposed CGG profile is an admission contract only; it is not self-serve launchable and must fail closed for runtime start/access until platform and security gates admit service mode.
+      notes: The CGG profile is admitted for bounded service implementation, but it is not self-serve launchable and must fail closed for runtime start/access until owner runtime commands and read-only smoke are proven.
     profile_path: dev-integration/profiles/context-governance-gateway/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -180,6 +180,17 @@ profiles:
     request_record:
       system: openproject
       ref: openproject://work_packages/583
+    build_admission:
+      approved_by: mfshaf7
+      approved_on: "2026-05-05"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/185
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/components/2026-05-05-context-governance-gateway-service-mode-admission-gates.md
+      implementation_allowed: true
+      self_serve_launch_allowed: false
+      work_item_ref: openproject://work_packages/622
     shared_dependencies:
       - workspace-governance
       - platform-engineering
@@ -193,7 +204,7 @@ profiles:
       owner_repo: platform-engineering
       governed_surface: context-governance-gateway-stage
       required_checks:
-        - dev-integration profile admission
+        - active dev-integration profile admission
         - API readiness contract
         - artifact custody model
         - redaction policy gate

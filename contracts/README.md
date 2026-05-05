@@ -209,6 +209,9 @@ The shared lifecycle states are:
 
 - `proposed`
   - request exists, but the profile is not yet self-serve launchable
+- `build-admitted`
+  - platform and security gates allow bounded owner-repo service
+    implementation, but the profile is not yet self-serve launchable
 - `active`
   - admitted and self-serve launchable on the shared runner
 - `suspended`
@@ -223,8 +226,10 @@ Current model:
   generic by recording `request_record.system` and `request_record.ref`
 - the shared runner must only launch profiles whose lifecycle is in
   `self_serve_statuses`
-- a new profile request does not become launchable until platform acceptance is
-  recorded and any flagged security review references are present
+- a new profile request may become `build-admitted` after platform build
+  acceptance and any flagged security review references are present
+- a profile does not become launchable until active admission records runnable
+  owner commands and smoke evidence
 - persistent profiles must keep the shared `devint-smoke` action read-only
 - if a workflow still needs mutating smoke, admit and use a separate
   disposable companion profile instead of writing test artifacts into the

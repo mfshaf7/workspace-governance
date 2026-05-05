@@ -57,6 +57,7 @@ validation_behavior:
     - covered-by-owner-repo
     - interface-contract-backed
     - proposed-profile-gated
+    - build-admitted-profile-gated
   allowed_graph_roles:
     - catalog-authority-source
     - wgcf-runtime-source

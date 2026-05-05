@@ -20,14 +20,22 @@ When a repo class is governed as dev-integration-required, the profile may
 start as `proposed` so the runtime shape is recorded before implementation
 drifts into API, worker, storage, or service assumptions.
 
+Move a profile to `build-admitted` when platform and security gates explicitly
+authorize bounded owner-repo service implementation, but the profile is not yet
+safe to launch from the shared runner. Do not skip from `proposed` to
+implementation work by pretending the profile is `active`.
+
 Current lifecycle:
 
 - `proposed`
+- `build-admitted`
 - `active`
 - `suspended`
 - `retired`
 
-Only `active` profiles are launchable from the shared runner.
+Only `active` profiles are launchable from the shared runner. `build-admitted`
+profiles may permit implementation work, but `up`, `access`, and shared smoke
+must still fail closed until the profile becomes `active`.
 
 The profile file must be owned by the repo that owns the concrete workflow,
 not by `workspace-governance/`.
@@ -122,4 +130,5 @@ The registry entry for a real profile should also carry:
 - `requested_by`
 - `requested_on`
 - `request_record`
+- `build_admission` when the profile is accepted for bounded implementation
 - `admission` once the profile is accepted for self-serve use
