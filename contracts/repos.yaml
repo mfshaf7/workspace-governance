@@ -83,13 +83,14 @@ repos:
       - security-architecture
       - operator-orchestration-service
     validation_behavior:
-      posture: build-admitted-profile-gated
+      posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
         - developer-integration
+        - devint-runner-read
         - security-bindings
         - review-coverage
-      notes: Active implementation repo for context packet production; service-mode implementation is build-admitted, while self-serve runtime launch remains blocked until the dev-integration profile becomes active.
+      notes: Active implementation repo for context packet production; local dev-integration runtime launch is active through the platform-owned runner, while governed stage/prod deployment, raw projection, downstream adapters, and approval authority remain blocked.
   platform-engineering:
     lifecycle: active
     repo_class: platform

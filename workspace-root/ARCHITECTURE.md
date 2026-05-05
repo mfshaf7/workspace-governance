@@ -32,8 +32,10 @@ lane:
   - owns implementation for operational context admission, redaction,
     projection, model-safe/operator-safe packets, receipts, and local ledger
     behavior
-  - service-mode runtime remains blocked behind proposed `dev-integration`,
-    platform, and security admission gates
+  - local `dev-integration` runtime is active for service-shape proof through
+    the platform-owned runner after workspace, platform, and security admission
+  - governed stage/prod runtime, raw model projection, downstream adapters, and
+    approval authority remain blocked behind later platform and security gates
   - does not replace WGCF, OOS, platform release authority, security
     acceptance, or any governed AI access path
 - shared platform and release authority
