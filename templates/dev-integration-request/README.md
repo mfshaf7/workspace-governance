@@ -67,12 +67,19 @@ Lifecycle targets:
 
 - `proposed`
   - request exists but the profile is not self-serve launchable
+- `build-admitted`
+  - platform and security gates authorize bounded owner-repo implementation,
+    but the profile is not self-serve launchable
 - `active`
   - admitted and launchable on the shared runner
 - `suspended`
   - admitted before, but temporarily blocked
 - `retired`
   - no longer part of the active profile set
+
+Use `build-admitted` for the bootstrap gap where service code and profile-owned
+runtime wiring must be built before `active` smoke can honestly pass. Do not
+use it as launch evidence.
 
 Current implementation note:
 

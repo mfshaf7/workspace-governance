@@ -43,13 +43,20 @@
       "type": "object",
       "required": [
         "statuses",
+        "implementation_statuses",
         "self_serve_statuses",
         "request_record_required",
+        "build_admission_required_for",
         "platform_acceptance_required_for",
         "security_review_ref_required_when_flagged"
       ],
       "properties": {
         "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "implementation_statuses": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
@@ -60,6 +67,11 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "request_record_required": { "type": "boolean" },
+        "build_admission_required_for": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
         "platform_acceptance_required_for": {
           "type": "array",
           "minItems": 1,
@@ -75,6 +87,7 @@
         "current_request_adapter",
         "required_request_fields",
         "activation_requirements",
+        "build_admission_requirements",
         "persistent_request_requirements"
       ],
       "properties": {
@@ -94,6 +107,11 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "activation_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "build_admission_requirements": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }

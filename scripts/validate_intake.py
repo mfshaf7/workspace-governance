@@ -413,6 +413,10 @@ def main() -> int:
             errors.append(
                 f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component or context-packet-provider graph role"
             )
+        if posture == "build-admitted-profile-gated" and graph_role != "context-packet-provider":
+            errors.append(
+                f"{label}: build-admitted-profile-gated posture must use context-packet-provider graph role"
+            )
 
     if intake_policy["workspace_inventory"]["scan_workspace_root_git_repos"]:
         discovered_git_repos = git_repo_names(workspace_root)

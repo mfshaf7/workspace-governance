@@ -228,9 +228,12 @@ When the repo class requires dev-integration, the repo must have a registered
 profile in `contracts/developer-integration-profiles.yaml` with at least
 `proposed` lifecycle, or a recorded runtime-lane waiver with a review date.
 
-`proposed` means the lane is not self-serve launchable. It records the intended
-runtime shape early enough to keep implementation from drifting. `active` is
-reserved for profiles that have platform acceptance, required security review,
+`proposed` means the lane is not self-serve launchable and has not yet
+authorized service-mode implementation. It records the intended runtime shape
+early enough to keep implementation from drifting. `build-admitted` means
+platform and security gates authorize bounded owner-repo service implementation
+while `up`, `access`, and shared-runner smoke still fail closed. `active` is
+reserved for profiles that have platform activation, required security review,
 owner repo commands, and runnable smoke behavior.
 
 ## Late Discovery

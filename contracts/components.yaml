@@ -90,13 +90,13 @@ components:
     product: null
     security_owner: security-architecture
     validation_behavior:
-      posture: proposed-profile-gated
+      posture: build-admitted-profile-gated
       wgcf_graph_role: context-packet-provider
       catalog_refs:
         - developer-integration
         - security-bindings
         - review-coverage
-      notes: Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.
+      notes: Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF after build-admitted implementation; it still does not own WGCF validation, ART mutation, platform release, or security acceptance.
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime
