@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "context_behavior"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "context_behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "implementation_repo",
+        "defining_epic_ref",
+        "defining_feature_ref",
+        "declaration_work_item_ref",
+        "primary_operator_surface",
+        "purpose",
+        "authority_model",
+        "default_policy",
+        "declaration_contract",
+        "source_classes",
+        "adoption_states",
+        "repo_declarations",
+        "intake_integration",
+        "rollout_gates",
+        "denied_actions"
+      ],
+      "properties": {
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "implementation_repo": { "type": "string", "minLength": 1 },
+        "defining_epic_ref": { "$ref": "#/$defs/openprojectRef" },
+        "defining_feature_ref": { "$ref": "#/$defs/openprojectRef" },
+        "declaration_work_item_ref": { "$ref": "#/$defs/openprojectRef" },
+        "primary_operator_surface": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "authority_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract_owner",
+            "implementation_owner",
+            "validation_runtime_owner",
+            "operator_workflow_owner",
+            "platform_authority",
+            "security_authority"
+          ],
+          "properties": {
+            "contract_owner": { "type": "string", "minLength": 1 },
+            "implementation_owner": { "type": "string", "minLength": 1 },
+            "validation_runtime_owner": { "type": "string", "minLength": 1 },
+            "operator_workflow_owner": { "type": "string", "minLength": 1 },
+            "platform_authority": { "type": "string", "minLength": 1 },
+            "security_authority": { "type": "string", "minLength": 1 }
+          }
+        },
+        "default_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "raw_model_projection",
+            "uncertain_detection",
+            "artifact_preservation",
+            "packet_requirement",
+            "exception_rule"
+          ],
+          "properties": {
+            "raw_model_projection": { "type": "string", "minLength": 1 },
+            "uncertain_detection": { "type": "string", "minLength": 1 },
+            "artifact_preservation": { "type": "string", "minLength": 1 },
+            "packet_requirement": { "type": "string", "minLength": 1 },
+            "exception_rule": { "type": "string", "minLength": 1 }
+          }
+        },
+        "declaration_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "recommended_owner_repo_path",
+            "required_for",
+            "required_fields",
+            "allowed_default_projections",
+            "denied_without_cgg"
+          ],
+          "properties": {
+            "recommended_owner_repo_path": { "type": "string", "minLength": 1 },
+            "required_for": { "$ref": "#/$defs/stringList" },
+            "required_fields": { "$ref": "#/$defs/stringList" },
+            "allowed_default_projections": { "$ref": "#/$defs/stringList" },
+            "denied_without_cgg": { "$ref": "#/$defs/stringList" }
+          }
+        },
+        "source_classes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["description", "default_sensitivity", "packet_expectation"],
+            "properties": {
+              "description": { "type": "string", "minLength": 1 },
+              "default_sensitivity": { "type": "string", "minLength": 1 },
+              "packet_expectation": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "adoption_states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "description"],
+            "properties": {
+              "state": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "repo_declarations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/repoDeclaration" }
+        },
+        "intake_integration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "intake_policy_ref",
+            "raw_context_retirement_ref",
+            "rule",
+            "required_decision_fields"
+          ],
+          "properties": {
+            "intake_policy_ref": { "type": "string", "minLength": 1 },
+            "raw_context_retirement_ref": { "type": "string", "minLength": 1 },
+            "rule": { "type": "string", "minLength": 1 },
+            "required_decision_fields": { "$ref": "#/$defs/stringList" }
+          }
+        },
+        "rollout_gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["gate_id", "description", "required_for_state"],
+            "properties": {
+              "gate_id": { "type": "string", "minLength": 1 },
+              "description": { "type": "string", "minLength": 1 },
+              "required_for_state": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "denied_actions": { "$ref": "#/$defs/stringList" }
+      }
+    }
+  },
+  "$defs": {
+    "openprojectRef": {
+      "type": "string",
+      "pattern": "^openproject://work_packages/[0-9]+$"
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "repoDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo",
+        "declaration_status",
+        "owner_repo",
+        "source_classes",
+        "default_projection",
+        "cgg_role",
+        "adoption_state",
+        "evidence_refs",
+        "denied_without_cgg"
+      ],
+      "properties": {
+        "repo": { "type": "string", "minLength": 1 },
+        "declaration_status": { "type": "string", "minLength": 1 },
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "source_classes": { "$ref": "#/$defs/stringList" },
+        "default_projection": { "type": "string", "minLength": 1 },
+        "cgg_role": { "type": "string", "minLength": 1 },
+        "adoption_state": { "type": "string", "minLength": 1 },
+        "evidence_refs": { "$ref": "#/$defs/stringList" },
+        "denied_without_cgg": { "$ref": "#/$defs/stringList" }
+      }
+    }
+  }
+}

@@ -1,0 +1,207 @@
+schema_version: 1
+raw_context_retirement:
+  owner_repo: workspace-governance
+  implementation_repo: context-governance-gateway
+  defining_epic_ref: openproject://work_packages/583
+  inventory_feature_ref: openproject://work_packages/608
+  inventory_work_item_ref: openproject://work_packages/609
+  playbook_work_item_ref: openproject://work_packages/610
+  primary_operator_surface: docs/context-admission-governance.md
+  purpose: >
+    Inventory raw operational context paths, define packet-parity gates, and
+    prevent legacy raw-output workarounds from surviving after CGG can produce
+    equivalent model-safe/operator-safe packets and receipts.
+  default_retirement_policy:
+    legacy_fallback_after_retirement: denied
+    rollback_until_retired: required
+    parity_before_removal: required
+    raw_projection_default: deny
+    exception_rule: explicit owner, security, platform or operator approval, expiry, and audit ref are required.
+  states:
+    - state: inventory-only
+      description: path is recorded but no migration can start until owner context and parity target are clear.
+    - state: declaration-required
+      description: owner repo needs a context-behavior declaration before parity work can start.
+    - state: parity-required
+      description: CGG packet parity must be proven before the legacy path can be removed.
+    - state: migrated
+      description: normal operator path uses CGG packet or receipt, while rollback remains documented.
+    - state: retirement-eligible
+      description: legacy path can be removed after finalized evidence and owner closeout.
+    - state: retired
+      description: legacy path is removed and may not return without a new exception.
+    - state: not-applicable
+      description: path does not project operational context to operators, models, CI, or automation.
+  parity_requirements:
+    required_evidence:
+      - legacy path purpose and owner are recorded.
+      - CGG packet preserves the diagnostic signal needed for that purpose.
+      - packet output omits raw sensitive context and records redaction decisions.
+      - full artifact custody path and digest are recorded when enterprise mode requires retention.
+      - operator receipt explains included, suppressed, denied, and stored material.
+      - rollback path remains until the state is retired.
+      - Review Packet maps the evidence to the ART items that authorized retirement.
+    denied_parity_claims:
+      - smaller output without equivalent diagnostic signal
+      - raw output copied into the packet as a shortcut
+      - CI-only evidence used when operator-side proof was blocked but not recorded
+      - owner repo behavior changed without source-backed evidence
+  inventory_entries:
+    - entry_id: workspace-governance-validator-output
+      owner_repo: workspace-governance
+      covered_repos:
+        - workspace-governance
+      context_behavior_repo_ref: workspace-governance
+      source_classes:
+        - terminal_output
+        - repo_snapshot
+      current_raw_context_path: direct Python validator and audit output in terminal sessions.
+      current_risk: large validation output can be pasted into model context without a redaction report or artifact digest.
+      target_cgg_path: cgg run or WGCF-to-CGG packet request for validation failure windows and receipts.
+      state: parity-required
+      next_action: prove packet parity for failed and passing validator examples before retiring raw terminal projection.
+      retirement_allowed: true
+      rollback_requirement: rollback remains the direct validator source-authority command set until packet parity is merged and recorded.
+      evidence_refs:
+        - contracts/governance-validator-catalog.yaml
+        - docs/governance-validator-catalog.md
+    - entry_id: delivery-art-broker-payloads
+      owner_repo: operator-orchestration-service
+      covered_repos:
+        - operator-orchestration-service
+        - workspace-governance
+      context_behavior_repo_ref: operator-orchestration-service
+      source_classes:
+        - art_work_item_context
+        - operator_workflow_payload
+      current_raw_context_path: ART planning, continuation, Review Packet, completion, blocker, and projection payloads returned through broker CLI/API.
+      current_risk: oversized JSON payloads and execution context can burn model tokens or expose authority-store details if projected raw.
+      target_cgg_path: broker or operator requests a CGG packet from the payload/artifact and passes only packet digest, relevant signals, and safe excerpts.
+      state: parity-required
+      next_action: prove CGG packets for continuation, review-packet, and completion payloads before retiring manual raw-payload projection.
+      retirement_allowed: true
+      rollback_requirement: rollback remains the OOS broker authority path for ART reads and mutations; CGG only governs admitted context.
+      evidence_refs:
+        - contracts/delivery-art-operator-path.yaml
+        - docs/delivery-art-operator-path.md
+    - entry_id: wgcf-validation-artifacts
+      owner_repo: workspace-governance-control-fabric
+      covered_repos:
+        - workspace-governance-control-fabric
+        - workspace-governance
+      context_behavior_repo_ref: workspace-governance-control-fabric
+      source_classes:
+        - terminal_output
+        - operator_workflow_payload
+      current_raw_context_path: WGCF catalog check output, receipts, artifacts, and readiness explanations.
+      current_risk: WGCF may receipt validation while still surfacing raw command output if packet boundaries are not explicit.
+      target_cgg_path: WGCF keeps compact receipts and references CGG packet digests for raw validation artifacts.
+      state: parity-required
+      next_action: prove WGCF receipt plus CGG packet composition for representative scopes before any direct raw-output retirement.
+      retirement_allowed: true
+      rollback_requirement: rollback remains direct WGCF and source validators until shadow parity and packet parity both pass.
+      evidence_refs:
+        - contracts/governance-validator-catalog.yaml
+        - docs/governance-control-fabric-operator-surface.md
+    - entry_id: platform-runtime-diagnostics
+      owner_repo: platform-engineering
+      covered_repos:
+        - platform-engineering
+      context_behavior_repo_ref: platform-engineering
+      source_classes:
+        - platform_runtime_logs
+        - terminal_output
+      current_raw_context_path: dev-integration runner output, Kubernetes diagnostics, OpenProject projection and quality commands.
+      current_risk: runtime logs may include hostnames, private IPs, tokens, namespace internals, or operational topology.
+      target_cgg_path: profile-gated CGG packet with redaction report and platform-owned artifact custody decision.
+      state: parity-required
+      next_action: platform owner defines which runtime diagnostic paths are packetized first and which remain operator-only.
+      retirement_allowed: true
+      rollback_requirement: platform make and Kubernetes diagnostic commands stay platform-owned rollback paths.
+      evidence_refs:
+        - contracts/developer-integration-profiles.yaml
+    - entry_id: cgg-native-artifacts
+      owner_repo: context-governance-gateway
+      covered_repos:
+        - context-governance-gateway
+      context_behavior_repo_ref: context-governance-gateway
+      source_classes:
+        - terminal_output
+        - ci_logs
+        - operator_workflow_payload
+      current_raw_context_path: CGG CLI/API/test artifacts, packets, receipts, manifests, redaction reports, and local ledger events.
+      current_risk: the context-governance implementation can leak its own raw test artifacts if self-use is not governed.
+      target_cgg_path: CGG packets its own test and service artifacts with self-redaction and digest evidence.
+      state: migrated
+      next_action: keep native self-packet tests and redaction proof current as service mode expands.
+      retirement_allowed: false
+      rollback_requirement: no retirement; this is the native provider path.
+      evidence_refs:
+        - contracts/repo-rules/context-governance-gateway.yaml
+    - entry_id: product-repo-ci-and-debug-output
+      owner_repo: openclaw-runtime-distribution
+      covered_repos:
+        - openclaw-runtime-distribution
+        - openclaw-host-bridge
+        - openclaw-telegram-enhanced
+      context_behavior_repo_ref: openclaw-runtime-distribution
+      source_classes:
+        - ci_logs
+        - terminal_output
+        - repo_snapshot
+      current_raw_context_path: product repo CI logs, local test output, runtime package diagnostics, host bridge diagnostics, and Telegram workflow traces.
+      current_risk: product debugging output can include host-control, chat-routing, token, root, path, or runtime topology context.
+      target_cgg_path: owner repo or CI emits CGG packet artifact and operator receipt for model-assisted debugging.
+      state: declaration-required
+      next_action: owner repos add native context-behavior declarations before CI packet adoption starts.
+      retirement_allowed: true
+      rollback_requirement: rollback remains product repo CI logs for maintainers until packet parity and owner closeout are recorded.
+      evidence_refs:
+        - contracts/products.yaml
+        - contracts/components.yaml
+    - entry_id: security-review-context
+      owner_repo: security-architecture
+      covered_repos:
+        - security-architecture
+      context_behavior_repo_ref: security-architecture
+      source_classes:
+        - security_review_context
+        - repo_snapshot
+      current_raw_context_path: security review outputs, findings, risk posture, trust-boundary context, and assessment evidence.
+      current_risk: review material can include sensitive architecture, secrets-handling details, or finding context that should not be broadly projected.
+      target_cgg_path: receipt-only or redacted packet with concrete review artifact refs and no raw sensitive finding detail.
+      state: inventory-only
+      next_action: security owner decides which review artifacts may be packetized and which remain reference-only.
+      retirement_allowed: false
+      rollback_requirement: security-architecture remains the authority for detailed review evidence.
+      evidence_refs:
+        - contracts/repo-rules/context-governance-gateway.yaml
+  migration_playbooks:
+    - playbook_id: raw-output-to-cgg-packet
+      applies_to_states:
+        - parity-required
+        - declaration-required
+      steps:
+        - record or verify the owner repo context-behavior declaration.
+        - capture the legacy raw output and classify source classes without projecting it to a model.
+        - run or design the equivalent CGG packet path under the allowed profile.
+        - compare whether the packet preserves the needed diagnostic signal.
+        - record redactions, suppressed content, artifact custody, digest, and operator receipt.
+        - keep rollback until the Review Packet is finalized and owner closeout is complete.
+        - remove the legacy raw projection path only after the state is retirement-eligible.
+    - playbook_id: new-context-source-intake
+      applies_to_states:
+        - inventory-only
+        - declaration-required
+      steps:
+        - classify the repo, product, component, or profile through intake before active use.
+        - decide whether operational context is emitted, consumed, stored, or projected.
+        - add a context-behavior declaration or explicitly record not-required.
+        - add raw-context inventory when a legacy or direct raw-output path exists.
+        - block model projection until CGG packet behavior and profile gates are proven.
+  denied_actions:
+    - deleting legacy raw-output paths before packet parity and rollback evidence exist
+    - using legacy fallback after an entry reaches retired state
+    - treating token reduction alone as parity when diagnostic signal is lost
+    - treating raw artifact custody as allowed without security and platform authority
+    - sending raw context directly to a model while uncertainty or secret-like material remains

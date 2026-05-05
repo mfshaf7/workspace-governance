@@ -128,6 +128,8 @@ def main() -> int:
         "governance_engine_extraction_gate": repo_root / "contracts/governance-engine-extraction-gate.yaml",
         "governance_control_fabric_operator_surface": repo_root / "contracts/governance-control-fabric-operator-surface.yaml",
         "governance_validator_catalog": repo_root / "contracts/governance-validator-catalog.yaml",
+        "context_behavior": repo_root / "contracts/context-behavior.yaml",
+        "raw_context_retirement": repo_root / "contracts/raw-context-retirement.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -180,6 +182,10 @@ def main() -> int:
     ]["governance_control_fabric_operator_surface"]
     governance_validator_catalog = contracts["governance_validator_catalog"][
         "governance_validator_catalog"
+    ]
+    context_behavior = contracts["context_behavior"]["context_behavior"]
+    raw_context_retirement = contracts["raw_context_retirement"][
+        "raw_context_retirement"
     ]
     delegation_task_classes = delegation_policy["task_classes"]
     self_improvement_governance = self_improvement_policy["governance"]
@@ -1924,6 +1930,7 @@ def main() -> int:
             + ", ".join(missing_retirement_coverage)
         )
     validation_behavior_policy = intake_policy["validation_behavior"]
+    context_behavior_policy = intake_policy["context_behavior"]
     if validation_behavior_policy["enabled"] is not True:
         errors.append("contracts/intake-policy.yaml: validation_behavior.enabled must remain true")
     if validation_behavior_policy["defining_work_item_ref"] != "openproject://work_packages/504":
@@ -2017,6 +2024,272 @@ def main() -> int:
         errors.append(
             "contracts/governance-validator-catalog.yaml: admission_contract.required_behavior_fields must be posture, wgcf_graph_role, catalog_refs, notes"
         )
+    if context_behavior_policy["enabled"] is not True:
+        errors.append("contracts/intake-policy.yaml: context_behavior.enabled must remain true")
+    if context_behavior_policy["defining_work_item_ref"] != "openproject://work_packages/606":
+        errors.append(
+            "contracts/intake-policy.yaml: context_behavior.defining_work_item_ref must point to openproject://work_packages/606"
+        )
+    expected_context_contract_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/context-behavior.yaml",
+    }
+    expected_raw_context_retirement_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/raw-context-retirement.yaml",
+    }
+    if context_behavior_policy["contract_ref"] != expected_context_contract_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: context_behavior.contract_ref must point to workspace-governance/contracts/context-behavior.yaml"
+        )
+    if context_behavior_policy["raw_context_retirement_ref"] != expected_raw_context_retirement_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: context_behavior.raw_context_retirement_ref must point to workspace-governance/contracts/raw-context-retirement.yaml"
+        )
+    if context_behavior_policy["default_model_projection"] != "deny-raw-project-model-safe-packet":
+        errors.append(
+            "contracts/intake-policy.yaml: context_behavior.default_model_projection must be deny-raw-project-model-safe-packet"
+        )
+
+    if context_behavior["owner_repo"] != "workspace-governance":
+        errors.append("contracts/context-behavior.yaml: owner_repo must be 'workspace-governance'")
+    if context_behavior["implementation_repo"] != "context-governance-gateway":
+        errors.append(
+            "contracts/context-behavior.yaml: implementation_repo must be 'context-governance-gateway'"
+        )
+    expected_context_refs = {
+        "defining_epic_ref": "openproject://work_packages/583",
+        "defining_feature_ref": "openproject://work_packages/605",
+        "declaration_work_item_ref": "openproject://work_packages/606",
+    }
+    for key, expected in expected_context_refs.items():
+        if context_behavior[key] != expected:
+            errors.append(f"contracts/context-behavior.yaml: {key} must be {expected!r}")
+    context_operator_surface = repo_root / context_behavior["primary_operator_surface"]
+    if context_operator_surface.suffix != ".md" or not context_operator_surface.exists():
+        errors.append(
+            "contracts/context-behavior.yaml: primary_operator_surface must point to an existing markdown surface"
+        )
+    if context_behavior["default_policy"]["raw_model_projection"] != "deny":
+        errors.append(
+            "contracts/context-behavior.yaml: default_policy.raw_model_projection must be deny"
+        )
+    if "deny" not in context_behavior["default_policy"]["uncertain_detection"]:
+        errors.append(
+            "contracts/context-behavior.yaml: default_policy.uncertain_detection must fail closed for raw projection"
+        )
+    context_source_classes = set(context_behavior["source_classes"])
+    expected_context_source_classes = {
+        "terminal_output",
+        "ci_logs",
+        "repo_snapshot",
+        "art_work_item_context",
+        "platform_runtime_logs",
+        "operator_workflow_payload",
+        "security_review_context",
+    }
+    if context_source_classes != expected_context_source_classes:
+        errors.append(
+            "contracts/context-behavior.yaml: source_classes must be exactly "
+            + ", ".join(sorted(expected_context_source_classes))
+        )
+    context_adoption_states = [
+        entry["state"] for entry in context_behavior["adoption_states"]
+    ]
+    duplicate_context_states = sorted(
+        state for state in set(context_adoption_states) if context_adoption_states.count(state) > 1
+    )
+    if duplicate_context_states:
+        errors.append(
+            "contracts/context-behavior.yaml: duplicate adoption states: "
+            + ", ".join(duplicate_context_states)
+        )
+    expected_context_states = {
+        "declared",
+        "native-provider",
+        "packet-consumer",
+        "parity-required",
+        "retirement-eligible",
+        "not-required",
+    }
+    if set(context_adoption_states) != expected_context_states:
+        errors.append(
+            "contracts/context-behavior.yaml: adoption_states must be exactly "
+            + ", ".join(sorted(expected_context_states))
+        )
+    context_declaration_repos = [
+        entry["repo"] for entry in context_behavior["repo_declarations"]
+    ]
+    duplicate_context_repos = sorted(
+        repo for repo in set(context_declaration_repos) if context_declaration_repos.count(repo) > 1
+    )
+    if duplicate_context_repos:
+        errors.append(
+            "contracts/context-behavior.yaml: duplicate repo declarations: "
+            + ", ".join(duplicate_context_repos)
+        )
+    if context_behavior_policy["repos"]["require_for_active"]:
+        missing_context_repos = sorted(active_repos - set(context_declaration_repos))
+        if missing_context_repos:
+            errors.append(
+                "contracts/context-behavior.yaml: missing active repo declarations: "
+                + ", ".join(missing_context_repos)
+            )
+    allowed_context_projections = set(
+        context_behavior["declaration_contract"]["allowed_default_projections"]
+    )
+    for entry in context_behavior["repo_declarations"]:
+        label = f"contracts/context-behavior.yaml: repo_declarations[{entry['repo']}]"
+        if entry["repo"] not in active_repos:
+            errors.append(f"{label}: repo is not active")
+        if entry["owner_repo"] not in active_repos:
+            errors.append(f"{label}: owner_repo {entry['owner_repo']!r} is not active")
+        unknown_sources = sorted(set(entry["source_classes"]) - context_source_classes)
+        if unknown_sources:
+            errors.append(
+                f"{label}: source_classes references unknown classes "
+                + ", ".join(unknown_sources)
+            )
+        if entry["default_projection"] not in allowed_context_projections:
+            errors.append(
+                f"{label}: default_projection {entry['default_projection']!r} is not allowed"
+            )
+        if entry["adoption_state"] not in set(context_adoption_states):
+            errors.append(
+                f"{label}: adoption_state {entry['adoption_state']!r} is not declared"
+            )
+        for rel_path in entry["evidence_refs"]:
+            if rel_path.startswith(("contracts/", "docs/")) and not (repo_root / rel_path).exists():
+                errors.append(f"{label}: evidence_ref {rel_path!r} does not exist")
+    context_intake = context_behavior["intake_integration"]
+    if context_intake["intake_policy_ref"] != "contracts/intake-policy.yaml":
+        errors.append(
+            "contracts/context-behavior.yaml: intake_integration.intake_policy_ref must be contracts/intake-policy.yaml"
+        )
+    if context_intake["raw_context_retirement_ref"] != "contracts/raw-context-retirement.yaml":
+        errors.append(
+            "contracts/context-behavior.yaml: intake_integration.raw_context_retirement_ref must be contracts/raw-context-retirement.yaml"
+        )
+    required_context_decision_fields = {
+        "context_behavior_required",
+        "source_classes",
+        "default_projection",
+        "cgg_role",
+        "adoption_state",
+        "denied_without_cgg",
+    }
+    if set(context_intake["required_decision_fields"]) != required_context_decision_fields:
+        errors.append(
+            "contracts/context-behavior.yaml: intake_integration.required_decision_fields must be exactly "
+            + ", ".join(sorted(required_context_decision_fields))
+        )
+
+    if raw_context_retirement["owner_repo"] != "workspace-governance":
+        errors.append("contracts/raw-context-retirement.yaml: owner_repo must be 'workspace-governance'")
+    if raw_context_retirement["implementation_repo"] != "context-governance-gateway":
+        errors.append(
+            "contracts/raw-context-retirement.yaml: implementation_repo must be 'context-governance-gateway'"
+        )
+    expected_raw_refs = {
+        "defining_epic_ref": "openproject://work_packages/583",
+        "inventory_feature_ref": "openproject://work_packages/608",
+        "inventory_work_item_ref": "openproject://work_packages/609",
+        "playbook_work_item_ref": "openproject://work_packages/610",
+    }
+    for key, expected in expected_raw_refs.items():
+        if raw_context_retirement[key] != expected:
+            errors.append(f"contracts/raw-context-retirement.yaml: {key} must be {expected!r}")
+    if raw_context_retirement["primary_operator_surface"] != context_behavior["primary_operator_surface"]:
+        errors.append(
+            "contracts/raw-context-retirement.yaml: primary_operator_surface must match context-behavior primary_operator_surface"
+        )
+    raw_policy = raw_context_retirement["default_retirement_policy"]
+    if raw_policy["legacy_fallback_after_retirement"] != "denied":
+        errors.append(
+            "contracts/raw-context-retirement.yaml: default_retirement_policy.legacy_fallback_after_retirement must be denied"
+        )
+    if raw_policy["raw_projection_default"] != "deny":
+        errors.append(
+            "contracts/raw-context-retirement.yaml: default_retirement_policy.raw_projection_default must be deny"
+        )
+    raw_states = [entry["state"] for entry in raw_context_retirement["states"]]
+    duplicate_raw_states = sorted(
+        state for state in set(raw_states) if raw_states.count(state) > 1
+    )
+    if duplicate_raw_states:
+        errors.append(
+            "contracts/raw-context-retirement.yaml: duplicate states: "
+            + ", ".join(duplicate_raw_states)
+        )
+    expected_raw_states = {
+        "inventory-only",
+        "declaration-required",
+        "parity-required",
+        "migrated",
+        "retirement-eligible",
+        "retired",
+        "not-applicable",
+    }
+    if set(raw_states) != expected_raw_states:
+        errors.append(
+            "contracts/raw-context-retirement.yaml: states must be exactly "
+            + ", ".join(sorted(expected_raw_states))
+        )
+    raw_entry_ids = [
+        entry["entry_id"] for entry in raw_context_retirement["inventory_entries"]
+    ]
+    duplicate_raw_entry_ids = sorted(
+        entry_id for entry_id in set(raw_entry_ids) if raw_entry_ids.count(entry_id) > 1
+    )
+    if duplicate_raw_entry_ids:
+        errors.append(
+            "contracts/raw-context-retirement.yaml: duplicate inventory entries: "
+            + ", ".join(duplicate_raw_entry_ids)
+        )
+    declared_context_repos = set(context_declaration_repos)
+    raw_inventory_covered_repos: set[str] = set()
+    for entry in raw_context_retirement["inventory_entries"]:
+        label = f"contracts/raw-context-retirement.yaml: inventory_entries[{entry['entry_id']}]"
+        if entry["owner_repo"] not in active_repos:
+            errors.append(f"{label}: owner_repo {entry['owner_repo']!r} is not active")
+        unknown_covered = sorted(set(entry["covered_repos"]) - active_repos)
+        if unknown_covered:
+            errors.append(
+                f"{label}: covered_repos references inactive repos "
+                + ", ".join(unknown_covered)
+            )
+        raw_inventory_covered_repos.update(entry["covered_repos"])
+        if entry["context_behavior_repo_ref"] not in declared_context_repos:
+            errors.append(
+                f"{label}: context_behavior_repo_ref {entry['context_behavior_repo_ref']!r} has no context-behavior declaration"
+            )
+        unknown_sources = sorted(set(entry["source_classes"]) - context_source_classes)
+        if unknown_sources:
+            errors.append(
+                f"{label}: source_classes references unknown classes "
+                + ", ".join(unknown_sources)
+            )
+        if entry["state"] not in set(raw_states):
+            errors.append(f"{label}: state {entry['state']!r} is not declared")
+        if entry["retirement_allowed"] and "rollback" not in entry["rollback_requirement"].lower():
+            errors.append(f"{label}: retirement_allowed entries must declare rollback_requirement")
+        for rel_path in entry["evidence_refs"]:
+            if rel_path.startswith(("contracts/", "docs/")) and not (repo_root / rel_path).exists():
+                errors.append(f"{label}: evidence_ref {rel_path!r} does not exist")
+    missing_raw_inventory_repos = sorted(active_repos - raw_inventory_covered_repos)
+    if missing_raw_inventory_repos:
+        errors.append(
+            "contracts/raw-context-retirement.yaml: inventory_entries do not cover active repos: "
+            + ", ".join(missing_raw_inventory_repos)
+        )
+    for playbook in raw_context_retirement["migration_playbooks"]:
+        unknown_states = sorted(set(playbook["applies_to_states"]) - set(raw_states))
+        if unknown_states:
+            errors.append(
+                "contracts/raw-context-retirement.yaml: migration_playbook "
+                f"{playbook['playbook_id']!r} references unknown states "
+                + ", ".join(unknown_states)
+            )
 
     def validate_validation_behavior(label: str, payload: dict, *, required: bool) -> None:
         behavior = payload.get("validation_behavior")
