@@ -79,6 +79,19 @@ Primary source:
 - `operator-orchestration-service/`
   - active shared operator workflow service
 
+## Admitted But Not Active Entrants
+
+- `context-governance-gateway/`
+  - admitted implementation home for operational context admission control
+  - current target is Phase 1 local-only CLI and library foundation
+  - may later provide model-safe/operator-safe context packets and receipts to
+    operators, agents, OOS, or WGCF
+  - does not replace WGCF, OOS, platform release authority, security
+    acceptance, or any governed AI access path
+  - API, worker, database-backed storage, dashboard, broker adapter, or
+    cross-repo runtime behavior requires `dev-integration` admission before it
+    becomes runnable shared infrastructure
+
 Retired path:
 
 - `openclaw-isolated-deployment/`
@@ -217,6 +230,9 @@ operator interaction layer, not just a UI skin.
 - governance graph, validation planning runtime, admission/readiness runtime,
   receipt ledger, or control-fabric API/worker/CLI implementation
   - [workspace-governance-control-fabric/README.md](/home/mfshaf7/projects/workspace-governance-control-fabric/README.md)
+- operational context admission, model-safe/operator-safe context packets,
+  context redaction, projection, receipts, or CGG Phase 1 local foundation
+  - [context-governance-gateway/README.md](/home/mfshaf7/projects/context-governance-gateway/README.md)
 - Codex GitHub review, PR flow, or read-only control-plane summary
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration

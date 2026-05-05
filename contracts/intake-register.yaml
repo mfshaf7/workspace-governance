@@ -1,7 +1,7 @@
 schema_version: 1
 repos:
   context-governance-gateway:
-    status: proposed
+    status: admitted
     decision_source: operator
     repo_class: governance-runtime
     requires_security_bindings: true
@@ -14,7 +14,7 @@ repos:
         - security-bindings
         - review-coverage
       notes: Proposed operational context governance gateway must declare profile-gated validation before admission; WGCF will consume packet receipts only and must not be replaced by this repo.
-    notes: Proposed implementation home for operational context admission control, including capture, classification, redaction, packet projection, receipts, and audit metadata.
+    notes: Admitted implementation home for operational context admission control, including capture, classification, redaction, packet projection, receipts, and audit metadata. Phase 1 is local-only; API, worker, database-backed storage, dashboard, broker adapter, or cross-repo runtime behavior requires a proposed or active dev-integration profile before implementation continues.
 products: {}
 components:
   ai-access-plane:
@@ -35,7 +35,7 @@ components:
     notes: Proposed internal AI gateway and approved model-profile control plane;
       not yet live or admitted into the active component inventory.
   context-governance-gateway:
-    status: proposed
+    status: admitted
     decision_source: operator
     component_class: shared-governance-runtime
     owner_repo: context-governance-gateway
@@ -49,4 +49,4 @@ components:
         - security-bindings
         - review-coverage
       notes: Future active graph role is a context-packet-provider that supplies model-safe/operator-safe context packets and receipts to WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.
-    notes: Proposed operational context governance component for raw context capture, redaction, packet projection, and audit receipt production.
+    notes: Admitted operational context governance component for raw context capture, redaction, packet projection, and audit receipt production. The current active ART slice is local-only; service-mode runtime requires dev-integration admission before it becomes launchable or platform-integrated.
