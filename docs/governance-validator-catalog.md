@@ -68,12 +68,13 @@ WGCF must use the catalog in this order:
 The default is deny-by-absence. A command that is not in the catalog is not a
 valid WGCF execution target.
 
-## Admission Rules For New Repos And Components
+## Admission Rules For New Workspace Surfaces
 
 The intake layer now treats validation behavior as part of admission, not as a
 cleanup task after a repo or component is already active.
 
-Every active repo and active component must declare:
+Every active repo, product, component, and registered runtime profile must
+declare:
 
 - `posture`: whether the subject owns catalog truth, consumes WGCF runtime
   truth, is profile-gated external validation, is covered by owner-repo
@@ -85,14 +86,20 @@ Every active repo and active component must declare:
 - `notes`: the operator-readable rationale for the posture.
 
 The same `validation_behavior` shape is required for proposed or admitted
-repos and components in the intake register. If that field is missing, the
-intake validator must fail before the entrant can silently become part of the
-governed workspace model.
+repos, products, and components in the intake register. If that field is
+missing, the intake validator must fail before the entrant can silently become
+part of the governed workspace model.
 
 This is intentionally strict at the contract boundary. It prevents a new
-component from landing first and only later asking "which validator owns this?"
-WGCF can then plan from declared graph participation instead of guessing from
-repo names, terminal history, or broad command lists.
+component, product, or runtime lane from landing first and only later asking
+"which validator owns this?" WGCF can then plan from declared graph
+participation instead of guessing from repo names, terminal history, or broad
+command lists.
+
+Future context systems use the same rule. A `context-governance-gateway`
+style component may provide model-safe/operator-safe context packets and
+receipts to WGCF, but it is not a WGCF replacement, ART mutation authority,
+platform release authority, or security-acceptance authority.
 
 ## Retirement Rule
 
@@ -121,6 +128,13 @@ The workspace shadow-parity contract defines the only valid cutover states:
 Raw artifact custody remains denied by default. A compact WGCF receipt may
 support operator or CI evidence, but it must not copy raw command output,
 secrets, environment dumps, or full artifacts into the operator-facing packet.
+
+Generated governance artifacts have an additional compatibility control in
+`contracts/governance-engine-output-manifest.yaml`: WGCF must detect and plan
+against declared output families first, default to check-mode evidence, and
+allow materialization only through an explicit write profile. This prevents a
+future runtime from turning generated artifact writes into broad implicit
+side effects.
 
 The machine-readable `retirement_register` groups entries by ownership and
 replacement posture. It distinguishes:

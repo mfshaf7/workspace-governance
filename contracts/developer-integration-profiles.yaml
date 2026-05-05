@@ -5,6 +5,14 @@ profiles:
     owner_repo: operator-orchestration-service
     summary: Persistent local-k3s dev-integration workbench for the accepted-idea delivery broker and OpenProject ART operator surfaces.
     purpose: Preserve the current accepted-idea delivery working lane for local ART execution, broker reads, and operator access while keeping shared smoke read-only and moving mutating consume rehearsal into a disposable companion profile.
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: dev-integration-profile
+      catalog_refs:
+        - delivery-art-broker-read
+        - openproject-quality-check
+        - devint-runner-read
+      notes: WGCF may consume accepted-idea-delivery profile evidence through explicit dev-integration gates while OOS keeps ART mutation authority and platform-engineering owns runtime lifecycle.
     profile_path: dev-integration/profiles/accepted-idea-delivery/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -51,6 +59,13 @@ profiles:
     owner_repo: operator-orchestration-service
     summary: Disposable local-k3s dev-integration profile for isolated accepted-idea consume and backlink smoke away from the persistent ART lane.
     purpose: Run mutating accepted-idea delivery smoke against a disposable local runtime so test artifacts never land in the persistent accepted-idea-delivery working lane.
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: dev-integration-profile
+      catalog_refs:
+        - delivery-art-broker-read
+        - devint-runner-read
+      notes: WGCF may observe disposable mutation-smoke readiness only through explicit profile gates; persistent ART state and mutation decisions stay with OOS.
     profile_path: dev-integration/profiles/accepted-idea-delivery-mutation-smoke/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -95,6 +110,14 @@ profiles:
       metadata store for WGCF contract and Governance Operations Console
       consumption work while keeping governed stage/prod deployment and worker
       activation gated.
+    validation_behavior:
+      posture: runtime-consumer
+      wgcf_graph_role: dev-integration-profile
+      catalog_refs:
+        - contract-model
+        - developer-integration
+        - devint-runner-read
+      notes: The governance-control-fabric profile proves WGCF runtime shape under dev-integration, while workspace-governance remains the source of contract truth.
     profile_path: dev-integration/profiles/governance-control-fabric/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -141,6 +164,12 @@ profiles:
     owner_repo: operator-orchestration-service
     summary: Local-k3s dev-integration profile for the broker-owned idea workflow, local OpenProject backlog model, and Telegram command harness.
     purpose: Fast local rehearsal of the broker-owned idea workflow before governed stage rehearsal and rollout.
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: dev-integration-profile
+      catalog_refs:
+        - devint-runner-read
+      notes: WGCF may consume idea-workflow runtime evidence through explicit dev-integration gates; proposal and Telegram workflow truth remain owner-repo and broker-owned.
     profile_path: dev-integration/profiles/idea-workflow/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture

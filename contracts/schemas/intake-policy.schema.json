@@ -108,7 +108,9 @@
         "defining_work_item_ref",
         "catalog_ref",
         "repos",
+        "products",
         "components",
+        "runtime_profiles",
         "allowed_postures",
         "allowed_graph_roles",
         "direct_invocation_postures",
@@ -139,12 +141,29 @@
           },
           "additionalProperties": false
         },
+        "products": {
+          "type": "object",
+          "required": ["require_for_active", "require_for_in_scope_intake"],
+          "properties": {
+            "require_for_active": { "type": "boolean" },
+            "require_for_in_scope_intake": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
         "components": {
           "type": "object",
           "required": ["require_for_active", "require_for_in_scope_intake"],
           "properties": {
             "require_for_active": { "type": "boolean" },
             "require_for_in_scope_intake": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "runtime_profiles": {
+          "type": "object",
+          "required": ["require_for_registered"],
+          "properties": {
+            "require_for_registered": { "type": "boolean" }
           },
           "additionalProperties": false
         },

@@ -17,9 +17,11 @@ governance_validator_catalog:
     work_item_ref: openproject://work_packages/504
     intake_policy_ref: contracts/intake-policy.yaml
     active_repo_inventory_ref: contracts/repos.yaml
+    active_product_inventory_ref: contracts/products.yaml
     active_component_inventory_ref: contracts/components.yaml
+    runtime_profile_registry_ref: contracts/developer-integration-profiles.yaml
     intake_register_ref: contracts/intake-register.yaml
-    rule: new active or in-scope repos and components must declare WGCF validation behavior before they can become governed workspace surfaces
+    rule: new active or in-scope repos, products, components, and runtime profiles must declare WGCF validation behavior before they can become governed workspace surfaces
     required_behavior_fields:
       - posture
       - wgcf_graph_role
@@ -27,8 +29,11 @@ governance_validator_catalog:
       - notes
     denied_without_behavior:
       - active repo inventory entry
+      - active product inventory entry
       - active component inventory entry
+      - registered runtime profile entry
       - proposed or admitted intake repo
+      - proposed or admitted intake product
       - proposed or admitted intake component
   profiles:
     local-read-only:

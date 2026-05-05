@@ -406,6 +406,13 @@ def main() -> int:
             errors.append(
                 f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
             )
+        if posture == "proposed-profile-gated" and graph_role not in {
+            "proposed-shared-platform-component",
+            "context-packet-provider",
+        }:
+            errors.append(
+                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component or context-packet-provider graph role"
+            )
 
     if intake_policy["workspace_inventory"]["scan_workspace_root_git_repos"]:
         discovered_git_repos = git_repo_names(workspace_root)
@@ -453,7 +460,7 @@ def main() -> int:
 
     for collection_name in ("repos", "products", "components"):
         for entry_name, payload in intake_register[collection_name].items():
-            if collection_name in {"repos", "components"}:
+            if collection_name in {"repos", "products", "components"}:
                 scope_policy = validation_behavior_policy[collection_name]
                 validate_validation_behavior(
                     label=f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}",

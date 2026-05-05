@@ -15,12 +15,63 @@
       "additionalProperties": false,
       "required": [
         "owner_repo",
+        "compatibility_controls",
         "emission_families"
       ],
       "properties": {
         "owner_repo": {
           "type": "string",
           "minLength": 1
+        },
+        "compatibility_controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "materialization_default",
+            "wgcf_detection_mode",
+            "require_explicit_family",
+            "require_manifest_output_match",
+            "require_check_before_write",
+            "allowed_write_profiles",
+            "denied_without_profile"
+          ],
+          "properties": {
+            "materialization_default": {
+              "type": "string",
+              "minLength": 1
+            },
+            "wgcf_detection_mode": {
+              "type": "string",
+              "minLength": 1
+            },
+            "require_explicit_family": {
+              "type": "boolean"
+            },
+            "require_manifest_output_match": {
+              "type": "boolean"
+            },
+            "require_check_before_write": {
+              "type": "boolean"
+            },
+            "allowed_write_profiles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "denied_without_profile": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
         },
         "emission_families": {
           "type": "array",
