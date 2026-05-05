@@ -215,11 +215,13 @@ counts as governed when it references an active approved model profile from
 - product source, runtime packaging, or host-runtime implementation
 - repo-local operator runbooks
 - governance control-fabric runtime implementation
+- operational context admission implementation
 - security standards or review outputs
 
 Those stay in the owning repos:
 
 - `workspace-governance-control-fabric/`
+- `context-governance-gateway/`
 - `platform-engineering/`
 - `openclaw-runtime-distribution/`
 - `openclaw-telegram-enhanced/`

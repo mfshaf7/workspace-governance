@@ -38,6 +38,7 @@ delivery repo.
 - product or component code
 - product-specific runbooks
 - governance control-fabric runtime implementation
+- operational context admission implementation
 - security standards or review evidence
 
 Route those changes back to the owner repos.

@@ -1,0 +1,104 @@
+schema_version: 1
+repo: context-governance-gateway
+lifecycle: active
+required_repo_refs:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - platform-engineering
+  - security-architecture
+  - operator-orchestration-service
+required_patterns:
+  readme:
+    - Operational Context Governance
+    - Context Admission Control
+    - model-safe/operator-safe context packet
+    - security-architecture
+  agents:
+    - Context Admission Control
+    - model-safe and operator-safe packet generation
+    - fail closed
+    - security binding
+forbidden_patterns:
+  readme: []
+  agents: []
+review_control_requirements:
+  guidance_files:
+    - path: AGENTS.md
+      heading: "## Review Guidelines"
+      required_terms:
+        - raw operational context
+        - model-safe packet
+        - dev-integration admission
+        - security binding
+        - platform deployment boundary
+  required_github_paths:
+    - .github/CODEOWNERS
+    - .github/pull_request_template.md
+  required_validation_paths:
+    - .github/workflows/validate.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_pr_template_sections:
+    - "## Summary"
+    - "## Governance Declaration"
+    - "## Documentation Updates"
+    - "## Validation"
+    - "## Codex Review"
+    - "## Review Gates"
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/2026-05-05-context-governance-gateway-phase-1-local-custody.md
+  required_artifacts:
+    - id: ai-security-and-governance
+      path: docs/standards/ai-security-and-governance.md
+      review_areas:
+        - ai
+      required_in_docs:
+        - readme
+        - agents
+    - id: ai-and-agentic-domain
+      path: docs/architecture/domains/ai-and-agentic.md
+      review_areas:
+        - ai
+      required_in_docs:
+        - readme
+        - agents
+  delta_review_triggers:
+    - id: context-admission-and-artifact-custody
+      summary: Context capture, redaction, packet projection, receipt, ledger, or artifact custody behavior changed.
+      review_areas:
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - apps/cli/**
+        - packages/context_core/**
+        - contracts/schemas/**
+        - docs/architecture/**
+        - docs/threat-model/**
+      review_subjects:
+        - inventory_section: repos
+          name: context-governance-gateway
+        - inventory_section: components
+          name: context-governance-gateway
+    - id: service-mode-runtime-and-downstream-adapters
+      summary: API, worker, database, artifact store, dashboard, broker adapter, downstream AI gateway adapter, or deployment surface changed.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - apps/api/**
+        - packages/context_storage/**
+        - packages/context_adapters/**
+        - deployments/**
+        - dev-integration/profiles/**
+        - docker-compose.yaml
+      review_subjects:
+        - inventory_section: repos
+          name: context-governance-gateway
+        - inventory_section: components
+          name: context-governance-gateway

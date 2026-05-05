@@ -83,6 +83,20 @@ components:
         - contract-model
         - developer-integration
       notes: WGCF is the runtime consumer of governance catalog truth and must expose receipts rather than owning source contracts.
+  context-governance-gateway:
+    lifecycle: active
+    component_class: shared-governance-runtime
+    owner_repo: context-governance-gateway
+    product: null
+    security_owner: security-architecture
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: context-packet-provider
+      catalog_refs:
+        - developer-integration
+        - security-bindings
+        - review-coverage
+      notes: Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime
