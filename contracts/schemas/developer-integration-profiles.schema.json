@@ -14,6 +14,7 @@
           "owner_repo",
           "summary",
           "purpose",
+          "validation_behavior",
           "profile_path",
           "runtime_owner",
           "security_owner",
@@ -30,6 +31,7 @@
           "owner_repo": { "type": "string", "minLength": 1 },
           "summary": { "type": "string", "minLength": 1 },
           "purpose": { "type": "string", "minLength": 1 },
+          "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
           "profile_path": { "type": "string", "minLength": 1 },
           "runtime_owner": { "type": "string", "minLength": 1 },
           "security_owner": { "type": "string", "minLength": 1 },
@@ -114,6 +116,23 @@
         },
         "additionalProperties": false
       }
+    }
+  },
+  "$defs": {
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "type": "string", "minLength": 1 },
+        "wgcf_graph_role": { "type": "string", "minLength": 1 },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

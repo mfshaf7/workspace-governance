@@ -489,6 +489,9 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
             "standalone_packaging_prerequisites": boundary_map[
                 "standalone_packaging_prerequisites"
             ],
+            "output_manifest_compatibility_controls": output_manifest[
+                "compatibility_controls"
+            ],
             "emitted_output_families": emitted_outputs,
             "invariants": boundary_map["invariants"],
         },

@@ -27,8 +27,9 @@ Use these contracts to declare:
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system
-  - requires in-scope repos and components to declare WGCF validation behavior
-    before they can be admitted into active governance
+  - requires in-scope repos, products, components, and registered runtime
+    profiles to declare WGCF validation behavior before they can be admitted
+    into active governance
 - `intake-register.yaml`
   - explicit intake decisions for new repos, products, and components that are
     out-of-scope, proposed, or admitted but not yet in the active contracts;
@@ -59,6 +60,8 @@ Use these contracts to declare:
     admission metadata
 - `products.yaml`
   - product maturity, owning repos, and delivery model
+  - active products must declare WGCF graph participation and the catalog
+    entries that inspect or aggregate their readiness posture
 - `components.yaml`
   - shared and product-linked components, operator surface, owner repo, and
     any published interface contract path plus validation entrypoint
@@ -104,6 +107,9 @@ Use these contracts to declare:
   - machine-readable declaration of which outputs are materialized into the
     live workspace, live Codex skill root, and `generated/`, plus the emitter
     script that owns each output family
+  - declares compatibility controls so WGCF can detect generated artifacts
+    first and only materialize explicitly selected output families under an
+    approved write profile
 - `governance-engine-shadow-parity.yaml`
   - fail-closed parity checks and cutover gate for workspace-root, installed
     skills, generated artifacts, and stable entrypoints during integrated
@@ -191,6 +197,11 @@ a repo-local `profile.yaml` that defines:
 - command paths
 - session-manifest expectations
 - stage handoff expectations
+
+Each registered profile also declares `validation_behavior` so WGCF knows
+whether the profile is a runtime-consumer profile, a profile-gated external
+owner surface, or another graph participant before it consumes dev-integration
+evidence.
 
 Profiles are not just binary present-or-missing entries anymore.
 

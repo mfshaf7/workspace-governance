@@ -215,7 +215,17 @@
         "openclaw-host-bridge",
         "openclaw-runtime-distribution"
       ],
-      "stage_supported": true
+      "stage_supported": true,
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "OpenClaw product readiness is aggregated from owner-repo component contracts, platform release evidence, and security review posture; WGCF must not own promotion authority.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "product-readiness-aggregate"
+      }
     },
     "openproject": {
       "governed_prod_promotion": false,
@@ -227,7 +237,17 @@
       "source_owners": [
         "platform-engineering"
       ],
-      "stage_supported": false
+      "stage_supported": false,
+      "validation_behavior": {
+        "catalog_refs": [
+          "delivery-art-broker-read",
+          "openproject-quality-check",
+          "openproject-projection-sync"
+        ],
+        "notes": "OpenProject readiness is platform-integrated and ART-backed; WGCF may consume broker and platform receipts but OOS and platform-engineering retain mutation and runtime authority.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "product-readiness-aggregate"
+      }
     }
   },
   "repos": {

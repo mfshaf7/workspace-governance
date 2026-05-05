@@ -617,6 +617,39 @@ def main() -> int:
         errors.append(
             "contracts/governance-engine-output-manifest.yaml: owner_repo must be 'workspace-governance'"
         )
+    compatibility_controls = governance_engine_output_manifest["compatibility_controls"]
+    if compatibility_controls["materialization_default"] != "check-first":
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: compatibility_controls.materialization_default must be 'check-first'"
+        )
+    if compatibility_controls["wgcf_detection_mode"] != "plan-before-materialize":
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: compatibility_controls.wgcf_detection_mode must be 'plan-before-materialize'"
+        )
+    for required_flag in (
+        "require_explicit_family",
+        "require_manifest_output_match",
+        "require_check_before_write",
+    ):
+        if compatibility_controls[required_flag] is not True:
+            errors.append(
+                "contracts/governance-engine-output-manifest.yaml: "
+                f"compatibility_controls.{required_flag} must be true"
+            )
+    if set(compatibility_controls["allowed_write_profiles"]) != {"break-glass"}:
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: compatibility_controls.allowed_write_profiles must be exactly break-glass"
+        )
+    expected_denied_without_profile = {
+        "implicit generated artifact materialization",
+        "broad all-output writes without selected family",
+        "WGCF materialization outside check mode",
+    }
+    if set(compatibility_controls["denied_without_profile"]) != expected_denied_without_profile:
+        errors.append(
+            "contracts/governance-engine-output-manifest.yaml: compatibility_controls.denied_without_profile must be exactly "
+            + ", ".join(sorted(expected_denied_without_profile))
+        )
     manifest_families = {
         entry["id"]: entry for entry in governance_engine_output_manifest["emission_families"]
     }
@@ -1901,6 +1934,9 @@ def main() -> int:
         "product-channel-component",
         "product-plugin-component",
         "operator-workflow-component",
+        "product-readiness-aggregate",
+        "dev-integration-profile",
+        "context-packet-provider",
         "proposed-shared-platform-component",
     }
     if allowed_validation_graph_roles != expected_validation_graph_roles:
@@ -1927,7 +1963,9 @@ def main() -> int:
     expected_admission_refs = {
         "intake_policy_ref": "contracts/intake-policy.yaml",
         "active_repo_inventory_ref": "contracts/repos.yaml",
+        "active_product_inventory_ref": "contracts/products.yaml",
         "active_component_inventory_ref": "contracts/components.yaml",
+        "runtime_profile_registry_ref": "contracts/developer-integration-profiles.yaml",
         "intake_register_ref": "contracts/intake-register.yaml",
     }
     for key, rel_path in expected_admission_refs.items():
@@ -1974,9 +2012,12 @@ def main() -> int:
             errors.append(
                 f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
             )
-        if posture == "proposed-profile-gated" and graph_role != "proposed-shared-platform-component":
+        if posture == "proposed-profile-gated" and graph_role not in {
+            "proposed-shared-platform-component",
+            "context-packet-provider",
+        }:
             errors.append(
-                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component graph role"
+                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component or context-packet-provider graph role"
             )
 
     workspace_root = repo_root.parent
@@ -2050,6 +2091,11 @@ def main() -> int:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {payload['lifecycle']!r} is not in the declared profile lifecycle set"
             )
+        validate_validation_behavior(
+            f"contracts/developer-integration-profiles.yaml: {profile_name}",
+            payload,
+            required=validation_behavior_policy["runtime_profiles"]["require_for_registered"],
+        )
         if payload["owner_repo"] not in active_repos:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} owner_repo {payload['owner_repo']!r} is not an active repo"
@@ -2231,6 +2277,11 @@ def main() -> int:
     for product_name, payload in contracts["products"]["products"].items():
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/products.yaml: {product_name} uses unknown lifecycle {payload['lifecycle']!r}")
+        validate_validation_behavior(
+            f"contracts/products.yaml: {product_name}",
+            payload,
+            required=validation_behavior_policy["products"]["require_for_active"],
+        )
         for owner_key in ("platform_owner", "security_owner", "runtime_owner"):
             if payload[owner_key] not in active_repos:
                 errors.append(f"contracts/products.yaml: {product_name} {owner_key} {payload[owner_key]!r} is not an active repo")
@@ -2321,6 +2372,14 @@ def main() -> int:
             errors.append(
                 f"contracts/intake-register.yaml: product {product_name} uses unknown status {payload['status']!r}"
             )
+        validate_validation_behavior(
+            f"contracts/intake-register.yaml: product {product_name}",
+            payload,
+            required=(
+                payload["status"] in in_scope_statuses
+                and validation_behavior_policy["products"]["require_for_in_scope_intake"]
+            ),
+        )
         if payload["decision_source"] not in {"operator", "ai-suggested"}:
             errors.append(
                 f"contracts/intake-register.yaml: product {product_name} decision_source must be operator or ai-suggested"

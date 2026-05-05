@@ -104,6 +104,21 @@
     "_workspace_tools/audit_workspace_layout.py",
     "~/.codex/skills/"
   ],
+  "output_manifest_compatibility_controls": {
+    "allowed_write_profiles": [
+      "break-glass"
+    ],
+    "denied_without_profile": [
+      "implicit generated artifact materialization",
+      "broad all-output writes without selected family",
+      "WGCF materialization outside check mode"
+    ],
+    "materialization_default": "check-first",
+    "require_check_before_write": true,
+    "require_explicit_family": true,
+    "require_manifest_output_match": true,
+    "wgcf_detection_mode": "plan-before-materialize"
+  },
   "schema_version": 1,
   "standalone_packaging_prerequisites": [
     {

@@ -97,6 +97,12 @@ catalog entries. Broad command-family placeholders are not executable until
 the catalog defines a concrete `wgcf_invocation` command for the target
 profile and representative scope.
 
+Generated governance artifact handling follows the same model. WGCF must read
+`contracts/governance-engine-output-manifest.yaml`, detect the explicit output
+family, and prefer check-mode receipts before any materialization. Generated
+artifact writes require an explicit approved write profile; they must never be
+implicit side effects of a broad readiness check.
+
 Clean-state claims use the `authority:workspace-clean-state` catalog scope after #536.
 Operators should not manually run direct repo-structure, workspace-layout, or
 branch-lifecycle validators as final proof unless WGCF is blocked and the
@@ -203,6 +209,11 @@ Day one must not build:
 - replacement OOS ART mutation or Review Packet surface
 - custom LLM gateway or AI execution boundary
 - platform deployment authority
+
+Day one may consume future context-governance packets only as an external
+packet-provider seam. Context packets can reduce raw-output token burn and
+protect sensitive context, but they do not replace WGCF validation planning,
+receipt decisions, or authority routing.
 
 ## Sequencing
 

@@ -17,7 +17,8 @@
           "source_owners",
           "stage_supported",
           "governed_prod_promotion",
-          "highest_real_endpoint"
+          "highest_real_endpoint",
+          "validation_behavior"
         ],
         "properties": {
           "lifecycle": { "type": "string", "minLength": 1 },
@@ -27,10 +28,28 @@
           "source_owners": { "type": "array", "items": { "type": "string", "minLength": 1 } },
           "stage_supported": { "type": "boolean" },
           "governed_prod_promotion": { "type": "boolean" },
-          "highest_real_endpoint": { "type": "string", "minLength": 1 }
+          "highest_real_endpoint": { "type": "string", "minLength": 1 },
+          "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
         },
         "additionalProperties": false
       }
+    }
+  },
+  "$defs": {
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "type": "string", "minLength": 1 },
+        "wgcf_graph_role": { "type": "string", "minLength": 1 },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

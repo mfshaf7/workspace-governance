@@ -1,6 +1,20 @@
 schema_version: 1
 repos:
-  {}
+  context-governance-gateway:
+    status: proposed
+    decision_source: operator
+    repo_class: governance-runtime
+    requires_security_bindings: true
+    security_owner: security-architecture
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: proposed-shared-platform-component
+      catalog_refs:
+        - developer-integration
+        - security-bindings
+        - review-coverage
+      notes: Proposed operational context governance gateway must declare profile-gated validation before admission; WGCF will consume packet receipts only and must not be replaced by this repo.
+    notes: Proposed implementation home for operational context admission control, including capture, classification, redaction, packet projection, receipts, and audit metadata.
 products: {}
 components:
   ai-access-plane:
@@ -20,3 +34,19 @@ components:
       notes: Proposed AI access-plane work must declare profile-gated validation and security review posture before admission into the active component inventory.
     notes: Proposed internal AI gateway and approved model-profile control plane;
       not yet live or admitted into the active component inventory.
+  context-governance-gateway:
+    status: proposed
+    decision_source: operator
+    component_class: shared-governance-runtime
+    owner_repo: context-governance-gateway
+    security_owner: security-architecture
+    product: null
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: context-packet-provider
+      catalog_refs:
+        - developer-integration
+        - security-bindings
+        - review-coverage
+      notes: Future active graph role is a context-packet-provider that supplies model-safe/operator-safe context packets and receipts to WGCF without owning WGCF validation, ART mutation, platform release, or security acceptance.
+    notes: Proposed operational context governance component for raw context capture, redaction, packet projection, and audit receipt production.

@@ -105,6 +105,7 @@
         },
         "intended_endpoint": { "type": ["string", "null"] },
         "notes": { "type": "string", "minLength": 1 },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
         "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
       },
       "allOf": [

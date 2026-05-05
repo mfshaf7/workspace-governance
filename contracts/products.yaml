@@ -12,6 +12,14 @@ products:
     stage_supported: true
     governed_prod_promotion: true
     highest_real_endpoint: governed-prod
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-readiness-aggregate
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: OpenClaw product readiness is aggregated from owner-repo component contracts, platform release evidence, and security review posture; WGCF must not own promotion authority.
   openproject:
     lifecycle: platform-integrated
     platform_owner: platform-engineering
@@ -22,3 +30,11 @@ products:
     stage_supported: false
     governed_prod_promotion: false
     highest_real_endpoint: platform-integrated-runtime
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: product-readiness-aggregate
+      catalog_refs:
+        - delivery-art-broker-read
+        - openproject-quality-check
+        - openproject-projection-sync
+      notes: OpenProject readiness is platform-integrated and ART-backed; WGCF may consume broker and platform receipts but OOS and platform-engineering retain mutation and runtime authority.

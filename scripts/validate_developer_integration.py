@@ -87,6 +87,10 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     active_repos = set(active_repo_names(contracts))
     policy = contracts["developer_integration_policy"]
     registry = contracts["developer_integration_profiles"]
+    intake_policy = contracts["intake_policy"]
+    governance_validator_catalog = contracts["governance_validator_catalog"][
+        "governance_validator_catalog"
+    ]
 
     required_actions = set(policy["required_actions"])
     profile_lifecycle = policy["profile_lifecycle"]
@@ -94,6 +98,42 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     testing_policy = policy["testing"]["smoke"]
     live_miss_escalation = policy.get("live_miss_escalation") or {}
     runtime_lane_decision = policy.get("runtime_lane_decision") or {}
+    validation_behavior_policy = intake_policy["validation_behavior"]
+    catalog_entries = set(governance_validator_catalog["entries"])
+    allowed_validation_postures = set(validation_behavior_policy["allowed_postures"])
+    allowed_validation_graph_roles = set(validation_behavior_policy["allowed_graph_roles"])
+    direct_invocation_postures = set(validation_behavior_policy["direct_invocation_postures"])
+
+    def validate_validation_behavior(label: str, payload: dict, *, required: bool) -> None:
+        behavior = payload.get("validation_behavior")
+        if behavior is None:
+            if required:
+                errors.append(f"{label}: missing validation_behavior")
+            return
+        posture = behavior.get("posture")
+        graph_role = behavior.get("wgcf_graph_role")
+        catalog_refs = behavior.get("catalog_refs") or []
+        if posture not in allowed_validation_postures:
+            errors.append(f"{label}: validation_behavior.posture {posture!r} is not allowed")
+        if graph_role not in allowed_validation_graph_roles:
+            errors.append(
+                f"{label}: validation_behavior.wgcf_graph_role {graph_role!r} is not allowed"
+            )
+        unknown_catalog_refs = sorted(set(catalog_refs) - catalog_entries)
+        if unknown_catalog_refs:
+            errors.append(
+                f"{label}: validation_behavior.catalog_refs references unknown catalog entries "
+                + ", ".join(unknown_catalog_refs)
+            )
+        if (
+            validation_behavior_policy["require_catalog_refs_for_direct_invocation"]
+            and posture in direct_invocation_postures
+            and not catalog_refs
+        ):
+            errors.append(
+                f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
+            )
+
     if required_actions != REQUIRED_ACTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: required_actions must be exactly "
@@ -219,6 +259,11 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} is not declared in profile_lifecycle.statuses"
             )
+        validate_validation_behavior(
+            f"contracts/developer-integration-profiles.yaml: {profile_name}",
+            payload,
+            required=validation_behavior_policy["runtime_profiles"]["require_for_registered"],
+        )
         if payload["owner_repo"] not in active_repos:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} owner_repo {payload['owner_repo']!r} is not active"

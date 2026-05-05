@@ -42,9 +42,14 @@ validation_behavior:
   repos:
     require_for_active: true
     require_for_in_scope_intake: true
+  products:
+    require_for_active: true
+    require_for_in_scope_intake: true
   components:
     require_for_active: true
     require_for_in_scope_intake: true
+  runtime_profiles:
+    require_for_registered: true
   allowed_postures:
     - catalog-owner
     - runtime-consumer
@@ -67,10 +72,13 @@ validation_behavior:
     - product-channel-component
     - product-plugin-component
     - operator-workflow-component
+    - product-readiness-aggregate
+    - dev-integration-profile
+    - context-packet-provider
     - proposed-shared-platform-component
   direct_invocation_postures:
     - catalog-owner
     - profile-gated-external-owner
     - interface-contract-backed
   require_catalog_refs_for_direct_invocation: true
-  notes: New repos and components that enter the workspace must declare how WGCF will see, plan, or suppress their validation before they can be admitted into active governance.
+  notes: New repos, products, components, and registered runtime profiles must declare how WGCF will see, plan, or suppress their validation before they can be admitted into active governance.

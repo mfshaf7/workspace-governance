@@ -1,6 +1,18 @@
 schema_version: 1
 governance_engine_output_manifest:
   owner_repo: workspace-governance
+  compatibility_controls:
+    materialization_default: check-first
+    wgcf_detection_mode: plan-before-materialize
+    require_explicit_family: true
+    require_manifest_output_match: true
+    require_check_before_write: true
+    allowed_write_profiles:
+      - break-glass
+    denied_without_profile:
+      - implicit generated artifact materialization
+      - broad all-output writes without selected family
+      - WGCF materialization outside check mode
   emission_families:
     - id: workspace-root-sync
       boundary: live-workspace-materialization
