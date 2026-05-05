@@ -35,6 +35,7 @@ profiles:
         - broker readiness
         - proposal backlog list read
         - delivery artifact mutation draft workflow
+        - WGCF ART readiness is required for broker completion-style mutations
         - proposal project verification
         - delivery-art project verification
     actions:
