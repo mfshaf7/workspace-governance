@@ -83,3 +83,23 @@ validation_behavior:
     - interface-contract-backed
   require_catalog_refs_for_direct_invocation: true
   notes: New repos, products, components, and registered runtime profiles must declare how WGCF will see, plan, or suppress their validation before they can be admitted into active governance.
+context_behavior:
+  enabled: true
+  defining_work_item_ref: openproject://work_packages/606
+  contract_ref:
+    repo: workspace-governance
+    path: contracts/context-behavior.yaml
+  raw_context_retirement_ref:
+    repo: workspace-governance
+    path: contracts/raw-context-retirement.yaml
+  repos:
+    require_for_active: true
+    require_for_in_scope_intake: true
+  products:
+    require_source_owner_declarations: true
+  components:
+    require_for_active_shared_runtime: true
+  runtime_profiles:
+    require_context_projection_posture: true
+  default_model_projection: deny-raw-project-model-safe-packet
+  notes: New repos, products, components, and profiles must make an explicit context-behavior decision before operational context is projected to models, agents, operators, CI automation, or workflow adapters.

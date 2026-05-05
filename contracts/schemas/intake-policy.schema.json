@@ -10,7 +10,8 @@
     "repos",
     "products",
     "components",
-    "validation_behavior"
+    "validation_behavior",
+    "context_behavior"
   ],
   "properties": {
     "schema_version": { "type": "integer", "minimum": 1 },
@@ -186,6 +187,82 @@
           "uniqueItems": true
         },
         "require_catalog_refs_for_direct_invocation": { "type": "boolean" },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "context_behavior": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "defining_work_item_ref",
+        "contract_ref",
+        "raw_context_retirement_ref",
+        "repos",
+        "products",
+        "components",
+        "runtime_profiles",
+        "default_model_projection",
+        "notes"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "defining_work_item_ref": {
+          "type": "string",
+          "pattern": "^openproject://work_packages/[0-9]+$"
+        },
+        "contract_ref": {
+          "type": "object",
+          "required": ["repo", "path"],
+          "properties": {
+            "repo": { "type": "string", "minLength": 1 },
+            "path": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "raw_context_retirement_ref": {
+          "type": "object",
+          "required": ["repo", "path"],
+          "properties": {
+            "repo": { "type": "string", "minLength": 1 },
+            "path": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "repos": {
+          "type": "object",
+          "required": ["require_for_active", "require_for_in_scope_intake"],
+          "properties": {
+            "require_for_active": { "type": "boolean" },
+            "require_for_in_scope_intake": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "products": {
+          "type": "object",
+          "required": ["require_source_owner_declarations"],
+          "properties": {
+            "require_source_owner_declarations": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "components": {
+          "type": "object",
+          "required": ["require_for_active_shared_runtime"],
+          "properties": {
+            "require_for_active_shared_runtime": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "runtime_profiles": {
+          "type": "object",
+          "required": ["require_context_projection_posture"],
+          "properties": {
+            "require_context_projection_posture": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "default_model_projection": { "type": "string", "minLength": 1 },
         "notes": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false

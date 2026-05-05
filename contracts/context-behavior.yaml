@@ -1,0 +1,276 @@
+schema_version: 1
+context_behavior:
+  owner_repo: workspace-governance
+  implementation_repo: context-governance-gateway
+  defining_epic_ref: openproject://work_packages/583
+  defining_feature_ref: openproject://work_packages/605
+  declaration_work_item_ref: openproject://work_packages/606
+  primary_operator_surface: docs/context-admission-governance.md
+  purpose: >
+    Declare how each governed repo, product source, operator service, and
+    control-plane surface is allowed to produce or consume operational context
+    before that context reaches agents, operator workflows, CI automation, or
+    downstream AI tooling.
+  authority_model:
+    contract_owner: workspace-governance owns the declaration contract, coverage gate, and intake requirement.
+    implementation_owner: context-governance-gateway owns capture, normalization, redaction, projection, packets, receipts, and ledger implementation.
+    validation_runtime_owner: workspace-governance-control-fabric may consume declarations and CGG receipts, but it must not redefine context-behavior truth.
+    operator_workflow_owner: operator-orchestration-service owns Delivery ART mutation and broker workflow adapters that may request CGG packets.
+    platform_authority: platform-engineering owns deployment state, dev-integration profile lifecycle, promotion gates, and approved runtime access.
+    security_authority: security-architecture owns context-safety standards, review acceptance, and risk disposition.
+  default_policy:
+    raw_model_projection: deny
+    uncertain_detection: deny_raw_projection_preserve_artifact
+    artifact_preservation: preserve locally or in approved enterprise custody with digest and receipt.
+    packet_requirement: model-safe/operator-safe packet required before context is admitted to a model or automation path.
+    exception_rule: explicit profile, security review, operator acceptance, and audit reference are required before raw projection can be allowed.
+  declaration_contract:
+    recommended_owner_repo_path: contracts/context-behavior.yaml
+    required_for:
+      - active repos that emit terminal, CI, runtime, ART, or operator workflow output
+      - product source repos that can produce troubleshooting or runtime context
+      - shared operator services that pass context to humans, agents, CI, or automation
+      - registered dev-integration profiles that expose logs, packets, receipts, or runtime diagnostics
+      - proposed or admitted intake entrants before promotion into active governance
+    required_fields:
+      - repo
+      - declaration_status
+      - owner_repo
+      - source_classes
+      - default_projection
+      - cgg_role
+      - adoption_state
+      - evidence_refs
+      - denied_without_cgg
+    allowed_default_projections:
+      - none
+      - digest-only
+      - redacted-excerpt
+      - model-safe-packet
+      - operator-safe-packet
+      - receipt-only
+    denied_without_cgg:
+      - raw terminal output copied into model prompts
+      - raw CI logs copied into model prompts
+      - environment dumps projected without redaction report
+      - ART execution context projected without packet digest
+      - Kubernetes logs projected without profile gate and packet receipt
+      - secret-like material projected because detection was uncertain
+  source_classes:
+    terminal_output:
+      description: stdout, stderr, command transcripts, stack traces, and local tool output.
+      default_sensitivity: moderate
+      packet_expectation: error windows, repeated-log collapse, redaction report, and digest.
+    ci_logs:
+      description: GitHub Actions logs, validation output, build output, and artifact summaries.
+      default_sensitivity: moderate
+      packet_expectation: failing job, step summary, relevant excerpts, redaction report, and artifact ref.
+    repo_snapshot:
+      description: repo tree listings, file excerpts, diffs, generated artifacts, and contract snippets.
+      default_sensitivity: moderate
+      packet_expectation: bounded paths, digest, explicit changed surfaces, and omitted raw files.
+    art_work_item_context:
+      description: ART planning, continuation, review-packet, closeout, blocker, risk, and projection state.
+      default_sensitivity: moderate
+      packet_expectation: work-item ids, readiness posture, evidence refs, and no direct raw authority-store dump.
+    platform_runtime_logs:
+      description: Kubernetes, OpenProject, broker, dev-integration, database, and platform component runtime output.
+      default_sensitivity: high
+      packet_expectation: profile gate, security posture, redaction report, and safe failure summary.
+    operator_workflow_payload:
+      description: request, approval, review packet, payload, receipt, and handoff objects used by operators or agents.
+      default_sensitivity: moderate
+      packet_expectation: schema name, decision, digest, omitted raw body when sensitive or oversized.
+    security_review_context:
+      description: findings, risk posture, review outputs, trust-boundary notes, and security evidence.
+      default_sensitivity: high
+      packet_expectation: reviewed artifact refs, finding ids, decision posture, and no secret material.
+  adoption_states:
+    - state: declared
+      description: workspace-level behavior is declared, but owner repo still needs native local contract or adoption work.
+    - state: native-provider
+      description: repo produces CGG packets or owns CGG implementation behavior directly.
+    - state: packet-consumer
+      description: repo consumes CGG packets or receipts but does not implement CGG.
+    - state: parity-required
+      description: legacy raw-output path remains until packet parity and rollback evidence are recorded.
+    - state: retirement-eligible
+      description: legacy raw-output path may be removed after finalized evidence and owner closeout.
+    - state: not-required
+      description: repo has no model/operator context projection path beyond normal reviewed source docs.
+  repo_declarations:
+    - repo: workspace-governance
+      declaration_status: authoritative-contract-owner
+      owner_repo: workspace-governance
+      source_classes:
+        - repo_snapshot
+        - art_work_item_context
+        - operator_workflow_payload
+      default_projection: model-safe-packet
+      cgg_role: contract-authority-and-consumer
+      adoption_state: declared
+      evidence_refs:
+        - contracts/context-behavior.yaml
+        - contracts/raw-context-retirement.yaml
+        - docs/context-admission-governance.md
+      denied_without_cgg:
+        - direct raw validator output copied into model prompts after CGG packet parity exists
+        - unbounded ART review-packet or completion payload projection
+    - repo: workspace-governance-control-fabric
+      declaration_status: runtime-consumer
+      owner_repo: workspace-governance-control-fabric
+      source_classes:
+        - terminal_output
+        - repo_snapshot
+        - operator_workflow_payload
+      default_projection: receipt-only
+      cgg_role: consumes CGG packets and receipts as evidence inputs after profile gates; does not replace CGG.
+      adoption_state: parity-required
+      evidence_refs:
+        - contracts/governance-validator-catalog.yaml
+        - docs/governance-validator-catalog.md
+      denied_without_cgg:
+        - raw command output embedded into WGCF receipts
+        - raw artifact custody enabled without security approval
+    - repo: context-governance-gateway
+      declaration_status: native-provider
+      owner_repo: context-governance-gateway
+      source_classes:
+        - terminal_output
+        - ci_logs
+        - repo_snapshot
+        - platform_runtime_logs
+        - operator_workflow_payload
+      default_projection: model-safe-packet
+      cgg_role: native context admission provider.
+      adoption_state: native-provider
+      evidence_refs:
+        - contracts/repo-rules/context-governance-gateway.yaml
+        - contracts/developer-integration-profiles.yaml
+      denied_without_cgg:
+        - raw context output from CGG tests or service mode projected without its own packet and receipt
+    - repo: platform-engineering
+      declaration_status: platform-authority-consumer
+      owner_repo: platform-engineering
+      source_classes:
+        - terminal_output
+        - ci_logs
+        - platform_runtime_logs
+        - operator_workflow_payload
+      default_projection: operator-safe-packet
+      cgg_role: consumes packets for platform diagnostics and owns deployment/profile gates for CGG runtime.
+      adoption_state: parity-required
+      evidence_refs:
+        - contracts/developer-integration-profiles.yaml
+      denied_without_cgg:
+        - raw Kubernetes or OpenProject logs copied into model prompts after packet parity exists
+        - raw dev-integration runtime dumps projected without profile gate
+    - repo: security-architecture
+      declaration_status: security-authority-consumer
+      owner_repo: security-architecture
+      source_classes:
+        - security_review_context
+        - repo_snapshot
+        - operator_workflow_payload
+      default_projection: receipt-only
+      cgg_role: consumes packet receipts and owns acceptance of context-safety risk.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/repo-rules/context-governance-gateway.yaml
+      denied_without_cgg:
+        - secret-bearing evidence or findings copied into model prompts without a redaction report
+    - repo: operator-orchestration-service
+      declaration_status: operator-workflow-consumer
+      owner_repo: operator-orchestration-service
+      source_classes:
+        - art_work_item_context
+        - operator_workflow_payload
+        - terminal_output
+        - platform_runtime_logs
+      default_projection: model-safe-packet
+      cgg_role: requests and consumes CGG packets for broker-backed operator workflows; remains ART mutation authority.
+      adoption_state: parity-required
+      evidence_refs:
+        - docs/delivery-art-operator-path.md
+        - contracts/delivery-art-operator-path.yaml
+      denied_without_cgg:
+        - raw ART continuation or closeout payloads projected into model prompts after packet parity exists
+        - direct authority-store dumps used as context packets
+    - repo: openclaw-runtime-distribution
+      declaration_status: product-source-consumer
+      owner_repo: openclaw-runtime-distribution
+      source_classes:
+        - ci_logs
+        - repo_snapshot
+        - terminal_output
+      default_projection: model-safe-packet
+      cgg_role: product repo context consumer after local declaration and CI packet parity.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/products.yaml
+        - contracts/components.yaml
+      denied_without_cgg:
+        - raw product CI logs copied into model prompts after packet parity exists
+    - repo: openclaw-host-bridge
+      declaration_status: product-source-consumer
+      owner_repo: openclaw-host-bridge
+      source_classes:
+        - ci_logs
+        - repo_snapshot
+        - terminal_output
+      default_projection: model-safe-packet
+      cgg_role: product repo context consumer with host-control sensitivity.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/products.yaml
+        - contracts/components.yaml
+      denied_without_cgg:
+        - host policy, allowed-root, or audit output copied into model prompts without packet redaction
+    - repo: openclaw-telegram-enhanced
+      declaration_status: product-source-consumer
+      owner_repo: openclaw-telegram-enhanced
+      source_classes:
+        - ci_logs
+        - repo_snapshot
+        - terminal_output
+      default_projection: model-safe-packet
+      cgg_role: product repo context consumer for Telegram workflow debugging.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/products.yaml
+        - contracts/components.yaml
+      denied_without_cgg:
+        - raw chat, token, or delivery traces copied into model prompts without packet redaction
+  intake_integration:
+    intake_policy_ref: contracts/intake-policy.yaml
+    raw_context_retirement_ref: contracts/raw-context-retirement.yaml
+    rule: >
+      Proposed or admitted repos, products, components, and runtime profiles
+      must declare context behavior before they can become active governed
+      surfaces when they emit or consume operational context.
+    required_decision_fields:
+      - context_behavior_required
+      - source_classes
+      - default_projection
+      - cgg_role
+      - adoption_state
+      - denied_without_cgg
+  rollout_gates:
+    - gate_id: declaration-coverage
+      description: every active repo has a workspace-level context-behavior declaration.
+      required_for_state: declared
+    - gate_id: owner-native-contract
+      description: owner repo publishes local context behavior only when it emits or consumes operational context directly.
+      required_for_state: packet-consumer
+    - gate_id: packet-parity
+      description: CGG packet output is equivalent or safer than the legacy raw-output path for the same diagnostic use.
+      required_for_state: retirement-eligible
+    - gate_id: security-current
+      description: context-safety review and risk posture are current for secret, identity, runtime, or AI paths.
+      required_for_state: retirement-eligible
+  denied_actions:
+    - replacing OOS as ART mutation authority
+    - replacing WGCF as validation planning and readiness runtime
+    - replacing platform-engineering release authority
+    - replacing security-architecture acceptance
+    - sending raw operational context to a model because packet generation is inconvenient

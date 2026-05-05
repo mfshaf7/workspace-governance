@@ -54,6 +54,17 @@ Use these contracts to declare:
     ART, owner-repo maintenance, Workspace Proposals, or blocker/risk paths,
     how ART records relate to owner-repo change records, and how ART items map
     to Landing Units and Review Packets
+- `context-behavior.yaml`
+  - declares how each governed repo emits, consumes, stores, or projects
+    operational context before that context can be admitted into models,
+    agents, operators, CI automation, or workflow adapters
+  - defines the default deny-raw-projection posture, source classes, repo
+    coverage, intake integration, rollout gates, and denied shortcuts for CGG
+    adoption
+- `raw-context-retirement.yaml`
+  - inventories legacy raw-context paths and defines packet-parity, rollback,
+    retirement, and no-legacy-fallback rules before raw-output workarounds can
+    be removed
 - `developer-integration-profiles.yaml`
   - registers the concrete repo-owned `dev-integration` profiles that may run
     on the shared local-k3s lane, including lifecycle, request record, and
@@ -243,6 +254,29 @@ to these contracts only as supporting detail.
 Current operator-facing runbook:
 
 - [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
+
+## Context Admission
+
+The workspace context-admission contract is explicit because raw operational
+context is both a token-burn problem and a safety boundary.
+
+Primary operator surface:
+
+- `../docs/context-admission-governance.md`
+
+`context-governance-gateway` owns implementation of capture, redaction,
+projection, packets, receipts, and ledgers. This repo owns the declaration and
+retirement contract that says which repos and context paths must use CGG before
+raw context is admitted into an AI or operator workflow.
+
+The default is deny raw model projection. If detection is uncertain or
+secret-like material is present, preserve the full artifact only through local
+or approved enterprise custody and project a packet, digest, receipt, redaction
+summary, and safe excerpt instead.
+
+New repos, products, components, and runtime profiles are not automatically CGG
+consumers, but they must make an explicit context-behavior decision during
+intake. Silent omission is not valid for active governed surfaces.
 
 ## Improvement Candidates And After-Action Reviews
 

@@ -178,6 +178,15 @@ have their own primary operator surface:
 
 - [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
 
+Operational context admission now has its own primary operator surface:
+
+- [docs/context-admission-governance.md](docs/context-admission-governance.md)
+
+That surface explains how raw terminal, CI, runtime, ART, operator-workflow, and
+security context must move through `context-governance-gateway` packet,
+receipt, digest, and redaction boundaries before it is admitted into models,
+agents, operators, CI automation, or workflow adapters.
+
 The skill model follows the same rule. Governing skill source is not enough by
 itself. `contracts/skills.yaml` and `skills-src/` must also be installed into
 the live Codex skill root under `~/.codex/skills`, and the workspace audit
