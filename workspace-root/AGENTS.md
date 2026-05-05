@@ -79,13 +79,16 @@ That means:
     Admission Control
   - owns Phase 1 local-only context capture, normalization, classification,
     redaction, slicing, budgeting, projection, model-safe/operator-safe
-    packets, receipts, and local ledger implementation
+    packets, receipts, local ledger implementation, and active local
+    `dev-integration` service-shape proof
   - does not own workspace contracts, WGCF validation/readiness, ART mutation,
     platform release authority, security acceptance, or a custom LLM gateway
-  - API, worker, database-backed storage, dashboard, broker adapter, or
-    cross-repo runtime behavior remains blocked until the proposed
-    `dev-integration` profile is admitted and platform/security gates approve
-    service mode
+  - API, worker, database-backed storage, and safe dashboard metadata are
+    active only in the local `dev-integration` lane after workspace, platform,
+    and security admission
+  - broker adapters, downstream AI adapters, raw model projection, governed
+    stage/prod runtime, and CGG approval authority remain blocked until later
+    platform and security gates approve those boundaries
   - read first:
     - `context-governance-gateway/AGENTS.md`
     - `context-governance-gateway/README.md`

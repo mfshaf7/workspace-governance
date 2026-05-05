@@ -160,18 +160,19 @@ profiles:
       - reset
       - promote_check
   context-governance-gateway:
-    lifecycle: build-admitted
+    lifecycle: active
     owner_repo: context-governance-gateway
-    summary: Build-admitted local-k3s dev-integration lane for Context Governance Gateway service-mode implementation.
-    purpose: Authorize bounded CGG service-mode API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger implementation after platform and security gates, without making the profile self-serve launchable before runtime proof exists.
+    summary: Active local-k3s dev-integration lane for Context Governance Gateway service-mode proof.
+    purpose: Authorize self-serve local CGG API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger proof through the shared platform runner after owner, platform, and security gates, without treating the profile as governed stage or production readiness.
     validation_behavior:
-      posture: build-admitted-profile-gated
+      posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
         - developer-integration
+        - devint-runner-read
         - security-bindings
         - review-coverage
-      notes: The CGG profile is admitted for bounded service implementation, but it is not self-serve launchable and must fail closed for runtime start/access until owner runtime commands and read-only smoke are proven.
+      notes: The CGG profile is active for local dev-integration launch and read-only smoke through the platform-owned runner. It remains local-only evidence and does not authorize governed stage/prod deployment, raw model projection, downstream adapters, or CGG approval authority.
     profile_path: dev-integration/profiles/context-governance-gateway/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -191,6 +192,14 @@ profiles:
       implementation_allowed: true
       self_serve_launch_allowed: false
       work_item_ref: openproject://work_packages/622
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-05-05"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/187
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/components/2026-05-05-context-governance-gateway-active-devint-runtime.md
     shared_dependencies:
       - workspace-governance
       - platform-engineering

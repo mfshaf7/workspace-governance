@@ -68,8 +68,9 @@ Read this as the workspace control map:
 - `workspace-governance-control-fabric` implements the governance runtime
   fabric and consumes workspace governance truth without owning that truth.
 - `context-governance-gateway` implements operational context admission and
-  context-packet generation; service mode remains blocked behind proposed
-  `dev-integration`, platform, and security gates.
+  context-packet generation; local `dev-integration` runtime is active for
+  service-shape proof, while governed stage/prod, raw model projection, and
+  downstream adapters remain blocked behind later platform and security gates.
 - `security-architecture` governs security decisions and evidence.
 - `platform-engineering` owns the shared platform plus product integration.
 - OpenClaw is assembled through `openclaw-runtime-distribution`.
@@ -124,7 +125,7 @@ Read this as the workflow path:
 | --- | --- | --- | --- |
 | `workspace-governance/` | Workspace control plane | workspace-root guidance, cross-repo routing, workspace audit tooling | platform rollout, product delivery, security standards |
 | `workspace-governance-control-fabric/` | Governance runtime fabric | governance graph, validation planning runtime, admission/readiness/receipt/ledger implementation, control-fabric API/worker/CLI | workspace contracts, workspace-root guidance, platform deployment authority, security standards |
-| `context-governance-gateway/` | Context admission runtime implementation | context capture, redaction, projection, model-safe/operator-safe packets, receipts, artifact digests, local ledger behavior, future service implementation after runtime admission | workspace contracts, WGCF readiness, ART mutation, platform release authority, security acceptance, custom LLM/scanner/storage/observability backends |
+| `context-governance-gateway/` | Context admission runtime implementation | context capture, redaction, projection, model-safe/operator-safe packets, receipts, artifact digests, local ledger behavior, active local dev-integration service-shape proof | workspace contracts, WGCF readiness, ART mutation, platform release authority, security acceptance, custom LLM/scanner/storage/observability backends |
 | `platform-engineering/` | Release and platform authority | environment contracts, pinned SHAs, image digests, Argo state, shared component docs, product integration runbooks | Telegram behavior, bridge implementation, security governance |
 | `openclaw-runtime-distribution/` | Active OpenClaw runtime composition | bundled runtime assembly, packaging checks, active `host-control-openclaw-plugin` package, runtime-required workspace templates | environment approval, Argo state, host runtime policy |
 | `openclaw-telegram-enhanced/` | Canonical Telegram source | Telegram UX, routing, approvals, media delivery behavior, Telegram-specific tests | host enforcement, platform rollout, security governance |
@@ -153,8 +154,9 @@ paths:
     owns the admitted runtime implementation path for the governance control
     fabric
   - [context-governance-gateway](/home/mfshaf7/projects/context-governance-gateway/README.md)
-    owns context admission implementation and proposed service-mode profile
-    shape, while service mode remains blocked behind admission gates
+    owns context admission implementation and active local dev-integration
+    service-shape proof, while governed service mode remains blocked behind
+    later stage/prod admission gates
   - [security-architecture](/home/mfshaf7/projects/security-architecture/README.md)
     owns trust-boundary judgment, security standards, and review posture
 - OpenClaw

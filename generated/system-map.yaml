@@ -89,15 +89,17 @@ repos:
     - security-architecture
     - operator-orchestration-service
     validation_behavior:
-      posture: build-admitted-profile-gated
+      posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
       - developer-integration
+      - devint-runner-read
       - security-bindings
       - review-coverage
-      notes: Active implementation repo for context packet production; service-mode
-        implementation is build-admitted, while self-serve runtime launch remains
-        blocked until the dev-integration profile becomes active.
+      notes: Active implementation repo for context packet production; local dev-integration
+        runtime launch is active through the platform-owned runner, while governed
+        stage/prod deployment, raw projection, downstream adapters, and approval authority
+        remain blocked.
   platform-engineering:
     lifecycle: active
     repo_class: platform
@@ -423,15 +425,17 @@ components:
     product: null
     security_owner: security-architecture
     validation_behavior:
-      posture: build-admitted-profile-gated
+      posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
       - developer-integration
+      - devint-runner-read
       - security-bindings
       - review-coverage
       notes: Provides model-safe/operator-safe context packets and receipts to operators,
-        agents, OOS, or WGCF after build-admitted implementation; it still does not
-        own WGCF validation, ART mutation, platform release, or security acceptance.
+        agents, OOS, or WGCF through an active local dev-integration profile; it still
+        does not own WGCF validation, ART mutation, platform release, security acceptance,
+        governed stage/prod deployment, or model invocation.
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime

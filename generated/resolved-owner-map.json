@@ -26,11 +26,12 @@
       "validation_behavior": {
         "catalog_refs": [
           "developer-integration",
+          "devint-runner-read",
           "security-bindings",
           "review-coverage"
         ],
-        "notes": "Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF after build-admitted implementation; it still does not own WGCF validation, ART mutation, platform release, or security acceptance.",
-        "posture": "build-admitted-profile-gated",
+        "notes": "Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF through an active local dev-integration profile; it still does not own WGCF validation, ART mutation, platform release, security acceptance, governed stage/prod deployment, or model invocation.",
+        "posture": "profile-gated-external-owner",
         "wgcf_graph_role": "context-packet-provider"
       }
     },
@@ -298,11 +299,12 @@
       "validation_behavior": {
         "catalog_refs": [
           "developer-integration",
+          "devint-runner-read",
           "security-bindings",
           "review-coverage"
         ],
-        "notes": "Active implementation repo for context packet production; service-mode implementation is build-admitted, while self-serve runtime launch remains blocked until the dev-integration profile becomes active.",
-        "posture": "build-admitted-profile-gated",
+        "notes": "Active implementation repo for context packet production; local dev-integration runtime launch is active through the platform-owned runner, while governed stage/prod deployment, raw projection, downstream adapters, and approval authority remain blocked.",
+        "posture": "profile-gated-external-owner",
         "wgcf_graph_role": "context-packet-provider"
       }
     },
