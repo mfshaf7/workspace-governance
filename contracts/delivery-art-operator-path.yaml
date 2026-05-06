@@ -31,6 +31,35 @@ delivery_art_operator_path:
       cli: npm run art -- item continuation <work-item-id>
       route: GET /v1/delivery-work-items/{work_item_id}/continuation-context
       purpose: resume one concrete work item before repo implementation work
+  planned_optimized_path:
+    availability: planned_under_art_650
+    rule: >
+      These surfaces are the accepted 90 percent optimization target. They are
+      not canonical until implemented in OOS, validated in dev-integration, and
+      promoted into the canonical read/write hierarchy by a completed Review
+      Packet.
+    target_surfaces:
+      - id: compact-session-packet
+        purpose: replace repeated bootstrap, workflow-health, planning, and review reads with one bounded session packet and full-output refs
+        owner_repo: operator-orchestration-service
+      - id: evidence-packet
+        purpose: summarize work-item, initiative, and Review Packet evidence without rereading raw descriptions, PRs, and validation logs
+        owner_repo: operator-orchestration-service
+      - id: landing-unit-status-and-close
+        purpose: compute covered children, parent closeout candidates, WGCF readiness, and projection checkpoints from one landing-unit packet
+        owner_repo: operator-orchestration-service
+      - id: wgcf-validation-plan-receipt
+        purpose: request one validation plan receipt per landing unit instead of rediscovering direct validators repeatedly
+        owner_repo: workspace-governance-control-fabric
+      - id: cgg-context-packet-ref
+        purpose: replace oversized raw ART, CI, terminal, and runtime outputs with context-governed packet refs and digests
+        owner_repo: context-governance-gateway
+    activation_gates:
+      - OOS API and CLI contracts document the implemented surfaces.
+      - WGCF and CGG seams are explicit and do not change authority ownership.
+      - Dev-integration smoke proves the optimized path.
+      - The first source-backed landing unit is dogfooded through the optimized path.
+      - Scoped ART quality and projection health are clean after the cutover.
   guided_write_intents:
     - id: item-blocker
       cli: npm run art -- item blocker <work-item-id> <payload.json>

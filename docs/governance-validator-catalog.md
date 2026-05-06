@@ -159,6 +159,11 @@ The catalog also defines representative scopes for shadow parity:
 - `component:platform-runtime`
 - `component:security-review`
 
+Component scopes prove component-level validator posture. Validators that need a
+specific ART initiative, such as OpenProject scoped quality, must use
+`art:delivery-<id>` and a catalog command template instead of a hardcoded
+representative initiative.
+
 After #536, workspace clean-state proof uses the explicit
 `authority:workspace-clean-state` scope. That scope exists so restart-ready or post-merge
 claims do not fall back to direct `repo-structure`, `workspace-layout`, or
