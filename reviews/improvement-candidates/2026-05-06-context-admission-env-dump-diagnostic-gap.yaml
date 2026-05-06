@@ -1,0 +1,41 @@
+schema_version: 1
+id: 2026-05-06-context-admission-env-dump-diagnostic-gap
+title: Prevent broad env inspection during context-admission diagnostics
+recorded_on: '2026-05-06'
+owner_repo: workspace-governance
+summary: 'During #411 metadata repair, a broad in-pod environment inspection was used
+  before a targeted read-only OpenProject REST fetch; diagnostic commands must not
+  print secret-bearing env when only host/header truth is needed.'
+regression_of: null
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The diagnostic step used a broad environment dump instead of a targeted
+    allowlisted lookup, violating the context-admission expectation that secret-bearing
+    operational context is never raw-projected.
+  source_refs:
+  - 'session: #411 repair after #679 projection sync dogfood'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-05-09'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
