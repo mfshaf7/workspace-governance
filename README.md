@@ -153,6 +153,7 @@ instead of symptom-driven debugging:
 Primary operator surfaces:
 
 - [docs/delivery-art-operator-path.md](docs/delivery-art-operator-path.md)
+- [docs/instruction-and-skill-governance.md](docs/instruction-and-skill-governance.md)
 - [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
 - [docs/delegated-execution.md](docs/delegated-execution.md)
 
@@ -160,6 +161,12 @@ The Delivery ART operator path is the workspace-level surface for the
 optimized ART working model. It points normal ART sessions to broker-owned
 active-session packets, evidence packets, Review Packets, and landing-unit
 closeout commands instead of repeated full-tree reads or direct Rails queries.
+
+The instruction and skill governance surface is the workspace-level procedure
+for changing `AGENTS.md`, registered skill source, and live installed skill
+behavior. It keeps source guidance, machine-readable contracts, root sync, and
+`~/.codex/skills` aligned so instruction changes do not become hidden runtime
+drift.
 
 The self-improvement model is no longer only about retrospective closure. It
 now combines:

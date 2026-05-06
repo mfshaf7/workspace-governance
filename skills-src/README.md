@@ -11,8 +11,10 @@ Workspace-owned skills currently cover:
 - routing
 - architecture discussion gates
 - contract drift checks
+- context admission and raw-output reduction
 - dev-integration-first routing for active profiles
 - done criteria
+- instruction and skill governance audits
 - operator workflow design
 - cross-repo sequencing
 - troubleshooting preflight

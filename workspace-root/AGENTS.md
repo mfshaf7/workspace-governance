@@ -46,6 +46,9 @@ That means:
 0.8 If a new workspace-level control, workflow, validator, skill, product
     surface, or architecture capability is being proposed, read:
    - `/home/mfshaf7/projects/workspace-governance/docs/recommendation-preflight.md`
+0.9 If `AGENTS.md`, registered skill source, `contracts/skills.yaml`, or live
+    installed skill behavior is being reviewed or changed, read:
+   - `/home/mfshaf7/projects/workspace-governance/docs/instruction-and-skill-governance.md`
 1. Read the local repo `AGENTS.md`.
 2. Read the local repo `README.md`.
 3. Use this file only to route the task to the correct owner.
@@ -295,6 +298,10 @@ Only start implementation after that discussion narrows the target design.
   `~/.codex/skills` are refreshed and the workspace audit confirms they are in
   sync.
 - Skill-source changes affect future sessions only after that install step.
+- `AGENTS.md` files are routing and authority controls, not dumping grounds for
+  long procedures. Keep detailed repeatable workflow in skills or primary
+  operator surfaces, and use the instruction-and-skill governance surface before
+  restructuring them.
 - If a restart is likely while meaningful workspace-level pending items remain,
   create or refresh the single local-only
   `workspace-governance/docs/archive/session-handoff-current.md` record before

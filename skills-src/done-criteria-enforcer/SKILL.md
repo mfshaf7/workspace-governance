@@ -14,6 +14,7 @@ or live governed state.
 - `contracts/evidence-obligations.yaml`
 - `contracts/review-obligations.yaml`
 - `contracts/products.yaml`
+- `docs/instruction-and-skill-governance.md`
 
 ## Workflow
 
@@ -32,9 +33,9 @@ Before telling the operator that a restart is safe or recommended:
 - if that state exists, create or refresh the single local-only `docs/archive/session-handoff-current.md` record first
 - keep zero or one session handoff at a time; remove stale `docs/archive/session-handoff-*.md` records instead of accumulating dated files
 - only after the handoff is current should you say the restart is ready
-- if the workspace is being described as clean or restart-ready,
-  `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --include-remote --check-clean`
-  must pass so stale branches, pinned worktrees, and remote branch residue are not left behind
+- if the workspace is being described as clean or restart-ready, the WGCF
+  clean-state scope must pass so branch lifecycle, repo structure, and
+  workspace layout are checked through the current catalog path
 - do not wait for the operator to ask whether a handoff is needed
 
 ## Minimum Checks
@@ -56,6 +57,8 @@ Before telling the operator that a restart is safe or recommended:
   Review Packet or explicitly marked as non-source evidence only
 - if repo review controls exist and the work is landing through a PR, Codex review was requested or explicitly waived and the PR records the result
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
+- instruction-and-skill governance validation is complete when AGENTS, skill
+  source, skill registry, or installed skill behavior changed
 - if the user is being asked to restart and meaningful workspace-level pending items remain, `docs/archive/session-handoff-current.md` exists and is current
 - if a restart is being recommended, the session handoff was refreshed before the recommendation rather than only after the operator asked about it
 - if the work was proven in `dev-integration`, the active profile's

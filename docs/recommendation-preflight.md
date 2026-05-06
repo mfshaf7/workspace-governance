@@ -55,6 +55,10 @@ python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/project
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check
 ```
 
+For AGENTS or skill changes, also use
+[`instruction-and-skill-governance.md`](instruction-and-skill-governance.md)
+before recommending a new skill or restructuring active guidance.
+
 6. State the recommendation posture explicitly:
 
 - `reuse`: an existing control already covers the need

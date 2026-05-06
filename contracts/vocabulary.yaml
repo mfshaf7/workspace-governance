@@ -62,3 +62,12 @@ retired_terms:
     repo_names:
       - workspace-governance
       - platform-engineering
+  - id: retired-art-raw-kubectl-default-guidance
+    pattern: use direct\s+`k3s kubectl` broker read and write calls by default
+    repo_names:
+      - workspace-governance
+      - operator-orchestration-service
+    exclude_paths:
+      - /docs/archive/
+      - /docs/records/change-records/
+      - /docs/decisions/adr/

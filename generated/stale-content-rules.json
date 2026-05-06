@@ -87,6 +87,22 @@
     ]
   },
   {
+    "exclude_paths": [
+      "/docs/archive/",
+      "/docs/records/change-records/",
+      "/docs/decisions/adr/"
+    ],
+    "id": "retired-art-raw-kubectl-default-guidance",
+    "pattern": "use direct\\s+`k3s kubectl` broker read and write calls by default",
+    "repo_names": [
+      "workspace-governance",
+      "operator-orchestration-service"
+    ],
+    "targets": [
+      "*.md"
+    ]
+  },
+  {
     "exclude_paths": [],
     "id": "openclaw-runtime-distribution-readme-forbidden",
     "pattern": "deployment workspace copy|bundled build input",

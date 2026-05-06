@@ -12,6 +12,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/contract-drift-check
     scope: workspace
+  context-admission-operator:
+    owner_repo: workspace-governance
+    source_path: skills-src/context-admission-operator
+    scope: workspace
   dev-integration-first:
     owner_repo: workspace-governance
     source_path: skills-src/dev-integration-first
@@ -23,6 +27,10 @@ skills:
   operator-workflow-design:
     owner_repo: workspace-governance
     source_path: skills-src/operator-workflow-design
+    scope: workspace
+  instruction-governance-auditor:
+    owner_repo: workspace-governance
+    source_path: skills-src/instruction-governance-auditor
     scope: workspace
   project-delivery-operator:
     owner_repo: workspace-governance
