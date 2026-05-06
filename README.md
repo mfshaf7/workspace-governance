@@ -152,8 +152,14 @@ instead of symptom-driven debugging:
 
 Primary operator surfaces:
 
+- [docs/delivery-art-operator-path.md](docs/delivery-art-operator-path.md)
 - [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)
 - [docs/delegated-execution.md](docs/delegated-execution.md)
+
+The Delivery ART operator path is the workspace-level surface for the
+optimized ART working model. It points normal ART sessions to broker-owned
+active-session packets, evidence packets, Review Packets, and landing-unit
+closeout commands instead of repeated full-tree reads or direct Rails queries.
 
 The self-improvement model is no longer only about retrospective closure. It
 now combines:

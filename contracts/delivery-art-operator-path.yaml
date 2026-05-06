@@ -19,6 +19,18 @@ delivery_art_operator_path:
       cli: npm run art -- workflow-health
       route: GET /v1/delivery-session/workflow-health
       purpose: confirm roadmap and PM² projection health before deeper repair
+    - id: initiative-active-session
+      cli: npm run art -- initiative active-session <delivery-id>
+      route: GET /v1/delivery-initiatives/{delivery_id}/active-session-packet
+      purpose: resume a known active initiative with bounded front state, quality drift, stale-open candidates, closeout readiness, and full-output refs
+    - id: initiative-evidence-packet
+      cli: npm run art -- initiative evidence-packet <delivery-id>
+      route: GET /v1/delivery-initiatives/{delivery_id}/evidence-packet
+      purpose: inspect initiative-level evidence posture without rereading raw descriptions, PRs, and validation logs
+    - id: item-evidence-packet
+      cli: npm run art -- item evidence-packet <work-item-id>
+      route: GET /v1/delivery-work-items/{work_item_id}/evidence-packet
+      purpose: inspect one work item's evidence posture without rereading raw descriptions or the full initiative tree
     - id: initiative-review-pack
       cli: npm run art -- initiative review-pack <delivery-id>
       route: GET /v1/delivery-initiatives/{delivery_id}/review-pack
@@ -31,14 +43,18 @@ delivery_art_operator_path:
       cli: npm run art -- item continuation <work-item-id>
       route: GET /v1/delivery-work-items/{work_item_id}/continuation-context
       purpose: resume one concrete work item before repo implementation work
-  planned_optimized_path:
-    availability: planned_under_art_650
+    - id: review-packet-evidence-packet
+      cli: npm run art -- review-packet evidence-packet <packet.json>
+      route: local helper
+      purpose: inspect one Review Packet's coverage and evidence posture before using it for closeout
+  optimized_path:
+    availability: active_for_oos_broker_surfaces_after_art_650_dogfood
     rule: >
-      These surfaces are the accepted 90 percent optimization target. They are
-      not canonical until implemented in OOS, validated in dev-integration, and
-      promoted into the canonical read/write hierarchy by a completed Review
-      Packet.
-    target_surfaces:
+      These surfaces are the accepted 90 percent optimization target. OOS
+      broker packet, evidence, Review Packet, and landing-unit closeout
+      surfaces are active after #650 dogfood. WGCF validation-plan receipts and
+      broader CGG packet projection remain residual optimization work.
+    active_surfaces:
       - id: compact-session-packet
         purpose: replace repeated bootstrap, workflow-health, planning, and review reads with one bounded session packet and full-output refs
         owner_repo: operator-orchestration-service
@@ -48,12 +64,30 @@ delivery_art_operator_path:
       - id: landing-unit-status-and-close
         purpose: compute covered children, parent closeout candidates, WGCF readiness, and projection checkpoints from one landing-unit packet
         owner_repo: operator-orchestration-service
+      - id: review-packet-command-family
+        purpose: provide draft, validate, readiness, evidence-packet, and finalize commands for source-backed completion evidence
+        owner_repo: operator-orchestration-service
+      - id: cgg-context-packet-ref-optional
+        purpose: add packet refs and digests for oversized ART CLI output when ART_CGG_PACKETING=enabled while keeping local output artifacts reviewable
+        owner_repo: context-governance-gateway
+    residual_surfaces:
       - id: wgcf-validation-plan-receipt
         purpose: request one validation plan receipt per landing unit instead of rediscovering direct validators repeatedly
         owner_repo: workspace-governance-control-fabric
-      - id: cgg-context-packet-ref
-        purpose: replace oversized raw ART, CI, terminal, and runtime outputs with context-governed packet refs and digests
+      - id: cgg-context-packet-ref-default
+        purpose: make CGG packet refs the normal path for oversized ART, CI, terminal, and runtime output instead of an opt-in CLI mode
         owner_repo: context-governance-gateway
+    dogfood_measurement:
+      delivery_ref: openproject://work_packages/650
+      completed_work_item_ref: openproject://work_packages/668
+      older_active_front_read:
+        command: npm run art -- initiative execution-summary 650 --json
+        output_bytes: 65648
+      optimized_active_front_read:
+        command: npm run art -- initiative active-session 650 --json
+        output_bytes: 9162
+      measured_reduction_percent: 86
+      completion_receipt: art-readiness-receipt:f5ae7cd83f2b73fa7b995370
     activation_gates:
       - OOS API and CLI contracts document the implemented surfaces.
       - WGCF and CGG seams are explicit and do not change authority ownership.
@@ -69,6 +103,34 @@ delivery_art_operator_path:
       cli: npm run art -- initiative planning-repair <delivery-id> <payload.json>
       route: POST /v1/delivery-initiatives/{delivery_id}/plan/repair
       purpose: retarget, decommit, or correct execution posture through one guided repair path
+    - id: review-packet-draft
+      cli: npm run art -- review-packet draft <delivery-id> <output.json> <work-item-id...> [--repo-root <path>...]
+      route: local helper
+      purpose: generate an editable Review Packet draft from repo state before source-backed completion evidence is finalized
+    - id: review-packet-validate
+      cli: npm run art -- review-packet validate <packet.json>
+      route: POST /v1/delivery-art/review-packets/validate
+      purpose: validate Review Packet schema, item coverage, changed surfaces, validation evidence, and rollback boundary
+    - id: review-packet-readiness
+      cli: npm run art -- review-packet readiness <packet.json>
+      route: POST /v1/delivery-art/review-packets/readiness
+      purpose: prove a source-backed Landing Unit is ready to merge before completion evidence is used
+    - id: review-packet-finalize
+      cli: npm run art -- review-packet finalize <packet.json>
+      route: POST /v1/delivery-art/review-packets/finalize
+      purpose: finalize merged or accepted Review Packet evidence and produce the digest used for ART completion
+    - id: landing-unit-status
+      cli: npm run art -- landing-unit status <packet.json>
+      route: local helper
+      purpose: compute covered child status, parent closeout candidates, generated payload preflight, WGCF readiness, and projection checkpoint posture
+    - id: landing-unit-dry-run
+      cli: npm run art -- landing-unit dry-run <packet.json>
+      route: local helper
+      purpose: prove landing-unit child completion and parent closeout actions without mutating ART
+    - id: landing-unit-submit
+      cli: npm run art -- landing-unit submit <packet.json>
+      route: local helper plus OOS completion routes
+      purpose: submit finalized Review Packet evidence, complete covered children, close eligible stale-open parents, and report projection checkpoint state
     - id: item-complete
       cli: npm run art -- item complete <work-item-id> <payload.json>
       route: POST /v1/delivery-work-items/{work_item_id}/complete
@@ -125,6 +187,10 @@ delivery_art_operator_path:
       outcome: operator can resume the ART lane with one bootstrap command
     - id: one-command-workflow-health
       outcome: operator can see roadmap and PM² projection health with one command
+    - id: one-command-active-session
+      outcome: operator can resume an active initiative with one bounded active-session packet instead of rereading the full execution summary
+    - id: bounded-evidence-packets
+      outcome: operator can inspect work-item, initiative, and Review Packet evidence posture through bounded packets
     - id: one-command-quality-and-review
       outcome: operator can inspect initiative quality and review readiness without Rails-admin access
     - id: one-command-planning-repair
@@ -133,6 +199,8 @@ delivery_art_operator_path:
       outcome: active blockers can be recorded and cleared through one bounded operator path instead of chat memory or generic status edits
     - id: one-command-item-close
       outcome: item completion and stale-open closeout each have one bounded operator path
+    - id: one-command-landing-unit-closeout
+      outcome: landing-unit child completion, parent closeout candidates, generated payload preflight, WGCF receipts, and projection checkpoint handling are one command family
     - id: one-command-initiative-close
       outcome: initiative closeout no longer requires reconstructing separate system-demo, Closing, inspect-and-adapt, and done writes
     - id: zero-normal-session-rails
