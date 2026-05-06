@@ -21,6 +21,7 @@ REQUIRED_ACTIONS = {
 REQUIRED_PROFILE_KEYS = {
     "schema_version",
     "profile_id",
+    "lane_class",
     "summary",
     "runtime",
     "testing",
@@ -87,6 +88,7 @@ EXPECTED_PLATFORM_ACCEPTANCE_STATUSES = {
     "suspended",
     "retired",
 }
+EXPECTED_LANE_CLASSES = {"prototype-devint", "integration-devint", "governed-devint"}
 REQUIRED_BUILD_ADMISSION_KEYS = {
     "approved_by",
     "approved_on",
@@ -213,6 +215,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             + ", ".join(sorted(EXPECTED_PLATFORM_ACCEPTANCE_STATUSES))
         )
     runtime_state_models = set(policy.get("runtime_state_models") or [])
+    lane_classes = {entry.get("id") for entry in policy.get("lane_classes") or []}
+    if lane_classes != EXPECTED_LANE_CLASSES:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: lane_classes must be exactly "
+            + ", ".join(sorted(EXPECTED_LANE_CLASSES))
+        )
     if runtime_state_models != REQUIRED_RUNTIME_STATE_MODELS:
         errors.append(
             "contracts/developer-integration-policy.yaml: runtime_state_models must be exactly disposable, persistent"
@@ -309,6 +317,11 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     for profile_name, payload in sorted(registry["profiles"].items()):
         checked_profiles += 1
         lifecycle = payload["lifecycle"]
+        lane_class = payload.get("lane_class")
+        if lane_class not in EXPECTED_LANE_CLASSES:
+            errors.append(
+                f"contracts/developer-integration-profiles.yaml: {profile_name} lane_class {lane_class!r} is not declared"
+            )
         if lifecycle not in profile_lifecycle["statuses"]:
             errors.append(
                 f"contracts/developer-integration-profiles.yaml: {profile_name} lifecycle {lifecycle!r} is not declared in profile_lifecycle.statuses"
@@ -425,6 +438,10 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         if profile["profile_id"] != profile_name:
             errors.append(
                 f"{profile_path}: profile_id {profile['profile_id']!r} must match registry name {profile_name!r}"
+            )
+        if profile.get("lane_class") != payload.get("lane_class"):
+            errors.append(
+                f"{profile_path}: lane_class must match contracts/developer-integration-profiles.yaml"
             )
         runtime = profile.get("runtime") or {}
         state_model = runtime.get("state_model")

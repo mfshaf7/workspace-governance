@@ -97,6 +97,26 @@
       "type": "authoritative-reference"
     },
     {
+      "from": "workspace-prototype-studio",
+      "to": "workspace-governance",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-prototype-studio",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-prototype-studio",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "workspace-prototype-studio",
+      "to": "operator-orchestration-service",
+      "type": "authoritative-reference"
+    },
+    {
       "from": "platform-engineering",
       "to": "security-architecture",
       "type": "authoritative-reference"

@@ -91,6 +91,36 @@ repos:
         - security-bindings
         - review-coverage
       notes: Active implementation repo for context packet production; local dev-integration runtime launch is active through the platform-owned runner, while governed stage/prod deployment, raw projection, downstream adapters, and approval authority remain blocked.
+  workspace-prototype-studio:
+    lifecycle: active
+    repo_class: product-incubation
+    requires_security_bindings: false
+    security_review_subject: true
+    owns:
+      - prototype and product-incubation source
+      - prototype registry and lifecycle records
+      - design baseline records before graduation
+      - mock and synthetic data fixtures for prototype review
+      - internal and client app prototype scaffolds before graduation
+    must_not_own:
+      - Workspace Delivery ART work-state truth
+      - platform deployment authority
+      - security acceptance
+      - production releases
+      - long-lived product source after graduation
+      - real client data by default
+    allowed_authoritative_refs:
+      - workspace-governance
+      - platform-engineering
+      - security-architecture
+      - operator-orchestration-service
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-runtime-source
+      catalog_refs:
+        - component-contracts
+        - review-coverage
+      notes: Prototype Studio owns incubation source and local validation; mature runtime, client-visible, or real-data work must graduate into the appropriate governed owner path before release evidence is accepted.
   platform-engineering:
     lifecycle: active
     repo_class: platform

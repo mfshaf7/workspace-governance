@@ -95,6 +95,16 @@ That means:
   - read first:
     - `context-governance-gateway/AGENTS.md`
     - `context-governance-gateway/README.md`
+- `workspace-prototype-studio/`
+  - owns prototype and product-incubation source for internal tools, future
+    client apps, UI prototypes, backend stubs, design baselines, and
+    graduation records before durable product ownership is assigned
+  - does not own Workspace Delivery ART work-state truth, platform deployment
+    authority, security acceptance, production releases, or long-lived product
+    source after graduation
+  - read first:
+    - `workspace-prototype-studio/AGENTS.md`
+    - `workspace-prototype-studio/README.md`
 - `platform-engineering/`
   - owns shared platform structure, environment contracts, Argo-managed state,
     release governance, and product integration docs
@@ -220,6 +230,10 @@ Only start implementation after that discussion narrows the target design.
   model-safe/operator-safe packets, receipts, and artifact ledger behavior,
   belongs in `context-governance-gateway/`; it must not replace WGCF, OOS,
   platform release authority, or security acceptance.
+- Prototype and product-incubation source, design baselines, mock/synthetic
+  fixtures, and prototype lifecycle records belong in
+  `workspace-prototype-studio/` until the work graduates to Workspace Delivery
+  ART, an existing product repo, a new product repo, or retirement.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.

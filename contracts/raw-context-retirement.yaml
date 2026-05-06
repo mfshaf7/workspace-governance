@@ -138,6 +138,26 @@ raw_context_retirement:
       rollback_requirement: no retirement; this is the native provider path.
       evidence_refs:
         - contracts/repo-rules/context-governance-gateway.yaml
+    - entry_id: prototype-studio-ci-and-preview-output
+      owner_repo: workspace-prototype-studio
+      covered_repos:
+        - workspace-prototype-studio
+      context_behavior_repo_ref: workspace-prototype-studio
+      source_classes:
+        - terminal_output
+        - ci_logs
+        - repo_snapshot
+        - operator_workflow_payload
+      current_raw_context_path: Workspace Prototype Studio validation output, CI logs, prototype registry snapshots, and future prototype preview diagnostics.
+      current_risk: prototype output may grow quickly and can include client-like mock data, design context, local preview diagnostics, or accidental real-data traces if projected raw.
+      target_cgg_path: prototype validation and preview output are packetized through CGG before model projection, preserving failure signals while redacting or denying unsafe context.
+      state: parity-required
+      next_action: prove CGG packet parity for representative validation and preview-diagnostic outputs before retiring raw projection habits.
+      retirement_allowed: true
+      rollback_requirement: rollback remains owner-repo validation and CI logs for maintainers until packet parity and owner closeout are recorded.
+      evidence_refs:
+        - contracts/repo-rules/workspace-prototype-studio.yaml
+        - contracts/context-behavior.yaml
     - entry_id: product-repo-ci-and-debug-output
       owner_repo: openclaw-runtime-distribution
       covered_repos:
