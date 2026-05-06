@@ -262,6 +262,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "command": { "type": "string", "minLength": 1 },
+        "command_template": { "type": "string", "minLength": 1 },
         "working_directory_repo": { "type": "string", "minLength": 1 },
         "validation_tier": {
           "type": "string",

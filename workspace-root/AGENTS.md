@@ -482,8 +482,12 @@ If that evidence cannot be produced, the work is not complete.
   `workspace-governance-control-fabric` catalog receipts:
   - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:workspace-governance --profile local-read-only --tier smoke`
   - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:delivery-art --profile dev-integration --tier scoped --operator-approved`
+  - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope art:delivery-<id> --profile dev-integration --tier scoped --operator-approved`
   - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:platform-runtime --profile dev-integration --tier smoke --operator-approved`
   - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope component:security-review --profile local-read-only --tier smoke`
+- `component:delivery-art` proves the broker and component-level ART surface.
+  Use `art:delivery-<id>` when evidence must include scoped OpenProject ART
+  quality for one concrete initiative.
 - The direct commands below remain source-authority, owner-repo, and rollback
   entrypoints. Use them when WGCF is blocked, the target scope is not admitted
   to WGCF, or the owner repo needs pre-landing validation.

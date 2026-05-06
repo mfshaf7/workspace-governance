@@ -39,6 +39,12 @@ WGCF_PLANNER_SCOPE_PREFIXES = (
     "release:",
     "changed-file:",
 )
+WGCF_COMMAND_TEMPLATE_FIELDS = {
+    "art_delivery_id",
+    "target_id",
+    "target_scope",
+    "target_type",
+}
 
 
 def _is_wgcf_planner_scope(value: str) -> bool:
@@ -59,6 +65,16 @@ def _has_shell_control_token(command: str) -> bool:
     except ValueError:
         return True
     return any(part in {"&&", "||", "|", ";"} for part in parts)
+
+
+def _command_template_fields(command: str) -> set[str]:
+    if command.count("{") != command.count("}"):
+        return {"<unbalanced-braces>"}
+    fields = set(re.findall(r"{([^{}]+)}", command))
+    stripped = re.sub(r"{[^{}]+}", "", command)
+    if "{" in stripped or "}" in stripped:
+        fields.add("<malformed-braces>")
+    return fields
 
 
 def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -> None:
@@ -1831,12 +1847,29 @@ def main() -> int:
                     f"{entry_id!r} has invalid wgcf_invocation.scopes "
                     + ", ".join(invalid_invocation_scopes)
                 )
-            if not (invocation_scopes & (representative_planner_scopes | {"workspace"})):
+            has_art_target_scope = any(scope.startswith("art:") for scope in invocation_scopes)
+            if not (
+                invocation_scopes & (representative_planner_scopes | {"workspace"})
+                or has_art_target_scope
+            ):
                 errors.append(
                     "contracts/governance-validator-catalog.yaml: entry "
-                    f"{entry_id!r} wgcf_invocation must include workspace or one representative planner_scope"
+                    f"{entry_id!r} wgcf_invocation must include workspace, one representative planner_scope, or an ART target scope"
                 )
-            effective_command = invocation.get("command") or payload["command"]
+            effective_command = invocation.get("command_template") or invocation.get("command") or payload["command"]
+            template_fields = _command_template_fields(effective_command)
+            invalid_template_fields = sorted(template_fields - WGCF_COMMAND_TEMPLATE_FIELDS)
+            if invalid_template_fields:
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation effective command contains unsupported template fields "
+                    + ", ".join(invalid_template_fields)
+                )
+            if "art_delivery_id" in template_fields and not has_art_target_scope:
+                errors.append(
+                    "contracts/governance-validator-catalog.yaml: entry "
+                    f"{entry_id!r} wgcf_invocation command_template uses art_delivery_id without an art:* scope"
+                )
             if "<" in effective_command or ">" in effective_command:
                 errors.append(
                     "contracts/governance-validator-catalog.yaml: entry "

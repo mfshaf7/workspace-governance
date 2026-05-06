@@ -161,6 +161,29 @@ Use this order:
 5. `npm run art -- initiative review-pack <delivery-id>`
    - inspect initiative review readiness, stale-open candidates, and closeout posture
 
+## 90 Percent Optimization Target
+
+ART #650 records the accepted optimization target for reducing repeated ART
+reads, manual evidence reconstruction, and large raw-output projection.
+
+The following surfaces are planned, not yet canonical:
+
+- compact session packet: one bounded broker packet for active front, evidence
+  refs, projection state, WGCF receipt refs, and next safe commands
+- evidence packet: compact work-item, initiative, and Review Packet evidence
+  reads without reopening raw descriptions, PRs, and validation logs
+- landing-unit status and close: one Review Packet driven workflow for child
+  completion, parent stale-open readiness, and projection checkpoint handling
+- WGCF validation-plan receipt: one validation plan per landing unit instead of
+  repeated direct validator discovery
+- CGG context packet refs: packetized refs and digests for oversized ART, CI,
+  terminal, and runtime output
+
+These surfaces become normal operator paths only after OOS implements the API
+and CLI contracts, WGCF and CGG seams preserve their authority boundaries,
+dev-integration smoke passes, and the first source-backed landing unit is
+dogfooded through the optimized path.
+
 ## Guided Write Intents
 
 Normal guided write paths are:

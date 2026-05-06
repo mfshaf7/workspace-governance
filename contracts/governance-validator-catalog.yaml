@@ -992,7 +992,7 @@ governance_validator_catalog:
         working_directory_repo: operator-orchestration-service
         scopes:
           - component:delivery-art
-          - art:delivery-498
+          - art:delivery-*
         timeout_seconds: 120
         output_budget_bytes: 40000
       wgcf_posture: profile-gated-read-only
@@ -1066,12 +1066,11 @@ governance_validator_catalog:
       included_in_validation_matrix: false
       wgcf_invocation:
         enabled: true
-        command: OPENPROJECT_NAMESPACE=devint-accepted-idea-delivery-mfshaf7 make openproject-check-delivery-art-quality TARGET_EPIC_ID=498
+        command_template: OPENPROJECT_NAMESPACE=devint-accepted-idea-delivery-mfshaf7 make openproject-check-delivery-art-quality TARGET_EPIC_ID={art_delivery_id}
         validation_tier: scoped
         working_directory_repo: platform-engineering
         scopes:
-          - component:delivery-art
-          - art:delivery-498
+          - art:delivery-*
         timeout_seconds: 120
         output_budget_bytes: 50000
       wgcf_posture: profile-gated-wgcf-invocation
