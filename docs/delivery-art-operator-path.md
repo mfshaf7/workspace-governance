@@ -146,43 +146,73 @@ evidence.
 Feature and Epic closeout must verify coverage: every child is either covered
 by a finalized Review Packet or explicitly marked as non-source evidence only.
 
-## Read Hierarchy
+## Optimized Read Hierarchy
 
-Use this order:
+Use this order for normal active ART work:
 
 1. `npm run art -- bootstrap`
-   - resume the active ART lane and assignable principals
-2. `npm run art -- workflow-health`
-   - confirm roadmap and PM² projection health
-3. `npm run art -- initiative planning <delivery-id>`
-   - identify the active committed front when the next item is not already known
-4. `npm run art -- item continuation <work-item-id>`
-   - resume one concrete leaf item
-5. `npm run art -- initiative review-pack <delivery-id>`
-   - inspect initiative review readiness, stale-open candidates, and closeout posture
+   - resume the active ART lane and assignable principals at the start of a
+     local session
+2. `npm run art -- initiative active-session <delivery-id>`
+   - resume a known active initiative with bounded front state, quality drift,
+     stale-open candidates, closeout readiness, and full-output refs
+3. `npm run art -- item continuation <work-item-id>`
+   - resume one concrete leaf item before implementation work starts
+4. `npm run art -- item evidence-packet <work-item-id>`
+   - inspect one work item's evidence posture without rereading raw
+     descriptions or the full initiative tree
+5. `npm run art -- initiative evidence-packet <delivery-id>`
+   - inspect initiative-level evidence posture without reopening raw
+     descriptions, PRs, and validation logs
+6. `npm run art -- review-packet evidence-packet <packet.json>`
+   - inspect one Review Packet's coverage and evidence posture before using it
+     for closeout
 
-## 90 Percent Optimization Target
+Use `npm run art -- workflow-health` when roadmap, PM² projection, or broker
+health is the question. Use `npm run art -- initiative planning <delivery-id>`
+when the active front is unknown or planning state must be repaired. Use
+`npm run art -- initiative review-pack <delivery-id>` for initiative review,
+stale-open, or final closeout posture.
+
+## 90 Percent Optimized Path
 
 ART #650 records the accepted optimization target for reducing repeated ART
 reads, manual evidence reconstruction, and large raw-output projection.
 
-The following surfaces are planned, not yet canonical:
+The operator path is now active for the OOS-owned broker surfaces that were
+implemented and dogfooded through #650:
 
-- compact session packet: one bounded broker packet for active front, evidence
-  refs, projection state, WGCF receipt refs, and next safe commands
+- active-session packet: one bounded broker packet for active front, quality
+  drift, stale-open candidates, closeout readiness, and full-output refs
 - evidence packet: compact work-item, initiative, and Review Packet evidence
   reads without reopening raw descriptions, PRs, and validation logs
-- landing-unit status and close: one Review Packet driven workflow for child
-  completion, parent stale-open readiness, and projection checkpoint handling
-- WGCF validation-plan receipt: one validation plan per landing unit instead of
-  repeated direct validator discovery
-- CGG context packet refs: packetized refs and digests for oversized ART, CI,
-  terminal, and runtime output
+- Review Packet workflow: draft, validate, readiness, evidence-packet, and
+  finalize commands for source-backed completion evidence
+- landing-unit status, dry-run, and submit: one Review Packet driven workflow
+  for child completion, parent stale-open readiness, generated-payload
+  preflight, WGCF readiness receipts, and projection checkpoint handling
+- optional CGG packet refs: `ART_CGG_PACKETING=enabled` can add packet refs and
+  digests for oversized ART CLI output while preserving the `.art/outputs`
+  local artifact path
 
-These surfaces become normal operator paths only after OOS implements the API
-and CLI contracts, WGCF and CGG seams preserve their authority boundaries,
-dev-integration smoke passes, and the first source-backed landing unit is
-dogfooded through the optimized path.
+First dogfood measurement:
+
+- older active-front evidence read: `npm run art -- initiative
+  execution-summary 650 --json` produced 65,648 bytes
+- optimized active-front read: `npm run art -- initiative active-session 650
+  --json` produced 9,162 bytes
+- measured reduction for that read path: 86%
+- same dogfood run closed #668 through `landing-unit status`, `landing-unit
+  dry-run`, and `landing-unit submit` with generated payload preflight valid,
+  WGCF receipt `art-readiness-receipt:f5ae7cd83f2b73fa7b995370`, and clean
+  projection state
+
+The target is not complete for every context source yet. The remaining
+optimization work is to replace repeated validator discovery with WGCF
+validation-plan receipts and make CGG packet projection the normal path for
+oversized ART, CI, terminal, and runtime output. Until that lands, raw large
+output should stay behind `.art/outputs` refs or CGG packet refs instead of
+being copied into operator or model context.
 
 ## Guided Write Intents
 
@@ -190,6 +220,13 @@ Normal guided write paths are:
 
 - `npm run art -- item blocker <work-item-id> <payload.json>`
 - `npm run art -- initiative planning-repair <delivery-id> <payload.json>`
+- `npm run art -- review-packet draft <delivery-id> <output.json> <work-item-id...> [--repo-root <path>...]`
+- `npm run art -- review-packet validate <packet.json>`
+- `npm run art -- review-packet readiness <packet.json>`
+- `npm run art -- review-packet finalize <packet.json>`
+- `npm run art -- landing-unit status <packet.json>`
+- `npm run art -- landing-unit dry-run <packet.json>`
+- `npm run art -- landing-unit submit <packet.json>`
 - `npm run art -- item complete <work-item-id> <payload.json>`
 - `npm run art -- item stale-open-close <work-item-id> <payload.json>`
 - `npm run art -- initiative close <delivery-id> <payload.json>`
@@ -294,11 +331,17 @@ OpenProject platform-admin only:
 The operator path is only considered complete when all of these are true:
 
 - ART lane bootstrap is one command
-- workflow health is one command
-- initiative review readiness is one command
+- active initiative resume is one bounded active-session packet
+- workflow health is one command when health is the question
+- initiative evidence posture is one bounded evidence packet
+- Review Packet readiness and finalization are one command family
 - planning repair is one guided write path
 - blocker management is one guided write path
-- item completion and stale-open close each have one guided write path
+- landing-unit child completion, parent closeout candidates, generated payload
+  preflight, WGCF receipts, and projection checkpoint are one guided command
+  family
+- direct item completion and stale-open close remain bounded fallback write
+  paths for non-Review Packet closure
 - initiative closeout is one guided write path
 - normal ART sessions do not use direct Rails query
 - normal ART sessions do not use raw pod exec plus ad hoc node one-liners
