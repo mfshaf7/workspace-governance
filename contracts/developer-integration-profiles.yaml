@@ -229,6 +229,74 @@ profiles:
       - down
       - reset
       - promote_check
+  governed-ai-gateway:
+    lifecycle: active
+    owner_repo: platform-engineering
+    summary: Active local-k3s dev-integration lane for the platform governed AI access-plane gateway.
+    purpose: Prove the governed AI gateway runtime, caller identity boundary, gateway-owned provider custody, local audit ledger emission, and gateway-only consumer egress path before any workspace consumer can use ai-suggested intake records.
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: dev-integration-profile
+      catalog_refs:
+        - developer-integration
+        - devint-runner-read
+        - security-bindings
+        - review-coverage
+      notes: WGCF may consume read-only dev-integration proof for the gateway profile, but platform-engineering owns runtime and provider custody while security-architecture owns activation acceptance.
+    profile_path: dev-integration/profiles/governed-ai-gateway/profile.yaml
+    runtime_owner: platform-engineering
+    security_owner: security-architecture
+    requested_by: mfshaf7
+    requested_on: "2026-05-06"
+    request_record:
+      system: openproject
+      ref: openproject://work_packages/412
+    build_admission:
+      approved_by: mfshaf7
+      approved_on: "2026-05-06"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/pending-governed-ai-gateway-devint-runtime
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/platform/2026-05-06-governed-ai-gateway-devint-runtime.md
+      implementation_allowed: true
+      self_serve_launch_allowed: false
+      work_item_ref: openproject://work_packages/412
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-05-06"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/pending-governed-ai-gateway-devint-runtime
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/platform/2026-05-06-governed-ai-gateway-devint-runtime.md
+    shared_dependencies:
+      - platform-engineering
+      - security-architecture
+    source_repos:
+      - platform-engineering
+      - workspace-governance
+      - security-architecture
+    stage_handoff:
+      owner_repo: platform-engineering
+      governed_surface: governed-ai-gateway-stage
+      required_checks:
+        - active dev-integration profile admission
+        - gateway API readiness
+        - caller identity boundary
+        - provider credential custody
+        - audit ledger emission
+        - gateway-only consumer egress proof
+        - direct-provider sentinel denial
+        - current security delta review
+    actions:
+      - up
+      - status
+      - access
+      - smoke
+      - down
+      - reset
+      - promote_check
   idea-workflow:
     lifecycle: active
     owner_repo: operator-orchestration-service

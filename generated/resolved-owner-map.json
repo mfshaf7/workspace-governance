@@ -52,6 +52,24 @@
         "wgcf_graph_role": "shared-platform-component"
       }
     },
+    "governed-ai-gateway": {
+      "component_class": "shared-platform",
+      "lifecycle": "active",
+      "owner_repo": "platform-engineering",
+      "product": null,
+      "security_owner": "security-architecture",
+      "validation_behavior": {
+        "catalog_refs": [
+          "developer-integration",
+          "devint-runner-read",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Platform-owned governed AI access-plane gateway, admitted from the prior ai-access-plane intake proposal into the active component inventory. Local dev-integration profile proof may be consumed as readiness input, but live model-profile activation remains blocked until platform, security, and workspace consumer gates pass.",
+        "posture": "profile-gated-external-owner",
+        "wgcf_graph_role": "shared-platform-component"
+      }
+    },
     "host-control-plugin": {
       "component_class": "product-plugin",
       "interface_contract": {

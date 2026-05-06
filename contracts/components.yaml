@@ -98,6 +98,21 @@ components:
         - security-bindings
         - review-coverage
       notes: Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF through an active local dev-integration profile; it still does not own WGCF validation, ART mutation, platform release, security acceptance, governed stage/prod deployment, or model invocation.
+  governed-ai-gateway:
+    lifecycle: active
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    product: null
+    security_owner: security-architecture
+    validation_behavior:
+      posture: profile-gated-external-owner
+      wgcf_graph_role: shared-platform-component
+      catalog_refs:
+        - developer-integration
+        - devint-runner-read
+        - security-bindings
+        - review-coverage
+      notes: Platform-owned governed AI access-plane gateway, admitted from the prior ai-access-plane intake proposal into the active component inventory. Local dev-integration profile proof may be consumed as readiness input, but live model-profile activation remains blocked until platform, security, and workspace consumer gates pass.
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime
