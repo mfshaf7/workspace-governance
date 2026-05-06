@@ -4,6 +4,7 @@
   "required": [
     "schema_version",
     "lane",
+    "lane_classes",
     "profile_lifecycle",
     "request_admission",
     "source_state",
@@ -38,6 +39,20 @@
         "governed_handoff_target": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false
+    },
+    "lane_classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "purpose", "governed_runtime_evidence"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "governed_runtime_evidence": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
     },
     "profile_lifecycle": {
       "type": "object",

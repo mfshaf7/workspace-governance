@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.wgcf/
 
 # Local session continuity state. Keep zero or one current handoff only.
 docs/archive/session-handoff-*.md

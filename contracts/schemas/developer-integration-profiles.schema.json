@@ -11,6 +11,7 @@
         "type": "object",
         "required": [
           "lifecycle",
+          "lane_class",
           "owner_repo",
           "summary",
           "purpose",
@@ -28,6 +29,7 @@
         ],
         "properties": {
           "lifecycle": { "type": "string", "minLength": 1 },
+          "lane_class": { "type": "string", "minLength": 1 },
           "owner_repo": { "type": "string", "minLength": 1 },
           "summary": { "type": "string", "minLength": 1 },
           "purpose": { "type": "string", "minLength": 1 },

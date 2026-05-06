@@ -6,6 +6,16 @@ lane:
   delivery_model: local-ungoverned
   runtime_target: local-k3s
   governed_handoff_target: stage
+lane_classes:
+  - id: prototype-devint
+    purpose: Fast prototype preview for internal tools, client app concepts, UI prototypes, and UI-plus-backend experiments before graduation.
+    governed_runtime_evidence: false
+  - id: integration-devint
+    purpose: Fast cross-repo or workflow integration rehearsal that is not yet governed runtime evidence.
+    governed_runtime_evidence: false
+  - id: governed-devint
+    purpose: Local proof lane for an admitted governed component or workflow before stage handoff.
+    governed_runtime_evidence: false
 profile_lifecycle:
   statuses:
     - proposed

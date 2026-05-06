@@ -1,0 +1,78 @@
+schema_version: 1
+repo: workspace-prototype-studio
+lifecycle: active
+required_repo_refs:
+  - workspace-governance
+  - platform-engineering
+  - security-architecture
+  - operator-orchestration-service
+required_patterns:
+  readme:
+    - Workspace Prototype Studio
+    - internal tools
+    - client apps
+    - graduation
+  agents:
+    - lifecycle
+    - visibility tier
+    - data mode
+    - mutation boundary
+forbidden_patterns:
+  readme:
+    - production release authority
+  agents:
+    - real client data by default
+review_control_requirements:
+  guidance_files:
+    - path: AGENTS.md
+      heading: "## Review Guidelines"
+      required_terms:
+        - lifecycle state
+        - visibility tier
+        - data mode
+        - mutation boundary
+        - security triggers
+  required_github_paths:
+    - .github/CODEOWNERS
+    - .github/pull_request_template.md
+  required_validation_paths:
+    - .github/workflows/validate.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_pr_template_sections:
+    - "## Summary"
+    - "## Prototype Governance"
+    - "## Security Triggers"
+    - "## Validation"
+    - "## Graduation Impact"
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/security-and-data-boundaries.md
+  review_output_path: docs/reviews/components/2026-05-06-workspace-prototype-studio-product-incubation-baseline.md
+  required_artifacts:
+    - id: prototype-studio-security-view
+      path: docs/architecture/components/workspace-prototype-studio/README.md
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      required_in_docs:
+        - readme
+        - agents
+  delta_review_triggers:
+    - id: prototype-real-data-or-client-visible
+      summary: Prototype changes introduce real data, client-visible exposure, or mutable external systems.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+      path_globs:
+        - prototypes.yaml
+        - docs/prototypes/**
+        - apps/**
+        - services/**
+      review_subjects:
+        - inventory_section: repos
+          name: workspace-prototype-studio

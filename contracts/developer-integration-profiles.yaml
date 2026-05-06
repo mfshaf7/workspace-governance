@@ -2,6 +2,7 @@ schema_version: 1
 profiles:
   accepted-idea-delivery:
     lifecycle: active
+    lane_class: governed-devint
     owner_repo: operator-orchestration-service
     summary: Persistent local-k3s dev-integration workbench for the accepted-idea delivery broker and OpenProject ART operator surfaces.
     purpose: Preserve the current accepted-idea delivery working lane for local ART execution, broker reads, and operator access while keeping shared smoke read-only and moving mutating consume rehearsal into a disposable companion profile.
@@ -58,6 +59,7 @@ profiles:
       - promote_check
   accepted-idea-delivery-mutation-smoke:
     lifecycle: active
+    lane_class: integration-devint
     owner_repo: operator-orchestration-service
     summary: Disposable local-k3s dev-integration profile for isolated accepted-idea consume and backlink smoke away from the persistent ART lane.
     purpose: Run mutating accepted-idea delivery smoke against a disposable local runtime so test artifacts never land in the persistent accepted-idea-delivery working lane.
@@ -105,6 +107,7 @@ profiles:
       - promote_check
   governance-control-fabric:
     lifecycle: active
+    lane_class: governed-devint
     owner_repo: workspace-governance-control-fabric
     summary: Persistent local-k3s dev-integration profile for the Workspace
       Governance Control Fabric API runtime and PostgreSQL metadata store.
@@ -163,6 +166,7 @@ profiles:
       - promote_check
   context-governance-gateway:
     lifecycle: active
+    lane_class: governed-devint
     owner_repo: context-governance-gateway
     summary: Active local-k3s dev-integration lane for Context Governance Gateway service-mode proof.
     purpose: Authorize self-serve local CGG API, worker, PostgreSQL, MinIO/S3-compatible artifact custody, packet receipt, and audit-ledger proof through the shared platform runner after owner, platform, and security gates, without treating the profile as governed stage or production readiness.
@@ -231,6 +235,7 @@ profiles:
       - promote_check
   governed-ai-gateway:
     lifecycle: active
+    lane_class: governed-devint
     owner_repo: platform-engineering
     summary: Active local-k3s dev-integration lane for the platform governed AI access-plane gateway.
     purpose: Prove the governed AI gateway runtime, caller identity boundary, gateway-owned provider custody, local audit ledger emission, and gateway-only consumer egress path before any workspace consumer can use ai-suggested intake records.
@@ -299,6 +304,7 @@ profiles:
       - promote_check
   idea-workflow:
     lifecycle: active
+    lane_class: integration-devint
     owner_repo: operator-orchestration-service
     summary: Local-k3s dev-integration profile for the broker-owned idea workflow, local OpenProject backlog model, and Telegram command harness.
     purpose: Fast local rehearsal of the broker-owned idea workflow before governed stage rehearsal and rollout.

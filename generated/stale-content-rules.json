@@ -156,5 +156,27 @@
     "targets": [
       "AGENTS.md"
     ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "workspace-prototype-studio-readme-forbidden",
+    "pattern": "production release authority",
+    "repo_names": [
+      "workspace-prototype-studio"
+    ],
+    "targets": [
+      "README.md"
+    ]
+  },
+  {
+    "exclude_paths": [],
+    "id": "workspace-prototype-studio-agents-forbidden",
+    "pattern": "real client data by default",
+    "repo_names": [
+      "workspace-prototype-studio"
+    ],
+    "targets": [
+      "AGENTS.md"
+    ]
   }
 ]

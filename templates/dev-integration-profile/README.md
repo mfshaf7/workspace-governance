@@ -49,6 +49,13 @@ Use `persistent` only when the local lane is expected to hold a long-running
 project tree whose data should survive normal `devint-down` / `devint-up`
 cycles. `devint-reset` remains the destructive wipe path.
 
+Each profile must also declare one `lane_class`:
+
+- `prototype-devint` for prototype preview before graduation
+- `integration-devint` for fast workflow or API integration rehearsal
+- `governed-devint` for admitted governed component or workflow proof before
+  stage handoff
+
 Profile-owned docs should include, at minimum:
 
 - `## Smoke Scope`
@@ -80,6 +87,7 @@ Required profile keys:
 
 - `schema_version`
 - `profile_id`
+- `lane_class`
 - `summary`
 - `runtime`
 - `testing`

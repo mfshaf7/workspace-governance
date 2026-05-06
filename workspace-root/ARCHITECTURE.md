@@ -13,8 +13,8 @@ Use it first for workspace orientation. Then route into the owning repo.
 ## Current System Shape
 
 The workspace currently has three durable authority planes, two active
-governance runtime implementation components, plus one fast local iteration
-lane:
+governance runtime implementation components, one product-incubation lane, plus
+one fast local iteration lane:
 
 - workspace governance
   - `workspace-governance/`
@@ -38,6 +38,13 @@ lane:
     approval authority remain blocked behind later platform and security gates
   - does not replace WGCF, OOS, platform release authority, security
     acceptance, or any governed AI access path
+- workspace prototype studio
+  - `workspace-prototype-studio/`
+  - owns prototype and product-incubation source for internal tools, future
+    client apps, UI prototypes, backend stubs, design baselines, and
+    graduation records
+  - does not own production releases, platform deployment authority, security
+    acceptance, or long-lived product source after graduation
 - shared platform and release authority
   - `platform-engineering/`
   - owns environment contracts, pinned SHAs and digests, Argo state, product
@@ -80,6 +87,8 @@ Primary source:
   - governance runtime implementation fabric
 - `context-governance-gateway/`
   - operational context admission implementation
+- `workspace-prototype-studio/`
+  - prototype and product-incubation source lane
 - `platform-engineering/`
   - shared platform and release authority
 - `security-architecture/`
@@ -234,6 +243,9 @@ operator interaction layer, not just a UI skin.
 - operational context admission, model-safe/operator-safe context packets,
   context redaction, projection, receipts, or CGG Phase 1 local foundation
   - [context-governance-gateway/README.md](/home/mfshaf7/projects/context-governance-gateway/README.md)
+- prototype and product-incubation source, UI prototypes, design baselines,
+  client app sketches, or graduation records
+  - [workspace-prototype-studio/README.md](/home/mfshaf7/projects/workspace-prototype-studio/README.md)
 - Codex GitHub review, PR flow, or read-only control-plane summary
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration

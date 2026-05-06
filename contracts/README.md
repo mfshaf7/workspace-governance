@@ -241,6 +241,8 @@ Current model:
   acceptance and any flagged security review references are present
 - a profile does not become launchable until active admission records runnable
   owner commands and smoke evidence
+- every profile must declare whether it is `prototype-devint`,
+  `integration-devint`, or `governed-devint`
 - persistent profiles must keep the shared `devint-smoke` action read-only
 - if a workflow still needs mutating smoke, admit and use a separate
   disposable companion profile instead of writing test artifacts into the

@@ -149,6 +149,22 @@ context_behavior:
         - contracts/developer-integration-profiles.yaml
       denied_without_cgg:
         - raw context output from CGG tests or service mode projected without its own packet and receipt
+    - repo: workspace-prototype-studio
+      declaration_status: product-incubation-source
+      owner_repo: workspace-prototype-studio
+      source_classes:
+        - repo_snapshot
+        - terminal_output
+        - ci_logs
+        - operator_workflow_payload
+      default_projection: model-safe-packet
+      cgg_role: prototype source context consumer; large prototype, CI, or runtime output should be packetized before model projection.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/repo-rules/workspace-prototype-studio.yaml
+      denied_without_cgg:
+        - raw prototype runtime output copied into model prompts after packet parity exists
+        - client-visible or real-data prototype context projected without redaction and receipt evidence
     - repo: platform-engineering
       declaration_status: platform-authority-consumer
       owner_repo: platform-engineering
