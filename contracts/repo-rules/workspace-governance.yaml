@@ -59,3 +59,9 @@ operator_workflow_requirements:
       required_in_docs:
         - readme
         - agents
+    - id: instruction-and-skill-governance
+      summary: Primary operator procedure for changing AGENTS files, registered skills, installed skill state, and workspace instruction governance.
+      primary_surface_path: docs/instruction-and-skill-governance.md
+      required_in_docs:
+        - readme
+        - agents

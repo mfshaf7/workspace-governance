@@ -38,6 +38,10 @@ workspace root and does not name the owning repo.
      decomposition
    - route repeated workflow misses to improvement candidates
    - classify plumbing by impact, not by name
+   - route AGENTS, registered skill source, installed skill behavior, and
+     workspace instruction governance changes to `workspace-governance` unless
+     the machine-readable skill owner says a repo-owned skill source is the
+     implementation home
    - for source-backed work, choose the Landing Unit separately from the ART
      item; ART decomposition, Git branches, and completion evidence are not
      one-to-one
@@ -49,6 +53,9 @@ workspace root and does not name the owning repo.
 4. Before proposing a new control, workflow, validator, skill, product surface,
    or architecture capability, run `docs/recommendation-preflight.md` and state
    whether the posture is `reuse`, `extend`, `replace`, or `new`.
+   - if the request is about AGENTS or skills, use
+     `docs/instruction-and-skill-governance.md` and the
+     `instruction-governance-auditor` workflow before editing source
 5. Pick the owner repo from the contracts, not from convenience.
 6. Check whether the task already has an `active` `dev-integration` profile and
    prefer that lane for fast workflow or API iteration before stage.

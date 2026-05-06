@@ -27,6 +27,13 @@ Use this skill when a serious initiative is already running inside
 1. Start from the ART, not from chat memory.
    - if the active `Epic` is already known, start with its fast active-front
      read and a scoped ART-quality check for that `Epic`
+   - for known initiatives, prefer optimized packet reads:
+     `npm run art -- initiative active-session <delivery-id>`,
+     `npm run art -- initiative evidence-packet <delivery-id>`, and
+     `npm run art -- item evidence-packet <work-item-id>`
+   - for oversized ART output, CI logs, terminal output, or sensitive
+     operational context, use `context-admission-operator` and CGG packet refs
+     instead of pasting raw output into the model context
    - if the target work item is already known, use the broker work-item
      continuation read before scanning the full execution tree
    - use the deep execution read only when the full evidence-grade tree is
@@ -397,8 +404,11 @@ Use this skill when a serious initiative is already running inside
   continuation-context first.
 - Do not treat repo code or contracts as the work queue; they are the
   implementation truth, not the planning truth.
-- Do not turn broker access into a wrapper-first workflow; use direct
-  `k3s kubectl` broker read and write calls by default in local delivery work.
+- Do not turn raw broker access into the normal workflow. Use the documented
+  `npm run art -- ...` broker CLI, optimized active-session/evidence packets,
+  Review Packet commands, and landing-unit closeout commands first. Raw
+  `k3s kubectl exec ... node -e ...` broker calls are fallback-only debugging
+  paths when the CLI or broker runtime itself is under test.
 - Do not guess broker caller auth headers during delivery work; reuse the
   broker pod's own allowed caller id and shared secret from environment.
 - Do not guess ART assignee or responsible values; read the live assignable

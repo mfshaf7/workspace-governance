@@ -11,6 +11,7 @@ delivery repo.
 - `README.md`
 - `docs/codex-github-review-and-automation.md`
 - `docs/recommendation-preflight.md`
+- `docs/instruction-and-skill-governance.md`
 - `docs/troubleshooting-preflight.md`
 - `docs/delegated-execution.md`
 - `docs/self-improvement-escalation.md`
@@ -26,6 +27,7 @@ delivery repo.
 - generated governance artifacts
 - workspace-level skill source
 - registered repo-owned skill inventory
+- instruction and skill governance controls
 - workspace audit and sync tooling
 - after-action reviews, improvement-candidate triage, and self-improvement validation
 - stale-content audit rules for active docs
@@ -133,6 +135,10 @@ Route those changes back to the owner repos.
 - If a broad workspace-level discussion is being resumed after a restart, check
   local `docs/archive/session-handoff-current.md` if it exists before assuming
   the chat thread is the only source of pending context.
+- When changing `AGENTS.md`, registered skill source, `contracts/skills.yaml`,
+  or installed skill behavior, use `docs/instruction-and-skill-governance.md`
+  first. The work is not complete until source, contracts, root sync, live
+  installed skills, and validation all agree.
 - If a session is likely to restart while meaningful workspace-level pending
   items remain, create or refresh the single local-only handoff record at
   `docs/archive/session-handoff-current.md` before closing.
@@ -229,6 +235,8 @@ regress the workspace control plane:
   new session read stale control-plane guidance
 - live installed skills or managed-skill sync drift after `skills-src/` or
   `contracts/skills.yaml` changes
+- AGENTS or skill changes that skip `docs/instruction-and-skill-governance.md`
+  or leave source, contracts, root sync, and installed skills out of alignment
 - missing improvement candidate, after-action, or durable control updates after
   a repeated mistake or deterministic review/control failure
 - branch lifecycle control regressions that would let stale local branches,
