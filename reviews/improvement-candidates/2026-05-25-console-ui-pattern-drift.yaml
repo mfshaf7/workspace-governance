@@ -1,0 +1,52 @@
+schema_version: 1
+id: 2026-05-25-console-ui-pattern-drift
+title: Console UI pattern drift during Delivery Fronts migration
+recorded_on: '2026-05-25'
+owner_repo: workspace-governance
+summary: Delivery Fronts and Metadata Readiness changes drifted from locked register
+  and modal patterns, creating hidden workflow routing and non-standard status treatment
+  during active UI shaping.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Operator called out repeated drift after Metadata Readiness became hidden
+    by a renamed gate classifier and then received a non-standard custom status pill
+    treatment instead of the locked register pattern.
+  source_refs:
+  - 'conversation: operator asked why drift continued and what else was broken after
+    Fronts/Metadata Readiness edits'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/interface-design-discipline/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires source-of-truth, closest-pattern, state, and baseline checks before interface edits.
+  - type: doc
+    path: workspace-prototype-studio/docs/prototypes/governance-operations-console/design-profile.md
+    owner_repo: workspace-prototype-studio
+    note: Records the Console pattern inventory, status semantics, and visual-baseline approval rules.
+  - type: validator
+    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/teras-list-status-contract.guard.mjs
+    owner_repo: workspace-prototype-studio
+    note: Fails when list and status structures drift from the approved shared contract.
+  note: Closed through the workspace interface-design discipline and the approved
+    Console pattern and status guards.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

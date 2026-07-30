@@ -675,6 +675,11 @@
       "scope": "workspace",
       "source_path": "skills-src/instruction-governance-auditor"
     },
+    "interface-design-discipline": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/interface-design-discipline"
+    },
     "openclaw-governed-delivery": {
       "owner_repo": "platform-engineering",
       "scope": "product",

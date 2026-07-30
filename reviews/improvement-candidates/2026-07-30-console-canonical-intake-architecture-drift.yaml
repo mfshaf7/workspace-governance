@@ -1,0 +1,56 @@
+schema_version: 1
+id: 2026-07-30-console-canonical-intake-architecture-drift
+title: Prevent Console architecture from redefining canonical intake semantics
+recorded_on: '2026-07-30'
+owner_repo: workspace-prototype-studio
+summary: The Governance Operations Console introduced a standalone product-intake
+  domain and downstream handoffs before checking the canonical generic Workspace Governance
+  intake contract.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  finding: The operator identified that the Console architecture had turned generic
+    repo/product/component classification into a product operation and Portfolio precursor.
+    This mismatch propagated through code, diagrams, guards, and tests and demonstrates
+    that canonical owner contracts must be proven before a Console architecture term
+    is approved.
+  source_refs:
+  - 'conversation: operator said mismatched system architecture created drift over
+    drift and required diagrams to remain current'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-prototype-studio/docs/prototypes/governance-operations-console/architecture/system-model.yaml
+    owner_repo: workspace-prototype-studio
+    note: Defines Workspace Governance as canonical intake authority and keeps Console domains as projections and controlled adapters.
+  - type: validator
+    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/workspace-intake-boundary.guard.mjs
+    owner_repo: workspace-prototype-studio
+    note: Rejects reintroduction of a product-specific canonical intake owner inside the Console.
+  - type: test
+    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-runtime/workspace-governance-boundary.test.mjs
+    owner_repo: workspace-prototype-studio
+    note: Proves Console intake integration preserves Workspace Governance ownership.
+  note: Closed through the approved machine-readable architecture, intake-boundary
+    guard, and runtime boundary tests.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

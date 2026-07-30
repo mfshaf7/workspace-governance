@@ -1,0 +1,55 @@
+schema_version: 1
+id: 2026-05-17-prototype-ui-exploration-build-discipline-gap
+title: Prevent full builds during active UI exploration
+recorded_on: '2026-05-17'
+owner_repo: workspace-governance
+summary: During Governance Operations Console visual exploration, Codex ran the full
+  validation gate after small UI changes. That ran Next build, rewrote .next, broke
+  the live preview, and forced a server restart even though focused typecheck plus
+  Playwright was the right exploration proof.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The operator asked why Codex keeps rebuilding every time and then requested
+    the rule be put in the existing contract so the same mistake does not recur.
+  source_refs:
+  - 'conversation: operator asked why Codex keeps rebuilding every time and requested
+    a contract update to prevent recurrence'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: doc
+    path: workspace-prototype-studio/AGENTS.md
+    owner_repo: workspace-prototype-studio
+    note: Separates UI exploration validation from completion checkpoint validation.
+  - type: doc
+    path: workspace-prototype-studio/docs/interface-design-discipline.md
+    owner_repo: workspace-prototype-studio
+    note: Makes preview-preserving focused validation the repo-wide exploration contract.
+  - type: doc
+    path: workspace-prototype-studio/docs/prototypes/_template/design-profile.md
+    owner_repo: workspace-prototype-studio
+    note: Adds the same exploration validation contract to future prototype profiles.
+  - type: doc
+    path: workspace-prototype-studio/docs/prototypes/governance-operations-console/design-profile.md
+    owner_repo: workspace-prototype-studio
+    note: Applies the contract to Governance Operations Console exploration.
+  note: Closed by hardening the existing prototype UI design contracts.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

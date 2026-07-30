@@ -15,6 +15,7 @@ Workspace-owned skills currently cover:
 - dev-integration-first routing for active profiles
 - done criteria
 - instruction and skill governance audits
+- interface design discipline for UI/UX work
 - operator workflow design
 - cross-repo sequencing
 - troubleshooting preflight

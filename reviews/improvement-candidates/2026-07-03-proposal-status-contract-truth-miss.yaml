@@ -1,0 +1,54 @@
+schema_version: 1
+id: 2026-07-03-proposal-status-contract-truth-miss
+title: Prevent Proposal status invention from prototype projection work
+recorded_on: '2026-07-03'
+owner_repo: workspace-governance
+summary: Proposal projection work introduced a prototype-only waiting-on-evidence
+  state before proving the OOS Proposal lifecycle contract.
+regression_of: null
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: late-root-cause-discovery
+  title: A simpler prerequisite, permission, environment, or contract check was proven
+    only after deeper analysis had already expanded.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: During Governance Operations Console Proposal cleanup, a new waiting-on-evidence
+    status was added to the prototype read model before checking the backend/OOS proposal
+    lifecycle. The later contract check showed that OOS supports captured, triaged,
+    parked, owner-assigned, accepted, rejected, implemented, and superseded proposal
+    states, so the prototype state was invented and had to be removed.
+  source_refs:
+  - 'conversation: operator questioned whether waiting-on-evidence is a real supported
+    state'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: doc
+    path: workspace-prototype-studio/docs/prototypes/governance-operations-console/domain-contracts/proposal.md
+    owner_repo: workspace-prototype-studio
+    note: Records Proposal lifecycle vocabulary and canonical authority boundaries.
+  - type: validator
+    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/domains/proposal/projection-boundary.guard.mjs
+    owner_repo: workspace-prototype-studio
+    note: Prevents Proposal presentation state from bypassing its typed projection boundary.
+  - type: test
+    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-projections/proposal-effective-projection.test.mjs
+    owner_repo: workspace-prototype-studio
+    note: Covers Proposal lifecycle and effective-state projection semantics.
+  note: Closed through the approved Proposal domain contract, projection guard,
+    and semantic projection tests.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
