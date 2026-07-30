@@ -1,0 +1,53 @@
+schema_version: 1
+id: 2026-06-21-console-extraction-visual-regression-guard-gap
+title: Prevent console extraction visual regression gaps
+recorded_on: '2026-06-21'
+owner_repo: workspace-governance
+summary: During Governance Operations Console Phase 4 extraction, multiple extracted
+  surfaces lost expected visual or surface behavior and were caught by operator review
+  instead of focused guards.
+regression_of: null
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'The same console extraction workflow needed another corrective follow-up
+    in one session: Model Operations lost its panel treatment, then the operator reported
+    the Prototype surface was broken. The miss shows extracted surface guards must
+    cover visible shell/panel and route behavior, not only module ownership.'
+  source_refs:
+  - 'conversation: operator reported Model Operations lost its panel, then reported
+    the Prototype surface is broken during the same extraction follow-up'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/interface-design-discipline/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires baseline-preserving validation and shared-pattern impact checks during structural UI changes.
+  - type: validator
+    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/whole-console-source.guard.mjs
+    owner_repo: workspace-prototype-studio
+    note: Enforces whole-Console source and visible-surface preservation after extraction.
+  - type: validator
+    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/guard-registry.mjs
+    owner_repo: workspace-prototype-studio
+    note: Keeps the complete approved guard set registered in one executable validation path.
+  note: Closed through baseline-aware interface discipline and the approved whole-Console
+    extraction guard suite.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -32,6 +32,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/instruction-governance-auditor
     scope: workspace
+  interface-design-discipline:
+    owner_repo: workspace-governance
+    source_path: skills-src/interface-design-discipline
+    scope: workspace
   project-delivery-operator:
     owner_repo: workspace-governance
     source_path: skills-src/project-delivery-operator

@@ -1,0 +1,55 @@
+schema_version: 1
+id: 2026-06-06-work-design-status-semantics-baseline-drift
+title: Prevent Work Design status semantics and locked-baseline drift
+recorded_on: '2026-06-06'
+owner_repo: workspace-governance
+summary: 'During Governance Operations Console Work Design cleanup, the operator repeatedly
+  had to correct blocker-recovery and register semantics: Ready must be blue and available-to-work,
+  Done must be green and completed, recovered must not become a package posture, and
+  locked visual components must not be changed while normalizing behavior.'
+regression_of: null
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The same Work Design prototype workflow needed repeated corrective follow-up
+    in one session for status color semantics, selected package projection, blocker
+    recovery result placement, and port/preview normalization. The miss shows the
+    prototype baseline contract needs an explicit preflight before future Work Design
+    changes are treated as safe.
+  source_refs:
+  - 'conversation: operator repeatedly corrected Work Design blocker/register status
+    semantics and locked visual baseline handling before requesting cleanup and normalization'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/interface-design-discipline/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires explicit state semantics and protects approved baselines from unreviewed visual changes.
+  - type: doc
+    path: workspace-prototype-studio/docs/prototypes/governance-operations-console/design-profile.md
+    owner_repo: workspace-prototype-studio
+    note: Defines Console status, baseline, and component-reuse rules.
+  - type: test
+    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-projections/operation-surface-status-projection.test.mjs
+    owner_repo: workspace-prototype-studio
+    note: Proves status projections use the approved operation-surface semantics.
+  note: Closed through the approved Console design profile, workspace interface
+    discipline, and semantic status-projection coverage.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
