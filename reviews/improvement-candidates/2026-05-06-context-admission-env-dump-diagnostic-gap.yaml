@@ -7,7 +7,7 @@ summary: 'During #411 metadata repair, a broad in-pod environment inspection was
   before a targeted read-only OpenProject REST fetch; diagnostic commands must not
   print secret-bearing env when only host/header truth is needed.'
 regression_of: null
-status: triaged
+status: closed
 source_type: manual
 scope:
   related_repos:
@@ -32,10 +32,22 @@ signals:
   - 'session: #411 repair after #679 projection sync dogfood'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/context-behavior.yaml
+    owner_repo: workspace-governance
+    note: Explicitly rejects environment dumps projected without a redaction report.
+  - type: skill
+    path: workspace-governance/skills-src/context-admission-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires redaction of env dumps and secret-like operational context before projection.
+  - type: doc
+    path: workspace-governance/docs/context-admission-governance.md
+    owner_repo: workspace-governance
+    note: Defines the governed capture, redaction, packet, receipt, and raw-path retirement workflow.
+  note: Closed through the workspace context-admission contract and operator skill rather
+    than a diagnostic-command-specific workaround.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-05-09'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null
