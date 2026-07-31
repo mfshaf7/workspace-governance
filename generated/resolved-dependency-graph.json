@@ -315,6 +315,26 @@
       "from": "openproject",
       "to": "platform-engineering",
       "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "security-architecture",
+      "type": "security-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "governance-operations-console",
+      "type": "runtime-input"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "governance-operations-console",
+      "type": "authoritative-reference"
     }
   ]
 }

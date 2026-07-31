@@ -38,12 +38,12 @@ resolution:
     owner_repo: workspace-governance
     note: Requires baseline-preserving validation and shared-pattern impact checks during structural UI changes.
   - type: validator
-    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/whole-console-source.guard.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/scripts/guards/shared/whole-console-source.guard.mjs
+    owner_repo: governance-operations-console
     note: Enforces whole-Console source and visible-surface preservation after extraction.
   - type: validator
-    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/guard-registry.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/scripts/guards/guard-registry.mjs
+    owner_repo: governance-operations-console
     note: Keeps the complete approved guard set registered in one executable validation path.
   note: Closed through baseline-aware interface discipline and the approved whole-Console
     extraction guard suite.

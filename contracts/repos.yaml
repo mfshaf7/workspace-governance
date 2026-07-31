@@ -127,18 +127,18 @@ repos:
     requires_security_bindings: true
     security_review_subject: true
     owns:
-      - Governance Operations Console product ownership guidance
+      - Governance Operations Console durable product source
       - repository review controls and public-source safety validation
-      - future durable application source after reviewed graduation
-      - product-local architecture, interface contracts, tests, and operator documentation after graduation
+      - product-local architecture, interface contracts, tests, and operator documentation
+      - loopback-only owner-repository local preview
     must_not_own:
       - workspace contracts or intake decisions
       - Workspace Delivery ART work-state truth
       - shared operator workflow orchestration
-      - Prototype Studio application source before graduation
+      - Prototype Studio incubation history or graduation records
       - platform deployment or release authority
       - identity or security acceptance
-      - live backend authority from repository registration alone
+      - live backend authority from source graduation alone
     allowed_authoritative_refs:
       - workspace-governance
       - workspace-prototype-studio
@@ -152,7 +152,7 @@ repos:
         - component-contracts
         - security-bindings
         - review-coverage
-      notes: The active repository is the durable product-source target and owns its review controls; Workspace Prototype Studio remains source and local preview authority until the separate reviewed graduation landing completes.
+      notes: The active repository owns the graduated product source, product-local validation, and loopback-only local preview. Workspace Prototype Studio retains incubation history and the graduation record; Platform and Security retain deployment, release, and acceptance authority.
   platform-engineering:
     lifecycle: active
     repo_class: platform

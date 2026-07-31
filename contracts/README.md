@@ -73,6 +73,10 @@ Use these contracts to declare:
   - product maturity, owning repos, and delivery model
   - active products must declare WGCF graph participation and the catalog
     entries that inspect or aggregate their readiness posture
+  - lifecycle `active` may represent a source-owned product whose highest real
+    endpoint is still owner-repository local preview
+  - lifecycle `platform-integrated` or `fully-governed` requires the matching
+    `platform-engineering/products/<product>/README.md` integration surface
 - `components.yaml`
   - shared and product-linked components, operator surface, owner repo, and
     any published interface contract path plus validation entrypoint

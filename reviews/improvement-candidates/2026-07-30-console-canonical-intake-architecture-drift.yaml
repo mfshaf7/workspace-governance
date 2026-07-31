@@ -41,12 +41,12 @@ resolution:
     owner_repo: workspace-prototype-studio
     note: Defines Workspace Governance as canonical intake authority and keeps Console domains as projections and controlled adapters.
   - type: validator
-    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/workspace-intake-boundary.guard.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/scripts/guards/shared/workspace-intake-boundary.guard.mjs
+    owner_repo: governance-operations-console
     note: Rejects reintroduction of a product-specific canonical intake owner inside the Console.
   - type: test
-    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-runtime/workspace-governance-boundary.test.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/tests/operation-runtime/workspace-governance-boundary.test.mjs
+    owner_repo: governance-operations-console
     note: Proves Console intake integration preserves Workspace Governance ownership.
   note: Closed through the approved machine-readable architecture, intake-boundary
     guard, and runtime boundary tests.

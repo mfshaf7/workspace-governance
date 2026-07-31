@@ -38,3 +38,21 @@ products:
         - openproject-quality-check
         - openproject-projection-sync
       notes: OpenProject readiness is platform-integrated and ART-backed; WGCF may consume broker and platform receipts but OOS and platform-engineering retain mutation and runtime authority.
+  governance-operations-console:
+    lifecycle: active
+    platform_owner: platform-engineering
+    security_owner: security-architecture
+    runtime_owner: governance-operations-console
+    source_owners:
+      - governance-operations-console
+    stage_supported: false
+    governed_prod_promotion: false
+    highest_real_endpoint: owner-repository-local-preview
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-readiness-aggregate
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: Product readiness aggregates owner-repository validation, Security review posture, Platform authority, and reviewed delivery evidence. The active product currently proves durable source ownership and loopback-only local preview, not live backend, authenticated identity, governed AI, stage, production, release, public, or client-visible runtime readiness.

@@ -51,7 +51,7 @@ flowchart LR
     PE -. deployment authority .-> WGCF
     PE -. profile and deployment authority .-> CGG
     PE -. prototype devint template authority .-> WPS
-    WPS -. source remains until graduation .-> GOC
+    WPS -. incubation history and graduation record .-> GOC
     SA -. review and risk posture .-> WGCF
     SA -. review and risk posture .-> CGG
     SA -. review and risk posture .-> WPS
@@ -83,9 +83,8 @@ Read this as the workspace control map:
   source lane for internal tools, future client apps, UI prototypes, backend
   stubs, design baselines, and graduation records before durable product
   ownership is assigned.
-- `governance-operations-console` is the active durable owner repository for
-  Console review controls and future product source; the approved application
-  source remains in `workspace-prototype-studio` until reviewed graduation.
+- `governance-operations-console` owns the graduated durable Console source,
+  product-local validation, and loopback-only local preview.
 - `security-architecture` governs security decisions and evidence.
 - `platform-engineering` owns the shared platform plus product integration.
 - OpenClaw is assembled through `openclaw-runtime-distribution`.
@@ -142,7 +141,7 @@ Read this as the workflow path:
 | `workspace-governance-control-fabric/` | Governance runtime fabric | governance graph, validation planning runtime, admission/readiness/receipt/ledger implementation, control-fabric API/worker/CLI | workspace contracts, workspace-root guidance, platform deployment authority, security standards |
 | `context-governance-gateway/` | Context admission runtime implementation | context capture, redaction, projection, model-safe/operator-safe packets, receipts, artifact digests, local ledger behavior, active local dev-integration service-shape proof | workspace contracts, WGCF readiness, ART mutation, platform release authority, security acceptance, custom LLM/scanner/storage/observability backends |
 | `workspace-prototype-studio/` | Prototype and product-incubation lane | prototype registry, lifecycle records, design baselines, mock/synthetic data fixtures, internal and client app prototype scaffolds before graduation | Workspace Delivery ART work-state truth, platform deployment authority, security acceptance, production releases, long-lived product source after graduation |
-| `governance-operations-console/` | Durable Console product owner | repository guidance, review controls, public-source validation, future application source after graduation | current Prototype Studio source, workspace contracts, ART truth, shared orchestration, platform release authority, security acceptance |
+| `governance-operations-console/` | Durable Console product owner | graduated product source, product-local architecture and validation, review controls, public-source validation, loopback-only local preview | workspace contracts, ART truth, shared orchestration, live backend authority, authenticated identity, platform release authority, security acceptance |
 | `platform-engineering/` | Release and platform authority | environment contracts, pinned SHAs, image digests, Argo state, shared component docs, product integration runbooks | Telegram behavior, bridge implementation, security governance |
 | `openclaw-runtime-distribution/` | Active OpenClaw runtime composition | bundled runtime assembly, packaging checks, active `host-control-openclaw-plugin` package, runtime-required workspace templates | environment approval, Argo state, host runtime policy |
 | `openclaw-telegram-enhanced/` | Canonical Telegram source | Telegram UX, routing, approvals, media delivery behavior, Telegram-specific tests | host enforcement, platform rollout, security governance |
@@ -178,8 +177,7 @@ paths:
     owns fast prototype and product-incubation source for internal tools and
     future client apps before graduation
   - [governance-operations-console](/home/mfshaf7/projects/governance-operations-console/README.md)
-    is the active durable Console owner repository, while application source
-    remains in Prototype Studio until reviewed graduation
+    owns the graduated durable Console source and loopback-only local preview
   - [security-architecture](/home/mfshaf7/projects/security-architecture/README.md)
     owns trust-boundary judgment, security standards, and review posture
 - OpenClaw

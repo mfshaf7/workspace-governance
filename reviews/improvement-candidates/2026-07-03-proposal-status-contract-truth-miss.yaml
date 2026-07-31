@@ -39,12 +39,12 @@ resolution:
     owner_repo: workspace-prototype-studio
     note: Records Proposal lifecycle vocabulary and canonical authority boundaries.
   - type: validator
-    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/domains/proposal/projection-boundary.guard.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/scripts/guards/domains/proposal/projection-boundary.guard.mjs
+    owner_repo: governance-operations-console
     note: Prevents Proposal presentation state from bypassing its typed projection boundary.
   - type: test
-    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-projections/proposal-effective-projection.test.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/tests/operation-projections/proposal-effective-projection.test.mjs
+    owner_repo: governance-operations-console
     note: Covers Proposal lifecycle and effective-state projection semantics.
   note: Closed through the approved Proposal domain contract, projection guard,
     and semantic projection tests.

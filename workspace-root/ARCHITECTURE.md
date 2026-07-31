@@ -14,8 +14,7 @@ Use it first for workspace orientation. Then route into the owning repo.
 
 The workspace currently has three durable authority planes, two active
 governance runtime implementation components, one product-incubation lane, one
-provisioned durable product owner awaiting source graduation, plus one fast
-local iteration lane:
+active durable Console product owner, plus one fast local iteration lane:
 
 - workspace governance
   - `workspace-governance/`
@@ -48,10 +47,11 @@ local iteration lane:
     acceptance, or long-lived product source after graduation
 - Governance Operations Console owner repository
   - `governance-operations-console/`
-  - owns repository guidance, review controls, public-source validation, and
-    future durable application source after reviewed graduation
-  - does not yet own the approved application source, local preview runtime,
-    platform release authority, or security acceptance
+  - owns the graduated durable application source, product-local architecture
+    and validation, review controls, public-source validation, and loopback-only
+    local preview
+  - does not own live backend authority, authenticated identity, governed
+    deployment or release authority, or security acceptance
 - shared platform and release authority
   - `platform-engineering/`
   - owns environment contracts, pinned SHAs and digests, Argo state, product
@@ -97,7 +97,7 @@ Primary source:
 - `workspace-prototype-studio/`
   - prototype and product-incubation source lane
 - `governance-operations-console/`
-  - durable Console product owner repository awaiting source graduation
+  - active durable Console product source and loopback-only local preview
 - `platform-engineering/`
   - shared platform and release authority
 - `security-architecture/`
