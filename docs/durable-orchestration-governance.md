@@ -46,6 +46,20 @@ themselves justify durable orchestration.
 Temporal, or owner-activity implementation may present either one as active
 before admission evidence exists.
 
+## Current Runtime Status
+
+- adapter: `temporal`
+- dev-integration profile: `temporal`
+- contract status: `runtime-admission-review`
+- profile lifecycle: `proposed`
+- implementation allowed: no
+- self-serve launch allowed: no
+- governed stage allowed: no
+- production allowed: no
+
+The proposed profile makes the review boundary concrete. It does not create a
+runtime or satisfy any admission gate by itself.
+
 ## Runtime Boundary
 
 Temporal is a replaceable adapter behind OOS. It may appear in architecture,

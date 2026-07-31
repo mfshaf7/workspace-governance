@@ -4,7 +4,7 @@ durable_orchestration:
   defining_art_ref: openproject://work_packages/700
   parent_initiative_ref: openproject://work_packages/698
   primary_operator_surface: docs/durable-orchestration-governance.md
-  contract_status: source-defined-runtime-not-admitted
+  contract_status: runtime-admission-review
   recommendation:
     workspace_contract: new
     aggregate_orchestrator: extend
@@ -198,8 +198,8 @@ durable_orchestration:
       - rollback-and-suspension-proven
     current_runtime:
       adapter: temporal
-      lifecycle: not-admitted
-      dev_integration_profile: null
+      lifecycle: proposed
+      dev_integration_profile: temporal
       shared_runtime_allowed: false
       governed_stage_allowed: false
       production_allowed: false
