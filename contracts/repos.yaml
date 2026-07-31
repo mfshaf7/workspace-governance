@@ -121,6 +121,38 @@ repos:
         - component-contracts
         - review-coverage
       notes: Prototype Studio owns incubation source and local validation; mature runtime, client-visible, or real-data work must graduate into the appropriate governed owner path before release evidence is accepted.
+  governance-operations-console:
+    lifecycle: active
+    repo_class: product-owner
+    requires_security_bindings: true
+    security_review_subject: true
+    owns:
+      - Governance Operations Console product ownership guidance
+      - repository review controls and public-source safety validation
+      - future durable application source after reviewed graduation
+      - product-local architecture, interface contracts, tests, and operator documentation after graduation
+    must_not_own:
+      - workspace contracts or intake decisions
+      - Workspace Delivery ART work-state truth
+      - shared operator workflow orchestration
+      - Prototype Studio application source before graduation
+      - platform deployment or release authority
+      - identity or security acceptance
+      - live backend authority from repository registration alone
+    allowed_authoritative_refs:
+      - workspace-governance
+      - workspace-prototype-studio
+      - operator-orchestration-service
+      - platform-engineering
+      - security-architecture
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-runtime-source
+      catalog_refs:
+        - component-contracts
+        - security-bindings
+        - review-coverage
+      notes: The active repository is the durable product-source target and owns its review controls; Workspace Prototype Studio remains source and local preview authority until the separate reviewed graduation landing completes.
   platform-engineering:
     lifecycle: active
     repo_class: platform

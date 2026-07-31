@@ -1,0 +1,105 @@
+schema_version: 1
+repo: governance-operations-console
+lifecycle: active
+required_repo_refs:
+  - workspace-governance
+  - workspace-prototype-studio
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+required_patterns:
+  readme:
+    - Governance Operations Console
+    - durable product-source home
+    - Workspace Prototype Studio
+    - application baseline
+  agents:
+    - source graduation
+    - baseline equivalence
+    - public-source safety
+    - security triggers
+    - Prototype Studio
+forbidden_patterns:
+  readme: []
+  agents: []
+review_control_requirements:
+  guidance_files:
+    - path: AGENTS.md
+      heading: "## Review Guidelines"
+      required_terms:
+        - source graduation
+        - baseline equivalence
+        - public-source safety
+        - security triggers
+  required_github_paths:
+    - .github/CODEOWNERS
+    - .github/pull_request_template.md
+  required_validation_paths:
+    - .github/workflows/validate.yaml
+  pr_template_path: .github/pull_request_template.md
+  required_pr_template_sections:
+    - "## Summary"
+    - "## Ownership Boundary"
+    - "## Public Safety"
+    - "## Security Triggers"
+    - "## Validation"
+    - "## Graduation Impact"
+security_requirements:
+  security_owner: security-architecture
+  review_checklist_path: docs/reviews/security-review-checklist.md
+  review_output_path: docs/reviews/components/2026-07-31-governance-operations-console-owner-repository-admission.md
+  required_artifacts:
+    - id: governance-console-baseline-security-delta
+      path: docs/reviews/components/2026-07-30-governance-operations-console-baseline-security-delta.md
+      review_areas:
+        - identity
+        - secrets
+        - runtime
+        - ai
+      required_in_docs:
+        - readme
+  delta_review_triggers:
+    - id: governance-console-source-graduation
+      summary: Application source, product contracts, fixtures, dependencies, or build configuration enter or materially change in the durable owner repository.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - app/**
+        - src/**
+        - components/**
+        - lib/**
+        - public/**
+        - contracts/**
+        - package.json
+        - package-lock.json
+        - next.config.*
+        - tsconfig.json
+      review_subjects:
+        - inventory_section: repos
+          name: governance-operations-console
+    - id: governance-console-live-integration
+      summary: Identity, external data, mutable backend access, AI action paths, runtime exposure, deployment, or release behavior changes.
+      review_areas:
+        - identity
+        - secrets
+        - delivery
+        - runtime
+        - ai
+      path_globs:
+        - app/api/**
+        - src/server/**
+        - src/runtime/**
+        - src/identity/**
+        - src/ai/**
+        - deployments/**
+        - infrastructure/**
+        - .github/workflows/**
+        - Dockerfile*
+        - docker-compose*
+      review_subjects:
+        - inventory_section: repos
+          name: governance-operations-console

@@ -1,20 +1,5 @@
 schema_version: 1
-repos:
-  governance-operations-console:
-    status: admitted
-    decision_source: operator
-    repo_class: product-runtime
-    requires_security_bindings: true
-    security_owner: security-architecture
-    validation_behavior:
-      posture: covered-by-owner-repo
-      wgcf_graph_role: product-runtime-source
-      catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: The durable owner repository will keep source validation and review evidence in the owner repo; WGCF may aggregate that evidence without taking product, release, or security authority.
-    notes: Recommendation posture is new after checking the existing Prototype Studio, Workspace Governance, WGCF, OOS, Platform Engineering, and Security Architecture ownership boundaries. The public repository exists with reviewed owner guidance and validation at governance-operations-console PR #1. Admission does not move Prototype Studio source or grant runtime, release, identity, backend mutation, deployment, or security authority.
+repos: {}
 products:
   governance-operations-console:
     status: proposed
