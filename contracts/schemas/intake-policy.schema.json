@@ -114,6 +114,7 @@
         "runtime_profiles",
         "allowed_postures",
         "allowed_graph_roles",
+        "allowed_graph_roles_by_posture",
         "direct_invocation_postures",
         "require_catalog_refs_for_direct_invocation",
         "notes"
@@ -179,6 +180,16 @@
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true
+        },
+        "allowed_graph_roles_by_posture": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
         },
         "direct_invocation_postures": {
           "type": "array",

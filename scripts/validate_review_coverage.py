@@ -20,6 +20,7 @@ ALLOWED_REVIEW_DECISIONS = {
     "blocked",
     "accepted-risk",
 }
+IN_SCOPE_INTAKE_STATUSES = {"proposed", "admitted"}
 
 
 def load_yaml(path: Path) -> dict:
@@ -137,45 +138,60 @@ def main() -> int:
             "baseline_review_path": (
                 contracts["repo_rules"][repo_name].get("security_requirements", {}).get("review_output_path")
             ),
+            "required": True,
         }
         for repo_name, payload in contracts["repos"]["repos"].items()
         if payload["requires_security_bindings"] or payload.get("security_review_subject")
     }
     for repo_name, payload in (contracts["intake_register"].get("repos") or {}).items():
         if (
-            payload.get("status") == "admitted"
+            payload.get("status") in IN_SCOPE_INTAKE_STATUSES
             and payload.get("requires_security_bindings")
         ):
             expected_repos[repo_name] = {
                 "owner_repo": repo_name,
                 "scope": "component",
                 "baseline_review_path": None,
+                "required": payload.get("status") == "admitted",
             }
     expected_components = {
         component_name: {
             "owner_repo": payload["owner_repo"],
             "scope": "component",
+            "required": True,
         }
         for component_name, payload in contracts["components"]["components"].items()
         if payload["security_owner"] == "security-architecture" and payload["lifecycle"] == "active"
     }
     for component_name, payload in (contracts["intake_register"].get("components") or {}).items():
         if (
-            payload.get("status") == "admitted"
+            payload.get("status") in IN_SCOPE_INTAKE_STATUSES
             and payload.get("security_owner") == "security-architecture"
         ):
             expected_components[component_name] = {
                 "owner_repo": payload["owner_repo"],
                 "scope": "component",
+                "required": payload.get("status") == "admitted",
             }
     expected_products = {
         product_name: {
             "owner_repo": payload["platform_owner"],
             "scope": "product",
+            "required": True,
         }
         for product_name, payload in contracts["products"]["products"].items()
         if payload["security_owner"] == "security-architecture"
     }
+    for product_name, payload in (contracts["intake_register"].get("products") or {}).items():
+        if (
+            payload.get("status") in IN_SCOPE_INTAKE_STATUSES
+            and payload.get("security_owner") == "security-architecture"
+        ):
+            expected_products[product_name] = {
+                "owner_repo": payload["platform_owner"],
+                "scope": "product",
+                "required": payload.get("status") == "admitted",
+            }
 
     unknown_repos = sorted(set(inventory_repos) - set(expected_repos))
     unknown_components = sorted(set(inventory_components) - set(expected_components))
@@ -199,7 +215,10 @@ def main() -> int:
         for subject_name, expected in expected_entries.items():
             entry = inventory_entries.get(subject_name)
             if not isinstance(entry, dict):
-                errors.append(f"registers/review-inventory.yaml: missing {section_name} entry for {subject_name}")
+                if expected["required"]:
+                    errors.append(
+                        f"registers/review-inventory.yaml: missing {section_name} entry for {subject_name}"
+                    )
                 continue
 
             owner_repo = entry.get("owner_repo")

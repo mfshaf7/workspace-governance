@@ -358,20 +358,20 @@ profiles:
       - reset
       - promote_check
   temporal:
-    lifecycle: proposed
+    lifecycle: build-admitted
     lane_class: governed-devint
     owner_repo: platform-engineering
-    summary: Proposed persistent local-k3s profile for the platform-owned Temporal runtime behind OOS.
-    purpose: Define the persistent runtime, ownership, access, persistence, and handoff boundary needed to evaluate Temporal as the replaceable durable workflow adapter behind OOS without authorizing implementation or launch.
+    summary: Build-admitted persistent local-k3s profile for the platform-owned Temporal runtime behind OOS.
+    purpose: Authorize bounded owner-repo source implementation of Temporal as the replaceable durable workflow adapter behind OOS while denying runtime launch, access, smoke, shared workflow execution, stage, and production.
     validation_behavior:
-      posture: proposed-profile-gated
-      wgcf_graph_role: proposed-shared-platform-component
+      posture: build-admitted-profile-gated
+      wgcf_graph_role: shared-platform-component
       catalog_refs:
         - developer-integration
         - devint-runner-read
         - security-bindings
         - review-coverage
-      notes: WGCF may provide bounded validation and readiness activities for OOS-owned workflows. Platform owns Temporal runtime lifecycle, OOS owns aggregate orchestration, and proposed status denies implementation and self-serve launch.
+      notes: WGCF may provide bounded validation and readiness activities for OOS-owned workflows. Platform owns Temporal runtime lifecycle, OOS owns aggregate orchestration, and build-admitted status allows source implementation while denying self-serve launch and workflow execution.
     profile_path: dev-integration/profiles/temporal/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -380,6 +380,17 @@ profiles:
     request_record:
       system: openproject
       ref: openproject://work_packages/707
+    build_admission:
+      approved_by: mfshaf7
+      approved_on: "2026-07-31"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/193
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/components/2026-07-31-temporal-durable-orchestration-build-admission.md
+      implementation_allowed: true
+      self_serve_launch_allowed: false
+      work_item_ref: openproject://work_packages/742
     shared_dependencies:
       - operator-orchestration-service
       - workspace-governance-control-fabric

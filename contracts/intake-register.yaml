@@ -17,5 +17,5 @@ components:
         - devint-runner-read
         - security-bindings
         - review-coverage
-      notes: Temporal validation remains profile-gated while the runtime is only proposed; WGCF may consume later readiness evidence but cannot own aggregate orchestration or runtime activation.
-    notes: Proposed replaceable durable workflow runtime behind operator-orchestration-service. Classification does not authorize implementation, launch, stage/prod deployment, or direct Console access.
+      notes: Temporal component admission remains proposed while its dev-integration profile is build-admitted; WGCF may consume later readiness evidence but cannot own aggregate orchestration or runtime activation.
+    notes: Proposed replaceable durable workflow runtime behind operator-orchestration-service. Build admission authorizes bounded owner-repo source implementation only; launch, workflow execution, stage/prod deployment, and direct Console access remain denied.

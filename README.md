@@ -31,9 +31,9 @@ required before fast local work can move into governed stage rehearsal. The
 concrete runtime shape still belongs to the profile owner.
 
 The same split applies to profile admission. A profile request is not the same
-thing as an active profile. Requests may be `proposed`, `active`,
-`suspended`, or `retired`, and the admission policy stays generic even when
-the current request adapter is a tool such as OpenProject.
+thing as an active profile. Requests may be `proposed`, `build-admitted`,
+`active`, `suspended`, or `retired`, and the admission policy stays generic
+even when the current request adapter is a tool such as OpenProject.
 
 The current architecture target for the workspace control plane is also
 explicit now:

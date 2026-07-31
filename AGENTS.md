@@ -83,6 +83,7 @@ Route those changes back to the owner repos.
   too quickly for governed stage rehearsal.
 - `dev-integration` profiles now have an admission lifecycle:
   - `proposed`
+  - `build-admitted`
   - `active`
   - `suspended`
   - `retired`
