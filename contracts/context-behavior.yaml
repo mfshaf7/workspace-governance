@@ -165,6 +165,22 @@ context_behavior:
       denied_without_cgg:
         - raw prototype runtime output copied into model prompts after packet parity exists
         - client-visible or real-data prototype context projected without redaction and receipt evidence
+    - repo: governance-operations-console
+      declaration_status: durable-product-owner-source-pending
+      owner_repo: governance-operations-console
+      source_classes:
+        - repo_snapshot
+        - terminal_output
+        - ci_logs
+        - operator_workflow_payload
+      default_projection: model-safe-packet
+      cgg_role: durable product context consumer; owner-repo validation and future product diagnostics should be packetized before model projection.
+      adoption_state: declared
+      evidence_refs:
+        - contracts/repo-rules/governance-operations-console.yaml
+      denied_without_cgg:
+        - raw product validation or CI output copied into model prompts after packet parity exists
+        - future identity, backend, AI, or runtime diagnostics projected without redaction and receipt evidence
     - repo: platform-engineering
       declaration_status: platform-authority-consumer
       owner_repo: platform-engineering

@@ -117,6 +117,31 @@
       "type": "authoritative-reference"
     },
     {
+      "from": "governance-operations-console",
+      "to": "workspace-governance",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "workspace-prototype-studio",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "operator-orchestration-service",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "governance-operations-console",
+      "to": "security-architecture",
+      "type": "authoritative-reference"
+    },
+    {
       "from": "platform-engineering",
       "to": "security-architecture",
       "type": "authoritative-reference"

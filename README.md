@@ -244,6 +244,7 @@ Those stay in the owning repos:
 
 - `workspace-governance-control-fabric/`
 - `context-governance-gateway/`
+- `governance-operations-console/`
 - `platform-engineering/`
 - `openclaw-runtime-distribution/`
 - `openclaw-telegram-enhanced/`

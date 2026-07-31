@@ -158,6 +158,26 @@ raw_context_retirement:
       evidence_refs:
         - contracts/repo-rules/workspace-prototype-studio.yaml
         - contracts/context-behavior.yaml
+    - entry_id: governance-console-ci-and-product-output
+      owner_repo: governance-operations-console
+      covered_repos:
+        - governance-operations-console
+      context_behavior_repo_ref: governance-operations-console
+      source_classes:
+        - terminal_output
+        - ci_logs
+        - repo_snapshot
+        - operator_workflow_payload
+      current_raw_context_path: owner-repository validation and CI output now, plus future product build and diagnostic output after source graduation.
+      current_risk: public product validation or future diagnostics may expose local paths, host metadata, external-system details, or operator context if projected raw.
+      target_cgg_path: Console validation and future diagnostics are packetized through CGG before model projection, with public-source and sensitive-context boundaries preserved.
+      state: parity-required
+      next_action: prove packet parity for owner-repository validation and revisit the source classes when the application baseline graduates.
+      retirement_allowed: true
+      rollback_requirement: rollback remains owner-repository validation and CI logs for maintainers until packet parity and owner closeout are recorded.
+      evidence_refs:
+        - contracts/repo-rules/governance-operations-console.yaml
+        - contracts/context-behavior.yaml
     - entry_id: product-repo-ci-and-debug-output
       owner_repo: openclaw-runtime-distribution
       covered_repos:

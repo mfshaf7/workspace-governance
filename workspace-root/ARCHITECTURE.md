@@ -13,8 +13,9 @@ Use it first for workspace orientation. Then route into the owning repo.
 ## Current System Shape
 
 The workspace currently has three durable authority planes, two active
-governance runtime implementation components, one product-incubation lane, plus
-one fast local iteration lane:
+governance runtime implementation components, one product-incubation lane, one
+provisioned durable product owner awaiting source graduation, plus one fast
+local iteration lane:
 
 - workspace governance
   - `workspace-governance/`
@@ -45,6 +46,12 @@ one fast local iteration lane:
     graduation records
   - does not own production releases, platform deployment authority, security
     acceptance, or long-lived product source after graduation
+- Governance Operations Console owner repository
+  - `governance-operations-console/`
+  - owns repository guidance, review controls, public-source validation, and
+    future durable application source after reviewed graduation
+  - does not yet own the approved application source, local preview runtime,
+    platform release authority, or security acceptance
 - shared platform and release authority
   - `platform-engineering/`
   - owns environment contracts, pinned SHAs and digests, Argo state, product
@@ -89,6 +96,8 @@ Primary source:
   - operational context admission implementation
 - `workspace-prototype-studio/`
   - prototype and product-incubation source lane
+- `governance-operations-console/`
+  - durable Console product owner repository awaiting source graduation
 - `platform-engineering/`
   - shared platform and release authority
 - `security-architecture/`
@@ -246,6 +255,9 @@ operator interaction layer, not just a UI skin.
 - prototype and product-incubation source, UI prototypes, design baselines,
   client app sketches, or graduation records
   - [workspace-prototype-studio/README.md](/home/mfshaf7/projects/workspace-prototype-studio/README.md)
+- Governance Operations Console owner guidance, public-source controls, or
+  durable product source after graduation
+  - [governance-operations-console/README.md](/home/mfshaf7/projects/governance-operations-console/README.md)
 - Codex GitHub review, PR flow, or read-only control-plane summary
   - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
 - platform, promotion flow, environments, or product integration

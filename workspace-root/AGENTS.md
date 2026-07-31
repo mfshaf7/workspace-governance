@@ -105,6 +105,16 @@ That means:
   - read first:
     - `workspace-prototype-studio/AGENTS.md`
     - `workspace-prototype-studio/README.md`
+- `governance-operations-console/`
+  - active durable owner repository for Governance Operations Console review
+    controls and future product source after graduation
+  - Workspace Prototype Studio still owns the approved application source and
+    local preview until the separate source-transfer landing completes
+  - does not own workspace contracts, Workspace Delivery ART truth, shared
+    workflow orchestration, platform release authority, or security acceptance
+  - read first:
+    - `governance-operations-console/AGENTS.md`
+    - `governance-operations-console/README.md`
 - `platform-engineering/`
   - owns shared platform structure, environment contracts, Argo-managed state,
     release governance, and product integration docs
@@ -234,6 +244,10 @@ Only start implementation after that discussion narrows the target design.
   fixtures, and prototype lifecycle records belong in
   `workspace-prototype-studio/` until the work graduates to Workspace Delivery
   ART, an existing product repo, a new product repo, or retirement.
+- Governance Operations Console owner guidance, public-source review controls,
+  and future durable application source after reviewed graduation belong in
+  `governance-operations-console/`; its current approved source remains in
+  `workspace-prototype-studio/` until that graduation landing completes.
 - Shared platform docs, Argo, Vault, observability, environment contracts,
   promotion flow, and product integration docs belong in
   `platform-engineering/`.
