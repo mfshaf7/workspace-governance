@@ -43,6 +43,11 @@ Use these contracts to declare:
 - `developer-integration-policy.yaml`
   - defines the shared `dev-integration` lane semantics, trigger guidance,
     forbidden targets, required actions, and required handoff artifacts
+- `durable-orchestration.yaml`
+  - defines durable-workflow qualification, OOS aggregate authority, the
+    replaceable Temporal runtime boundary, immutable definition and run
+    lifecycles, admission gates, evidence requirements, and the first safe and
+    business proof order
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations
