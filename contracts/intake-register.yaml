@@ -1,4 +1,21 @@
 schema_version: 1
 repos: {}
 products: {}
-components: {}
+components:
+  temporal:
+    status: proposed
+    decision_source: operator
+    component_class: shared-platform
+    owner_repo: platform-engineering
+    security_owner: security-architecture
+    product: null
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: proposed-shared-platform-component
+      catalog_refs:
+        - developer-integration
+        - devint-runner-read
+        - security-bindings
+        - review-coverage
+      notes: Temporal validation remains profile-gated while the runtime is only proposed; WGCF may consume later readiness evidence but cannot own aggregate orchestration or runtime activation.
+    notes: Proposed replaceable durable workflow runtime behind operator-orchestration-service. Classification does not authorize implementation, launch, stage/prod deployment, or direct Console access.
