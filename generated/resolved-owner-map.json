@@ -239,6 +239,28 @@
     }
   },
   "products": {
+    "governance-operations-console": {
+      "governed_prod_promotion": false,
+      "highest_real_endpoint": "owner-repository-local-preview",
+      "lifecycle": "active",
+      "platform_owner": "platform-engineering",
+      "runtime_owner": "governance-operations-console",
+      "security_owner": "security-architecture",
+      "source_owners": [
+        "governance-operations-console"
+      ],
+      "stage_supported": false,
+      "validation_behavior": {
+        "catalog_refs": [
+          "component-contracts",
+          "security-bindings",
+          "review-coverage"
+        ],
+        "notes": "Product readiness aggregates owner-repository validation, Security review posture, Platform authority, and reviewed delivery evidence. The active product currently proves durable source ownership and loopback-only local preview, not live backend, authenticated identity, governed AI, stage, production, release, public, or client-visible runtime readiness.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "product-readiness-aggregate"
+      }
+    },
     "openclaw": {
       "governed_prod_promotion": true,
       "highest_real_endpoint": "governed-prod",
@@ -339,16 +361,16 @@
         "workspace contracts or intake decisions",
         "Workspace Delivery ART work-state truth",
         "shared operator workflow orchestration",
-        "Prototype Studio application source before graduation",
+        "Prototype Studio incubation history or graduation records",
         "platform deployment or release authority",
         "identity or security acceptance",
-        "live backend authority from repository registration alone"
+        "live backend authority from source graduation alone"
       ],
       "owns": [
-        "Governance Operations Console product ownership guidance",
+        "Governance Operations Console durable product source",
         "repository review controls and public-source safety validation",
-        "future durable application source after reviewed graduation",
-        "product-local architecture, interface contracts, tests, and operator documentation after graduation"
+        "product-local architecture, interface contracts, tests, and operator documentation",
+        "loopback-only owner-repository local preview"
       ],
       "repo_class": "product-owner",
       "requires_security_bindings": true,
@@ -359,7 +381,7 @@
           "security-bindings",
           "review-coverage"
         ],
-        "notes": "The active repository is the durable product-source target and owns its review controls; Workspace Prototype Studio remains source and local preview authority until the separate reviewed graduation landing completes.",
+        "notes": "The active repository owns the graduated product source, product-local validation, and loopback-only local preview. Workspace Prototype Studio retains incubation history and the graduation record; Platform and Security retain deployment, release, and acceptance authority.",
         "posture": "covered-by-owner-repo",
         "wgcf_graph_role": "product-runtime-source"
       }

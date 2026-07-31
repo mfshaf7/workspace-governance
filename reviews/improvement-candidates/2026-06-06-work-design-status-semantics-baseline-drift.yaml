@@ -44,8 +44,8 @@ resolution:
     owner_repo: workspace-prototype-studio
     note: Defines Console status, baseline, and component-reuse rules.
   - type: test
-    path: workspace-prototype-studio/apps/governance-operations-console/tests/operation-projections/operation-surface-status-projection.test.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/tests/operation-projections/operation-surface-status-projection.test.mjs
+    owner_repo: governance-operations-console
     note: Proves status projections use the approved operation-surface semantics.
   note: Closed through the approved Console design profile, workspace interface
     discipline, and semantic status-projection coverage.

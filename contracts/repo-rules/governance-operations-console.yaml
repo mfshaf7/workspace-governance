@@ -10,9 +10,9 @@ required_repo_refs:
 required_patterns:
   readme:
     - Governance Operations Console
-    - durable product-source home
-    - Workspace Prototype Studio
-    - application baseline
+    - durable product source
+    - Prototype Studio baseline
+    - loopback-only
   agents:
     - source graduation
     - baseline equivalence

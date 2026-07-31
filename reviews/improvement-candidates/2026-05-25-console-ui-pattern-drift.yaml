@@ -41,8 +41,8 @@ resolution:
     owner_repo: workspace-prototype-studio
     note: Records the Console pattern inventory, status semantics, and visual-baseline approval rules.
   - type: validator
-    path: workspace-prototype-studio/apps/governance-operations-console/scripts/guards/shared/teras-list-status-contract.guard.mjs
-    owner_repo: workspace-prototype-studio
+    path: governance-operations-console/scripts/guards/shared/teras-list-status-contract.guard.mjs
+    owner_repo: governance-operations-console
     note: Fails when list and status structures drift from the approved shared contract.
   note: Closed through the workspace interface-design discipline and the approved
     Console pattern and status guards.

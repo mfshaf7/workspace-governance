@@ -1,22 +1,4 @@
 schema_version: 1
 repos: {}
-products:
-  governance-operations-console:
-    status: proposed
-    decision_source: operator
-    platform_owner: platform-engineering
-    security_owner: security-architecture
-    runtime_owner: workspace-prototype-studio
-    source_owners:
-      - workspace-prototype-studio
-    intended_endpoint: durable-product-ownership
-    validation_behavior:
-      posture: covered-by-owner-repo
-      wgcf_graph_role: product-readiness-aggregate
-      catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Product readiness will be aggregated from the durable owner repo, Platform, Security, and reviewed delivery evidence; intake classification does not imply stage, production, or live backend readiness.
-    notes: The approved Governance Operations Console baseline remains sourced and previewed from Workspace Prototype Studio until a separate reviewed source-transfer landing completes. This proposed product entry records the durable ownership intent without changing current source or runtime authority.
+products: {}
 components: {}

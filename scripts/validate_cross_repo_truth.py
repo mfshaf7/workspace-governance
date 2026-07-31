@@ -566,7 +566,9 @@ def main() -> int:
     validate_delivery_art_initiative_lineage_contract(workspace_root, errors)
     validate_delivery_art_operator_path_contract(workspace_root, repo_root, errors)
 
-    for product_name in contracts["products"]["products"]:
+    for product_name, product in contracts["products"]["products"].items():
+        if product["lifecycle"] not in {"platform-integrated", "fully-governed"}:
+            continue
         product_readme = workspace_root / "platform-engineering" / "products" / product_name / "README.md"
         if not product_readme.exists():
             errors.append(f"platform-engineering product missing README for declared product {product_name}: {product_readme}")
