@@ -357,3 +357,57 @@ profiles:
       - down
       - reset
       - promote_check
+  temporal:
+    lifecycle: proposed
+    lane_class: governed-devint
+    owner_repo: platform-engineering
+    summary: Proposed persistent local-k3s profile for the platform-owned Temporal runtime behind OOS.
+    purpose: Define the persistent runtime, ownership, access, persistence, and handoff boundary needed to evaluate Temporal as the replaceable durable workflow adapter behind OOS without authorizing implementation or launch.
+    validation_behavior:
+      posture: proposed-profile-gated
+      wgcf_graph_role: proposed-shared-platform-component
+      catalog_refs:
+        - developer-integration
+        - devint-runner-read
+        - security-bindings
+        - review-coverage
+      notes: WGCF may provide bounded validation and readiness activities for OOS-owned workflows. Platform owns Temporal runtime lifecycle, OOS owns aggregate orchestration, and proposed status denies implementation and self-serve launch.
+    profile_path: dev-integration/profiles/temporal/profile.yaml
+    runtime_owner: platform-engineering
+    security_owner: security-architecture
+    requested_by: mfshaf7
+    requested_on: "2026-07-31"
+    request_record:
+      system: openproject
+      ref: openproject://work_packages/707
+    shared_dependencies:
+      - operator-orchestration-service
+      - workspace-governance-control-fabric
+      - security-architecture
+    source_repos:
+      - platform-engineering
+      - operator-orchestration-service
+      - workspace-governance
+      - workspace-governance-control-fabric
+      - security-architecture
+    stage_handoff:
+      owner_repo: platform-engineering
+      governed_surface: temporal-stage
+      required_checks:
+        - active dev-integration profile admission
+        - OOS Temporal adapter and workflow definition contract
+        - namespace and task queue identity boundary
+        - PostgreSQL persistence migration backup and restore
+        - worker and runtime restart replay proof
+        - workflow and activity idempotency retry timeout and cancellation
+        - observability retention and payload redaction
+        - current security acceptance
+        - source projection rollback and suspension proof
+    actions:
+      - up
+      - status
+      - access
+      - smoke
+      - down
+      - reset
+      - promote_check
