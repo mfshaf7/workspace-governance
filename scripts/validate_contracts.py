@@ -2218,6 +2218,30 @@ def main() -> int:
             "contracts/intake-policy.yaml: validation_behavior.allowed_graph_roles must be exactly "
             + ", ".join(sorted(expected_validation_graph_roles))
         )
+    allowed_validation_graph_roles_by_posture = {
+        posture: set(graph_roles)
+        for posture, graph_roles in validation_behavior_policy[
+            "allowed_graph_roles_by_posture"
+        ].items()
+    }
+    expected_validation_graph_roles_by_posture = {
+        "proposed-profile-gated": {
+            "proposed-shared-platform-component",
+            "context-packet-provider",
+        },
+        "build-admitted-profile-gated": {
+            "shared-platform-component",
+            "context-packet-provider",
+        },
+    }
+    if (
+        allowed_validation_graph_roles_by_posture
+        != expected_validation_graph_roles_by_posture
+    ):
+        errors.append(
+            "contracts/intake-policy.yaml: validation_behavior.allowed_graph_roles_by_posture "
+            "must declare the exact proposed and build-admitted profile role sets"
+        )
     direct_invocation_postures = set(validation_behavior_policy["direct_invocation_postures"])
     expected_direct_invocation_postures = {
         "catalog-owner",
@@ -2552,16 +2576,11 @@ def main() -> int:
             errors.append(
                 f"{label}: validation_behavior.posture {posture!r} requires at least one catalog_ref"
             )
-        if posture == "proposed-profile-gated" and graph_role not in {
-            "proposed-shared-platform-component",
-            "context-packet-provider",
-        }:
+        posture_graph_roles = allowed_validation_graph_roles_by_posture.get(posture)
+        if posture_graph_roles is not None and graph_role not in posture_graph_roles:
             errors.append(
-                f"{label}: proposed-profile-gated posture must use proposed-shared-platform-component or context-packet-provider graph role"
-            )
-        if posture == "build-admitted-profile-gated" and graph_role != "context-packet-provider":
-            errors.append(
-                f"{label}: build-admitted-profile-gated posture must use context-packet-provider graph role"
+                f"{label}: {posture} posture must use one of these graph roles: "
+                + ", ".join(sorted(posture_graph_roles))
             )
 
     workspace_root = repo_root.parent

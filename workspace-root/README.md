@@ -272,6 +272,7 @@ longer current.
 `dev-integration` profiles also have a lifecycle now:
 
 - `proposed`
+- `build-admitted`
 - `active`
 - `suspended`
 - `retired`

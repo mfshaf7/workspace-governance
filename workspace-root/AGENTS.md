@@ -383,6 +383,7 @@ Only start implementation after that discussion narrows the target design.
   governed stage rehearsal.
 - `dev-integration` profiles use an admission lifecycle:
   - `proposed`
+  - `build-admitted`
   - `active`
   - `suspended`
   - `retired`

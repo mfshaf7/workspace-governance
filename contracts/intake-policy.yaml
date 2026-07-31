@@ -77,6 +77,13 @@ validation_behavior:
     - dev-integration-profile
     - context-packet-provider
     - proposed-shared-platform-component
+  allowed_graph_roles_by_posture:
+    proposed-profile-gated:
+      - proposed-shared-platform-component
+      - context-packet-provider
+    build-admitted-profile-gated:
+      - shared-platform-component
+      - context-packet-provider
   direct_invocation_postures:
     - catalog-owner
     - profile-gated-external-owner

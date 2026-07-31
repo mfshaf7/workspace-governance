@@ -51,14 +51,16 @@ before admission evidence exists.
 - adapter: `temporal`
 - dev-integration profile: `temporal`
 - contract status: `runtime-admission-review`
-- profile lifecycle: `proposed`
-- implementation allowed: no
+- profile lifecycle: `build-admitted`
+- implementation allowed: bounded owner-repo source work only
 - self-serve launch allowed: no
+- workflow execution allowed: no
 - governed stage allowed: no
 - production allowed: no
 
-The proposed profile makes the review boundary concrete. It does not create a
-runtime or satisfy any admission gate by itself.
+Build admission records completed Platform and Security review for source
+implementation. It does not create or activate a runtime, admit a workflow
+definition, or satisfy the later operating-evidence gates.
 
 ## Runtime Boundary
 
