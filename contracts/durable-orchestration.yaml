@@ -1,0 +1,247 @@
+schema_version: 1
+durable_orchestration:
+  owner_repo: workspace-governance
+  defining_art_ref: openproject://work_packages/700
+  parent_initiative_ref: openproject://work_packages/698
+  primary_operator_surface: docs/durable-orchestration-governance.md
+  contract_status: source-defined-runtime-not-admitted
+  recommendation:
+    workspace_contract: new
+    aggregate_orchestrator: extend
+    governance_activity_boundary: replace
+    durable_runtime: new
+    rationale: >-
+      Existing Console design contracts define the intended behavior, OOS
+      already owns shared operator workflows, WGCF already owns governance
+      execution, and Platform Engineering already owns runtime adoption. The
+      missing layer is one workspace authority contract plus an admitted
+      durable runtime adapter behind OOS.
+  authority:
+    contract_owner: workspace-governance
+    aggregate_orchestrator: operator-orchestration-service
+    durable_runtime_owner: platform-engineering
+    durable_runtime_adapter: temporal
+    security_acceptance_owner: security-architecture
+    operator_cockpit_owner: governance-operations-console
+    direct_console_runtime_access_allowed: false
+    domain_business_authority_preserved: true
+    aggregate_orchestrator_owns:
+      - workflow definition catalog
+      - orchestration request acceptance
+      - run-control API
+      - correlation and causation
+      - aggregate run projection
+      - final orchestration receipts
+    runtime_adapter_owns:
+      - durable scheduling
+      - deterministic workflow replay
+      - timers and wait persistence
+      - activity retry dispatch
+    operator_cockpit_owns:
+      - intent preparation
+      - approval collection
+      - definition and run projection
+      - allowed-control presentation
+    activity_owners:
+      workspace-governance-control-fabric:
+        - governance validation activities
+        - readiness evaluation activities
+        - governance receipts and ledger correlation
+      context-governance-gateway:
+        - context admission activities
+        - packet and redaction receipts
+      platform-engineering:
+        - runtime lifecycle activities
+        - deployment and promotion activities
+      security-architecture:
+        - trust-boundary decisions
+        - security acceptance evidence
+  qualification:
+    default: synchronous
+    classifications:
+      - synchronous
+      - conditional
+      - durable-candidate
+      - admitted-durable
+    durable_triggers:
+      - restart survival
+      - multiple non-atomic side effects
+      - external or human wait beyond one request
+      - controlled retry or timeout
+      - reconciliation or compensation
+      - durable cancel, pause, resume, or signal
+      - correlated history across multiple execution owners
+    explicit_non_candidates:
+      - draft editing and autosave
+      - user interface navigation
+      - review forms and packet preparation
+      - ordinary CRUD
+      - single-record status updates
+      - read projections and dashboards
+      - direct start, stop, restart, or health check for one runtime
+      - controls against an already running orchestration
+  definition_contract:
+    lifecycle:
+      - candidate
+      - qualified
+      - definition-ready
+      - implementation-requested
+      - admission-review
+      - active
+      - suspended
+      - retired
+    immutable_version_states:
+      - active
+      - suspended
+      - retired
+    required_fields:
+      - definition_id
+      - definition_version
+      - title
+      - purpose
+      - source_domain
+      - source_record_type
+      - business_owner
+      - implementation_repo
+      - execution_owner
+      - execution_node_owners
+      - trigger
+      - approval_requirements
+      - source_version_refs
+      - idempotency_strategy
+      - lock_strategy
+      - execution_graph
+      - wait_and_signal_contract
+      - retry_and_timeout_contract
+      - compensation_strategy
+      - cancellation_boundary
+      - completion_condition
+      - expected_receipt
+      - return_projection
+      - evidence_and_retention
+      - security_requirements
+      - rollout_and_rollback
+    executable_source_rules:
+      reviewed_git_source_required: true
+      arbitrary_operator_code_allowed: false
+      runtime_node_upload_allowed: false
+      secret_values_in_definition_allowed: false
+  run_contract:
+    lifecycle:
+      - queued
+      - running
+      - waiting
+      - blocked
+      - failed
+      - completed
+      - cancelled
+    controls:
+      - retry
+      - resume
+      - signal
+      - cancel
+      - defer
+    wait_kinds:
+      - authority-decision
+      - external-event
+      - dependency
+      - timer
+    effect_postures:
+      - none
+      - possible
+      - partial
+      - verified
+    blocker_dispositions:
+      - remove
+      - workaround
+      - accept-risk
+      - defer
+    required_projection_fields:
+      - request_id
+      - run_id
+      - definition_id
+      - definition_version
+      - source_domain
+      - source_record_ref
+      - correlation_ref
+      - causation_ref
+      - state
+      - current_node
+      - progress
+      - wait
+      - blocker
+      - failure
+      - retry_status
+      - effect_posture
+      - control_availability
+      - artifact_refs
+      - log_refs
+      - receipt_refs
+      - event_refs
+      - source_projection_ref
+      - source_projection_version
+      - created_at
+      - last_projected_at
+      - completed_at
+  admission:
+    active_definition_requires_all_gates: true
+    gates:
+      - contract-valid
+      - implementation-reviewed
+      - deterministic-replay-tested
+      - activity-idempotency-tested
+      - failure-and-control-tested
+      - dev-integration-profile-active
+      - platform-runtime-accepted
+      - security-review-accepted
+      - source-projection-verified
+      - rollback-and-suspension-proven
+    current_runtime:
+      adapter: temporal
+      lifecycle: not-admitted
+      dev_integration_profile: null
+      shared_runtime_allowed: false
+      governed_stage_allowed: false
+      production_allowed: false
+  initial_definitions:
+    - definition_id: validation-readiness-run
+      definition_version: 1
+      definition_state: qualified
+      qualification: durable-candidate
+      role: safe-runtime-proof
+      source_domain: workspace-governance-control-fabric
+      implementation_repo: operator-orchestration-service
+      execution_owner: operator-orchestration-service
+      activity_owners:
+        - workspace-governance-control-fabric
+      expected_receipt: orchestration-validation-readiness-receipt
+      admitted: false
+    - definition_id: delivery.refinement.apply
+      definition_version: 1
+      definition_state: definition-ready
+      qualification: durable-candidate
+      role: first-business-workflow
+      source_domain: delivery-refinement
+      implementation_repo: operator-orchestration-service
+      execution_owner: operator-orchestration-service
+      activity_owners:
+        - operator-orchestration-service
+        - workspace-governance-control-fabric
+      expected_receipt: delivery-refinement-apply-receipt
+      admitted: false
+  implementation_order:
+    safe_runtime_proof:
+      - validation-readiness-run
+    business_definitions:
+      - delivery.refinement.apply
+      - delivery.work-design.apply
+      - delivery.review-packet-closeout
+      - prototype.landing
+      - model-profile.fulfillment-and-activation
+  denied_authority_claims:
+    - WGCF owns aggregate orchestration
+    - OOS is only an activity adapter
+    - Governance Operations Console calls Temporal directly
+    - Temporal owns business workflow policy
+    - a definition is active without admission evidence
+    - a local dev-integration run is governed stage or production evidence

@@ -1,0 +1,516 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "durable_orchestration"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "durable_orchestration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "defining_art_ref",
+        "parent_initiative_ref",
+        "primary_operator_surface",
+        "contract_status",
+        "recommendation",
+        "authority",
+        "qualification",
+        "definition_contract",
+        "run_contract",
+        "admission",
+        "initial_definitions",
+        "implementation_order",
+        "denied_authority_claims"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "workspace-governance"
+        },
+        "defining_art_ref": {
+          "$ref": "#/$defs/openprojectRef"
+        },
+        "parent_initiative_ref": {
+          "$ref": "#/$defs/openprojectRef"
+        },
+        "primary_operator_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_status": {
+          "enum": [
+            "source-defined-runtime-not-admitted",
+            "runtime-admission-review",
+            "runtime-admitted"
+          ]
+        },
+        "recommendation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "workspace_contract",
+            "aggregate_orchestrator",
+            "governance_activity_boundary",
+            "durable_runtime",
+            "rationale"
+          ],
+          "properties": {
+            "workspace_contract": {
+              "$ref": "#/$defs/recommendationPosture"
+            },
+            "aggregate_orchestrator": {
+              "$ref": "#/$defs/recommendationPosture"
+            },
+            "governance_activity_boundary": {
+              "$ref": "#/$defs/recommendationPosture"
+            },
+            "durable_runtime": {
+              "$ref": "#/$defs/recommendationPosture"
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract_owner",
+            "aggregate_orchestrator",
+            "durable_runtime_owner",
+            "durable_runtime_adapter",
+            "security_acceptance_owner",
+            "operator_cockpit_owner",
+            "direct_console_runtime_access_allowed",
+            "domain_business_authority_preserved",
+            "aggregate_orchestrator_owns",
+            "runtime_adapter_owns",
+            "operator_cockpit_owns",
+            "activity_owners"
+          ],
+          "properties": {
+            "contract_owner": {
+              "const": "workspace-governance"
+            },
+            "aggregate_orchestrator": {
+              "const": "operator-orchestration-service"
+            },
+            "durable_runtime_owner": {
+              "const": "platform-engineering"
+            },
+            "durable_runtime_adapter": {
+              "const": "temporal"
+            },
+            "security_acceptance_owner": {
+              "const": "security-architecture"
+            },
+            "operator_cockpit_owner": {
+              "const": "governance-operations-console"
+            },
+            "direct_console_runtime_access_allowed": {
+              "const": false
+            },
+            "domain_business_authority_preserved": {
+              "const": true
+            },
+            "aggregate_orchestrator_owns": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "runtime_adapter_owns": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "operator_cockpit_owns": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "activity_owners": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/nonEmptyUniqueStringList"
+              }
+            }
+          }
+        },
+        "qualification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "default",
+            "classifications",
+            "durable_triggers",
+            "explicit_non_candidates"
+          ],
+          "properties": {
+            "default": {
+              "const": "synchronous"
+            },
+            "classifications": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "synchronous"
+                },
+                {
+                  "const": "conditional"
+                },
+                {
+                  "const": "durable-candidate"
+                },
+                {
+                  "const": "admitted-durable"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "durable_triggers": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "explicit_non_candidates": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            }
+          }
+        },
+        "definition_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lifecycle",
+            "immutable_version_states",
+            "required_fields",
+            "executable_source_rules"
+          ],
+          "properties": {
+            "lifecycle": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "candidate"
+                },
+                {
+                  "const": "qualified"
+                },
+                {
+                  "const": "definition-ready"
+                },
+                {
+                  "const": "implementation-requested"
+                },
+                {
+                  "const": "admission-review"
+                },
+                {
+                  "const": "active"
+                },
+                {
+                  "const": "suspended"
+                },
+                {
+                  "const": "retired"
+                }
+              ],
+              "items": false,
+              "minItems": 8,
+              "maxItems": 8
+            },
+            "immutable_version_states": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "active"
+                },
+                {
+                  "const": "suspended"
+                },
+                {
+                  "const": "retired"
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "required_fields": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "executable_source_rules": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "reviewed_git_source_required",
+                "arbitrary_operator_code_allowed",
+                "runtime_node_upload_allowed",
+                "secret_values_in_definition_allowed"
+              ],
+              "properties": {
+                "reviewed_git_source_required": {
+                  "const": true
+                },
+                "arbitrary_operator_code_allowed": {
+                  "const": false
+                },
+                "runtime_node_upload_allowed": {
+                  "const": false
+                },
+                "secret_values_in_definition_allowed": {
+                  "const": false
+                }
+              }
+            }
+          }
+        },
+        "run_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lifecycle",
+            "controls",
+            "wait_kinds",
+            "effect_postures",
+            "blocker_dispositions",
+            "required_projection_fields"
+          ],
+          "properties": {
+            "lifecycle": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "queued"
+                },
+                {
+                  "const": "running"
+                },
+                {
+                  "const": "waiting"
+                },
+                {
+                  "const": "blocked"
+                },
+                {
+                  "const": "failed"
+                },
+                {
+                  "const": "completed"
+                },
+                {
+                  "const": "cancelled"
+                }
+              ],
+              "items": false,
+              "minItems": 7,
+              "maxItems": 7
+            },
+            "controls": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "wait_kinds": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "effect_postures": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "blocker_dispositions": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "required_projection_fields": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            }
+          }
+        },
+        "admission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "active_definition_requires_all_gates",
+            "gates",
+            "current_runtime"
+          ],
+          "properties": {
+            "active_definition_requires_all_gates": {
+              "const": true
+            },
+            "gates": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "current_runtime": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "adapter",
+                "lifecycle",
+                "dev_integration_profile",
+                "shared_runtime_allowed",
+                "governed_stage_allowed",
+                "production_allowed"
+              ],
+              "properties": {
+                "adapter": {
+                  "const": "temporal"
+                },
+                "lifecycle": {
+                  "enum": [
+                    "not-admitted",
+                    "proposed",
+                    "active",
+                    "suspended",
+                    "retired"
+                  ]
+                },
+                "dev_integration_profile": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "shared_runtime_allowed": {
+                  "type": "boolean"
+                },
+                "governed_stage_allowed": {
+                  "type": "boolean"
+                },
+                "production_allowed": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "initial_definitions": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/initialDefinition"
+          }
+        },
+        "implementation_order": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "safe_runtime_proof",
+            "business_definitions"
+          ],
+          "properties": {
+            "safe_runtime_proof": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "business_definitions": {
+              "$ref": "#/$defs/nonEmptyUniqueStringList"
+            }
+          }
+        },
+        "denied_authority_claims": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "openprojectRef": {
+      "type": "string",
+      "pattern": "^openproject://work_packages/[1-9][0-9]*$"
+    },
+    "recommendationPosture": {
+      "enum": [
+        "reuse",
+        "extend",
+        "replace",
+        "new"
+      ]
+    },
+    "nonEmptyUniqueStringList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "initialDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "definition_id",
+        "definition_version",
+        "definition_state",
+        "qualification",
+        "role",
+        "source_domain",
+        "implementation_repo",
+        "execution_owner",
+        "activity_owners",
+        "expected_receipt",
+        "admitted"
+      ],
+      "properties": {
+        "definition_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+        },
+        "definition_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "definition_state": {
+          "enum": [
+            "candidate",
+            "qualified",
+            "definition-ready",
+            "implementation-requested",
+            "admission-review",
+            "active",
+            "suspended",
+            "retired"
+          ]
+        },
+        "qualification": {
+          "enum": [
+            "synchronous",
+            "conditional",
+            "durable-candidate",
+            "admitted-durable"
+          ]
+        },
+        "role": {
+          "enum": [
+            "safe-runtime-proof",
+            "first-business-workflow",
+            "business-workflow"
+          ]
+        },
+        "source_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementation_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "activity_owners": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "expected_receipt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admitted": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

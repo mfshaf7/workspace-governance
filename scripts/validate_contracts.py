@@ -120,6 +120,7 @@ def main() -> int:
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
         "developer_integration_policy": repo_root / "contracts/developer-integration-policy.yaml",
         "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
+        "durable_orchestration": repo_root / "contracts/durable-orchestration.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
         "work_home_routing": repo_root / "contracts/work-home-routing.yaml",
@@ -162,6 +163,7 @@ def main() -> int:
     governed_intake_assist = contracts["governed_intake_assist"]["governed_intake_assist"]
     developer_integration_policy = contracts["developer_integration_policy"]
     developer_integration_profiles = contracts["developer_integration_profiles"]
+    durable_orchestration = contracts["durable_orchestration"]["durable_orchestration"]
     delegation_policy = contracts["delegation_policy"]
     self_improvement_policy = contracts["self_improvement_policy"]
     work_home_routing = contracts["work_home_routing"]["work_home_routing"]
@@ -209,6 +211,203 @@ def main() -> int:
     self_improvement_signal_catalog = self_improvement_policy["signal_catalog"]
     work_home_classes = work_home_routing["classes"]
     work_home_routing_homes = set(work_home_routing["routing_homes"].keys())
+
+    durable_label = "contracts/durable-orchestration.yaml"
+    durable_operator_surface = repo_root / durable_orchestration["primary_operator_surface"]
+    if not durable_operator_surface.exists() or durable_operator_surface.suffix != ".md":
+        errors.append(
+            f"{durable_label}: primary_operator_surface must point to an existing markdown surface"
+        )
+    expected_durable_authority = {
+        "contract_owner": "workspace-governance",
+        "aggregate_orchestrator": "operator-orchestration-service",
+        "durable_runtime_owner": "platform-engineering",
+        "durable_runtime_adapter": "temporal",
+        "security_acceptance_owner": "security-architecture",
+        "operator_cockpit_owner": "governance-operations-console",
+    }
+    durable_authority = durable_orchestration["authority"]
+    for field, expected in expected_durable_authority.items():
+        if durable_authority[field] != expected:
+            errors.append(f"{durable_label}: authority.{field} must be {expected!r}")
+    if durable_authority["direct_console_runtime_access_allowed"]:
+        errors.append(
+            f"{durable_label}: direct Console-to-runtime access must remain denied"
+        )
+    if not durable_authority["domain_business_authority_preserved"]:
+        errors.append(
+            f"{durable_label}: domain business authority must remain preserved"
+        )
+    referenced_durable_repos = {
+        durable_authority["contract_owner"],
+        durable_authority["aggregate_orchestrator"],
+        durable_authority["durable_runtime_owner"],
+        durable_authority["security_acceptance_owner"],
+        durable_authority["operator_cockpit_owner"],
+        *durable_authority["activity_owners"].keys(),
+    }
+    unknown_durable_repos = sorted(referenced_durable_repos - active_repos)
+    if unknown_durable_repos:
+        errors.append(
+            f"{durable_label}: authority references inactive repos: "
+            + ", ".join(unknown_durable_repos)
+        )
+    expected_qualification_classes = [
+        "synchronous",
+        "conditional",
+        "durable-candidate",
+        "admitted-durable",
+    ]
+    if durable_orchestration["qualification"]["classifications"] != expected_qualification_classes:
+        errors.append(
+            f"{durable_label}: qualification.classifications must preserve the canonical order"
+        )
+    expected_definition_lifecycle = [
+        "candidate",
+        "qualified",
+        "definition-ready",
+        "implementation-requested",
+        "admission-review",
+        "active",
+        "suspended",
+        "retired",
+    ]
+    if durable_orchestration["definition_contract"]["lifecycle"] != expected_definition_lifecycle:
+        errors.append(
+            f"{durable_label}: definition_contract.lifecycle must preserve the canonical lifecycle"
+        )
+    expected_definition_fields = {
+        "definition_id",
+        "definition_version",
+        "title",
+        "purpose",
+        "source_domain",
+        "source_record_type",
+        "business_owner",
+        "implementation_repo",
+        "execution_owner",
+        "execution_node_owners",
+        "trigger",
+        "approval_requirements",
+        "source_version_refs",
+        "idempotency_strategy",
+        "lock_strategy",
+        "execution_graph",
+        "wait_and_signal_contract",
+        "retry_and_timeout_contract",
+        "compensation_strategy",
+        "cancellation_boundary",
+        "completion_condition",
+        "expected_receipt",
+        "return_projection",
+        "evidence_and_retention",
+        "security_requirements",
+        "rollout_and_rollback",
+    }
+    if set(durable_orchestration["definition_contract"]["required_fields"]) != expected_definition_fields:
+        errors.append(
+            f"{durable_label}: definition_contract.required_fields must preserve the complete definition contract"
+        )
+    expected_run_lifecycle = [
+        "queued",
+        "running",
+        "waiting",
+        "blocked",
+        "failed",
+        "completed",
+        "cancelled",
+    ]
+    if durable_orchestration["run_contract"]["lifecycle"] != expected_run_lifecycle:
+        errors.append(
+            f"{durable_label}: run_contract.lifecycle must preserve the canonical lifecycle"
+        )
+    runtime_posture = durable_orchestration["admission"]["current_runtime"]
+    if (
+        durable_orchestration["contract_status"] == "source-defined-runtime-not-admitted"
+        and runtime_posture["lifecycle"] != "not-admitted"
+    ):
+        errors.append(
+            f"{durable_label}: source-defined-runtime-not-admitted requires current_runtime.lifecycle=not-admitted"
+        )
+    if runtime_posture["lifecycle"] == "not-admitted":
+        if runtime_posture["dev_integration_profile"] is not None:
+            errors.append(
+                f"{durable_label}: a not-admitted runtime must not name an active dev-integration profile"
+            )
+        for field in (
+            "shared_runtime_allowed",
+            "governed_stage_allowed",
+            "production_allowed",
+        ):
+            if runtime_posture[field]:
+                errors.append(
+                    f"{durable_label}: current_runtime.{field} must remain false before admission"
+                )
+    initial_definitions = durable_orchestration["initial_definitions"]
+    initial_definition_ids = [item["definition_id"] for item in initial_definitions]
+    if len(initial_definition_ids) != len(set(initial_definition_ids)):
+        errors.append(f"{durable_label}: initial definition ids must be unique")
+    if any(
+        item["admitted"]
+        or item["qualification"] == "admitted-durable"
+        or item["definition_state"] == "active"
+        for item in initial_definitions
+    ):
+        errors.append(
+            f"{durable_label}: initial definitions must remain unadmitted until runtime evidence exists"
+        )
+    definition_roles = [item["role"] for item in initial_definitions]
+    if len(definition_roles) != len(set(definition_roles)):
+        errors.append(f"{durable_label}: initial definition roles must be unique")
+    for definition in initial_definitions:
+        definition_repos = {
+            definition["implementation_repo"],
+            definition["execution_owner"],
+            *definition["activity_owners"],
+        }
+        unknown_definition_repos = sorted(definition_repos - active_repos)
+        if unknown_definition_repos:
+            errors.append(
+                f"{durable_label}: definition {definition['definition_id']} references inactive repos: "
+                + ", ".join(unknown_definition_repos)
+            )
+    definitions_by_role = {item["role"]: item for item in initial_definitions}
+    safe_definition = definitions_by_role.get("safe-runtime-proof")
+    business_definition = definitions_by_role.get("first-business-workflow")
+    if not safe_definition or safe_definition["definition_id"] != "validation-readiness-run":
+        errors.append(
+            f"{durable_label}: validation-readiness-run must remain the safe runtime proof"
+        )
+    if not business_definition or business_definition["definition_id"] != "delivery.refinement.apply":
+        errors.append(
+            f"{durable_label}: delivery.refinement.apply must remain the first business workflow"
+        )
+    implementation_order = durable_orchestration["implementation_order"]
+    if implementation_order["safe_runtime_proof"] != ["validation-readiness-run"]:
+        errors.append(
+            f"{durable_label}: implementation_order.safe_runtime_proof must start with validation-readiness-run"
+        )
+    if (
+        not implementation_order["business_definitions"]
+        or implementation_order["business_definitions"][0] != "delivery.refinement.apply"
+    ):
+        errors.append(
+            f"{durable_label}: implementation_order.business_definitions must start with delivery.refinement.apply"
+        )
+    required_denied_claims = {
+        "WGCF owns aggregate orchestration",
+        "OOS is only an activity adapter",
+        "Governance Operations Console calls Temporal directly",
+        "Temporal owns business workflow policy",
+        "a definition is active without admission evidence",
+        "a local dev-integration run is governed stage or production evidence",
+    }
+    if not required_denied_claims.issubset(
+        set(durable_orchestration["denied_authority_claims"])
+    ):
+        errors.append(
+            f"{durable_label}: denied_authority_claims must preserve every authority and maturity guard"
+        )
 
     expected_intake_statuses = {"out-of-scope", "proposed", "admitted"}
     if intake_statuses != expected_intake_statuses:
