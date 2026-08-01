@@ -42,12 +42,19 @@ Use these contracts to declare:
     disabled until platform and security activation gates are proven
 - `developer-integration-policy.yaml`
   - defines the shared `dev-integration` lane semantics, trigger guidance,
-    forbidden targets, required actions, and required handoff artifacts
+    forbidden targets, required actions, controlled component-commissioning
+    proof boundary, and required handoff artifacts
 - `durable-orchestration.yaml`
   - defines durable-workflow qualification, OOS aggregate authority, the
     replaceable Temporal runtime boundary, immutable definition and run
-    lifecycles, admission gates, evidence requirements, and the first safe and
-    business proof order
+    lifecycles, normal admission gates, the bounded first-runtime proof path,
+    evidence phases, and the first safe and business proof order
+- `schemas/controlled-runtime-proof-authorization.schema.json`
+  - defines the expiring pre-run permit envelope for an exact build-admitted
+    commissioning proof; it binds the target profile, definitions, source
+    revisions, immutable runtime images and artifacts, namespaces, identities,
+    queues, scenarios, approvals, evidence owner, and exact-baseline restore
+    without granting normal activation
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations

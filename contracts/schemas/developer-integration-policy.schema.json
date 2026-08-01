@@ -6,6 +6,7 @@
     "lane",
     "lane_classes",
     "profile_lifecycle",
+    "controlled_proof",
     "request_admission",
     "source_state",
     "runtime_state_models",
@@ -19,7 +20,7 @@
     "required_session_fields"
   ],
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1 },
+    "schema_version": { "const": 2 },
     "lane": {
       "type": "object",
       "required": [
@@ -93,6 +94,145 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "security_review_ref_required_when_flagged": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "controlled_proof": {
+      "type": "object",
+      "required": [
+        "purpose",
+        "authority_type",
+        "drill_type",
+        "eligible_profile_statuses",
+        "changes_profile_lifecycle",
+        "self_serve_launch_allowed",
+        "normal_profile_launch_remains_denied",
+        "permit",
+        "authorities",
+        "completion",
+        "forbidden_claims"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_type": {
+          "const": "runtime-drill"
+        },
+        "drill_type": {
+          "const": "component-commissioning-proof"
+        },
+        "eligible_profile_statuses": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "build-admitted"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "changes_profile_lifecycle": {
+          "const": false
+        },
+        "self_serve_launch_allowed": {
+          "const": false
+        },
+        "normal_profile_launch_remains_denied": {
+          "const": true
+        },
+        "permit": {
+          "type": "object",
+          "required": [
+            "schema_ref",
+            "schema_version",
+            "required_sections",
+            "exact_scope_required",
+            "expiration_required"
+          ],
+          "properties": {
+            "schema_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "schema_version": {
+              "const": 1
+            },
+            "required_sections": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "exact_scope_required": {
+              "const": true
+            },
+            "expiration_required": {
+              "const": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "authorities": {
+          "type": "object",
+          "required": [
+            "issuer",
+            "security_authorizer",
+            "operator_approval_required"
+          ],
+          "properties": {
+            "issuer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "security_authorizer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "operator_approval_required": {
+              "const": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "completion": {
+          "type": "object",
+          "required": [
+            "restore_mode",
+            "restore_required_before_completion",
+            "post_proof_security_review_required",
+            "pre_run_authorization_reusable_as_activation_evidence"
+          ],
+          "properties": {
+            "restore_mode": {
+              "const": "exact-baseline"
+            },
+            "restore_required_before_completion": {
+              "const": true
+            },
+            "post_proof_security_review_required": {
+              "const": true
+            },
+            "pre_run_authorization_reusable_as_activation_evidence": {
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "forbidden_claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       },
       "additionalProperties": false
     },

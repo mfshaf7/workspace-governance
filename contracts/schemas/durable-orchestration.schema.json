@@ -8,7 +8,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "durable_orchestration": {
       "type": "object",
@@ -332,6 +332,7 @@
           "required": [
             "active_definition_requires_all_gates",
             "gates",
+            "controlled_proof",
             "current_runtime"
           ],
           "properties": {
@@ -340,6 +341,9 @@
             },
             "gates": {
               "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "controlled_proof": {
+              "$ref": "#/$defs/controlledProof"
             },
             "current_runtime": {
               "type": "object",
@@ -360,6 +364,7 @@
                   "enum": [
                     "not-admitted",
                     "proposed",
+                    "build-admitted",
                     "active",
                     "suspended",
                     "retired"
@@ -434,6 +439,159 @@
       "items": {
         "type": "string",
         "minLength": 1
+      }
+    },
+    "controlledProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_ref",
+        "proof_classification",
+        "permit_schema_ref",
+        "target",
+        "lifecycle_transition_allowed_during_proof",
+        "self_serve_launch_allowed",
+        "definition_allowlist",
+        "required_scenarios",
+        "permitted_action_allowlist",
+        "required_stop_conditions",
+        "evidence_phases",
+        "denied_outcomes"
+      ],
+      "properties": {
+        "policy_ref": {
+          "const": "contracts/developer-integration-policy.yaml#controlled_proof"
+        },
+        "proof_classification": {
+          "const": "component-commissioning-proof"
+        },
+        "permit_schema_ref": {
+          "const": "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile_id",
+            "profile_lifecycle",
+            "environment"
+          ],
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile_lifecycle": {
+              "const": "build-admitted"
+            },
+            "environment": {
+              "const": "dev-integration"
+            }
+          }
+        },
+        "lifecycle_transition_allowed_during_proof": {
+          "const": false
+        },
+        "self_serve_launch_allowed": {
+          "const": false
+        },
+        "definition_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "definition_id",
+              "definition_version"
+            ],
+            "properties": {
+              "definition_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+              },
+              "definition_version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "required_scenarios": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "permitted_action_allowlist": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "required_stop_conditions": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "evidence_phases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pre_run_authorization",
+            "post_run_activation_review"
+          ],
+          "properties": {
+            "pre_run_authorization": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "grants_profile_activation",
+                "grants_definition_activation",
+                "reusable_as_post_run_activation_evidence"
+              ],
+              "properties": {
+                "artifact_type": {
+                  "const": "controlled-runtime-proof-authorization"
+                },
+                "grants_profile_activation": {
+                  "const": false
+                },
+                "grants_definition_activation": {
+                  "const": false
+                },
+                "reusable_as_post_run_activation_evidence": {
+                  "const": false
+                }
+              }
+            },
+            "post_run_activation_review": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "exact_baseline_restore_required",
+                "security_acceptance_required",
+                "profile_activation_allowed_before_acceptance",
+                "definition_activation_allowed_before_acceptance"
+              ],
+              "properties": {
+                "artifact_type": {
+                  "const": "controlled-runtime-proof-result"
+                },
+                "exact_baseline_restore_required": {
+                  "const": true
+                },
+                "security_acceptance_required": {
+                  "const": true
+                },
+                "profile_activation_allowed_before_acceptance": {
+                  "const": false
+                },
+                "definition_activation_allowed_before_acceptance": {
+                  "const": false
+                }
+              }
+            }
+          }
+        },
+        "denied_outcomes": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        }
       }
     },
     "initialDefinition": {

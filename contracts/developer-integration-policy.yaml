@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 lane:
   id: dev-integration
   standard_owner: workspace-governance
@@ -37,6 +37,51 @@ profile_lifecycle:
     - suspended
     - retired
   security_review_ref_required_when_flagged: true
+controlled_proof:
+  purpose: >-
+    Permit one expiring, non-self-serve commissioning proof for an exact
+    build-admitted component scope without activating the profile or treating
+    the result as governed stage or production evidence.
+  authority_type: runtime-drill
+  drill_type: component-commissioning-proof
+  eligible_profile_statuses:
+    - build-admitted
+  changes_profile_lifecycle: false
+  self_serve_launch_allowed: false
+  normal_profile_launch_remains_denied: true
+  permit:
+    schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+    schema_version: 1
+    required_sections:
+      - schema_version
+      - authorization_id
+      - authority_type
+      - drill_type
+      - target
+      - scope
+      - approvals
+      - window
+      - evidence
+      - baseline_and_restore
+      - exception_handling
+      - stop_conditions
+    exact_scope_required: true
+    expiration_required: true
+  authorities:
+    issuer: platform-engineering
+    security_authorizer: security-architecture
+    operator_approval_required: true
+  completion:
+    restore_mode: exact-baseline
+    restore_required_before_completion: true
+    post_proof_security_review_required: true
+    pre_run_authorization_reusable_as_activation_evidence: false
+  forbidden_claims:
+    - build-admitted profile became active
+    - controlled proof became a self-serve launch path
+    - pre-run authorization satisfied post-run activation evidence
+    - local proof became governed stage or production evidence
+    - post-proof runtime state was retained without governed reclassification
 request_admission:
   current_request_adapter:
     system: openproject

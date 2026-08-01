@@ -9,6 +9,7 @@ import shlex
 import sys
 
 from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 import yaml
 
 from contracts_lib import (
@@ -44,6 +45,90 @@ WGCF_COMMAND_TEMPLATE_FIELDS = {
     "target_id",
     "target_scope",
     "target_type",
+}
+CONTROLLED_PROOF_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+)
+CONTROLLED_PROOF_REQUIRED_SECTIONS = {
+    "schema_version",
+    "authorization_id",
+    "authority_type",
+    "drill_type",
+    "target",
+    "scope",
+    "approvals",
+    "window",
+    "evidence",
+    "baseline_and_restore",
+    "exception_handling",
+    "stop_conditions",
+}
+CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
+    "allowed_definitions",
+    "source_revisions",
+    "runtime_artifacts",
+    "runtime_images",
+    "target_namespaces",
+    "runtime_identities",
+    "task_queues",
+    "allowed_scenarios",
+    "permitted_actions",
+    "max_runs",
+}
+CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS = {
+    "issued_by",
+    "operator_approval_ref",
+    "security_authorization_ref",
+}
+CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS = {"issued_at", "expires_at"}
+CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS = {
+    "owner_repo",
+    "verification_pack_ref",
+}
+CONTROLLED_PROOF_REQUIRED_RESTORE_FIELDS = {
+    "baseline_snapshot_ref",
+    "restore_mode",
+    "restore_scope",
+}
+CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS = {
+    "allowed_decisions",
+    "record_ref_required",
+}
+CONTROLLED_PROOF_REQUIRED_SCENARIOS = {
+    "nominal-completion",
+    "workflow-worker-restart",
+    "temporal-runtime-restart",
+    "deterministic-replay",
+    "duplicate-suppression",
+    "cancellation",
+    "unavailable-dependency",
+    "identity-denial",
+    "payload-boundary",
+    "backup-restore",
+    "exact-baseline-restore",
+}
+CONTROLLED_PROOF_PERMITTED_ACTIONS = {
+    "install-scoped-runtime",
+    "start-validation-readiness-run",
+    "restart-oos-workflow-worker",
+    "restart-wgcf-activity-worker",
+    "restart-temporal-runtime",
+    "cancel-validation-readiness-run",
+    "simulate-unavailable-dependency",
+    "verify-identity-denial",
+    "capture-backup",
+    "restore-exact-baseline",
+    "remove-scoped-runtime",
+}
+CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS = {
+    "authorization-expired",
+    "source-or-artifact-digest-mismatch",
+    "target-scope-mismatch",
+    "identity-or-queue-denial-failure",
+    "baseline-snapshot-unavailable",
+    "unexpected-side-effect",
+    "evidence-custody-failure",
+    "restore-failure",
 }
 
 
@@ -152,11 +237,44 @@ def main() -> int:
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
 
+    controlled_proof_schema_path = repo_root / CONTROLLED_PROOF_SCHEMA_REF
+    controlled_proof_schema: dict = {}
+    if not controlled_proof_schema_path.exists():
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: controlled proof authorization schema is missing"
+        )
+    else:
+        controlled_proof_schema = load_json(controlled_proof_schema_path)
+        try:
+            Draft202012Validator.check_schema(controlled_proof_schema)
+        except SchemaError as exc:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: invalid JSON Schema: {exc.message}"
+            )
+
     repo_rules_schema = repo_root / REPO_RULES_SCHEMA
     for path in sorted((repo_root / "contracts" / "repo-rules").glob("*.yaml")):
         validate_schema(errors, path, repo_rules_schema)
 
     contracts = load_contracts(repo_root)
+    supported_schema_versions = set(
+        contracts["version"]["compatibility"]["supported_schema_versions"]
+    )
+    for contract_name, contract_payload in contracts.items():
+        if contract_name == "repo_rules":
+            for repo_name, repo_rule in contract_payload.items():
+                if repo_rule.get("schema_version") not in supported_schema_versions:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: schema_version is not supported by contracts/version.yaml"
+                    )
+            continue
+        if (
+            isinstance(contract_payload, dict)
+            and contract_payload.get("schema_version") not in supported_schema_versions
+        ):
+            errors.append(
+                f"{instance_paths[contract_name]}: schema_version is not supported by contracts/version.yaml"
+            )
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
@@ -321,19 +439,29 @@ def main() -> int:
         errors.append(
             f"{durable_label}: run_contract.lifecycle must preserve the canonical lifecycle"
         )
-    runtime_posture = durable_orchestration["admission"]["current_runtime"]
-    if (
-        durable_orchestration["contract_status"] == "source-defined-runtime-not-admitted"
-        and runtime_posture["lifecycle"] != "not-admitted"
-    ):
+    durable_admission = durable_orchestration["admission"]
+    runtime_posture = durable_admission["current_runtime"]
+    allowed_runtime_lifecycles = {
+        "source-defined-runtime-not-admitted": {"not-admitted"},
+        "runtime-admission-review": {"proposed", "build-admitted"},
+        "runtime-admitted": {"active", "suspended", "retired"},
+    }
+    contract_status = durable_orchestration["contract_status"]
+    if runtime_posture["lifecycle"] not in allowed_runtime_lifecycles[contract_status]:
         errors.append(
-            f"{durable_label}: source-defined-runtime-not-admitted requires current_runtime.lifecycle=not-admitted"
+            f"{durable_label}: contract_status {contract_status!r} is incompatible with "
+            f"current_runtime.lifecycle {runtime_posture['lifecycle']!r}"
         )
     if runtime_posture["lifecycle"] == "not-admitted":
         if runtime_posture["dev_integration_profile"] is not None:
             errors.append(
-                f"{durable_label}: a not-admitted runtime must not name an active dev-integration profile"
+                f"{durable_label}: a not-admitted runtime must not name a dev-integration profile"
             )
+    elif not runtime_posture["dev_integration_profile"]:
+        errors.append(
+            f"{durable_label}: an admitted-review or admitted runtime must name its dev-integration profile"
+        )
+    if runtime_posture["lifecycle"] in {"not-admitted", "proposed", "build-admitted"}:
         for field in (
             "shared_runtime_allowed",
             "governed_stage_allowed",
@@ -347,19 +475,44 @@ def main() -> int:
     initial_definition_ids = [item["definition_id"] for item in initial_definitions]
     if len(initial_definition_ids) != len(set(initial_definition_ids)):
         errors.append(f"{durable_label}: initial definition ids must be unique")
-    if any(
-        item["admitted"]
-        or item["qualification"] == "admitted-durable"
-        or item["definition_state"] == "active"
-        for item in initial_definitions
-    ):
-        errors.append(
-            f"{durable_label}: initial definitions must remain unadmitted until runtime evidence exists"
-        )
     definition_roles = [item["role"] for item in initial_definitions]
     if len(definition_roles) != len(set(definition_roles)):
         errors.append(f"{durable_label}: initial definition roles must be unique")
     for definition in initial_definitions:
+        definition_id = definition["definition_id"]
+        admitted = definition["admitted"]
+        admitted_qualification = definition["qualification"] == "admitted-durable"
+        admitted_state = definition["definition_state"] in {
+            "active",
+            "suspended",
+            "retired",
+        }
+        if admitted and (not admitted_qualification or not admitted_state):
+            errors.append(
+                f"{durable_label}: admitted definition {definition_id!r} must use "
+                "qualification=admitted-durable and an active, suspended, or retired state"
+            )
+        if admitted and (
+            contract_status != "runtime-admitted"
+            or runtime_posture["lifecycle"] not in {"active", "suspended", "retired"}
+        ):
+            errors.append(
+                f"{durable_label}: admitted definition {definition_id!r} requires "
+                "an admitted runtime contract and lifecycle"
+            )
+        if not admitted and (admitted_qualification or definition["definition_state"] in {"active", "suspended"}):
+            errors.append(
+                f"{durable_label}: unadmitted definition {definition_id!r} cannot use "
+                "admitted-durable qualification or an active/suspended state"
+            )
+        if definition["definition_state"] == "active" and (
+            contract_status != "runtime-admitted"
+            or runtime_posture["lifecycle"] != "active"
+        ):
+            errors.append(
+                f"{durable_label}: active definition {definition_id!r} requires "
+                "contract_status=runtime-admitted and current_runtime.lifecycle=active"
+            )
         definition_repos = {
             definition["implementation_repo"],
             definition["execution_owner"],
@@ -381,6 +534,267 @@ def main() -> int:
     if not business_definition or business_definition["definition_id"] != "delivery.refinement.apply":
         errors.append(
             f"{durable_label}: delivery.refinement.apply must remain the first business workflow"
+        )
+    controlled_proof_policy = developer_integration_policy["controlled_proof"]
+    controlled_proof = durable_admission["controlled_proof"]
+    permit_contract = controlled_proof_policy["permit"]
+    if controlled_proof_policy["authority_type"] != "runtime-drill":
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.authority_type "
+            "must remain runtime-drill"
+        )
+    if controlled_proof_policy["drill_type"] != controlled_proof["proof_classification"]:
+        errors.append(
+            f"{durable_label}: controlled proof classification must match the dev-integration policy"
+        )
+    if set(controlled_proof_policy["eligible_profile_statuses"]) != {"build-admitted"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proofs must be limited "
+            "to build-admitted profiles"
+        )
+    for field, expected in (
+        ("changes_profile_lifecycle", False),
+        ("self_serve_launch_allowed", False),
+        ("normal_profile_launch_remains_denied", True),
+    ):
+        if controlled_proof_policy[field] is not expected:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: "
+                f"controlled_proof.{field} must be {expected!r}"
+            )
+    if permit_contract["schema_ref"] != CONTROLLED_PROOF_SCHEMA_REF:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.permit.schema_ref "
+            f"must be {CONTROLLED_PROOF_SCHEMA_REF!r}"
+        )
+    if controlled_proof["permit_schema_ref"] != permit_contract["schema_ref"]:
+        errors.append(
+            f"{durable_label}: controlled proof permit schema must match the dev-integration policy"
+        )
+    if set(permit_contract["required_sections"]) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
+            "must preserve the complete authorization envelope"
+        )
+    if set(controlled_proof_schema.get("required") or []) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: required sections must preserve the complete authorization envelope"
+        )
+    controlled_proof_schema_properties = controlled_proof_schema.get("properties", {})
+    controlled_proof_schema_boundaries = {
+        "target": {"profile_id", "profile_lifecycle", "environment"},
+        "scope": CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS,
+        "approvals": CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS,
+        "window": CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS,
+        "evidence": CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS,
+        "baseline_and_restore": CONTROLLED_PROOF_REQUIRED_RESTORE_FIELDS,
+        "exception_handling": CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS,
+    }
+    for boundary_name, required_fields in controlled_proof_schema_boundaries.items():
+        boundary_schema = controlled_proof_schema_properties.get(boundary_name, {})
+        if set(boundary_schema.get("required") or []) != required_fields:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {boundary_name}.required must preserve "
+                "the complete bounded-proof scope"
+            )
+        if boundary_schema.get("additionalProperties") is not False:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {boundary_name} must reject additional properties"
+            )
+    scope_schema_properties = controlled_proof_schema_properties.get("scope", {}).get(
+        "properties", {}
+    )
+    if scope_schema_properties.get("max_runs", {}).get("const") != 1:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.max_runs must remain fixed at one"
+        )
+    for digest_collection in ("runtime_artifacts", "runtime_images"):
+        collection_schema = scope_schema_properties.get(digest_collection, {})
+        item_schema = collection_schema.get("items", {})
+        if collection_schema.get("minItems") != 1 or "digest" not in set(
+            item_schema.get("required") or []
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.{digest_collection} must require at least one immutable digest"
+            )
+    target_schema_properties = controlled_proof_schema_properties.get("target", {}).get(
+        "properties", {}
+    )
+    if (
+        target_schema_properties.get("profile_lifecycle", {}).get("const")
+        != "build-admitted"
+        or target_schema_properties.get("environment", {}).get("const")
+        != "dev-integration"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: target must remain build-admitted dev-integration"
+        )
+    approval_schema_properties = controlled_proof_schema_properties.get(
+        "approvals", {}
+    ).get("properties", {})
+    if approval_schema_properties.get("issued_by", {}).get("const") != "platform-engineering":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals.issued_by must remain platform-engineering"
+        )
+    restore_schema_properties = controlled_proof_schema_properties.get(
+        "baseline_and_restore", {}
+    ).get("properties", {})
+    if restore_schema_properties.get("restore_mode", {}).get("const") != "exact-baseline":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: baseline_and_restore.restore_mode must remain exact-baseline"
+        )
+    if controlled_proof_schema_properties.get("authority_type", {}).get("const") != "runtime-drill":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: authority_type must remain runtime-drill"
+        )
+    if (
+        controlled_proof_schema_properties.get("drill_type", {}).get("const")
+        != "component-commissioning-proof"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: drill_type must remain component-commissioning-proof"
+        )
+    schema_version_contract = (
+        controlled_proof_schema.get("properties", {})
+        .get("schema_version", {})
+        .get("const")
+    )
+    if schema_version_contract != permit_contract["schema_version"]:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof permit schema_version "
+            "must match the authorization schema"
+        )
+    proof_authorities = controlled_proof_policy["authorities"]
+    expected_proof_authorities = {
+        "issuer": durable_authority["durable_runtime_owner"],
+        "security_authorizer": durable_authority["security_acceptance_owner"],
+    }
+    for field, expected in expected_proof_authorities.items():
+        if proof_authorities[field] != expected:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: "
+                f"controlled_proof.authorities.{field} must be {expected!r}"
+            )
+    if not proof_authorities["operator_approval_required"]:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
+        )
+    proof_completion = controlled_proof_policy["completion"]
+    if (
+        proof_completion["restore_mode"] != "exact-baseline"
+        or not proof_completion["restore_required_before_completion"]
+        or not proof_completion["post_proof_security_review_required"]
+        or proof_completion["pre_run_authorization_reusable_as_activation_evidence"]
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof completion must "
+            "require exact-baseline restore and separate post-proof Security review"
+        )
+    required_policy_denials = {
+        "build-admitted profile became active",
+        "controlled proof became a self-serve launch path",
+        "pre-run authorization satisfied post-run activation evidence",
+        "local proof became governed stage or production evidence",
+        "post-proof runtime state was retained without governed reclassification",
+    }
+    if not required_policy_denials.issubset(
+        set(controlled_proof_policy["forbidden_claims"])
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.forbidden_claims "
+            "must preserve every maturity and restoration boundary"
+        )
+    proof_target = controlled_proof["target"]
+    if proof_target["profile_id"] != runtime_posture["dev_integration_profile"]:
+        errors.append(
+            f"{durable_label}: controlled proof target profile must match current_runtime.dev_integration_profile"
+        )
+    if proof_target["profile_lifecycle"] != runtime_posture["lifecycle"]:
+        errors.append(
+            f"{durable_label}: controlled proof target lifecycle must match current_runtime.lifecycle"
+        )
+    if proof_target["profile_lifecycle"] not in set(
+        controlled_proof_policy["eligible_profile_statuses"]
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof target lifecycle is not eligible under the dev-integration policy"
+        )
+    profile_id = proof_target["profile_id"]
+    profile_payload = developer_integration_profiles["profiles"].get(profile_id)
+    if profile_payload is None:
+        errors.append(
+            f"{durable_label}: controlled proof references unknown dev-integration profile {profile_id!r}"
+        )
+    else:
+        if profile_payload["lifecycle"] != runtime_posture["lifecycle"]:
+            errors.append(
+                f"{durable_label}: current runtime lifecycle must match profile {profile_id!r} registry lifecycle"
+            )
+        if profile_payload.get("build_admission", {}).get("self_serve_launch_allowed") is not False:
+            errors.append(
+                f"{durable_label}: controlled proof profile must keep build_admission.self_serve_launch_allowed=false"
+            )
+    if proof_target["profile_lifecycle"] in set(
+        developer_integration_policy["profile_lifecycle"]["self_serve_statuses"]
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof cannot use a self-serve profile lifecycle"
+        )
+    proof_allowlist = {
+        (item["definition_id"], item["definition_version"])
+        for item in controlled_proof["definition_allowlist"]
+    }
+    expected_proof_allowlist = {
+        (safe_definition["definition_id"], safe_definition["definition_version"])
+    } if safe_definition else set()
+    if proof_allowlist != expected_proof_allowlist:
+        errors.append(
+            f"{durable_label}: controlled proof definition allowlist must contain only the safe runtime proof"
+        )
+    if set(controlled_proof["required_scenarios"]) != CONTROLLED_PROOF_REQUIRED_SCENARIOS:
+        errors.append(
+            f"{durable_label}: controlled proof required_scenarios must preserve the complete commissioning set"
+        )
+    if set(controlled_proof["permitted_action_allowlist"]) != CONTROLLED_PROOF_PERMITTED_ACTIONS:
+        errors.append(
+            f"{durable_label}: controlled proof permitted_action_allowlist must preserve the bounded action set"
+        )
+    if set(controlled_proof["required_stop_conditions"]) != CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS:
+        errors.append(
+            f"{durable_label}: controlled proof required_stop_conditions must preserve every fail-stop boundary"
+        )
+    pre_run_evidence = controlled_proof["evidence_phases"]["pre_run_authorization"]
+    post_run_evidence = controlled_proof["evidence_phases"]["post_run_activation_review"]
+    if (
+        pre_run_evidence["grants_profile_activation"]
+        or pre_run_evidence["grants_definition_activation"]
+        or pre_run_evidence["reusable_as_post_run_activation_evidence"]
+    ):
+        errors.append(
+            f"{durable_label}: pre-run proof authorization cannot grant or substitute for activation"
+        )
+    if (
+        not post_run_evidence["exact_baseline_restore_required"]
+        or not post_run_evidence["security_acceptance_required"]
+        or post_run_evidence["profile_activation_allowed_before_acceptance"]
+        or post_run_evidence["definition_activation_allowed_before_acceptance"]
+    ):
+        errors.append(
+            f"{durable_label}: post-run activation review must require restore and Security acceptance before activation"
+        )
+    required_controlled_proof_denials = {
+        "business workflow execution",
+        "normal self-serve profile launch",
+        "active profile projection during proof",
+        "active definition projection during proof",
+        "governed stage or production evidence claim",
+        "retained runtime state without governed reclassification",
+    }
+    if not required_controlled_proof_denials.issubset(
+        set(controlled_proof["denied_outcomes"])
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof denied_outcomes must preserve every maturity and scope boundary"
         )
     implementation_order = durable_orchestration["implementation_order"]
     if implementation_order["safe_runtime_proof"] != ["validation-readiness-run"]:
