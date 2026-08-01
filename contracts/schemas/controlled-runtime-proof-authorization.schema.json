@@ -12,6 +12,7 @@
     "drill_type",
     "target",
     "scope",
+    "run_binding",
     "permit_issuer",
     "executor",
     "approvals",
@@ -212,6 +213,30 @@
         }
       }
     },
+    "run_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "consumption_mode",
+        "consume_before_first_mutation",
+        "duplicate_consumption_denied"
+      ],
+      "properties": {
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "consumption_mode": {
+          "const": "atomic-single-use"
+        },
+        "consume_before_first_mutation": {
+          "const": true
+        },
+        "duplicate_consumption_denied": {
+          "const": true
+        }
+      }
+    },
     "permit_issuer": {
       "$ref": "#/$defs/reviewedPlatformSource"
     },
@@ -223,18 +248,38 @@
       "additionalProperties": false,
       "required": [
         "issued_by",
+        "canonicalization",
+        "canonical_claims_projection",
+        "canonical_claims_digest",
         "operator_approval_ref",
-        "security_authorization_ref"
+        "operator_approval_digest",
+        "security_authorization_ref",
+        "security_authorization_digest"
       ],
       "properties": {
         "issued_by": {
           "const": "platform-engineering"
         },
+        "canonicalization": {
+          "const": "rfc8785"
+        },
+        "canonical_claims_projection": {
+          "const": "all-authorization-fields-except-approvals"
+        },
+        "canonical_claims_digest": {
+          "$ref": "#/$defs/digest"
+        },
         "operator_approval_ref": {
           "$ref": "#/$defs/uri"
         },
+        "operator_approval_digest": {
+          "$ref": "#/$defs/digest"
+        },
         "security_authorization_ref": {
           "$ref": "#/$defs/uri"
+        },
+        "security_authorization_digest": {
+          "$ref": "#/$defs/digest"
         }
       }
     },
@@ -275,6 +320,7 @@
       "additionalProperties": false,
       "required": [
         "baseline_snapshot_ref",
+        "baseline_snapshot_digest",
         "restore_mode",
         "restore_scope",
         "terminal_cleanup_authority"
@@ -282,6 +328,9 @@
       "properties": {
         "baseline_snapshot_ref": {
           "$ref": "#/$defs/uri"
+        },
+        "baseline_snapshot_digest": {
+          "$ref": "#/$defs/digest"
         },
         "restore_mode": {
           "const": "exact-baseline"

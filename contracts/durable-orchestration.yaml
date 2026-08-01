@@ -200,6 +200,7 @@ durable_orchestration:
       policy_ref: contracts/developer-integration-policy.yaml#controlled_proof
       proof_classification: component-commissioning-proof
       permit_schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+      result_schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
       permit_issuer:
         owner_repo: platform-engineering
         source_review_work_item_ref: openproject://work_packages/792
@@ -274,6 +275,7 @@ durable_orchestration:
           reusable_as_post_run_activation_evidence: false
         post_run_activation_review:
           artifact_type: controlled-runtime-proof-result
+          schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
           exact_baseline_restore_required: true
           security_acceptance_required: true
           profile_activation_allowed_before_acceptance: false

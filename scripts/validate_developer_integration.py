@@ -102,6 +102,9 @@ REQUIRED_BUILD_ADMISSION_KEYS = {
 CONTROLLED_PROOF_SCHEMA_REF = (
     "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
 )
+CONTROLLED_PROOF_RESULT_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-result.schema.json"
+)
 CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "schema_version",
     "authorization_id",
@@ -109,6 +112,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
+    "run_binding",
     "permit_issuer",
     "executor",
     "approvals",
@@ -244,7 +248,9 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         "self_serve_launch_allowed",
         "normal_profile_launch_remains_denied",
         "permit",
+        "result",
         "authorities",
+        "owner_surfaces",
         "completion",
         "forbidden_claims",
     }
@@ -299,9 +305,55 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed issuer and executor"
             )
+        expected_semantic_validation = {
+            "unique_binding_keys": {
+                "source_revisions": "repo",
+                "runtime_artifacts": "artifact_id",
+                "runtime_images": "image_ref",
+            },
+            "canonical_claims": {
+                "canonicalization": "rfc8785",
+                "projection": "all-authorization-fields-except-approvals",
+                "approvals_bind_complete_claims": True,
+                "approval_artifact_digests_required": True,
+            },
+            "run_consumption": {
+                "mode": "atomic-single-use",
+                "keyed_by": "authorization_id",
+                "consume_before_first_mutation": True,
+                "duplicate_consumption_denied": True,
+            },
+            "immutable_baseline_digest_required": True,
+        }
+        if permit.get("semantic_validation") != expected_semantic_validation:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof semantic validation "
+                "must preserve unique logical bindings, canonical approval binding, atomic single-use "
+                "consumption, and immutable baseline verification"
+            )
         if not (repo_root / permit.get("schema_ref", "<missing>")).exists():
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof permit schema does not exist"
+            )
+        result = controlled_proof["result"]
+        expected_result = {
+            "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
+            "schema_version": 1,
+            "authorization_binding_required": True,
+            "run_binding_required": True,
+            "scenario_outcomes_required": True,
+            "scenario_ids_must_be_unique": True,
+            "owner_receipts_required": True,
+            "exact_baseline_evidence_required": True,
+        }
+        if result != expected_result:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof result must preserve "
+                "authorization, single-run, scenario, owner-receipt, and exact-baseline evidence bindings"
+            )
+        if not (repo_root / result.get("schema_ref", "<missing>")).exists():
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof result schema does not exist"
             )
         authorities = controlled_proof["authorities"]
         if authorities.get("issuer") != "platform-engineering":
@@ -374,6 +426,19 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         if durable_proof["permit_schema_ref"] != permit.get("schema_ref"):
             errors.append(
                 "contracts/durable-orchestration.yaml: controlled proof permit schema must match the dev-integration policy"
+            )
+        if durable_proof.get("result_schema_ref") != result.get("schema_ref"):
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof result schema must match the dev-integration policy"
+            )
+        if (
+            durable_proof.get("evidence_phases", {})
+            .get("post_run_activation_review", {})
+            .get("schema_ref")
+            != result.get("schema_ref")
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: post-run activation review must bind the controlled proof result schema"
             )
         for source_role in ("permit_issuer", "executor"):
             reviewed_source = durable_proof.get(source_role, {})

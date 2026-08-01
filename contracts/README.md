@@ -54,10 +54,15 @@ Use these contracts to declare:
     commissioning proof; it binds the target profile, definitions, source
     revisions, immutable runtime images and artifacts, the exact reviewed
     permit-issuer and executor revisions, namespaces, identities, queues,
-    scenarios, approvals, evidence owner, and exact-baseline restore without
-    granting normal activation
+    scenarios, an RFC 8785 digest over every field outside the approval
+    envelope, one atomically consumed run, evidence owner, and an immutable
+    pre-issued exact-baseline snapshot without granting normal activation
   - denies new proof work after any terminal stop condition while preserving
     only run-bound, exact-baseline cleanup authority for an already-started run
+- `schemas/controlled-runtime-proof-result.schema.json`
+  - defines the post-run result envelope that binds the consumed authorization,
+    one execution, scenario evidence, owner receipts, and exact-baseline restore
+    evidence without granting profile or workflow-definition activation
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations

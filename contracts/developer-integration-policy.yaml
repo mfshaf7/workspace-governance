@@ -59,6 +59,7 @@ controlled_proof:
       - drill_type
       - target
       - scope
+      - run_binding
       - permit_issuer
       - executor
       - approvals
@@ -71,6 +72,31 @@ controlled_proof:
     expiration_required: true
     permit_issuer_binding_required: true
     executor_binding_required: true
+    semantic_validation:
+      unique_binding_keys:
+        source_revisions: repo
+        runtime_artifacts: artifact_id
+        runtime_images: image_ref
+      canonical_claims:
+        canonicalization: rfc8785
+        projection: all-authorization-fields-except-approvals
+        approvals_bind_complete_claims: true
+        approval_artifact_digests_required: true
+      run_consumption:
+        mode: atomic-single-use
+        keyed_by: authorization_id
+        consume_before_first_mutation: true
+        duplicate_consumption_denied: true
+      immutable_baseline_digest_required: true
+  result:
+    schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
+    schema_version: 1
+    authorization_binding_required: true
+    run_binding_required: true
+    scenario_outcomes_required: true
+    scenario_ids_must_be_unique: true
+    owner_receipts_required: true
+    exact_baseline_evidence_required: true
   authorities:
     issuer: platform-engineering
     permit_issuer_source_review_required: true

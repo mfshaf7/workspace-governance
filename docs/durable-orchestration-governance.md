@@ -40,16 +40,19 @@ themselves justify durable orchestration.
 4. When operating evidence is required before normal activation, Platform
    implements and source-reviews the bounded permit issuer and executor under
    ART #792.
-5. Platform may issue one expiring controlled-proof permit only after Security
-   reviews those exact merged source revisions and the operator approves the
-   exact permit scope.
-6. Run only the permitted definition, revisions, artifacts, namespaces,
+5. Before permit issuance, Platform captures the immutable pre-run baseline
+   artifact and assembles the complete authorization claims, including its
+   reference and digest.
+6. Security and the operator approve the RFC 8785 digest of every authorization
+   field outside the approval envelope. Platform may then issue one expiring
+   controlled-proof permit carrying both approval artifact refs and digests.
+7. Run only the permitted definition, revisions, artifacts, namespaces,
    identities, queues, scenarios, and actions. The profile remains
    `build-admitted`; ordinary self-serve actions remain denied.
-7. Restore the captured exact baseline and preserve the proof result and owner
+8. Restore the captured exact baseline and preserve the proof result and owner
    receipts.
-8. Obtain a separate post-proof Security decision on the operating evidence.
-9. Activate the profile and one immutable definition version only after every
+9. Obtain a separate post-proof Security decision on the operating evidence.
+10. Activate the profile and one immutable definition version only after every
    normal admission gate passes.
 
 `validation-readiness-run` is the safe runtime proof.
@@ -70,6 +73,8 @@ normal activation:
   digests, the exact reviewed permit-issuer and executor revisions, and the
   permitted namespaces, identities, queues, definition versions, scenarios,
   and actions
+- it binds the immutable baseline artifact captured before issuance and one
+  run that must be atomically consumed before the first mutation
 - its permit follows
   [`../contracts/schemas/controlled-runtime-proof-authorization.schema.json`](../contracts/schemas/controlled-runtime-proof-authorization.schema.json)
 - its pre-run authorization cannot be reused as post-run activation evidence
@@ -86,12 +91,29 @@ profile.
 
 Schema validity is necessary but not sufficient. The future permit issuer and
 executor must also compare the permit with the current orchestration allowlist,
-verify both exact merged source bindings, verify its issue and expiry window,
-verify every source and runtime digest, and fail closed when any stop condition
-is met. No stop condition can authorize a new action or retry; every stop
-preserves only the fixed exact-baseline cleanup authority for the
-already-started run. No such execution path is activated by this contract
-change.
+reject duplicate logical bindings by their declared semantic keys, verify both
+exact merged source bindings, and verify the issue and expiry window. They must
+canonicalize every authorization field except the approval envelope with RFC
+8785, verify that both approval artifacts bind that canonical digest,
+atomically consume the permit
+for its one declared run before the first mutation, and reject every duplicate
+consumption attempt. Every source, runtime, approval, and captured baseline
+digest must be verified before its dependent action. No stop condition can
+authorize a new action or retry; every stop preserves only the fixed
+exact-baseline cleanup authority for the already-started run.
+
+The executor must emit a result that validates against
+`contracts/schemas/controlled-runtime-proof-result.schema.json`. That artifact
+binds the consumed authorization and run, scenario outcomes, owner receipts,
+and exact-baseline restoration evidence. It is operating evidence for the
+separate post-run Security review; it does not activate the profile or a
+workflow definition.
+
+The primary Platform procedure is the
+[controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).
+The runbook and profile must fail closed until the reviewed issuer and executor
+source tracked by ART #792 has landed. No execution path is activated by this
+contract change.
 
 ## Current Runtime Status
 
@@ -102,7 +124,9 @@ change.
 - implementation allowed: bounded owner-repo source work only
 - self-serve launch allowed: no
 - normal workflow execution allowed: no
-- controlled proof allowed: only after an exact permit is issued and accepted
+- controlled proof contract defined: yes
+- controlled proof execution allowed: no, until ART #792 lands reviewed issuer
+  and executor source and an exact permit is issued and accepted
 - governed stage allowed: no
 - production allowed: no
 

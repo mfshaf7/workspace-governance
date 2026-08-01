@@ -125,6 +125,7 @@
         "self_serve_launch_allowed",
         "normal_profile_launch_remains_denied",
         "permit",
+        "result",
         "authorities",
         "owner_surfaces",
         "completion",
@@ -170,7 +171,8 @@
             "exact_scope_required",
             "expiration_required",
             "permit_issuer_binding_required",
-            "executor_binding_required"
+            "executor_binding_required",
+            "semantic_validation"
           ],
           "properties": {
             "schema_ref": {
@@ -199,6 +201,129 @@
               "const": true
             },
             "executor_binding_required": {
+              "const": true
+            },
+            "semantic_validation": {
+              "type": "object",
+              "required": [
+                "unique_binding_keys",
+                "canonical_claims",
+                "run_consumption",
+                "immutable_baseline_digest_required"
+              ],
+              "properties": {
+                "unique_binding_keys": {
+                  "type": "object",
+                  "required": [
+                    "source_revisions",
+                    "runtime_artifacts",
+                    "runtime_images"
+                  ],
+                  "properties": {
+                    "source_revisions": {
+                      "const": "repo"
+                    },
+                    "runtime_artifacts": {
+                      "const": "artifact_id"
+                    },
+                    "runtime_images": {
+                      "const": "image_ref"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "canonical_claims": {
+                  "type": "object",
+                  "required": [
+                    "canonicalization",
+                    "projection",
+                    "approvals_bind_complete_claims",
+                    "approval_artifact_digests_required"
+                  ],
+                  "properties": {
+                    "canonicalization": {
+                      "const": "rfc8785"
+                    },
+                    "projection": {
+                      "const": "all-authorization-fields-except-approvals"
+                    },
+                    "approvals_bind_complete_claims": {
+                      "const": true
+                    },
+                    "approval_artifact_digests_required": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "run_consumption": {
+                  "type": "object",
+                  "required": [
+                    "mode",
+                    "keyed_by",
+                    "consume_before_first_mutation",
+                    "duplicate_consumption_denied"
+                  ],
+                  "properties": {
+                    "mode": {
+                      "const": "atomic-single-use"
+                    },
+                    "keyed_by": {
+                      "const": "authorization_id"
+                    },
+                    "consume_before_first_mutation": {
+                      "const": true
+                    },
+                    "duplicate_consumption_denied": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "immutable_baseline_digest_required": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "result": {
+          "type": "object",
+          "required": [
+            "schema_ref",
+            "schema_version",
+            "authorization_binding_required",
+            "run_binding_required",
+            "scenario_outcomes_required",
+            "scenario_ids_must_be_unique",
+            "owner_receipts_required",
+            "exact_baseline_evidence_required"
+          ],
+          "properties": {
+            "schema_ref": {
+              "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
+            },
+            "schema_version": {
+              "const": 1
+            },
+            "authorization_binding_required": {
+              "const": true
+            },
+            "run_binding_required": {
+              "const": true
+            },
+            "scenario_outcomes_required": {
+              "const": true
+            },
+            "scenario_ids_must_be_unique": {
+              "const": true
+            },
+            "owner_receipts_required": {
+              "const": true
+            },
+            "exact_baseline_evidence_required": {
               "const": true
             }
           },

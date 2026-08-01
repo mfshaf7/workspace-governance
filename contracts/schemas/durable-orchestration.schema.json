@@ -468,6 +468,7 @@
         "policy_ref",
         "proof_classification",
         "permit_schema_ref",
+        "result_schema_ref",
         "permit_issuer",
         "executor",
         "target",
@@ -490,6 +491,9 @@
         },
         "permit_schema_ref": {
           "const": "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+        },
+        "result_schema_ref": {
+          "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
         },
         "permit_issuer": {
           "$ref": "#/$defs/controlledProofSourceReview"
@@ -665,6 +669,7 @@
               "additionalProperties": false,
               "required": [
                 "artifact_type",
+                "schema_ref",
                 "exact_baseline_restore_required",
                 "security_acceptance_required",
                 "profile_activation_allowed_before_acceptance",
@@ -673,6 +678,9 @@
               "properties": {
                 "artifact_type": {
                   "const": "controlled-runtime-proof-result"
+                },
+                "schema_ref": {
+                  "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
                 },
                 "exact_baseline_restore_required": {
                   "const": true
