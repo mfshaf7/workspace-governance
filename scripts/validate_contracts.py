@@ -3,13 +3,13 @@ from __future__ import annotations
 
 import argparse
 import copy
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 import re
 import shlex
 import sys
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import SchemaError
 import yaml
 
@@ -20,6 +20,23 @@ from contracts_lib import (
     load_contracts,
     load_json,
 )
+
+
+CONTRACT_FORMAT_CHECKER = FormatChecker()
+
+
+@CONTRACT_FORMAT_CHECKER.checks("date-time")
+def is_rfc3339_utc_timestamp(value: object) -> bool:
+    if not isinstance(value, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z",
+        value,
+    ):
+        return False
+    try:
+        datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
+        return False
+    return True
 
 
 BRANCH_LIFECYCLE_TARGET_RE = re.compile(
@@ -252,10 +269,156 @@ def _command_template_fields(command: str) -> set[str]:
 def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -> None:
     instance = yaml.safe_load(instance_path.read_text()) or {}
     schema = load_json(schema_path)
-    validator = Draft202012Validator(schema)
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
     for error in validator.iter_errors(instance):
         path = ".".join(str(part) for part in error.absolute_path) or "<root>"
         errors.append(f"{instance_path}: {path}: {error.message}")
+
+
+def controlled_proof_authorization_fixture() -> dict:
+    digest = "sha256:" + "a" * 64
+    source_revision = "b" * 40
+    reviewed_source = {
+        "owner_repo": "platform-engineering",
+        "implementation_ref": "artifact://controlled-proof/source/permit-issuer",
+        "source_revision": source_revision,
+        "review_packet_ref": "artifact://review-packets/platform-source",
+    }
+    return {
+        "schema_version": 2,
+        "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+        "authority_type": "runtime-drill",
+        "drill_type": "component-commissioning-proof",
+        "target": {
+            "profile_id": "temporal-dev-integration",
+            "profile_lifecycle": "build-admitted",
+            "environment": "dev-integration",
+        },
+        "scope": {
+            "allowed_definitions": [
+                {
+                    "definition_id": "validation-readiness-run",
+                    "definition_version": 1,
+                }
+            ],
+            "source_revisions": [
+                {
+                    "repo": "platform-engineering",
+                    "commit": source_revision,
+                }
+            ],
+            "runtime_artifacts": [
+                {
+                    "artifact_id": "temporal-runtime-contract",
+                    "digest": digest,
+                }
+            ],
+            "runtime_images": [
+                {
+                    "image_ref": "temporal-runtime",
+                    "digest": digest,
+                }
+            ],
+            "target_namespaces": ["devint-temporal"],
+            "runtime_identities": [
+                {
+                    "role": "workflow-worker",
+                    "identity": "oos-validation-readiness-worker",
+                }
+            ],
+            "task_queues": [
+                {
+                    "owner_repo": "operator-orchestration-service",
+                    "queue_name": "validation-readiness-run",
+                }
+            ],
+            "allowed_scenarios": CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER,
+            "permitted_actions": sorted(CONTROLLED_PROOF_PERMITTED_ACTIONS),
+            "max_runs": 1,
+        },
+        "run_binding": {
+            "run_id": "controlled-proof-validation-run",
+            "consumption_mode": "atomic-single-use",
+            "consume_before_first_mutation": True,
+            "duplicate_consumption_denied": True,
+        },
+        "permit_issuer": reviewed_source,
+        "executor": {
+            **reviewed_source,
+            "implementation_ref": "artifact://controlled-proof/source/executor",
+        },
+        "approvals": {
+            "issued_by": "platform-engineering",
+            "canonicalization": "rfc8785",
+            "canonical_claims_projection": "all-authorization-fields-except-approvals",
+            "canonical_claims_digest": digest,
+            "operator_approval_ref": "artifact://controlled-proof/approvals/operator",
+            "operator_approval_digest": digest,
+            "security_authorization_ref": "artifact://controlled-proof/approvals/security",
+            "security_authorization_digest": digest,
+        },
+        "window": {
+            "issued_at": "2026-08-01T00:00:00Z",
+            "expires_at": "2026-08-01T01:00:00Z",
+        },
+        "evidence": {
+            "owner_repo": "platform-engineering",
+            "verification_pack_ref": "artifact://controlled-proof/evidence/validation-run",
+        },
+        "baseline_and_restore": {
+            "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
+            "baseline_snapshot_digest": digest,
+            "restore_mode": "exact-baseline",
+            "restore_scope": ["temporal-runtime", "oos-worker", "wgcf-worker"],
+            "terminal_cleanup_authority": {
+                "mode": "exact-baseline-restore-only",
+                "applies_to": "already-started-run",
+                "trigger_scope": "any-triggered-stop-condition",
+                "scope_binding": "exact-captured-restore-scope",
+                "new_proof_actions_denied": True,
+                "scope_expansion_denied": True,
+                "runtime_retention_denied": True,
+                "permitted_actions": CONTROLLED_PROOF_TERMINAL_CLEANUP_ACTIONS,
+                "termination_conditions": (
+                    CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS
+                ),
+            },
+        },
+        "exception_handling": {
+            "allowed_decisions": ["remove", "workaround", "accept-risk", "defer"],
+            "record_ref_required": True,
+        },
+        "stop_conditions": sorted(CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS),
+    }
+
+
+def validate_controlled_proof_authorization_invariants(
+    errors: list[str], schema: dict
+) -> None:
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
+    valid_authorization = controlled_proof_authorization_fixture()
+    if validation_errors := list(validator.iter_errors(valid_authorization)):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: valid bounded authorization was rejected: "
+            f"{validation_errors[0].message}"
+        )
+
+    invalid_cases: dict[str, dict] = {}
+    invalid_digest = copy.deepcopy(valid_authorization)
+    invalid_digest["approvals"]["operator_approval_digest"] = "sha256:not-a-digest"
+    invalid_cases["malformed approval digest"] = invalid_digest
+
+    invalid_source_revision = copy.deepcopy(valid_authorization)
+    invalid_source_revision["permit_issuer"]["source_revision"] = "unreviewed"
+    invalid_cases["malformed reviewed-source revision"] = invalid_source_revision
+
+    invalid_timestamp = copy.deepcopy(valid_authorization)
+    invalid_timestamp["window"]["expires_at"] = "2026-13-40T25:61:00Z"
+    invalid_cases["invalid RFC 3339 expiry timestamp"] = invalid_timestamp
+
+    for label, instance in invalid_cases.items():
+        if not list(validator.iter_errors(instance)):
+            errors.append(f"{CONTROLLED_PROOF_SCHEMA_REF}: must reject {label}")
 
 
 def controlled_proof_result_fixture() -> dict:
@@ -303,7 +466,7 @@ def controlled_proof_result_fixture() -> dict:
 
 
 def validate_controlled_proof_result_invariants(errors: list[str], schema: dict) -> None:
-    validator = Draft202012Validator(schema)
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
     valid_passed = controlled_proof_result_fixture()
     if validation_errors := list(validator.iter_errors(valid_passed)):
         errors.append(
@@ -1020,6 +1183,10 @@ def main() -> int:
             "contracts/developer-integration-policy.yaml: controlled proof permit schema_version "
             "must match the authorization schema"
         )
+    validate_controlled_proof_authorization_invariants(
+        errors,
+        controlled_proof_schema,
+    )
     if controlled_proof.get("result_schema_ref") != CONTROLLED_PROOF_RESULT_SCHEMA_REF:
         errors.append(
             f"{durable_label}: controlled proof result schema must remain {CONTROLLED_PROOF_RESULT_SCHEMA_REF!r}"
