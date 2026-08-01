@@ -3,10 +3,11 @@ id: 2026-08-01-temporal-protocol-completeness-review-loop
 title: Prevent exact-head review from discovering protocol architecture
 recorded_on: '2026-08-01'
 owner_repo: workspace-governance
-summary: Temporal generation retirement entered repeated implementation-review-fix
-  cycles because the cross-repo protocol checklist did not require every command to
-  define transport acknowledgement, deterministic identity, error mapping, mutation
-  timing, retry behavior, and machine-enforced HTTP semantics before code review.
+summary: Temporal generation retirement and controlled-proof commissioning entered
+  repeated implementation-review-fix cycles because the cross-repo protocol checklist
+  did not require command semantics, authorization integrity, result completeness,
+  immutable restore evidence, and executable schema cases to be proven before code
+  review.
 regression_of: null
 status: triaged
 source_type: conversation
@@ -14,6 +15,7 @@ scope:
   related_repos:
   - operator-orchestration-service
   - platform-engineering
+  - security-architecture
   - workspace-governance
   related_products: []
   related_components:
@@ -27,6 +29,7 @@ signals:
   trigger: repeated-operator-friction
   failure_classes:
   - contract-drift
+  - missing-deterministic-test-seam
   - workflow-doctrine-gap
   finding: The operator explicitly identified a never-ending correction loop. Exact-head
     reviews successively discovered missing seal acknowledgement, handler-time authorization
@@ -37,6 +40,25 @@ signals:
     problem'
   - 'github: platform-engineering#196 and operator-orchestration-service#117 exact-head
     review history'
+- id: controlled-proof-contract-completeness-recurrence
+  title: Exact-head review again discovered protocol architecture after the controlled-proof
+    contract was treated as nearly complete.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - missing-deterministic-test-seam
+  - workflow-doctrine-gap
+  finding: >-
+    Workspace Governance PR #134 required successive exact-head fixes for
+    owner-surface linkage, semantic source uniqueness, single-use authorization,
+    immutable restore binding, approval-to-claims binding, exact scenario coverage,
+    non-passing restore exceptions, and executable positive and negative schema cases.
+    The existing improvement candidate covered only command-protocol completeness and
+    therefore did not yet capture the broader authorization and evidence-contract
+    recurrence.
+  source_refs:
+  - 'github: workspace-governance#134 exact-head review history'
+  - 'art: Workspace Delivery ART #789 controlled Temporal commissioning proof contract'
 resolution:
   after_action_ref: null
   control_refs: []
@@ -45,6 +67,9 @@ follow_up:
   owner_repo: workspace-governance
   due_on: '2026-08-08'
   note: Propose one protocol-completeness contract and conformance preflight that
-    proves command acknowledgement, deterministic IDs, state-mutation ordering, retry/recovery
-    semantics, bounded failure mapping, and cross-repo machine parity before implementation
-    is declared review-ready; obtain operator approval before landing the control.
+    proves command acknowledgement, deterministic IDs, state-mutation ordering,
+    retry/recovery semantics, bounded failure mapping, authorization replay resistance,
+    semantic source uniqueness, approval-to-claims binding, immutable restore state,
+    exact result coverage, and executable positive and negative schema cases before
+    implementation is declared review-ready; obtain operator approval before landing
+    the control.
