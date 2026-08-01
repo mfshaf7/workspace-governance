@@ -1,0 +1,50 @@
+schema_version: 1
+id: 2026-08-01-temporal-protocol-completeness-review-loop
+title: Prevent exact-head review from discovering protocol architecture
+recorded_on: '2026-08-01'
+owner_repo: workspace-governance
+summary: Temporal generation retirement entered repeated implementation-review-fix
+  cycles because the cross-repo protocol checklist did not require every command to
+  define transport acknowledgement, deterministic identity, error mapping, mutation
+  timing, retry behavior, and machine-enforced HTTP semantics before code review.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - workflow-doctrine-gap
+  finding: The operator explicitly identified a never-ending correction loop. Exact-head
+    reviews successively discovered missing seal acknowledgement, handler-time authorization
+    semantics, capacity error mapping, and machine-pinned status after implementation
+    had already been treated as nearly complete.
+  source_refs:
+  - 'conversation: operator said the work kept looping instead of fixing the root
+    problem'
+  - 'github: platform-engineering#196 and operator-orchestration-service#117 exact-head
+    review history'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-08-08'
+  note: Propose one protocol-completeness contract and conformance preflight that
+    proves command acknowledgement, deterministic IDs, state-mutation ordering, retry/recovery
+    semantics, bounded failure mapping, and cross-repo machine parity before implementation
+    is declared review-ready; obtain operator approval before landing the control.
