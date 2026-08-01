@@ -104,10 +104,14 @@ exact-baseline cleanup authority for the already-started run.
 
 The executor must emit a result that validates against
 `contracts/schemas/controlled-runtime-proof-result.schema.json`. That artifact
-binds the consumed authorization and run, scenario outcomes, owner receipts,
-and exact-baseline restoration evidence. It is operating evidence for the
-separate post-run Security review; it does not activate the profile or a
-workflow definition.
+binds the consumed authorization and run, exactly one outcome for every
+authorized commissioning scenario, owner receipts, and exact-baseline
+restoration evidence. Scenario ids are object keys, so duplicates and partial
+coverage are rejected. A `passed` result requires every scenario to pass,
+exact-baseline restoration, and no exception; governed restoration exceptions
+produce only a `stopped` result. It is operating evidence for the separate
+post-run Security review; it does not activate the profile or a workflow
+definition.
 
 The primary Platform procedure is the
 [controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).

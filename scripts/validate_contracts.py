@@ -137,8 +137,7 @@ CONTROLLED_PROOF_RESULT_REQUIRED_RUN_FIELDS = {
     "consumed_at",
     "started_at",
 }
-CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_FIELDS = {
-    "scenario_id",
+CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS = {
     "status",
     "evidence_ref",
     "evidence_digest",
@@ -180,7 +179,7 @@ CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS = {
     "allowed_decisions",
     "record_ref_required",
 }
-CONTROLLED_PROOF_REQUIRED_SCENARIOS = {
+CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER = [
     "nominal-completion",
     "workflow-worker-restart",
     "temporal-runtime-restart",
@@ -192,7 +191,8 @@ CONTROLLED_PROOF_REQUIRED_SCENARIOS = {
     "payload-boundary",
     "backup-restore",
     "exact-baseline-restore",
-}
+]
+CONTROLLED_PROOF_REQUIRED_SCENARIOS = set(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
 CONTROLLED_PROOF_PERMITTED_ACTIONS = {
     "install-scoped-runtime",
     "start-validation-readiness-run",
@@ -712,7 +712,9 @@ def main() -> int:
         "authorization_binding_required": True,
         "run_binding_required": True,
         "scenario_outcomes_required": True,
+        "scenario_outcomes_keyed_by_scenario_id": True,
         "scenario_ids_must_be_unique": True,
+        "scenario_ids_must_exactly_match_authorization": True,
         "owner_receipts_required": True,
         "exact_baseline_evidence_required": True,
     }
@@ -781,6 +783,22 @@ def main() -> int:
             errors.append(
                 f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.{digest_collection} must require at least one immutable digest"
             )
+    allowed_scenarios_schema = scope_schema_properties.get("allowed_scenarios", {})
+    allowed_scenario_order = [
+        item.get("const")
+        for item in allowed_scenarios_schema.get("prefixItems", [])
+    ]
+    if (
+        allowed_scenario_order != CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+        or allowed_scenarios_schema.get("items") is not False
+        or allowed_scenarios_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+        or allowed_scenarios_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.allowed_scenarios must preserve the exact commissioning scenario set"
+        )
     target_schema_properties = controlled_proof_schema_properties.get("target", {}).get(
         "properties", {}
     )
@@ -943,21 +961,40 @@ def main() -> int:
             errors.append(
                 f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: {boundary_name} must preserve its complete closed binding"
             )
-    result_collection_boundaries = {
-        "scenario_outcomes": CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_FIELDS,
-        "owner_receipts": CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS,
-    }
-    for boundary_name, required_fields in result_collection_boundaries.items():
-        collection_schema = result_schema_properties.get(boundary_name, {})
-        item_schema = collection_schema.get("items", {})
-        if (
-            collection_schema.get("minItems") != 1
-            or set(item_schema.get("required") or []) != required_fields
-            or item_schema.get("additionalProperties") is not False
-        ):
-            errors.append(
-                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: {boundary_name} must preserve complete machine-readable evidence"
-            )
+    scenario_outcomes_schema = result_schema_properties.get("scenario_outcomes", {})
+    if (
+        scenario_outcomes_schema.get("type") != "object"
+        or scenario_outcomes_schema.get("additionalProperties") is not False
+        or set(scenario_outcomes_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
+        or set((scenario_outcomes_schema.get("properties") or {}).keys())
+        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: scenario outcomes must be keyed by and exactly cover every authorized scenario"
+        )
+    scenario_outcome_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
+        "scenarioOutcome", {}
+    )
+    if (
+        set(scenario_outcome_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS
+        or scenario_outcome_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each scenario outcome must preserve complete machine-readable evidence"
+        )
+    owner_receipts_schema = result_schema_properties.get("owner_receipts", {})
+    owner_receipt_item_schema = owner_receipts_schema.get("items", {})
+    if (
+        owner_receipts_schema.get("minItems") != 1
+        or set(owner_receipt_item_schema.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS
+        or owner_receipt_item_schema.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must preserve complete machine-readable evidence"
+        )
     if result_schema_properties.get("run", {}).get("properties", {}).get(
         "execution_count", {}
     ).get("const") != 1:

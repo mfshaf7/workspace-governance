@@ -94,7 +94,9 @@ controlled_proof:
     authorization_binding_required: true
     run_binding_required: true
     scenario_outcomes_required: true
+    scenario_outcomes_keyed_by_scenario_id: true
     scenario_ids_must_be_unique: true
+    scenario_ids_must_exactly_match_authorization: true
     owner_receipts_required: true
     exact_baseline_evidence_required: true
   authorities:

@@ -297,7 +297,9 @@
             "authorization_binding_required",
             "run_binding_required",
             "scenario_outcomes_required",
+            "scenario_outcomes_keyed_by_scenario_id",
             "scenario_ids_must_be_unique",
+            "scenario_ids_must_exactly_match_authorization",
             "owner_receipts_required",
             "exact_baseline_evidence_required"
           ],
@@ -317,7 +319,13 @@
             "scenario_outcomes_required": {
               "const": true
             },
+            "scenario_outcomes_keyed_by_scenario_id": {
+              "const": true
+            },
             "scenario_ids_must_be_unique": {
+              "const": true
+            },
+            "scenario_ids_must_exactly_match_authorization": {
               "const": true
             },
             "owner_receipts_required": {

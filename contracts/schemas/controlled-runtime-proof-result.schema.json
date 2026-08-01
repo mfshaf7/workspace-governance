@@ -75,36 +75,54 @@
       ]
     },
     "scenario_outcomes": {
-      "type": "array",
-      "minItems": 1,
-      "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "scenario_id",
-          "status",
-          "evidence_ref",
-          "evidence_digest"
-        ],
-        "properties": {
-          "scenario_id": {
-            "$ref": "#/$defs/identifier"
-          },
-          "status": {
-            "enum": [
-              "passed",
-              "failed",
-              "blocked",
-              "not-applicable"
-            ]
-          },
-          "evidence_ref": {
-            "$ref": "#/$defs/uri"
-          },
-          "evidence_digest": {
-            "$ref": "#/$defs/digest"
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nominal-completion",
+        "workflow-worker-restart",
+        "temporal-runtime-restart",
+        "deterministic-replay",
+        "duplicate-suppression",
+        "cancellation",
+        "unavailable-dependency",
+        "identity-denial",
+        "payload-boundary",
+        "backup-restore",
+        "exact-baseline-restore"
+      ],
+      "properties": {
+        "nominal-completion": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "workflow-worker-restart": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "temporal-runtime-restart": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "deterministic-replay": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "duplicate-suppression": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "cancellation": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "unavailable-dependency": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "identity-denial": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "payload-boundary": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "backup-restore": {
+          "$ref": "#/$defs/scenarioOutcome"
+        },
+        "exact-baseline-restore": {
+          "$ref": "#/$defs/scenarioOutcome"
         }
       }
     },
@@ -232,7 +250,43 @@
       "then": {
         "required": [
           "exception"
+        ],
+        "properties": {
+          "outcome": {
+            "const": "stopped"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "passed"
+          }
+        },
+        "required": [
+          "outcome"
         ]
+      },
+      "then": {
+        "properties": {
+          "baseline_restore": {
+            "properties": {
+              "status": {
+                "const": "exact-baseline-restored"
+              }
+            }
+          },
+          "scenario_outcomes": {
+            "$ref": "#/$defs/passedScenarioOutcomes"
+          }
+        },
+        "not": {
+          "required": [
+            "exception"
+          ]
+        }
       }
     }
   ],
@@ -246,6 +300,77 @@
       "minLength": 1,
       "maxLength": 256,
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+    },
+    "passedScenarioOutcome": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "const": "passed"
+        }
+      }
+    },
+    "passedScenarioOutcomes": {
+      "type": "object",
+      "properties": {
+        "nominal-completion": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "workflow-worker-restart": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "temporal-runtime-restart": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "deterministic-replay": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "duplicate-suppression": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "cancellation": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "unavailable-dependency": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "identity-denial": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "payload-boundary": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "backup-restore": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        },
+        "exact-baseline-restore": {
+          "$ref": "#/$defs/passedScenarioOutcome"
+        }
+      }
+    },
+    "scenarioOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence_ref",
+        "evidence_digest"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "blocked",
+            "not-applicable"
+          ]
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/uri"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
     },
     "timestamp": {
       "type": "string",

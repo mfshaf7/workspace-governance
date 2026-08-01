@@ -342,7 +342,9 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "authorization_binding_required": True,
             "run_binding_required": True,
             "scenario_outcomes_required": True,
+            "scenario_outcomes_keyed_by_scenario_id": True,
             "scenario_ids_must_be_unique": True,
+            "scenario_ids_must_exactly_match_authorization": True,
             "owner_receipts_required": True,
             "exact_baseline_evidence_required": True,
         }

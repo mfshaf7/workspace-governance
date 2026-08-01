@@ -61,8 +61,10 @@ Use these contracts to declare:
     only run-bound, exact-baseline cleanup authority for an already-started run
 - `schemas/controlled-runtime-proof-result.schema.json`
   - defines the post-run result envelope that binds the consumed authorization,
-    one execution, scenario evidence, owner receipts, and exact-baseline restore
-    evidence without granting profile or workflow-definition activation
+    one execution, exact keyed coverage of every authorized commissioning
+    scenario, owner receipts, and exact-baseline restore evidence without
+    granting profile or workflow-definition activation; passing requires every
+    scenario and restoration to pass without an exception
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations

@@ -203,7 +203,45 @@
           }
         },
         "allowed_scenarios": {
-          "$ref": "#/$defs/nonEmptyUniqueIdentifierList"
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "nominal-completion"
+            },
+            {
+              "const": "workflow-worker-restart"
+            },
+            {
+              "const": "temporal-runtime-restart"
+            },
+            {
+              "const": "deterministic-replay"
+            },
+            {
+              "const": "duplicate-suppression"
+            },
+            {
+              "const": "cancellation"
+            },
+            {
+              "const": "unavailable-dependency"
+            },
+            {
+              "const": "identity-denial"
+            },
+            {
+              "const": "payload-boundary"
+            },
+            {
+              "const": "backup-restore"
+            },
+            {
+              "const": "exact-baseline-restore"
+            }
+          ],
+          "items": false,
+          "minItems": 11,
+          "maxItems": 11
         },
         "permitted_actions": {
           "$ref": "#/$defs/nonEmptyUniqueIdentifierList"
