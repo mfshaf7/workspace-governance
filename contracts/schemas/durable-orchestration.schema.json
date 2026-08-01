@@ -448,6 +448,7 @@
         "policy_ref",
         "proof_classification",
         "permit_schema_ref",
+        "executor",
         "target",
         "lifecycle_transition_allowed_during_proof",
         "self_serve_launch_allowed",
@@ -455,6 +456,7 @@
         "required_scenarios",
         "permitted_action_allowlist",
         "required_stop_conditions",
+        "expiry_cleanup_authority",
         "evidence_phases",
         "denied_outcomes"
       ],
@@ -467,6 +469,26 @@
         },
         "permit_schema_ref": {
           "const": "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+        },
+        "executor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "owner_repo",
+            "source_review_work_item_ref",
+            "merged_source_required_before_security_authorization"
+          ],
+          "properties": {
+            "owner_repo": {
+              "const": "platform-engineering"
+            },
+            "source_review_work_item_ref": {
+              "const": "openproject://work_packages/792"
+            },
+            "merged_source_required_before_security_authorization": {
+              "const": true
+            }
+          }
         },
         "target": {
           "type": "object",
@@ -526,6 +548,66 @@
         },
         "required_stop_conditions": {
           "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "expiry_cleanup_authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "applies_to",
+            "scope_binding",
+            "new_proof_actions_denied",
+            "permitted_actions",
+            "termination_conditions"
+          ],
+          "properties": {
+            "mode": {
+              "const": "exact-baseline-restore-only"
+            },
+            "applies_to": {
+              "const": "already-started-run"
+            },
+            "scope_binding": {
+              "const": "exact-captured-restore-scope"
+            },
+            "new_proof_actions_denied": {
+              "const": true
+            },
+            "permitted_actions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "remove-scoped-runtime"
+                },
+                {
+                  "const": "restore-exact-baseline"
+                },
+                {
+                  "const": "record-restore-evidence"
+                },
+                {
+                  "const": "record-governed-exception"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "termination_conditions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "exact-baseline-restored"
+                },
+                {
+                  "const": "governed-exception-recorded"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
         },
         "evidence_phases": {
           "type": "object",

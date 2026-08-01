@@ -109,6 +109,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
+    "executor",
     "approvals",
     "window",
     "evidence",
@@ -286,6 +287,14 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
                 "must preserve the complete authorization envelope"
             )
+        if permit.get("schema_version") != 2:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 2"
+            )
+        if permit.get("executor_binding_required") is not True:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed executor"
+            )
         if not (repo_root / permit.get("schema_ref", "<missing>")).exists():
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof permit schema does not exist"
@@ -295,6 +304,14 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof issuer must be platform-engineering"
             )
+        if authorities.get("executor_owner") != "platform-engineering":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof executor owner must be platform-engineering"
+            )
+        if authorities.get("executor_source_review_required") is not True:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof executor source review is required"
+            )
         if authorities.get("security_authorizer") != "security-architecture":
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof Security authorizer must be security-architecture"
@@ -303,10 +320,41 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
             )
+        owner_surfaces = controlled_proof.get("owner_surfaces", {})
+        expected_owner_surfaces = {
+            "platform_operator": {
+                "repo": "platform-engineering",
+                "path": "docs/components/temporal/operations.md",
+            },
+            "platform_profile": {
+                "repo": "platform-engineering",
+                "path": "environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml",
+            },
+            "security_contract_review": {
+                "repo": "security-architecture",
+                "path": "docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md",
+            },
+        }
+        if owner_surfaces != expected_owner_surfaces:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof owner surfaces must bind the Platform runbook/profile and Security contract review"
+            )
+        if workspace_root:
+            for surface in owner_surfaces.values():
+                surface_path = workspace_root / surface["repo"] / surface["path"]
+                if not surface_path.exists():
+                    errors.append(
+                        "contracts/developer-integration-policy.yaml: controlled proof owner surface does not exist: "
+                        + str(surface_path)
+                    )
         completion = controlled_proof["completion"]
         if (
             completion.get("restore_mode") != "exact-baseline"
             or completion.get("restore_required_before_completion") is not True
+            or completion.get("expiry_cleanup_authority_mode")
+            != "exact-baseline-restore-only"
+            or completion.get("expiry_cleanup_bound_to_started_run") is not True
+            or completion.get("new_proof_actions_allowed_after_expiry") is not False
             or completion.get("post_proof_security_review_required") is not True
             or completion.get("pre_run_authorization_reusable_as_activation_evidence") is not False
         ):
@@ -317,6 +365,36 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         if durable_proof["permit_schema_ref"] != permit.get("schema_ref"):
             errors.append(
                 "contracts/durable-orchestration.yaml: controlled proof permit schema must match the dev-integration policy"
+            )
+        executor = durable_proof.get("executor", {})
+        if (
+            executor.get("owner_repo") != "platform-engineering"
+            or executor.get("source_review_work_item_ref")
+            != "openproject://work_packages/792"
+            or executor.get("merged_source_required_before_security_authorization")
+            is not True
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof executor must bind Platform source review #792 before Security authorization"
+            )
+        cleanup = durable_proof.get("expiry_cleanup_authority", {})
+        if (
+            cleanup.get("mode") != "exact-baseline-restore-only"
+            or cleanup.get("applies_to") != "already-started-run"
+            or cleanup.get("scope_binding") != "exact-captured-restore-scope"
+            or cleanup.get("new_proof_actions_denied") is not True
+            or cleanup.get("permitted_actions")
+            != [
+                "remove-scoped-runtime",
+                "restore-exact-baseline",
+                "record-restore-evidence",
+                "record-governed-exception",
+            ]
+            or cleanup.get("termination_conditions")
+            != ["exact-baseline-restored", "governed-exception-recorded"]
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof expiry must preserve only run-bound exact-baseline cleanup authority"
             )
         proof_target = durable_proof["target"]
         target_profile = registry["profiles"].get(proof_target["profile_id"])

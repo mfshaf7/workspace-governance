@@ -200,6 +200,10 @@ durable_orchestration:
       policy_ref: contracts/developer-integration-policy.yaml#controlled_proof
       proof_classification: component-commissioning-proof
       permit_schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+      executor:
+        owner_repo: platform-engineering
+        source_review_work_item_ref: openproject://work_packages/792
+        merged_source_required_before_security_authorization: true
       target:
         profile_id: temporal
         profile_lifecycle: build-admitted
@@ -242,6 +246,19 @@ durable_orchestration:
         - unexpected-side-effect
         - evidence-custody-failure
         - restore-failure
+      expiry_cleanup_authority:
+        mode: exact-baseline-restore-only
+        applies_to: already-started-run
+        scope_binding: exact-captured-restore-scope
+        new_proof_actions_denied: true
+        permitted_actions:
+          - remove-scoped-runtime
+          - restore-exact-baseline
+          - record-restore-evidence
+          - record-governed-exception
+        termination_conditions:
+          - exact-baseline-restored
+          - governed-exception-recorded
       evidence_phases:
         pre_run_authorization:
           artifact_type: controlled-runtime-proof-authorization

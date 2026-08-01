@@ -37,16 +37,18 @@ themselves justify durable orchestration.
 3. Build-admit the dev-integration profile, then route source implementation to
    OOS, Platform, and each activity owner. Build admission does not allow a
    runtime launch.
-4. When operating evidence is required before normal activation, Platform may
-   issue one expiring controlled-proof permit only after Security and the
-   operator approve its exact scope.
-5. Run only the permitted definition, revisions, artifacts, namespaces,
+4. When operating evidence is required before normal activation, Platform
+   implements and source-reviews the bounded executor under ART #792.
+5. Platform may issue one expiring controlled-proof permit only after Security
+   reviews that exact merged executor revision and the operator approves the
+   exact permit scope.
+6. Run only the permitted definition, revisions, artifacts, namespaces,
    identities, queues, scenarios, and actions. The profile remains
    `build-admitted`; ordinary self-serve actions remain denied.
-6. Restore the captured exact baseline and preserve the proof result and owner
+7. Restore the captured exact baseline and preserve the proof result and owner
    receipts.
-7. Obtain a separate post-proof Security decision on the operating evidence.
-8. Activate the profile and one immutable definition version only after every
+8. Obtain a separate post-proof Security decision on the operating evidence.
+9. Activate the profile and one immutable definition version only after every
    normal admission gate passes.
 
 `validation-readiness-run` is the safe runtime proof.
@@ -64,12 +66,15 @@ normal activation:
 - it is operator-approved, Security-authorized, expiring, exact-scope, and
   limited to one run
 - it binds exact source revisions and immutable runtime image and artifact
-  digests as well as the permitted namespaces, identities, queues, definition
-  versions, scenarios, and actions
+  digests, the exact reviewed executor revision, and the permitted namespaces,
+  identities, queues, definition versions, scenarios, and actions
 - its permit follows
   [`../contracts/schemas/controlled-runtime-proof-authorization.schema.json`](../contracts/schemas/controlled-runtime-proof-authorization.schema.json)
 - its pre-run authorization cannot be reused as post-run activation evidence
 - exact-baseline restoration is required before the post-proof Security review
+- expiry denies every new proof action; for an already-started run, only
+  run-bound removal, exact-baseline restoration, restore evidence, and governed
+  exception recording remain allowed until restore or exception closure
 - it cannot run a business definition or create stage or production evidence
 
 The permit is a separate bounded execution authority. It does not make normal
@@ -78,9 +83,11 @@ profile.
 
 Schema validity is necessary but not sufficient. The future permit issuer and
 executor must also compare the permit with the current orchestration allowlist,
-verify its issue and expiry window, verify every source and runtime digest, and
-fail closed when any stop condition is met. No such execution path is activated
-by this contract change.
+verify the exact merged executor binding, verify its issue and expiry window,
+verify every source and runtime digest, and fail closed when any stop condition
+is met. Expiry cannot authorize a new action or retry; it preserves only the
+fixed exact-baseline cleanup authority for the already-started run. No such
+execution path is activated by this contract change.
 
 ## Current Runtime Status
 

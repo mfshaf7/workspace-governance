@@ -51,7 +51,7 @@ controlled_proof:
   normal_profile_launch_remains_denied: true
   permit:
     schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
-    schema_version: 1
+    schema_version: 2
     required_sections:
       - schema_version
       - authorization_id
@@ -59,6 +59,7 @@ controlled_proof:
       - drill_type
       - target
       - scope
+      - executor
       - approvals
       - window
       - evidence
@@ -67,13 +68,29 @@ controlled_proof:
       - stop_conditions
     exact_scope_required: true
     expiration_required: true
+    executor_binding_required: true
   authorities:
     issuer: platform-engineering
+    executor_owner: platform-engineering
+    executor_source_review_required: true
     security_authorizer: security-architecture
     operator_approval_required: true
+  owner_surfaces:
+    platform_operator:
+      repo: platform-engineering
+      path: docs/components/temporal/operations.md
+    platform_profile:
+      repo: platform-engineering
+      path: environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml
+    security_contract_review:
+      repo: security-architecture
+      path: docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md
   completion:
     restore_mode: exact-baseline
     restore_required_before_completion: true
+    expiry_cleanup_authority_mode: exact-baseline-restore-only
+    expiry_cleanup_bound_to_started_run: true
+    new_proof_actions_allowed_after_expiry: false
     post_proof_security_review_required: true
     pre_run_authorization_reusable_as_activation_evidence: false
   forbidden_claims:

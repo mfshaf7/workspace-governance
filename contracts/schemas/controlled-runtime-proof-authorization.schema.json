@@ -12,6 +12,7 @@
     "drill_type",
     "target",
     "scope",
+    "executor",
     "approvals",
     "window",
     "evidence",
@@ -21,7 +22,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "authorization_id": {
       "$ref": "#/$defs/uri"
@@ -210,6 +211,31 @@
         }
       }
     },
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "implementation_ref",
+        "source_revision",
+        "review_packet_ref"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "platform-engineering"
+        },
+        "implementation_ref": {
+          "$ref": "#/$defs/uri"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "review_packet_ref": {
+          "$ref": "#/$defs/uri"
+        }
+      }
+    },
     "approvals": {
       "type": "object",
       "additionalProperties": false,
@@ -268,7 +294,8 @@
       "required": [
         "baseline_snapshot_ref",
         "restore_mode",
-        "restore_scope"
+        "restore_scope",
+        "expiry_cleanup_authority"
       ],
       "properties": {
         "baseline_snapshot_ref": {
@@ -279,6 +306,74 @@
         },
         "restore_scope": {
           "$ref": "#/$defs/nonEmptyUniqueIdentifierList"
+        },
+        "expiry_cleanup_authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "applies_to",
+            "scope_binding",
+            "new_proof_actions_denied",
+            "scope_expansion_denied",
+            "runtime_retention_denied",
+            "permitted_actions",
+            "termination_conditions"
+          ],
+          "properties": {
+            "mode": {
+              "const": "exact-baseline-restore-only"
+            },
+            "applies_to": {
+              "const": "already-started-run"
+            },
+            "scope_binding": {
+              "const": "exact-captured-restore-scope"
+            },
+            "new_proof_actions_denied": {
+              "const": true
+            },
+            "scope_expansion_denied": {
+              "const": true
+            },
+            "runtime_retention_denied": {
+              "const": true
+            },
+            "permitted_actions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "remove-scoped-runtime"
+                },
+                {
+                  "const": "restore-exact-baseline"
+                },
+                {
+                  "const": "record-restore-evidence"
+                },
+                {
+                  "const": "record-governed-exception"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "termination_conditions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "exact-baseline-restored"
+                },
+                {
+                  "const": "governed-exception-recorded"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
         }
       }
     },

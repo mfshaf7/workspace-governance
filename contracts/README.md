@@ -52,9 +52,12 @@ Use these contracts to declare:
 - `schemas/controlled-runtime-proof-authorization.schema.json`
   - defines the expiring pre-run permit envelope for an exact build-admitted
     commissioning proof; it binds the target profile, definitions, source
-    revisions, immutable runtime images and artifacts, namespaces, identities,
-    queues, scenarios, approvals, evidence owner, and exact-baseline restore
-    without granting normal activation
+    revisions, immutable runtime images and artifacts, the exact reviewed
+    executor revision, namespaces, identities, queues, scenarios, approvals,
+    evidence owner, and exact-baseline restore without granting normal
+    activation
+  - denies new proof work after expiry while preserving only run-bound,
+    exact-baseline cleanup authority for an already-started run
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations

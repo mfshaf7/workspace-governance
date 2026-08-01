@@ -56,6 +56,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
+    "executor",
     "approvals",
     "window",
     "evidence",
@@ -75,6 +76,12 @@ CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
     "permitted_actions",
     "max_runs",
 }
+CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS = {
+    "owner_repo",
+    "implementation_ref",
+    "source_revision",
+    "review_packet_ref",
+}
 CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS = {
     "issued_by",
     "operator_approval_ref",
@@ -89,7 +96,28 @@ CONTROLLED_PROOF_REQUIRED_RESTORE_FIELDS = {
     "baseline_snapshot_ref",
     "restore_mode",
     "restore_scope",
+    "expiry_cleanup_authority",
 }
+CONTROLLED_PROOF_REQUIRED_EXPIRY_CLEANUP_FIELDS = {
+    "mode",
+    "applies_to",
+    "scope_binding",
+    "new_proof_actions_denied",
+    "scope_expansion_denied",
+    "runtime_retention_denied",
+    "permitted_actions",
+    "termination_conditions",
+}
+CONTROLLED_PROOF_EXPIRY_CLEANUP_ACTIONS = [
+    "remove-scoped-runtime",
+    "restore-exact-baseline",
+    "record-restore-evidence",
+    "record-governed-exception",
+]
+CONTROLLED_PROOF_EXPIRY_CLEANUP_TERMINATION_CONDITIONS = [
+    "exact-baseline-restored",
+    "governed-exception-recorded",
+]
 CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS = {
     "allowed_decisions",
     "record_ref_required",
@@ -571,6 +599,10 @@ def main() -> int:
         errors.append(
             f"{durable_label}: controlled proof permit schema must match the dev-integration policy"
         )
+    if permit_contract.get("executor_binding_required") is not True:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed executor"
+        )
     if set(permit_contract["required_sections"]) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
         errors.append(
             "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
@@ -584,6 +616,7 @@ def main() -> int:
     controlled_proof_schema_boundaries = {
         "target": {"profile_id", "profile_lifecycle", "environment"},
         "scope": CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS,
+        "executor": CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS,
         "approvals": CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS,
         "window": CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS,
         "evidence": CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS,
@@ -636,6 +669,13 @@ def main() -> int:
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals.issued_by must remain platform-engineering"
         )
+    executor_schema_properties = controlled_proof_schema_properties.get(
+        "executor", {}
+    ).get("properties", {})
+    if executor_schema_properties.get("owner_repo", {}).get("const") != "platform-engineering":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: executor.owner_repo must remain platform-engineering"
+        )
     restore_schema_properties = controlled_proof_schema_properties.get(
         "baseline_and_restore", {}
     ).get("properties", {})
@@ -643,6 +683,46 @@ def main() -> int:
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: baseline_and_restore.restore_mode must remain exact-baseline"
         )
+    expiry_cleanup_schema = restore_schema_properties.get(
+        "expiry_cleanup_authority", {}
+    )
+    if set(expiry_cleanup_schema.get("required") or []) != CONTROLLED_PROOF_REQUIRED_EXPIRY_CLEANUP_FIELDS:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: expiry cleanup authority must preserve the complete restore-only boundary"
+        )
+    if expiry_cleanup_schema.get("additionalProperties") is not False:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: expiry cleanup authority must reject additional properties"
+        )
+    expiry_cleanup_properties = expiry_cleanup_schema.get("properties", {})
+    expected_expiry_cleanup_constants = {
+        "mode": "exact-baseline-restore-only",
+        "applies_to": "already-started-run",
+        "scope_binding": "exact-captured-restore-scope",
+        "new_proof_actions_denied": True,
+        "scope_expansion_denied": True,
+        "runtime_retention_denied": True,
+    }
+    for field, expected in expected_expiry_cleanup_constants.items():
+        if expiry_cleanup_properties.get(field, {}).get("const") != expected:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: expiry cleanup {field} must remain {expected!r}"
+            )
+    for field, expected in (
+        ("permitted_actions", CONTROLLED_PROOF_EXPIRY_CLEANUP_ACTIONS),
+        (
+            "termination_conditions",
+            CONTROLLED_PROOF_EXPIRY_CLEANUP_TERMINATION_CONDITIONS,
+        ),
+    ):
+        actual = [
+            item.get("const")
+            for item in expiry_cleanup_properties.get(field, {}).get("prefixItems", [])
+        ]
+        if actual != expected:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: expiry cleanup {field} must remain {expected!r}"
+            )
     if controlled_proof_schema_properties.get("authority_type", {}).get("const") != "runtime-drill":
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: authority_type must remain runtime-drill"
@@ -667,6 +747,7 @@ def main() -> int:
     proof_authorities = controlled_proof_policy["authorities"]
     expected_proof_authorities = {
         "issuer": durable_authority["durable_runtime_owner"],
+        "executor_owner": durable_authority["durable_runtime_owner"],
         "security_authorizer": durable_authority["security_acceptance_owner"],
     }
     for field, expected in expected_proof_authorities.items():
@@ -679,10 +760,37 @@ def main() -> int:
         errors.append(
             "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
         )
+    if proof_authorities.get("executor_source_review_required") is not True:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof executor source review is required"
+        )
+    proof_owner_surfaces = controlled_proof_policy.get("owner_surfaces", {})
+    expected_proof_owner_surfaces = {
+        "platform_operator": {
+            "repo": "platform-engineering",
+            "path": "docs/components/temporal/operations.md",
+        },
+        "platform_profile": {
+            "repo": "platform-engineering",
+            "path": "environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml",
+        },
+        "security_contract_review": {
+            "repo": "security-architecture",
+            "path": "docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md",
+        },
+    }
+    if proof_owner_surfaces != expected_proof_owner_surfaces:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof owner surfaces must bind the Platform runbook/profile and Security contract review"
+        )
     proof_completion = controlled_proof_policy["completion"]
     if (
         proof_completion["restore_mode"] != "exact-baseline"
         or not proof_completion["restore_required_before_completion"]
+        or proof_completion.get("expiry_cleanup_authority_mode")
+        != "exact-baseline-restore-only"
+        or proof_completion.get("expiry_cleanup_bound_to_started_run") is not True
+        or proof_completion.get("new_proof_actions_allowed_after_expiry") is not False
         or not proof_completion["post_proof_security_review_required"]
         or proof_completion["pre_run_authorization_reusable_as_activation_evidence"]
     ):
@@ -762,6 +870,31 @@ def main() -> int:
     if set(controlled_proof["required_stop_conditions"]) != CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS:
         errors.append(
             f"{durable_label}: controlled proof required_stop_conditions must preserve every fail-stop boundary"
+        )
+    proof_executor = controlled_proof.get("executor", {})
+    if (
+        proof_executor.get("owner_repo") != "platform-engineering"
+        or proof_executor.get("source_review_work_item_ref")
+        != "openproject://work_packages/792"
+        or proof_executor.get("merged_source_required_before_security_authorization")
+        is not True
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof executor must bind Platform source review #792 before Security authorization"
+        )
+    expiry_cleanup = controlled_proof.get("expiry_cleanup_authority", {})
+    if (
+        expiry_cleanup.get("mode") != "exact-baseline-restore-only"
+        or expiry_cleanup.get("applies_to") != "already-started-run"
+        or expiry_cleanup.get("scope_binding") != "exact-captured-restore-scope"
+        or expiry_cleanup.get("new_proof_actions_denied") is not True
+        or expiry_cleanup.get("permitted_actions")
+        != CONTROLLED_PROOF_EXPIRY_CLEANUP_ACTIONS
+        or expiry_cleanup.get("termination_conditions")
+        != CONTROLLED_PROOF_EXPIRY_CLEANUP_TERMINATION_CONDITIONS
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof expiry must preserve only run-bound exact-baseline cleanup authority"
         )
     pre_run_evidence = controlled_proof["evidence_phases"]["pre_run_authorization"]
     post_run_evidence = controlled_proof["evidence_phases"]["post_run_activation_review"]
@@ -3012,13 +3145,17 @@ def main() -> int:
             "runtime_primary_operator_surface_ref"
         ],
     }
+    for owner_surface in controlled_proof_policy.get("owner_surfaces", {}).values():
+        required_cross_repo_refs.add(
+            f"{owner_surface['repo']}/{owner_surface['path']}"
+        )
     for ref in governed_contract_refs.values():
         required_cross_repo_refs.add(f"{ref['repo']}/{ref['path']}")
     if workspace_has_sibling_repos:
         for rel_path in sorted(required_cross_repo_refs):
             if not (workspace_root / rel_path).exists():
                 errors.append(
-                    "contracts/governance-engine-foundation.yaml: referenced path does not exist: "
+                    "cross-repo contract reference does not exist: "
                     + rel_path
                 )
     if self_improvement_governance["policy_owner_repo"] not in active_repos:
