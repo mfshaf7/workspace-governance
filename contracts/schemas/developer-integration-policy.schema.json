@@ -169,6 +169,7 @@
             "required_sections",
             "exact_scope_required",
             "expiration_required",
+            "permit_issuer_binding_required",
             "executor_binding_required"
           ],
           "properties": {
@@ -194,6 +195,9 @@
             "expiration_required": {
               "const": true
             },
+            "permit_issuer_binding_required": {
+              "const": true
+            },
             "executor_binding_required": {
               "const": true
             }
@@ -204,6 +208,7 @@
           "type": "object",
           "required": [
             "issuer",
+            "permit_issuer_source_review_required",
             "executor_owner",
             "executor_source_review_required",
             "security_authorizer",
@@ -213,6 +218,9 @@
             "issuer": {
               "type": "string",
               "minLength": 1
+            },
+            "permit_issuer_source_review_required": {
+              "const": true
             },
             "executor_owner": {
               "type": "string",

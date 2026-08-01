@@ -200,6 +200,10 @@ durable_orchestration:
       policy_ref: contracts/developer-integration-policy.yaml#controlled_proof
       proof_classification: component-commissioning-proof
       permit_schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+      permit_issuer:
+        owner_repo: platform-engineering
+        source_review_work_item_ref: openproject://work_packages/792
+        merged_source_required_before_security_authorization: true
       executor:
         owner_repo: platform-engineering
         source_review_work_item_ref: openproject://work_packages/792

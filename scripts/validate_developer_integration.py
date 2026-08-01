@@ -109,6 +109,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
+    "permit_issuer",
     "executor",
     "approvals",
     "window",
@@ -291,9 +292,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 2"
             )
-        if permit.get("executor_binding_required") is not True:
+        if (
+            permit.get("permit_issuer_binding_required") is not True
+            or permit.get("executor_binding_required") is not True
+        ):
             errors.append(
-                "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed executor"
+                "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed issuer and executor"
             )
         if not (repo_root / permit.get("schema_ref", "<missing>")).exists():
             errors.append(
@@ -308,9 +312,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof executor owner must be platform-engineering"
             )
-        if authorities.get("executor_source_review_required") is not True:
+        if (
+            authorities.get("permit_issuer_source_review_required") is not True
+            or authorities.get("executor_source_review_required") is not True
+        ):
             errors.append(
-                "contracts/developer-integration-policy.yaml: controlled proof executor source review is required"
+                "contracts/developer-integration-policy.yaml: controlled proof issuer and executor source review is required"
             )
         if authorities.get("security_authorizer") != "security-architecture":
             errors.append(
@@ -366,17 +373,22 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/durable-orchestration.yaml: controlled proof permit schema must match the dev-integration policy"
             )
-        executor = durable_proof.get("executor", {})
-        if (
-            executor.get("owner_repo") != "platform-engineering"
-            or executor.get("source_review_work_item_ref")
-            != "openproject://work_packages/792"
-            or executor.get("merged_source_required_before_security_authorization")
-            is not True
-        ):
-            errors.append(
-                "contracts/durable-orchestration.yaml: controlled proof executor must bind Platform source review #792 before Security authorization"
-            )
+        for source_role in ("permit_issuer", "executor"):
+            reviewed_source = durable_proof.get(source_role, {})
+            if (
+                reviewed_source.get("owner_repo") != "platform-engineering"
+                or reviewed_source.get("source_review_work_item_ref")
+                != "openproject://work_packages/792"
+                or reviewed_source.get(
+                    "merged_source_required_before_security_authorization"
+                )
+                is not True
+            ):
+                errors.append(
+                    "contracts/durable-orchestration.yaml: controlled proof "
+                    f"{source_role.replace('_', ' ')} must bind Platform source "
+                    "review #792 before Security authorization"
+                )
         cleanup = durable_proof.get("expiry_cleanup_authority", {})
         if (
             cleanup.get("mode") != "exact-baseline-restore-only"

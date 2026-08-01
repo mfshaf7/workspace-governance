@@ -12,6 +12,7 @@
     "drill_type",
     "target",
     "scope",
+    "permit_issuer",
     "executor",
     "approvals",
     "window",
@@ -211,30 +212,11 @@
         }
       }
     },
+    "permit_issuer": {
+      "$ref": "#/$defs/reviewedPlatformSource"
+    },
     "executor": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "owner_repo",
-        "implementation_ref",
-        "source_revision",
-        "review_packet_ref"
-      ],
-      "properties": {
-        "owner_repo": {
-          "const": "platform-engineering"
-        },
-        "implementation_ref": {
-          "$ref": "#/$defs/uri"
-        },
-        "source_revision": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{40,64}$"
-        },
-        "review_packet_ref": {
-          "$ref": "#/$defs/uri"
-        }
-      }
+      "$ref": "#/$defs/reviewedPlatformSource"
     },
     "approvals": {
       "type": "object",
@@ -421,6 +403,31 @@
     }
   },
   "$defs": {
+    "reviewedPlatformSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "implementation_ref",
+        "source_revision",
+        "review_packet_ref"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "platform-engineering"
+        },
+        "implementation_ref": {
+          "$ref": "#/$defs/uri"
+        },
+        "source_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "review_packet_ref": {
+          "$ref": "#/$defs/uri"
+        }
+      }
+    },
     "digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"

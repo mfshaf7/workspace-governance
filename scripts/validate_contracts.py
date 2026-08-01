@@ -56,6 +56,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
+    "permit_issuer",
     "executor",
     "approvals",
     "window",
@@ -599,9 +600,12 @@ def main() -> int:
         errors.append(
             f"{durable_label}: controlled proof permit schema must match the dev-integration policy"
         )
-    if permit_contract.get("executor_binding_required") is not True:
+    if (
+        permit_contract.get("permit_issuer_binding_required") is not True
+        or permit_contract.get("executor_binding_required") is not True
+    ):
         errors.append(
-            "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed executor"
+            "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed issuer and executor"
         )
     if set(permit_contract["required_sections"]) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
         errors.append(
@@ -616,7 +620,6 @@ def main() -> int:
     controlled_proof_schema_boundaries = {
         "target": {"profile_id", "profile_lifecycle", "environment"},
         "scope": CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS,
-        "executor": CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS,
         "approvals": CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS,
         "window": CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS,
         "evidence": CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS,
@@ -669,13 +672,28 @@ def main() -> int:
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals.issued_by must remain platform-engineering"
         )
-    executor_schema_properties = controlled_proof_schema_properties.get(
-        "executor", {}
-    ).get("properties", {})
-    if executor_schema_properties.get("owner_repo", {}).get("const") != "platform-engineering":
+    reviewed_source_schema = (controlled_proof_schema.get("$defs") or {}).get(
+        "reviewedPlatformSource", {}
+    )
+    if (
+        set(reviewed_source_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS
+        or reviewed_source_schema.get("additionalProperties") is not False
+    ):
         errors.append(
-            f"{CONTROLLED_PROOF_SCHEMA_REF}: executor.owner_repo must remain platform-engineering"
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: reviewed Platform source binding must preserve the complete closed schema"
         )
+    reviewed_source_properties = reviewed_source_schema.get("properties", {})
+    if reviewed_source_properties.get("owner_repo", {}).get("const") != "platform-engineering":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: reviewed source owner_repo must remain platform-engineering"
+        )
+    expected_source_ref = "#/$defs/reviewedPlatformSource"
+    for field in ("permit_issuer", "executor"):
+        if controlled_proof_schema_properties.get(field, {}).get("$ref") != expected_source_ref:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {field} must use the reviewed Platform source binding"
+            )
     restore_schema_properties = controlled_proof_schema_properties.get(
         "baseline_and_restore", {}
     ).get("properties", {})
@@ -760,9 +778,12 @@ def main() -> int:
         errors.append(
             "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
         )
-    if proof_authorities.get("executor_source_review_required") is not True:
+    if (
+        proof_authorities.get("permit_issuer_source_review_required") is not True
+        or proof_authorities.get("executor_source_review_required") is not True
+    ):
         errors.append(
-            "contracts/developer-integration-policy.yaml: controlled proof executor source review is required"
+            "contracts/developer-integration-policy.yaml: controlled proof issuer and executor source review is required"
         )
     proof_owner_surfaces = controlled_proof_policy.get("owner_surfaces", {})
     expected_proof_owner_surfaces = {
@@ -871,17 +892,21 @@ def main() -> int:
         errors.append(
             f"{durable_label}: controlled proof required_stop_conditions must preserve every fail-stop boundary"
         )
-    proof_executor = controlled_proof.get("executor", {})
-    if (
-        proof_executor.get("owner_repo") != "platform-engineering"
-        or proof_executor.get("source_review_work_item_ref")
-        != "openproject://work_packages/792"
-        or proof_executor.get("merged_source_required_before_security_authorization")
-        is not True
-    ):
-        errors.append(
-            f"{durable_label}: controlled proof executor must bind Platform source review #792 before Security authorization"
-        )
+    for source_role in ("permit_issuer", "executor"):
+        reviewed_source = controlled_proof.get(source_role, {})
+        if (
+            reviewed_source.get("owner_repo") != "platform-engineering"
+            or reviewed_source.get("source_review_work_item_ref")
+            != "openproject://work_packages/792"
+            or reviewed_source.get(
+                "merged_source_required_before_security_authorization"
+            )
+            is not True
+        ):
+            errors.append(
+                f"{durable_label}: controlled proof {source_role.replace('_', ' ')} "
+                "must bind Platform source review #792 before Security authorization"
+            )
     expiry_cleanup = controlled_proof.get("expiry_cleanup_authority", {})
     if (
         expiry_cleanup.get("mode") != "exact-baseline-restore-only"

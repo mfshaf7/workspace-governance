@@ -53,9 +53,9 @@ Use these contracts to declare:
   - defines the expiring pre-run permit envelope for an exact build-admitted
     commissioning proof; it binds the target profile, definitions, source
     revisions, immutable runtime images and artifacts, the exact reviewed
-    executor revision, namespaces, identities, queues, scenarios, approvals,
-    evidence owner, and exact-baseline restore without granting normal
-    activation
+    permit-issuer and executor revisions, namespaces, identities, queues,
+    scenarios, approvals, evidence owner, and exact-baseline restore without
+    granting normal activation
   - denies new proof work after expiry while preserving only run-bound,
     exact-baseline cleanup authority for an already-started run
 - `delegation-policy.yaml`

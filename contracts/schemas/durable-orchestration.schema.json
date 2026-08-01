@@ -441,6 +441,26 @@
         "minLength": 1
       }
     },
+    "controlledProofSourceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "source_review_work_item_ref",
+        "merged_source_required_before_security_authorization"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "platform-engineering"
+        },
+        "source_review_work_item_ref": {
+          "const": "openproject://work_packages/792"
+        },
+        "merged_source_required_before_security_authorization": {
+          "const": true
+        }
+      }
+    },
     "controlledProof": {
       "type": "object",
       "additionalProperties": false,
@@ -448,6 +468,7 @@
         "policy_ref",
         "proof_classification",
         "permit_schema_ref",
+        "permit_issuer",
         "executor",
         "target",
         "lifecycle_transition_allowed_during_proof",
@@ -470,25 +491,11 @@
         "permit_schema_ref": {
           "const": "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
         },
+        "permit_issuer": {
+          "$ref": "#/$defs/controlledProofSourceReview"
+        },
         "executor": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "owner_repo",
-            "source_review_work_item_ref",
-            "merged_source_required_before_security_authorization"
-          ],
-          "properties": {
-            "owner_repo": {
-              "const": "platform-engineering"
-            },
-            "source_review_work_item_ref": {
-              "const": "openproject://work_packages/792"
-            },
-            "merged_source_required_before_security_authorization": {
-              "const": true
-            }
-          }
+          "$ref": "#/$defs/controlledProofSourceReview"
         },
         "target": {
           "type": "object",

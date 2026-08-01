@@ -59,6 +59,7 @@ controlled_proof:
       - drill_type
       - target
       - scope
+      - permit_issuer
       - executor
       - approvals
       - window
@@ -68,9 +69,11 @@ controlled_proof:
       - stop_conditions
     exact_scope_required: true
     expiration_required: true
+    permit_issuer_binding_required: true
     executor_binding_required: true
   authorities:
     issuer: platform-engineering
+    permit_issuer_source_review_required: true
     executor_owner: platform-engineering
     executor_source_review_required: true
     security_authorizer: security-architecture
