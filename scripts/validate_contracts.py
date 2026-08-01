@@ -80,7 +80,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
-    "run_binding",
+    "commissioning_session",
     "permit_issuer",
     "executor",
     "approvals",
@@ -90,11 +90,12 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "exception_handling",
     "stop_conditions",
 }
-CONTROLLED_PROOF_REQUIRED_RUN_BINDING_FIELDS = {
-    "run_id",
+CONTROLLED_PROOF_REQUIRED_SESSION_FIELDS = {
+    "commissioning_session_id",
     "consumption_mode",
     "consume_before_first_mutation",
     "duplicate_consumption_denied",
+    "scenario_executions",
 }
 CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
     "allowed_definitions",
@@ -104,10 +105,7 @@ CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
     "target_namespaces",
     "runtime_identities",
     "task_queues",
-    "required_receipt_owners",
-    "allowed_scenarios",
     "permitted_actions",
-    "max_runs",
 }
 CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS = {
     "owner_repo",
@@ -141,7 +139,7 @@ CONTROLLED_PROOF_RESULT_REQUIRED_SECTIONS = {
     "schema_version",
     "result_id",
     "authorization",
-    "run",
+    "commissioning_session",
     "outcome",
     "scenario_outcomes",
     "owner_receipts",
@@ -153,23 +151,41 @@ CONTROLLED_PROOF_RESULT_REQUIRED_AUTHORIZATION_FIELDS = {
     "authorization_digest",
     "canonical_claims_digest",
 }
-CONTROLLED_PROOF_RESULT_REQUIRED_RUN_FIELDS = {
-    "run_id",
-    "execution_count",
-    "consumed_at",
+CONTROLLED_PROOF_RESULT_REQUIRED_SESSION_FIELDS = {
+    "commissioning_session_id",
+    "scenario_execution_count",
+    "authorization_consumed_at",
     "started_at",
 }
 CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS = {
+    "scenario_id",
+    "scenario_execution_id",
     "status",
-    "evidence_ref",
-    "evidence_digest",
+    "evidence_refs",
+    "started_at",
+    "completed_at",
 }
 CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS = {
+    "owner_repo",
     "authorization_id",
     "authorization_digest",
-    "run_id",
+    "commissioning_session_id",
+    "scenario_id",
+    "scenario_execution_id",
+    "owner_execution",
+    "owner_result",
+    "evidence_refs",
     "receipt_ref",
     "receipt_digest",
+    "recorded_at",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_OWNER_EXECUTION_FIELDS = {
+    "execution_type",
+    "execution_id",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_EVIDENCE_FIELDS = {
+    "artifact_ref",
+    "artifact_digest",
 }
 CONTROLLED_PROOF_RESULT_REQUIRED_RESTORE_FIELDS = {
     "baseline_snapshot_ref",
@@ -316,6 +332,17 @@ def validate_contract_format_checker(errors: list[str]) -> None:
 def controlled_proof_authorization_fixture() -> dict:
     digest = "sha256:" + "a" * 64
     source_revision = "b" * 40
+    scenario_executions = [
+        {
+            "scenario_id": scenario_id,
+            "scenario_execution_id": f"scenario-execution:{index:02d}:{scenario_id}",
+            "required_receipt_owners": CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER,
+        }
+        for index, scenario_id in enumerate(
+            CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER,
+            start=1,
+        )
+    ]
     reviewed_source = {
         "owner_repo": "platform-engineering",
         "implementation_ref": "artifact://controlled-proof/source/permit-issuer",
@@ -323,7 +350,7 @@ def controlled_proof_authorization_fixture() -> dict:
         "review_packet_ref": "artifact://review-packets/platform-source",
     }
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
         "authority_type": "runtime-drill",
         "drill_type": "component-commissioning-proof",
@@ -370,16 +397,14 @@ def controlled_proof_authorization_fixture() -> dict:
                     "queue_name": "validation-readiness-run",
                 }
             ],
-            "required_receipt_owners": CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER,
-            "allowed_scenarios": CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER,
             "permitted_actions": sorted(CONTROLLED_PROOF_PERMITTED_ACTIONS),
-            "max_runs": 1,
         },
-        "run_binding": {
-            "run_id": "controlled-proof-validation-run",
+        "commissioning_session": {
+            "commissioning_session_id": "controlled-proof-validation-session",
             "consumption_mode": "atomic-single-use",
             "consume_before_first_mutation": True,
             "duplicate_consumption_denied": True,
+            "scenario_executions": scenario_executions,
         },
         "permit_issuer": reviewed_source,
         "executor": {
@@ -411,7 +436,7 @@ def controlled_proof_authorization_fixture() -> dict:
             "restore_scope": ["temporal-runtime", "oos-worker", "wgcf-worker"],
             "terminal_cleanup_authority": {
                 "mode": "exact-baseline-restore-only",
-                "applies_to": "already-started-run",
+                "applies_to": "already-started-commissioning-session",
                 "trigger_scope": "any-triggered-stop-condition",
                 "scope_binding": "exact-captured-restore-scope",
                 "new_proof_actions_denied": True,
@@ -431,6 +456,58 @@ def controlled_proof_authorization_fixture() -> dict:
     }
 
 
+def controlled_proof_authorization_binding_errors(
+    authorization: dict,
+) -> list[str]:
+    binding_errors: list[str] = []
+    semantic_keys = {
+        "source_revisions": "repo",
+        "runtime_artifacts": "artifact_id",
+        "runtime_images": "image_ref",
+    }
+    for collection_name, key_name in semantic_keys.items():
+        values = [
+            item[key_name] for item in authorization["scope"][collection_name]
+        ]
+        if len(values) != len(set(values)):
+            binding_errors.append(
+                f"scope.{collection_name} contains duplicate {key_name} bindings"
+            )
+
+    scenario_executions = authorization["commissioning_session"][
+        "scenario_executions"
+    ]
+    scenario_ids = [item["scenario_id"] for item in scenario_executions]
+    if scenario_ids != CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER:
+        binding_errors.append(
+            "scenario executions do not preserve the exact authorized scenario order"
+        )
+    scenario_execution_ids = [
+        item["scenario_execution_id"] for item in scenario_executions
+    ]
+    if len(scenario_execution_ids) != len(set(scenario_execution_ids)):
+        binding_errors.append("scenario execution ids are not unique")
+    declared_receipt_owners = {
+        owner
+        for item in scenario_executions
+        for owner in item["required_receipt_owners"]
+    }
+    if declared_receipt_owners != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS:
+        binding_errors.append(
+            "scenario executions do not collectively cover every proof receipt owner"
+        )
+
+    issued_at = datetime.fromisoformat(
+        authorization["window"]["issued_at"].replace("Z", "+00:00")
+    )
+    expires_at = datetime.fromisoformat(
+        authorization["window"]["expires_at"].replace("Z", "+00:00")
+    )
+    if issued_at >= expires_at:
+        binding_errors.append("authorization issue time does not precede expiry")
+    return binding_errors
+
+
 def validate_controlled_proof_authorization_invariants(
     errors: list[str], schema: dict
 ) -> None:
@@ -440,6 +517,13 @@ def validate_controlled_proof_authorization_invariants(
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: valid bounded authorization was rejected: "
             f"{validation_errors[0].message}"
+        )
+    if binding_errors := controlled_proof_authorization_binding_errors(
+        valid_authorization
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: valid authorization semantics were rejected: "
+            f"{binding_errors[0]}"
         )
     valid_sha256_revision = copy.deepcopy(valid_authorization)
     valid_sha256_revision["permit_issuer"]["source_revision"] = "c" * 64
@@ -472,43 +556,134 @@ def validate_controlled_proof_authorization_invariants(
         if not list(validator.iter_errors(instance)):
             errors.append(f"{CONTROLLED_PROOF_SCHEMA_REF}: must reject {label}")
 
+    invalid_binding_cases: dict[str, dict] = {}
+    duplicate_source_repo = copy.deepcopy(valid_authorization)
+    duplicate_source_repo["scope"]["source_revisions"].append(
+        {
+            "repo": "platform-engineering",
+            "commit": "c" * 40,
+        }
+    )
+    invalid_binding_cases["duplicate semantic source-revision key"] = (
+        duplicate_source_repo
+    )
+
+    duplicate_scenario_execution = copy.deepcopy(valid_authorization)
+    duplicate_scenario_execution["commissioning_session"]["scenario_executions"][1][
+        "scenario_execution_id"
+    ] = duplicate_scenario_execution["commissioning_session"][
+        "scenario_executions"
+    ][0]["scenario_execution_id"]
+    invalid_binding_cases["duplicate scenario execution id"] = (
+        duplicate_scenario_execution
+    )
+
+    incomplete_owner_coverage = copy.deepcopy(valid_authorization)
+    for scenario_execution in incomplete_owner_coverage["commissioning_session"][
+        "scenario_executions"
+    ]:
+        scenario_execution["required_receipt_owners"] = ["platform-engineering"]
+    invalid_binding_cases["authorization omitting proof owner coverage"] = (
+        incomplete_owner_coverage
+    )
+
+    invalid_window = copy.deepcopy(valid_authorization)
+    invalid_window["window"]["issued_at"] = "2026-08-01T02:00:00Z"
+    invalid_binding_cases["authorization issued after expiry"] = invalid_window
+
+    for label, instance in invalid_binding_cases.items():
+        if not controlled_proof_authorization_binding_errors(instance):
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: semantic validation must reject {label}"
+            )
+
 
 def controlled_proof_result_fixture() -> dict:
     digest = "sha256:" + "a" * 64
-    scenario_outcomes = {
-        scenario_id: {
+    authorization = controlled_proof_authorization_fixture()
+    scenario_executions = authorization["commissioning_session"][
+        "scenario_executions"
+    ]
+    scenario_outcomes = [
+        {
+            "scenario_id": scenario_execution["scenario_id"],
+            "scenario_execution_id": scenario_execution["scenario_execution_id"],
             "status": "passed",
-            "evidence_ref": f"artifact://controlled-proof/scenarios/{scenario_id}",
-            "evidence_digest": digest,
+            "evidence_refs": [
+                {
+                    "artifact_ref": (
+                        "artifact://controlled-proof/scenarios/"
+                        f"{scenario_execution['scenario_execution_id']}"
+                    ),
+                    "artifact_digest": digest,
+                }
+            ],
+            "started_at": "2026-08-01T00:00:02Z",
+            "completed_at": "2026-08-01T00:00:03Z",
         }
-        for scenario_id in CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+        for scenario_execution in scenario_executions
+    ]
+    owner_execution_types = {
+        "platform-engineering": "platform-action",
+        "operator-orchestration-service": "workflow",
+        "workspace-governance-control-fabric": "activity",
     }
+    owner_receipts = [
+        {
+            "owner_repo": owner_repo,
+            "authorization_id": authorization["authorization_id"],
+            "authorization_digest": digest,
+            "commissioning_session_id": authorization["commissioning_session"][
+                "commissioning_session_id"
+            ],
+            "scenario_id": scenario_execution["scenario_id"],
+            "scenario_execution_id": scenario_execution["scenario_execution_id"],
+            "owner_execution": {
+                "execution_type": owner_execution_types[owner_repo],
+                "execution_id": (
+                    f"{owner_execution_types[owner_repo]}:"
+                    f"{scenario_execution['scenario_execution_id']}"
+                ),
+            },
+            "owner_result": "passed",
+            "evidence_refs": [
+                {
+                    "artifact_ref": (
+                        "artifact://controlled-proof/owner-evidence/"
+                        f"{owner_repo}/{scenario_execution['scenario_execution_id']}"
+                    ),
+                    "artifact_digest": digest,
+                }
+            ],
+            "receipt_ref": (
+                "artifact://controlled-proof/receipts/"
+                f"{owner_repo}/{scenario_execution['scenario_execution_id']}"
+            ),
+            "receipt_digest": digest,
+            "recorded_at": "2026-08-01T00:00:04Z",
+        }
+        for scenario_execution in scenario_executions
+        for owner_repo in scenario_execution["required_receipt_owners"]
+    ]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "result_id": "artifact://controlled-proof/results/validation-run",
         "authorization": {
-            "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+            "authorization_id": authorization["authorization_id"],
             "authorization_digest": digest,
             "canonical_claims_digest": digest,
         },
-        "run": {
-            "run_id": "controlled-proof-validation-run",
-            "execution_count": 1,
-            "consumed_at": "2026-08-01T00:00:00Z",
+        "commissioning_session": {
+            "commissioning_session_id": authorization["commissioning_session"][
+                "commissioning_session_id"
+            ],
+            "scenario_execution_count": len(scenario_executions),
+            "authorization_consumed_at": "2026-08-01T00:00:00Z",
             "started_at": "2026-08-01T00:00:01Z",
         },
         "outcome": "passed",
         "scenario_outcomes": scenario_outcomes,
-        "owner_receipts": {
-            owner_repo: {
-                "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
-                "authorization_digest": digest,
-                "run_id": "controlled-proof-validation-run",
-                "receipt_ref": f"artifact://controlled-proof/receipts/{owner_repo}",
-                "receipt_digest": digest,
-            }
-            for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
-        },
+        "owner_receipts": owner_receipts,
         "baseline_restore": {
             "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
             "baseline_snapshot_digest": digest,
@@ -543,9 +718,9 @@ def controlled_proof_result_binding_errors(
             authorization["approvals"]["canonical_claims_digest"],
         ),
         (
-            "run id",
-            result["run"]["run_id"],
-            authorization["run_binding"]["run_id"],
+            "commissioning session id",
+            result["commissioning_session"]["commissioning_session_id"],
+            authorization["commissioning_session"]["commissioning_session_id"],
         ),
         (
             "baseline snapshot reference",
@@ -561,19 +736,59 @@ def controlled_proof_result_binding_errors(
     for label, actual, expected in comparisons:
         if actual != expected:
             binding_errors.append(f"{label} does not match the consumed authorization")
-    if set(result["scenario_outcomes"]) != set(
-        authorization["scope"]["allowed_scenarios"]
-    ):
+
+    authorized_scenarios = {
+        item["scenario_execution_id"]: item
+        for item in authorization["commissioning_session"]["scenario_executions"]
+    }
+    outcome_execution_ids = [
+        item["scenario_execution_id"] for item in result["scenario_outcomes"]
+    ]
+    if len(outcome_execution_ids) != len(set(outcome_execution_ids)):
+        binding_errors.append("scenario outcome execution ids are not unique")
+    if set(outcome_execution_ids) != set(authorized_scenarios):
         binding_errors.append(
-            "scenario outcomes do not exactly match the authorized scenario set"
+            "scenario outcomes do not exactly match the authorized execution set"
         )
-    if set(result["owner_receipts"]) != set(
-        authorization["scope"]["required_receipt_owners"]
-    ):
-        binding_errors.append(
-            "receipt owners do not exactly match the authorized proof-owner set"
-        )
-    for owner_repo, receipt in result["owner_receipts"].items():
+    outcome_by_execution_id = {
+        item["scenario_execution_id"]: item for item in result["scenario_outcomes"]
+    }
+    for scenario_execution_id, outcome in outcome_by_execution_id.items():
+        authorized = authorized_scenarios.get(scenario_execution_id)
+        if authorized and outcome["scenario_id"] != authorized["scenario_id"]:
+            binding_errors.append(
+                f"scenario outcome {scenario_execution_id} changes its authorized scenario id"
+            )
+
+    expected_receipt_pairs = {
+        (item["scenario_execution_id"], owner_repo)
+        for item in authorized_scenarios.values()
+        for owner_repo in item["required_receipt_owners"]
+    }
+    actual_receipt_pairs: set[tuple[str, str]] = set()
+    expected_owner_execution_types = {
+        "platform-engineering": "platform-action",
+        "operator-orchestration-service": "workflow",
+        "workspace-governance-control-fabric": "activity",
+    }
+    for receipt in result["owner_receipts"]:
+        owner_repo = receipt["owner_repo"]
+        scenario_execution_id = receipt["scenario_execution_id"]
+        receipt_pair = (scenario_execution_id, owner_repo)
+        if receipt_pair in actual_receipt_pairs:
+            binding_errors.append(
+                f"owner receipt pair {scenario_execution_id}/{owner_repo} is duplicated"
+            )
+        actual_receipt_pairs.add(receipt_pair)
+        authorized = authorized_scenarios.get(scenario_execution_id)
+        if not authorized or owner_repo not in authorized["required_receipt_owners"]:
+            binding_errors.append(
+                f"owner receipt pair {scenario_execution_id}/{owner_repo} is not authorized"
+            )
+        elif receipt["scenario_id"] != authorized["scenario_id"]:
+            binding_errors.append(
+                f"{owner_repo} receipt changes the authorized scenario id"
+            )
         receipt_bindings = (
             (
                 "authorization id",
@@ -585,13 +800,31 @@ def controlled_proof_result_binding_errors(
                 receipt["authorization_digest"],
                 result["authorization"]["authorization_digest"],
             ),
-            ("run id", receipt["run_id"], result["run"]["run_id"]),
+            (
+                "commissioning session id",
+                receipt["commissioning_session_id"],
+                result["commissioning_session"]["commissioning_session_id"],
+            ),
         )
         for label, actual, expected in receipt_bindings:
             if actual != expected:
                 binding_errors.append(
                     f"{owner_repo} receipt {label} does not match the result binding"
                 )
+        expected_execution_type = expected_owner_execution_types.get(owner_repo)
+        if receipt["owner_execution"]["execution_type"] != expected_execution_type:
+            binding_errors.append(
+                f"{owner_repo} receipt uses the wrong owner execution type"
+            )
+    if result["outcome"] == "passed" and actual_receipt_pairs != expected_receipt_pairs:
+        binding_errors.append(
+            "passing result receipts do not exactly match the authorized owner/execution pairs"
+        )
+    if result["outcome"] == "passed" and any(
+        receipt["owner_result"] != "passed" for receipt in result["owner_receipts"]
+    ):
+        binding_errors.append("passing result contains a non-passing owner receipt")
+
     issued_at = datetime.fromisoformat(
         authorization["window"]["issued_at"].replace("Z", "+00:00")
     )
@@ -599,10 +832,12 @@ def controlled_proof_result_binding_errors(
         authorization["window"]["expires_at"].replace("Z", "+00:00")
     )
     consumed_at = datetime.fromisoformat(
-        result["run"]["consumed_at"].replace("Z", "+00:00")
+        result["commissioning_session"]["authorization_consumed_at"].replace(
+            "Z", "+00:00"
+        )
     )
-    started_at = datetime.fromisoformat(
-        result["run"]["started_at"].replace("Z", "+00:00")
+    session_started_at = datetime.fromisoformat(
+        result["commissioning_session"]["started_at"].replace("Z", "+00:00")
     )
     completed_at = datetime.fromisoformat(
         result["completed_at"].replace("Z", "+00:00")
@@ -611,12 +846,49 @@ def controlled_proof_result_binding_errors(
         binding_errors.append("authorization issue time does not precede expiry")
     if consumed_at < issued_at or consumed_at >= expires_at:
         binding_errors.append("permit consumption is outside the authorization window")
-    if consumed_at > started_at:
-        binding_errors.append("execution started before permit consumption")
-    if started_at >= expires_at:
-        binding_errors.append("execution started at or after authorization expiry")
-    if started_at > completed_at:
-        binding_errors.append("result completion precedes execution start")
+    if consumed_at > session_started_at:
+        binding_errors.append("commissioning session started before permit consumption")
+    if session_started_at >= expires_at:
+        binding_errors.append(
+            "commissioning session started at or after authorization expiry"
+        )
+    scenario_completed_at: list[datetime] = []
+    for outcome in result["scenario_outcomes"]:
+        scenario_started_at = datetime.fromisoformat(
+            outcome["started_at"].replace("Z", "+00:00")
+        )
+        scenario_finished_at = datetime.fromisoformat(
+            outcome["completed_at"].replace("Z", "+00:00")
+        )
+        if scenario_started_at < session_started_at:
+            binding_errors.append(
+                f"scenario {outcome['scenario_execution_id']} started before its session"
+            )
+        if scenario_started_at >= expires_at:
+            binding_errors.append(
+                f"scenario {outcome['scenario_execution_id']} started at or after authorization expiry"
+            )
+        if scenario_finished_at < scenario_started_at:
+            binding_errors.append(
+                f"scenario {outcome['scenario_execution_id']} completed before it started"
+            )
+        scenario_completed_at.append(scenario_finished_at)
+    if scenario_completed_at and max(scenario_completed_at) > completed_at:
+        binding_errors.append("result completion precedes a scenario completion")
+
+    for receipt in result["owner_receipts"]:
+        recorded_at = datetime.fromisoformat(
+            receipt["recorded_at"].replace("Z", "+00:00")
+        )
+        outcome = outcome_by_execution_id.get(receipt["scenario_execution_id"])
+        if outcome:
+            scenario_started_at = datetime.fromisoformat(
+                outcome["started_at"].replace("Z", "+00:00")
+            )
+            if recorded_at < scenario_started_at or recorded_at > completed_at:
+                binding_errors.append(
+                    f"{receipt['owner_repo']} receipt timestamp is outside its result timeline"
+                )
     if result["outcome"] == "passed" and completed_at >= expires_at:
         binding_errors.append("passing result completed after authorization expiry")
     return binding_errors
@@ -644,7 +916,14 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
 
     valid_stopped = copy.deepcopy(valid_passed)
     valid_stopped["outcome"] = "stopped"
-    valid_stopped["scenario_outcomes"]["exact-baseline-restore"]["status"] = "failed"
+    valid_stopped["scenario_outcomes"][-1]["status"] = "failed"
+    valid_stopped["scenario_outcomes"][-1]["completed_at"] = (
+        "2026-08-01T01:05:00Z"
+    )
+    for receipt in valid_stopped["owner_receipts"]:
+        if receipt["scenario_id"] == "exact-baseline-restore":
+            receipt["owner_result"] = "failed"
+            receipt["recorded_at"] = "2026-08-01T01:06:00Z"
     valid_stopped["baseline_restore"]["status"] = "governed-exception-recorded"
     valid_stopped["completed_at"] = "2026-08-01T01:10:00Z"
     valid_stopped["exception"] = {
@@ -669,7 +948,7 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
 
     invalid_cases: dict[str, dict] = {}
     failed_scenario = copy.deepcopy(valid_passed)
-    failed_scenario["scenario_outcomes"]["payload-boundary"]["status"] = "failed"
+    failed_scenario["scenario_outcomes"][8]["status"] = "failed"
     invalid_cases["passed result with a non-passing scenario"] = failed_scenario
 
     restore_exception = copy.deepcopy(valid_passed)
@@ -681,19 +960,8 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     unexpected_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
     invalid_cases["passed result carrying any exception"] = unexpected_exception
 
-    missing_owner_receipt = copy.deepcopy(valid_passed)
-    missing_owner_receipt["owner_receipts"].pop(
-        "workspace-governance-control-fabric"
-    )
-    invalid_cases["result missing a required proof-owner receipt"] = (
-        missing_owner_receipt
-    )
-
     unrelated_owner_receipt = copy.deepcopy(valid_passed)
-    unrelated_owner_receipt["owner_receipts"]["unrelated-owner"] = {
-        "receipt_ref": "artifact://controlled-proof/receipts/unrelated-owner",
-        "receipt_digest": "sha256:" + "d" * 64,
-    }
+    unrelated_owner_receipt["owner_receipts"][0]["owner_repo"] = "unrelated-owner"
     invalid_cases["result carrying an unrelated owner receipt"] = (
         unrelated_owner_receipt
     )
@@ -730,30 +998,42 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     )
 
     started_before_consumption = copy.deepcopy(valid_passed)
-    started_before_consumption["run"]["started_at"] = "2026-07-31T23:59:59Z"
-    invalid_binding_cases["execution start before permit consumption"] = (
+    started_before_consumption["commissioning_session"]["started_at"] = (
+        "2026-07-31T23:59:59Z"
+    )
+    invalid_binding_cases["session start before permit consumption"] = (
         started_before_consumption
     )
 
     consumed_before_issue = copy.deepcopy(valid_passed)
-    consumed_before_issue["run"]["consumed_at"] = "2026-07-31T23:59:59Z"
+    consumed_before_issue["commissioning_session"]["authorization_consumed_at"] = (
+        "2026-07-31T23:59:59Z"
+    )
     invalid_binding_cases["permit consumption before issuance"] = consumed_before_issue
 
     consumed_after_expiry = copy.deepcopy(valid_passed)
-    consumed_after_expiry["run"]["consumed_at"] = "2026-08-01T01:00:01Z"
-    consumed_after_expiry["run"]["started_at"] = "2026-08-01T01:00:02Z"
+    consumed_after_expiry["commissioning_session"]["authorization_consumed_at"] = (
+        "2026-08-01T01:00:01Z"
+    )
+    consumed_after_expiry["commissioning_session"]["started_at"] = (
+        "2026-08-01T01:00:02Z"
+    )
     consumed_after_expiry["completed_at"] = "2026-08-01T01:00:03Z"
     invalid_binding_cases["permit consumption after expiry"] = consumed_after_expiry
 
     consumed_at_expiry = copy.deepcopy(valid_passed)
-    consumed_at_expiry["run"]["consumed_at"] = "2026-08-01T01:00:00Z"
-    consumed_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
+    consumed_at_expiry["commissioning_session"]["authorization_consumed_at"] = (
+        "2026-08-01T01:00:00Z"
+    )
+    consumed_at_expiry["commissioning_session"]["started_at"] = (
+        "2026-08-01T01:00:00Z"
+    )
     consumed_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
     invalid_binding_cases["permit consumption at expiry"] = consumed_at_expiry
 
     completion_before_start = copy.deepcopy(valid_passed)
     completion_before_start["completed_at"] = "2026-08-01T00:00:00Z"
-    invalid_binding_cases["result completion before execution start"] = (
+    invalid_binding_cases["result completion before scenario completion"] = (
         completion_before_start
     )
 
@@ -768,26 +1048,88 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     invalid_binding_cases["passing result completed at expiry"] = passing_at_expiry
 
     stopped_starting_at_expiry = copy.deepcopy(valid_stopped)
-    stopped_starting_at_expiry["run"]["consumed_at"] = "2026-08-01T00:59:59Z"
-    stopped_starting_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
-    invalid_binding_cases["stopped run starting at expiry"] = (
+    stopped_starting_at_expiry["commissioning_session"][
+        "authorization_consumed_at"
+    ] = "2026-08-01T00:59:59Z"
+    stopped_starting_at_expiry["commissioning_session"]["started_at"] = (
+        "2026-08-01T01:00:00Z"
+    )
+    invalid_binding_cases["stopped session starting at expiry"] = (
         stopped_starting_at_expiry
     )
 
     stale_owner_receipt = copy.deepcopy(valid_passed)
-    stale_owner_receipt["owner_receipts"]["operator-orchestration-service"][
-        "run_id"
-    ] = "historical-run"
-    invalid_binding_cases["owner receipt bound to a different run"] = (
+    stale_owner_receipt["owner_receipts"][1]["commissioning_session_id"] = (
+        "historical-session"
+    )
+    invalid_binding_cases["owner receipt bound to a different session"] = (
         stale_owner_receipt
     )
 
     stale_owner_authorization = copy.deepcopy(valid_passed)
-    stale_owner_authorization["owner_receipts"]["platform-engineering"][
-        "authorization_digest"
-    ] = "sha256:" + "f" * 64
+    stale_owner_authorization["owner_receipts"][0]["authorization_digest"] = (
+        "sha256:" + "f" * 64
+    )
     invalid_binding_cases["owner receipt bound to a different authorization"] = (
         stale_owner_authorization
+    )
+
+    missing_owner_receipt = copy.deepcopy(valid_passed)
+    missing_owner_receipt["owner_receipts"].pop()
+    invalid_binding_cases["passing result missing an authorized owner receipt"] = (
+        missing_owner_receipt
+    )
+
+    duplicate_owner_pair = copy.deepcopy(valid_passed)
+    duplicate_owner_pair["owner_receipts"][-1]["owner_repo"] = (
+        duplicate_owner_pair["owner_receipts"][-2]["owner_repo"]
+    )
+    invalid_binding_cases["duplicate owner/scenario execution receipt pair"] = (
+        duplicate_owner_pair
+    )
+
+    mismatched_scenario_execution = copy.deepcopy(valid_passed)
+    mismatched_scenario_execution["owner_receipts"][0]["scenario_execution_id"] = (
+        "scenario-execution:unrelated"
+    )
+    invalid_binding_cases["owner receipt bound to an unauthorized execution"] = (
+        mismatched_scenario_execution
+    )
+
+    wrong_owner_execution_type = copy.deepcopy(valid_passed)
+    wrong_owner_execution_type["owner_receipts"][0]["owner_execution"][
+        "execution_type"
+    ] = "activity"
+    invalid_binding_cases["owner receipt using another owner's execution type"] = (
+        wrong_owner_execution_type
+    )
+
+    duplicate_scenario_outcome = copy.deepcopy(valid_passed)
+    duplicate_scenario_outcome["scenario_outcomes"][1]["scenario_execution_id"] = (
+        duplicate_scenario_outcome["scenario_outcomes"][0]["scenario_execution_id"]
+    )
+    invalid_binding_cases["duplicate scenario outcome execution id"] = (
+        duplicate_scenario_outcome
+    )
+
+    scenario_started_after_expiry = copy.deepcopy(valid_passed)
+    scenario_started_after_expiry["scenario_outcomes"][0]["started_at"] = (
+        "2026-08-01T01:00:00Z"
+    )
+    scenario_started_after_expiry["scenario_outcomes"][0]["completed_at"] = (
+        "2026-08-01T01:00:01Z"
+    )
+    scenario_started_after_expiry["completed_at"] = "2026-08-01T01:00:02Z"
+    invalid_binding_cases["scenario starting at authorization expiry"] = (
+        scenario_started_after_expiry
+    )
+
+    scenario_completed_before_start = copy.deepcopy(valid_passed)
+    scenario_completed_before_start["scenario_outcomes"][0]["completed_at"] = (
+        "2026-08-01T00:00:01Z"
+    )
+    invalid_binding_cases["scenario completion before scenario start"] = (
+        scenario_completed_before_start
     )
 
     for label, instance in invalid_binding_cases.items():
@@ -1264,11 +1606,17 @@ def main() -> int:
             "approvals_bind_complete_claims": True,
             "approval_artifact_digests_required": True,
         },
-        "run_consumption": {
+        "session_consumption": {
             "mode": "atomic-single-use",
             "keyed_by": "authorization_id",
             "consume_before_first_mutation": True,
             "duplicate_consumption_denied": True,
+        },
+        "scenario_execution_binding": {
+            "exact_authorized_set_required": True,
+            "scenario_ids_must_be_unique": True,
+            "scenario_execution_ids_must_be_unique": True,
+            "required_receipt_owners_declared_per_execution": True,
         },
         "window_validation": {
             "issued_before_expiry": True,
@@ -1285,25 +1633,28 @@ def main() -> int:
     result_contract = controlled_proof_policy.get("result", {})
     expected_result_contract = {
         "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
-        "schema_version": 1,
+        "schema_version": 2,
         "authorization_binding_required": True,
         "authorization_artifact_digest_canonicalization": "rfc8785",
         "authorization_artifact_digest_projection": "complete-authorization",
         "authorization_artifact_digest_must_match_consumed_permit": True,
-        "run_binding_required": True,
+        "commissioning_session_binding_required": True,
         "scenario_outcomes_required": True,
-        "scenario_outcomes_keyed_by_scenario_id": True,
+        "scenario_outcomes_bind_execution_id": True,
         "scenario_ids_must_be_unique": True,
+        "scenario_execution_ids_must_be_unique": True,
         "scenario_ids_must_exactly_match_authorization": True,
         "owner_receipts_required": True,
-        "receipt_owners_keyed_by_owner_repo": True,
-        "receipt_owners_must_exactly_match_authorization": True,
-        "owner_receipts_bind_authorization_and_run": True,
+        "owner_receipt_pairs_must_be_unique": True,
+        "passed_receipt_pairs_must_exactly_match_authorization": True,
+        "owner_receipts_bind_authorization_session_execution_and_result": True,
         "timeline_validation": {
             "consumption_within_authorization_window": True,
-            "consumed_before_start": True,
-            "start_within_authorization_window": True,
-            "completion_not_before_start": True,
+            "consumed_before_session_start": True,
+            "session_start_within_authorization_window": True,
+            "scenario_start_within_authorization_window": True,
+            "scenario_completion_not_before_start": True,
+            "result_completion_not_before_scenarios": True,
             "passed_completion_before_expiry": True,
         },
         "exact_baseline_evidence_required": True,
@@ -1312,7 +1663,7 @@ def main() -> int:
     if result_contract != expected_result_contract:
         errors.append(
             "contracts/developer-integration-policy.yaml: controlled proof result must preserve "
-            "authorization, single-run, scenario, owner-receipt, and exact-baseline evidence bindings"
+            "authorization, commissioning-session, scenario-execution, owner-receipt, and exact-baseline evidence bindings"
         )
     if set(permit_contract["required_sections"]) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
         errors.append(
@@ -1327,7 +1678,7 @@ def main() -> int:
     controlled_proof_schema_boundaries = {
         "target": {"profile_id", "profile_lifecycle", "environment"},
         "scope": CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS,
-        "run_binding": CONTROLLED_PROOF_REQUIRED_RUN_BINDING_FIELDS,
+        "commissioning_session": CONTROLLED_PROOF_REQUIRED_SESSION_FIELDS,
         "approvals": CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS,
         "window": CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS,
         "evidence": CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS,
@@ -1348,22 +1699,18 @@ def main() -> int:
     scope_schema_properties = controlled_proof_schema_properties.get("scope", {}).get(
         "properties", {}
     )
-    if scope_schema_properties.get("max_runs", {}).get("const") != 1:
-        errors.append(
-            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.max_runs must remain fixed at one"
-        )
-    run_binding_schema_properties = controlled_proof_schema_properties.get(
-        "run_binding", {}
+    session_schema_properties = controlled_proof_schema_properties.get(
+        "commissioning_session", {}
     ).get("properties", {})
-    expected_run_binding_constants = {
+    expected_session_constants = {
         "consumption_mode": "atomic-single-use",
         "consume_before_first_mutation": True,
         "duplicate_consumption_denied": True,
     }
-    for field, expected in expected_run_binding_constants.items():
-        if run_binding_schema_properties.get(field, {}).get("const") != expected:
+    for field, expected in expected_session_constants.items():
+        if session_schema_properties.get(field, {}).get("const") != expected:
             errors.append(
-                f"{CONTROLLED_PROOF_SCHEMA_REF}: run_binding.{field} must remain {expected!r}"
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: commissioning_session.{field} must remain {expected!r}"
             )
     for digest_collection in ("runtime_artifacts", "runtime_images"):
         collection_schema = scope_schema_properties.get(digest_collection, {})
@@ -1374,41 +1721,59 @@ def main() -> int:
             errors.append(
                 f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.{digest_collection} must require at least one immutable digest"
             )
-    allowed_scenarios_schema = scope_schema_properties.get("allowed_scenarios", {})
-    allowed_scenario_order = [
-        item.get("const")
-        for item in allowed_scenarios_schema.get("prefixItems", [])
-    ]
-    if (
-        allowed_scenario_order != CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
-        or allowed_scenarios_schema.get("items") is not False
-        or allowed_scenarios_schema.get("minItems")
-        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
-        or allowed_scenarios_schema.get("maxItems")
-        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
-    ):
-        errors.append(
-            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.allowed_scenarios must preserve the exact commissioning scenario set"
-        )
-    required_receipt_owners_schema = scope_schema_properties.get(
-        "required_receipt_owners", {}
+    scenario_executions_schema = session_schema_properties.get(
+        "scenario_executions", {}
     )
-    required_receipt_owner_order = [
-        item.get("const")
-        for item in required_receipt_owners_schema.get("prefixItems", [])
+    scenario_execution_refs = [
+        item.get("$ref")
+        for item in scenario_executions_schema.get("prefixItems", [])
+    ]
+    expected_scenario_execution_refs = [
+        "#/$defs/nominalCompletionExecution",
+        "#/$defs/workflowWorkerRestartExecution",
+        "#/$defs/temporalRuntimeRestartExecution",
+        "#/$defs/deterministicReplayExecution",
+        "#/$defs/duplicateSuppressionExecution",
+        "#/$defs/cancellationExecution",
+        "#/$defs/unavailableDependencyExecution",
+        "#/$defs/identityDenialExecution",
+        "#/$defs/payloadBoundaryExecution",
+        "#/$defs/backupRestoreExecution",
+        "#/$defs/exactBaselineRestoreExecution",
     ]
     if (
-        required_receipt_owner_order
-        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
-        or required_receipt_owners_schema.get("items") is not False
-        or required_receipt_owners_schema.get("uniqueItems") is not True
-        or required_receipt_owners_schema.get("minItems")
-        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
-        or required_receipt_owners_schema.get("maxItems")
-        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
+        scenario_execution_refs != expected_scenario_execution_refs
+        or scenario_executions_schema.get("items") is not False
+        or scenario_executions_schema.get("uniqueItems") is not True
+        or scenario_executions_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+        or scenario_executions_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
     ):
         errors.append(
-            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.required_receipt_owners must preserve the exact proof-owner set"
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: commissioning_session.scenario_executions must preserve the exact scenario set"
+        )
+    scenario_execution_definition = (controlled_proof_schema.get("$defs") or {}).get(
+        "scenarioExecution", {}
+    )
+    if (
+        set(scenario_execution_definition.get("required") or [])
+        != {"scenario_id", "scenario_execution_id", "required_receipt_owners"}
+        or scenario_execution_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: every scenario execution must bind its id and required receipt owners"
+        )
+    receipt_owner_definition = (controlled_proof_schema.get("$defs") or {}).get(
+        "receiptOwnerList", {}
+    )
+    if (
+        set((receipt_owner_definition.get("items") or {}).get("enum") or [])
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
+        or receipt_owner_definition.get("uniqueItems") is not True
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: per-execution receipt owners must be limited to the proof-owner set"
         )
     target_schema_properties = controlled_proof_schema_properties.get("target", {}).get(
         "properties", {}
@@ -1493,7 +1858,7 @@ def main() -> int:
     terminal_cleanup_properties = terminal_cleanup_schema.get("properties", {})
     expected_terminal_cleanup_constants = {
         "mode": "exact-baseline-restore-only",
-        "applies_to": "already-started-run",
+        "applies_to": "already-started-commissioning-session",
         "trigger_scope": "any-triggered-stop-condition",
         "scope_binding": "exact-captured-restore-scope",
         "new_proof_actions_denied": True,
@@ -1564,7 +1929,7 @@ def main() -> int:
     result_schema_properties = controlled_proof_result_schema.get("properties", {})
     result_schema_boundaries = {
         "authorization": CONTROLLED_PROOF_RESULT_REQUIRED_AUTHORIZATION_FIELDS,
-        "run": CONTROLLED_PROOF_RESULT_REQUIRED_RUN_FIELDS,
+        "commissioning_session": CONTROLLED_PROOF_RESULT_REQUIRED_SESSION_FIELDS,
         "baseline_restore": CONTROLLED_PROOF_RESULT_REQUIRED_RESTORE_FIELDS,
     }
     for boundary_name, required_fields in result_schema_boundaries.items():
@@ -1577,16 +1942,26 @@ def main() -> int:
                 f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: {boundary_name} must preserve its complete closed binding"
             )
     scenario_outcomes_schema = result_schema_properties.get("scenario_outcomes", {})
+    expected_scenario_outcome_refs = [
+        ref.replace("Execution", "Outcome")
+        for ref in expected_scenario_execution_refs
+    ]
     if (
-        scenario_outcomes_schema.get("type") != "object"
-        or scenario_outcomes_schema.get("additionalProperties") is not False
-        or set(scenario_outcomes_schema.get("required") or [])
-        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
-        or set((scenario_outcomes_schema.get("properties") or {}).keys())
-        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
+        scenario_outcomes_schema.get("type") != "array"
+        or [
+            item.get("$ref")
+            for item in scenario_outcomes_schema.get("prefixItems", [])
+        ]
+        != expected_scenario_outcome_refs
+        or scenario_outcomes_schema.get("items") is not False
+        or scenario_outcomes_schema.get("uniqueItems") is not True
+        or scenario_outcomes_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+        or scenario_outcomes_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
     ):
         errors.append(
-            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: scenario outcomes must be keyed by and exactly cover every authorized scenario"
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: scenario outcomes must exactly cover every authorized scenario execution"
         )
     scenario_outcome_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
         "scenarioOutcome", {}
@@ -1601,27 +1976,15 @@ def main() -> int:
         )
     owner_receipts_schema = result_schema_properties.get("owner_receipts", {})
     if (
-        owner_receipts_schema.get("type") != "object"
-        or owner_receipts_schema.get("additionalProperties") is not False
-        or set(owner_receipts_schema.get("required") or [])
-        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
-        or set((owner_receipts_schema.get("properties") or {}).keys())
-        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
+        owner_receipts_schema.get("type") != "array"
+        or owner_receipts_schema.get("minItems") != 1
+        or owner_receipts_schema.get("uniqueItems") is not True
+        or (owner_receipts_schema.get("items") or {}).get("$ref")
+        != "#/$defs/ownerReceipt"
     ):
         errors.append(
-            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must be keyed by and exactly cover every authorized proof owner"
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must use the closed per-execution receipt schema"
         )
-    expected_owner_receipt_ref = "#/$defs/ownerReceipt"
-    for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER:
-        if (
-            owner_receipts_schema.get("properties", {})
-            .get(owner_repo, {})
-            .get("$ref")
-            != expected_owner_receipt_ref
-        ):
-            errors.append(
-                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipt {owner_repo!r} must use the closed owner receipt evidence schema"
-            )
     owner_receipt_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
         "ownerReceipt", {}
     )
@@ -1633,11 +1996,35 @@ def main() -> int:
         errors.append(
             f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each owner receipt must preserve complete machine-readable evidence"
         )
-    if result_schema_properties.get("run", {}).get("properties", {}).get(
-        "execution_count", {}
-    ).get("const") != 1:
+    owner_execution_definition = owner_receipt_definition.get("properties", {}).get(
+        "owner_execution", {}
+    )
+    if (
+        set(owner_execution_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_OWNER_EXECUTION_FIELDS
+        or owner_execution_definition.get("additionalProperties") is not False
+    ):
         errors.append(
-            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: run.execution_count must remain fixed at one"
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each owner receipt must bind one typed owner execution"
+        )
+    evidence_pointer_definition = (
+        controlled_proof_result_schema.get("$defs") or {}
+    ).get("evidencePointer", {})
+    if (
+        set(evidence_pointer_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_EVIDENCE_FIELDS
+        or evidence_pointer_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: evidence pointers must bind immutable artifact refs and digests"
+        )
+    if result_schema_properties.get("commissioning_session", {}).get(
+        "properties", {}
+    ).get("scenario_execution_count", {}).get("const") != len(
+        CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: commissioning session count must match the authorized scenario set"
         )
     if result_schema_properties.get("schema_version", {}).get("const") != result_contract.get(
         "schema_version"
@@ -1698,7 +2085,8 @@ def main() -> int:
         or not proof_completion["restore_required_before_completion"]
         or proof_completion.get("terminal_cleanup_authority_mode")
         != "exact-baseline-restore-only"
-        or proof_completion.get("terminal_cleanup_bound_to_started_run") is not True
+        or proof_completion.get("terminal_cleanup_bound_to_started_session")
+        is not True
         or proof_completion.get("terminal_cleanup_trigger_scope")
         != "any-triggered-stop-condition"
         or proof_completion.get("new_proof_actions_allowed_after_stop") is not False
@@ -1774,6 +2162,24 @@ def main() -> int:
         errors.append(
             f"{durable_label}: controlled proof required_scenarios must preserve the complete commissioning set"
         )
+    expected_session_contract = {
+        "authorization_consumption": "atomic-single-use",
+        "one_session_per_authorization": True,
+        "exact_scenario_execution_set_required": True,
+        "scenario_execution_ids_unique": True,
+        "required_receipt_owners_declared_per_execution": True,
+        "retries_cancels_replays_and_dedup_bound_to_session_and_execution": True,
+    }
+    if controlled_proof.get("commissioning_session") != expected_session_contract:
+        errors.append(
+            f"{durable_label}: controlled proof must bind one consumed commissioning session and its exact executions"
+        )
+    if controlled_proof.get("receipt_owners") != (
+        CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof receipt owners must preserve the complete owner set"
+        )
     if set(controlled_proof["permitted_action_allowlist"]) != CONTROLLED_PROOF_PERMITTED_ACTIONS:
         errors.append(
             f"{durable_label}: controlled proof permitted_action_allowlist must preserve the bounded action set"
@@ -1800,7 +2206,8 @@ def main() -> int:
     terminal_cleanup = controlled_proof.get("terminal_cleanup_authority", {})
     if (
         terminal_cleanup.get("mode") != "exact-baseline-restore-only"
-        or terminal_cleanup.get("applies_to") != "already-started-run"
+        or terminal_cleanup.get("applies_to")
+        != "already-started-commissioning-session"
         or terminal_cleanup.get("trigger_scope")
         != "any-triggered-stop-condition"
         or terminal_cleanup.get("scope_binding") != "exact-captured-restore-scope"
@@ -1813,7 +2220,7 @@ def main() -> int:
         != CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS
     ):
         errors.append(
-            f"{durable_label}: every controlled-proof stop condition must preserve only run-bound exact-baseline cleanup authority"
+            f"{durable_label}: every controlled-proof stop condition must preserve only session-bound exact-baseline cleanup authority"
         )
     pre_run_evidence = controlled_proof["evidence_phases"]["pre_run_authorization"]
     post_run_evidence = controlled_proof["evidence_phases"]["post_run_activation_review"]
@@ -1829,8 +2236,12 @@ def main() -> int:
         not post_run_evidence[
             "authorization_artifact_digest_must_match_consumed_permit"
         ]
-        or not post_run_evidence["receipt_owners_must_match_authorization"]
-        or not post_run_evidence["owner_receipts_bind_authorization_and_run"]
+        or not post_run_evidence[
+            "passed_receipt_pairs_must_match_authorization"
+        ]
+        or not post_run_evidence[
+            "owner_receipts_bind_authorization_session_execution_and_result"
+        ]
         or not post_run_evidence["permit_timeline_must_validate"]
         or not post_run_evidence["exact_baseline_restore_required"]
         or not post_run_evidence["baseline_snapshot_must_match_authorization"]

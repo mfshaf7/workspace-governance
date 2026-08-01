@@ -180,7 +180,7 @@
               "minLength": 1
             },
             "schema_version": {
-              "const": 2
+              "const": 3
             },
             "required_sections": {
               "type": "array",
@@ -207,10 +207,11 @@
               "type": "object",
               "required": [
                 "unique_binding_keys",
-              "canonical_claims",
-              "run_consumption",
-              "window_validation",
-              "immutable_baseline_digest_required"
+                "canonical_claims",
+                "session_consumption",
+                "scenario_execution_binding",
+                "window_validation",
+                "immutable_baseline_digest_required"
               ],
               "properties": {
                 "unique_binding_keys": {
@@ -257,7 +258,7 @@
                   },
                   "additionalProperties": false
                 },
-            "run_consumption": {
+                "session_consumption": {
                   "type": "object",
                   "required": [
                     "mode",
@@ -278,26 +279,50 @@
                     "duplicate_consumption_denied": {
                       "const": true
                     }
-              },
-              "additionalProperties": false
-            },
-            "window_validation": {
-              "type": "object",
-              "required": [
-                "issued_before_expiry",
-                "acceptance_time_within_window"
-              ],
-              "properties": {
-                "issued_before_expiry": {
-                  "const": true
+                  },
+                  "additionalProperties": false
                 },
-                "acceptance_time_within_window": {
-                  "const": true
-                }
-              },
-              "additionalProperties": false
-            },
-            "immutable_baseline_digest_required": {
+                "scenario_execution_binding": {
+                  "type": "object",
+                  "required": [
+                    "exact_authorized_set_required",
+                    "scenario_ids_must_be_unique",
+                    "scenario_execution_ids_must_be_unique",
+                    "required_receipt_owners_declared_per_execution"
+                  ],
+                  "properties": {
+                    "exact_authorized_set_required": {
+                      "const": true
+                    },
+                    "scenario_ids_must_be_unique": {
+                      "const": true
+                    },
+                    "scenario_execution_ids_must_be_unique": {
+                      "const": true
+                    },
+                    "required_receipt_owners_declared_per_execution": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "window_validation": {
+                  "type": "object",
+                  "required": [
+                    "issued_before_expiry",
+                    "acceptance_time_within_window"
+                  ],
+                  "properties": {
+                    "issued_before_expiry": {
+                      "const": true
+                    },
+                    "acceptance_time_within_window": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "immutable_baseline_digest_required": {
                   "const": true
                 }
               },
@@ -315,15 +340,16 @@
             "authorization_artifact_digest_canonicalization",
             "authorization_artifact_digest_projection",
             "authorization_artifact_digest_must_match_consumed_permit",
-            "run_binding_required",
+            "commissioning_session_binding_required",
             "scenario_outcomes_required",
-            "scenario_outcomes_keyed_by_scenario_id",
+            "scenario_outcomes_bind_execution_id",
             "scenario_ids_must_be_unique",
+            "scenario_execution_ids_must_be_unique",
             "scenario_ids_must_exactly_match_authorization",
             "owner_receipts_required",
-            "receipt_owners_keyed_by_owner_repo",
-            "receipt_owners_must_exactly_match_authorization",
-            "owner_receipts_bind_authorization_and_run",
+            "owner_receipt_pairs_must_be_unique",
+            "passed_receipt_pairs_must_exactly_match_authorization",
+            "owner_receipts_bind_authorization_session_execution_and_result",
             "timeline_validation",
             "exact_baseline_evidence_required",
             "baseline_snapshot_must_match_authorization"
@@ -333,7 +359,7 @@
               "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
             },
             "schema_version": {
-              "const": 1
+              "const": 2
             },
             "authorization_binding_required": {
               "const": true
@@ -347,16 +373,19 @@
             "authorization_artifact_digest_must_match_consumed_permit": {
               "const": true
             },
-            "run_binding_required": {
+            "commissioning_session_binding_required": {
               "const": true
             },
             "scenario_outcomes_required": {
               "const": true
             },
-            "scenario_outcomes_keyed_by_scenario_id": {
+            "scenario_outcomes_bind_execution_id": {
               "const": true
             },
             "scenario_ids_must_be_unique": {
+              "const": true
+            },
+            "scenario_execution_ids_must_be_unique": {
               "const": true
             },
             "scenario_ids_must_exactly_match_authorization": {
@@ -365,35 +394,43 @@
             "owner_receipts_required": {
               "const": true
             },
-            "receipt_owners_keyed_by_owner_repo": {
+            "owner_receipt_pairs_must_be_unique": {
               "const": true
             },
-            "receipt_owners_must_exactly_match_authorization": {
+            "passed_receipt_pairs_must_exactly_match_authorization": {
               "const": true
             },
-            "owner_receipts_bind_authorization_and_run": {
+            "owner_receipts_bind_authorization_session_execution_and_result": {
               "const": true
             },
             "timeline_validation": {
               "type": "object",
               "required": [
                 "consumption_within_authorization_window",
-                "consumed_before_start",
-                "start_within_authorization_window",
-                "completion_not_before_start",
+                "consumed_before_session_start",
+                "session_start_within_authorization_window",
+                "scenario_start_within_authorization_window",
+                "scenario_completion_not_before_start",
+                "result_completion_not_before_scenarios",
                 "passed_completion_before_expiry"
               ],
               "properties": {
                 "consumption_within_authorization_window": {
                   "const": true
                 },
-                "consumed_before_start": {
+                "consumed_before_session_start": {
                   "const": true
                 },
-                "start_within_authorization_window": {
+                "session_start_within_authorization_window": {
                   "const": true
                 },
-                "completion_not_before_start": {
+                "scenario_start_within_authorization_window": {
+                  "const": true
+                },
+                "scenario_completion_not_before_start": {
+                  "const": true
+                },
+                "result_completion_not_before_scenarios": {
                   "const": true
                 },
                 "passed_completion_before_expiry": {
@@ -472,7 +509,7 @@
             "restore_mode",
             "restore_required_before_completion",
             "terminal_cleanup_authority_mode",
-            "terminal_cleanup_bound_to_started_run",
+            "terminal_cleanup_bound_to_started_session",
             "terminal_cleanup_trigger_scope",
             "new_proof_actions_allowed_after_stop",
             "post_proof_security_review_required",
@@ -488,7 +525,7 @@
             "terminal_cleanup_authority_mode": {
               "const": "exact-baseline-restore-only"
             },
-            "terminal_cleanup_bound_to_started_run": {
+            "terminal_cleanup_bound_to_started_session": {
               "const": true
             },
             "terminal_cleanup_trigger_scope": {

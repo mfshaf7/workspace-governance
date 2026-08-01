@@ -230,6 +230,17 @@ durable_orchestration:
         - payload-boundary
         - backup-restore
         - exact-baseline-restore
+      commissioning_session:
+        authorization_consumption: atomic-single-use
+        one_session_per_authorization: true
+        exact_scenario_execution_set_required: true
+        scenario_execution_ids_unique: true
+        required_receipt_owners_declared_per_execution: true
+        retries_cancels_replays_and_dedup_bound_to_session_and_execution: true
+      receipt_owners:
+        - platform-engineering
+        - operator-orchestration-service
+        - workspace-governance-control-fabric
       permitted_action_allowlist:
         - install-scoped-runtime
         - start-validation-readiness-run
@@ -253,7 +264,7 @@ durable_orchestration:
         - restore-failure
       terminal_cleanup_authority:
         mode: exact-baseline-restore-only
-        applies_to: already-started-run
+        applies_to: already-started-commissioning-session
         trigger_scope: any-triggered-stop-condition
         scope_binding: exact-captured-restore-scope
         new_proof_actions_denied: true
@@ -277,8 +288,8 @@ durable_orchestration:
           artifact_type: controlled-runtime-proof-result
           schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
           authorization_artifact_digest_must_match_consumed_permit: true
-          receipt_owners_must_match_authorization: true
-          owner_receipts_bind_authorization_and_run: true
+          passed_receipt_pairs_must_match_authorization: true
+          owner_receipts_bind_authorization_session_execution_and_result: true
           permit_timeline_must_validate: true
           exact_baseline_restore_required: true
           baseline_snapshot_must_match_authorization: true

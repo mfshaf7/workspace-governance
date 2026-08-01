@@ -319,6 +319,86 @@ def validate_delivery_art_operator_path_contract(
             f"{contract_path}: canonical entrypoint command must stay 'npm run art'"
         )
 
+    architecture_preflight = operator_path.get("initiative_architecture_preflight") or {}
+    if architecture_preflight.get("required_before_source_implementation") is not True:
+        errors.append(
+            f"{contract_path}: initiative architecture preflight must run before source implementation"
+        )
+
+    required_packet_sections = {
+        "descendant-and-owner-map",
+        "dependency-and-merge-sequence",
+        "lifecycle-and-state-model",
+        "authorization-session-and-execution-model",
+        "evidence-and-receipt-handoffs",
+        "runtime-boundaries-and-prohibited-actions",
+        "rollback-cleanup-and-terminal-conditions",
+        "contradictions-and-open-decisions",
+    }
+    packet_sections = set(architecture_preflight.get("packet_required_sections") or [])
+    missing_packet_sections = sorted(required_packet_sections - packet_sections)
+    if missing_packet_sections:
+        errors.append(
+            f"{contract_path}: initiative architecture preflight missing packet sections "
+            + ", ".join(missing_packet_sections)
+        )
+
+    decision_gate = architecture_preflight.get("decision_gate") or {}
+    required_decisions = {
+        "ready-for-child-implementation",
+        "blocked-pending-architecture-decision",
+    }
+    allowed_decisions = set(decision_gate.get("allowed_results") or [])
+    if decision_gate.get("operator_discussion_required") is not True:
+        errors.append(
+            f"{contract_path}: initiative architecture preflight must require operator discussion"
+        )
+    if decision_gate.get("execution_sequence_locked_before_child_work") is not True:
+        errors.append(
+            f"{contract_path}: initiative execution sequence must be locked before child work"
+        )
+    if allowed_decisions != required_decisions:
+        errors.append(
+            f"{contract_path}: initiative architecture preflight decisions must be exactly "
+            + ", ".join(sorted(required_decisions))
+        )
+
+    protocol_preflight = architecture_preflight.get("protocol_conformance_preflight") or {}
+    required_protocol_dimensions = {
+        "command-and-acknowledgement-semantics",
+        "deterministic-identities-and-idempotency",
+        "state-mutation-ordering",
+        "retry-cancel-replay-and-recovery-semantics",
+        "bounded-failure-mapping",
+        "authorization-integrity-and-replay-resistance",
+        "session-scenario-and-execution-binding",
+        "result-and-owner-receipt-completeness",
+        "immutable-baseline-and-restore-evidence",
+        "lifecycle-state-matrix",
+        "cross-artifact-timeline-ordering",
+        "shared-validator-compatibility",
+    }
+    protocol_dimensions = set(protocol_preflight.get("required_dimensions") or [])
+    missing_protocol_dimensions = sorted(
+        required_protocol_dimensions - protocol_dimensions
+    )
+    if missing_protocol_dimensions:
+        errors.append(
+            f"{contract_path}: protocol conformance preflight missing dimensions "
+            + ", ".join(missing_protocol_dimensions)
+        )
+    if set(protocol_preflight.get("executable_cases_required") or []) != {
+        "positive-contract-cases",
+        "negative-contract-cases",
+    }:
+        errors.append(
+            f"{contract_path}: protocol conformance preflight must require positive and negative cases"
+        )
+    if protocol_preflight.get("child_ready_only_after_conformance_passes") is not True:
+        errors.append(
+            f"{contract_path}: protocol child readiness must fail closed on conformance"
+        )
+
     surface_paths = [
         workspace_root / canonical_entrypoint.get("primary_operator_surface", ""),
         workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
@@ -369,6 +449,16 @@ def validate_delivery_art_operator_path_contract(
             if required not in skill_text:
                 errors.append(
                     f"{skill_path}: missing initiative-lineage reminder {required!r}"
+                )
+        for required in (
+            "Initiative Architecture Preflight",
+            "ready-for-child-implementation",
+            "session and scenario-execution binding",
+            "positive and negative contract cases",
+        ):
+            if required not in skill_text:
+                errors.append(
+                    f"{skill_path}: missing initiative architecture preflight control {required!r}"
                 )
         forbidden = "default ART reads and writes to direct\n     top-level `k3s kubectl` broker calls against the active profile namespace"
         if forbidden in skill_text:

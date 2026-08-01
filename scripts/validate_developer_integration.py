@@ -112,7 +112,7 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "drill_type",
     "target",
     "scope",
-    "run_binding",
+    "commissioning_session",
     "permit_issuer",
     "executor",
     "approvals",
@@ -294,9 +294,9 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
                 "must preserve the complete authorization envelope"
             )
-        if permit.get("schema_version") != 2:
+        if permit.get("schema_version") != 3:
             errors.append(
-                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 2"
+                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 3"
             )
         if (
             permit.get("permit_issuer_binding_required") is not True
@@ -317,11 +317,17 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "approvals_bind_complete_claims": True,
                 "approval_artifact_digests_required": True,
             },
-            "run_consumption": {
+            "session_consumption": {
                 "mode": "atomic-single-use",
                 "keyed_by": "authorization_id",
                 "consume_before_first_mutation": True,
                 "duplicate_consumption_denied": True,
+            },
+            "scenario_execution_binding": {
+                "exact_authorized_set_required": True,
+                "scenario_ids_must_be_unique": True,
+                "scenario_execution_ids_must_be_unique": True,
+                "required_receipt_owners_declared_per_execution": True,
             },
             "window_validation": {
                 "issued_before_expiry": True,
@@ -342,25 +348,28 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         result = controlled_proof["result"]
         expected_result = {
             "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
-            "schema_version": 1,
+            "schema_version": 2,
             "authorization_binding_required": True,
             "authorization_artifact_digest_canonicalization": "rfc8785",
             "authorization_artifact_digest_projection": "complete-authorization",
             "authorization_artifact_digest_must_match_consumed_permit": True,
-            "run_binding_required": True,
+            "commissioning_session_binding_required": True,
             "scenario_outcomes_required": True,
-            "scenario_outcomes_keyed_by_scenario_id": True,
+            "scenario_outcomes_bind_execution_id": True,
             "scenario_ids_must_be_unique": True,
+            "scenario_execution_ids_must_be_unique": True,
             "scenario_ids_must_exactly_match_authorization": True,
             "owner_receipts_required": True,
-            "receipt_owners_keyed_by_owner_repo": True,
-            "receipt_owners_must_exactly_match_authorization": True,
-            "owner_receipts_bind_authorization_and_run": True,
+            "owner_receipt_pairs_must_be_unique": True,
+            "passed_receipt_pairs_must_exactly_match_authorization": True,
+            "owner_receipts_bind_authorization_session_execution_and_result": True,
             "timeline_validation": {
                 "consumption_within_authorization_window": True,
-                "consumed_before_start": True,
-                "start_within_authorization_window": True,
-                "completion_not_before_start": True,
+                "consumed_before_session_start": True,
+                "session_start_within_authorization_window": True,
+                "scenario_start_within_authorization_window": True,
+                "scenario_completion_not_before_start": True,
+                "result_completion_not_before_scenarios": True,
                 "passed_completion_before_expiry": True,
             },
             "exact_baseline_evidence_required": True,
@@ -369,7 +378,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         if result != expected_result:
             errors.append(
                 "contracts/developer-integration-policy.yaml: controlled proof result must preserve "
-                "authorization, single-run, scenario, owner-receipt, and exact-baseline evidence bindings"
+                "authorization, commissioning-session, scenario-execution, owner-receipt, and exact-baseline evidence bindings"
             )
         if not (repo_root / result.get("schema_ref", "<missing>")).exists():
             errors.append(
@@ -432,7 +441,8 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             or completion.get("restore_required_before_completion") is not True
             or completion.get("terminal_cleanup_authority_mode")
             != "exact-baseline-restore-only"
-            or completion.get("terminal_cleanup_bound_to_started_run") is not True
+            or completion.get("terminal_cleanup_bound_to_started_session")
+            is not True
             or completion.get("terminal_cleanup_trigger_scope")
             != "any-triggered-stop-condition"
             or completion.get("new_proof_actions_allowed_after_stop") is not False
@@ -479,7 +489,8 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         cleanup = durable_proof.get("terminal_cleanup_authority", {})
         if (
             cleanup.get("mode") != "exact-baseline-restore-only"
-            or cleanup.get("applies_to") != "already-started-run"
+            or cleanup.get("applies_to")
+            != "already-started-commissioning-session"
             or cleanup.get("trigger_scope") != "any-triggered-stop-condition"
             or cleanup.get("scope_binding") != "exact-captured-restore-scope"
             or cleanup.get("new_proof_actions_denied") is not True
