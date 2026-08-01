@@ -264,9 +264,10 @@
           "required": [
             "restore_mode",
             "restore_required_before_completion",
-            "expiry_cleanup_authority_mode",
-            "expiry_cleanup_bound_to_started_run",
-            "new_proof_actions_allowed_after_expiry",
+            "terminal_cleanup_authority_mode",
+            "terminal_cleanup_bound_to_started_run",
+            "terminal_cleanup_trigger_scope",
+            "new_proof_actions_allowed_after_stop",
             "post_proof_security_review_required",
             "pre_run_authorization_reusable_as_activation_evidence"
           ],
@@ -277,13 +278,16 @@
             "restore_required_before_completion": {
               "const": true
             },
-            "expiry_cleanup_authority_mode": {
+            "terminal_cleanup_authority_mode": {
               "const": "exact-baseline-restore-only"
             },
-            "expiry_cleanup_bound_to_started_run": {
+            "terminal_cleanup_bound_to_started_run": {
               "const": true
             },
-            "new_proof_actions_allowed_after_expiry": {
+            "terminal_cleanup_trigger_scope": {
+              "const": "any-triggered-stop-condition"
+            },
+            "new_proof_actions_allowed_after_stop": {
               "const": false
             },
             "post_proof_security_review_required": {

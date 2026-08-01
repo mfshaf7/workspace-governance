@@ -250,11 +250,14 @@ durable_orchestration:
         - unexpected-side-effect
         - evidence-custody-failure
         - restore-failure
-      expiry_cleanup_authority:
+      terminal_cleanup_authority:
         mode: exact-baseline-restore-only
         applies_to: already-started-run
+        trigger_scope: any-triggered-stop-condition
         scope_binding: exact-captured-restore-scope
         new_proof_actions_denied: true
+        scope_expansion_denied: true
+        runtime_retention_denied: true
         permitted_actions:
           - remove-scoped-runtime
           - restore-exact-baseline

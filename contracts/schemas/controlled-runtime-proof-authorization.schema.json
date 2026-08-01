@@ -277,7 +277,7 @@
         "baseline_snapshot_ref",
         "restore_mode",
         "restore_scope",
-        "expiry_cleanup_authority"
+        "terminal_cleanup_authority"
       ],
       "properties": {
         "baseline_snapshot_ref": {
@@ -289,12 +289,13 @@
         "restore_scope": {
           "$ref": "#/$defs/nonEmptyUniqueIdentifierList"
         },
-        "expiry_cleanup_authority": {
+        "terminal_cleanup_authority": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "mode",
             "applies_to",
+            "trigger_scope",
             "scope_binding",
             "new_proof_actions_denied",
             "scope_expansion_denied",
@@ -308,6 +309,9 @@
             },
             "applies_to": {
               "const": "already-started-run"
+            },
+            "trigger_scope": {
+              "const": "any-triggered-stop-condition"
             },
             "scope_binding": {
               "const": "exact-captured-restore-scope"

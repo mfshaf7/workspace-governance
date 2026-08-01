@@ -91,9 +91,10 @@ controlled_proof:
   completion:
     restore_mode: exact-baseline
     restore_required_before_completion: true
-    expiry_cleanup_authority_mode: exact-baseline-restore-only
-    expiry_cleanup_bound_to_started_run: true
-    new_proof_actions_allowed_after_expiry: false
+    terminal_cleanup_authority_mode: exact-baseline-restore-only
+    terminal_cleanup_bound_to_started_run: true
+    terminal_cleanup_trigger_scope: any-triggered-stop-condition
+    new_proof_actions_allowed_after_stop: false
     post_proof_security_review_required: true
     pre_run_authorization_reusable_as_activation_evidence: false
   forbidden_claims:

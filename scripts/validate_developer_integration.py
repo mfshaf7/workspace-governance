@@ -358,10 +358,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
         if (
             completion.get("restore_mode") != "exact-baseline"
             or completion.get("restore_required_before_completion") is not True
-            or completion.get("expiry_cleanup_authority_mode")
+            or completion.get("terminal_cleanup_authority_mode")
             != "exact-baseline-restore-only"
-            or completion.get("expiry_cleanup_bound_to_started_run") is not True
-            or completion.get("new_proof_actions_allowed_after_expiry") is not False
+            or completion.get("terminal_cleanup_bound_to_started_run") is not True
+            or completion.get("terminal_cleanup_trigger_scope")
+            != "any-triggered-stop-condition"
+            or completion.get("new_proof_actions_allowed_after_stop") is not False
             or completion.get("post_proof_security_review_required") is not True
             or completion.get("pre_run_authorization_reusable_as_activation_evidence") is not False
         ):
@@ -389,12 +391,15 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                     f"{source_role.replace('_', ' ')} must bind Platform source "
                     "review #792 before Security authorization"
                 )
-        cleanup = durable_proof.get("expiry_cleanup_authority", {})
+        cleanup = durable_proof.get("terminal_cleanup_authority", {})
         if (
             cleanup.get("mode") != "exact-baseline-restore-only"
             or cleanup.get("applies_to") != "already-started-run"
+            or cleanup.get("trigger_scope") != "any-triggered-stop-condition"
             or cleanup.get("scope_binding") != "exact-captured-restore-scope"
             or cleanup.get("new_proof_actions_denied") is not True
+            or cleanup.get("scope_expansion_denied") is not True
+            or cleanup.get("runtime_retention_denied") is not True
             or cleanup.get("permitted_actions")
             != [
                 "remove-scoped-runtime",
@@ -406,7 +411,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             != ["exact-baseline-restored", "governed-exception-recorded"]
         ):
             errors.append(
-                "contracts/durable-orchestration.yaml: controlled proof expiry must preserve only run-bound exact-baseline cleanup authority"
+                "contracts/durable-orchestration.yaml: every controlled-proof stop condition must preserve only run-bound exact-baseline cleanup authority"
             )
         proof_target = durable_proof["target"]
         target_profile = registry["profiles"].get(proof_target["profile_id"])

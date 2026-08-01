@@ -74,9 +74,10 @@ normal activation:
   [`../contracts/schemas/controlled-runtime-proof-authorization.schema.json`](../contracts/schemas/controlled-runtime-proof-authorization.schema.json)
 - its pre-run authorization cannot be reused as post-run activation evidence
 - exact-baseline restoration is required before the post-proof Security review
-- expiry denies every new proof action; for an already-started run, only
-  run-bound removal, exact-baseline restoration, restore evidence, and governed
-  exception recording remain allowed until restore or exception closure
+- every triggered stop condition denies new proof actions; for an
+  already-started run, only run-bound removal, exact-baseline restoration,
+  restore evidence, and governed exception recording remain allowed until
+  restore or exception closure
 - it cannot run a business definition or create stage or production evidence
 
 The permit is a separate bounded execution authority. It does not make normal
@@ -87,9 +88,10 @@ Schema validity is necessary but not sufficient. The future permit issuer and
 executor must also compare the permit with the current orchestration allowlist,
 verify both exact merged source bindings, verify its issue and expiry window,
 verify every source and runtime digest, and fail closed when any stop condition
-is met. Expiry cannot authorize a new action or retry; it preserves only the
-fixed exact-baseline cleanup authority for the already-started run. No such
-execution path is activated by this contract change.
+is met. No stop condition can authorize a new action or retry; every stop
+preserves only the fixed exact-baseline cleanup authority for the
+already-started run. No such execution path is activated by this contract
+change.
 
 ## Current Runtime Status
 

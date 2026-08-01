@@ -477,7 +477,7 @@
         "required_scenarios",
         "permitted_action_allowlist",
         "required_stop_conditions",
-        "expiry_cleanup_authority",
+        "terminal_cleanup_authority",
         "evidence_phases",
         "denied_outcomes"
       ],
@@ -556,14 +556,17 @@
         "required_stop_conditions": {
           "$ref": "#/$defs/nonEmptyUniqueStringList"
         },
-        "expiry_cleanup_authority": {
+        "terminal_cleanup_authority": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "mode",
             "applies_to",
+            "trigger_scope",
             "scope_binding",
             "new_proof_actions_denied",
+            "scope_expansion_denied",
+            "runtime_retention_denied",
             "permitted_actions",
             "termination_conditions"
           ],
@@ -574,10 +577,19 @@
             "applies_to": {
               "const": "already-started-run"
             },
+            "trigger_scope": {
+              "const": "any-triggered-stop-condition"
+            },
             "scope_binding": {
               "const": "exact-captured-restore-scope"
             },
             "new_proof_actions_denied": {
+              "const": true
+            },
+            "scope_expansion_denied": {
+              "const": true
+            },
+            "runtime_retention_denied": {
               "const": true
             },
             "permitted_actions": {
