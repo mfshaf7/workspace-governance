@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 from datetime import date
 from pathlib import Path
 import re
@@ -255,6 +256,95 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
     for error in validator.iter_errors(instance):
         path = ".".join(str(part) for part in error.absolute_path) or "<root>"
         errors.append(f"{instance_path}: {path}: {error.message}")
+
+
+def controlled_proof_result_fixture() -> dict:
+    digest = "sha256:" + "a" * 64
+    scenario_outcomes = {
+        scenario_id: {
+            "status": "passed",
+            "evidence_ref": f"artifact://controlled-proof/scenarios/{scenario_id}",
+            "evidence_digest": digest,
+        }
+        for scenario_id in CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+    }
+    return {
+        "schema_version": 1,
+        "result_id": "artifact://controlled-proof/results/validation-run",
+        "authorization": {
+            "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+            "authorization_digest": digest,
+            "canonical_claims_digest": digest,
+        },
+        "run": {
+            "run_id": "controlled-proof-validation-run",
+            "execution_count": 1,
+            "consumed_at": "2026-08-01T00:00:00Z",
+            "started_at": "2026-08-01T00:00:01Z",
+        },
+        "outcome": "passed",
+        "scenario_outcomes": scenario_outcomes,
+        "owner_receipts": [
+            {
+                "owner_repo": "platform-engineering",
+                "receipt_ref": "artifact://controlled-proof/receipts/platform",
+                "receipt_digest": digest,
+            }
+        ],
+        "baseline_restore": {
+            "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
+            "baseline_snapshot_digest": digest,
+            "status": "exact-baseline-restored",
+            "evidence_ref": "artifact://controlled-proof/restore/exact-baseline",
+            "evidence_digest": digest,
+        },
+        "completed_at": "2026-08-01T00:10:00Z",
+    }
+
+
+def validate_controlled_proof_result_invariants(errors: list[str], schema: dict) -> None:
+    validator = Draft202012Validator(schema)
+    valid_passed = controlled_proof_result_fixture()
+    if validation_errors := list(validator.iter_errors(valid_passed)):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid all-passing result was rejected: "
+            f"{validation_errors[0].message}"
+        )
+
+    valid_stopped = copy.deepcopy(valid_passed)
+    valid_stopped["outcome"] = "stopped"
+    valid_stopped["scenario_outcomes"]["exact-baseline-restore"]["status"] = "failed"
+    valid_stopped["baseline_restore"]["status"] = "governed-exception-recorded"
+    valid_stopped["exception"] = {
+        "decision": "defer",
+        "record_ref": "artifact://controlled-proof/exceptions/restore",
+        "record_digest": "sha256:" + "b" * 64,
+    }
+    if validation_errors := list(validator.iter_errors(valid_stopped)):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid stopped exception result was rejected: "
+            f"{validation_errors[0].message}"
+        )
+
+    invalid_cases: dict[str, dict] = {}
+    failed_scenario = copy.deepcopy(valid_passed)
+    failed_scenario["scenario_outcomes"]["payload-boundary"]["status"] = "failed"
+    invalid_cases["passed result with a non-passing scenario"] = failed_scenario
+
+    restore_exception = copy.deepcopy(valid_passed)
+    restore_exception["baseline_restore"]["status"] = "governed-exception-recorded"
+    restore_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
+    invalid_cases["passed result with a restore exception"] = restore_exception
+
+    unexpected_exception = copy.deepcopy(valid_passed)
+    unexpected_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
+    invalid_cases["passed result carrying any exception"] = unexpected_exception
+
+    for label, instance in invalid_cases.items():
+        if not list(validator.iter_errors(instance)):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: must reject {label}"
+            )
 
 
 def has_required_scalar(payload: dict, key: str) -> bool:
@@ -1008,6 +1098,10 @@ def main() -> int:
             "contracts/developer-integration-policy.yaml: controlled proof result schema_version "
             "must match the result schema"
         )
+    validate_controlled_proof_result_invariants(
+        errors,
+        controlled_proof_result_schema,
+    )
     proof_authorities = controlled_proof_policy["authorities"]
     expected_proof_authorities = {
         "issuer": durable_authority["durable_runtime_owner"],
