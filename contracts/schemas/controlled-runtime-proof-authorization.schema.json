@@ -66,6 +66,7 @@
         "target_namespaces",
         "runtime_identities",
         "task_queues",
+        "required_receipt_owners",
         "allowed_scenarios",
         "permitted_actions",
         "max_runs"
@@ -201,6 +202,24 @@
               }
             }
           }
+        },
+        "required_receipt_owners": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "platform-engineering"
+            },
+            {
+              "const": "operator-orchestration-service"
+            },
+            {
+              "const": "workspace-governance-control-fabric"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
         },
         "allowed_scenarios": {
           "type": "array",

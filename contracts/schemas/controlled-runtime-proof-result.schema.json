@@ -127,27 +127,22 @@
       }
     },
     "owner_receipts": {
-      "type": "array",
-      "minItems": 1,
-      "uniqueItems": true,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "owner_repo",
-          "receipt_ref",
-          "receipt_digest"
-        ],
-        "properties": {
-          "owner_repo": {
-            "$ref": "#/$defs/identifier"
-          },
-          "receipt_ref": {
-            "$ref": "#/$defs/uri"
-          },
-          "receipt_digest": {
-            "$ref": "#/$defs/digest"
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform-engineering",
+        "operator-orchestration-service",
+        "workspace-governance-control-fabric"
+      ],
+      "properties": {
+        "platform-engineering": {
+          "$ref": "#/$defs/ownerReceipt"
+        },
+        "operator-orchestration-service": {
+          "$ref": "#/$defs/ownerReceipt"
+        },
+        "workspace-governance-control-fabric": {
+          "$ref": "#/$defs/ownerReceipt"
         }
       }
     },
@@ -300,6 +295,22 @@
       "minLength": 1,
       "maxLength": 256,
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]*$"
+    },
+    "ownerReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_ref",
+        "receipt_digest"
+      ],
+      "properties": {
+        "receipt_ref": {
+          "$ref": "#/$defs/uri"
+        },
+        "receipt_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
     },
     "passedScenarioOutcome": {
       "type": "object",

@@ -92,12 +92,17 @@ controlled_proof:
     schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
     schema_version: 1
     authorization_binding_required: true
+    authorization_artifact_digest_canonicalization: rfc8785
+    authorization_artifact_digest_projection: complete-authorization
+    authorization_artifact_digest_must_match_consumed_permit: true
     run_binding_required: true
     scenario_outcomes_required: true
     scenario_outcomes_keyed_by_scenario_id: true
     scenario_ids_must_be_unique: true
     scenario_ids_must_exactly_match_authorization: true
     owner_receipts_required: true
+    receipt_owners_keyed_by_owner_repo: true
+    receipt_owners_must_exactly_match_authorization: true
     exact_baseline_evidence_required: true
     baseline_snapshot_must_match_authorization: true
   authorities:

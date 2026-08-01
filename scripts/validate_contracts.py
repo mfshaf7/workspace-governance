@@ -104,6 +104,7 @@ CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
     "target_namespaces",
     "runtime_identities",
     "task_queues",
+    "required_receipt_owners",
     "allowed_scenarios",
     "permitted_actions",
     "max_runs",
@@ -164,7 +165,6 @@ CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS = {
     "evidence_digest",
 }
 CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS = {
-    "owner_repo",
     "receipt_ref",
     "receipt_digest",
 }
@@ -214,6 +214,14 @@ CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER = [
     "exact-baseline-restore",
 ]
 CONTROLLED_PROOF_REQUIRED_SCENARIOS = set(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER = [
+    "platform-engineering",
+    "operator-orchestration-service",
+    "workspace-governance-control-fabric",
+]
+CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS = set(
+    CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+)
 CONTROLLED_PROOF_PERMITTED_ACTIONS = {
     "install-scoped-runtime",
     "start-validation-readiness-run",
@@ -359,6 +367,7 @@ def controlled_proof_authorization_fixture() -> dict:
                     "queue_name": "validation-readiness-run",
                 }
             ],
+            "required_receipt_owners": CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER,
             "allowed_scenarios": CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER,
             "permitted_actions": sorted(CONTROLLED_PROOF_PERMITTED_ACTIONS),
             "max_runs": 1,
@@ -487,13 +496,13 @@ def controlled_proof_result_fixture() -> dict:
         },
         "outcome": "passed",
         "scenario_outcomes": scenario_outcomes,
-        "owner_receipts": [
-            {
-                "owner_repo": "platform-engineering",
-                "receipt_ref": "artifact://controlled-proof/receipts/platform",
+        "owner_receipts": {
+            owner_repo: {
+                "receipt_ref": f"artifact://controlled-proof/receipts/{owner_repo}",
                 "receipt_digest": digest,
             }
-        ],
+            for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+        },
         "baseline_restore": {
             "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
             "baseline_snapshot_digest": digest,
@@ -507,6 +516,7 @@ def controlled_proof_result_fixture() -> dict:
 
 def controlled_proof_result_binding_errors(
     authorization: dict,
+    authorization_artifact_digest: str,
     result: dict,
 ) -> list[str]:
     binding_errors: list[str] = []
@@ -515,6 +525,11 @@ def controlled_proof_result_binding_errors(
             "authorization id",
             result["authorization"]["authorization_id"],
             authorization["authorization_id"],
+        ),
+        (
+            "authorization artifact digest",
+            result["authorization"]["authorization_digest"],
+            authorization_artifact_digest,
         ),
         (
             "canonical claims digest",
@@ -546,12 +561,19 @@ def controlled_proof_result_binding_errors(
         binding_errors.append(
             "scenario outcomes do not exactly match the authorized scenario set"
         )
+    if set(result["owner_receipts"]) != set(
+        authorization["scope"]["required_receipt_owners"]
+    ):
+        binding_errors.append(
+            "receipt owners do not exactly match the authorized proof-owner set"
+        )
     return binding_errors
 
 
 def validate_controlled_proof_result_invariants(errors: list[str], schema: dict) -> None:
     validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
     valid_authorization = controlled_proof_authorization_fixture()
+    authorization_artifact_digest = "sha256:" + "a" * 64
     valid_passed = controlled_proof_result_fixture()
     if validation_errors := list(validator.iter_errors(valid_passed)):
         errors.append(
@@ -560,6 +582,7 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
         )
     if binding_errors := controlled_proof_result_binding_errors(
         valid_authorization,
+        authorization_artifact_digest,
         valid_passed,
     ):
         errors.append(
@@ -596,6 +619,23 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     unexpected_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
     invalid_cases["passed result carrying any exception"] = unexpected_exception
 
+    missing_owner_receipt = copy.deepcopy(valid_passed)
+    missing_owner_receipt["owner_receipts"].pop(
+        "workspace-governance-control-fabric"
+    )
+    invalid_cases["result missing a required proof-owner receipt"] = (
+        missing_owner_receipt
+    )
+
+    unrelated_owner_receipt = copy.deepcopy(valid_passed)
+    unrelated_owner_receipt["owner_receipts"]["unrelated-owner"] = {
+        "receipt_ref": "artifact://controlled-proof/receipts/unrelated-owner",
+        "receipt_digest": "sha256:" + "d" * 64,
+    }
+    invalid_cases["result carrying an unrelated owner receipt"] = (
+        unrelated_owner_receipt
+    )
+
     for label, instance in invalid_cases.items():
         if not list(validator.iter_errors(instance)):
             errors.append(
@@ -603,6 +643,14 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
             )
 
     invalid_binding_cases: dict[str, dict] = {}
+    mismatched_authorization_digest = copy.deepcopy(valid_passed)
+    mismatched_authorization_digest["authorization"]["authorization_digest"] = (
+        "sha256:" + "e" * 64
+    )
+    invalid_binding_cases["incorrect complete authorization digest"] = (
+        mismatched_authorization_digest
+    )
+
     mismatched_baseline_ref = copy.deepcopy(valid_passed)
     mismatched_baseline_ref["baseline_restore"]["baseline_snapshot_ref"] = (
         "artifact://controlled-proof/baselines/different"
@@ -620,7 +668,11 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     )
 
     for label, instance in invalid_binding_cases.items():
-        if not controlled_proof_result_binding_errors(valid_authorization, instance):
+        if not controlled_proof_result_binding_errors(
+            valid_authorization,
+            authorization_artifact_digest,
+            instance,
+        ):
             errors.append(
                 f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject {label}"
             )
@@ -1097,12 +1149,17 @@ def main() -> int:
         "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
         "schema_version": 1,
         "authorization_binding_required": True,
+        "authorization_artifact_digest_canonicalization": "rfc8785",
+        "authorization_artifact_digest_projection": "complete-authorization",
+        "authorization_artifact_digest_must_match_consumed_permit": True,
         "run_binding_required": True,
         "scenario_outcomes_required": True,
         "scenario_outcomes_keyed_by_scenario_id": True,
         "scenario_ids_must_be_unique": True,
         "scenario_ids_must_exactly_match_authorization": True,
         "owner_receipts_required": True,
+        "receipt_owners_keyed_by_owner_repo": True,
+        "receipt_owners_must_exactly_match_authorization": True,
         "exact_baseline_evidence_required": True,
         "baseline_snapshot_must_match_authorization": True,
     }
@@ -1186,6 +1243,26 @@ def main() -> int:
     ):
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.allowed_scenarios must preserve the exact commissioning scenario set"
+        )
+    required_receipt_owners_schema = scope_schema_properties.get(
+        "required_receipt_owners", {}
+    )
+    required_receipt_owner_order = [
+        item.get("const")
+        for item in required_receipt_owners_schema.get("prefixItems", [])
+    ]
+    if (
+        required_receipt_owner_order
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+        or required_receipt_owners_schema.get("items") is not False
+        or required_receipt_owners_schema.get("uniqueItems") is not True
+        or required_receipt_owners_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
+        or required_receipt_owners_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.required_receipt_owners must preserve the exact proof-owner set"
         )
     target_schema_properties = controlled_proof_schema_properties.get("target", {}).get(
         "properties", {}
@@ -1377,15 +1454,38 @@ def main() -> int:
             f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each scenario outcome must preserve complete machine-readable evidence"
         )
     owner_receipts_schema = result_schema_properties.get("owner_receipts", {})
-    owner_receipt_item_schema = owner_receipts_schema.get("items", {})
     if (
-        owner_receipts_schema.get("minItems") != 1
-        or set(owner_receipt_item_schema.get("required") or [])
-        != CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS
-        or owner_receipt_item_schema.get("additionalProperties") is not False
+        owner_receipts_schema.get("type") != "object"
+        or owner_receipts_schema.get("additionalProperties") is not False
+        or set(owner_receipts_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
+        or set((owner_receipts_schema.get("properties") or {}).keys())
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
     ):
         errors.append(
-            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must preserve complete machine-readable evidence"
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must be keyed by and exactly cover every authorized proof owner"
+        )
+    expected_owner_receipt_ref = "#/$defs/ownerReceipt"
+    for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER:
+        if (
+            owner_receipts_schema.get("properties", {})
+            .get(owner_repo, {})
+            .get("$ref")
+            != expected_owner_receipt_ref
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipt {owner_repo!r} must use the closed owner receipt evidence schema"
+            )
+    owner_receipt_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
+        "ownerReceipt", {}
+    )
+    if (
+        set(owner_receipt_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS
+        or owner_receipt_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each owner receipt must preserve complete machine-readable evidence"
         )
     if result_schema_properties.get("run", {}).get("properties", {}).get(
         "execution_count", {}
@@ -1580,7 +1680,11 @@ def main() -> int:
             f"{durable_label}: pre-run proof authorization cannot grant or substitute for activation"
         )
     if (
-        not post_run_evidence["exact_baseline_restore_required"]
+        not post_run_evidence[
+            "authorization_artifact_digest_must_match_consumed_permit"
+        ]
+        or not post_run_evidence["receipt_owners_must_match_authorization"]
+        or not post_run_evidence["exact_baseline_restore_required"]
         or not post_run_evidence["baseline_snapshot_must_match_authorization"]
         or not post_run_evidence["security_acceptance_required"]
         or post_run_evidence.get("schema_ref") != CONTROLLED_PROOF_RESULT_SCHEMA_REF

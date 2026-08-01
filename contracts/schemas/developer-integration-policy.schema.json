@@ -295,12 +295,17 @@
             "schema_ref",
             "schema_version",
             "authorization_binding_required",
+            "authorization_artifact_digest_canonicalization",
+            "authorization_artifact_digest_projection",
+            "authorization_artifact_digest_must_match_consumed_permit",
             "run_binding_required",
             "scenario_outcomes_required",
             "scenario_outcomes_keyed_by_scenario_id",
             "scenario_ids_must_be_unique",
             "scenario_ids_must_exactly_match_authorization",
             "owner_receipts_required",
+            "receipt_owners_keyed_by_owner_repo",
+            "receipt_owners_must_exactly_match_authorization",
             "exact_baseline_evidence_required",
             "baseline_snapshot_must_match_authorization"
           ],
@@ -312,6 +317,15 @@
               "const": 1
             },
             "authorization_binding_required": {
+              "const": true
+            },
+            "authorization_artifact_digest_canonicalization": {
+              "const": "rfc8785"
+            },
+            "authorization_artifact_digest_projection": {
+              "const": "complete-authorization"
+            },
+            "authorization_artifact_digest_must_match_consumed_permit": {
               "const": true
             },
             "run_binding_required": {
@@ -330,6 +344,12 @@
               "const": true
             },
             "owner_receipts_required": {
+              "const": true
+            },
+            "receipt_owners_keyed_by_owner_repo": {
+              "const": true
+            },
+            "receipt_owners_must_exactly_match_authorization": {
               "const": true
             },
             "exact_baseline_evidence_required": {
