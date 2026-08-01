@@ -60,6 +60,8 @@ signals:
     equality and incomplete, non-unique proof-owner receipt coverage.
     A subsequent pass found that valid individual timestamps still lacked
     cross-artifact ordering against the permit window.
+    The follow-up timeline review then found that run start itself was not yet
+    bounded by expiry for stopped results.
     The existing improvement candidate covered only command-protocol completeness and
     therefore did not yet capture the broader authorization and evidence-contract
     recurrence.

@@ -588,6 +588,8 @@ def controlled_proof_result_binding_errors(
         binding_errors.append("permit consumption is outside the authorization window")
     if consumed_at > started_at:
         binding_errors.append("execution started before permit consumption")
+    if started_at >= expires_at:
+        binding_errors.append("execution started at or after authorization expiry")
     if started_at > completed_at:
         binding_errors.append("result completion precedes execution start")
     if result["outcome"] == "passed" and completed_at >= expires_at:
@@ -739,6 +741,13 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     passing_at_expiry = copy.deepcopy(valid_passed)
     passing_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
     invalid_binding_cases["passing result completed at expiry"] = passing_at_expiry
+
+    stopped_starting_at_expiry = copy.deepcopy(valid_stopped)
+    stopped_starting_at_expiry["run"]["consumed_at"] = "2026-08-01T00:59:59Z"
+    stopped_starting_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["stopped run starting at expiry"] = (
+        stopped_starting_at_expiry
+    )
 
     for label, instance in invalid_binding_cases.items():
         if not controlled_proof_result_binding_errors(
@@ -1251,6 +1260,7 @@ def main() -> int:
         "timeline_validation": {
             "consumption_within_authorization_window": True,
             "consumed_before_start": True,
+            "start_within_authorization_window": True,
             "completion_not_before_start": True,
             "passed_completion_before_expiry": True,
         },

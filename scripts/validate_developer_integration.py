@@ -358,6 +358,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "timeline_validation": {
                 "consumption_within_authorization_window": True,
                 "consumed_before_start": True,
+                "start_within_authorization_window": True,
                 "completion_not_before_start": True,
                 "passed_completion_before_expiry": True,
             },

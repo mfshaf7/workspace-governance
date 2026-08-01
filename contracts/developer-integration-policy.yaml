@@ -109,6 +109,7 @@ controlled_proof:
     timeline_validation:
       consumption_within_authorization_window: true
       consumed_before_start: true
+      start_within_authorization_window: true
       completion_not_before_start: true
       passed_completion_before_expiry: true
     exact_baseline_evidence_required: true

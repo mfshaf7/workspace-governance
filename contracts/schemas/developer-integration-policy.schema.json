@@ -375,6 +375,7 @@
               "required": [
                 "consumption_within_authorization_window",
                 "consumed_before_start",
+                "start_within_authorization_window",
                 "completion_not_before_start",
                 "passed_completion_before_expiry"
               ],
@@ -383,6 +384,9 @@
                   "const": true
                 },
                 "consumed_before_start": {
+                  "const": true
+                },
+                "start_within_authorization_window": {
                   "const": true
                 },
                 "completion_not_before_start": {
