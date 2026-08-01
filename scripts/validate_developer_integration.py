@@ -323,6 +323,10 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "consume_before_first_mutation": True,
                 "duplicate_consumption_denied": True,
             },
+            "window_validation": {
+                "issued_before_expiry": True,
+                "acceptance_time_within_window": True,
+            },
             "immutable_baseline_digest_required": True,
         }
         if permit.get("semantic_validation") != expected_semantic_validation:
@@ -351,6 +355,12 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "owner_receipts_required": True,
             "receipt_owners_keyed_by_owner_repo": True,
             "receipt_owners_must_exactly_match_authorization": True,
+            "timeline_validation": {
+                "consumption_within_authorization_window": True,
+                "consumed_before_start": True,
+                "completion_not_before_start": True,
+                "passed_completion_before_expiry": True,
+            },
             "exact_baseline_evidence_required": True,
             "baseline_snapshot_must_match_authorization": True,
         }

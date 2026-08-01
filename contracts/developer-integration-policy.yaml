@@ -87,6 +87,9 @@ controlled_proof:
         keyed_by: authorization_id
         consume_before_first_mutation: true
         duplicate_consumption_denied: true
+      window_validation:
+        issued_before_expiry: true
+        acceptance_time_within_window: true
       immutable_baseline_digest_required: true
   result:
     schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
@@ -103,6 +106,11 @@ controlled_proof:
     owner_receipts_required: true
     receipt_owners_keyed_by_owner_repo: true
     receipt_owners_must_exactly_match_authorization: true
+    timeline_validation:
+      consumption_within_authorization_window: true
+      consumed_before_start: true
+      completion_not_before_start: true
+      passed_completion_before_expiry: true
     exact_baseline_evidence_required: true
     baseline_snapshot_must_match_authorization: true
   authorities:

@@ -567,6 +567,31 @@ def controlled_proof_result_binding_errors(
         binding_errors.append(
             "receipt owners do not exactly match the authorized proof-owner set"
         )
+    issued_at = datetime.fromisoformat(
+        authorization["window"]["issued_at"].replace("Z", "+00:00")
+    )
+    expires_at = datetime.fromisoformat(
+        authorization["window"]["expires_at"].replace("Z", "+00:00")
+    )
+    consumed_at = datetime.fromisoformat(
+        result["run"]["consumed_at"].replace("Z", "+00:00")
+    )
+    started_at = datetime.fromisoformat(
+        result["run"]["started_at"].replace("Z", "+00:00")
+    )
+    completed_at = datetime.fromisoformat(
+        result["completed_at"].replace("Z", "+00:00")
+    )
+    if issued_at >= expires_at:
+        binding_errors.append("authorization issue time does not precede expiry")
+    if consumed_at < issued_at or consumed_at >= expires_at:
+        binding_errors.append("permit consumption is outside the authorization window")
+    if consumed_at > started_at:
+        binding_errors.append("execution started before permit consumption")
+    if started_at > completed_at:
+        binding_errors.append("result completion precedes execution start")
+    if result["outcome"] == "passed" and completed_at >= expires_at:
+        binding_errors.append("passing result completed after authorization expiry")
     return binding_errors
 
 
@@ -594,6 +619,7 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     valid_stopped["outcome"] = "stopped"
     valid_stopped["scenario_outcomes"]["exact-baseline-restore"]["status"] = "failed"
     valid_stopped["baseline_restore"]["status"] = "governed-exception-recorded"
+    valid_stopped["completed_at"] = "2026-08-01T01:10:00Z"
     valid_stopped["exception"] = {
         "decision": "defer",
         "record_ref": "artifact://controlled-proof/exceptions/restore",
@@ -603,6 +629,15 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
         errors.append(
             f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid stopped exception result was rejected: "
             f"{validation_errors[0].message}"
+        )
+    if binding_errors := controlled_proof_result_binding_errors(
+        valid_authorization,
+        authorization_artifact_digest,
+        valid_stopped,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid stopped cleanup after expiry "
+            f"was rejected: {binding_errors[0]}"
         )
 
     invalid_cases: dict[str, dict] = {}
@@ -667,6 +702,44 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
         mismatched_baseline_digest
     )
 
+    started_before_consumption = copy.deepcopy(valid_passed)
+    started_before_consumption["run"]["started_at"] = "2026-07-31T23:59:59Z"
+    invalid_binding_cases["execution start before permit consumption"] = (
+        started_before_consumption
+    )
+
+    consumed_before_issue = copy.deepcopy(valid_passed)
+    consumed_before_issue["run"]["consumed_at"] = "2026-07-31T23:59:59Z"
+    invalid_binding_cases["permit consumption before issuance"] = consumed_before_issue
+
+    consumed_after_expiry = copy.deepcopy(valid_passed)
+    consumed_after_expiry["run"]["consumed_at"] = "2026-08-01T01:00:01Z"
+    consumed_after_expiry["run"]["started_at"] = "2026-08-01T01:00:02Z"
+    consumed_after_expiry["completed_at"] = "2026-08-01T01:00:03Z"
+    invalid_binding_cases["permit consumption after expiry"] = consumed_after_expiry
+
+    consumed_at_expiry = copy.deepcopy(valid_passed)
+    consumed_at_expiry["run"]["consumed_at"] = "2026-08-01T01:00:00Z"
+    consumed_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
+    consumed_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["permit consumption at expiry"] = consumed_at_expiry
+
+    completion_before_start = copy.deepcopy(valid_passed)
+    completion_before_start["completed_at"] = "2026-08-01T00:00:00Z"
+    invalid_binding_cases["result completion before execution start"] = (
+        completion_before_start
+    )
+
+    passing_after_expiry = copy.deepcopy(valid_passed)
+    passing_after_expiry["completed_at"] = "2026-08-01T01:00:01Z"
+    invalid_binding_cases["passing result completed after expiry"] = (
+        passing_after_expiry
+    )
+
+    passing_at_expiry = copy.deepcopy(valid_passed)
+    passing_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["passing result completed at expiry"] = passing_at_expiry
+
     for label, instance in invalid_binding_cases.items():
         if not controlled_proof_result_binding_errors(
             valid_authorization,
@@ -676,6 +749,17 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
             errors.append(
                 f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject {label}"
             )
+
+    invalid_authorization_window = copy.deepcopy(valid_authorization)
+    invalid_authorization_window["window"]["issued_at"] = "2026-08-01T02:00:00Z"
+    if not controlled_proof_result_binding_errors(
+        invalid_authorization_window,
+        authorization_artifact_digest,
+        valid_passed,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject an authorization issued after expiry"
+        )
 
 
 def has_required_scalar(payload: dict, key: str) -> bool:
@@ -1136,6 +1220,10 @@ def main() -> int:
             "consume_before_first_mutation": True,
             "duplicate_consumption_denied": True,
         },
+        "window_validation": {
+            "issued_before_expiry": True,
+            "acceptance_time_within_window": True,
+        },
         "immutable_baseline_digest_required": True,
     }
     if permit_contract.get("semantic_validation") != expected_semantic_validation:
@@ -1160,6 +1248,12 @@ def main() -> int:
         "owner_receipts_required": True,
         "receipt_owners_keyed_by_owner_repo": True,
         "receipt_owners_must_exactly_match_authorization": True,
+        "timeline_validation": {
+            "consumption_within_authorization_window": True,
+            "consumed_before_start": True,
+            "completion_not_before_start": True,
+            "passed_completion_before_expiry": True,
+        },
         "exact_baseline_evidence_required": True,
         "baseline_snapshot_must_match_authorization": True,
     }
@@ -1684,6 +1778,7 @@ def main() -> int:
             "authorization_artifact_digest_must_match_consumed_permit"
         ]
         or not post_run_evidence["receipt_owners_must_match_authorization"]
+        or not post_run_evidence["permit_timeline_must_validate"]
         or not post_run_evidence["exact_baseline_restore_required"]
         or not post_run_evidence["baseline_snapshot_must_match_authorization"]
         or not post_run_evidence["security_acceptance_required"]

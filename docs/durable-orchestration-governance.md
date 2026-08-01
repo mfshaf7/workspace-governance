@@ -119,7 +119,11 @@ the complete authorization artifact, run id, canonical claims digest, exact
 scenario set, exact required receipt-owner set, and restored baseline reference
 and digest must equal the corresponding authorized values. Receipts are keyed
 by owner repository, so duplicates, missing owners, and unrelated owners are
-rejected. Any mismatch rejects the result before post-run Security review.
+rejected. The permit must be issued before it expires; consumption must occur
+inside that window and before execution starts; completion cannot precede
+start; and a passing result must complete before expiry. A stopped run may
+finish bounded cleanup after expiry but cannot become passing evidence. Any
+mismatch rejects the result before post-run Security review.
 
 The primary Platform procedure is the
 [controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).

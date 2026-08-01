@@ -58,6 +58,8 @@ signals:
     3339 validation, and an unadmitted retired-definition lifecycle hole.
     The next exact-head pass then exposed missing complete-authorization digest
     equality and incomplete, non-unique proof-owner receipt coverage.
+    A subsequent pass found that valid individual timestamps still lacked
+    cross-artifact ordering against the permit window.
     The existing improvement candidate covered only command-protocol completeness and
     therefore did not yet capture the broader authorization and evidence-contract
     recurrence.
@@ -77,6 +79,7 @@ follow_up:
     semantic source uniqueness and exact revision widths, approval-to-claims binding,
     immutable restore state, cross-artifact result equality, exact result coverage,
     complete authorization artifact binding, exact owner-keyed receipt coverage,
-    shared-validator compatibility, complete lifecycle-state matrices, and executable
-    positive and negative schema cases before implementation is declared review-ready;
-    obtain operator approval before landing the control.
+    permit/result timeline ordering, shared-validator compatibility, complete
+    lifecycle-state matrices, and executable positive and negative schema cases before
+    implementation is declared review-ready; obtain operator approval before landing
+    the control.

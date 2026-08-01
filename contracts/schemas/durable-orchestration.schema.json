@@ -672,6 +672,7 @@
                 "schema_ref",
                 "authorization_artifact_digest_must_match_consumed_permit",
                 "receipt_owners_must_match_authorization",
+                "permit_timeline_must_validate",
                 "exact_baseline_restore_required",
                 "baseline_snapshot_must_match_authorization",
                 "security_acceptance_required",
@@ -689,6 +690,9 @@
                   "const": true
                 },
                 "receipt_owners_must_match_authorization": {
+                  "const": true
+                },
+                "permit_timeline_must_validate": {
                   "const": true
                 },
                 "exact_baseline_restore_required": {
