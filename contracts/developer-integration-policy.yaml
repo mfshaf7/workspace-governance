@@ -99,6 +99,7 @@ controlled_proof:
     scenario_ids_must_exactly_match_authorization: true
     owner_receipts_required: true
     exact_baseline_evidence_required: true
+    baseline_snapshot_must_match_authorization: true
   authorities:
     issuer: platform-engineering
     permit_issuer_source_review_required: true

@@ -301,7 +301,8 @@
             "scenario_ids_must_be_unique",
             "scenario_ids_must_exactly_match_authorization",
             "owner_receipts_required",
-            "exact_baseline_evidence_required"
+            "exact_baseline_evidence_required",
+            "baseline_snapshot_must_match_authorization"
           ],
           "properties": {
             "schema_ref": {
@@ -332,6 +333,9 @@
               "const": true
             },
             "exact_baseline_evidence_required": {
+              "const": true
+            },
+            "baseline_snapshot_must_match_authorization": {
               "const": true
             }
           },

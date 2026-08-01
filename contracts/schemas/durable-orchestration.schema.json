@@ -671,6 +671,7 @@
                 "artifact_type",
                 "schema_ref",
                 "exact_baseline_restore_required",
+                "baseline_snapshot_must_match_authorization",
                 "security_acceptance_required",
                 "profile_activation_allowed_before_acceptance",
                 "definition_activation_allowed_before_acceptance"
@@ -683,6 +684,9 @@
                   "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
                 },
                 "exact_baseline_restore_required": {
+                  "const": true
+                },
+                "baseline_snapshot_must_match_authorization": {
                   "const": true
                 },
                 "security_acceptance_required": {

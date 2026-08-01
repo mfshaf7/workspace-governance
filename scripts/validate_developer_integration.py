@@ -347,6 +347,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "scenario_ids_must_exactly_match_authorization": True,
             "owner_receipts_required": True,
             "exact_baseline_evidence_required": True,
+            "baseline_snapshot_must_match_authorization": True,
         }
         if result != expected_result:
             errors.append(

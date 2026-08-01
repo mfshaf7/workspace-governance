@@ -26,17 +26,20 @@ CONTRACT_FORMAT_CHECKER = FormatChecker()
 
 
 @CONTRACT_FORMAT_CHECKER.checks("date-time")
-def is_rfc3339_utc_timestamp(value: object) -> bool:
+def is_rfc3339_timestamp(value: object) -> bool:
     if not isinstance(value, str) or not re.fullmatch(
-        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z",
+        r"\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})",
         value,
     ):
         return False
+    normalized = value
+    if value.endswith(("Z", "z")):
+        normalized = value[:-1] + "+00:00"
     try:
-        datetime.fromisoformat(value[:-1] + "+00:00")
+        parsed = datetime.fromisoformat(normalized)
     except ValueError:
         return False
-    return True
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
 
 
 BRANCH_LIFECYCLE_TARGET_RE = re.compile(
@@ -275,6 +278,30 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
         errors.append(f"{instance_path}: {path}: {error.message}")
 
 
+def validate_contract_format_checker(errors: list[str]) -> None:
+    schema = {"type": "string", "format": "date-time"}
+    validator = Draft202012Validator(
+        schema,
+        format_checker=CONTRACT_FORMAT_CHECKER,
+    )
+    for value in (
+        "2026-08-01T00:00:00Z",
+        "2026-08-01T08:00:00+08:00",
+    ):
+        if list(validator.iter_errors(value)):
+            errors.append(
+                f"shared date-time format checker must accept RFC 3339 timestamp {value!r}"
+            )
+    for value in (
+        "2026-13-40T25:61:00Z",
+        "2026-08-01T08:00:00",
+    ):
+        if not list(validator.iter_errors(value)):
+            errors.append(
+                f"shared date-time format checker must reject invalid timestamp {value!r}"
+            )
+
+
 def controlled_proof_authorization_fixture() -> dict:
     digest = "sha256:" + "a" * 64
     source_revision = "b" * 40
@@ -402,6 +429,15 @@ def validate_controlled_proof_authorization_invariants(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: valid bounded authorization was rejected: "
             f"{validation_errors[0].message}"
         )
+    valid_sha256_revision = copy.deepcopy(valid_authorization)
+    valid_sha256_revision["permit_issuer"]["source_revision"] = "c" * 64
+    valid_sha256_revision["executor"]["source_revision"] = "c" * 64
+    valid_sha256_revision["scope"]["source_revisions"][0]["commit"] = "c" * 64
+    if validation_errors := list(validator.iter_errors(valid_sha256_revision)):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: valid 64-character source revisions "
+            f"were rejected: {validation_errors[0].message}"
+        )
 
     invalid_cases: dict[str, dict] = {}
     invalid_digest = copy.deepcopy(valid_authorization)
@@ -409,8 +445,12 @@ def validate_controlled_proof_authorization_invariants(
     invalid_cases["malformed approval digest"] = invalid_digest
 
     invalid_source_revision = copy.deepcopy(valid_authorization)
-    invalid_source_revision["permit_issuer"]["source_revision"] = "unreviewed"
-    invalid_cases["malformed reviewed-source revision"] = invalid_source_revision
+    invalid_source_revision["permit_issuer"]["source_revision"] = "a" * 41
+    invalid_cases["non-exact reviewed-source revision"] = invalid_source_revision
+
+    invalid_scope_revision = copy.deepcopy(valid_authorization)
+    invalid_scope_revision["scope"]["source_revisions"][0]["commit"] = "a" * 63
+    invalid_cases["non-exact scoped source revision"] = invalid_scope_revision
 
     invalid_timestamp = copy.deepcopy(valid_authorization)
     invalid_timestamp["window"]["expires_at"] = "2026-13-40T25:61:00Z"
@@ -465,13 +505,66 @@ def controlled_proof_result_fixture() -> dict:
     }
 
 
+def controlled_proof_result_binding_errors(
+    authorization: dict,
+    result: dict,
+) -> list[str]:
+    binding_errors: list[str] = []
+    comparisons = (
+        (
+            "authorization id",
+            result["authorization"]["authorization_id"],
+            authorization["authorization_id"],
+        ),
+        (
+            "canonical claims digest",
+            result["authorization"]["canonical_claims_digest"],
+            authorization["approvals"]["canonical_claims_digest"],
+        ),
+        (
+            "run id",
+            result["run"]["run_id"],
+            authorization["run_binding"]["run_id"],
+        ),
+        (
+            "baseline snapshot reference",
+            result["baseline_restore"]["baseline_snapshot_ref"],
+            authorization["baseline_and_restore"]["baseline_snapshot_ref"],
+        ),
+        (
+            "baseline snapshot digest",
+            result["baseline_restore"]["baseline_snapshot_digest"],
+            authorization["baseline_and_restore"]["baseline_snapshot_digest"],
+        ),
+    )
+    for label, actual, expected in comparisons:
+        if actual != expected:
+            binding_errors.append(f"{label} does not match the consumed authorization")
+    if set(result["scenario_outcomes"]) != set(
+        authorization["scope"]["allowed_scenarios"]
+    ):
+        binding_errors.append(
+            "scenario outcomes do not exactly match the authorized scenario set"
+        )
+    return binding_errors
+
+
 def validate_controlled_proof_result_invariants(errors: list[str], schema: dict) -> None:
     validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
+    valid_authorization = controlled_proof_authorization_fixture()
     valid_passed = controlled_proof_result_fixture()
     if validation_errors := list(validator.iter_errors(valid_passed)):
         errors.append(
             f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid all-passing result was rejected: "
             f"{validation_errors[0].message}"
+        )
+    if binding_errors := controlled_proof_result_binding_errors(
+        valid_authorization,
+        valid_passed,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid result-to-authorization binding "
+            f"was rejected: {binding_errors[0]}"
         )
 
     valid_stopped = copy.deepcopy(valid_passed)
@@ -509,6 +602,29 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
                 f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: must reject {label}"
             )
 
+    invalid_binding_cases: dict[str, dict] = {}
+    mismatched_baseline_ref = copy.deepcopy(valid_passed)
+    mismatched_baseline_ref["baseline_restore"]["baseline_snapshot_ref"] = (
+        "artifact://controlled-proof/baselines/different"
+    )
+    invalid_binding_cases["unauthorized baseline snapshot reference"] = (
+        mismatched_baseline_ref
+    )
+
+    mismatched_baseline_digest = copy.deepcopy(valid_passed)
+    mismatched_baseline_digest["baseline_restore"]["baseline_snapshot_digest"] = (
+        "sha256:" + "c" * 64
+    )
+    invalid_binding_cases["unauthorized baseline snapshot digest"] = (
+        mismatched_baseline_digest
+    )
+
+    for label, instance in invalid_binding_cases.items():
+        if not controlled_proof_result_binding_errors(valid_authorization, instance):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject {label}"
+            )
+
 
 def has_required_scalar(payload: dict, key: str) -> bool:
     if key not in payload:
@@ -523,6 +639,13 @@ def has_required_scalar(payload: dict, key: str) -> bool:
     return True
 
 
+def unadmitted_definition_uses_admitted_state(definition: dict) -> bool:
+    return not definition["admitted"] and (
+        definition["qualification"] == "admitted-durable"
+        or definition["definition_state"] in {"active", "suspended", "retired"}
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate workspace governance contracts.")
     parser.add_argument(
@@ -535,6 +658,7 @@ def main() -> int:
 
     repo_root = args.repo_root.resolve()
     errors: list[str] = []
+    validate_contract_format_checker(errors)
 
     instance_paths = {
         "version": repo_root / "contracts/version.yaml",
@@ -826,6 +950,16 @@ def main() -> int:
                     f"{durable_label}: current_runtime.{field} must remain false before admission"
                 )
     initial_definitions = durable_orchestration["initial_definitions"]
+    if not unadmitted_definition_uses_admitted_state(
+        {
+            "admitted": False,
+            "qualification": "durable-candidate",
+            "definition_state": "retired",
+        }
+    ):
+        errors.append(
+            f"{durable_label}: semantic validation must reject retired state for an unadmitted definition"
+        )
     initial_definition_ids = [item["definition_id"] for item in initial_definitions]
     if len(initial_definition_ids) != len(set(initial_definition_ids)):
         errors.append(f"{durable_label}: initial definition ids must be unique")
@@ -854,10 +988,10 @@ def main() -> int:
                 f"{durable_label}: admitted definition {definition_id!r} requires "
                 "an admitted runtime contract and lifecycle"
             )
-        if not admitted and (admitted_qualification or definition["definition_state"] in {"active", "suspended"}):
+        if unadmitted_definition_uses_admitted_state(definition):
             errors.append(
                 f"{durable_label}: unadmitted definition {definition_id!r} cannot use "
-                "admitted-durable qualification or an active/suspended state"
+                "admitted-durable qualification or an active, suspended, or retired state"
             )
         if definition["definition_state"] == "active" and (
             contract_status != "runtime-admitted"
@@ -970,6 +1104,7 @@ def main() -> int:
         "scenario_ids_must_exactly_match_authorization": True,
         "owner_receipts_required": True,
         "exact_baseline_evidence_required": True,
+        "baseline_snapshot_must_match_authorization": True,
     }
     if result_contract != expected_result_contract:
         errors.append(
@@ -1446,6 +1581,7 @@ def main() -> int:
         )
     if (
         not post_run_evidence["exact_baseline_restore_required"]
+        or not post_run_evidence["baseline_snapshot_must_match_authorization"]
         or not post_run_evidence["security_acceptance_required"]
         or post_run_evidence.get("schema_ref") != CONTROLLED_PROOF_RESULT_SCHEMA_REF
         or post_run_evidence["profile_activation_allowed_before_acceptance"]

@@ -277,6 +277,7 @@ durable_orchestration:
           artifact_type: controlled-runtime-proof-result
           schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
           exact_baseline_restore_required: true
+          baseline_snapshot_must_match_authorization: true
           security_acceptance_required: true
           profile_activation_allowed_before_acceptance: false
           definition_activation_allowed_before_acceptance: false

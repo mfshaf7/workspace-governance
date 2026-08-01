@@ -113,6 +113,12 @@ produce only a `stopped` result. It is operating evidence for the separate
 post-run Security review; it does not activate the profile or a workflow
 definition.
 
+Result acceptance must compare the result with the consumed authorization, not
+validate each artifact in isolation. The authorization id, run id, canonical
+claims digest, exact scenario set, and restored baseline reference and digest
+must equal the corresponding authorized values. Any mismatch rejects the
+result before post-run Security review.
+
 The primary Platform procedure is the
 [controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).
 The runbook and profile must fail closed until the reviewed issuer and executor

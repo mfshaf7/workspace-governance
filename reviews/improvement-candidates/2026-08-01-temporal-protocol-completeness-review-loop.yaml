@@ -53,6 +53,9 @@ signals:
     owner-surface linkage, semantic source uniqueness, single-use authorization,
     immutable restore binding, approval-to-claims binding, exact scenario coverage,
     non-passing restore exceptions, and executable positive and negative schema cases.
+    A later exact-head pass also found non-exact source revision lengths, missing
+    result-to-permit baseline equality, a UTC-only checker leaking into shared RFC
+    3339 validation, and an unadmitted retired-definition lifecycle hole.
     The existing improvement candidate covered only command-protocol completeness and
     therefore did not yet capture the broader authorization and evidence-contract
     recurrence.
@@ -69,7 +72,8 @@ follow_up:
   note: Propose one protocol-completeness contract and conformance preflight that
     proves command acknowledgement, deterministic IDs, state-mutation ordering,
     retry/recovery semantics, bounded failure mapping, authorization replay resistance,
-    semantic source uniqueness, approval-to-claims binding, immutable restore state,
-    exact result coverage, and executable positive and negative schema cases before
-    implementation is declared review-ready; obtain operator approval before landing
-    the control.
+    semantic source uniqueness and exact revision widths, approval-to-claims binding,
+    immutable restore state, cross-artifact result equality, exact result coverage,
+    shared-validator compatibility, complete lifecycle-state matrices, and executable
+    positive and negative schema cases before implementation is declared review-ready;
+    obtain operator approval before landing the control.
