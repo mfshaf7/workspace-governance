@@ -42,12 +42,29 @@ Use these contracts to declare:
     disabled until platform and security activation gates are proven
 - `developer-integration-policy.yaml`
   - defines the shared `dev-integration` lane semantics, trigger guidance,
-    forbidden targets, required actions, and required handoff artifacts
+    forbidden targets, required actions, controlled component-commissioning
+    proof boundary, and required handoff artifacts
 - `durable-orchestration.yaml`
   - defines durable-workflow qualification, OOS aggregate authority, the
     replaceable Temporal runtime boundary, immutable definition and run
-    lifecycles, admission gates, evidence requirements, and the first safe and
-    business proof order
+    lifecycles, normal admission gates, the bounded first-runtime proof path,
+    evidence phases, and the first safe and business proof order
+- `schemas/controlled-runtime-proof-authorization.schema.json`
+  - defines the expiring pre-run permit envelope for an exact build-admitted
+    commissioning proof; it binds the target profile, definitions, source
+    revisions, immutable runtime images and artifacts, the exact reviewed
+    permit-issuer and executor revisions, namespaces, identities, queues,
+    scenarios, an RFC 8785 digest over every field outside the approval
+    envelope, one atomically consumed run, evidence owner, and an immutable
+    pre-issued exact-baseline snapshot without granting normal activation
+  - denies new proof work after any terminal stop condition while preserving
+    only run-bound, exact-baseline cleanup authority for an already-started run
+- `schemas/controlled-runtime-proof-result.schema.json`
+  - defines the post-run result envelope that binds the consumed authorization,
+    one execution, exact keyed coverage of every authorized commissioning
+    scenario, owner receipts, and exact-baseline restore evidence without
+    granting profile or workflow-definition activation; passing requires every
+    scenario and restoration to pass without an exception
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations

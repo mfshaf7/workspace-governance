@@ -6,6 +6,7 @@
     "lane",
     "lane_classes",
     "profile_lifecycle",
+    "controlled_proof",
     "request_admission",
     "source_state",
     "runtime_state_models",
@@ -18,8 +19,25 @@
     "required_handoff_artifacts",
     "required_session_fields"
   ],
+  "$defs": {
+    "repoPathRef": {
+      "type": "object",
+      "required": ["repo", "path"],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1 },
+    "schema_version": { "const": 2 },
     "lane": {
       "type": "object",
       "required": [
@@ -93,6 +111,410 @@
           "items": { "type": "string", "minLength": 1 }
         },
         "security_review_ref_required_when_flagged": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "controlled_proof": {
+      "type": "object",
+      "required": [
+        "purpose",
+        "authority_type",
+        "drill_type",
+        "eligible_profile_statuses",
+        "changes_profile_lifecycle",
+        "self_serve_launch_allowed",
+        "normal_profile_launch_remains_denied",
+        "permit",
+        "result",
+        "authorities",
+        "owner_surfaces",
+        "completion",
+        "forbidden_claims"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_type": {
+          "const": "runtime-drill"
+        },
+        "drill_type": {
+          "const": "component-commissioning-proof"
+        },
+        "eligible_profile_statuses": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "build-admitted"
+            }
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "changes_profile_lifecycle": {
+          "const": false
+        },
+        "self_serve_launch_allowed": {
+          "const": false
+        },
+        "normal_profile_launch_remains_denied": {
+          "const": true
+        },
+        "permit": {
+          "type": "object",
+          "required": [
+            "schema_ref",
+            "schema_version",
+            "required_sections",
+            "exact_scope_required",
+            "expiration_required",
+            "permit_issuer_binding_required",
+            "executor_binding_required",
+            "semantic_validation"
+          ],
+          "properties": {
+            "schema_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "schema_version": {
+              "const": 2
+            },
+            "required_sections": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "exact_scope_required": {
+              "const": true
+            },
+            "expiration_required": {
+              "const": true
+            },
+            "permit_issuer_binding_required": {
+              "const": true
+            },
+            "executor_binding_required": {
+              "const": true
+            },
+            "semantic_validation": {
+              "type": "object",
+              "required": [
+                "unique_binding_keys",
+              "canonical_claims",
+              "run_consumption",
+              "window_validation",
+              "immutable_baseline_digest_required"
+              ],
+              "properties": {
+                "unique_binding_keys": {
+                  "type": "object",
+                  "required": [
+                    "source_revisions",
+                    "runtime_artifacts",
+                    "runtime_images"
+                  ],
+                  "properties": {
+                    "source_revisions": {
+                      "const": "repo"
+                    },
+                    "runtime_artifacts": {
+                      "const": "artifact_id"
+                    },
+                    "runtime_images": {
+                      "const": "image_ref"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "canonical_claims": {
+                  "type": "object",
+                  "required": [
+                    "canonicalization",
+                    "projection",
+                    "approvals_bind_complete_claims",
+                    "approval_artifact_digests_required"
+                  ],
+                  "properties": {
+                    "canonicalization": {
+                      "const": "rfc8785"
+                    },
+                    "projection": {
+                      "const": "all-authorization-fields-except-approvals"
+                    },
+                    "approvals_bind_complete_claims": {
+                      "const": true
+                    },
+                    "approval_artifact_digests_required": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                },
+            "run_consumption": {
+                  "type": "object",
+                  "required": [
+                    "mode",
+                    "keyed_by",
+                    "consume_before_first_mutation",
+                    "duplicate_consumption_denied"
+                  ],
+                  "properties": {
+                    "mode": {
+                      "const": "atomic-single-use"
+                    },
+                    "keyed_by": {
+                      "const": "authorization_id"
+                    },
+                    "consume_before_first_mutation": {
+                      "const": true
+                    },
+                    "duplicate_consumption_denied": {
+                      "const": true
+                    }
+              },
+              "additionalProperties": false
+            },
+            "window_validation": {
+              "type": "object",
+              "required": [
+                "issued_before_expiry",
+                "acceptance_time_within_window"
+              ],
+              "properties": {
+                "issued_before_expiry": {
+                  "const": true
+                },
+                "acceptance_time_within_window": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            },
+            "immutable_baseline_digest_required": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "result": {
+          "type": "object",
+          "required": [
+            "schema_ref",
+            "schema_version",
+            "authorization_binding_required",
+            "authorization_artifact_digest_canonicalization",
+            "authorization_artifact_digest_projection",
+            "authorization_artifact_digest_must_match_consumed_permit",
+            "run_binding_required",
+            "scenario_outcomes_required",
+            "scenario_outcomes_keyed_by_scenario_id",
+            "scenario_ids_must_be_unique",
+            "scenario_ids_must_exactly_match_authorization",
+            "owner_receipts_required",
+            "receipt_owners_keyed_by_owner_repo",
+            "receipt_owners_must_exactly_match_authorization",
+            "owner_receipts_bind_authorization_and_run",
+            "timeline_validation",
+            "exact_baseline_evidence_required",
+            "baseline_snapshot_must_match_authorization"
+          ],
+          "properties": {
+            "schema_ref": {
+              "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
+            },
+            "schema_version": {
+              "const": 1
+            },
+            "authorization_binding_required": {
+              "const": true
+            },
+            "authorization_artifact_digest_canonicalization": {
+              "const": "rfc8785"
+            },
+            "authorization_artifact_digest_projection": {
+              "const": "complete-authorization"
+            },
+            "authorization_artifact_digest_must_match_consumed_permit": {
+              "const": true
+            },
+            "run_binding_required": {
+              "const": true
+            },
+            "scenario_outcomes_required": {
+              "const": true
+            },
+            "scenario_outcomes_keyed_by_scenario_id": {
+              "const": true
+            },
+            "scenario_ids_must_be_unique": {
+              "const": true
+            },
+            "scenario_ids_must_exactly_match_authorization": {
+              "const": true
+            },
+            "owner_receipts_required": {
+              "const": true
+            },
+            "receipt_owners_keyed_by_owner_repo": {
+              "const": true
+            },
+            "receipt_owners_must_exactly_match_authorization": {
+              "const": true
+            },
+            "owner_receipts_bind_authorization_and_run": {
+              "const": true
+            },
+            "timeline_validation": {
+              "type": "object",
+              "required": [
+                "consumption_within_authorization_window",
+                "consumed_before_start",
+                "start_within_authorization_window",
+                "completion_not_before_start",
+                "passed_completion_before_expiry"
+              ],
+              "properties": {
+                "consumption_within_authorization_window": {
+                  "const": true
+                },
+                "consumed_before_start": {
+                  "const": true
+                },
+                "start_within_authorization_window": {
+                  "const": true
+                },
+                "completion_not_before_start": {
+                  "const": true
+                },
+                "passed_completion_before_expiry": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            },
+            "exact_baseline_evidence_required": {
+              "const": true
+            },
+            "baseline_snapshot_must_match_authorization": {
+              "const": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "authorities": {
+          "type": "object",
+          "required": [
+            "issuer",
+            "permit_issuer_source_review_required",
+            "executor_owner",
+            "executor_source_review_required",
+            "security_authorizer",
+            "operator_approval_required"
+          ],
+          "properties": {
+            "issuer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "permit_issuer_source_review_required": {
+              "const": true
+            },
+            "executor_owner": {
+              "type": "string",
+              "minLength": 1
+            },
+            "executor_source_review_required": {
+              "const": true
+            },
+            "security_authorizer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "operator_approval_required": {
+              "const": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "owner_surfaces": {
+          "type": "object",
+          "required": [
+            "platform_operator",
+            "platform_profile",
+            "security_contract_review"
+          ],
+          "properties": {
+            "platform_operator": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "platform_profile": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "security_contract_review": {
+              "$ref": "#/$defs/repoPathRef"
+            }
+          },
+          "additionalProperties": false
+        },
+        "completion": {
+          "type": "object",
+          "required": [
+            "restore_mode",
+            "restore_required_before_completion",
+            "terminal_cleanup_authority_mode",
+            "terminal_cleanup_bound_to_started_run",
+            "terminal_cleanup_trigger_scope",
+            "new_proof_actions_allowed_after_stop",
+            "post_proof_security_review_required",
+            "pre_run_authorization_reusable_as_activation_evidence"
+          ],
+          "properties": {
+            "restore_mode": {
+              "const": "exact-baseline"
+            },
+            "restore_required_before_completion": {
+              "const": true
+            },
+            "terminal_cleanup_authority_mode": {
+              "const": "exact-baseline-restore-only"
+            },
+            "terminal_cleanup_bound_to_started_run": {
+              "const": true
+            },
+            "terminal_cleanup_trigger_scope": {
+              "const": "any-triggered-stop-condition"
+            },
+            "new_proof_actions_allowed_after_stop": {
+              "const": false
+            },
+            "post_proof_security_review_required": {
+              "const": true
+            },
+            "pre_run_authorization_reusable_as_activation_evidence": {
+              "const": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "forbidden_claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
       },
       "additionalProperties": false
     },

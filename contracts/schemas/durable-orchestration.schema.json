@@ -8,7 +8,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "durable_orchestration": {
       "type": "object",
@@ -332,6 +332,7 @@
           "required": [
             "active_definition_requires_all_gates",
             "gates",
+            "controlled_proof",
             "current_runtime"
           ],
           "properties": {
@@ -340,6 +341,9 @@
             },
             "gates": {
               "$ref": "#/$defs/nonEmptyUniqueStringList"
+            },
+            "controlled_proof": {
+              "$ref": "#/$defs/controlledProof"
             },
             "current_runtime": {
               "type": "object",
@@ -360,6 +364,7 @@
                   "enum": [
                     "not-admitted",
                     "proposed",
+                    "build-admitted",
                     "active",
                     "suspended",
                     "retired"
@@ -434,6 +439,288 @@
       "items": {
         "type": "string",
         "minLength": 1
+      }
+    },
+    "controlledProofSourceReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "source_review_work_item_ref",
+        "merged_source_required_before_security_authorization"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "platform-engineering"
+        },
+        "source_review_work_item_ref": {
+          "const": "openproject://work_packages/792"
+        },
+        "merged_source_required_before_security_authorization": {
+          "const": true
+        }
+      }
+    },
+    "controlledProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_ref",
+        "proof_classification",
+        "permit_schema_ref",
+        "result_schema_ref",
+        "permit_issuer",
+        "executor",
+        "target",
+        "lifecycle_transition_allowed_during_proof",
+        "self_serve_launch_allowed",
+        "definition_allowlist",
+        "required_scenarios",
+        "permitted_action_allowlist",
+        "required_stop_conditions",
+        "terminal_cleanup_authority",
+        "evidence_phases",
+        "denied_outcomes"
+      ],
+      "properties": {
+        "policy_ref": {
+          "const": "contracts/developer-integration-policy.yaml#controlled_proof"
+        },
+        "proof_classification": {
+          "const": "component-commissioning-proof"
+        },
+        "permit_schema_ref": {
+          "const": "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+        },
+        "result_schema_ref": {
+          "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
+        },
+        "permit_issuer": {
+          "$ref": "#/$defs/controlledProofSourceReview"
+        },
+        "executor": {
+          "$ref": "#/$defs/controlledProofSourceReview"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile_id",
+            "profile_lifecycle",
+            "environment"
+          ],
+          "properties": {
+            "profile_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile_lifecycle": {
+              "const": "build-admitted"
+            },
+            "environment": {
+              "const": "dev-integration"
+            }
+          }
+        },
+        "lifecycle_transition_allowed_during_proof": {
+          "const": false
+        },
+        "self_serve_launch_allowed": {
+          "const": false
+        },
+        "definition_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "definition_id",
+              "definition_version"
+            ],
+            "properties": {
+              "definition_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+              },
+              "definition_version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "required_scenarios": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "permitted_action_allowlist": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "required_stop_conditions": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        },
+        "terminal_cleanup_authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "applies_to",
+            "trigger_scope",
+            "scope_binding",
+            "new_proof_actions_denied",
+            "scope_expansion_denied",
+            "runtime_retention_denied",
+            "permitted_actions",
+            "termination_conditions"
+          ],
+          "properties": {
+            "mode": {
+              "const": "exact-baseline-restore-only"
+            },
+            "applies_to": {
+              "const": "already-started-run"
+            },
+            "trigger_scope": {
+              "const": "any-triggered-stop-condition"
+            },
+            "scope_binding": {
+              "const": "exact-captured-restore-scope"
+            },
+            "new_proof_actions_denied": {
+              "const": true
+            },
+            "scope_expansion_denied": {
+              "const": true
+            },
+            "runtime_retention_denied": {
+              "const": true
+            },
+            "permitted_actions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "remove-scoped-runtime"
+                },
+                {
+                  "const": "restore-exact-baseline"
+                },
+                {
+                  "const": "record-restore-evidence"
+                },
+                {
+                  "const": "record-governed-exception"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "termination_conditions": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "const": "exact-baseline-restored"
+                },
+                {
+                  "const": "governed-exception-recorded"
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "evidence_phases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pre_run_authorization",
+            "post_run_activation_review"
+          ],
+          "properties": {
+            "pre_run_authorization": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "grants_profile_activation",
+                "grants_definition_activation",
+                "reusable_as_post_run_activation_evidence"
+              ],
+              "properties": {
+                "artifact_type": {
+                  "const": "controlled-runtime-proof-authorization"
+                },
+                "grants_profile_activation": {
+                  "const": false
+                },
+                "grants_definition_activation": {
+                  "const": false
+                },
+                "reusable_as_post_run_activation_evidence": {
+                  "const": false
+                }
+              }
+            },
+            "post_run_activation_review": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "artifact_type",
+                "schema_ref",
+                "authorization_artifact_digest_must_match_consumed_permit",
+                "receipt_owners_must_match_authorization",
+                "owner_receipts_bind_authorization_and_run",
+                "permit_timeline_must_validate",
+                "exact_baseline_restore_required",
+                "baseline_snapshot_must_match_authorization",
+                "security_acceptance_required",
+                "profile_activation_allowed_before_acceptance",
+                "definition_activation_allowed_before_acceptance"
+              ],
+              "properties": {
+                "artifact_type": {
+                  "const": "controlled-runtime-proof-result"
+                },
+                "schema_ref": {
+                  "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
+                },
+                "authorization_artifact_digest_must_match_consumed_permit": {
+                  "const": true
+                },
+                "receipt_owners_must_match_authorization": {
+                  "const": true
+                },
+                "owner_receipts_bind_authorization_and_run": {
+                  "const": true
+                },
+                "permit_timeline_must_validate": {
+                  "const": true
+                },
+                "exact_baseline_restore_required": {
+                  "const": true
+                },
+                "baseline_snapshot_must_match_authorization": {
+                  "const": true
+                },
+                "security_acceptance_required": {
+                  "const": true
+                },
+                "profile_activation_allowed_before_acceptance": {
+                  "const": false
+                },
+                "definition_activation_allowed_before_acceptance": {
+                  "const": false
+                }
+              }
+            }
+          }
+        },
+        "denied_outcomes": {
+          "$ref": "#/$defs/nonEmptyUniqueStringList"
+        }
       }
     },
     "initialDefinition": {

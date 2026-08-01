@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 lane:
   id: dev-integration
   standard_owner: workspace-governance
@@ -37,6 +37,116 @@ profile_lifecycle:
     - suspended
     - retired
   security_review_ref_required_when_flagged: true
+controlled_proof:
+  purpose: >-
+    Permit one expiring, non-self-serve commissioning proof for an exact
+    build-admitted component scope without activating the profile or treating
+    the result as governed stage or production evidence.
+  authority_type: runtime-drill
+  drill_type: component-commissioning-proof
+  eligible_profile_statuses:
+    - build-admitted
+  changes_profile_lifecycle: false
+  self_serve_launch_allowed: false
+  normal_profile_launch_remains_denied: true
+  permit:
+    schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+    schema_version: 2
+    required_sections:
+      - schema_version
+      - authorization_id
+      - authority_type
+      - drill_type
+      - target
+      - scope
+      - run_binding
+      - permit_issuer
+      - executor
+      - approvals
+      - window
+      - evidence
+      - baseline_and_restore
+      - exception_handling
+      - stop_conditions
+    exact_scope_required: true
+    expiration_required: true
+    permit_issuer_binding_required: true
+    executor_binding_required: true
+    semantic_validation:
+      unique_binding_keys:
+        source_revisions: repo
+        runtime_artifacts: artifact_id
+        runtime_images: image_ref
+      canonical_claims:
+        canonicalization: rfc8785
+        projection: all-authorization-fields-except-approvals
+        approvals_bind_complete_claims: true
+        approval_artifact_digests_required: true
+      run_consumption:
+        mode: atomic-single-use
+        keyed_by: authorization_id
+        consume_before_first_mutation: true
+        duplicate_consumption_denied: true
+      window_validation:
+        issued_before_expiry: true
+        acceptance_time_within_window: true
+      immutable_baseline_digest_required: true
+  result:
+    schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
+    schema_version: 1
+    authorization_binding_required: true
+    authorization_artifact_digest_canonicalization: rfc8785
+    authorization_artifact_digest_projection: complete-authorization
+    authorization_artifact_digest_must_match_consumed_permit: true
+    run_binding_required: true
+    scenario_outcomes_required: true
+    scenario_outcomes_keyed_by_scenario_id: true
+    scenario_ids_must_be_unique: true
+    scenario_ids_must_exactly_match_authorization: true
+    owner_receipts_required: true
+    receipt_owners_keyed_by_owner_repo: true
+    receipt_owners_must_exactly_match_authorization: true
+    owner_receipts_bind_authorization_and_run: true
+    timeline_validation:
+      consumption_within_authorization_window: true
+      consumed_before_start: true
+      start_within_authorization_window: true
+      completion_not_before_start: true
+      passed_completion_before_expiry: true
+    exact_baseline_evidence_required: true
+    baseline_snapshot_must_match_authorization: true
+  authorities:
+    issuer: platform-engineering
+    permit_issuer_source_review_required: true
+    executor_owner: platform-engineering
+    executor_source_review_required: true
+    security_authorizer: security-architecture
+    operator_approval_required: true
+  owner_surfaces:
+    platform_operator:
+      repo: platform-engineering
+      path: docs/components/temporal/operations.md
+    platform_profile:
+      repo: platform-engineering
+      path: environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml
+    security_contract_review:
+      repo: security-architecture
+      path: docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md
+  completion:
+    restore_mode: exact-baseline
+    restore_required_before_completion: true
+    terminal_cleanup_authority_mode: exact-baseline-restore-only
+    terminal_cleanup_bound_to_started_run: true
+    terminal_cleanup_trigger_scope: any-triggered-stop-condition
+    new_proof_actions_allowed_after_stop: false
+    post_proof_security_review_required: true
+    pre_run_authorization_reusable_as_activation_evidence: false
+  forbidden_claims:
+    - build-admitted profile became active
+    - controlled proof became a self-serve launch path
+    - pre-run authorization satisfied post-run activation evidence
+    - local proof became governed stage or production evidence
+    - post-proof runtime state was retained without governed reclassification
 request_admission:
   current_request_adapter:
     system: openproject

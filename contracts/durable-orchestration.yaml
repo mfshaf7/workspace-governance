@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 durable_orchestration:
   owner_repo: workspace-governance
   defining_art_ref: openproject://work_packages/700
@@ -196,9 +196,105 @@ durable_orchestration:
       - security-review-accepted
       - source-projection-verified
       - rollback-and-suspension-proven
+    controlled_proof:
+      policy_ref: contracts/developer-integration-policy.yaml#controlled_proof
+      proof_classification: component-commissioning-proof
+      permit_schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
+      result_schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
+      permit_issuer:
+        owner_repo: platform-engineering
+        source_review_work_item_ref: openproject://work_packages/792
+        merged_source_required_before_security_authorization: true
+      executor:
+        owner_repo: platform-engineering
+        source_review_work_item_ref: openproject://work_packages/792
+        merged_source_required_before_security_authorization: true
+      target:
+        profile_id: temporal
+        profile_lifecycle: build-admitted
+        environment: dev-integration
+      lifecycle_transition_allowed_during_proof: false
+      self_serve_launch_allowed: false
+      definition_allowlist:
+        - definition_id: validation-readiness-run
+          definition_version: 1
+      required_scenarios:
+        - nominal-completion
+        - workflow-worker-restart
+        - temporal-runtime-restart
+        - deterministic-replay
+        - duplicate-suppression
+        - cancellation
+        - unavailable-dependency
+        - identity-denial
+        - payload-boundary
+        - backup-restore
+        - exact-baseline-restore
+      permitted_action_allowlist:
+        - install-scoped-runtime
+        - start-validation-readiness-run
+        - restart-oos-workflow-worker
+        - restart-wgcf-activity-worker
+        - restart-temporal-runtime
+        - cancel-validation-readiness-run
+        - simulate-unavailable-dependency
+        - verify-identity-denial
+        - capture-backup
+        - restore-exact-baseline
+        - remove-scoped-runtime
+      required_stop_conditions:
+        - authorization-expired
+        - source-or-artifact-digest-mismatch
+        - target-scope-mismatch
+        - identity-or-queue-denial-failure
+        - baseline-snapshot-unavailable
+        - unexpected-side-effect
+        - evidence-custody-failure
+        - restore-failure
+      terminal_cleanup_authority:
+        mode: exact-baseline-restore-only
+        applies_to: already-started-run
+        trigger_scope: any-triggered-stop-condition
+        scope_binding: exact-captured-restore-scope
+        new_proof_actions_denied: true
+        scope_expansion_denied: true
+        runtime_retention_denied: true
+        permitted_actions:
+          - remove-scoped-runtime
+          - restore-exact-baseline
+          - record-restore-evidence
+          - record-governed-exception
+        termination_conditions:
+          - exact-baseline-restored
+          - governed-exception-recorded
+      evidence_phases:
+        pre_run_authorization:
+          artifact_type: controlled-runtime-proof-authorization
+          grants_profile_activation: false
+          grants_definition_activation: false
+          reusable_as_post_run_activation_evidence: false
+        post_run_activation_review:
+          artifact_type: controlled-runtime-proof-result
+          schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
+          authorization_artifact_digest_must_match_consumed_permit: true
+          receipt_owners_must_match_authorization: true
+          owner_receipts_bind_authorization_and_run: true
+          permit_timeline_must_validate: true
+          exact_baseline_restore_required: true
+          baseline_snapshot_must_match_authorization: true
+          security_acceptance_required: true
+          profile_activation_allowed_before_acceptance: false
+          definition_activation_allowed_before_acceptance: false
+      denied_outcomes:
+        - business workflow execution
+        - normal self-serve profile launch
+        - active profile projection during proof
+        - active definition projection during proof
+        - governed stage or production evidence claim
+        - retained runtime state without governed reclassification
     current_runtime:
       adapter: temporal
-      lifecycle: proposed
+      lifecycle: build-admitted
       dev_integration_profile: temporal
       shared_runtime_allowed: false
       governed_stage_allowed: false

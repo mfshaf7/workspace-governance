@@ -99,6 +99,29 @@ REQUIRED_BUILD_ADMISSION_KEYS = {
     "self_serve_launch_allowed",
     "work_item_ref",
 }
+CONTROLLED_PROOF_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+)
+CONTROLLED_PROOF_RESULT_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-result.schema.json"
+)
+CONTROLLED_PROOF_REQUIRED_SECTIONS = {
+    "schema_version",
+    "authorization_id",
+    "authority_type",
+    "drill_type",
+    "target",
+    "scope",
+    "run_binding",
+    "permit_issuer",
+    "executor",
+    "approvals",
+    "window",
+    "evidence",
+    "baseline_and_restore",
+    "exception_handling",
+    "stop_conditions",
+}
 
 
 def load_yaml(path: Path) -> dict:
@@ -128,6 +151,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     active_repos = set(active_repo_names(contracts))
     policy = contracts["developer_integration_policy"]
     registry = contracts["developer_integration_profiles"]
+    durable_orchestration = contracts["durable_orchestration"]["durable_orchestration"]
     intake_policy = contracts["intake_policy"]
     governance_validator_catalog = contracts["governance_validator_catalog"][
         "governance_validator_catalog"
@@ -138,6 +162,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     request_admission = policy["request_admission"]
     testing_policy = policy["testing"]["smoke"]
     live_miss_escalation = policy.get("live_miss_escalation") or {}
+    controlled_proof = policy.get("controlled_proof") or {}
     runtime_lane_decision = policy.get("runtime_lane_decision") or {}
     validation_behavior_policy = intake_policy["validation_behavior"]
     catalog_entries = set(governance_validator_catalog["entries"])
@@ -214,6 +239,283 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "contracts/developer-integration-policy.yaml: profile_lifecycle.platform_acceptance_required_for must be exactly "
             + ", ".join(sorted(EXPECTED_PLATFORM_ACCEPTANCE_STATUSES))
         )
+    required_controlled_proof_keys = {
+        "purpose",
+        "authority_type",
+        "drill_type",
+        "eligible_profile_statuses",
+        "changes_profile_lifecycle",
+        "self_serve_launch_allowed",
+        "normal_profile_launch_remains_denied",
+        "permit",
+        "result",
+        "authorities",
+        "owner_surfaces",
+        "completion",
+        "forbidden_claims",
+    }
+    missing_controlled_proof_keys = sorted(
+        required_controlled_proof_keys - set(controlled_proof)
+    )
+    if missing_controlled_proof_keys:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof missing keys "
+            + ", ".join(missing_controlled_proof_keys)
+        )
+    else:
+        if controlled_proof["authority_type"] != "runtime-drill":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled_proof.authority_type must be runtime-drill"
+            )
+        if controlled_proof["drill_type"] != "component-commissioning-proof":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled_proof.drill_type must be component-commissioning-proof"
+            )
+        if set(controlled_proof["eligible_profile_statuses"]) != {"build-admitted"}:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proofs must be limited to build-admitted profiles"
+            )
+        if (
+            controlled_proof["changes_profile_lifecycle"]
+            or controlled_proof["self_serve_launch_allowed"]
+            or not controlled_proof["normal_profile_launch_remains_denied"]
+        ):
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proofs must remain non-self-serve without changing profile lifecycle"
+            )
+        permit = controlled_proof["permit"]
+        if permit.get("schema_ref") != CONTROLLED_PROOF_SCHEMA_REF:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled_proof.permit.schema_ref "
+                f"must be {CONTROLLED_PROOF_SCHEMA_REF!r}"
+            )
+        if set(permit.get("required_sections") or []) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
+                "must preserve the complete authorization envelope"
+            )
+        if permit.get("schema_version") != 2:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 2"
+            )
+        if (
+            permit.get("permit_issuer_binding_required") is not True
+            or permit.get("executor_binding_required") is not True
+        ):
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed issuer and executor"
+            )
+        expected_semantic_validation = {
+            "unique_binding_keys": {
+                "source_revisions": "repo",
+                "runtime_artifacts": "artifact_id",
+                "runtime_images": "image_ref",
+            },
+            "canonical_claims": {
+                "canonicalization": "rfc8785",
+                "projection": "all-authorization-fields-except-approvals",
+                "approvals_bind_complete_claims": True,
+                "approval_artifact_digests_required": True,
+            },
+            "run_consumption": {
+                "mode": "atomic-single-use",
+                "keyed_by": "authorization_id",
+                "consume_before_first_mutation": True,
+                "duplicate_consumption_denied": True,
+            },
+            "window_validation": {
+                "issued_before_expiry": True,
+                "acceptance_time_within_window": True,
+            },
+            "immutable_baseline_digest_required": True,
+        }
+        if permit.get("semantic_validation") != expected_semantic_validation:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof semantic validation "
+                "must preserve unique logical bindings, canonical approval binding, atomic single-use "
+                "consumption, and immutable baseline verification"
+            )
+        if not (repo_root / permit.get("schema_ref", "<missing>")).exists():
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof permit schema does not exist"
+            )
+        result = controlled_proof["result"]
+        expected_result = {
+            "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
+            "schema_version": 1,
+            "authorization_binding_required": True,
+            "authorization_artifact_digest_canonicalization": "rfc8785",
+            "authorization_artifact_digest_projection": "complete-authorization",
+            "authorization_artifact_digest_must_match_consumed_permit": True,
+            "run_binding_required": True,
+            "scenario_outcomes_required": True,
+            "scenario_outcomes_keyed_by_scenario_id": True,
+            "scenario_ids_must_be_unique": True,
+            "scenario_ids_must_exactly_match_authorization": True,
+            "owner_receipts_required": True,
+            "receipt_owners_keyed_by_owner_repo": True,
+            "receipt_owners_must_exactly_match_authorization": True,
+            "owner_receipts_bind_authorization_and_run": True,
+            "timeline_validation": {
+                "consumption_within_authorization_window": True,
+                "consumed_before_start": True,
+                "start_within_authorization_window": True,
+                "completion_not_before_start": True,
+                "passed_completion_before_expiry": True,
+            },
+            "exact_baseline_evidence_required": True,
+            "baseline_snapshot_must_match_authorization": True,
+        }
+        if result != expected_result:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof result must preserve "
+                "authorization, single-run, scenario, owner-receipt, and exact-baseline evidence bindings"
+            )
+        if not (repo_root / result.get("schema_ref", "<missing>")).exists():
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof result schema does not exist"
+            )
+        authorities = controlled_proof["authorities"]
+        if authorities.get("issuer") != "platform-engineering":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof issuer must be platform-engineering"
+            )
+        if authorities.get("executor_owner") != "platform-engineering":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof executor owner must be platform-engineering"
+            )
+        if (
+            authorities.get("permit_issuer_source_review_required") is not True
+            or authorities.get("executor_source_review_required") is not True
+        ):
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof issuer and executor source review is required"
+            )
+        if authorities.get("security_authorizer") != "security-architecture":
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof Security authorizer must be security-architecture"
+            )
+        if authorities.get("operator_approval_required") is not True:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
+            )
+        owner_surfaces = controlled_proof.get("owner_surfaces", {})
+        expected_owner_surfaces = {
+            "platform_operator": {
+                "repo": "platform-engineering",
+                "path": "docs/components/temporal/operations.md",
+            },
+            "platform_profile": {
+                "repo": "platform-engineering",
+                "path": "environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml",
+            },
+            "security_contract_review": {
+                "repo": "security-architecture",
+                "path": "docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md",
+            },
+        }
+        if owner_surfaces != expected_owner_surfaces:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof owner surfaces must bind the Platform runbook/profile and Security contract review"
+            )
+        if workspace_root:
+            for surface in owner_surfaces.values():
+                surface_path = workspace_root / surface["repo"] / surface["path"]
+                if not surface_path.exists():
+                    errors.append(
+                        "contracts/developer-integration-policy.yaml: controlled proof owner surface does not exist: "
+                        + str(surface_path)
+                    )
+        completion = controlled_proof["completion"]
+        if (
+            completion.get("restore_mode") != "exact-baseline"
+            or completion.get("restore_required_before_completion") is not True
+            or completion.get("terminal_cleanup_authority_mode")
+            != "exact-baseline-restore-only"
+            or completion.get("terminal_cleanup_bound_to_started_run") is not True
+            or completion.get("terminal_cleanup_trigger_scope")
+            != "any-triggered-stop-condition"
+            or completion.get("new_proof_actions_allowed_after_stop") is not False
+            or completion.get("post_proof_security_review_required") is not True
+            or completion.get("pre_run_authorization_reusable_as_activation_evidence") is not False
+        ):
+            errors.append(
+                "contracts/developer-integration-policy.yaml: controlled proof completion must require exact-baseline restore and separate post-proof Security review"
+            )
+        durable_proof = durable_orchestration["admission"]["controlled_proof"]
+        if durable_proof["permit_schema_ref"] != permit.get("schema_ref"):
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof permit schema must match the dev-integration policy"
+            )
+        if durable_proof.get("result_schema_ref") != result.get("schema_ref"):
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof result schema must match the dev-integration policy"
+            )
+        if (
+            durable_proof.get("evidence_phases", {})
+            .get("post_run_activation_review", {})
+            .get("schema_ref")
+            != result.get("schema_ref")
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: post-run activation review must bind the controlled proof result schema"
+            )
+        for source_role in ("permit_issuer", "executor"):
+            reviewed_source = durable_proof.get(source_role, {})
+            if (
+                reviewed_source.get("owner_repo") != "platform-engineering"
+                or reviewed_source.get("source_review_work_item_ref")
+                != "openproject://work_packages/792"
+                or reviewed_source.get(
+                    "merged_source_required_before_security_authorization"
+                )
+                is not True
+            ):
+                errors.append(
+                    "contracts/durable-orchestration.yaml: controlled proof "
+                    f"{source_role.replace('_', ' ')} must bind Platform source "
+                    "review #792 before Security authorization"
+                )
+        cleanup = durable_proof.get("terminal_cleanup_authority", {})
+        if (
+            cleanup.get("mode") != "exact-baseline-restore-only"
+            or cleanup.get("applies_to") != "already-started-run"
+            or cleanup.get("trigger_scope") != "any-triggered-stop-condition"
+            or cleanup.get("scope_binding") != "exact-captured-restore-scope"
+            or cleanup.get("new_proof_actions_denied") is not True
+            or cleanup.get("scope_expansion_denied") is not True
+            or cleanup.get("runtime_retention_denied") is not True
+            or cleanup.get("permitted_actions")
+            != [
+                "remove-scoped-runtime",
+                "restore-exact-baseline",
+                "record-restore-evidence",
+                "record-governed-exception",
+            ]
+            or cleanup.get("termination_conditions")
+            != ["exact-baseline-restored", "governed-exception-recorded"]
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: every controlled-proof stop condition must preserve only run-bound exact-baseline cleanup authority"
+            )
+        proof_target = durable_proof["target"]
+        target_profile = registry["profiles"].get(proof_target["profile_id"])
+        if target_profile is None:
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof target profile is not registered"
+            )
+        elif target_profile["lifecycle"] != proof_target["profile_lifecycle"]:
+            errors.append(
+                "contracts/durable-orchestration.yaml: controlled proof target lifecycle must match the profile registry"
+            )
+        runtime_posture = durable_orchestration["admission"]["current_runtime"]
+        if (
+            runtime_posture["dev_integration_profile"] != proof_target["profile_id"]
+            or runtime_posture["lifecycle"] != proof_target["profile_lifecycle"]
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: current runtime posture must match the controlled proof target"
+            )
     runtime_state_models = set(policy.get("runtime_state_models") or [])
     lane_classes = {entry.get("id") for entry in policy.get("lane_classes") or []}
     if lane_classes != EXPECTED_LANE_CLASSES:

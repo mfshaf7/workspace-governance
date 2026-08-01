@@ -2,13 +2,15 @@
 from __future__ import annotations
 
 import argparse
-from datetime import date
+import copy
+from datetime import date, datetime
 from pathlib import Path
 import re
 import shlex
 import sys
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema.exceptions import SchemaError
 import yaml
 
 from contracts_lib import (
@@ -18,6 +20,26 @@ from contracts_lib import (
     load_contracts,
     load_json,
 )
+
+
+CONTRACT_FORMAT_CHECKER = FormatChecker()
+
+
+@CONTRACT_FORMAT_CHECKER.checks("date-time")
+def is_rfc3339_timestamp(value: object) -> bool:
+    if not isinstance(value, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})",
+        value,
+    ):
+        return False
+    normalized = value
+    if value.endswith(("Z", "z")):
+        normalized = value[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None and parsed.utcoffset() is not None
 
 
 BRANCH_LIFECYCLE_TARGET_RE = re.compile(
@@ -44,6 +66,187 @@ WGCF_COMMAND_TEMPLATE_FIELDS = {
     "target_id",
     "target_scope",
     "target_type",
+}
+CONTROLLED_PROOF_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-authorization.schema.json"
+)
+CONTROLLED_PROOF_RESULT_SCHEMA_REF = (
+    "contracts/schemas/controlled-runtime-proof-result.schema.json"
+)
+CONTROLLED_PROOF_REQUIRED_SECTIONS = {
+    "schema_version",
+    "authorization_id",
+    "authority_type",
+    "drill_type",
+    "target",
+    "scope",
+    "run_binding",
+    "permit_issuer",
+    "executor",
+    "approvals",
+    "window",
+    "evidence",
+    "baseline_and_restore",
+    "exception_handling",
+    "stop_conditions",
+}
+CONTROLLED_PROOF_REQUIRED_RUN_BINDING_FIELDS = {
+    "run_id",
+    "consumption_mode",
+    "consume_before_first_mutation",
+    "duplicate_consumption_denied",
+}
+CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
+    "allowed_definitions",
+    "source_revisions",
+    "runtime_artifacts",
+    "runtime_images",
+    "target_namespaces",
+    "runtime_identities",
+    "task_queues",
+    "required_receipt_owners",
+    "allowed_scenarios",
+    "permitted_actions",
+    "max_runs",
+}
+CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS = {
+    "owner_repo",
+    "implementation_ref",
+    "source_revision",
+    "review_packet_ref",
+}
+CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS = {
+    "issued_by",
+    "canonicalization",
+    "canonical_claims_projection",
+    "canonical_claims_digest",
+    "operator_approval_ref",
+    "operator_approval_digest",
+    "security_authorization_ref",
+    "security_authorization_digest",
+}
+CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS = {"issued_at", "expires_at"}
+CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS = {
+    "owner_repo",
+    "verification_pack_ref",
+}
+CONTROLLED_PROOF_REQUIRED_RESTORE_FIELDS = {
+    "baseline_snapshot_ref",
+    "baseline_snapshot_digest",
+    "restore_mode",
+    "restore_scope",
+    "terminal_cleanup_authority",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_SECTIONS = {
+    "schema_version",
+    "result_id",
+    "authorization",
+    "run",
+    "outcome",
+    "scenario_outcomes",
+    "owner_receipts",
+    "baseline_restore",
+    "completed_at",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_AUTHORIZATION_FIELDS = {
+    "authorization_id",
+    "authorization_digest",
+    "canonical_claims_digest",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_RUN_FIELDS = {
+    "run_id",
+    "execution_count",
+    "consumed_at",
+    "started_at",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS = {
+    "status",
+    "evidence_ref",
+    "evidence_digest",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS = {
+    "authorization_id",
+    "authorization_digest",
+    "run_id",
+    "receipt_ref",
+    "receipt_digest",
+}
+CONTROLLED_PROOF_RESULT_REQUIRED_RESTORE_FIELDS = {
+    "baseline_snapshot_ref",
+    "baseline_snapshot_digest",
+    "status",
+    "evidence_ref",
+    "evidence_digest",
+}
+CONTROLLED_PROOF_REQUIRED_TERMINAL_CLEANUP_FIELDS = {
+    "mode",
+    "applies_to",
+    "trigger_scope",
+    "scope_binding",
+    "new_proof_actions_denied",
+    "scope_expansion_denied",
+    "runtime_retention_denied",
+    "permitted_actions",
+    "termination_conditions",
+}
+CONTROLLED_PROOF_TERMINAL_CLEANUP_ACTIONS = [
+    "remove-scoped-runtime",
+    "restore-exact-baseline",
+    "record-restore-evidence",
+    "record-governed-exception",
+]
+CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS = [
+    "exact-baseline-restored",
+    "governed-exception-recorded",
+]
+CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS = {
+    "allowed_decisions",
+    "record_ref_required",
+}
+CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER = [
+    "nominal-completion",
+    "workflow-worker-restart",
+    "temporal-runtime-restart",
+    "deterministic-replay",
+    "duplicate-suppression",
+    "cancellation",
+    "unavailable-dependency",
+    "identity-denial",
+    "payload-boundary",
+    "backup-restore",
+    "exact-baseline-restore",
+]
+CONTROLLED_PROOF_REQUIRED_SCENARIOS = set(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER = [
+    "platform-engineering",
+    "operator-orchestration-service",
+    "workspace-governance-control-fabric",
+]
+CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS = set(
+    CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+)
+CONTROLLED_PROOF_PERMITTED_ACTIONS = {
+    "install-scoped-runtime",
+    "start-validation-readiness-run",
+    "restart-oos-workflow-worker",
+    "restart-wgcf-activity-worker",
+    "restart-temporal-runtime",
+    "cancel-validation-readiness-run",
+    "simulate-unavailable-dependency",
+    "verify-identity-denial",
+    "capture-backup",
+    "restore-exact-baseline",
+    "remove-scoped-runtime",
+}
+CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS = {
+    "authorization-expired",
+    "source-or-artifact-digest-mismatch",
+    "target-scope-mismatch",
+    "identity-or-queue-denial-failure",
+    "baseline-snapshot-unavailable",
+    "unexpected-side-effect",
+    "evidence-custody-failure",
+    "restore-failure",
 }
 
 
@@ -80,10 +283,533 @@ def _command_template_fields(command: str) -> set[str]:
 def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -> None:
     instance = yaml.safe_load(instance_path.read_text()) or {}
     schema = load_json(schema_path)
-    validator = Draft202012Validator(schema)
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
     for error in validator.iter_errors(instance):
         path = ".".join(str(part) for part in error.absolute_path) or "<root>"
         errors.append(f"{instance_path}: {path}: {error.message}")
+
+
+def validate_contract_format_checker(errors: list[str]) -> None:
+    schema = {"type": "string", "format": "date-time"}
+    validator = Draft202012Validator(
+        schema,
+        format_checker=CONTRACT_FORMAT_CHECKER,
+    )
+    for value in (
+        "2026-08-01T00:00:00Z",
+        "2026-08-01T08:00:00+08:00",
+    ):
+        if list(validator.iter_errors(value)):
+            errors.append(
+                f"shared date-time format checker must accept RFC 3339 timestamp {value!r}"
+            )
+    for value in (
+        "2026-13-40T25:61:00Z",
+        "2026-08-01T08:00:00",
+    ):
+        if not list(validator.iter_errors(value)):
+            errors.append(
+                f"shared date-time format checker must reject invalid timestamp {value!r}"
+            )
+
+
+def controlled_proof_authorization_fixture() -> dict:
+    digest = "sha256:" + "a" * 64
+    source_revision = "b" * 40
+    reviewed_source = {
+        "owner_repo": "platform-engineering",
+        "implementation_ref": "artifact://controlled-proof/source/permit-issuer",
+        "source_revision": source_revision,
+        "review_packet_ref": "artifact://review-packets/platform-source",
+    }
+    return {
+        "schema_version": 2,
+        "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+        "authority_type": "runtime-drill",
+        "drill_type": "component-commissioning-proof",
+        "target": {
+            "profile_id": "temporal-dev-integration",
+            "profile_lifecycle": "build-admitted",
+            "environment": "dev-integration",
+        },
+        "scope": {
+            "allowed_definitions": [
+                {
+                    "definition_id": "validation-readiness-run",
+                    "definition_version": 1,
+                }
+            ],
+            "source_revisions": [
+                {
+                    "repo": "platform-engineering",
+                    "commit": source_revision,
+                }
+            ],
+            "runtime_artifacts": [
+                {
+                    "artifact_id": "temporal-runtime-contract",
+                    "digest": digest,
+                }
+            ],
+            "runtime_images": [
+                {
+                    "image_ref": "temporal-runtime",
+                    "digest": digest,
+                }
+            ],
+            "target_namespaces": ["devint-temporal"],
+            "runtime_identities": [
+                {
+                    "role": "workflow-worker",
+                    "identity": "oos-validation-readiness-worker",
+                }
+            ],
+            "task_queues": [
+                {
+                    "owner_repo": "operator-orchestration-service",
+                    "queue_name": "validation-readiness-run",
+                }
+            ],
+            "required_receipt_owners": CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER,
+            "allowed_scenarios": CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER,
+            "permitted_actions": sorted(CONTROLLED_PROOF_PERMITTED_ACTIONS),
+            "max_runs": 1,
+        },
+        "run_binding": {
+            "run_id": "controlled-proof-validation-run",
+            "consumption_mode": "atomic-single-use",
+            "consume_before_first_mutation": True,
+            "duplicate_consumption_denied": True,
+        },
+        "permit_issuer": reviewed_source,
+        "executor": {
+            **reviewed_source,
+            "implementation_ref": "artifact://controlled-proof/source/executor",
+        },
+        "approvals": {
+            "issued_by": "platform-engineering",
+            "canonicalization": "rfc8785",
+            "canonical_claims_projection": "all-authorization-fields-except-approvals",
+            "canonical_claims_digest": digest,
+            "operator_approval_ref": "artifact://controlled-proof/approvals/operator",
+            "operator_approval_digest": digest,
+            "security_authorization_ref": "artifact://controlled-proof/approvals/security",
+            "security_authorization_digest": digest,
+        },
+        "window": {
+            "issued_at": "2026-08-01T00:00:00Z",
+            "expires_at": "2026-08-01T01:00:00Z",
+        },
+        "evidence": {
+            "owner_repo": "platform-engineering",
+            "verification_pack_ref": "artifact://controlled-proof/evidence/validation-run",
+        },
+        "baseline_and_restore": {
+            "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
+            "baseline_snapshot_digest": digest,
+            "restore_mode": "exact-baseline",
+            "restore_scope": ["temporal-runtime", "oos-worker", "wgcf-worker"],
+            "terminal_cleanup_authority": {
+                "mode": "exact-baseline-restore-only",
+                "applies_to": "already-started-run",
+                "trigger_scope": "any-triggered-stop-condition",
+                "scope_binding": "exact-captured-restore-scope",
+                "new_proof_actions_denied": True,
+                "scope_expansion_denied": True,
+                "runtime_retention_denied": True,
+                "permitted_actions": CONTROLLED_PROOF_TERMINAL_CLEANUP_ACTIONS,
+                "termination_conditions": (
+                    CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS
+                ),
+            },
+        },
+        "exception_handling": {
+            "allowed_decisions": ["remove", "workaround", "accept-risk", "defer"],
+            "record_ref_required": True,
+        },
+        "stop_conditions": sorted(CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS),
+    }
+
+
+def validate_controlled_proof_authorization_invariants(
+    errors: list[str], schema: dict
+) -> None:
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
+    valid_authorization = controlled_proof_authorization_fixture()
+    if validation_errors := list(validator.iter_errors(valid_authorization)):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: valid bounded authorization was rejected: "
+            f"{validation_errors[0].message}"
+        )
+    valid_sha256_revision = copy.deepcopy(valid_authorization)
+    valid_sha256_revision["permit_issuer"]["source_revision"] = "c" * 64
+    valid_sha256_revision["executor"]["source_revision"] = "c" * 64
+    valid_sha256_revision["scope"]["source_revisions"][0]["commit"] = "c" * 64
+    if validation_errors := list(validator.iter_errors(valid_sha256_revision)):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: valid 64-character source revisions "
+            f"were rejected: {validation_errors[0].message}"
+        )
+
+    invalid_cases: dict[str, dict] = {}
+    invalid_digest = copy.deepcopy(valid_authorization)
+    invalid_digest["approvals"]["operator_approval_digest"] = "sha256:not-a-digest"
+    invalid_cases["malformed approval digest"] = invalid_digest
+
+    invalid_source_revision = copy.deepcopy(valid_authorization)
+    invalid_source_revision["permit_issuer"]["source_revision"] = "a" * 41
+    invalid_cases["non-exact reviewed-source revision"] = invalid_source_revision
+
+    invalid_scope_revision = copy.deepcopy(valid_authorization)
+    invalid_scope_revision["scope"]["source_revisions"][0]["commit"] = "a" * 63
+    invalid_cases["non-exact scoped source revision"] = invalid_scope_revision
+
+    invalid_timestamp = copy.deepcopy(valid_authorization)
+    invalid_timestamp["window"]["expires_at"] = "2026-13-40T25:61:00Z"
+    invalid_cases["invalid RFC 3339 expiry timestamp"] = invalid_timestamp
+
+    for label, instance in invalid_cases.items():
+        if not list(validator.iter_errors(instance)):
+            errors.append(f"{CONTROLLED_PROOF_SCHEMA_REF}: must reject {label}")
+
+
+def controlled_proof_result_fixture() -> dict:
+    digest = "sha256:" + "a" * 64
+    scenario_outcomes = {
+        scenario_id: {
+            "status": "passed",
+            "evidence_ref": f"artifact://controlled-proof/scenarios/{scenario_id}",
+            "evidence_digest": digest,
+        }
+        for scenario_id in CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+    }
+    return {
+        "schema_version": 1,
+        "result_id": "artifact://controlled-proof/results/validation-run",
+        "authorization": {
+            "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+            "authorization_digest": digest,
+            "canonical_claims_digest": digest,
+        },
+        "run": {
+            "run_id": "controlled-proof-validation-run",
+            "execution_count": 1,
+            "consumed_at": "2026-08-01T00:00:00Z",
+            "started_at": "2026-08-01T00:00:01Z",
+        },
+        "outcome": "passed",
+        "scenario_outcomes": scenario_outcomes,
+        "owner_receipts": {
+            owner_repo: {
+                "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+                "authorization_digest": digest,
+                "run_id": "controlled-proof-validation-run",
+                "receipt_ref": f"artifact://controlled-proof/receipts/{owner_repo}",
+                "receipt_digest": digest,
+            }
+            for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+        },
+        "baseline_restore": {
+            "baseline_snapshot_ref": "artifact://controlled-proof/baselines/pre-run",
+            "baseline_snapshot_digest": digest,
+            "status": "exact-baseline-restored",
+            "evidence_ref": "artifact://controlled-proof/restore/exact-baseline",
+            "evidence_digest": digest,
+        },
+        "completed_at": "2026-08-01T00:10:00Z",
+    }
+
+
+def controlled_proof_result_binding_errors(
+    authorization: dict,
+    authorization_artifact_digest: str,
+    result: dict,
+) -> list[str]:
+    binding_errors: list[str] = []
+    comparisons = (
+        (
+            "authorization id",
+            result["authorization"]["authorization_id"],
+            authorization["authorization_id"],
+        ),
+        (
+            "authorization artifact digest",
+            result["authorization"]["authorization_digest"],
+            authorization_artifact_digest,
+        ),
+        (
+            "canonical claims digest",
+            result["authorization"]["canonical_claims_digest"],
+            authorization["approvals"]["canonical_claims_digest"],
+        ),
+        (
+            "run id",
+            result["run"]["run_id"],
+            authorization["run_binding"]["run_id"],
+        ),
+        (
+            "baseline snapshot reference",
+            result["baseline_restore"]["baseline_snapshot_ref"],
+            authorization["baseline_and_restore"]["baseline_snapshot_ref"],
+        ),
+        (
+            "baseline snapshot digest",
+            result["baseline_restore"]["baseline_snapshot_digest"],
+            authorization["baseline_and_restore"]["baseline_snapshot_digest"],
+        ),
+    )
+    for label, actual, expected in comparisons:
+        if actual != expected:
+            binding_errors.append(f"{label} does not match the consumed authorization")
+    if set(result["scenario_outcomes"]) != set(
+        authorization["scope"]["allowed_scenarios"]
+    ):
+        binding_errors.append(
+            "scenario outcomes do not exactly match the authorized scenario set"
+        )
+    if set(result["owner_receipts"]) != set(
+        authorization["scope"]["required_receipt_owners"]
+    ):
+        binding_errors.append(
+            "receipt owners do not exactly match the authorized proof-owner set"
+        )
+    for owner_repo, receipt in result["owner_receipts"].items():
+        receipt_bindings = (
+            (
+                "authorization id",
+                receipt["authorization_id"],
+                result["authorization"]["authorization_id"],
+            ),
+            (
+                "authorization digest",
+                receipt["authorization_digest"],
+                result["authorization"]["authorization_digest"],
+            ),
+            ("run id", receipt["run_id"], result["run"]["run_id"]),
+        )
+        for label, actual, expected in receipt_bindings:
+            if actual != expected:
+                binding_errors.append(
+                    f"{owner_repo} receipt {label} does not match the result binding"
+                )
+    issued_at = datetime.fromisoformat(
+        authorization["window"]["issued_at"].replace("Z", "+00:00")
+    )
+    expires_at = datetime.fromisoformat(
+        authorization["window"]["expires_at"].replace("Z", "+00:00")
+    )
+    consumed_at = datetime.fromisoformat(
+        result["run"]["consumed_at"].replace("Z", "+00:00")
+    )
+    started_at = datetime.fromisoformat(
+        result["run"]["started_at"].replace("Z", "+00:00")
+    )
+    completed_at = datetime.fromisoformat(
+        result["completed_at"].replace("Z", "+00:00")
+    )
+    if issued_at >= expires_at:
+        binding_errors.append("authorization issue time does not precede expiry")
+    if consumed_at < issued_at or consumed_at >= expires_at:
+        binding_errors.append("permit consumption is outside the authorization window")
+    if consumed_at > started_at:
+        binding_errors.append("execution started before permit consumption")
+    if started_at >= expires_at:
+        binding_errors.append("execution started at or after authorization expiry")
+    if started_at > completed_at:
+        binding_errors.append("result completion precedes execution start")
+    if result["outcome"] == "passed" and completed_at >= expires_at:
+        binding_errors.append("passing result completed after authorization expiry")
+    return binding_errors
+
+
+def validate_controlled_proof_result_invariants(errors: list[str], schema: dict) -> None:
+    validator = Draft202012Validator(schema, format_checker=CONTRACT_FORMAT_CHECKER)
+    valid_authorization = controlled_proof_authorization_fixture()
+    authorization_artifact_digest = "sha256:" + "a" * 64
+    valid_passed = controlled_proof_result_fixture()
+    if validation_errors := list(validator.iter_errors(valid_passed)):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid all-passing result was rejected: "
+            f"{validation_errors[0].message}"
+        )
+    if binding_errors := controlled_proof_result_binding_errors(
+        valid_authorization,
+        authorization_artifact_digest,
+        valid_passed,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid result-to-authorization binding "
+            f"was rejected: {binding_errors[0]}"
+        )
+
+    valid_stopped = copy.deepcopy(valid_passed)
+    valid_stopped["outcome"] = "stopped"
+    valid_stopped["scenario_outcomes"]["exact-baseline-restore"]["status"] = "failed"
+    valid_stopped["baseline_restore"]["status"] = "governed-exception-recorded"
+    valid_stopped["completed_at"] = "2026-08-01T01:10:00Z"
+    valid_stopped["exception"] = {
+        "decision": "defer",
+        "record_ref": "artifact://controlled-proof/exceptions/restore",
+        "record_digest": "sha256:" + "b" * 64,
+    }
+    if validation_errors := list(validator.iter_errors(valid_stopped)):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid stopped exception result was rejected: "
+            f"{validation_errors[0].message}"
+        )
+    if binding_errors := controlled_proof_result_binding_errors(
+        valid_authorization,
+        authorization_artifact_digest,
+        valid_stopped,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: valid stopped cleanup after expiry "
+            f"was rejected: {binding_errors[0]}"
+        )
+
+    invalid_cases: dict[str, dict] = {}
+    failed_scenario = copy.deepcopy(valid_passed)
+    failed_scenario["scenario_outcomes"]["payload-boundary"]["status"] = "failed"
+    invalid_cases["passed result with a non-passing scenario"] = failed_scenario
+
+    restore_exception = copy.deepcopy(valid_passed)
+    restore_exception["baseline_restore"]["status"] = "governed-exception-recorded"
+    restore_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
+    invalid_cases["passed result with a restore exception"] = restore_exception
+
+    unexpected_exception = copy.deepcopy(valid_passed)
+    unexpected_exception["exception"] = copy.deepcopy(valid_stopped["exception"])
+    invalid_cases["passed result carrying any exception"] = unexpected_exception
+
+    missing_owner_receipt = copy.deepcopy(valid_passed)
+    missing_owner_receipt["owner_receipts"].pop(
+        "workspace-governance-control-fabric"
+    )
+    invalid_cases["result missing a required proof-owner receipt"] = (
+        missing_owner_receipt
+    )
+
+    unrelated_owner_receipt = copy.deepcopy(valid_passed)
+    unrelated_owner_receipt["owner_receipts"]["unrelated-owner"] = {
+        "receipt_ref": "artifact://controlled-proof/receipts/unrelated-owner",
+        "receipt_digest": "sha256:" + "d" * 64,
+    }
+    invalid_cases["result carrying an unrelated owner receipt"] = (
+        unrelated_owner_receipt
+    )
+
+    for label, instance in invalid_cases.items():
+        if not list(validator.iter_errors(instance)):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: must reject {label}"
+            )
+
+    invalid_binding_cases: dict[str, dict] = {}
+    mismatched_authorization_digest = copy.deepcopy(valid_passed)
+    mismatched_authorization_digest["authorization"]["authorization_digest"] = (
+        "sha256:" + "e" * 64
+    )
+    invalid_binding_cases["incorrect complete authorization digest"] = (
+        mismatched_authorization_digest
+    )
+
+    mismatched_baseline_ref = copy.deepcopy(valid_passed)
+    mismatched_baseline_ref["baseline_restore"]["baseline_snapshot_ref"] = (
+        "artifact://controlled-proof/baselines/different"
+    )
+    invalid_binding_cases["unauthorized baseline snapshot reference"] = (
+        mismatched_baseline_ref
+    )
+
+    mismatched_baseline_digest = copy.deepcopy(valid_passed)
+    mismatched_baseline_digest["baseline_restore"]["baseline_snapshot_digest"] = (
+        "sha256:" + "c" * 64
+    )
+    invalid_binding_cases["unauthorized baseline snapshot digest"] = (
+        mismatched_baseline_digest
+    )
+
+    started_before_consumption = copy.deepcopy(valid_passed)
+    started_before_consumption["run"]["started_at"] = "2026-07-31T23:59:59Z"
+    invalid_binding_cases["execution start before permit consumption"] = (
+        started_before_consumption
+    )
+
+    consumed_before_issue = copy.deepcopy(valid_passed)
+    consumed_before_issue["run"]["consumed_at"] = "2026-07-31T23:59:59Z"
+    invalid_binding_cases["permit consumption before issuance"] = consumed_before_issue
+
+    consumed_after_expiry = copy.deepcopy(valid_passed)
+    consumed_after_expiry["run"]["consumed_at"] = "2026-08-01T01:00:01Z"
+    consumed_after_expiry["run"]["started_at"] = "2026-08-01T01:00:02Z"
+    consumed_after_expiry["completed_at"] = "2026-08-01T01:00:03Z"
+    invalid_binding_cases["permit consumption after expiry"] = consumed_after_expiry
+
+    consumed_at_expiry = copy.deepcopy(valid_passed)
+    consumed_at_expiry["run"]["consumed_at"] = "2026-08-01T01:00:00Z"
+    consumed_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
+    consumed_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["permit consumption at expiry"] = consumed_at_expiry
+
+    completion_before_start = copy.deepcopy(valid_passed)
+    completion_before_start["completed_at"] = "2026-08-01T00:00:00Z"
+    invalid_binding_cases["result completion before execution start"] = (
+        completion_before_start
+    )
+
+    passing_after_expiry = copy.deepcopy(valid_passed)
+    passing_after_expiry["completed_at"] = "2026-08-01T01:00:01Z"
+    invalid_binding_cases["passing result completed after expiry"] = (
+        passing_after_expiry
+    )
+
+    passing_at_expiry = copy.deepcopy(valid_passed)
+    passing_at_expiry["completed_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["passing result completed at expiry"] = passing_at_expiry
+
+    stopped_starting_at_expiry = copy.deepcopy(valid_stopped)
+    stopped_starting_at_expiry["run"]["consumed_at"] = "2026-08-01T00:59:59Z"
+    stopped_starting_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
+    invalid_binding_cases["stopped run starting at expiry"] = (
+        stopped_starting_at_expiry
+    )
+
+    stale_owner_receipt = copy.deepcopy(valid_passed)
+    stale_owner_receipt["owner_receipts"]["operator-orchestration-service"][
+        "run_id"
+    ] = "historical-run"
+    invalid_binding_cases["owner receipt bound to a different run"] = (
+        stale_owner_receipt
+    )
+
+    stale_owner_authorization = copy.deepcopy(valid_passed)
+    stale_owner_authorization["owner_receipts"]["platform-engineering"][
+        "authorization_digest"
+    ] = "sha256:" + "f" * 64
+    invalid_binding_cases["owner receipt bound to a different authorization"] = (
+        stale_owner_authorization
+    )
+
+    for label, instance in invalid_binding_cases.items():
+        if not controlled_proof_result_binding_errors(
+            valid_authorization,
+            authorization_artifact_digest,
+            instance,
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject {label}"
+            )
+
+    invalid_authorization_window = copy.deepcopy(valid_authorization)
+    invalid_authorization_window["window"]["issued_at"] = "2026-08-01T02:00:00Z"
+    if not controlled_proof_result_binding_errors(
+        invalid_authorization_window,
+        authorization_artifact_digest,
+        valid_passed,
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result acceptance must reject an authorization issued after expiry"
+        )
 
 
 def has_required_scalar(payload: dict, key: str) -> bool:
@@ -99,6 +825,13 @@ def has_required_scalar(payload: dict, key: str) -> bool:
     return True
 
 
+def unadmitted_definition_uses_admitted_state(definition: dict) -> bool:
+    return not definition["admitted"] and (
+        definition["qualification"] == "admitted-durable"
+        or definition["definition_state"] in {"active", "suspended", "retired"}
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate workspace governance contracts.")
     parser.add_argument(
@@ -111,6 +844,7 @@ def main() -> int:
 
     repo_root = args.repo_root.resolve()
     errors: list[str] = []
+    validate_contract_format_checker(errors)
 
     instance_paths = {
         "version": repo_root / "contracts/version.yaml",
@@ -152,11 +886,59 @@ def main() -> int:
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
 
+    controlled_proof_schema_path = repo_root / CONTROLLED_PROOF_SCHEMA_REF
+    controlled_proof_schema: dict = {}
+    if not controlled_proof_schema_path.exists():
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: controlled proof authorization schema is missing"
+        )
+    else:
+        controlled_proof_schema = load_json(controlled_proof_schema_path)
+        try:
+            Draft202012Validator.check_schema(controlled_proof_schema)
+        except SchemaError as exc:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: invalid JSON Schema: {exc.message}"
+            )
+
+    controlled_proof_result_schema_path = repo_root / CONTROLLED_PROOF_RESULT_SCHEMA_REF
+    controlled_proof_result_schema: dict = {}
+    if not controlled_proof_result_schema_path.exists():
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: controlled proof result schema is missing"
+        )
+    else:
+        controlled_proof_result_schema = load_json(controlled_proof_result_schema_path)
+        try:
+            Draft202012Validator.check_schema(controlled_proof_result_schema)
+        except SchemaError as exc:
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: invalid JSON Schema: {exc.message}"
+            )
+
     repo_rules_schema = repo_root / REPO_RULES_SCHEMA
     for path in sorted((repo_root / "contracts" / "repo-rules").glob("*.yaml")):
         validate_schema(errors, path, repo_rules_schema)
 
     contracts = load_contracts(repo_root)
+    supported_schema_versions = set(
+        contracts["version"]["compatibility"]["supported_schema_versions"]
+    )
+    for contract_name, contract_payload in contracts.items():
+        if contract_name == "repo_rules":
+            for repo_name, repo_rule in contract_payload.items():
+                if repo_rule.get("schema_version") not in supported_schema_versions:
+                    errors.append(
+                        f"contracts/repo-rules/{repo_name}.yaml: schema_version is not supported by contracts/version.yaml"
+                    )
+            continue
+        if (
+            isinstance(contract_payload, dict)
+            and contract_payload.get("schema_version") not in supported_schema_versions
+        ):
+            errors.append(
+                f"{instance_paths[contract_name]}: schema_version is not supported by contracts/version.yaml"
+            )
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
@@ -321,19 +1103,29 @@ def main() -> int:
         errors.append(
             f"{durable_label}: run_contract.lifecycle must preserve the canonical lifecycle"
         )
-    runtime_posture = durable_orchestration["admission"]["current_runtime"]
-    if (
-        durable_orchestration["contract_status"] == "source-defined-runtime-not-admitted"
-        and runtime_posture["lifecycle"] != "not-admitted"
-    ):
+    durable_admission = durable_orchestration["admission"]
+    runtime_posture = durable_admission["current_runtime"]
+    allowed_runtime_lifecycles = {
+        "source-defined-runtime-not-admitted": {"not-admitted"},
+        "runtime-admission-review": {"proposed", "build-admitted"},
+        "runtime-admitted": {"active", "suspended", "retired"},
+    }
+    contract_status = durable_orchestration["contract_status"]
+    if runtime_posture["lifecycle"] not in allowed_runtime_lifecycles[contract_status]:
         errors.append(
-            f"{durable_label}: source-defined-runtime-not-admitted requires current_runtime.lifecycle=not-admitted"
+            f"{durable_label}: contract_status {contract_status!r} is incompatible with "
+            f"current_runtime.lifecycle {runtime_posture['lifecycle']!r}"
         )
     if runtime_posture["lifecycle"] == "not-admitted":
         if runtime_posture["dev_integration_profile"] is not None:
             errors.append(
-                f"{durable_label}: a not-admitted runtime must not name an active dev-integration profile"
+                f"{durable_label}: a not-admitted runtime must not name a dev-integration profile"
             )
+    elif not runtime_posture["dev_integration_profile"]:
+        errors.append(
+            f"{durable_label}: an admitted-review or admitted runtime must name its dev-integration profile"
+        )
+    if runtime_posture["lifecycle"] in {"not-admitted", "proposed", "build-admitted"}:
         for field in (
             "shared_runtime_allowed",
             "governed_stage_allowed",
@@ -344,22 +1136,57 @@ def main() -> int:
                     f"{durable_label}: current_runtime.{field} must remain false before admission"
                 )
     initial_definitions = durable_orchestration["initial_definitions"]
+    if not unadmitted_definition_uses_admitted_state(
+        {
+            "admitted": False,
+            "qualification": "durable-candidate",
+            "definition_state": "retired",
+        }
+    ):
+        errors.append(
+            f"{durable_label}: semantic validation must reject retired state for an unadmitted definition"
+        )
     initial_definition_ids = [item["definition_id"] for item in initial_definitions]
     if len(initial_definition_ids) != len(set(initial_definition_ids)):
         errors.append(f"{durable_label}: initial definition ids must be unique")
-    if any(
-        item["admitted"]
-        or item["qualification"] == "admitted-durable"
-        or item["definition_state"] == "active"
-        for item in initial_definitions
-    ):
-        errors.append(
-            f"{durable_label}: initial definitions must remain unadmitted until runtime evidence exists"
-        )
     definition_roles = [item["role"] for item in initial_definitions]
     if len(definition_roles) != len(set(definition_roles)):
         errors.append(f"{durable_label}: initial definition roles must be unique")
     for definition in initial_definitions:
+        definition_id = definition["definition_id"]
+        admitted = definition["admitted"]
+        admitted_qualification = definition["qualification"] == "admitted-durable"
+        admitted_state = definition["definition_state"] in {
+            "active",
+            "suspended",
+            "retired",
+        }
+        if admitted and (not admitted_qualification or not admitted_state):
+            errors.append(
+                f"{durable_label}: admitted definition {definition_id!r} must use "
+                "qualification=admitted-durable and an active, suspended, or retired state"
+            )
+        if admitted and (
+            contract_status != "runtime-admitted"
+            or runtime_posture["lifecycle"] not in {"active", "suspended", "retired"}
+        ):
+            errors.append(
+                f"{durable_label}: admitted definition {definition_id!r} requires "
+                "an admitted runtime contract and lifecycle"
+            )
+        if unadmitted_definition_uses_admitted_state(definition):
+            errors.append(
+                f"{durable_label}: unadmitted definition {definition_id!r} cannot use "
+                "admitted-durable qualification or an active, suspended, or retired state"
+            )
+        if definition["definition_state"] == "active" and (
+            contract_status != "runtime-admitted"
+            or runtime_posture["lifecycle"] != "active"
+        ):
+            errors.append(
+                f"{durable_label}: active definition {definition_id!r} requires "
+                "contract_status=runtime-admitted and current_runtime.lifecycle=active"
+            )
         definition_repos = {
             definition["implementation_repo"],
             definition["execution_owner"],
@@ -381,6 +1208,653 @@ def main() -> int:
     if not business_definition or business_definition["definition_id"] != "delivery.refinement.apply":
         errors.append(
             f"{durable_label}: delivery.refinement.apply must remain the first business workflow"
+        )
+    controlled_proof_policy = developer_integration_policy["controlled_proof"]
+    controlled_proof = durable_admission["controlled_proof"]
+    permit_contract = controlled_proof_policy["permit"]
+    if controlled_proof_policy["authority_type"] != "runtime-drill":
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.authority_type "
+            "must remain runtime-drill"
+        )
+    if controlled_proof_policy["drill_type"] != controlled_proof["proof_classification"]:
+        errors.append(
+            f"{durable_label}: controlled proof classification must match the dev-integration policy"
+        )
+    if set(controlled_proof_policy["eligible_profile_statuses"]) != {"build-admitted"}:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proofs must be limited "
+            "to build-admitted profiles"
+        )
+    for field, expected in (
+        ("changes_profile_lifecycle", False),
+        ("self_serve_launch_allowed", False),
+        ("normal_profile_launch_remains_denied", True),
+    ):
+        if controlled_proof_policy[field] is not expected:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: "
+                f"controlled_proof.{field} must be {expected!r}"
+            )
+    if permit_contract["schema_ref"] != CONTROLLED_PROOF_SCHEMA_REF:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.permit.schema_ref "
+            f"must be {CONTROLLED_PROOF_SCHEMA_REF!r}"
+        )
+    if controlled_proof["permit_schema_ref"] != permit_contract["schema_ref"]:
+        errors.append(
+            f"{durable_label}: controlled proof permit schema must match the dev-integration policy"
+        )
+    if (
+        permit_contract.get("permit_issuer_binding_required") is not True
+        or permit_contract.get("executor_binding_required") is not True
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof permits must bind the reviewed issuer and executor"
+        )
+    expected_semantic_validation = {
+        "unique_binding_keys": {
+            "source_revisions": "repo",
+            "runtime_artifacts": "artifact_id",
+            "runtime_images": "image_ref",
+        },
+        "canonical_claims": {
+            "canonicalization": "rfc8785",
+            "projection": "all-authorization-fields-except-approvals",
+            "approvals_bind_complete_claims": True,
+            "approval_artifact_digests_required": True,
+        },
+        "run_consumption": {
+            "mode": "atomic-single-use",
+            "keyed_by": "authorization_id",
+            "consume_before_first_mutation": True,
+            "duplicate_consumption_denied": True,
+        },
+        "window_validation": {
+            "issued_before_expiry": True,
+            "acceptance_time_within_window": True,
+        },
+        "immutable_baseline_digest_required": True,
+    }
+    if permit_contract.get("semantic_validation") != expected_semantic_validation:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof permit semantic validation "
+            "must preserve unique logical bindings, RFC 8785 approval binding, atomic single-use "
+            "consumption, and immutable baseline digest verification"
+        )
+    result_contract = controlled_proof_policy.get("result", {})
+    expected_result_contract = {
+        "schema_ref": CONTROLLED_PROOF_RESULT_SCHEMA_REF,
+        "schema_version": 1,
+        "authorization_binding_required": True,
+        "authorization_artifact_digest_canonicalization": "rfc8785",
+        "authorization_artifact_digest_projection": "complete-authorization",
+        "authorization_artifact_digest_must_match_consumed_permit": True,
+        "run_binding_required": True,
+        "scenario_outcomes_required": True,
+        "scenario_outcomes_keyed_by_scenario_id": True,
+        "scenario_ids_must_be_unique": True,
+        "scenario_ids_must_exactly_match_authorization": True,
+        "owner_receipts_required": True,
+        "receipt_owners_keyed_by_owner_repo": True,
+        "receipt_owners_must_exactly_match_authorization": True,
+        "owner_receipts_bind_authorization_and_run": True,
+        "timeline_validation": {
+            "consumption_within_authorization_window": True,
+            "consumed_before_start": True,
+            "start_within_authorization_window": True,
+            "completion_not_before_start": True,
+            "passed_completion_before_expiry": True,
+        },
+        "exact_baseline_evidence_required": True,
+        "baseline_snapshot_must_match_authorization": True,
+    }
+    if result_contract != expected_result_contract:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof result must preserve "
+            "authorization, single-run, scenario, owner-receipt, and exact-baseline evidence bindings"
+        )
+    if set(permit_contract["required_sections"]) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
+            "must preserve the complete authorization envelope"
+        )
+    if set(controlled_proof_schema.get("required") or []) != CONTROLLED_PROOF_REQUIRED_SECTIONS:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: required sections must preserve the complete authorization envelope"
+        )
+    controlled_proof_schema_properties = controlled_proof_schema.get("properties", {})
+    controlled_proof_schema_boundaries = {
+        "target": {"profile_id", "profile_lifecycle", "environment"},
+        "scope": CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS,
+        "run_binding": CONTROLLED_PROOF_REQUIRED_RUN_BINDING_FIELDS,
+        "approvals": CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS,
+        "window": CONTROLLED_PROOF_REQUIRED_WINDOW_FIELDS,
+        "evidence": CONTROLLED_PROOF_REQUIRED_EVIDENCE_FIELDS,
+        "baseline_and_restore": CONTROLLED_PROOF_REQUIRED_RESTORE_FIELDS,
+        "exception_handling": CONTROLLED_PROOF_REQUIRED_EXCEPTION_FIELDS,
+    }
+    for boundary_name, required_fields in controlled_proof_schema_boundaries.items():
+        boundary_schema = controlled_proof_schema_properties.get(boundary_name, {})
+        if set(boundary_schema.get("required") or []) != required_fields:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {boundary_name}.required must preserve "
+                "the complete bounded-proof scope"
+            )
+        if boundary_schema.get("additionalProperties") is not False:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {boundary_name} must reject additional properties"
+            )
+    scope_schema_properties = controlled_proof_schema_properties.get("scope", {}).get(
+        "properties", {}
+    )
+    if scope_schema_properties.get("max_runs", {}).get("const") != 1:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.max_runs must remain fixed at one"
+        )
+    run_binding_schema_properties = controlled_proof_schema_properties.get(
+        "run_binding", {}
+    ).get("properties", {})
+    expected_run_binding_constants = {
+        "consumption_mode": "atomic-single-use",
+        "consume_before_first_mutation": True,
+        "duplicate_consumption_denied": True,
+    }
+    for field, expected in expected_run_binding_constants.items():
+        if run_binding_schema_properties.get(field, {}).get("const") != expected:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: run_binding.{field} must remain {expected!r}"
+            )
+    for digest_collection in ("runtime_artifacts", "runtime_images"):
+        collection_schema = scope_schema_properties.get(digest_collection, {})
+        item_schema = collection_schema.get("items", {})
+        if collection_schema.get("minItems") != 1 or "digest" not in set(
+            item_schema.get("required") or []
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.{digest_collection} must require at least one immutable digest"
+            )
+    allowed_scenarios_schema = scope_schema_properties.get("allowed_scenarios", {})
+    allowed_scenario_order = [
+        item.get("const")
+        for item in allowed_scenarios_schema.get("prefixItems", [])
+    ]
+    if (
+        allowed_scenario_order != CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER
+        or allowed_scenarios_schema.get("items") is not False
+        or allowed_scenarios_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+        or allowed_scenarios_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_SCENARIO_ORDER)
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.allowed_scenarios must preserve the exact commissioning scenario set"
+        )
+    required_receipt_owners_schema = scope_schema_properties.get(
+        "required_receipt_owners", {}
+    )
+    required_receipt_owner_order = [
+        item.get("const")
+        for item in required_receipt_owners_schema.get("prefixItems", [])
+    ]
+    if (
+        required_receipt_owner_order
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER
+        or required_receipt_owners_schema.get("items") is not False
+        or required_receipt_owners_schema.get("uniqueItems") is not True
+        or required_receipt_owners_schema.get("minItems")
+        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
+        or required_receipt_owners_schema.get("maxItems")
+        != len(CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER)
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: scope.required_receipt_owners must preserve the exact proof-owner set"
+        )
+    target_schema_properties = controlled_proof_schema_properties.get("target", {}).get(
+        "properties", {}
+    )
+    if (
+        target_schema_properties.get("profile_lifecycle", {}).get("const")
+        != "build-admitted"
+        or target_schema_properties.get("environment", {}).get("const")
+        != "dev-integration"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: target must remain build-admitted dev-integration"
+        )
+    approval_schema_properties = controlled_proof_schema_properties.get(
+        "approvals", {}
+    ).get("properties", {})
+    if approval_schema_properties.get("issued_by", {}).get("const") != "platform-engineering":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals.issued_by must remain platform-engineering"
+        )
+    if approval_schema_properties.get("canonicalization", {}).get("const") != "rfc8785":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals.canonicalization must remain rfc8785"
+        )
+    if (
+        approval_schema_properties.get("canonical_claims_projection", {}).get("const")
+        != "all-authorization-fields-except-approvals"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals must bind every authorization field outside the approval envelope"
+        )
+    reviewed_source_schema = (controlled_proof_schema.get("$defs") or {}).get(
+        "reviewedPlatformSource", {}
+    )
+    if (
+        set(reviewed_source_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_EXECUTOR_FIELDS
+        or reviewed_source_schema.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: reviewed Platform source binding must preserve the complete closed schema"
+        )
+    reviewed_source_properties = reviewed_source_schema.get("properties", {})
+    if reviewed_source_properties.get("owner_repo", {}).get("const") != "platform-engineering":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: reviewed source owner_repo must remain platform-engineering"
+        )
+    expected_source_ref = "#/$defs/reviewedPlatformSource"
+    for field in ("permit_issuer", "executor"):
+        if controlled_proof_schema_properties.get(field, {}).get("$ref") != expected_source_ref:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: {field} must use the reviewed Platform source binding"
+            )
+    restore_schema_properties = controlled_proof_schema_properties.get(
+        "baseline_and_restore", {}
+    ).get("properties", {})
+    if restore_schema_properties.get("restore_mode", {}).get("const") != "exact-baseline":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: baseline_and_restore.restore_mode must remain exact-baseline"
+        )
+    if (
+        restore_schema_properties.get("baseline_snapshot_digest", {}).get("$ref")
+        != "#/$defs/digest"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: baseline_and_restore must bind an immutable snapshot digest"
+        )
+    terminal_cleanup_schema = restore_schema_properties.get(
+        "terminal_cleanup_authority", {}
+    )
+    if (
+        set(terminal_cleanup_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_TERMINAL_CLEANUP_FIELDS
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: terminal cleanup authority must preserve the complete restore-only boundary"
+        )
+    if terminal_cleanup_schema.get("additionalProperties") is not False:
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: terminal cleanup authority must reject additional properties"
+        )
+    terminal_cleanup_properties = terminal_cleanup_schema.get("properties", {})
+    expected_terminal_cleanup_constants = {
+        "mode": "exact-baseline-restore-only",
+        "applies_to": "already-started-run",
+        "trigger_scope": "any-triggered-stop-condition",
+        "scope_binding": "exact-captured-restore-scope",
+        "new_proof_actions_denied": True,
+        "scope_expansion_denied": True,
+        "runtime_retention_denied": True,
+    }
+    for field, expected in expected_terminal_cleanup_constants.items():
+        if terminal_cleanup_properties.get(field, {}).get("const") != expected:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: terminal cleanup {field} must remain {expected!r}"
+            )
+    for field, expected in (
+        ("permitted_actions", CONTROLLED_PROOF_TERMINAL_CLEANUP_ACTIONS),
+        (
+            "termination_conditions",
+            CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS,
+        ),
+    ):
+        actual = [
+            item.get("const")
+            for item in terminal_cleanup_properties.get(field, {}).get("prefixItems", [])
+        ]
+        if actual != expected:
+            errors.append(
+                f"{CONTROLLED_PROOF_SCHEMA_REF}: terminal cleanup {field} must remain {expected!r}"
+            )
+    if controlled_proof_schema_properties.get("authority_type", {}).get("const") != "runtime-drill":
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: authority_type must remain runtime-drill"
+        )
+    if (
+        controlled_proof_schema_properties.get("drill_type", {}).get("const")
+        != "component-commissioning-proof"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: drill_type must remain component-commissioning-proof"
+        )
+    schema_version_contract = (
+        controlled_proof_schema.get("properties", {})
+        .get("schema_version", {})
+        .get("const")
+    )
+    if schema_version_contract != permit_contract["schema_version"]:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof permit schema_version "
+            "must match the authorization schema"
+        )
+    validate_controlled_proof_authorization_invariants(
+        errors,
+        controlled_proof_schema,
+    )
+    if controlled_proof.get("result_schema_ref") != CONTROLLED_PROOF_RESULT_SCHEMA_REF:
+        errors.append(
+            f"{durable_label}: controlled proof result schema must remain {CONTROLLED_PROOF_RESULT_SCHEMA_REF!r}"
+        )
+    if result_contract.get("schema_ref") != controlled_proof.get("result_schema_ref"):
+        errors.append(
+            f"{durable_label}: controlled proof result schema must match the dev-integration policy"
+        )
+    if (
+        set(controlled_proof_result_schema.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_SECTIONS
+        or controlled_proof_result_schema.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: result envelope must preserve the complete closed schema"
+        )
+    result_schema_properties = controlled_proof_result_schema.get("properties", {})
+    result_schema_boundaries = {
+        "authorization": CONTROLLED_PROOF_RESULT_REQUIRED_AUTHORIZATION_FIELDS,
+        "run": CONTROLLED_PROOF_RESULT_REQUIRED_RUN_FIELDS,
+        "baseline_restore": CONTROLLED_PROOF_RESULT_REQUIRED_RESTORE_FIELDS,
+    }
+    for boundary_name, required_fields in result_schema_boundaries.items():
+        boundary_schema = result_schema_properties.get(boundary_name, {})
+        if (
+            set(boundary_schema.get("required") or []) != required_fields
+            or boundary_schema.get("additionalProperties") is not False
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: {boundary_name} must preserve its complete closed binding"
+            )
+    scenario_outcomes_schema = result_schema_properties.get("scenario_outcomes", {})
+    if (
+        scenario_outcomes_schema.get("type") != "object"
+        or scenario_outcomes_schema.get("additionalProperties") is not False
+        or set(scenario_outcomes_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
+        or set((scenario_outcomes_schema.get("properties") or {}).keys())
+        != CONTROLLED_PROOF_REQUIRED_SCENARIOS
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: scenario outcomes must be keyed by and exactly cover every authorized scenario"
+        )
+    scenario_outcome_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
+        "scenarioOutcome", {}
+    )
+    if (
+        set(scenario_outcome_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS
+        or scenario_outcome_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each scenario outcome must preserve complete machine-readable evidence"
+        )
+    owner_receipts_schema = result_schema_properties.get("owner_receipts", {})
+    if (
+        owner_receipts_schema.get("type") != "object"
+        or owner_receipts_schema.get("additionalProperties") is not False
+        or set(owner_receipts_schema.get("required") or [])
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
+        or set((owner_receipts_schema.get("properties") or {}).keys())
+        != CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNERS
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipts must be keyed by and exactly cover every authorized proof owner"
+        )
+    expected_owner_receipt_ref = "#/$defs/ownerReceipt"
+    for owner_repo in CONTROLLED_PROOF_REQUIRED_RECEIPT_OWNER_ORDER:
+        if (
+            owner_receipts_schema.get("properties", {})
+            .get(owner_repo, {})
+            .get("$ref")
+            != expected_owner_receipt_ref
+        ):
+            errors.append(
+                f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: owner receipt {owner_repo!r} must use the closed owner receipt evidence schema"
+            )
+    owner_receipt_definition = (controlled_proof_result_schema.get("$defs") or {}).get(
+        "ownerReceipt", {}
+    )
+    if (
+        set(owner_receipt_definition.get("required") or [])
+        != CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS
+        or owner_receipt_definition.get("additionalProperties") is not False
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: each owner receipt must preserve complete machine-readable evidence"
+        )
+    if result_schema_properties.get("run", {}).get("properties", {}).get(
+        "execution_count", {}
+    ).get("const") != 1:
+        errors.append(
+            f"{CONTROLLED_PROOF_RESULT_SCHEMA_REF}: run.execution_count must remain fixed at one"
+        )
+    if result_schema_properties.get("schema_version", {}).get("const") != result_contract.get(
+        "schema_version"
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof result schema_version "
+            "must match the result schema"
+        )
+    validate_controlled_proof_result_invariants(
+        errors,
+        controlled_proof_result_schema,
+    )
+    proof_authorities = controlled_proof_policy["authorities"]
+    expected_proof_authorities = {
+        "issuer": durable_authority["durable_runtime_owner"],
+        "executor_owner": durable_authority["durable_runtime_owner"],
+        "security_authorizer": durable_authority["security_acceptance_owner"],
+    }
+    for field, expected in expected_proof_authorities.items():
+        if proof_authorities[field] != expected:
+            errors.append(
+                "contracts/developer-integration-policy.yaml: "
+                f"controlled_proof.authorities.{field} must be {expected!r}"
+            )
+    if not proof_authorities["operator_approval_required"]:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proofs require operator approval"
+        )
+    if (
+        proof_authorities.get("permit_issuer_source_review_required") is not True
+        or proof_authorities.get("executor_source_review_required") is not True
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof issuer and executor source review is required"
+        )
+    proof_owner_surfaces = controlled_proof_policy.get("owner_surfaces", {})
+    expected_proof_owner_surfaces = {
+        "platform_operator": {
+            "repo": "platform-engineering",
+            "path": "docs/components/temporal/operations.md",
+        },
+        "platform_profile": {
+            "repo": "platform-engineering",
+            "path": "environments/shared/runtime-drills/temporal-component-commissioning-proof.yaml",
+        },
+        "security_contract_review": {
+            "repo": "security-architecture",
+            "path": "docs/reviews/components/2026-08-01-temporal-controlled-commissioning-proof-contract.md",
+        },
+    }
+    if proof_owner_surfaces != expected_proof_owner_surfaces:
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof owner surfaces must bind the Platform runbook/profile and Security contract review"
+        )
+    proof_completion = controlled_proof_policy["completion"]
+    if (
+        proof_completion["restore_mode"] != "exact-baseline"
+        or not proof_completion["restore_required_before_completion"]
+        or proof_completion.get("terminal_cleanup_authority_mode")
+        != "exact-baseline-restore-only"
+        or proof_completion.get("terminal_cleanup_bound_to_started_run") is not True
+        or proof_completion.get("terminal_cleanup_trigger_scope")
+        != "any-triggered-stop-condition"
+        or proof_completion.get("new_proof_actions_allowed_after_stop") is not False
+        or not proof_completion["post_proof_security_review_required"]
+        or proof_completion["pre_run_authorization_reusable_as_activation_evidence"]
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled proof completion must "
+            "require exact-baseline restore and separate post-proof Security review"
+        )
+    required_policy_denials = {
+        "build-admitted profile became active",
+        "controlled proof became a self-serve launch path",
+        "pre-run authorization satisfied post-run activation evidence",
+        "local proof became governed stage or production evidence",
+        "post-proof runtime state was retained without governed reclassification",
+    }
+    if not required_policy_denials.issubset(
+        set(controlled_proof_policy["forbidden_claims"])
+    ):
+        errors.append(
+            "contracts/developer-integration-policy.yaml: controlled_proof.forbidden_claims "
+            "must preserve every maturity and restoration boundary"
+        )
+    proof_target = controlled_proof["target"]
+    if proof_target["profile_id"] != runtime_posture["dev_integration_profile"]:
+        errors.append(
+            f"{durable_label}: controlled proof target profile must match current_runtime.dev_integration_profile"
+        )
+    if proof_target["profile_lifecycle"] != runtime_posture["lifecycle"]:
+        errors.append(
+            f"{durable_label}: controlled proof target lifecycle must match current_runtime.lifecycle"
+        )
+    if proof_target["profile_lifecycle"] not in set(
+        controlled_proof_policy["eligible_profile_statuses"]
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof target lifecycle is not eligible under the dev-integration policy"
+        )
+    profile_id = proof_target["profile_id"]
+    profile_payload = developer_integration_profiles["profiles"].get(profile_id)
+    if profile_payload is None:
+        errors.append(
+            f"{durable_label}: controlled proof references unknown dev-integration profile {profile_id!r}"
+        )
+    else:
+        if profile_payload["lifecycle"] != runtime_posture["lifecycle"]:
+            errors.append(
+                f"{durable_label}: current runtime lifecycle must match profile {profile_id!r} registry lifecycle"
+            )
+        if profile_payload.get("build_admission", {}).get("self_serve_launch_allowed") is not False:
+            errors.append(
+                f"{durable_label}: controlled proof profile must keep build_admission.self_serve_launch_allowed=false"
+            )
+    if proof_target["profile_lifecycle"] in set(
+        developer_integration_policy["profile_lifecycle"]["self_serve_statuses"]
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof cannot use a self-serve profile lifecycle"
+        )
+    proof_allowlist = {
+        (item["definition_id"], item["definition_version"])
+        for item in controlled_proof["definition_allowlist"]
+    }
+    expected_proof_allowlist = {
+        (safe_definition["definition_id"], safe_definition["definition_version"])
+    } if safe_definition else set()
+    if proof_allowlist != expected_proof_allowlist:
+        errors.append(
+            f"{durable_label}: controlled proof definition allowlist must contain only the safe runtime proof"
+        )
+    if set(controlled_proof["required_scenarios"]) != CONTROLLED_PROOF_REQUIRED_SCENARIOS:
+        errors.append(
+            f"{durable_label}: controlled proof required_scenarios must preserve the complete commissioning set"
+        )
+    if set(controlled_proof["permitted_action_allowlist"]) != CONTROLLED_PROOF_PERMITTED_ACTIONS:
+        errors.append(
+            f"{durable_label}: controlled proof permitted_action_allowlist must preserve the bounded action set"
+        )
+    if set(controlled_proof["required_stop_conditions"]) != CONTROLLED_PROOF_REQUIRED_STOP_CONDITIONS:
+        errors.append(
+            f"{durable_label}: controlled proof required_stop_conditions must preserve every fail-stop boundary"
+        )
+    for source_role in ("permit_issuer", "executor"):
+        reviewed_source = controlled_proof.get(source_role, {})
+        if (
+            reviewed_source.get("owner_repo") != "platform-engineering"
+            or reviewed_source.get("source_review_work_item_ref")
+            != "openproject://work_packages/792"
+            or reviewed_source.get(
+                "merged_source_required_before_security_authorization"
+            )
+            is not True
+        ):
+            errors.append(
+                f"{durable_label}: controlled proof {source_role.replace('_', ' ')} "
+                "must bind Platform source review #792 before Security authorization"
+            )
+    terminal_cleanup = controlled_proof.get("terminal_cleanup_authority", {})
+    if (
+        terminal_cleanup.get("mode") != "exact-baseline-restore-only"
+        or terminal_cleanup.get("applies_to") != "already-started-run"
+        or terminal_cleanup.get("trigger_scope")
+        != "any-triggered-stop-condition"
+        or terminal_cleanup.get("scope_binding") != "exact-captured-restore-scope"
+        or terminal_cleanup.get("new_proof_actions_denied") is not True
+        or terminal_cleanup.get("scope_expansion_denied") is not True
+        or terminal_cleanup.get("runtime_retention_denied") is not True
+        or terminal_cleanup.get("permitted_actions")
+        != CONTROLLED_PROOF_TERMINAL_CLEANUP_ACTIONS
+        or terminal_cleanup.get("termination_conditions")
+        != CONTROLLED_PROOF_TERMINAL_CLEANUP_TERMINATION_CONDITIONS
+    ):
+        errors.append(
+            f"{durable_label}: every controlled-proof stop condition must preserve only run-bound exact-baseline cleanup authority"
+        )
+    pre_run_evidence = controlled_proof["evidence_phases"]["pre_run_authorization"]
+    post_run_evidence = controlled_proof["evidence_phases"]["post_run_activation_review"]
+    if (
+        pre_run_evidence["grants_profile_activation"]
+        or pre_run_evidence["grants_definition_activation"]
+        or pre_run_evidence["reusable_as_post_run_activation_evidence"]
+    ):
+        errors.append(
+            f"{durable_label}: pre-run proof authorization cannot grant or substitute for activation"
+        )
+    if (
+        not post_run_evidence[
+            "authorization_artifact_digest_must_match_consumed_permit"
+        ]
+        or not post_run_evidence["receipt_owners_must_match_authorization"]
+        or not post_run_evidence["owner_receipts_bind_authorization_and_run"]
+        or not post_run_evidence["permit_timeline_must_validate"]
+        or not post_run_evidence["exact_baseline_restore_required"]
+        or not post_run_evidence["baseline_snapshot_must_match_authorization"]
+        or not post_run_evidence["security_acceptance_required"]
+        or post_run_evidence.get("schema_ref") != CONTROLLED_PROOF_RESULT_SCHEMA_REF
+        or post_run_evidence["profile_activation_allowed_before_acceptance"]
+        or post_run_evidence["definition_activation_allowed_before_acceptance"]
+    ):
+        errors.append(
+            f"{durable_label}: post-run activation review must require restore and Security acceptance before activation"
+        )
+    required_controlled_proof_denials = {
+        "business workflow execution",
+        "normal self-serve profile launch",
+        "active profile projection during proof",
+        "active definition projection during proof",
+        "governed stage or production evidence claim",
+        "retained runtime state without governed reclassification",
+    }
+    if not required_controlled_proof_denials.issubset(
+        set(controlled_proof["denied_outcomes"])
+    ):
+        errors.append(
+            f"{durable_label}: controlled proof denied_outcomes must preserve every maturity and scope boundary"
         )
     implementation_order = durable_orchestration["implementation_order"]
     if implementation_order["safe_runtime_proof"] != ["validation-readiness-run"]:
@@ -2598,13 +4072,17 @@ def main() -> int:
             "runtime_primary_operator_surface_ref"
         ],
     }
+    for owner_surface in controlled_proof_policy.get("owner_surfaces", {}).values():
+        required_cross_repo_refs.add(
+            f"{owner_surface['repo']}/{owner_surface['path']}"
+        )
     for ref in governed_contract_refs.values():
         required_cross_repo_refs.add(f"{ref['repo']}/{ref['path']}")
     if workspace_has_sibling_repos:
         for rel_path in sorted(required_cross_repo_refs):
             if not (workspace_root / rel_path).exists():
                 errors.append(
-                    "contracts/governance-engine-foundation.yaml: referenced path does not exist: "
+                    "cross-repo contract reference does not exist: "
                     + rel_path
                 )
     if self_improvement_governance["policy_owner_repo"] not in active_repos:
