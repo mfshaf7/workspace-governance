@@ -39,9 +39,10 @@ profile_lifecycle:
   security_review_ref_required_when_flagged: true
 controlled_proof:
   purpose: >-
-    Permit one expiring, non-self-serve commissioning proof for an exact
-    build-admitted component scope without activating the profile or treating
-    the result as governed stage or production evidence.
+    Permit one expiring, non-self-serve commissioning session with exact
+    enumerated scenario executions for a build-admitted component scope without
+    activating the profile or treating the result as governed stage or
+    production evidence.
   authority_type: runtime-drill
   drill_type: component-commissioning-proof
   eligible_profile_statuses:
@@ -51,7 +52,7 @@ controlled_proof:
   normal_profile_launch_remains_denied: true
   permit:
     schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
-    schema_version: 2
+    schema_version: 3
     required_sections:
       - schema_version
       - authorization_id
@@ -59,7 +60,7 @@ controlled_proof:
       - drill_type
       - target
       - scope
-      - run_binding
+      - commissioning_session
       - permit_issuer
       - executor
       - approvals
@@ -82,36 +83,44 @@ controlled_proof:
         projection: all-authorization-fields-except-approvals
         approvals_bind_complete_claims: true
         approval_artifact_digests_required: true
-      run_consumption:
+      session_consumption:
         mode: atomic-single-use
         keyed_by: authorization_id
         consume_before_first_mutation: true
         duplicate_consumption_denied: true
+      scenario_execution_binding:
+        exact_authorized_set_required: true
+        scenario_ids_must_be_unique: true
+        scenario_execution_ids_must_be_unique: true
+        required_receipt_owners_declared_per_execution: true
       window_validation:
         issued_before_expiry: true
         acceptance_time_within_window: true
       immutable_baseline_digest_required: true
   result:
     schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
-    schema_version: 1
+    schema_version: 2
     authorization_binding_required: true
     authorization_artifact_digest_canonicalization: rfc8785
     authorization_artifact_digest_projection: complete-authorization
     authorization_artifact_digest_must_match_consumed_permit: true
-    run_binding_required: true
+    commissioning_session_binding_required: true
     scenario_outcomes_required: true
-    scenario_outcomes_keyed_by_scenario_id: true
+    scenario_outcomes_bind_execution_id: true
     scenario_ids_must_be_unique: true
+    scenario_execution_ids_must_be_unique: true
     scenario_ids_must_exactly_match_authorization: true
     owner_receipts_required: true
-    receipt_owners_keyed_by_owner_repo: true
-    receipt_owners_must_exactly_match_authorization: true
-    owner_receipts_bind_authorization_and_run: true
+    owner_receipt_pairs_must_be_unique: true
+    passed_receipt_pairs_must_exactly_match_authorization: true
+    owner_receipts_bind_authorization_session_execution_and_result: true
     timeline_validation:
       consumption_within_authorization_window: true
-      consumed_before_start: true
-      start_within_authorization_window: true
-      completion_not_before_start: true
+      consumed_before_session_start: true
+      session_start_within_authorization_window: true
+      scenario_start_within_authorization_window: true
+      scenario_completion_not_before_start: true
+      result_completion_not_before_scenarios: true
       passed_completion_before_expiry: true
     exact_baseline_evidence_required: true
     baseline_snapshot_must_match_authorization: true
@@ -136,7 +145,7 @@ controlled_proof:
     restore_mode: exact-baseline
     restore_required_before_completion: true
     terminal_cleanup_authority_mode: exact-baseline-restore-only
-    terminal_cleanup_bound_to_started_run: true
+    terminal_cleanup_bound_to_started_session: true
     terminal_cleanup_trigger_scope: any-triggered-stop-condition
     new_proof_actions_allowed_after_stop: false
     post_proof_security_review_required: true

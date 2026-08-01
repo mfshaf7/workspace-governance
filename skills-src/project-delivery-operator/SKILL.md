@@ -24,6 +24,38 @@ Use this skill when a serious initiative is already running inside
 
 ## Workflow
 
+### Initiative Architecture Preflight
+
+Before source implementation for an architecture-shaping initiative,
+cross-repo protocol, or control-plane change:
+
+1. Read the complete initiative descendant tree from the ART.
+2. Read merged contract and implementation truth from every affected owner
+   repo.
+3. Produce one bounded architecture packet containing:
+   - descendant and owner map
+   - dependency and merge sequence
+   - lifecycle and state model
+   - authorization, session, scenario, and execution model
+   - evidence and owner-receipt handoffs
+   - runtime boundaries and prohibited actions
+   - rollback, cleanup, and terminal conditions
+   - contradictions and unresolved decisions
+4. Discuss the packet with the operator and lock the execution sequence.
+5. Record either `ready-for-child-implementation` or
+   `blocked-pending-architecture-decision` before child source work begins.
+6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
+   evidence handoff materially changes.
+
+For cross-repo protocol work, also prove an executable conformance plan before
+implementation is declared ready. It must cover command acknowledgement,
+deterministic identity and idempotency, state-mutation ordering, retry, cancel,
+replay and recovery semantics, bounded failure mapping, authorization integrity
+and replay resistance, session and scenario-execution binding, complete owner
+receipts, immutable baseline and restore evidence, lifecycle-state matrices,
+cross-artifact timeline ordering, shared-validator compatibility, and
+`positive and negative contract cases`.
+
 1. Start from the ART, not from chat memory.
    - if the active `Epic` is already known, start with its fast active-front
      read and a scoped ART-quality check for that `Epic`

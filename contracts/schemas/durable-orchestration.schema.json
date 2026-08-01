@@ -476,6 +476,8 @@
         "self_serve_launch_allowed",
         "definition_allowlist",
         "required_scenarios",
+        "commissioning_session",
+        "receipt_owners",
         "permitted_action_allowlist",
         "required_stop_conditions",
         "terminal_cleanup_authority",
@@ -554,6 +556,56 @@
         "required_scenarios": {
           "$ref": "#/$defs/nonEmptyUniqueStringList"
         },
+        "commissioning_session": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authorization_consumption",
+            "one_session_per_authorization",
+            "exact_scenario_execution_set_required",
+            "scenario_execution_ids_unique",
+            "required_receipt_owners_declared_per_execution",
+            "retries_cancels_replays_and_dedup_bound_to_session_and_execution"
+          ],
+          "properties": {
+            "authorization_consumption": {
+              "const": "atomic-single-use"
+            },
+            "one_session_per_authorization": {
+              "const": true
+            },
+            "exact_scenario_execution_set_required": {
+              "const": true
+            },
+            "scenario_execution_ids_unique": {
+              "const": true
+            },
+            "required_receipt_owners_declared_per_execution": {
+              "const": true
+            },
+            "retries_cancels_replays_and_dedup_bound_to_session_and_execution": {
+              "const": true
+            }
+          }
+        },
+        "receipt_owners": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "platform-engineering"
+            },
+            {
+              "const": "operator-orchestration-service"
+            },
+            {
+              "const": "workspace-governance-control-fabric"
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
         "permitted_action_allowlist": {
           "$ref": "#/$defs/nonEmptyUniqueStringList"
         },
@@ -579,7 +631,7 @@
               "const": "exact-baseline-restore-only"
             },
             "applies_to": {
-              "const": "already-started-run"
+              "const": "already-started-commissioning-session"
             },
             "trigger_scope": {
               "const": "any-triggered-stop-condition"
@@ -671,8 +723,8 @@
                 "artifact_type",
                 "schema_ref",
                 "authorization_artifact_digest_must_match_consumed_permit",
-                "receipt_owners_must_match_authorization",
-                "owner_receipts_bind_authorization_and_run",
+                "passed_receipt_pairs_must_match_authorization",
+                "owner_receipts_bind_authorization_session_execution_and_result",
                 "permit_timeline_must_validate",
                 "exact_baseline_restore_required",
                 "baseline_snapshot_must_match_authorization",
@@ -690,10 +742,10 @@
                 "authorization_artifact_digest_must_match_consumed_permit": {
                   "const": true
                 },
-                "receipt_owners_must_match_authorization": {
+                "passed_receipt_pairs_must_match_authorization": {
                   "const": true
                 },
-                "owner_receipts_bind_authorization_and_run": {
+                "owner_receipts_bind_authorization_session_execution_and_result": {
                   "const": true
                 },
                 "permit_timeline_must_validate": {

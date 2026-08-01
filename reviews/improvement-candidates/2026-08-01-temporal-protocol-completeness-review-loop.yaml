@@ -1,12 +1,15 @@
 schema_version: 1
 id: 2026-08-01-temporal-protocol-completeness-review-loop
-title: Prevent exact-head review from discovering protocol architecture
+title: Require initiative-wide architecture preflight before protocol implementation
 recorded_on: '2026-08-01'
 owner_repo: workspace-governance
-summary: Temporal generation retirement and controlled-proof commissioning entered
-  repeated implementation-review-fix cycles because the cross-repo protocol checklist
-  did not require command semantics, authorization integrity, result completeness,
-  immutable restore evidence, and executable schema cases to be proven before code
+summary: >-
+  Temporal generation retirement and controlled-proof commissioning entered repeated
+  implementation-review-fix cycles because delivery began from individual child items
+  before the complete #698 initiative architecture, dependency order, evidence
+  boundaries, and terminal state were reconstructed. The narrower cross-repo protocol
+  checklist also failed to require command semantics, authorization integrity, result
+  completeness, immutable restore evidence, and executable schema cases before code
   review.
 regression_of: null
 status: triaged
@@ -70,20 +73,78 @@ signals:
   source_refs:
   - 'github: workspace-governance#134 exact-head review history'
   - 'art: Workspace Delivery ART #789 controlled Temporal commissioning proof contract'
+- id: initiative-architecture-preflight-bypassed
+  title: Child implementation started before the complete initiative was inspected and
+    sequenced.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - missing-discussion-gate
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    The operator identified that the long #789 run repeatedly added, removed, and
+    reworked contract lines because execution was driven from the immediate child and
+    each successive review finding rather than a complete read of #698 and every
+    descendant. The initiative's owner boundaries, dependency order, proof phases,
+    evidence handoffs, runtime prohibition, and completion state were therefore
+    discovered incrementally after implementation had already begun.
+  source_refs:
+  - 'conversation: operator said the #789 run was wasteful because #698 was not fully
+    studied and required circular line-by-line correction'
+  - 'art: Workspace Delivery ART #698 and its complete descendant structure'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Requires a complete initiative architecture packet, operator decision,
+      locked execution sequence, and executable cross-repo protocol conformance
+      plan before child implementation begins.
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: Fail-closes when the initiative architecture packet, decision gate,
+      protocol dimensions, or positive and negative conformance cases disappear.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Defines the operator-facing initiative-wide architecture preflight.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Forces future ART implementation sessions through the same preflight.
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-policy.yaml
+    owner_repo: workspace-governance
+    note: Defines controlled proof as one commissioning session with exact
+      scenario executions and owner-bound receipts.
+  - type: validator
+    path: workspace-governance/scripts/validate_developer_integration.py
+    owner_repo: workspace-governance
+    note: Proves positive and negative authorization, session, execution,
+      receipt, timeline, and restore bindings.
+  note: >-
+    Controls are implemented on the active branch. Closure remains pending until
+    the source change is merged and its finalized Review Packet is bound back to
+    the ART.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-08-08'
-  note: Propose one protocol-completeness contract and conformance preflight that
-    proves command acknowledgement, deterministic IDs, state-mutation ordering,
-    retry/recovery semantics, bounded failure mapping, authorization replay resistance,
-    semantic source uniqueness and exact revision widths, approval-to-claims binding,
-    immutable restore state, cross-artifact result equality, exact result coverage,
-    complete authorization artifact binding, exact owner-keyed receipt coverage,
-    per-receipt authorization and run binding, permit/result timeline ordering,
-    shared-validator compatibility, complete lifecycle-state matrices, and
-    executable positive and negative schema cases before implementation is declared
-    review-ready; obtain operator approval before landing the control.
+  note: >-
+    First produce a read-only initiative architecture packet for #698 from the
+    authoritative ART and merged owner-repo sources. It must enumerate every descendant,
+    owner, dependency, lifecycle transition, evidence handoff, runtime boundary,
+    contradiction, and terminal completion condition, then propose one locked execution
+    sequence. After operator approval, propose an initiative-preflight control plus the
+    protocol conformance preflight that proves command acknowledgement, deterministic
+    IDs, state-mutation ordering, retry/recovery semantics, bounded failure mapping,
+    authorization replay resistance, semantic source uniqueness and exact revision
+    widths, approval-to-claims binding, immutable restore state, cross-artifact result
+    equality, exact result coverage, complete authorization artifact binding, exact
+    owner-keyed receipt coverage, per-receipt authorization, commissioning
+    session, and scenario-execution binding,
+    permit/result timeline ordering, shared-validator compatibility, complete
+    lifecycle-state matrices, and executable positive and negative schema cases before
+    child implementation is declared ready. Do not land either control without operator
+    approval.

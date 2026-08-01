@@ -46,9 +46,11 @@ themselves justify durable orchestration.
 6. Security and the operator approve the RFC 8785 digest of every authorization
    field outside the approval envelope. Platform may then issue one expiring
    controlled-proof permit carrying both approval artifact refs and digests.
-7. Run only the permitted definition, revisions, artifacts, namespaces,
-   identities, queues, scenarios, and actions. The profile remains
-   `build-admitted`; ordinary self-serve actions remain denied.
+7. Consume that permit once to open its declared commissioning session. Run
+   only the exact scenario executions, receipt owners, definition, revisions,
+   artifacts, namespaces, identities, queues, and actions enumerated by the
+   permit. The profile remains `build-admitted`; ordinary self-serve actions
+   remain denied.
 8. Restore the captured exact baseline and preserve the proof result and owner
    receipts.
 9. Obtain a separate post-proof Security decision on the operating evidence.
@@ -68,19 +70,23 @@ normal activation:
 - it is a `runtime-drill` with drill type `component-commissioning-proof`
 - it is available only to a `build-admitted` profile
 - it is operator-approved, Security-authorized, expiring, exact-scope, and
-  limited to one run
+  limited to one commissioning session
 - it binds exact source revisions and immutable runtime image and artifact
   digests, the exact reviewed permit-issuer and executor revisions, and the
   permitted namespaces, identities, queues, definition versions, scenarios,
   and actions
 - it binds the immutable baseline artifact captured before issuance and one
-  run that must be atomically consumed before the first mutation
+  commissioning session that must be atomically consumed before the first
+  mutation
+- it enumerates every authorized scenario execution id and the exact receipt
+  owners required for that execution; retries, cancellation, replay, and
+  duplicate suppression cannot cross either boundary
 - its permit follows
   [`../contracts/schemas/controlled-runtime-proof-authorization.schema.json`](../contracts/schemas/controlled-runtime-proof-authorization.schema.json)
 - its pre-run authorization cannot be reused as post-run activation evidence
 - exact-baseline restoration is required before the post-proof Security review
 - every triggered stop condition denies new proof actions; for an
-  already-started run, only run-bound removal, exact-baseline restoration,
+  already-started session, only session-bound removal, exact-baseline restoration,
   restore evidence, and governed exception recording remain allowed until
   restore or exception closure
 - it cannot run a business definition or create stage or production evidence
@@ -95,38 +101,41 @@ reject duplicate logical bindings by their declared semantic keys, verify both
 exact merged source bindings, and verify the issue and expiry window. They must
 canonicalize every authorization field except the approval envelope with RFC
 8785, verify that both approval artifacts bind that canonical digest,
-atomically consume the permit
-for its one declared run before the first mutation, and reject every duplicate
-consumption attempt. Every source, runtime, approval, and captured baseline
+atomically consume the permit for its one declared commissioning session before
+the first mutation, and reject every duplicate consumption attempt. Every
+scenario execution id and per-execution receipt-owner set must be authorized
+before execution. Every source, runtime, approval, and captured baseline
 digest must be verified before its dependent action. No stop condition can
 authorize a new action or retry; every stop preserves only the fixed
-exact-baseline cleanup authority for the already-started run.
+exact-baseline cleanup authority for the already-started session.
 
 The executor must emit a result that validates against
 `contracts/schemas/controlled-runtime-proof-result.schema.json`. That artifact
-binds the consumed authorization and run, exactly one outcome for every
-authorized commissioning scenario, owner receipts, and exact-baseline
-restoration evidence. Scenario ids are object keys, so duplicates and partial
-coverage are rejected. A `passed` result requires every scenario to pass,
-exact-baseline restoration, and no exception; governed restoration exceptions
+binds the consumed authorization and commissioning session, exactly one outcome
+for every authorized scenario execution, owner receipts, and exact-baseline
+restoration evidence. Scenario and execution ids are checked as an exact set,
+so duplicates, substitutions, and partial coverage are rejected. A `passed`
+result requires every scenario to pass, exact-baseline restoration, and no
+exception; governed restoration exceptions
 produce only a `stopped` result. It is operating evidence for the separate
 post-run Security review; it does not activate the profile or a workflow
 definition.
 
 Result acceptance must compare the result with the consumed authorization, not
 validate each artifact in isolation. The authorization id, RFC 8785 digest of
-the complete authorization artifact, run id, canonical claims digest, exact
-scenario set, exact required receipt-owner set, and restored baseline reference
-and digest must equal the corresponding authorized values. Receipts are keyed
-by owner repository, so duplicates, missing owners, and unrelated owners are
-rejected. Every receipt also carries and must match the authorization id,
-complete authorization digest, and run id, preventing receipt reuse across
-proofs. The permit must be issued before it expires; consumption and execution
-start must occur inside that window, with consumption first; completion cannot
-precede start; and a passing result must complete before expiry. A run that
-started before expiry may finish bounded cleanup afterward only as a stopped
-result and cannot become passing evidence. Any mismatch rejects the result
-before post-run Security review.
+the complete authorization artifact, commissioning session id, canonical claims
+digest, exact scenario-execution set, required receipt-owner pairs, and restored
+baseline reference and digest must equal the corresponding authorized values.
+Every receipt binds its owner, authorization id and digest, commissioning
+session id, scenario and scenario execution ids, owner execution id, terminal
+owner result, and bounded evidence refs. Duplicate pairs, missing pairs on a
+passing result, unrelated owners, and stale or cross-session receipts are
+rejected. The permit must be issued before it expires; consumption, session
+start, and each new scenario start must occur inside that window, in that order;
+scenario and result completion cannot precede their starts; and a passing result
+must complete before expiry. A session that started before expiry may finish
+bounded cleanup afterward only as a stopped result and cannot become passing
+evidence. Any mismatch rejects the result before post-run Security review.
 
 The primary Platform procedure is the
 [controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).

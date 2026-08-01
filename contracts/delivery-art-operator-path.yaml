@@ -10,6 +10,51 @@ delivery_art_operator_path:
     workflow_health: platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md
     quality_gate: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
     admin_boundary: platform-engineering/products/openproject/runbooks/openproject-platform-admin-surface.md
+  initiative_architecture_preflight:
+    applies_when:
+      - an accepted initiative is architecture-shaping
+      - a source change spans multiple owner repos or protocol boundaries
+      - child implementation depends on an unproven cross-repo execution sequence
+    required_before_source_implementation: true
+    authoritative_inputs:
+      - complete initiative descendant tree from Workspace Delivery ART
+      - merged implementation and contract truth from every affected owner repo
+      - active workspace, platform, orchestration, and security authority contracts
+    packet_required_sections:
+      - descendant-and-owner-map
+      - dependency-and-merge-sequence
+      - lifecycle-and-state-model
+      - authorization-session-and-execution-model
+      - evidence-and-receipt-handoffs
+      - runtime-boundaries-and-prohibited-actions
+      - rollback-cleanup-and-terminal-conditions
+      - contradictions-and-open-decisions
+    decision_gate:
+      operator_discussion_required: true
+      execution_sequence_locked_before_child_work: true
+      reopen_when_owner_boundary_or_protocol_changes: true
+      allowed_results:
+        - ready-for-child-implementation
+        - blocked-pending-architecture-decision
+    protocol_conformance_preflight:
+      required_when_cross_repo_protocol_changes: true
+      required_dimensions:
+        - command-and-acknowledgement-semantics
+        - deterministic-identities-and-idempotency
+        - state-mutation-ordering
+        - retry-cancel-replay-and-recovery-semantics
+        - bounded-failure-mapping
+        - authorization-integrity-and-replay-resistance
+        - session-scenario-and-execution-binding
+        - result-and-owner-receipt-completeness
+        - immutable-baseline-and-restore-evidence
+        - lifecycle-state-matrix
+        - cross-artifact-timeline-ordering
+        - shared-validator-compatibility
+      executable_cases_required:
+        - positive-contract-cases
+        - negative-contract-cases
+      child_ready_only_after_conformance_passes: true
   canonical_read_hierarchy:
     - id: session-bootstrap
       cli: npm run art -- bootstrap

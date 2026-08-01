@@ -73,6 +73,40 @@ If important work was already done without classification, reconcile it after
 discovery. Do not throw away useful work, and do not leave the skipped
 classification invisible.
 
+## Initiative Architecture Preflight
+
+Before source implementation begins for an architecture-shaping initiative,
+cross-repo protocol, or control-plane change, reconstruct the whole initiative
+once. Do not start from one child item and discover the architecture through
+successive implementation reviews.
+
+The preflight must use authoritative ART and merged owner-repo truth to produce
+one bounded architecture packet containing:
+
+- the complete descendant and owner map
+- the dependency and merge sequence
+- the lifecycle and state model
+- the authorization, session, scenario, and execution model
+- evidence and owner-receipt handoffs
+- runtime boundaries and prohibited actions
+- rollback, cleanup, and terminal completion conditions
+- contradictions and unresolved decisions
+
+Discuss that packet with the operator and lock the execution sequence before
+child implementation starts. The only valid outcomes are
+`ready-for-child-implementation` or
+`blocked-pending-architecture-decision`. Reopen the preflight if an owner
+boundary, protocol, lifecycle, or evidence handoff materially changes.
+
+When the initiative changes a cross-repo protocol, the packet must also include
+an executable conformance plan. It must cover command acknowledgement,
+deterministic identity and idempotency, state-mutation ordering, retry, cancel,
+replay and recovery semantics, bounded failure mapping, authorization integrity,
+session and scenario-execution binding, complete owner receipts, immutable
+restore evidence, lifecycle matrices, cross-artifact timelines, and shared
+validator compatibility. Positive and negative contract cases must pass before
+the affected child is considered ready for implementation.
+
 ## Landing Evidence
 
 Do not treat ART child items, Git branches, and merge evidence as one-to-one.
