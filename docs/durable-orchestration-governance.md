@@ -119,7 +119,9 @@ the complete authorization artifact, run id, canonical claims digest, exact
 scenario set, exact required receipt-owner set, and restored baseline reference
 and digest must equal the corresponding authorized values. Receipts are keyed
 by owner repository, so duplicates, missing owners, and unrelated owners are
-rejected. The permit must be issued before it expires; consumption and execution
+rejected. Every receipt also carries and must match the authorization id,
+complete authorization digest, and run id, preventing receipt reuse across
+proofs. The permit must be issued before it expires; consumption and execution
 start must occur inside that window, with consumption first; completion cannot
 precede start; and a passing result must complete before expiry. A run that
 started before expiry may finish bounded cleanup afterward only as a stopped

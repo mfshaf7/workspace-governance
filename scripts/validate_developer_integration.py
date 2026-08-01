@@ -355,6 +355,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             "owner_receipts_required": True,
             "receipt_owners_keyed_by_owner_repo": True,
             "receipt_owners_must_exactly_match_authorization": True,
+            "owner_receipts_bind_authorization_and_run": True,
             "timeline_validation": {
                 "consumption_within_authorization_window": True,
                 "consumed_before_start": True,

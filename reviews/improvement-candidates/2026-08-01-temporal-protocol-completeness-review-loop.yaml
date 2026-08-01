@@ -62,6 +62,8 @@ signals:
     cross-artifact ordering against the permit window.
     The follow-up timeline review then found that run start itself was not yet
     bounded by expiry for stopped results.
+    The next pass found that exact owner coverage still allowed historical
+    receipts from another authorization or run.
     The existing improvement candidate covered only command-protocol completeness and
     therefore did not yet capture the broader authorization and evidence-contract
     recurrence.
@@ -81,7 +83,7 @@ follow_up:
     semantic source uniqueness and exact revision widths, approval-to-claims binding,
     immutable restore state, cross-artifact result equality, exact result coverage,
     complete authorization artifact binding, exact owner-keyed receipt coverage,
-    permit/result timeline ordering, shared-validator compatibility, complete
-    lifecycle-state matrices, and executable positive and negative schema cases before
-    implementation is declared review-ready; obtain operator approval before landing
-    the control.
+    per-receipt authorization and run binding, permit/result timeline ordering,
+    shared-validator compatibility, complete lifecycle-state matrices, and
+    executable positive and negative schema cases before implementation is declared
+    review-ready; obtain operator approval before landing the control.

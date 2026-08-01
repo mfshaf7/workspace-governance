@@ -300,10 +300,22 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "authorization_id",
+        "authorization_digest",
+        "run_id",
         "receipt_ref",
         "receipt_digest"
       ],
       "properties": {
+        "authorization_id": {
+          "$ref": "#/$defs/uri"
+        },
+        "authorization_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "run_id": {
+          "$ref": "#/$defs/identifier"
+        },
         "receipt_ref": {
           "$ref": "#/$defs/uri"
         },

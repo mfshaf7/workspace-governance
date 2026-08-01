@@ -165,6 +165,9 @@ CONTROLLED_PROOF_RESULT_REQUIRED_SCENARIO_OUTCOME_FIELDS = {
     "evidence_digest",
 }
 CONTROLLED_PROOF_RESULT_REQUIRED_RECEIPT_FIELDS = {
+    "authorization_id",
+    "authorization_digest",
+    "run_id",
     "receipt_ref",
     "receipt_digest",
 }
@@ -498,6 +501,9 @@ def controlled_proof_result_fixture() -> dict:
         "scenario_outcomes": scenario_outcomes,
         "owner_receipts": {
             owner_repo: {
+                "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
+                "authorization_digest": digest,
+                "run_id": "controlled-proof-validation-run",
                 "receipt_ref": f"artifact://controlled-proof/receipts/{owner_repo}",
                 "receipt_digest": digest,
             }
@@ -567,6 +573,25 @@ def controlled_proof_result_binding_errors(
         binding_errors.append(
             "receipt owners do not exactly match the authorized proof-owner set"
         )
+    for owner_repo, receipt in result["owner_receipts"].items():
+        receipt_bindings = (
+            (
+                "authorization id",
+                receipt["authorization_id"],
+                result["authorization"]["authorization_id"],
+            ),
+            (
+                "authorization digest",
+                receipt["authorization_digest"],
+                result["authorization"]["authorization_digest"],
+            ),
+            ("run id", receipt["run_id"], result["run"]["run_id"]),
+        )
+        for label, actual, expected in receipt_bindings:
+            if actual != expected:
+                binding_errors.append(
+                    f"{owner_repo} receipt {label} does not match the result binding"
+                )
     issued_at = datetime.fromisoformat(
         authorization["window"]["issued_at"].replace("Z", "+00:00")
     )
@@ -747,6 +772,22 @@ def validate_controlled_proof_result_invariants(errors: list[str], schema: dict)
     stopped_starting_at_expiry["run"]["started_at"] = "2026-08-01T01:00:00Z"
     invalid_binding_cases["stopped run starting at expiry"] = (
         stopped_starting_at_expiry
+    )
+
+    stale_owner_receipt = copy.deepcopy(valid_passed)
+    stale_owner_receipt["owner_receipts"]["operator-orchestration-service"][
+        "run_id"
+    ] = "historical-run"
+    invalid_binding_cases["owner receipt bound to a different run"] = (
+        stale_owner_receipt
+    )
+
+    stale_owner_authorization = copy.deepcopy(valid_passed)
+    stale_owner_authorization["owner_receipts"]["platform-engineering"][
+        "authorization_digest"
+    ] = "sha256:" + "f" * 64
+    invalid_binding_cases["owner receipt bound to a different authorization"] = (
+        stale_owner_authorization
     )
 
     for label, instance in invalid_binding_cases.items():
@@ -1257,6 +1298,7 @@ def main() -> int:
         "owner_receipts_required": True,
         "receipt_owners_keyed_by_owner_repo": True,
         "receipt_owners_must_exactly_match_authorization": True,
+        "owner_receipts_bind_authorization_and_run": True,
         "timeline_validation": {
             "consumption_within_authorization_window": True,
             "consumed_before_start": True,
@@ -1788,6 +1830,7 @@ def main() -> int:
             "authorization_artifact_digest_must_match_consumed_permit"
         ]
         or not post_run_evidence["receipt_owners_must_match_authorization"]
+        or not post_run_evidence["owner_receipts_bind_authorization_and_run"]
         or not post_run_evidence["permit_timeline_must_validate"]
         or not post_run_evidence["exact_baseline_restore_required"]
         or not post_run_evidence["baseline_snapshot_must_match_authorization"]

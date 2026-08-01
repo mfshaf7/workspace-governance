@@ -106,6 +106,7 @@ controlled_proof:
     owner_receipts_required: true
     receipt_owners_keyed_by_owner_repo: true
     receipt_owners_must_exactly_match_authorization: true
+    owner_receipts_bind_authorization_and_run: true
     timeline_validation:
       consumption_within_authorization_window: true
       consumed_before_start: true
