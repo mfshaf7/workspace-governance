@@ -200,6 +200,9 @@ delivery_art_operator_path:
       exactly_covers_declared_work_items: true
       evidence_references_must_resolve: true
       evidence_ids_globally_unique: true
+    exception_authority:
+      direct_land_exception_must_be_time_bound: true
+      direct_land_exception_must_remain_valid_through_readiness_and_finalization: true
     custody:
       draft_backend: local-filesystem
       durable_backend: openproject-attachment

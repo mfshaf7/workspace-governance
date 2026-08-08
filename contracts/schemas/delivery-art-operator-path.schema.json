@@ -343,6 +343,7 @@
         "conformance_case_binding",
         "source_provenance",
         "acceptance_mapping",
+        "exception_authority",
         "custody"
       ],
       "properties": {
@@ -452,6 +453,18 @@
             "exactly_covers_declared_work_items": { "const": true },
             "evidence_references_must_resolve": { "const": true },
             "evidence_ids_globally_unique": { "const": true }
+          }
+        },
+        "exception_authority": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "direct_land_exception_must_be_time_bound",
+            "direct_land_exception_must_remain_valid_through_readiness_and_finalization"
+          ],
+          "properties": {
+            "direct_land_exception_must_be_time_bound": { "const": true },
+            "direct_land_exception_must_remain_valid_through_readiness_and_finalization": { "const": true }
           }
         },
         "custody": {

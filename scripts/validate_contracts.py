@@ -1112,6 +1112,28 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 "custody.persisted_at",
                 custody.get("persisted_at"),
             )
+        if evidence_kind == "approved_direct_land":
+            authority_cutoffs = [
+                cutoff
+                for cutoff in (
+                    _artifact_timestamp(readiness.get("evaluated_at")),
+                    _artifact_timestamp(payload.get("finalized_at")),
+                )
+                if cutoff is not None
+            ]
+            authority_cutoff = max(authority_cutoffs) if authority_cutoffs else None
+            valid_direct_land_authority = any(
+                authority_cutoff is not None
+                and (expires_at := _artifact_timestamp(exception.get("expires_at")))
+                is not None
+                and expires_at > authority_cutoff
+                for exception in _artifact_object_list(payload.get("exceptions"))
+                if exception.get("kind") == "direct-land"
+            )
+            if not valid_direct_land_authority:
+                errors.append(
+                    "approved_direct_land requires a direct-land exception valid through readiness evaluation and finalization"
+                )
 
     return errors
 
@@ -2291,6 +2313,43 @@ def validate_delivery_art_artifact_contracts(
             "review_packet",
             missing_readiness_receipt,
             "finalized Review Packet without a readiness receipt",
+        )
+
+        valid_direct_land = copy.deepcopy(finalized)
+        valid_direct_land["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        valid_direct_land["exceptions"] = [
+            {
+                "id": "exception:direct-land-work-item-801",
+                "kind": "direct-land",
+                "authority_ref": "openproject://work_packages/801",
+                "rationale": "The operator approved this bounded source landing without a pull request.",
+                "expires_at": "2026-08-08T12:00:00+08:00",
+            }
+        ]
+        require_accepted(
+            "review_packet",
+            valid_direct_land,
+            "finalized direct-land Review Packet with current exception authority",
+        )
+
+        expired_direct_land = copy.deepcopy(valid_direct_land)
+        expired_direct_land["exceptions"][0]["expires_at"] = (
+            "2026-08-08T11:29:59+08:00"
+        )
+        require_rejected(
+            "review_packet",
+            expired_direct_land,
+            "finalized direct-land Review Packet with expired exception authority",
+        )
+
+        non_expiring_direct_land = copy.deepcopy(valid_direct_land)
+        non_expiring_direct_land["exceptions"][0]["expires_at"] = None
+        require_rejected(
+            "review_packet",
+            non_expiring_direct_land,
+            "finalized direct-land Review Packet without time-bound exception authority",
         )
 
         impossible_finalization_timeline = copy.deepcopy(finalized)

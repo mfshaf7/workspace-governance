@@ -235,6 +235,11 @@ branch. Keep them open with work notes such as `implemented pending landing`
 until the finalized Review Packet provides merged PR evidence, approved
 direct-land evidence, or equivalent durable source evidence.
 
+Approved direct landing is an exception path, not timeless authority. Its
+`direct-land` exception must carry an expiry and remain valid through the
+packet's readiness evaluation and finalization. An expired or non-expiring
+exception cannot authorize a finalized direct-land packet.
+
 Before merging source-backed work, create or refresh the draft Review Packet
 while the PR is still open. The packet must use `open_pr` evidence and include
 the PR URL, changed-surface explanations, tests, validations, rollback

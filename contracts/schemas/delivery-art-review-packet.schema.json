@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-review-packet.schema.json",
   "title": "Delivery ART Review Packet v2",
-  "$comment": "Exact work-item coverage, source/non-source evidence binding, globally unique evidence ids, and evidence-reference resolution are enforced by this schema and scripts/validate_contracts.py because JSON Schema cannot compare dynamic array members.",
+  "$comment": "Exact work-item coverage, source/non-source evidence binding, globally unique evidence ids, evidence-reference resolution, and direct-land exception expiry relative to readiness and finalization are enforced by this schema and scripts/validate_contracts.py because JSON Schema cannot compare dynamic members or timestamps.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -337,8 +337,11 @@
           "exceptions": {
             "contains": {
               "type": "object",
-              "properties": { "kind": { "const": "direct-land" } },
-              "required": ["kind"]
+              "properties": {
+                "kind": { "const": "direct-land" },
+                "expires_at": { "$ref": "#/$defs/timestamp" }
+              },
+              "required": ["kind", "expires_at"]
             }
           }
         }
