@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import copy
 from datetime import date, datetime
+import hashlib
+import json
 from pathlib import Path
 import re
 import shlex
@@ -72,6 +74,34 @@ CONTROLLED_PROOF_SCHEMA_REF = (
 )
 CONTROLLED_PROOF_RESULT_SCHEMA_REF = (
     "contracts/schemas/controlled-runtime-proof-result.schema.json"
+)
+DELIVERY_ART_ARTIFACT_CASES = {
+    "architecture_packet": (
+        "contracts/schemas/delivery-art-architecture-packet.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json",),
+    ),
+    "work_start_record": (
+        "contracts/schemas/delivery-art-work-start-record.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/work-start-record.valid.json",),
+    ),
+    "review_packet": (
+        "contracts/schemas/delivery-art-review-packet.schema.json",
+        (
+            "contracts/fixtures/delivery-art-workflow/review-packet-merge-ready.valid.json",
+            "contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json",
+        ),
+    ),
+    "readiness_receipt": (
+        "contracts/schemas/delivery-art-readiness-receipt.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json",),
+    ),
+}
+
+DELIVERY_ART_PROOF_CLAIM_ROOTS = (
+    "readiness_model.rules",
+    "work_start_gate",
+    "evidence_integrity",
+    "initiative_architecture_preflight",
 )
 CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "schema_version",
@@ -305,6 +335,3457 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
         errors.append(f"{instance_path}: {path}: {error.message}")
 
 
+DELIVERY_ART_EVIDENCE_SECTIONS = (
+    "changed_surfaces",
+    "tests",
+    "validations",
+    "runtime_and_live",
+    "security_and_trust",
+)
+DELIVERY_ART_SOURCE_BACKED_DECISIONS = {
+    "feature_single_landing_unit",
+    "child_isolated_landing_unit",
+}
+DELIVERY_ART_WORK_START_INVALIDATION_INPUTS = {
+    "art-descendant-or-dependency-change",
+    "owner-or-rollback-boundary-change",
+    "base-ref-or-commit-change",
+    "architecture-decision-or-digest-change",
+    "validation-or-security-obligation-change",
+}
+DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS = {
+    "command-and-acknowledgement-semantics",
+    "deterministic-identities-and-idempotency",
+    "state-mutation-ordering",
+    "retry-cancel-replay-and-recovery-semantics",
+    "bounded-failure-mapping",
+    "authorization-integrity-and-replay-resistance",
+    "session-scenario-and-execution-binding",
+    "result-and-owner-receipt-completeness",
+    "immutable-baseline-and-restore-evidence",
+    "lifecycle-state-matrix",
+    "cross-artifact-timeline-ordering",
+    "shared-validator-compatibility",
+}
+DELIVERY_ART_READINESS_RANK = {
+    "merge-ready": 1,
+    "operating-ready": 2,
+}
+
+
+def _artifact_object(value: object) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def _artifact_object_list(value: object) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    return [entry for entry in value if isinstance(entry, dict)]
+
+
+def _artifact_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [entry for entry in value if isinstance(entry, str)]
+
+
+def _delivery_art_openproject_id(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    match = re.fullmatch(r"openproject://work_packages/([1-9][0-9]*)", value)
+    return match.group(1) if match else None
+
+
+def _delivery_art_entity_number(value: object, prefix: str) -> str | None:
+    if not isinstance(value, str):
+        return None
+    match = re.fullmatch(rf"{re.escape(prefix)}-([1-9][0-9]*)", value)
+    return match.group(1) if match else None
+
+
+def _delivery_art_ref_digest_errors(
+    ref: object,
+    digest: object,
+    label: str,
+) -> list[str]:
+    if not isinstance(ref, str) or not isinstance(digest, str):
+        return []
+    digest_hex = digest.removeprefix("sha256:")
+    if digest_hex not in ref:
+        return [f"{label} must include its declared content digest"]
+    return []
+
+
+def _delivery_art_identifier_scoped_to(
+    value: object,
+    artifact_prefix: str,
+    delivery_id: object,
+) -> bool:
+    if not isinstance(value, str) or not isinstance(delivery_id, str):
+        return False
+    return bool(
+        re.match(
+            rf"^{re.escape(artifact_prefix)}:{re.escape(delivery_id)}(?:$|[-:.])",
+            value,
+        )
+    )
+
+
+def _delivery_art_edge_precedence(edge: dict) -> tuple[str, str] | None:
+    """Return the work-item order implied by one dependency relation."""
+    source = edge.get("from")
+    target = edge.get("to")
+    relation = edge.get("relation")
+    if not isinstance(source, str) or not isinstance(target, str):
+        return None
+    if relation == "depends_on":
+        return target, source
+    if relation in {"blocks", "must_merge_before"}:
+        return source, target
+    return None
+
+
+def _artifact_timestamp(value: object) -> datetime | None:
+    if not is_rfc3339_timestamp(value):
+        return None
+    normalized = value[:-1] + "+00:00" if value.endswith(("Z", "z")) else value
+    return datetime.fromisoformat(normalized)
+
+
+def _require_artifact_time_order(
+    errors: list[str],
+    earlier_name: str,
+    earlier_value: object,
+    later_name: str,
+    later_value: object,
+) -> None:
+    earlier = _artifact_timestamp(earlier_value)
+    later = _artifact_timestamp(later_value)
+    if earlier is not None and later is not None and earlier > later:
+        errors.append(f"{earlier_name} must not be later than {later_name}")
+
+
+def _require_strict_artifact_time_order(
+    errors: list[str],
+    earlier_name: str,
+    earlier_value: object,
+    later_name: str,
+    later_value: object,
+) -> None:
+    earlier = _artifact_timestamp(earlier_value)
+    later = _artifact_timestamp(later_value)
+    if earlier is not None and later is not None and earlier >= later:
+        errors.append(f"{earlier_name} must be earlier than {later_name}")
+
+
+def _delivery_art_canonical_bytes(value: object) -> bytes:
+    """Serialize the integer-only RFC 8785 subset accepted by ART artifacts."""
+    if value is None:
+        return b"null"
+    if value is True:
+        return b"true"
+    if value is False:
+        return b"false"
+    if isinstance(value, int):
+        return str(value).encode("ascii")
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    if isinstance(value, list):
+        return b"[" + b",".join(
+            _delivery_art_canonical_bytes(entry) for entry in value
+        ) + b"]"
+    if isinstance(value, dict):
+        entries = []
+        for key in sorted(value, key=lambda item: item.encode("utf-16be")):
+            entries.append(
+                _delivery_art_canonical_bytes(key)
+                + b":"
+                + _delivery_art_canonical_bytes(value[key])
+            )
+        return b"{" + b",".join(entries) + b"}"
+    raise TypeError(f"unsupported canonical JSON value {type(value).__name__}")
+
+
+def _delivery_art_projection_digest(projection: object) -> str:
+    return "sha256:" + hashlib.sha256(
+        _delivery_art_canonical_bytes(projection)
+    ).hexdigest()
+
+
+def _delivery_art_projection_digest_if_canonical(
+    projection: object,
+) -> str | None:
+    if _artifact_canonicalization_errors(projection):
+        return None
+    return _delivery_art_projection_digest(projection)
+
+
+def _architecture_scope_projection(payload: dict) -> dict:
+    decision = _artifact_object(payload.get("decision"))
+    return {
+        "schema_version": payload.get("schema_version"),
+        "artifact_type": payload.get("artifact_type"),
+        "delivery_id": payload.get("delivery_id"),
+        "covered_work_item_ids": payload.get("covered_work_item_ids"),
+        "source_snapshot": payload.get("source_snapshot"),
+        "architecture": payload.get("architecture"),
+        "conformance_plan": payload.get("conformance_plan"),
+        "decision_status": decision.get("status"),
+    }
+
+
+def _work_start_scope_projection(payload: dict) -> dict:
+    return {
+        "schema_version": payload.get("schema_version"),
+        "artifact_type": payload.get("artifact_type"),
+        "delivery_id": payload.get("delivery_id"),
+        "covered_work_item_ids": payload.get("covered_work_item_ids"),
+        "landing_unit": payload.get("landing_unit"),
+        "architecture": payload.get("architecture"),
+        "source_snapshot": payload.get("source_snapshot"),
+        "invalidation_inputs": payload.get("invalidation_inputs"),
+    }
+
+
+def _review_packet_readiness_subject_projection(payload: dict) -> dict:
+    projection = copy.deepcopy(payload)
+    projection.pop("custody", None)
+    projection.pop("integrity", None)
+    readiness = _artifact_object(projection.get("readiness"))
+    readiness.pop("receipt_refs", None)
+    readiness.pop("subject_digest", None)
+    return projection
+
+
+def delivery_art_review_packet_readiness_subject_digest(payload: dict) -> str:
+    return _delivery_art_projection_digest(
+        _review_packet_readiness_subject_projection(payload)
+    )
+
+
+def _review_packet_predecessor_continuity_errors(
+    finalized: dict,
+    merge_ready: dict,
+) -> list[str]:
+    errors: list[str] = []
+    for field in (
+        "packet_id",
+        "delivery_id",
+        "covered_work_item_ids",
+        "created_at",
+        "operator",
+        "work_start",
+    ):
+        if finalized.get(field) != merge_ready.get(field):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready {field}"
+            )
+
+    final_landing = _artifact_object(finalized.get("landing_unit"))
+    prior_landing = _artifact_object(merge_ready.get("landing_unit"))
+    for field in ("decision", "rollback_boundary"):
+        if final_landing.get(field) != prior_landing.get(field):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready landing_unit.{field}"
+            )
+    expected_final_kind = {
+        "open_pr": "merged_pr",
+        "approved_direct_land": "approved_direct_land",
+    }.get(prior_landing.get("evidence_kind"))
+    if expected_final_kind is None or final_landing.get("evidence_kind") != expected_final_kind:
+        errors.append(
+            "finalized source Review Packet evidence kind must advance from its merge-ready predecessor"
+        )
+
+    prior_repos = {
+        repo.get("repo_name"): repo
+        for repo in _artifact_object_list(prior_landing.get("repos"))
+        if isinstance(repo.get("repo_name"), str)
+    }
+    final_repos = {
+        repo.get("repo_name"): repo
+        for repo in _artifact_object_list(final_landing.get("repos"))
+        if isinstance(repo.get("repo_name"), str)
+    }
+    if set(prior_repos) != set(final_repos):
+        errors.append(
+            "finalized Review Packet repos must match its merge-ready predecessor"
+        )
+    stable_repo_fields = (
+        "branch",
+        "base_ref",
+        "base_commit",
+        "head_commit",
+        "pr_url",
+        "changed_files",
+        "change_record_refs",
+    )
+    for repo_name, prior_repo in prior_repos.items():
+        final_repo = final_repos.get(repo_name)
+        if final_repo is None:
+            continue
+        for field in stable_repo_fields:
+            if final_repo.get(field) != prior_repo.get(field):
+                errors.append(
+                    f"finalized Review Packet must preserve merge-ready {repo_name}.{field}"
+                )
+
+    prior_evidence = _artifact_object(merge_ready.get("evidence"))
+    final_evidence = _artifact_object(finalized.get("evidence"))
+    for section in (
+        "changed_surfaces",
+        "tests",
+        "validations",
+        "runtime_and_live",
+        "security_and_trust",
+    ):
+        final_entries = _artifact_object_list(final_evidence.get(section))
+        for prior_entry in _artifact_object_list(prior_evidence.get(section)):
+            if prior_entry not in final_entries:
+                errors.append(
+                    f"finalized Review Packet must preserve merge-ready evidence {prior_entry.get('id')}"
+                )
+
+    final_mappings = {
+        mapping.get("work_item_id"): mapping
+        for mapping in _artifact_object_list(final_evidence.get("acceptance_mapping"))
+        if isinstance(mapping.get("work_item_id"), str)
+    }
+    for prior_mapping in _artifact_object_list(
+        prior_evidence.get("acceptance_mapping")
+    ):
+        work_item_id = prior_mapping.get("work_item_id")
+        final_mapping = final_mappings.get(work_item_id)
+        if final_mapping is None:
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready acceptance mapping for {work_item_id}"
+            )
+            continue
+        if final_mapping.get("acceptance_ref") != prior_mapping.get(
+            "acceptance_ref"
+        ) or final_mapping.get("summary") != prior_mapping.get("summary") or not set(
+            _artifact_string_list(prior_mapping.get("evidence_ids"))
+        ).issubset(_artifact_string_list(final_mapping.get("evidence_ids"))):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready acceptance evidence for {work_item_id}"
+            )
+
+    if merge_ready.get("rollback") is not None and finalized.get(
+        "rollback"
+    ) != merge_ready.get("rollback"):
+        errors.append("finalized Review Packet must preserve merge-ready rollback evidence")
+
+    final_exceptions = _artifact_object_list(finalized.get("exceptions"))
+    for prior_exception in _artifact_object_list(merge_ready.get("exceptions")):
+        if prior_exception not in final_exceptions:
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready exception {prior_exception.get('id')}"
+            )
+    return errors
+
+
+def _artifact_canonicalization_errors(
+    value: object,
+    path: str = "<root>",
+) -> list[str]:
+    """Restrict artifacts to the RFC 8785 domain used by this contract."""
+    errors: list[str] = []
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            errors.append(f"{path} contains a lone UTF-16 surrogate")
+    elif isinstance(value, float):
+        errors.append(
+            f"{path} uses a floating-point value; Delivery ART artifacts require integral numbers"
+        )
+    elif isinstance(value, int) and not isinstance(value, bool):
+        if abs(value) > 9_007_199_254_740_991:
+            errors.append(f"{path} exceeds the RFC 8785 safe integer range")
+    elif isinstance(value, list):
+        for index, entry in enumerate(value):
+            errors.extend(
+                _artifact_canonicalization_errors(entry, f"{path}[{index}]")
+            )
+    elif isinstance(value, dict):
+        for key, entry in value.items():
+            if not isinstance(key, str):
+                errors.append(f"{path} contains a non-string object key")
+                continue
+            errors.extend(_artifact_canonicalization_errors(key, f"{path} key"))
+            errors.extend(
+                _artifact_canonicalization_errors(entry, f"{path}[{key!r}]")
+            )
+    elif value is not None and not isinstance(value, bool):
+        errors.append(f"{path} contains an unsupported canonical JSON value")
+    return errors
+
+
+def strict_delivery_art_object(pairs: list[tuple[str, object]]) -> dict:
+    artifact_object = {}
+    for key, value in pairs:
+        if key in artifact_object:
+            raise ValueError(f"duplicate JSON object key {key!r}")
+        artifact_object[key] = value
+    return artifact_object
+
+
+def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
+    """Validate cross-field invariants that JSON Schema cannot express."""
+    errors: list[str] = []
+    artifact_type = payload.get("artifact_type")
+    delivery_id = payload.get("delivery_id")
+    delivery_number = _delivery_art_entity_number(delivery_id, "delivery")
+    custody = _artifact_object(payload.get("custody"))
+    if (
+        custody.get("state") == "durable"
+        and custody.get("backend") == "openproject-attachment"
+        and delivery_number is not None
+    ):
+        expected_prefix = (
+            f"openproject://work_packages/{delivery_number}/attachments/"
+        )
+        if not str(custody.get("uri", "")).startswith(expected_prefix):
+            errors.append(
+                "durable custody URI must attach the artifact to its declared Delivery initiative"
+            )
+    supersedes = _artifact_object(custody.get("supersedes"))
+    errors.extend(
+        _delivery_art_ref_digest_errors(
+            supersedes.get("uri"),
+            supersedes.get("digest"),
+            "custody.supersedes.uri",
+        )
+    )
+
+    if artifact_type == "delivery_art_architecture_packet":
+        artifact_id = payload.get("artifact_id")
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            artifact_id, "architecture-packet", delivery_id
+        ):
+            errors.append("artifact_id must be scoped to delivery_id")
+        expected_scope_fingerprint = _delivery_art_projection_digest_if_canonical(
+            _architecture_scope_projection(payload)
+        )
+        if (
+            expected_scope_fingerprint is not None
+            and payload.get("scope_fingerprint") != expected_scope_fingerprint
+        ):
+            errors.append(
+                "scope_fingerprint must equal the deterministic architecture scope projection "
+                + expected_scope_fingerprint
+            )
+        covered_work_items = set(
+            _artifact_string_list(payload.get("covered_work_item_ids"))
+        )
+        architecture = _artifact_object(payload.get("architecture"))
+        owner_map = _artifact_object_list(architecture.get("descendant_owner_map"))
+        dag = _artifact_object(architecture.get("dependency_merge_dag"))
+        owner_map_ids = [
+            entry.get("work_item_id")
+            for entry in owner_map
+            if isinstance(entry.get("work_item_id"), str)
+        ]
+        owner_by_work_item = {
+            entry.get("work_item_id"): entry.get("owner_repo")
+            for entry in owner_map
+            if isinstance(entry.get("work_item_id"), str)
+            and isinstance(entry.get("owner_repo"), str)
+        }
+        dag_nodes = set(_artifact_string_list(dag.get("nodes")))
+
+        if len(owner_map_ids) != len(set(owner_map_ids)):
+            errors.append(
+                "architecture.descendant_owner_map must contain one entry per work item"
+            )
+        if set(owner_map_ids) != covered_work_items:
+            errors.append(
+                "architecture.descendant_owner_map must exactly cover covered_work_item_ids"
+            )
+        if dag_nodes != covered_work_items:
+            errors.append(
+                "architecture.dependency_merge_dag.nodes must exactly cover covered_work_item_ids"
+            )
+
+        parent_by_work_item = {}
+        root_work_items = []
+        for entry in owner_map:
+            work_item_id = entry.get("work_item_id")
+            parent = entry.get("parent_work_item_id")
+            if isinstance(work_item_id, str):
+                parent_by_work_item[work_item_id] = parent
+                if parent is None:
+                    root_work_items.append(work_item_id)
+            if isinstance(parent, str) and parent not in dag_nodes:
+                errors.append(
+                    f"architecture descendant {work_item_id} references unknown parent {parent}"
+                )
+        if owner_map_ids and not root_work_items:
+            errors.append(
+                "architecture.descendant_owner_map must contain at least one root"
+            )
+
+        parent_cycle_nodes = set()
+        parent_walk_complete = set()
+        for start in parent_by_work_item:
+            chain = []
+            chain_positions = {}
+            current = start
+            while isinstance(current, str) and current in parent_by_work_item:
+                if current in chain_positions:
+                    parent_cycle_nodes.update(chain[chain_positions[current] :])
+                    break
+                if current in parent_walk_complete:
+                    break
+                chain_positions[current] = len(chain)
+                chain.append(current)
+                current = parent_by_work_item[current]
+            parent_walk_complete.update(chain)
+        if parent_cycle_nodes:
+            errors.append(
+                "architecture.descendant_owner_map parent links must be acyclic; cycle includes: "
+                + ", ".join(sorted(parent_cycle_nodes))
+            )
+
+        adjacency = {node: [] for node in dag_nodes}
+        indegree = {node: 0 for node in dag_nodes}
+        precedence_edges = []
+        for edge in _artifact_object_list(dag.get("edges")):
+            source = edge.get("from")
+            target = edge.get("to")
+            if not isinstance(source, str) or not isinstance(target, str):
+                continue
+            unknown_endpoints = {source, target} - dag_nodes
+            if unknown_endpoints:
+                errors.append(
+                    "architecture dependency edge references unknown nodes: "
+                    + ", ".join(sorted(str(node) for node in unknown_endpoints))
+                )
+                continue
+            precedence = _delivery_art_edge_precedence(edge)
+            if precedence is None:
+                continue
+            before, after = precedence
+            precedence_edges.append(precedence)
+            adjacency[before].append(after)
+            indegree[after] += 1
+
+        ready = [node for node, degree in indegree.items() if degree == 0]
+        visited_count = 0
+        while ready:
+            node = ready.pop()
+            visited_count += 1
+            for target in adjacency[node]:
+                indegree[target] -= 1
+                if indegree[target] == 0:
+                    ready.append(target)
+        if visited_count != len(dag_nodes):
+            errors.append("architecture.dependency_merge_dag must be acyclic")
+
+        owner_repos = {
+            entry.get("owner_repo")
+            for entry in owner_map
+            if isinstance(entry.get("owner_repo"), str)
+        }
+        merge_order = _artifact_string_list(dag.get("merge_order"))
+        if set(merge_order) != owner_repos:
+            errors.append(
+                "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
+            )
+        else:
+            merge_positions = {
+                repo: position for position, repo in enumerate(merge_order)
+            }
+            for before, after in precedence_edges:
+                before_repo = owner_by_work_item.get(before)
+                after_repo = owner_by_work_item.get(after)
+                if (
+                    before_repo is not None
+                    and after_repo is not None
+                    and before_repo != after_repo
+                    and merge_positions[before_repo] >= merge_positions[after_repo]
+                ):
+                    errors.append(
+                        "architecture.dependency_merge_dag.merge_order violates "
+                        f"{before} before {after}: {before_repo} must precede {after_repo}"
+                    )
+
+        source_snapshot = _artifact_object(payload.get("source_snapshot"))
+        if (
+            delivery_number is not None
+            and _delivery_art_openproject_id(source_snapshot.get("art_ref"))
+            != delivery_number
+        ):
+            errors.append(
+                "architecture source_snapshot.art_ref must reference its declared Delivery initiative"
+            )
+        repo_revisions = _artifact_object_list(source_snapshot.get("repo_revisions"))
+        revision_repos = [
+            entry.get("repo")
+            for entry in repo_revisions
+            if isinstance(entry.get("repo"), str)
+        ]
+        if len(revision_repos) != len(set(revision_repos)):
+            errors.append(
+                "source_snapshot.repo_revisions must contain one entry per owner repo"
+            )
+        if set(revision_repos) != owner_repos:
+            errors.append(
+                "source_snapshot.repo_revisions must exactly cover descendant owner repos"
+            )
+
+        lifecycle = _artifact_object(architecture.get("lifecycle_state_model"))
+        lifecycle_states = set(_artifact_string_list(lifecycle.get("states")))
+        for transition in _artifact_object_list(lifecycle.get("transitions")):
+            endpoints = {
+                endpoint
+                for endpoint in (transition.get("from"), transition.get("to"))
+                if isinstance(endpoint, str)
+            }
+            unknown_states = endpoints - lifecycle_states
+            if unknown_states:
+                errors.append(
+                    "architecture lifecycle transition references undeclared states: "
+                    + ", ".join(sorted(unknown_states))
+                )
+
+        conformance_plan = _artifact_object(payload.get("conformance_plan"))
+        conformance_dimensions = set(
+            _artifact_string_list(conformance_plan.get("dimensions"))
+        )
+        applicability_rows = _artifact_object_list(
+            conformance_plan.get("work_item_dimension_applicability")
+        )
+        applicability_items = [
+            row.get("work_item_id")
+            for row in applicability_rows
+            if isinstance(row.get("work_item_id"), str)
+        ]
+        applicability_by_work_item = {
+            row.get("work_item_id"): set(
+                _artifact_string_list(row.get("dimension_ids"))
+            )
+            for row in applicability_rows
+            if isinstance(row.get("work_item_id"), str)
+        }
+        if len(applicability_items) != len(set(applicability_items)):
+            errors.append(
+                "conformance_plan.work_item_dimension_applicability must contain one row per work item"
+            )
+        if set(applicability_items) != covered_work_items:
+            errors.append(
+                "conformance_plan.work_item_dimension_applicability must exactly cover covered_work_item_ids"
+            )
+        applicable_dimensions = set().union(
+            *applicability_by_work_item.values()
+        ) if applicability_by_work_item else set()
+        if applicable_dimensions != conformance_dimensions:
+            errors.append(
+                "work-item dimension applicability must exactly cover declared conformance dimensions"
+            )
+        for work_item_id, dimensions in applicability_by_work_item.items():
+            unknown_dimensions = dimensions - conformance_dimensions
+            if unknown_dimensions:
+                errors.append(
+                    f"work-item dimension applicability for {work_item_id} references undeclared dimensions: "
+                    + ", ".join(sorted(unknown_dimensions))
+                )
+        protocol_applicability = _artifact_object(
+            conformance_plan.get("protocol_applicability")
+        )
+        if protocol_applicability.get("applies") is True:
+            missing_dimensions = (
+                DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS
+                - conformance_dimensions
+            )
+            if missing_dimensions:
+                errors.append(
+                    "protocol conformance plan is missing required dimensions: "
+                    + ", ".join(sorted(missing_dimensions))
+                )
+        conformance_cases = _artifact_object_list(conformance_plan.get("cases"))
+        conformance_case_ids = [
+            case.get("id")
+            for case in conformance_cases
+            if isinstance(case.get("id"), str)
+        ]
+        if len(conformance_case_ids) != len(set(conformance_case_ids)):
+            errors.append("conformance_plan.cases must contain unique case ids")
+        conformance_items = set()
+        executable_dimensions = set()
+        polarities_by_work_item = {
+            work_item_id: set() for work_item_id in covered_work_items
+        }
+        merge_ready_polarities_by_dimension = {
+            dimension: set() for dimension in conformance_dimensions
+        }
+        merge_ready_polarities_by_work_item = {
+            work_item_id: set() for work_item_id in covered_work_items
+        }
+        merge_ready_polarities_by_pair = {
+            (work_item_id, dimension): set()
+            for work_item_id, dimensions in applicability_by_work_item.items()
+            for dimension in dimensions
+        }
+        for case in conformance_cases:
+            case_id = case.get("id")
+            applicability = set(
+                _artifact_string_list(case.get("applies_to_work_item_ids"))
+            )
+            case_dimensions = set(
+                _artifact_string_list(case.get("dimension_ids"))
+            )
+            conformance_items.update(applicability)
+            executable_dimensions.update(case_dimensions)
+            for work_item_id in applicability.intersection(covered_work_items):
+                polarity = case.get("polarity")
+                if isinstance(polarity, str):
+                    polarities_by_work_item[work_item_id].add(polarity)
+            if case.get("target_readiness") == "merge-ready":
+                polarity = case.get("polarity")
+                for work_item_id in applicability.intersection(covered_work_items):
+                    if isinstance(polarity, str):
+                        merge_ready_polarities_by_work_item[work_item_id].add(
+                            polarity
+                        )
+                for dimension in case_dimensions.intersection(
+                    conformance_dimensions
+                ):
+                    if isinstance(polarity, str):
+                        merge_ready_polarities_by_dimension[dimension].add(
+                            polarity
+                        )
+                for work_item_id in applicability.intersection(covered_work_items):
+                    for dimension in case_dimensions.intersection(
+                        applicability_by_work_item.get(work_item_id, set())
+                    ):
+                        if isinstance(polarity, str):
+                            merge_ready_polarities_by_pair[
+                                (work_item_id, dimension)
+                            ].add(polarity)
+            unknown_items = applicability - covered_work_items
+            if unknown_items:
+                errors.append(
+                    f"conformance case {case_id} applies to undeclared work items: "
+                    + ", ".join(sorted(unknown_items))
+                )
+            unknown_dimensions = case_dimensions - conformance_dimensions
+            if unknown_dimensions:
+                errors.append(
+                    f"conformance case {case_id} references undeclared dimensions: "
+                    + ", ".join(sorted(unknown_dimensions))
+                )
+            for work_item_id in applicability.intersection(covered_work_items):
+                inapplicable_dimensions = case_dimensions - applicability_by_work_item.get(
+                    work_item_id, set()
+                )
+                if inapplicable_dimensions:
+                    errors.append(
+                        f"conformance case {case_id} references dimensions not applicable to {work_item_id}: "
+                        + ", ".join(sorted(inapplicable_dimensions))
+                    )
+        if conformance_plan.get("required") is True:
+            if conformance_items != covered_work_items:
+                errors.append(
+                    "required conformance plan must exactly cover covered_work_item_ids"
+                )
+            if executable_dimensions != conformance_dimensions:
+                errors.append(
+                    "required conformance cases must exactly cover declared dimensions"
+                )
+            for work_item_id, polarities in polarities_by_work_item.items():
+                if polarities != {"positive", "negative"}:
+                    errors.append(
+                        f"required conformance plan must include positive and negative cases for {work_item_id}"
+                    )
+        if protocol_applicability.get("applies") is True:
+            for work_item_id, polarities in (
+                merge_ready_polarities_by_work_item.items()
+            ):
+                if polarities != {"positive", "negative"}:
+                    errors.append(
+                        "required protocol work item must have positive and negative merge-ready cases: "
+                        + work_item_id
+                    )
+            for dimension in DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS:
+                if merge_ready_polarities_by_dimension.get(dimension) != {
+                    "positive",
+                    "negative",
+                }:
+                    errors.append(
+                        "required protocol dimension must have positive and negative merge-ready cases: "
+                        + dimension
+                    )
+            for (work_item_id, dimension), polarities in (
+                merge_ready_polarities_by_pair.items()
+            ):
+                if polarities != {"positive", "negative"}:
+                    errors.append(
+                        "required work-item/dimension pair must have positive and negative merge-ready cases: "
+                        f"{work_item_id}/{dimension}"
+                    )
+
+        git_causality = _artifact_object(conformance_plan.get("git_causality"))
+        git_claims = _artifact_object_list(git_causality.get("claims"))
+        git_claim_ids = [
+            claim.get("id")
+            for claim in git_claims
+            if isinstance(claim.get("id"), str)
+        ]
+        if len(git_claim_ids) != len(set(git_claim_ids)):
+            errors.append("conformance_plan.git_causality claims must have unique ids")
+        for claim in git_claims:
+            claim_id = claim.get("id")
+            claim_items = set(
+                _artifact_string_list(claim.get("applies_to_work_item_ids"))
+            )
+            claim_dimensions = set(
+                _artifact_string_list(claim.get("dimension_ids"))
+            )
+            for work_item_id in claim_items:
+                if work_item_id not in covered_work_items:
+                    errors.append(
+                        f"Git-causality claim {claim_id} references undeclared work item {work_item_id}"
+                    )
+                    continue
+                outside_dimensions = claim_dimensions - applicability_by_work_item.get(
+                    work_item_id, set()
+                )
+                if outside_dimensions:
+                    errors.append(
+                        f"Git-causality claim {claim_id} is outside declared applicability for {work_item_id}: "
+                        + ", ".join(sorted(outside_dimensions))
+                    )
+                for dimension in claim_dimensions.intersection(
+                    applicability_by_work_item.get(work_item_id, set())
+                ):
+                    real_git_polarities = {
+                        case.get("polarity")
+                        for case in conformance_cases
+                        if case.get("target_readiness") == "merge-ready"
+                        and case.get("fidelity") == "real-git"
+                        and work_item_id
+                        in _artifact_string_list(
+                            case.get("applies_to_work_item_ids")
+                        )
+                        and dimension
+                        in _artifact_string_list(case.get("dimension_ids"))
+                    }
+                    if real_git_polarities != {"positive", "negative"}:
+                        errors.append(
+                            "Git-causality claim requires positive and negative real-git merge-ready cases: "
+                            f"{work_item_id}/{dimension}"
+                        )
+
+        decision = _artifact_object(payload.get("decision"))
+        if decision.get("status") == "blocked-pending-architecture-decision":
+            open_decisions = [
+                entry
+                for entry in _artifact_object_list(
+                    architecture.get("contradictions_open_decisions")
+                )
+                if entry.get("status") == "open"
+            ]
+            if not open_decisions:
+                errors.append(
+                    "blocked architecture decision must identify at least one open decision"
+                )
+        if decision.get("status") != "draft":
+            _require_artifact_time_order(
+                errors,
+                "created_at",
+                payload.get("created_at"),
+                "decision.decided_at",
+                decision.get("decided_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "source_snapshot.captured_at",
+                source_snapshot.get("captured_at"),
+                "decision.decided_at",
+                decision.get("decided_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "decision.decided_at",
+                decision.get("decided_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
+
+    if artifact_type == "delivery_art_work_start_record":
+        artifact_id = payload.get("artifact_id")
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            artifact_id, "work-start", delivery_id
+        ):
+            errors.append("artifact_id must be scoped to delivery_id")
+        expected_scope_fingerprint = _delivery_art_projection_digest_if_canonical(
+            _work_start_scope_projection(payload)
+        )
+        if (
+            expected_scope_fingerprint is not None
+            and payload.get("scope_fingerprint") != expected_scope_fingerprint
+        ):
+            errors.append(
+                "scope_fingerprint must equal the deterministic work-start scope projection "
+                + expected_scope_fingerprint
+            )
+        source_snapshot = _artifact_object(payload.get("source_snapshot"))
+        source_art_id = _delivery_art_openproject_id(source_snapshot.get("art_ref"))
+        allowed_source_ids = {
+            item_number
+            for item_number in (
+                _delivery_art_entity_number(item, "work-item")
+                for item in _artifact_string_list(payload.get("covered_work_item_ids"))
+            )
+            if item_number is not None
+        }
+        if delivery_number is not None:
+            allowed_source_ids.add(delivery_number)
+        if source_art_id not in allowed_source_ids:
+            errors.append(
+                "work-start source_snapshot.art_ref must reference its Delivery initiative or a covered work item"
+            )
+        architecture_state = _artifact_object(payload.get("architecture"))
+        errors.extend(
+            _delivery_art_ref_digest_errors(
+                architecture_state.get("packet_ref"),
+                architecture_state.get("packet_digest"),
+                "architecture.packet_ref",
+            )
+        )
+        landing_unit = _artifact_object(payload.get("landing_unit"))
+        invalidation_inputs = set(
+            _artifact_string_list(payload.get("invalidation_inputs"))
+        )
+        if invalidation_inputs != DELIVERY_ART_WORK_START_INVALIDATION_INPUTS:
+            missing_inputs = (
+                DELIVERY_ART_WORK_START_INVALIDATION_INPUTS - invalidation_inputs
+            )
+            unexpected_inputs = (
+                invalidation_inputs - DELIVERY_ART_WORK_START_INVALIDATION_INPUTS
+            )
+            details = []
+            if missing_inputs:
+                details.append("missing " + ", ".join(sorted(missing_inputs)))
+            if unexpected_inputs:
+                details.append(
+                    "unexpected " + ", ".join(sorted(unexpected_inputs))
+                )
+            errors.append(
+                "work-start invalidation_inputs must contain the complete declared set"
+                + (": " + "; ".join(details) if details else "")
+            )
+        if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+            owner_repos = _artifact_string_list(landing_unit.get("owner_repos"))
+            branch_plan = _artifact_object_list(landing_unit.get("branch_plan"))
+            repo_revisions = _artifact_object_list(
+                source_snapshot.get("repo_revisions")
+            )
+            branch_repos = [
+                entry.get("repo")
+                for entry in branch_plan
+                if isinstance(entry.get("repo"), str)
+            ]
+            revision_repos = [
+                entry.get("repo")
+                for entry in repo_revisions
+                if isinstance(entry.get("repo"), str)
+            ]
+
+            if len(branch_repos) != len(set(branch_repos)):
+                errors.append("landing_unit.branch_plan must contain one entry per repo")
+            if len(revision_repos) != len(set(revision_repos)):
+                errors.append(
+                    "source_snapshot.repo_revisions must contain one entry per repo"
+                )
+            if set(owner_repos) != set(branch_repos):
+                errors.append(
+                    "landing_unit.owner_repos must exactly match landing_unit.branch_plan repos"
+                )
+            if set(owner_repos) != set(revision_repos):
+                errors.append(
+                    "landing_unit.owner_repos must exactly match source_snapshot.repo_revisions repos"
+                )
+
+            revisions_by_repo = {
+                entry.get("repo"): entry
+                for entry in repo_revisions
+                if isinstance(entry.get("repo"), str)
+            }
+            for entry in branch_plan:
+                repo = entry.get("repo")
+                if not isinstance(repo, str):
+                    continue
+                revision = revisions_by_repo.get(repo)
+                if revision is None:
+                    continue
+                if entry.get("base_ref") != revision.get("base_ref"):
+                    errors.append(
+                        f"landing_unit.branch_plan base_ref for {repo} must match the source snapshot"
+                    )
+                if entry.get("base_commit") != revision.get("commit"):
+                    errors.append(
+                        f"landing_unit.branch_plan base_commit for {repo} must match the source snapshot"
+                    )
+
+        readiness = _artifact_object(payload.get("readiness"))
+        if readiness.get("level") != "draft":
+            source_snapshot = _artifact_object(payload.get("source_snapshot"))
+            custody = _artifact_object(payload.get("custody"))
+            _require_artifact_time_order(
+                errors,
+                "created_at",
+                payload.get("created_at"),
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "source_snapshot.captured_at",
+                source_snapshot.get("captured_at"),
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
+
+    if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
+        packet_id = payload.get("packet_id")
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            packet_id, "review-packet", delivery_id
+        ):
+            errors.append("packet_id must be scoped to delivery_id")
+        work_start_ref = _artifact_object(payload.get("work_start"))
+        errors.extend(
+            _delivery_art_ref_digest_errors(
+                work_start_ref.get("artifact_ref"),
+                work_start_ref.get("artifact_digest"),
+                "work_start.artifact_ref",
+            )
+        )
+        covered_work_items = _artifact_string_list(
+            payload.get("covered_work_item_ids")
+        )
+        evidence = _artifact_object(payload.get("evidence"))
+        landing_unit = _artifact_object(payload.get("landing_unit"))
+        landing_decision = landing_unit.get("decision")
+        evidence_kind = landing_unit.get("evidence_kind")
+        repo_evidence = _artifact_object_list(landing_unit.get("repos"))
+        repo_names = [
+            entry.get("repo_name")
+            for entry in repo_evidence
+            if isinstance(entry.get("repo_name"), str)
+        ]
+        if landing_decision == "non_source_child":
+            if evidence_kind not in {"pending", "non_source_evidence"}:
+                errors.append(
+                    "non_source_child Landing Units may use only pending or non_source_evidence"
+                )
+            if repo_evidence:
+                errors.append(
+                    "non_source_child Landing Units must not declare source repository evidence"
+                )
+            if _artifact_object_list(evidence.get("changed_surfaces")):
+                errors.append(
+                    "non_source_child Landing Units must not declare changed source surfaces"
+                )
+        elif (
+            landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS
+            and evidence_kind == "non_source_evidence"
+        ):
+            errors.append(
+                "source-backed Landing Units must not use non_source_evidence"
+            )
+        if len(repo_names) != len(set(repo_names)):
+            errors.append("landing_unit.repos must contain one entry per repo")
+
+        mappings = _artifact_object_list(evidence.get("acceptance_mapping"))
+        mapped_work_items = [
+            entry.get("work_item_id")
+            for entry in mappings
+            if isinstance(entry.get("work_item_id"), str)
+        ]
+
+        if len(mapped_work_items) != len(set(mapped_work_items)):
+            errors.append(
+                "evidence.acceptance_mapping must contain one entry per work item"
+            )
+        if set(mapped_work_items) != set(covered_work_items):
+            errors.append(
+                "evidence.acceptance_mapping must exactly cover covered_work_item_ids"
+            )
+
+        evidence_ids = [
+            entry.get("id")
+            for section in DELIVERY_ART_EVIDENCE_SECTIONS
+            for entry in _artifact_object_list(evidence.get(section))
+            if isinstance(entry.get("id"), str)
+        ]
+        if len(evidence_ids) != len(set(evidence_ids)):
+            errors.append("evidence ids must be unique across all evidence sections")
+        known_evidence_ids = set(evidence_ids)
+        for mapping in mappings:
+            work_item_id = mapping.get("work_item_id")
+            expected_art_id = _delivery_art_entity_number(work_item_id, "work-item")
+            if (
+                expected_art_id is not None
+                and _delivery_art_openproject_id(mapping.get("acceptance_ref"))
+                != expected_art_id
+            ):
+                errors.append(
+                    f"acceptance mapping for {work_item_id} must reference the same OpenProject work item"
+                )
+            unknown_ids = set(
+                _artifact_string_list(mapping.get("evidence_ids"))
+            ) - known_evidence_ids
+            if unknown_ids:
+                errors.append(
+                    f"acceptance mapping for {mapping.get('work_item_id')} references unknown evidence ids: "
+                    + ", ".join(sorted(unknown_ids))
+                )
+
+        if landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+            changed_files_by_repo = {
+                entry.get("repo_name"): set(
+                    _artifact_string_list(entry.get("changed_files"))
+                )
+                for entry in repo_evidence
+                if isinstance(entry.get("repo_name"), str)
+            }
+            for changed_surface in _artifact_object_list(
+                evidence.get("changed_surfaces")
+            ):
+                repo = changed_surface.get("repo")
+                path = changed_surface.get("path")
+                if not isinstance(repo, str) or not isinstance(path, str):
+                    continue
+                if repo not in changed_files_by_repo:
+                    errors.append(
+                        f"changed surface {path} references undeclared landing repo {repo}"
+                    )
+                elif path not in changed_files_by_repo[repo]:
+                    errors.append(
+                        f"changed surface {repo}/{path} is absent from landing_unit.repos changed_files"
+                    )
+
+        expected_source_revisions = {
+            (entry.get("repo_name"), entry.get("head_commit"))
+            for entry in repo_evidence
+            if isinstance(entry.get("repo_name"), str)
+            and isinstance(entry.get("head_commit"), str)
+        }
+        for section in (
+            "tests",
+            "validations",
+            "runtime_and_live",
+            "security_and_trust",
+        ):
+            for result in _artifact_object_list(evidence.get(section)):
+                revisions = _artifact_object_list(result.get("source_revisions"))
+                revision_repos = [
+                    revision.get("repo")
+                    for revision in revisions
+                    if isinstance(revision.get("repo"), str)
+                ]
+                if len(revision_repos) != len(set(revision_repos)):
+                    errors.append(
+                        f"evidence result {result.get('id')} must contain one source revision per repo"
+                    )
+                declared_revisions = {
+                    (revision.get("repo"), revision.get("commit"))
+                    for revision in revisions
+                    if isinstance(revision.get("repo"), str)
+                    and isinstance(revision.get("commit"), str)
+                }
+                if (
+                    landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS
+                    and result.get("result") == "pass"
+                    and declared_revisions != expected_source_revisions
+                ):
+                    errors.append(
+                        f"passing evidence result {result.get('id')} must bind the exact landing-unit source heads"
+                    )
+                if (
+                    landing_decision == "non_source_child"
+                    and declared_revisions
+                ):
+                    errors.append(
+                        f"non-source evidence result {result.get('id')} must not declare source revisions"
+                    )
+
+        readiness = _artifact_object(payload.get("readiness"))
+        custody = _artifact_object(payload.get("custody"))
+        _require_artifact_time_order(
+            errors,
+            "created_at",
+            payload.get("created_at"),
+            "readiness.evaluated_at",
+            readiness.get("evaluated_at"),
+        )
+        if payload.get("status") == "finalized":
+            subject_projection = _review_packet_readiness_subject_projection(
+                payload
+            )
+            expected_subject_digest = _delivery_art_projection_digest_if_canonical(
+                subject_projection
+            )
+            if (
+                expected_subject_digest is not None
+                and readiness.get("subject_digest") != expected_subject_digest
+            ):
+                errors.append(
+                    "readiness.subject_digest must equal the canonical Review Packet readiness-subject projection "
+                    + expected_subject_digest
+                )
+            _require_artifact_time_order(
+                errors,
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+                "finalized_at",
+                payload.get("finalized_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "finalized_at",
+                payload.get("finalized_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
+        if evidence_kind == "approved_direct_land":
+            authority_cutoffs = [
+                cutoff
+                for cutoff in (
+                    _artifact_timestamp(readiness.get("evaluated_at")),
+                    _artifact_timestamp(payload.get("finalized_at")),
+                )
+                if cutoff is not None
+            ]
+            authority_cutoff = max(authority_cutoffs) if authority_cutoffs else None
+            valid_direct_land_authority = any(
+                authority_cutoff is not None
+                and (expires_at := _artifact_timestamp(exception.get("expires_at")))
+                is not None
+                and expires_at > authority_cutoff
+                for exception in _artifact_object_list(payload.get("exceptions"))
+                if exception.get("kind") == "direct-land"
+            )
+            if not valid_direct_land_authority:
+                errors.append(
+                    "approved_direct_land requires a direct-land exception valid through readiness evaluation and finalization"
+                )
+
+    if artifact_type == "delivery_art_readiness_receipt":
+        subject = _artifact_object(payload.get("subject"))
+        subject_prefixes = {
+            "delivery_art_architecture_packet": "architecture-packet",
+            "delivery_art_work_start_record": "work-start",
+            "art_review_packet": "review-packet",
+        }
+        subject_prefix = subject_prefixes.get(subject.get("artifact_type"))
+        if (
+            isinstance(delivery_id, str)
+            and isinstance(subject_prefix, str)
+            and not _delivery_art_identifier_scoped_to(
+                subject.get("artifact_id"), subject_prefix, delivery_id
+            )
+        ):
+            errors.append("readiness receipt subject.artifact_id must be scoped to delivery_id")
+        receipt_id = payload.get("receipt_id")
+        receipt_token = (
+            receipt_id.split(":", 1)[1]
+            if isinstance(receipt_id, str) and ":" in receipt_id
+            else None
+        )
+        if receipt_token is not None and (
+            f"art-readiness-receipt-{receipt_token}-"
+            not in str(custody.get("uri", ""))
+        ):
+            errors.append("readiness receipt custody URI must include its receipt id")
+        readiness = _artifact_object(payload.get("readiness"))
+        if delivery_number is not None and readiness.get("target_scope") != (
+            f"art:delivery-{delivery_number}"
+        ):
+            errors.append(
+                "readiness receipt target_scope must match its declared Delivery initiative"
+            )
+        findings = _artifact_object_list(payload.get("findings"))
+        finding_ids = [
+            finding.get("id")
+            for finding in findings
+            if isinstance(finding.get("id"), str)
+        ]
+        if len(finding_ids) != len(set(finding_ids)):
+            errors.append("readiness receipt finding ids must be unique")
+        if readiness.get("outcome") == "ready" and any(
+            finding.get("severity") in {"blocker", "error"}
+            for finding in findings
+        ):
+            errors.append(
+                "ready readiness receipt must not contain blocker or error findings"
+            )
+        if readiness.get("outcome") != "ready" and not findings:
+            errors.append("non-ready readiness receipt must identify at least one finding")
+        if readiness.get("outcome") == "blocked" and not any(
+            finding.get("severity") in {"blocker", "error"}
+            for finding in findings
+        ):
+            errors.append(
+                "blocked readiness receipt must identify a blocker or error finding"
+            )
+        _require_artifact_time_order(
+            errors,
+            "readiness.evaluated_at",
+            readiness.get("evaluated_at"),
+            "custody.persisted_at",
+            custody.get("persisted_at"),
+        )
+
+    return errors
+
+
+def delivery_art_artifact_reference_errors(
+    payload: dict,
+    dependency_artifacts: list[dict],
+) -> list[str]:
+    """Resolve and compare the immutable artifact chain behind readiness."""
+    errors: list[str] = []
+    artifacts_by_ref: dict[str, list[dict]] = {}
+    all_artifacts = []
+    seen_artifact_objects = set()
+    for artifact in [payload, *dependency_artifacts]:
+        if not isinstance(artifact, dict):
+            continue
+        if id(artifact) in seen_artifact_objects:
+            continue
+        seen_artifact_objects.add(id(artifact))
+        all_artifacts.append(artifact)
+    for artifact in all_artifacts:
+        custody = _artifact_object(artifact.get("custody"))
+        uri = custody.get("uri")
+        if isinstance(uri, str):
+            artifacts_by_ref.setdefault(uri, []).append(artifact)
+
+    for uri, artifacts in artifacts_by_ref.items():
+        if len(artifacts) > 1:
+            errors.append(f"dependency artifact ref {uri} resolves ambiguously")
+
+    def resolve(
+        ref: object,
+        digest: object,
+        label: str,
+        expected_type: str,
+    ) -> dict | None:
+        if not isinstance(ref, str) or not isinstance(digest, str):
+            return None
+        candidates = artifacts_by_ref.get(ref, [])
+        if not candidates:
+            errors.append(f"{label} does not resolve to a supplied dependency artifact")
+            return None
+        if len(candidates) != 1:
+            return None
+        artifact = candidates[0]
+        if artifact.get("artifact_type") != expected_type:
+            errors.append(f"{label} resolves to the wrong artifact type")
+            return None
+        actual_digest = _artifact_object(artifact.get("integrity")).get(
+            "content_digest"
+        )
+        if actual_digest != digest:
+            errors.append(f"{label} digest does not match the resolved artifact")
+            return None
+        return artifact
+
+    def resolve_architecture(work_start: dict) -> dict | None:
+        architecture_state = _artifact_object(work_start.get("architecture"))
+        if architecture_state.get("readiness") != "architecture-ready":
+            return None
+        architecture_packet = resolve(
+            architecture_state.get("packet_ref"),
+            architecture_state.get("packet_digest"),
+            "architecture.packet_ref",
+            "delivery_art_architecture_packet",
+        )
+        if architecture_packet is None:
+            return None
+        if architecture_packet.get("delivery_id") != work_start.get("delivery_id"):
+            errors.append(
+                "resolved architecture packet delivery_id must match the work-start record"
+            )
+        if (
+            _artifact_object(architecture_packet.get("decision")).get("status")
+            != "architecture-ready"
+        ):
+            errors.append(
+                "resolved architecture packet must carry an architecture-ready decision"
+            )
+        work_start_cutoff = _artifact_object(work_start.get("readiness")).get(
+            "evaluated_at"
+        ) or work_start.get("created_at")
+        _require_artifact_time_order(
+            errors,
+            "resolved architecture decision.decided_at",
+            _artifact_object(architecture_packet.get("decision")).get(
+                "decided_at"
+            ),
+            "work-start evaluation",
+            work_start_cutoff,
+        )
+        _require_artifact_time_order(
+            errors,
+            "resolved architecture custody.persisted_at",
+            _artifact_object(architecture_packet.get("custody")).get(
+                "persisted_at"
+            ),
+            "work-start evaluation",
+            work_start_cutoff,
+        )
+        covered_work_items = set(
+            _artifact_string_list(work_start.get("covered_work_item_ids"))
+        )
+        architecture_items = set(
+            _artifact_string_list(
+                architecture_packet.get("covered_work_item_ids")
+            )
+        )
+        if not covered_work_items.issubset(architecture_items):
+            errors.append(
+                "work-start covered_work_item_ids must be covered by the resolved architecture packet"
+            )
+        owner_map = _artifact_object_list(
+            _artifact_object(architecture_packet.get("architecture")).get(
+                "descendant_owner_map"
+            )
+        )
+        architecture_owners = {
+            entry.get("owner_repo")
+            for entry in owner_map
+            if entry.get("work_item_id") in covered_work_items
+            and isinstance(entry.get("owner_repo"), str)
+        }
+        landing_owners = set(
+            _artifact_string_list(
+                _artifact_object(work_start.get("landing_unit")).get("owner_repos")
+            )
+        )
+        if architecture_owners != landing_owners:
+            errors.append(
+                "work-start owner repos must match the resolved architecture owner map for covered work items"
+            )
+        return architecture_packet
+
+    def artifact_identifier(artifact: dict) -> object:
+        if artifact.get("artifact_type") == "art_review_packet":
+            return artifact.get("packet_id")
+        return artifact.get("artifact_id")
+
+    def receipt_subject_digest(artifact: dict, digest_kind: object) -> object:
+        if digest_kind == "artifact-content":
+            return _artifact_object(artifact.get("integrity")).get(
+                "content_digest"
+            )
+        if (
+            digest_kind == "readiness-subject"
+            and artifact.get("artifact_type") == "art_review_packet"
+        ):
+            return _delivery_art_projection_digest_if_canonical(
+                _review_packet_readiness_subject_projection(artifact)
+            )
+        return None
+
+    artifact_type = payload.get("artifact_type")
+    current_artifact = payload
+    current_uri = _artifact_object(payload.get("custody")).get("uri")
+    visited_supersession_uris = {current_uri} if isinstance(current_uri, str) else set()
+    supersession_cycle_reported = False
+    while True:
+        current_custody = _artifact_object(current_artifact.get("custody"))
+        supersedes = _artifact_object(current_custody.get("supersedes"))
+        if not supersedes:
+            break
+        prior_uri = supersedes.get("uri")
+        prior_artifact = resolve(
+            prior_uri,
+            supersedes.get("digest"),
+            "custody.supersedes.uri",
+            str(artifact_type),
+        )
+        if prior_artifact is None:
+            break
+        if prior_uri in visited_supersession_uris:
+            errors.append("custody.supersedes chain must be acyclic")
+            supersession_cycle_reported = True
+            break
+        if prior_artifact.get("delivery_id") != payload.get("delivery_id"):
+            errors.append(
+                "superseded artifact delivery_id must match the replacement artifact"
+            )
+        prior_custody = _artifact_object(prior_artifact.get("custody"))
+        if prior_custody.get("state") != "durable":
+            errors.append("custody.supersedes must resolve a durable artifact")
+        _require_strict_artifact_time_order(
+            errors,
+            "superseded artifact custody.persisted_at",
+            prior_custody.get("persisted_at"),
+            "replacement artifact custody.persisted_at",
+            current_custody.get("persisted_at"),
+        )
+        if isinstance(prior_uri, str):
+            visited_supersession_uris.add(prior_uri)
+        current_artifact = prior_artifact
+    if supersession_cycle_reported:
+        return errors
+
+    if artifact_type == "delivery_art_work_start_record":
+        resolve_architecture(payload)
+
+    if artifact_type == "delivery_art_readiness_receipt":
+        subject = _artifact_object(payload.get("subject"))
+        subject_candidates = [
+            artifact
+            for artifact in all_artifacts
+            if artifact is not payload
+            and artifact.get("artifact_type") == subject.get("artifact_type")
+            and artifact_identifier(artifact) == subject.get("artifact_id")
+            and receipt_subject_digest(artifact, subject.get("digest_kind"))
+            == subject.get("digest")
+        ]
+        if not subject_candidates:
+            errors.append(
+                "readiness receipt subject does not resolve to a supplied artifact with the declared id and digest"
+            )
+        elif len(subject_candidates) > 1:
+            errors.append("readiness receipt subject resolves ambiguously")
+        else:
+            subject_artifact = subject_candidates[0]
+            if subject_artifact.get("delivery_id") != payload.get("delivery_id"):
+                errors.append(
+                    "readiness receipt subject delivery_id must match the receipt"
+                )
+            if set(
+                _artifact_string_list(subject_artifact.get("covered_work_item_ids"))
+            ) != set(_artifact_string_list(payload.get("covered_work_item_ids"))):
+                errors.append(
+                    "readiness receipt coverage must match its resolved subject artifact"
+                )
+
+            receipt_readiness = _artifact_object(payload.get("readiness"))
+            readiness_level = receipt_readiness.get("level")
+            expected_ready_subjects = {
+                "architecture-ready": (
+                    "delivery_art_architecture_packet",
+                    _artifact_object(subject_artifact.get("decision")).get("status"),
+                    "architecture-ready",
+                ),
+                "implementation-ready": (
+                    "delivery_art_work_start_record",
+                    _artifact_object(subject_artifact.get("readiness")).get("level"),
+                    "implementation-ready",
+                ),
+                "merge-ready": (
+                    "art_review_packet",
+                    (
+                        subject_artifact.get("status"),
+                        _artifact_object(subject_artifact.get("readiness")).get(
+                            "level"
+                        ),
+                    ),
+                    ("merge-ready", "merge-ready"),
+                ),
+                "operating-ready": (
+                    "art_review_packet",
+                    (
+                        subject_artifact.get("status"),
+                        _artifact_object(subject_artifact.get("readiness")).get(
+                            "level"
+                        ),
+                    ),
+                    ("finalized", "operating-ready"),
+                ),
+            }
+            expected_subject = expected_ready_subjects.get(readiness_level)
+            if expected_subject is not None:
+                expected_type, actual_state, expected_state = expected_subject
+                if subject_artifact.get("artifact_type") != expected_type:
+                    errors.append(
+                        "readiness receipt level resolves the wrong subject artifact type"
+                    )
+                if (
+                    receipt_readiness.get("outcome") == "ready"
+                    and actual_state != expected_state
+                ):
+                    errors.append(
+                        "ready readiness receipt subject has not reached the declared readiness level"
+                    )
+
+            subject_state_time = None
+            if readiness_level == "architecture-ready":
+                subject_state_time = _artifact_object(
+                    subject_artifact.get("decision")
+                ).get("decided_at")
+            elif readiness_level in {
+                "implementation-ready",
+                "merge-ready",
+                "operating-ready",
+            }:
+                subject_state_time = _artifact_object(
+                    subject_artifact.get("readiness")
+                ).get("evaluated_at")
+            _require_artifact_time_order(
+                errors,
+                "readiness receipt subject decision",
+                subject_state_time,
+                "readiness receipt evaluation",
+                receipt_readiness.get("evaluated_at"),
+            )
+
+            if subject.get("digest_kind") == "artifact-content":
+                subject_custody = _artifact_object(subject_artifact.get("custody"))
+                if subject_custody.get("state") != "durable":
+                    errors.append(
+                        "artifact-content readiness receipt must resolve a durable subject artifact"
+                    )
+                _require_artifact_time_order(
+                    errors,
+                    "readiness receipt subject custody.persisted_at",
+                    subject_custody.get("persisted_at"),
+                    "readiness receipt evaluation",
+                    receipt_readiness.get("evaluated_at"),
+                )
+            elif (
+                readiness_level == "operating-ready"
+                and _artifact_object(subject_artifact.get("readiness")).get(
+                    "evaluated_at"
+                )
+                != receipt_readiness.get("evaluated_at")
+            ):
+                errors.append(
+                    "operating-readiness receipt evaluation time must match its Review Packet subject"
+                )
+
+    if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
+        work_start_ref = _artifact_object(payload.get("work_start"))
+        work_start = resolve(
+            work_start_ref.get("artifact_ref"),
+            work_start_ref.get("artifact_digest"),
+            "work_start.artifact_ref",
+            "delivery_art_work_start_record",
+        )
+        if work_start is None:
+            return errors
+
+        if work_start.get("delivery_id") != payload.get("delivery_id"):
+            errors.append(
+                "Review Packet delivery_id must match the resolved work-start record"
+            )
+        if set(_artifact_string_list(work_start.get("covered_work_item_ids"))) != set(
+            _artifact_string_list(payload.get("covered_work_item_ids"))
+        ):
+            errors.append(
+                "Review Packet covered_work_item_ids must match the resolved work-start record"
+            )
+        if work_start.get("scope_fingerprint") != work_start_ref.get(
+            "scope_fingerprint"
+        ):
+            errors.append(
+                "Review Packet scope_fingerprint must match the resolved work-start record"
+            )
+        if (
+            _artifact_object(work_start.get("readiness")).get("level")
+            != "implementation-ready"
+        ):
+            errors.append(
+                "Review Packet must resolve an implementation-ready work-start record"
+            )
+        _require_artifact_time_order(
+            errors,
+            "resolved work-start readiness.evaluated_at",
+            _artifact_object(work_start.get("readiness")).get("evaluated_at"),
+            "Review Packet created_at",
+            payload.get("created_at"),
+        )
+        _require_artifact_time_order(
+            errors,
+            "resolved work-start custody.persisted_at",
+            _artifact_object(work_start.get("custody")).get("persisted_at"),
+            "Review Packet created_at",
+            payload.get("created_at"),
+        )
+
+        work_landing = _artifact_object(work_start.get("landing_unit"))
+        packet_landing = _artifact_object(payload.get("landing_unit"))
+        if work_landing.get("decision") != packet_landing.get("decision"):
+            errors.append(
+                "Review Packet Landing Unit decision must match the resolved work-start record"
+            )
+
+        if work_landing.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+            branch_plan = {
+                entry.get("repo"): entry
+                for entry in _artifact_object_list(work_landing.get("branch_plan"))
+                if isinstance(entry.get("repo"), str)
+            }
+            repo_evidence = {
+                entry.get("repo_name"): entry
+                for entry in _artifact_object_list(packet_landing.get("repos"))
+                if isinstance(entry.get("repo_name"), str)
+            }
+            owner_repos = set(_artifact_string_list(work_landing.get("owner_repos")))
+            if set(repo_evidence) != owner_repos:
+                errors.append(
+                    "Review Packet repos must exactly match the resolved work-start owner repos"
+                )
+            for repo, branch in branch_plan.items():
+                evidence = repo_evidence.get(repo)
+                if evidence is None:
+                    continue
+                for packet_field, work_field in (
+                    ("branch", "branch"),
+                    ("base_ref", "base_ref"),
+                    ("base_commit", "base_commit"),
+                ):
+                    if evidence.get(packet_field) != branch.get(work_field):
+                        errors.append(
+                            f"Review Packet {packet_field} for {repo} must match the resolved work-start branch plan"
+                        )
+
+        architecture_packet = resolve_architecture(work_start)
+        if architecture_packet is not None:
+            conformance_plan = _artifact_object(
+                architecture_packet.get("conformance_plan")
+            )
+            if conformance_plan.get("required") is True:
+                packet_items = set(
+                    _artifact_string_list(payload.get("covered_work_item_ids"))
+                )
+                packet_rank = DELIVERY_ART_READINESS_RANK.get(
+                    _artifact_object(payload.get("readiness")).get("level"), 0
+                )
+                cases = {
+                    case.get("id"): case
+                    for case in _artifact_object_list(conformance_plan.get("cases"))
+                    if isinstance(case.get("id"), str)
+                }
+                applicable_cases = {
+                    case_id: case
+                    for case_id, case in cases.items()
+                    if packet_items.intersection(
+                        _artifact_string_list(
+                            case.get("applies_to_work_item_ids")
+                        )
+                    )
+                    and DELIVERY_ART_READINESS_RANK.get(
+                        case.get("target_readiness"), 99
+                    )
+                    <= packet_rank
+                }
+                evidence = _artifact_object(payload.get("evidence"))
+                case_results: dict[str, list[dict]] = {}
+                for section in (
+                    "tests",
+                    "validations",
+                    "runtime_and_live",
+                    "security_and_trust",
+                ):
+                    for result in _artifact_object_list(evidence.get(section)):
+                        for case_id in _artifact_string_list(
+                            result.get("conformance_case_ids")
+                        ):
+                            case_results.setdefault(case_id, []).append(result)
+
+                unknown_case_ids = set(case_results) - set(cases)
+                if unknown_case_ids:
+                    errors.append(
+                        "Review Packet evidence references unknown conformance cases: "
+                        + ", ".join(sorted(unknown_case_ids))
+                    )
+                premature_case_ids = set(case_results) - set(applicable_cases)
+                if premature_case_ids:
+                    errors.append(
+                        "Review Packet evidence binds conformance cases outside its work-item or readiness scope: "
+                        + ", ".join(sorted(premature_case_ids))
+                    )
+                missing_case_ids = set(applicable_cases) - set(case_results)
+                if missing_case_ids:
+                    errors.append(
+                        "Review Packet is missing applicable conformance case results: "
+                        + ", ".join(sorted(missing_case_ids))
+                    )
+                for case_id, results in case_results.items():
+                    case = applicable_cases.get(case_id)
+                    if case is None:
+                        continue
+                    for result in results:
+                        if result.get("result") != "pass":
+                            errors.append(
+                                f"conformance case {case_id} must have a passing result"
+                            )
+                        if result.get("fidelity") != case.get("fidelity"):
+                            errors.append(
+                                f"conformance case {case_id} must use planned fidelity {case.get('fidelity')}"
+                            )
+
+        if payload.get("status") == "finalized":
+            packet_landing = _artifact_object(payload.get("landing_unit"))
+            if packet_landing.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+                supersedes = _artifact_object(
+                    _artifact_object(payload.get("custody")).get("supersedes")
+                )
+                merge_ready_predecessor = resolve(
+                    supersedes.get("uri"),
+                    supersedes.get("digest"),
+                    "custody.supersedes.uri",
+                    "art_review_packet",
+                )
+                if merge_ready_predecessor is not None:
+                    if merge_ready_predecessor.get("status") != "merge-ready":
+                        errors.append(
+                            "finalized source Review Packet must supersede a merge-ready Review Packet"
+                        )
+                    errors.extend(
+                        _review_packet_predecessor_continuity_errors(
+                            payload, merge_ready_predecessor
+                        )
+                    )
+
+            readiness = _artifact_object(payload.get("readiness"))
+            for receipt_ref in _artifact_object_list(readiness.get("receipt_refs")):
+                receipt = resolve(
+                    receipt_ref.get("uri"),
+                    receipt_ref.get("digest"),
+                    "readiness.receipt_refs.uri",
+                    "delivery_art_readiness_receipt",
+                )
+                if receipt is None:
+                    continue
+                if receipt.get("delivery_id") != payload.get("delivery_id"):
+                    errors.append(
+                        "resolved readiness receipt delivery_id must match the Review Packet"
+                    )
+                if set(
+                    _artifact_string_list(receipt.get("covered_work_item_ids"))
+                ) != set(_artifact_string_list(payload.get("covered_work_item_ids"))):
+                    errors.append(
+                        "resolved readiness receipt coverage must match the Review Packet"
+                    )
+                receipt_subject = _artifact_object(receipt.get("subject"))
+                if receipt_subject.get("artifact_id") != payload.get("packet_id"):
+                    errors.append(
+                        "resolved readiness receipt artifact_id must match the Review Packet"
+                    )
+                if receipt_subject.get("digest_kind") != "readiness-subject":
+                    errors.append(
+                        "finalized Review Packet requires a readiness-subject receipt"
+                    )
+                if receipt_subject.get("digest") != readiness.get("subject_digest"):
+                    errors.append(
+                        "resolved readiness receipt subject digest must match the Review Packet"
+                    )
+                receipt_readiness = _artifact_object(receipt.get("readiness"))
+                if receipt_readiness.get("level") != readiness.get("level"):
+                    errors.append(
+                        "resolved readiness receipt level must match the Review Packet"
+                    )
+                if receipt_readiness.get("outcome") != "ready" or receipt_readiness.get(
+                    "mutation_allowed"
+                ) is not True:
+                    errors.append(
+                        "finalized Review Packet requires a ready receipt that permits mutation"
+                    )
+                if receipt_readiness.get("evaluated_at") != readiness.get(
+                    "evaluated_at"
+                ):
+                    errors.append(
+                        "resolved readiness receipt evaluation time must match the Review Packet"
+                    )
+                _require_artifact_time_order(
+                    errors,
+                    "resolved readiness receipt custody.persisted_at",
+                    _artifact_object(receipt.get("custody")).get("persisted_at"),
+                    "Review Packet finalized_at",
+                    payload.get("finalized_at"),
+                )
+                _require_artifact_time_order(
+                    errors,
+                    "resolved readiness receipt custody.persisted_at",
+                    _artifact_object(receipt.get("custody")).get("persisted_at"),
+                    "Review Packet custody.persisted_at",
+                    _artifact_object(payload.get("custody")).get("persisted_at"),
+                )
+
+    return errors
+
+
+def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
+    """Validate the declared content digest and durable content-addressed URI."""
+    canonicalization_errors = _artifact_canonicalization_errors(payload)
+    if canonicalization_errors:
+        return canonicalization_errors
+    digest_projection = copy.deepcopy(payload)
+    digest_projection.pop("custody", None)
+    projected_integrity = _artifact_object(digest_projection.get("integrity"))
+    projected_integrity.pop("content_digest", None)
+    expected_digest = _delivery_art_projection_digest(digest_projection)
+    actual_digest = _artifact_object(payload.get("integrity")).get("content_digest")
+    errors = []
+    if actual_digest != expected_digest:
+        errors.append(
+            f"integrity.content_digest must equal canonical content digest {expected_digest}"
+        )
+    custody = _artifact_object(payload.get("custody"))
+    if custody.get("state") == "durable":
+        digest_hex = expected_digest.removeprefix("sha256:")
+        if digest_hex not in str(custody.get("uri", "")):
+            errors.append("durable custody URI must include the full content digest")
+    return errors
+
+
+def validate_delivery_art_artifact_contracts(
+    errors: list[str],
+    repo_root: Path,
+) -> set[str]:
+    validators: dict[str, Draft202012Validator] = {}
+    fixtures: dict[str, dict] = {}
+    executed_proof_cases: set[str] = set()
+
+    for artifact_name, (schema_ref, fixture_refs) in DELIVERY_ART_ARTIFACT_CASES.items():
+        schema_path = repo_root / schema_ref
+        if not schema_path.exists():
+            errors.append(f"{schema_ref}: Delivery ART artifact schema is missing")
+            continue
+        schema = load_json(schema_path)
+        try:
+            Draft202012Validator.check_schema(schema)
+        except SchemaError as exc:
+            errors.append(f"{schema_ref}: invalid JSON Schema: {exc.message}")
+            continue
+
+        validator = Draft202012Validator(
+            schema,
+            format_checker=CONTRACT_FORMAT_CHECKER,
+        )
+        validators[artifact_name] = validator
+        for fixture_ref in fixture_refs:
+            fixture_path = repo_root / fixture_ref
+            if not fixture_path.exists():
+                errors.append(f"{fixture_ref}: Delivery ART artifact fixture is missing")
+                continue
+            fixture = load_json(fixture_path)
+            fixture_errors = sorted(
+                validator.iter_errors(fixture),
+                key=lambda error: list(error.absolute_path),
+            )
+            for error in fixture_errors:
+                path = ".".join(str(part) for part in error.absolute_path) or "<root>"
+                errors.append(f"{fixture_ref}: {path}: {error.message}")
+            if isinstance(fixture, dict):
+                for error in delivery_art_artifact_semantic_errors(fixture):
+                    errors.append(f"{fixture_ref}: semantic invariant: {error}")
+                for error in delivery_art_artifact_integrity_errors(fixture):
+                    errors.append(f"{fixture_ref}: integrity invariant: {error}")
+                fixtures[Path(fixture_ref).name] = fixture
+
+    if "architecture-packet.valid.json" in fixtures:
+        executed_proof_cases.update(
+            {"architecture-structure-valid", "architecture-conformance-valid"}
+        )
+    if "work-start-record.valid.json" in fixtures:
+        executed_proof_cases.add("work-start-valid")
+    if "review-packet-merge-ready.valid.json" in fixtures:
+        executed_proof_cases.add("review-evidence-valid")
+    if "readiness-receipt.valid.json" in fixtures:
+        executed_proof_cases.add("readiness-receipt-valid")
+    if fixtures:
+        executed_proof_cases.add("canonical-integrity-valid")
+
+    fixture_dependencies = list(fixtures.values())
+    for fixture_name, fixture in fixtures.items():
+        for error in delivery_art_artifact_reference_errors(
+            fixture, fixture_dependencies
+        ):
+            errors.append(f"{fixture_name}: reference invariant: {error}")
+    if {
+        "architecture-packet.valid.json",
+        "work-start-record.valid.json",
+        "review-packet-merge-ready.valid.json",
+        "review-packet-finalized.valid.json",
+        "readiness-receipt.valid.json",
+    }.issubset(fixtures):
+        executed_proof_cases.add("reference-chain-valid")
+
+    def require_rejected(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+        proof_case_id: str | None = None,
+        expected_fragment: str | None = None,
+    ) -> None:
+        validator = validators.get(validator_name)
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        semantic_errors = delivery_art_artifact_semantic_errors(payload)
+        if validator is not None and not schema_errors and not semantic_errors:
+            errors.append(
+                f"Delivery ART contract negative case {case_name!r} must be rejected"
+            )
+        if expected_fragment is not None:
+            observed = [error.message for error in schema_errors] + semantic_errors
+            if not any(expected_fragment in error for error in observed):
+                errors.append(
+                    f"Delivery ART contract negative case {case_name!r} must report {expected_fragment!r}"
+                )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
+
+    def require_accepted(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+        proof_case_id: str | None = None,
+    ) -> None:
+        validator = validators.get(validator_name)
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        semantic_errors = delivery_art_artifact_semantic_errors(payload)
+        if schema_errors or semantic_errors:
+            details = [error.message for error in schema_errors] + semantic_errors
+            errors.append(
+                f"Delivery ART contract positive case {case_name!r} must be accepted: "
+                + "; ".join(details)
+            )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
+
+    def require_integrity_error(
+        payload: dict,
+        case_name: str,
+        expected_fragment: str,
+        proof_case_id: str | None = None,
+    ) -> None:
+        integrity_errors = delivery_art_artifact_integrity_errors(payload)
+        if not any(expected_fragment in error for error in integrity_errors):
+            errors.append(
+                f"Delivery ART integrity case {case_name!r} must report {expected_fragment!r}"
+            )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
+
+    def require_reference_rejected(
+        payload: dict,
+        case_name: str,
+        expected_fragment: str,
+        dependencies: list[dict] | None = None,
+        proof_case_id: str | None = None,
+    ) -> None:
+        reference_errors = delivery_art_artifact_reference_errors(
+            payload,
+            dependencies if dependencies is not None else fixture_dependencies,
+        )
+        if not any(expected_fragment in error for error in reference_errors):
+            errors.append(
+                f"Delivery ART reference case {case_name!r} must report {expected_fragment!r}"
+            )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
+
+    def require_reference_accepted(
+        payload: dict,
+        case_name: str,
+        dependencies: list[dict] | None = None,
+    ) -> None:
+        reference_errors = delivery_art_artifact_reference_errors(
+            payload,
+            dependencies if dependencies is not None else fixture_dependencies,
+        )
+        if reference_errors:
+            errors.append(
+                f"Delivery ART reference positive case {case_name!r} must be accepted: "
+                + "; ".join(reference_errors)
+            )
+
+    def require_fully_accepted(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+        dependencies: list[dict] | None = None,
+    ) -> None:
+        validator = validators.get(validator_name)
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        observed = [error.message for error in schema_errors]
+        observed.extend(delivery_art_artifact_semantic_errors(payload))
+        observed.extend(delivery_art_artifact_integrity_errors(payload))
+        observed.extend(
+            delivery_art_artifact_reference_errors(
+                payload,
+                dependencies if dependencies is not None else fixture_dependencies,
+            )
+        )
+        if observed:
+            errors.append(
+                f"Delivery ART full-contract positive case {case_name!r} must be accepted: "
+                + "; ".join(observed)
+            )
+
+    try:
+        json.loads(
+            '{"artifact_type":"first","artifact_type":"second"}',
+            object_pairs_hook=strict_delivery_art_object,
+        )
+    except ValueError as exc:
+        if "duplicate JSON object key" not in str(exc):
+            errors.append(
+                "Delivery ART duplicate-key case must identify the duplicate key"
+            )
+    else:
+        errors.append("Delivery ART duplicate JSON object keys must be rejected")
+    executed_proof_cases.add("canonical-integrity-invalid")
+
+    architecture = fixtures.get("architecture-packet.valid.json")
+    if architecture:
+        stale_decision = copy.deepcopy(architecture)
+        stale_decision["decision"]["status"] = "ready-for-child-implementation"
+        require_rejected(
+            "architecture_packet",
+            stale_decision,
+            "legacy architecture decision vocabulary",
+        )
+
+        overlapping_delivery_identifier = copy.deepcopy(architecture)
+        overlapping_delivery_identifier["artifact_id"] = (
+            "architecture-packet:delivery-6980-v1"
+        )
+        require_rejected(
+            "architecture_packet",
+            overlapping_delivery_identifier,
+            "architecture artifact id with only a delivery-id prefix overlap",
+        )
+
+        unresolved_decision = copy.deepcopy(architecture)
+        unresolved_decision["architecture"]["contradictions_open_decisions"][0][
+            "status"
+        ] = "open"
+        unresolved_decision["architecture"]["contradictions_open_decisions"][0][
+            "resolution"
+        ] = None
+        require_rejected(
+            "architecture_packet",
+            unresolved_decision,
+            "architecture-ready packet with an open contradiction",
+        )
+
+        architecture_ready_without_required_conformance = copy.deepcopy(
+            architecture
+        )
+        architecture_ready_without_required_conformance["conformance_plan"][
+            "required"
+        ] = False
+        require_rejected(
+            "architecture_packet",
+            architecture_ready_without_required_conformance,
+            "architecture-ready packet without a required conformance plan",
+        )
+
+        missing_protocol_applicability = copy.deepcopy(architecture)
+        del missing_protocol_applicability["conformance_plan"][
+            "protocol_applicability"
+        ]
+        require_rejected(
+            "architecture_packet",
+            missing_protocol_applicability,
+            "architecture packet without an explicit protocol applicability decision",
+        )
+
+        incomplete_protocol_dimensions = copy.deepcopy(architecture)
+        incomplete_protocol_dimensions["conformance_plan"]["dimensions"].pop()
+        require_rejected(
+            "architecture_packet",
+            incomplete_protocol_dimensions,
+            "applicable protocol conformance plan missing a mandated dimension",
+            "architecture-conformance-invalid",
+        )
+
+        case_without_dimensions = copy.deepcopy(architecture)
+        del case_without_dimensions["conformance_plan"]["cases"][0][
+            "dimension_ids"
+        ]
+        require_rejected(
+            "architecture_packet",
+            case_without_dimensions,
+            "architecture conformance case without dimension bindings",
+        )
+
+        untested_protocol_dimension = copy.deepcopy(architecture)
+        for case in untested_protocol_dimension["conformance_plan"]["cases"]:
+            case["dimension_ids"] = [
+                dimension
+                for dimension in case["dimension_ids"]
+                if dimension != "shared-validator-compatibility"
+            ]
+        require_rejected(
+            "architecture_packet",
+            untested_protocol_dimension,
+            "protocol conformance plan with a declared but untested dimension",
+        )
+
+        protocol_dimension_deferred_past_merge = copy.deepcopy(architecture)
+        for case in protocol_dimension_deferred_past_merge["conformance_plan"][
+            "cases"
+        ]:
+            if "shared-validator-compatibility" in case["dimension_ids"]:
+                case["target_readiness"] = "operating-ready"
+        require_rejected(
+            "architecture_packet",
+            protocol_dimension_deferred_past_merge,
+            "protocol dimension without positive and negative merge-ready cases",
+        )
+
+        protocol_work_item_deferred_past_merge = copy.deepcopy(architecture)
+        original_cases = protocol_work_item_deferred_past_merge[
+            "conformance_plan"
+        ]["cases"]
+        deferred_cases = []
+        for case in original_cases:
+            case["applies_to_work_item_ids"] = ["work-item-801"]
+            deferred_case = copy.deepcopy(case)
+            deferred_case["id"] = f"{case['id']}-deferred-work-item-802"
+            deferred_case["applies_to_work_item_ids"] = ["work-item-802"]
+            deferred_case["target_readiness"] = "operating-ready"
+            deferred_cases.append(deferred_case)
+        original_cases.extend(deferred_cases)
+        require_rejected(
+            "architecture_packet",
+            protocol_work_item_deferred_past_merge,
+            "protocol work item without positive and negative merge-ready cases",
+        )
+
+        conformance_case_with_undeclared_dimension = copy.deepcopy(architecture)
+        conformance_case_with_undeclared_dimension["conformance_plan"]["cases"][
+            0
+        ]["dimension_ids"].append("undeclared-protocol-dimension")
+        require_rejected(
+            "architecture_packet",
+            conformance_case_with_undeclared_dimension,
+            "architecture conformance case referencing an undeclared dimension",
+        )
+
+        non_protocol_conformance = copy.deepcopy(architecture)
+        non_protocol_conformance["conformance_plan"]["protocol_applicability"] = {
+            "applies": False,
+            "rationale": "The architecture decision is local and does not change a cross-repo protocol.",
+        }
+        non_protocol_conformance["conformance_plan"]["dimensions"] = [
+            "local-architecture-regression"
+        ]
+        non_protocol_conformance["conformance_plan"][
+            "work_item_dimension_applicability"
+        ] = [
+            {
+                "work_item_id": work_item_id,
+                "dimension_ids": ["local-architecture-regression"],
+            }
+            for work_item_id in non_protocol_conformance[
+                "covered_work_item_ids"
+            ]
+        ]
+        non_protocol_conformance["conformance_plan"]["git_causality"] = {
+            "applies": False,
+            "rationale": "The scoped local regression claim does not depend on Git-history causality.",
+            "claims": [],
+        }
+        for case in non_protocol_conformance["conformance_plan"]["cases"]:
+            case["dimension_ids"] = ["local-architecture-regression"]
+        non_protocol_conformance["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(non_protocol_conformance)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            non_protocol_conformance,
+            "non-protocol architecture packet with a scoped conformance dimension",
+        )
+
+        resolved_without_resolution = copy.deepcopy(architecture)
+        resolved_without_resolution["architecture"][
+            "contradictions_open_decisions"
+        ][0]["resolution"] = None
+        require_rejected(
+            "architecture_packet",
+            resolved_without_resolution,
+            "resolved architecture decision without a resolution",
+        )
+
+        unknown_dag_endpoint = copy.deepcopy(architecture)
+        unknown_dag_endpoint["architecture"]["dependency_merge_dag"]["edges"][0][
+            "to"
+        ] = "work-item-999"
+        require_rejected(
+            "architecture_packet",
+            unknown_dag_endpoint,
+            "architecture dependency edge with an unknown endpoint",
+        )
+
+        cyclic_dag = copy.deepcopy(architecture)
+        cyclic_dag["architecture"]["dependency_merge_dag"]["edges"].append(
+            {
+                "from": "work-item-802",
+                "to": "work-item-801",
+                "relation": "must_merge_before",
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            cyclic_dag,
+            "cyclic architecture dependency graph",
+            "architecture-structure-invalid",
+        )
+
+        cyclic_parent_map = copy.deepcopy(architecture)
+        cyclic_parent_map["architecture"]["descendant_owner_map"][0][
+            "parent_work_item_id"
+        ] = "work-item-802"
+        require_rejected(
+            "architecture_packet",
+            cyclic_parent_map,
+            "cyclic architecture descendant parent map without a root",
+        )
+
+        reversed_merge_order = copy.deepcopy(architecture)
+        reversed_merge_order["architecture"]["dependency_merge_dag"][
+            "merge_order"
+        ].reverse()
+        require_rejected(
+            "architecture_packet",
+            reversed_merge_order,
+            "architecture merge order that violates cross-repo dependency precedence",
+        )
+
+        valid_depends_on_order = copy.deepcopy(architecture)
+        valid_depends_on_order["architecture"]["dependency_merge_dag"]["edges"] = [
+            {
+                "from": "work-item-802",
+                "to": "work-item-801",
+                "relation": "depends_on",
+            }
+        ]
+        valid_depends_on_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(valid_depends_on_order)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            valid_depends_on_order,
+            "depends_on relation with dependency owner first in merge order",
+        )
+
+        invalid_depends_on_order = copy.deepcopy(architecture)
+        invalid_depends_on_order["architecture"]["dependency_merge_dag"]["edges"] = [
+            {
+                "from": "work-item-801",
+                "to": "work-item-802",
+                "relation": "depends_on",
+            }
+        ]
+        require_rejected(
+            "architecture_packet",
+            invalid_depends_on_order,
+            "depends_on relation with dependent owner first in merge order",
+        )
+
+        unrelated_source_snapshot = copy.deepcopy(architecture)
+        unrelated_source_snapshot["source_snapshot"]["repo_revisions"] = [
+            {
+                "repo": "unrelated-repo",
+                "base_ref": "origin/main",
+                "commit": "3" * 40,
+            }
+        ]
+        require_rejected(
+            "architecture_packet",
+            unrelated_source_snapshot,
+            "architecture source snapshot that omits declared owner repos",
+        )
+
+        duplicate_snapshot_owner = copy.deepcopy(architecture)
+        duplicate_snapshot_owner["source_snapshot"]["repo_revisions"].append(
+            {
+                "repo": "workspace-governance",
+                "base_ref": "origin/release",
+                "commit": "4" * 40,
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            duplicate_snapshot_owner,
+            "architecture source snapshot with duplicate owner repo revisions",
+        )
+
+        undeclared_lifecycle_state = copy.deepcopy(architecture)
+        undeclared_lifecycle_state["architecture"]["lifecycle_state_model"][
+            "transitions"
+        ][0]["to"] = "untracked-state"
+        require_rejected(
+            "architecture_packet",
+            undeclared_lifecycle_state,
+            "architecture lifecycle transition with an undeclared endpoint",
+        )
+
+        decision_before_snapshot = copy.deepcopy(architecture)
+        decision_before_snapshot["decision"]["decided_at"] = (
+            "2026-08-08T09:50:00+08:00"
+        )
+        require_rejected(
+            "architecture_packet",
+            decision_before_snapshot,
+            "architecture decision recorded before its source snapshot",
+        )
+
+        missing_architecture_persistence_time = copy.deepcopy(architecture)
+        missing_architecture_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "architecture_packet",
+            missing_architecture_persistence_time,
+            "durable architecture packet without a persistence timestamp",
+        )
+
+        duplicate_conformance_case = copy.deepcopy(architecture)
+        duplicate_conformance_case["conformance_plan"]["cases"][1]["id"] = (
+            duplicate_conformance_case["conformance_plan"]["cases"][0]["id"]
+        )
+        require_rejected(
+            "architecture_packet",
+            duplicate_conformance_case,
+            "architecture conformance plan with duplicate case ids",
+        )
+
+        unscoped_conformance_case = copy.deepcopy(architecture)
+        unscoped_conformance_case["conformance_plan"]["cases"][0][
+            "applies_to_work_item_ids"
+        ] = ["work-item-999"]
+        require_rejected(
+            "architecture_packet",
+            unscoped_conformance_case,
+            "architecture conformance case scoped outside packet coverage",
+        )
+
+        incomplete_conformance_coverage = copy.deepcopy(architecture)
+        for case in incomplete_conformance_coverage["conformance_plan"]["cases"]:
+            case["applies_to_work_item_ids"] = ["work-item-801"]
+        require_rejected(
+            "architecture_packet",
+            incomplete_conformance_coverage,
+            "required conformance plan that omits a covered work item",
+        )
+
+        arbitrary_architecture_fingerprint = copy.deepcopy(architecture)
+        arbitrary_architecture_fingerprint["scope_fingerprint"] = (
+            "sha256:" + "9" * 64
+        )
+        require_rejected(
+            "architecture_packet",
+            arbitrary_architecture_fingerprint,
+            "architecture packet with an arbitrary scope fingerprint",
+            expected_fragment="deterministic architecture scope projection",
+        )
+
+        missing_work_item_dimension_polarity = copy.deepcopy(architecture)
+        for case in missing_work_item_dimension_polarity["conformance_plan"][
+            "cases"
+        ]:
+            if (
+                case["polarity"] == "negative"
+                and "shared-validator-compatibility" in case["dimension_ids"]
+            ):
+                case["dimension_ids"].remove("shared-validator-compatibility")
+        require_rejected(
+            "architecture_packet",
+            missing_work_item_dimension_polarity,
+            "conformance plan missing one work-item/dimension polarity",
+            expected_fragment="work-item/dimension pair",
+        )
+
+        synthetic_git_causality = copy.deepcopy(architecture)
+        for case in synthetic_git_causality["conformance_plan"]["cases"]:
+            if case["id"].startswith("case:real-git"):
+                case["fidelity"] = "filesystem"
+        require_rejected(
+            "architecture_packet",
+            synthetic_git_causality,
+            "Git-causality claim backed only by synthetic filesystem cases",
+            expected_fragment="real-git merge-ready cases",
+        )
+
+        duplicate_git_claim_id = copy.deepcopy(architecture)
+        duplicate_git_claim_id["conformance_plan"]["git_causality"][
+            "claims"
+        ].append(
+            copy.deepcopy(
+                duplicate_git_claim_id["conformance_plan"]["git_causality"][
+                    "claims"
+                ][0]
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            duplicate_git_claim_id,
+            "duplicate Git-causality claim ids",
+            expected_fragment="unique ids",
+        )
+
+        draft_architecture = copy.deepcopy(architecture)
+        draft_architecture["decision"]["status"] = "draft"
+        draft_architecture["decision"]["decided_by"] = None
+        draft_architecture["decision"]["decided_at"] = None
+        draft_architecture["custody"] = {
+            "state": "local-draft",
+            "backend": "local-filesystem",
+            "uri": ".art/drafts/architecture-packet-delivery-698-v1.json",
+            "persisted_at": None,
+            "supersedes": None,
+        }
+        draft_architecture["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(draft_architecture)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            draft_architecture,
+            "local architecture draft without durable persistence claims",
+        )
+        draft_architecture_with_persistence = copy.deepcopy(draft_architecture)
+        draft_architecture_with_persistence["custody"]["persisted_at"] = (
+            "2026-08-08T10:06:00+08:00"
+        )
+        require_rejected(
+            "architecture_packet",
+            draft_architecture_with_persistence,
+            "local architecture draft claiming a persistence timestamp",
+        )
+
+        unresolved_supersedes = copy.deepcopy(architecture)
+        unresolved_supersedes["custody"]["supersedes"] = {
+            "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v0-"
+            + "9" * 64
+            + ".json",
+            "digest": "sha256:" + "9" * 64,
+        }
+        require_reference_rejected(
+            unresolved_supersedes,
+            "architecture correction with an unresolved superseded artifact",
+            "custody.supersedes.uri does not resolve",
+            [],
+            "reference-chain-invalid",
+        )
+
+    work_start = fixtures.get("work-start-record.valid.json")
+    if work_start and architecture:
+        missing_split_reason = copy.deepcopy(work_start)
+        missing_split_reason["landing_unit"]["split_reason"] = None
+        require_rejected(
+            "work_start_record",
+            missing_split_reason,
+            "isolated Landing Unit without a split reason",
+            "work-start-invalid",
+        )
+
+        inexact_base = copy.deepcopy(work_start)
+        inexact_base["landing_unit"]["branch_plan"][0]["base_commit"] = "main"
+        require_rejected(
+            "work_start_record",
+            inexact_base,
+            "work-start record without an exact base commit",
+        )
+
+        mismatched_owner = copy.deepcopy(work_start)
+        mismatched_owner["landing_unit"]["owner_repos"] = ["unrelated-repo"]
+        require_rejected(
+            "work_start_record",
+            mismatched_owner,
+            "work-start owner repo not represented by branch and snapshot truth",
+        )
+
+        mismatched_base_ref = copy.deepcopy(work_start)
+        mismatched_base_ref["landing_unit"]["branch_plan"][0][
+            "base_ref"
+        ] = "origin/release"
+        require_rejected(
+            "work_start_record",
+            mismatched_base_ref,
+            "work-start branch base ref that differs from its source snapshot",
+        )
+
+        mismatched_base_commit = copy.deepcopy(work_start)
+        mismatched_base_commit["landing_unit"]["branch_plan"][0][
+            "base_commit"
+        ] = "2" * 40
+        require_rejected(
+            "work_start_record",
+            mismatched_base_commit,
+            "work-start branch base commit that differs from its source snapshot",
+        )
+
+        missing_persistence_time = copy.deepcopy(work_start)
+        missing_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "work_start_record",
+            missing_persistence_time,
+            "durable work-start record without a persistence timestamp",
+        )
+
+        incomplete_invalidation_set = copy.deepcopy(work_start)
+        incomplete_invalidation_set["invalidation_inputs"].pop()
+        require_rejected(
+            "work_start_record",
+            incomplete_invalidation_set,
+            "implementation-ready work-start record with an incomplete invalidation set",
+        )
+
+        arbitrary_work_start_fingerprint = copy.deepcopy(work_start)
+        arbitrary_work_start_fingerprint["scope_fingerprint"] = (
+            "sha256:" + "9" * 64
+        )
+        require_rejected(
+            "work_start_record",
+            arbitrary_work_start_fingerprint,
+            "work-start record with an arbitrary scope fingerprint",
+            expected_fragment="deterministic work-start scope projection",
+        )
+
+        blocked_architecture = copy.deepcopy(work_start)
+        blocked_architecture["landing_unit"]["decision"] = "defer_decision_blocked"
+        blocked_architecture["landing_unit"]["branch_plan"] = []
+        blocked_architecture["landing_unit"]["planned_review_packet_ref"] = None
+        blocked_architecture["architecture"] = {
+            "required": True,
+            "packet_ref": None,
+            "packet_digest": None,
+            "readiness": "blocked",
+        }
+        blocked_architecture["readiness"] = {
+            "level": "blocked",
+            "evaluated_at": "2026-08-08T10:10:00+08:00",
+            "blockers": ["Architecture decision remains unresolved."],
+        }
+        blocked_architecture["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _work_start_scope_projection(blocked_architecture)
+            )
+        )
+        require_accepted(
+            "work_start_record",
+            blocked_architecture,
+            "required architecture represented as a durable blocked work-start record",
+        )
+
+        blocked_without_persistence_time = copy.deepcopy(blocked_architecture)
+        blocked_without_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "work_start_record",
+            blocked_without_persistence_time,
+            "durable blocked work-start record without a persistence timestamp",
+        )
+
+        blocked_without_reason = copy.deepcopy(blocked_architecture)
+        blocked_without_reason["readiness"]["blockers"] = []
+        require_rejected(
+            "work_start_record",
+            blocked_without_reason,
+            "blocked work-start record without an identified blocker",
+        )
+
+        blocked_architecture_with_invented_refs = copy.deepcopy(
+            blocked_architecture
+        )
+        blocked_architecture_with_invented_refs["architecture"]["packet_ref"] = (
+            "openproject-attachment://work_packages/698/architecture.json"
+        )
+        blocked_architecture_with_invented_refs["architecture"][
+            "packet_digest"
+        ] = "sha256:" + "7" * 64
+        require_rejected(
+            "work_start_record",
+            blocked_architecture_with_invented_refs,
+            "blocked architecture substate with invented packet references",
+        )
+
+        unrelated_blocker_after_architecture_ready = copy.deepcopy(work_start)
+        unrelated_blocker_after_architecture_ready["readiness"] = {
+            "level": "blocked",
+            "evaluated_at": "2026-08-08T10:10:00+08:00",
+            "blockers": ["Operator approval remains pending."],
+        }
+        require_accepted(
+            "work_start_record",
+            unrelated_blocker_after_architecture_ready,
+            "overall blocked record retaining exact architecture-ready refs",
+        )
+
+        architecture_ready_without_refs = copy.deepcopy(
+            unrelated_blocker_after_architecture_ready
+        )
+        architecture_ready_without_refs["architecture"]["packet_ref"] = None
+        architecture_ready_without_refs["architecture"]["packet_digest"] = None
+        require_rejected(
+            "work_start_record",
+            architecture_ready_without_refs,
+            "architecture-ready substate without packet references",
+        )
+
+        evaluation_before_snapshot = copy.deepcopy(work_start)
+        evaluation_before_snapshot["readiness"]["evaluated_at"] = (
+            "2026-08-08T10:08:00+08:00"
+        )
+        require_rejected(
+            "work_start_record",
+            evaluation_before_snapshot,
+            "work-start evaluation recorded before its source snapshot",
+        )
+
+        require_reference_rejected(
+            work_start,
+            "work-start record without its referenced architecture packet",
+            "does not resolve",
+            [],
+        )
+
+        future_architecture = copy.deepcopy(architecture)
+        future_architecture["decision"]["decided_at"] = (
+            "2026-08-08T10:20:00+08:00"
+        )
+        future_architecture["custody"]["persisted_at"] = (
+            "2026-08-08T10:21:00+08:00"
+        )
+        require_reference_rejected(
+            work_start,
+            "work-start record depending on a future architecture decision",
+            "resolved architecture decision.decided_at must not be later",
+            [future_architecture],
+        )
+
+        deferred_with_source_plan = copy.deepcopy(blocked_architecture)
+        deferred_with_source_plan["landing_unit"]["branch_plan"] = copy.deepcopy(
+            work_start["landing_unit"]["branch_plan"]
+        )
+        require_rejected(
+            "work_start_record",
+            deferred_with_source_plan,
+            "deferred Landing Unit decision with a source branch plan",
+        )
+
+    merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
+    if merge_ready and work_start and architecture:
+        failed_test = copy.deepcopy(merge_ready)
+        failed_test["evidence"]["tests"][0]["result"] = "fail"
+        require_rejected(
+            "review_packet",
+            failed_test,
+            "merge-ready Review Packet with failed evidence",
+            "review-evidence-invalid",
+        )
+
+        prose_result = copy.deepcopy(merge_ready)
+        prose_result["evidence"]["tests"] = [
+            "PASS: a result prefix is not structured evidence"
+        ]
+        require_rejected(
+            "review_packet",
+            prose_result,
+            "Review Packet with prose result strings",
+        )
+
+        missing_mapping = copy.deepcopy(merge_ready)
+        missing_mapping["evidence"]["acceptance_mapping"] = []
+        require_rejected(
+            "review_packet",
+            missing_mapping,
+            "Review Packet without item acceptance mapping",
+        )
+
+        partial_mapping = copy.deepcopy(merge_ready)
+        partial_mapping["covered_work_item_ids"].append("work-item-802")
+        require_rejected(
+            "review_packet",
+            partial_mapping,
+            "Review Packet whose acceptance mapping covers only some work items",
+        )
+
+        unknown_evidence = copy.deepcopy(merge_ready)
+        unknown_evidence["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ].append("evidence:missing")
+        require_rejected(
+            "review_packet",
+            unknown_evidence,
+            "Review Packet acceptance mapping with an unknown evidence reference",
+        )
+
+        duplicate_evidence_id = copy.deepcopy(merge_ready)
+        duplicate_evidence_id["evidence"]["validations"][0]["id"] = (
+            duplicate_evidence_id["evidence"]["tests"][0]["id"]
+        )
+        require_rejected(
+            "review_packet",
+            duplicate_evidence_id,
+            "Review Packet with duplicate ids across evidence sections",
+        )
+
+        unexplained_not_applicable = copy.deepcopy(merge_ready)
+        unexplained_not_applicable["evidence"]["security_and_trust"][0][
+            "authority_ref"
+        ] = None
+        require_rejected(
+            "review_packet",
+            unexplained_not_applicable,
+            "not-applicable evidence without an authority ref",
+        )
+
+        mismatched_review_base = copy.deepcopy(merge_ready)
+        mismatched_review_base["landing_unit"]["repos"][0]["base_commit"] = (
+            "9" * 40
+        )
+        require_reference_rejected(
+            mismatched_review_base,
+            "Review Packet base commit diverging from work-start truth",
+            "base_commit",
+        )
+
+        mismatched_review_decision = copy.deepcopy(merge_ready)
+        mismatched_review_decision["landing_unit"]["decision"] = (
+            "feature_single_landing_unit"
+        )
+        require_reference_rejected(
+            mismatched_review_decision,
+            "Review Packet Landing Unit decision diverging from work-start truth",
+            "Landing Unit decision",
+        )
+
+        mismatched_review_coverage = copy.deepcopy(merge_ready)
+        mismatched_review_coverage["covered_work_item_ids"].append(
+            "work-item-802"
+        )
+        mismatched_review_coverage["evidence"]["acceptance_mapping"].append(
+            {
+                "work_item_id": "work-item-802",
+                "acceptance_ref": "openproject://work_packages/802",
+                "evidence_ids": ["evidence:contract-model"],
+                "summary": "Synthetic complete mapping used to exercise reference continuity.",
+            }
+        )
+        require_reference_rejected(
+            mismatched_review_coverage,
+            "Review Packet coverage diverging from work-start truth",
+            "covered_work_item_ids",
+        )
+
+        mismatched_scope_fingerprint = copy.deepcopy(merge_ready)
+        mismatched_scope_fingerprint["work_start"]["scope_fingerprint"] = (
+            "sha256:" + "9" * 64
+        )
+        require_reference_rejected(
+            mismatched_scope_fingerprint,
+            "Review Packet scope diverging from work-start truth",
+            "scope_fingerprint",
+        )
+
+        future_work_start_persistence = copy.deepcopy(work_start)
+        future_work_start_persistence["custody"]["persisted_at"] = (
+            "2026-08-08T11:10:00+08:00"
+        )
+        require_reference_rejected(
+            merge_ready,
+            "Review Packet depending on a work-start record persisted in the future",
+            "resolved work-start custody.persisted_at must not be later",
+            [architecture, future_work_start_persistence],
+        )
+
+        missing_conformance_results = copy.deepcopy(merge_ready)
+        missing_conformance_results["evidence"]["tests"][0][
+            "conformance_case_ids"
+        ] = []
+        require_reference_rejected(
+            missing_conformance_results,
+            "Review Packet without applicable architecture conformance results",
+            "missing applicable conformance case results",
+        )
+
+        wrong_conformance_fidelity = copy.deepcopy(merge_ready)
+        wrong_conformance_fidelity["evidence"]["tests"][0]["fidelity"] = (
+            "pure-unit"
+        )
+        require_reference_rejected(
+            wrong_conformance_fidelity,
+            "Review Packet conformance result below planned fidelity",
+            "planned fidelity",
+        )
+
+        out_of_scope_conformance_case = copy.deepcopy(merge_ready)
+        out_of_scope_conformance_case["evidence"]["validations"][0][
+            "conformance_case_ids"
+        ] = ["case:real-git-positive"]
+        require_reference_rejected(
+            out_of_scope_conformance_case,
+            "Review Packet claiming a different work item's conformance case",
+            "outside its work-item or readiness scope",
+        )
+
+        stale_evidence_source_head = copy.deepcopy(merge_ready)
+        stale_evidence_source_head["evidence"]["tests"][0]["source_revisions"][
+            0
+        ]["commit"] = "2" * 40
+        require_rejected(
+            "review_packet",
+            stale_evidence_source_head,
+            "passing evidence bound to a stale source head",
+            expected_fragment="exact landing-unit source heads",
+        )
+
+        valid_merge_ready_direct_land = copy.deepcopy(merge_ready)
+        valid_merge_ready_direct_land["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        valid_merge_ready_direct_land["landing_unit"]["repos"][0]["pr_url"] = None
+        valid_merge_ready_direct_land["exceptions"] = [
+            {
+                "id": "exception:direct-land-work-item-801",
+                "kind": "direct-land",
+                "authority_ref": "openproject://work_packages/801",
+                "rationale": "The operator approved this bounded source landing without a pull request.",
+                "expires_at": "2026-08-08T12:00:00+08:00",
+            }
+        ]
+        require_accepted(
+            "review_packet",
+            valid_merge_ready_direct_land,
+            "merge-ready direct-land Review Packet with current exception authority",
+        )
+
+        direct_land_with_pr = copy.deepcopy(valid_merge_ready_direct_land)
+        direct_land_with_pr["landing_unit"]["repos"][0]["pr_url"] = (
+            "https://github.com/mfshaf7/workspace-governance/pull/136"
+        )
+        require_rejected(
+            "review_packet",
+            direct_land_with_pr,
+            "direct-land Review Packet that also claims pull-request evidence",
+        )
+
+        local_packet_with_persistence = copy.deepcopy(merge_ready)
+        local_packet_with_persistence["custody"]["state"] = "local-draft"
+        local_packet_with_persistence["custody"]["backend"] = "local-filesystem"
+        local_packet_with_persistence["custody"]["uri"] = (
+            ".art/review-packet-merge-ready.json"
+        )
+        local_packet_with_persistence["custody"]["persisted_at"] = (
+            "2026-08-08T11:16:00+08:00"
+        )
+        require_rejected(
+            "review_packet",
+            local_packet_with_persistence,
+            "local Review Packet claiming a persistence timestamp",
+        )
+
+    readiness_receipt = fixtures.get("readiness-receipt.valid.json")
+    if readiness_receipt:
+        def readiness_receipt_for(
+            subject_artifact: dict,
+            level: str,
+            evaluated_at: str,
+            persisted_at: str,
+        ) -> dict:
+            receipt = copy.deepcopy(readiness_receipt)
+            subject_artifact_type = subject_artifact.get("artifact_type")
+            subject_artifact_id = (
+                subject_artifact.get("packet_id")
+                if subject_artifact_type == "art_review_packet"
+                else subject_artifact.get("artifact_id")
+            )
+            receipt["covered_work_item_ids"] = copy.deepcopy(
+                subject_artifact.get("covered_work_item_ids")
+            )
+            receipt["subject"] = {
+                "artifact_type": subject_artifact_type,
+                "artifact_id": subject_artifact_id,
+                "digest_kind": "artifact-content",
+                "digest": _artifact_object(subject_artifact.get("integrity")).get(
+                    "content_digest"
+                ),
+            }
+            receipt["readiness"]["level"] = level
+            receipt["readiness"]["outcome"] = "ready"
+            receipt["readiness"]["mutation_allowed"] = True
+            receipt["readiness"]["evaluated_at"] = evaluated_at
+            receipt["findings"] = []
+            receipt["custody"]["persisted_at"] = persisted_at
+
+            digest_projection = copy.deepcopy(receipt)
+            digest_projection.pop("custody", None)
+            _artifact_object(digest_projection.get("integrity")).pop(
+                "content_digest", None
+            )
+            content_digest = _delivery_art_projection_digest(digest_projection)
+            receipt["integrity"]["content_digest"] = content_digest
+            receipt_token = receipt["receipt_id"].split(":", 1)[1]
+            receipt["custody"]["uri"] = (
+                "wgcf://receipts/art-readiness/art-readiness-receipt-"
+                f"{receipt_token}-{content_digest.removeprefix('sha256:')}.json"
+            )
+            return receipt
+
+        receipt_level_cases = []
+        if architecture:
+            receipt_level_cases.append(
+                (
+                    "architecture-ready",
+                    readiness_receipt_for(
+                        architecture,
+                        "architecture-ready",
+                        "2026-08-08T10:07:00+08:00",
+                        "2026-08-08T10:08:00+08:00",
+                    ),
+                    architecture,
+                )
+            )
+        if work_start:
+            receipt_level_cases.append(
+                (
+                    "implementation-ready",
+                    readiness_receipt_for(
+                        work_start,
+                        "implementation-ready",
+                        "2026-08-08T10:12:00+08:00",
+                        "2026-08-08T10:13:00+08:00",
+                    ),
+                    work_start,
+                )
+            )
+        if merge_ready:
+            receipt_level_cases.append(
+                (
+                    "merge-ready",
+                    readiness_receipt_for(
+                        merge_ready,
+                        "merge-ready",
+                        "2026-08-08T11:17:00+08:00",
+                        "2026-08-08T11:18:00+08:00",
+                    ),
+                    merge_ready,
+                )
+            )
+        for level, receipt_case, subject_artifact in receipt_level_cases:
+            require_fully_accepted(
+                "readiness_receipt",
+                receipt_case,
+                f"{level} receipt bound to its exact durable subject",
+                [subject_artifact],
+            )
+
+        if architecture:
+            wrong_level_subject = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:07:00+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            wrong_level_subject["readiness"]["level"] = "implementation-ready"
+            require_rejected(
+                "readiness_receipt",
+                wrong_level_subject,
+                "receipt readiness level paired with the wrong artifact type",
+            )
+
+            mismatched_receipt_coverage = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:07:00+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            mismatched_receipt_coverage["covered_work_item_ids"] = [
+                "work-item-801"
+            ]
+            require_reference_rejected(
+                mismatched_receipt_coverage,
+                "readiness receipt with partial subject coverage",
+                "coverage must match",
+                [architecture],
+            )
+
+            premature_receipt = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:05:30+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            require_reference_rejected(
+                premature_receipt,
+                "readiness receipt evaluated before durable subject custody",
+                "must not be later than readiness receipt evaluation",
+                [architecture],
+            )
+
+        source_artifact_claimed_as_receipt = copy.deepcopy(readiness_receipt)
+        source_artifact_claimed_as_receipt["artifact_type"] = (
+            "art_review_packet"
+        )
+        require_rejected(
+            "readiness_receipt",
+            source_artifact_claimed_as_receipt,
+            "WGCF receipt custody claiming a source artifact type",
+            "readiness-receipt-invalid",
+        )
+
+        ready_receipt_with_error = copy.deepcopy(readiness_receipt)
+        ready_receipt_with_error["findings"] = [
+            {
+                "id": "finding:unexpected-error",
+                "severity": "error",
+                "summary": "A required readiness check failed.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_rejected(
+            "readiness_receipt",
+            ready_receipt_with_error,
+            "ready receipt containing an error finding",
+            expected_fragment="must not contain blocker or error findings",
+        )
+
+        blocked_receipt_without_finding = copy.deepcopy(readiness_receipt)
+        blocked_receipt_without_finding["readiness"]["outcome"] = "blocked"
+        blocked_receipt_without_finding["readiness"]["mutation_allowed"] = False
+        require_rejected(
+            "readiness_receipt",
+            blocked_receipt_without_finding,
+            "blocked receipt without an actionable finding",
+            expected_fragment="must identify at least one finding",
+        )
+
+        duplicate_finding_ids = copy.deepcopy(blocked_receipt_without_finding)
+        duplicate_finding_ids["findings"] = [
+            {
+                "id": "finding:duplicate",
+                "severity": "blocker",
+                "summary": "The first readiness condition failed.",
+                "authority_ref": "openproject://work_packages/803",
+            },
+            {
+                "id": "finding:duplicate",
+                "severity": "warning",
+                "summary": "A second condition uses the same identifier.",
+                "authority_ref": "openproject://work_packages/805",
+            },
+        ]
+        require_rejected(
+            "readiness_receipt",
+            duplicate_finding_ids,
+            "readiness receipt with ambiguous finding ids",
+            expected_fragment="finding ids must be unique",
+        )
+
+        blocked_with_warning_only = copy.deepcopy(blocked_receipt_without_finding)
+        blocked_with_warning_only["findings"] = [
+            {
+                "id": "finding:warning-only",
+                "severity": "warning",
+                "summary": "The evaluation produced only an advisory warning.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_rejected(
+            "readiness_receipt",
+            blocked_with_warning_only,
+            "blocked receipt supported only by an advisory warning",
+            expected_fragment="blocker or error finding",
+        )
+
+    finalized = fixtures.get("review-packet-finalized.valid.json")
+    if (
+        finalized
+        and architecture
+        and work_start
+        and merge_ready
+        and readiness_receipt
+    ):
+        malformed_receipt_subject = copy.deepcopy(finalized)
+        malformed_receipt_subject["schema_version"] = 2.0
+        require_reference_rejected(
+            readiness_receipt,
+            "readiness receipt with a non-canonical subject artifact",
+            "subject does not resolve",
+            [malformed_receipt_subject],
+        )
+
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet without its readiness receipt dependency",
+            "readiness.receipt_refs.uri does not resolve",
+            [architecture, work_start, merge_ready],
+        )
+
+        require_reference_rejected(
+            finalized,
+            "finalized source Review Packet without its merge-ready predecessor",
+            "custody.supersedes.uri does not resolve",
+            [architecture, work_start, readiness_receipt],
+        )
+
+        rewritten_final_evidence = copy.deepcopy(finalized)
+        rewritten_final_evidence["evidence"]["tests"][0]["summary"] = (
+            "Rewritten after merge instead of preserving reviewed evidence."
+        )
+        require_reference_rejected(
+            rewritten_final_evidence,
+            "finalized Review Packet that rewrites merge-ready evidence",
+            "must preserve merge-ready evidence",
+        )
+
+        mismatched_receipt_subject = copy.deepcopy(readiness_receipt)
+        mismatched_receipt_subject["subject"]["digest"] = (
+            "sha256:" + "9" * 64
+        )
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet with a receipt for another subject",
+            "subject digest must match",
+            [architecture, work_start, merge_ready, mismatched_receipt_subject],
+        )
+
+        non_ready_receipt = copy.deepcopy(readiness_receipt)
+        non_ready_receipt["readiness"]["outcome"] = "blocked"
+        non_ready_receipt["readiness"]["mutation_allowed"] = False
+        non_ready_receipt["findings"] = [
+            {
+                "id": "finding:blocked",
+                "severity": "blocker",
+                "summary": "Operating readiness remains blocked.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet with a non-ready receipt",
+            "requires a ready receipt",
+            [architecture, work_start, merge_ready, non_ready_receipt],
+        )
+
+        late_readiness_receipt = copy.deepcopy(readiness_receipt)
+        late_readiness_receipt["custody"]["persisted_at"] = (
+            "2026-08-08T11:30:01+08:00"
+        )
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet whose readiness receipt was persisted later",
+            "must not be later than Review Packet finalized_at",
+            [architecture, work_start, merge_ready, late_readiness_receipt],
+        )
+
+        cyclic_merge_ready = copy.deepcopy(merge_ready)
+        cyclic_merge_ready["custody"]["supersedes"] = {
+            "uri": finalized["custody"]["uri"],
+            "digest": finalized["integrity"]["content_digest"],
+        }
+        require_reference_rejected(
+            finalized,
+            "cyclic Review Packet supersession chain",
+            "must be acyclic",
+            [architecture, work_start, cyclic_merge_ready, readiness_receipt],
+        )
+
+        local_final = copy.deepcopy(finalized)
+        local_final["custody"]["state"] = "local-draft"
+        local_final["custody"]["backend"] = "local-filesystem"
+        require_rejected(
+            "review_packet",
+            local_final,
+            "finalized Review Packet without durable custody",
+        )
+
+        missing_source_tests = copy.deepcopy(finalized)
+        missing_source_tests["evidence"]["tests"] = []
+        require_rejected(
+            "review_packet",
+            missing_source_tests,
+            "source-backed finalized Review Packet without tests",
+        )
+
+        missing_readiness_receipt = copy.deepcopy(finalized)
+        missing_readiness_receipt["readiness"]["receipt_refs"] = []
+        require_rejected(
+            "review_packet",
+            missing_readiness_receipt,
+            "finalized Review Packet without a readiness receipt",
+        )
+
+        valid_direct_land = copy.deepcopy(finalized)
+        valid_direct_land["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        valid_direct_land["landing_unit"]["repos"][0]["pr_url"] = None
+        valid_direct_land["exceptions"] = [
+            {
+                "id": "exception:direct-land-work-item-801",
+                "kind": "direct-land",
+                "authority_ref": "openproject://work_packages/801",
+                "rationale": "The operator approved this bounded source landing without a pull request.",
+                "expires_at": "2026-08-08T12:00:00+08:00",
+            }
+        ]
+        valid_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(valid_direct_land)
+        )
+        require_accepted(
+            "review_packet",
+            valid_direct_land,
+            "finalized direct-land Review Packet with current exception authority",
+        )
+
+        direct_land_predecessor = copy.deepcopy(merge_ready)
+        direct_land_predecessor["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        direct_land_predecessor["landing_unit"]["repos"][0]["pr_url"] = None
+        direct_land_predecessor["exceptions"] = copy.deepcopy(
+            valid_direct_land["exceptions"]
+        )
+        direct_land_receipt = copy.deepcopy(readiness_receipt)
+        direct_land_receipt["subject"]["digest"] = valid_direct_land[
+            "readiness"
+        ]["subject_digest"]
+        require_reference_accepted(
+            valid_direct_land,
+            "finalized direct-land packet preserving its merge-ready predecessor",
+            [
+                architecture,
+                work_start,
+                direct_land_predecessor,
+                direct_land_receipt,
+            ],
+        )
+
+        expired_direct_land = copy.deepcopy(valid_direct_land)
+        expired_direct_land["exceptions"][0]["expires_at"] = (
+            "2026-08-08T11:29:59+08:00"
+        )
+        expired_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(expired_direct_land)
+        )
+        require_rejected(
+            "review_packet",
+            expired_direct_land,
+            "finalized direct-land Review Packet with expired exception authority",
+        )
+
+        non_expiring_direct_land = copy.deepcopy(valid_direct_land)
+        non_expiring_direct_land["exceptions"][0]["expires_at"] = None
+        non_expiring_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(
+                non_expiring_direct_land
+            )
+        )
+        require_rejected(
+            "review_packet",
+            non_expiring_direct_land,
+            "finalized direct-land Review Packet without time-bound exception authority",
+        )
+
+        impossible_finalization_timeline = copy.deepcopy(finalized)
+        impossible_finalization_timeline["created_at"] = (
+            "2026-08-08T12:00:00+08:00"
+        )
+        require_rejected(
+            "review_packet",
+            impossible_finalization_timeline,
+            "Review Packet created after evaluation and finalization",
+        )
+
+        floating_schema_version = copy.deepcopy(finalized)
+        floating_schema_version["schema_version"] = 2.0
+        require_integrity_error(
+            floating_schema_version,
+            "floating-point schema version",
+            "floating-point value",
+            "canonical-integrity-invalid",
+        )
+
+        lone_surrogate = copy.deepcopy(finalized)
+        lone_surrogate["operator"]["id"] = "\ud800"
+        require_integrity_error(
+            lone_surrogate,
+            "lone surrogate in operator identity",
+            "lone UTF-16 surrogate",
+        )
+
+        non_source_with_source_evidence = copy.deepcopy(finalized)
+        non_source_with_source_evidence["landing_unit"]["decision"] = (
+            "non_source_child"
+        )
+        require_rejected(
+            "review_packet",
+            non_source_with_source_evidence,
+            "non-source Review Packet with source landing evidence",
+        )
+
+        valid_non_source_packet = copy.deepcopy(finalized)
+        valid_non_source_packet["landing_unit"]["decision"] = "non_source_child"
+        valid_non_source_packet["landing_unit"]["evidence_kind"] = (
+            "non_source_evidence"
+        )
+        valid_non_source_packet["landing_unit"]["repos"] = []
+        valid_non_source_packet["evidence"]["changed_surfaces"] = []
+        valid_non_source_packet["custody"]["supersedes"] = None
+        valid_non_source_packet["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ] = ["evidence:schema-negative-cases"]
+        for section in (
+            "tests",
+            "validations",
+            "runtime_and_live",
+            "security_and_trust",
+        ):
+            for result in valid_non_source_packet["evidence"][section]:
+                result["source_revisions"] = []
+        valid_non_source_packet["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(
+                valid_non_source_packet
+            )
+        )
+        require_accepted(
+            "review_packet",
+            valid_non_source_packet,
+            "finalized non-source Review Packet without source landing evidence",
+        )
+
+        duplicate_landing_repo = copy.deepcopy(finalized)
+        duplicate_repo_entry = copy.deepcopy(
+            duplicate_landing_repo["landing_unit"]["repos"][0]
+        )
+        duplicate_repo_entry["branch"] = "codex/duplicate-repo-entry"
+        duplicate_landing_repo["landing_unit"]["repos"].append(
+            duplicate_repo_entry
+        )
+        require_rejected(
+            "review_packet",
+            duplicate_landing_repo,
+            "source Review Packet with duplicate repo evidence",
+        )
+
+        unbound_changed_surface = copy.deepcopy(finalized)
+        unbound_changed_surface["evidence"]["changed_surfaces"][0][
+            "path"
+        ] = "contracts/unreported-surface.yaml"
+        require_rejected(
+            "review_packet",
+            unbound_changed_surface,
+            "changed surface absent from exact landing-unit changed files",
+        )
+
+    return executed_proof_cases
+
+
 def validate_contract_format_checker(errors: list[str]) -> None:
     schema = {"type": "string", "format": "date-time"}
     validator = Draft202012Validator(
@@ -327,6 +3808,189 @@ def validate_contract_format_checker(errors: list[str]) -> None:
             errors.append(
                 f"shared date-time format checker must reject invalid timestamp {value!r}"
             )
+
+
+def _delivery_art_true_claim_refs(operator_path: dict) -> set[str]:
+    true_claims: set[str] = set()
+
+    def walk(value: object, path: str) -> None:
+        if value is True:
+            true_claims.add(path)
+        elif isinstance(value, dict):
+            for key, entry in value.items():
+                walk(entry, f"{path}.{key}")
+
+    for root in DELIVERY_ART_PROOF_CLAIM_ROOTS:
+        value: object = operator_path
+        for part in root.split("."):
+            if not isinstance(value, dict) or part not in value:
+                value = None
+                break
+            value = value[part]
+        if value is not None:
+            walk(value, root)
+    return true_claims
+
+
+def delivery_art_proof_obligation_errors(
+    operator_path: dict,
+    executed_case_ids: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    proof_contract = _artifact_object(operator_path.get("proof_obligations"))
+    declared_roots = tuple(
+        _artifact_string_list(proof_contract.get("governed_claim_roots"))
+    )
+    if declared_roots != DELIVERY_ART_PROOF_CLAIM_ROOTS:
+        errors.append("proof obligations must govern the canonical claim roots")
+
+    obligations = _artifact_object_list(proof_contract.get("obligations"))
+    obligation_ids = [
+        obligation.get("id")
+        for obligation in obligations
+        if isinstance(obligation.get("id"), str)
+    ]
+    if len(obligation_ids) != len(set(obligation_ids)):
+        errors.append("proof obligation ids must be unique")
+
+    claims_to_obligations: dict[str, list[str]] = {}
+    activation_targets = set(
+        _artifact_string_list(
+            _artifact_object(operator_path.get("contract_activation")).get(
+                "target_art_items"
+            )
+        )
+    )
+    for obligation in obligations:
+        obligation_id = str(obligation.get("id"))
+        for claim_ref in _artifact_string_list(obligation.get("claim_refs")):
+            claims_to_obligations.setdefault(claim_ref, []).append(obligation_id)
+        state = obligation.get("enforcement_state")
+        positive_cases = set(
+            _artifact_string_list(obligation.get("positive_case_ids"))
+        )
+        negative_cases = set(
+            _artifact_string_list(obligation.get("negative_case_ids"))
+        )
+        target_refs = set(
+            _artifact_string_list(obligation.get("target_art_refs"))
+        )
+        if state == "active-local":
+            missing_cases = (positive_cases | negative_cases) - executed_case_ids
+            if missing_cases:
+                errors.append(
+                    f"proof obligation {obligation_id} references unexecuted validation cases: "
+                    + ", ".join(sorted(missing_cases))
+                )
+            if not positive_cases or not negative_cases:
+                errors.append(
+                    f"proof obligation {obligation_id} requires positive and negative validation cases"
+                )
+        elif state == "pending-owner":
+            if not target_refs:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} requires target ART refs"
+                )
+            unknown_targets = target_refs - activation_targets
+            if unknown_targets:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} references targets outside contract activation: "
+                    + ", ".join(sorted(unknown_targets))
+                )
+            if positive_cases or negative_cases:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} must not claim local validation cases"
+                )
+        elif state == "doctrine" and (positive_cases or negative_cases or target_refs):
+            errors.append(
+                f"doctrine proof obligation {obligation_id} must not claim execution or target artifacts"
+            )
+
+    true_claims = _delivery_art_true_claim_refs(operator_path)
+    mapped_claims = set(claims_to_obligations)
+    missing_claims = true_claims - mapped_claims
+    if missing_claims:
+        errors.append(
+            "proof obligations leave true claims unmapped: "
+            + ", ".join(sorted(missing_claims))
+        )
+    unknown_claims = mapped_claims - true_claims
+    if unknown_claims:
+        errors.append(
+            "proof obligations reference claims that are absent or not true: "
+            + ", ".join(sorted(unknown_claims))
+        )
+    multiply_mapped = {
+        claim_ref: obligation_ids
+        for claim_ref, obligation_ids in claims_to_obligations.items()
+        if len(obligation_ids) != 1
+    }
+    if multiply_mapped:
+        errors.append(
+            "proof claims must be mapped exactly once: "
+            + ", ".join(sorted(multiply_mapped))
+        )
+    return errors
+
+
+def validate_delivery_art_proof_obligations(
+    errors: list[str],
+    operator_path: dict,
+    executed_case_ids: set[str],
+) -> None:
+    for error in delivery_art_proof_obligation_errors(
+        operator_path, executed_case_ids
+    ):
+        errors.append(f"delivery-art-operator-path proof invariant: {error}")
+
+    proof_contract = _artifact_object(operator_path.get("proof_obligations"))
+    obligations = _artifact_object_list(proof_contract.get("obligations"))
+    if len(obligations) < 2:
+        return
+
+    unmapped = copy.deepcopy(operator_path)
+    unmapped["proof_obligations"]["obligations"][0]["claim_refs"].pop()
+    if not any(
+        "unmapped" in error
+        for error in delivery_art_proof_obligation_errors(
+            unmapped, executed_case_ids
+        )
+    ):
+        errors.append("Delivery ART proof registry must reject an unmapped true claim")
+
+    duplicate = copy.deepcopy(operator_path)
+    duplicated_claim = duplicate["proof_obligations"]["obligations"][0][
+        "claim_refs"
+    ][0]
+    duplicate["proof_obligations"]["obligations"][1]["claim_refs"].append(
+        duplicated_claim
+    )
+    if not any(
+        "mapped exactly once" in error
+        for error in delivery_art_proof_obligation_errors(
+            duplicate, executed_case_ids
+        )
+    ):
+        errors.append(
+            "Delivery ART proof registry must reject a multiply mapped true claim"
+        )
+
+    unexecuted = copy.deepcopy(operator_path)
+    active_obligation = next(
+        obligation
+        for obligation in unexecuted["proof_obligations"]["obligations"]
+        if obligation["enforcement_state"] == "active-local"
+    )
+    active_obligation["positive_case_ids"].append("case-never-executed")
+    if not any(
+        "unexecuted validation cases" in error
+        for error in delivery_art_proof_obligation_errors(
+            unexecuted, executed_case_ids
+        )
+    ):
+        errors.append(
+            "Delivery ART proof registry must reject an unexecuted validation case"
+        )
 
 
 def controlled_proof_authorization_fixture() -> dict:
@@ -1223,10 +4887,23 @@ def main() -> int:
         "governance_validator_catalog": repo_root / "contracts/governance-validator-catalog.yaml",
         "context_behavior": repo_root / "contracts/context-behavior.yaml",
         "raw_context_retirement": repo_root / "contracts/raw-context-retirement.yaml",
+        "delivery_art_operator_path": repo_root / "contracts/delivery-art-operator-path.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
+
+    delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
+        errors, repo_root
+    )
+    delivery_art_contract = yaml.safe_load(
+        instance_paths["delivery_art_operator_path"].read_text()
+    ) or {}
+    validate_delivery_art_proof_obligations(
+        errors,
+        _artifact_object(delivery_art_contract.get("delivery_art_operator_path")),
+        delivery_art_proof_cases,
+    )
 
     controlled_proof_schema_path = repo_root / CONTROLLED_PROOF_SCHEMA_REF
     controlled_proof_schema: dict = {}

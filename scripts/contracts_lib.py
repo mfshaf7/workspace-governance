@@ -43,6 +43,7 @@ CONTRACT_FILES = {
     "governance_validator_catalog": "contracts/governance-validator-catalog.yaml",
     "context_behavior": "contracts/context-behavior.yaml",
     "raw_context_retirement": "contracts/raw-context-retirement.yaml",
+    "delivery_art_operator_path": "contracts/delivery-art-operator-path.yaml",
 }
 
 SCHEMA_FILES = {
@@ -80,6 +81,7 @@ SCHEMA_FILES = {
     "governance_validator_catalog": "contracts/schemas/governance-validator-catalog.schema.json",
     "context_behavior": "contracts/schemas/context-behavior.schema.json",
     "raw_context_retirement": "contracts/schemas/raw-context-retirement.schema.json",
+    "delivery_art_operator_path": "contracts/schemas/delivery-art-operator-path.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"

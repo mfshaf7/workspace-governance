@@ -91,21 +91,134 @@ one bounded architecture packet containing:
 - runtime boundaries and prohibited actions
 - rollback, cleanup, and terminal completion conditions
 - contradictions and unresolved decisions
+- the positive and negative conformance cases that later implementation must
+  prove, including the required fidelity class for each case
 
 Discuss that packet with the operator and lock the execution sequence before
-child implementation starts. The only valid outcomes are
-`ready-for-child-implementation` or
+child implementation starts. The only valid outcomes are `architecture-ready`
+or
 `blocked-pending-architecture-decision`. Reopen the preflight if an owner
 boundary, protocol, lifecycle, or evidence handoff materially changes.
 
-When the initiative changes a cross-repo protocol, the packet must also include
-an executable conformance plan. It must cover command acknowledgement,
+The descendant owner map and dependency DAG must cover the same declared work
+items. Parent links form a rooted acyclic forest, every edge endpoint resolves,
+and the source snapshot contains exactly one revision for every declared owner
+repo. Dependency relations have explicit precedence: the target precedes the
+source for `depends_on`; the source precedes the target for `blocks` and
+`must_merge_before`. Cross-repo edges must be honored by `merge_order`, and
+every lifecycle transition endpoint must be a declared lifecycle state. These
+invariants are semantic checks in addition to JSON Schema shape.
+
+Every architecture packet records whether it changes a cross-repo protocol and
+why. When protocol conformance applies, the packet must include every mandated
+dimension in its executable conformance plan. It must cover command acknowledgement,
 deterministic identity and idempotency, state-mutation ordering, retry, cancel,
 replay and recovery semantics, bounded failure mapping, authorization integrity,
 session and scenario-execution binding, complete owner receipts, immutable
 restore evidence, lifecycle matrices, cross-artifact timelines, and shared
-validator compatibility. Positive and negative contract cases must pass before
-the affected child is considered ready for implementation.
+validator compatibility.
+
+Architecture readiness proves that this plan is complete and operator-approved;
+it does not pretend implementation tests have already run. Applicable positive
+and negative cases must pass before `merge-ready`, using the fidelity needed for
+the claim. Each case names the dimensions it proves, required plans cover every
+declared dimension, and every mandated protocol dimension has positive and
+negative `merge-ready` cases. Every covered work item must also have positive
+and negative `merge-ready` cases, so one item cannot carry protocol proof for a
+different item that defers its own cases until operating readiness. A synthetic
+resolver may support unit tests, but it cannot prove a claim about real Git
+history. The packet therefore declares the exact applicable dimensions for each
+work item. Every declared `(work item, dimension)` pair needs positive and
+negative merge-ready cases. Git-causality claims separately name their work
+items and dimensions, and each such pair requires positive and negative
+`real-git` cases.
+
+The machine schema is
+[`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
+
+## Readiness Levels
+
+ART readiness is four separate decisions, not one overloaded `ready` flag:
+
+1. `architecture-ready`: design, ownership, execution sequence, boundaries,
+   and conformance plan are explicit and operator-approved.
+2. `implementation-ready`: one Landing Unit is bound to exact ART and owner-repo
+   source truth through a durable work-start record.
+3. `merge-ready`: the exact open-PR source head, or an explicitly authorized
+   direct-land head, has passing applicable tests, validations, acceptance
+   mapping, and a concrete rollback boundary.
+4. `operating-ready`: merged or explicitly accepted evidence is finalized,
+   content-addressed, durably stored, and includes any live, runtime, security,
+   or restore proof required by the change class.
+
+Each decision is bound to a source snapshot and scope fingerprint. The
+architecture fingerprint is recomputed from Delivery scope, covered work,
+source snapshot, architecture, conformance plan, and decision status. The
+work-start fingerprint is recomputed from Delivery scope, covered work,
+Landing Unit, architecture binding, source snapshot, and the complete
+invalidation set. Operator-provided arbitrary digests are invalid. A material
+ART dependency, owner boundary, base revision, architecture decision, or
+validation obligation change invalidates the affected later decision instead
+of silently mutating earlier evidence.
+
+The contract and schemas define this target now. Runtime enforcement remains
+pending the owner-repo work and initiative `698` dogfood listed in the machine
+contract. Until those items land, use the existing OOS operator commands and
+Review Packet v1 path; do not claim that a new work-start command or Review
+Packet v2 persistence path already exists.
+
+The machine contract also carries a proof-obligation registry. Every Boolean
+claim under readiness rules, work-start, evidence integrity, and architecture
+preflight is mapped exactly once as:
+
+- `active-local`, with an executed positive and negative validation case
+- `pending-owner`, with its activation ART item
+- `doctrine`, with an explicit rationale and no false runtime proof
+
+Adding a true claim without that mapping, mapping one claim twice, or naming a
+validation case that did not execute fails the contract validator.
+
+## Work-Start Gate
+
+Before creating a branch or editing source, the target OOS path will persist a
+[`delivery-art-work-start-record`](../contracts/schemas/delivery-art-work-start-record.schema.json)
+that records:
+
+- the covered ART items and explicit Landing Unit Decision
+- a concrete split reason for `child_isolated_landing_unit`
+- owner repos, branch plan, exact base refs, and exact base commits
+- the architecture packet ref and digest when preflight applies
+- a planned Review Packet ref
+- the scoped ART/source snapshot, fingerprint, and invalidation inputs
+- the operator decision and resulting implementation readiness
+
+For a source-backed Landing Unit, owner repos, branch-plan repos, and source
+snapshot repos must be the same set. Each planned base ref and base commit must
+also equal the corresponding captured source revision. Schema shape validation
+alone is insufficient for these dynamic cross-record comparisons, so the
+contract validator applies the semantic binding as a separate required check.
+Durable work-start or blocked records must also record `persisted_at`; durable
+custody without a persistence timestamp is invalid.
+
+The invalidation input list is a complete machine set, not an operator-selected
+subset. Every work-start record carries all five declared change classes so a
+later ART, ownership, source, architecture, validation, or security change
+forces reevaluation instead of silently relying on stale readiness.
+
+When architecture is required but its decision is unresolved, the work-start
+record remains durable with architecture readiness `blocked` and overall
+readiness `blocked`. It must not invent a packet ref or claim
+`implementation-ready`. Once the architecture decision is ready, a fresh
+work-start evaluation binds its packet ref and digest before source work.
+Those refs follow the architecture substate even when a separate blocker keeps
+overall work-start readiness blocked: `architecture-ready` requires both refs,
+while `blocked` and `not-required` require both to remain null.
+
+Read snapshots may be cached to keep preparation fast. A final mutation must
+refresh the target item and dependency subset. The intended cold work-start
+budget is five seconds, the warm budget is two seconds, and local schema
+validation should remain under 250 milliseconds. These are target budgets until
+dogfood turns them into measured operating controls.
 
 ## Landing Evidence
 
@@ -143,23 +256,158 @@ branch. Keep them open with work notes such as `implemented pending landing`
 until the finalized Review Packet provides merged PR evidence, approved
 direct-land evidence, or equivalent durable source evidence.
 
-Before merging source-backed work, create or refresh the draft Review Packet
-while the PR is still open. The packet must use `open_pr` evidence and include
-the PR URL, changed-surface explanations, tests, validations, rollback
-boundary, and item-level completion mapping. Fetch the PR base and run the
-local command or command set that is CI-equivalent for the changed surface. If
-required CI uses a base-aware validator, use the same base-ref shape after
-fetching the base, such as `--against-ref origin/main`. Record the command,
-base ref, and result in validation evidence. Then run:
+Approved direct landing is an exception path, not timeless authority. Its
+`direct-land` exception must carry an expiry and remain valid through the
+packet's readiness evaluation and finalization. An expired or non-expiring
+exception cannot authorize a finalized direct-land packet, and direct-land
+evidence cannot simultaneously claim a pull-request URL.
+
+Before merging source-backed work, create or refresh the local draft Review
+Packet. For the normal PR path it uses `open_pr` evidence and includes the PR
+URL, changed-surface explanations, tests, validations, rollback boundary, and
+item-level completion mapping. Fetch the PR base and run the local command or
+command set that is CI-equivalent for the changed surface. If required CI uses
+a base-aware validator, use the same base-ref shape after fetching the base,
+such as `--against-ref origin/main`. Every passing result records the exact
+repo/head revisions it proves; a stale or partial source-revision set is not
+passing evidence. Then run:
 
 ```bash
 npm run art -- review-packet readiness <packet.json>
 ```
 
-Merge only after readiness passes. If it fails, fix the same PR or split the
-Landing Unit; do not merge first and repair the evidence later. After merge,
-set the packet to `merged_pr`, add the merge commit, finalize it, and use the
-final digest in ART completion evidence.
+Passing readiness persists a content-addressed `merge-ready` Review Packet.
+That artifact is the immutable reviewed predecessor, not a local file that can
+be rewritten after merge. Merge only after it exists. If readiness fails, fix
+the same PR or split the Landing Unit; do not merge first and repair the
+evidence later. After merge, build the final packet from that predecessor, set
+the evidence kind to `merged_pr`, add the merge commit and any later evidence,
+and preserve every earlier source, result, mapping, and exception fact.
+Finalize only after the operating-readiness receipt resolves, then use the
+final packet digest in ART completion evidence.
+
+Review Packet v2 replaces prose result lines with structured evidence. Every
+test and validation records its command, fidelity class, result, summary, and
+evidence refs. `fail` blocks merge readiness. `not_applicable` requires both a
+reason and an authority ref. `Attached artifact` is a reference, not a passing
+result, and prefixes such as `PASS:`, `FAIL:`, and `CHECK:` are not evidence
+types.
+
+The acceptance mapping must contain exactly one mapping for every declared
+covered work item. Mapping references must resolve to globally unique evidence
+ids in that packet. These are packet-level semantic invariants in addition to
+the JSON Schema shape, and partial coverage or unknown references fail
+readiness.
+
+For source-backed packets, repository evidence is unique per repo and every
+declared changed surface must resolve to a file in that repo's exact
+`changed_files` list. This prevents a packet from presenting acceptance
+evidence for source outside its declared landing boundary.
+
+Readiness references are not opaque labels. A work-start record resolves its
+architecture packet; a Review Packet resolves its work-start record and that
+record's architecture packet. The resolved chain must preserve Delivery id,
+work-item coverage, Landing Unit decision, owner and branch plan, exact base
+revisions, scope fingerprint, and architecture decision. Architecture
+conformance cases declare the work items they apply to. Every case applicable
+to the packet's work-item and readiness scope must have a passing evidence
+result at the planned fidelity. A required conformance plan covers every
+architecture work item and every declared dimension with executable cases. A
+child cannot advance merely because its tests were omitted from the plan or
+deferred beyond that child's current readiness gate.
+
+A finalized source Review Packet also resolves the durable merge-ready packet
+named by `custody.supersedes`. The predecessor must be earlier, durable, of the
+same packet and Delivery scope, and its reviewed source/evidence facts must
+remain present. The final packet may add merge and operating evidence; it may
+not rewrite what was reviewed. Supersession is walked as a complete chain, so
+cycles and non-strict persistence order fail even when each immediate ref looks
+well formed.
+
+WGCF can issue receipts for all four readiness levels. Architecture,
+implementation, and merge receipts bind the exact durable source artifact by
+its content digest. Operating readiness is intentionally different: the final
+packet's `readiness.subject_digest` is recomputed over packet content excluding
+custody, integrity, receipt refs, and that digest field, which lets WGCF issue
+the receipt before its content address is inserted into the final packet. The
+receipt resolver still requires the exact subject artifact and matching
+Delivery, covered work, readiness level, chronology, and digest.
+
+Each receipt referenced by a finalized packet must resolve by URI and content
+digest, bind the same packet id and readiness-subject digest, carry a `ready`
+outcome that permits mutation, and be durably persisted before the final
+packet. This local validation proves receipt structure and subject binding;
+trusted WGCF service identity remains target owner work under `803` and the
+security gate under `805`.
+
+An architecture decision and its durable attachment must exist before the
+work-start evaluation that consumes it. The durable work-start attachment must
+exist before a Review Packet is created. Internally valid future evidence
+cannot satisfy an earlier readiness decision.
+
+When an append-only correction declares `custody.supersedes`, that reference
+must resolve to an earlier durable artifact of the same type and Delivery
+initiative. A self-reference or an invented prior digest is not a correction.
+
+Validate any supplied target-contract artifact locally with:
+
+```bash
+python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root . \
+  --dependency-artifact <referenced-artifact.json>
+```
+
+Repeat `--dependency-artifact` until the referenced dependency closure is
+complete. An architecture packet has no dependency argument. A work-start
+record needs its architecture packet. A merge-ready Review Packet needs both.
+A readiness receipt needs its exact subject artifact plus that subject's
+dependency closure. An operating-readiness receipt therefore needs the final
+packet, its merge-ready predecessor, work-start record, and architecture
+packet. A finalized source Review Packet needs its durable merge-ready
+predecessor and readiness receipt in addition to the earlier source artifacts:
+
+```bash
+python3 scripts/validate_delivery_art_artifact.py <finalized-packet.json> --repo-root . \
+  --dependency-artifact <architecture-packet.json> \
+  --dependency-artifact <work-start-record.json> \
+  --dependency-artifact <merge-ready-packet.json> \
+  --dependency-artifact <readiness-receipt.json>
+```
+
+This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
+exact evidence source heads, resolved cross-artifact continuity, applicable
+conformance cases, and content integrity. OOS work item `802` must resolve the
+same durable dependencies on the active runtime path before Review Packet v2
+is declared implemented.
+
+The v2 schema is
+[`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).
+It remains a target contract until OOS work item `802` implements and activates
+the migration from the current runtime schema version.
+
+Draft artifacts remain local and reviewable, carry no persistence timestamp,
+and do not claim durable custody. Once an architecture decision, work-start
+evaluation, or merge-ready/final Review Packet is recorded, OOS owns durable
+custody by attaching content-addressed JSON to the initiative Epic. Corrections
+append a superseding artifact; they do not replace prior evidence. Every
+durable architecture, work-start, merge-ready, and finalized Review Packet
+records when it was persisted.
+
+WGCF stores content-addressed readiness receipts and exact source-artifact
+bindings, not duplicate source artifacts. The same receipt schema covers
+architecture, implementation, merge, and operating readiness; only the
+operating receipt uses the cycle-safe Review Packet readiness-subject digest.
+The receipt schema is
+[`delivery-art-readiness-receipt.schema.json`](../contracts/schemas/delivery-art-readiness-receipt.schema.json).
+Artifact digests use the integer-only RFC 8785 canonical domain and SHA-256
+over artifact content, excluding custody metadata and the digest field itself.
+
+The accepted canonical input domain contains unique JSON object keys, Unicode
+scalar values, and integral numbers only; duplicate keys, floating-point
+spellings such as `1.0`, and lone UTF-16 surrogates are rejected before
+hashing. Artifact lifecycle timestamps are chronological:
+source capture precedes architecture decisions and work-start evaluation,
+packet creation precedes evaluation and finalization, and durable persistence
+does not precede the decision it stores.
 
 Generated ART payloads, Review Packets, and completion evidence files must stay
 reviewable. Edit them through a patchable diff path such as `apply_patch` or an
@@ -175,7 +423,10 @@ the operator explicitly accepts that blocker or exception.
 
 Non-source work, such as risk disposition, live verification, planning, or ART
 metadata repair, closes with non-source evidence and should not invent merge
-evidence.
+evidence. A `non_source_child` may remain `pending` while its packet is a draft,
+but it may finalize only with `non_source_evidence` and no repository, branch,
+pull-request, or merge evidence. Source-backed Landing Units cannot use
+`non_source_evidence`.
 
 Feature and Epic closeout must verify coverage: every child is either covered
 by a finalized Review Packet or explicitly marked as non-source evidence only.

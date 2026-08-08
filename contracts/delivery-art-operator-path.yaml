@@ -10,6 +10,481 @@ delivery_art_operator_path:
     workflow_health: platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md
     quality_gate: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
     admin_boundary: platform-engineering/products/openproject/runbooks/openproject-platform-admin-surface.md
+  contract_activation:
+    state: contract-defined
+    runtime_enforcement: pending-owner-implementation-and-dogfood
+    target_art_items:
+      - openproject://work_packages/802
+      - openproject://work_packages/803
+      - openproject://work_packages/804
+      - openproject://work_packages/805
+      - openproject://work_packages/806
+    current_runtime_compatibility:
+      review_packet_schema_version: 1
+      new_work_start_commands_available: false
+      rule: >-
+        Continue using the currently documented OOS commands until the target
+        owner implementations land. This contract defines the next boundary;
+        it does not claim that work-start enforcement or Review Packet v2 is
+        already active.
+    activation_requires:
+      - OOS persists and evaluates the architecture packet and work-start record
+      - OOS implements Review Packet v2 and rejects weak result strings
+      - WGCF evaluates the four readiness levels from structured artifacts
+      - Platform removes duplicate ART quality semantics and consumes OOS projections
+      - Security approves evidence custody and source-provenance controls
+      - the path is dogfooded on delivery initiative 698
+  readiness_model:
+    ordered_levels:
+      - architecture-ready
+      - implementation-ready
+      - merge-ready
+      - operating-ready
+    levels:
+      architecture-ready:
+        purpose: prove the target design, ownership, sequence, and conformance plan before source implementation
+        requires:
+          - finalized architecture packet with an explicit operator decision
+          - complete descendant and owner map
+          - dependency and merge sequence
+          - lifecycle, authority, evidence, runtime, and rollback boundaries
+          - planned positive and negative conformance cases with fidelity classes
+        does_not_require:
+          - implementation tests to have already passed
+          - a source branch or pull request to exist
+      implementation-ready:
+        purpose: bind one Landing Unit to fresh ART and owner-repo source truth before implementation
+        requires:
+          - architecture-ready evidence when architecture preflight applies
+          - explicit Landing Unit Decision
+          - exact owner repos, base refs, base commits, and planned Review Packet ref
+          - fresh scope fingerprint with invalidation inputs
+        does_not_require:
+          - an open pull request
+          - merge or runtime evidence
+      merge-ready:
+        purpose: prove the exact reviewed source head satisfies the Landing Unit before merge
+        requires:
+          - implementation-ready work-start record
+          - open pull request evidence or approved direct-land authority at exact source head
+          - structured changed surfaces and acceptance mapping
+          - applicable test and validation results with no failed result
+          - durable content-addressed merge-ready Review Packet
+          - concrete rollback boundary
+        does_not_require:
+          - merged source evidence
+          - post-merge runtime proof
+      operating-ready:
+        purpose: prove the merged or explicitly accepted change has the evidence required for ART closeout
+        requires:
+          - finalized content-addressed Review Packet
+          - durable source or non-source evidence
+          - applicable live, runtime, security, and restore evidence for the change class
+          - append-only custody ref and receipt refs
+        does_not_require:
+          - runtime proof when the declared change class does not require it
+    rules:
+      readiness_is_snapshot_bound: true
+      later_level_does_not_rewrite_earlier_evidence: true
+      failed_required_evidence_blocks_advancement: true
+      not_applicable_requires_reason_and_authority_ref: true
+      attached_artifact_is_a_reference_not_a_pass_result: true
+      architecture_dependency_graph_is_bound_and_acyclic: true
+      architecture_parent_map_is_a_rooted_acyclic_forest: true
+      architecture_source_snapshot_exactly_covers_owner_repos: true
+      architecture_lifecycle_transitions_use_declared_states: true
+      architecture_merge_order_respects_dependency_precedence: true
+      dependency_relation_precedence:
+        depends_on: the target work item and its owner repo precede the source
+        blocks: the source work item and its owner repo precede the target
+        must_merge_before: the source work item and its owner repo precede the target
+  artifact_contracts:
+    architecture_packet:
+      schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
+      schema_version: 1
+      target_owner_repo: operator-orchestration-service
+      durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
+    work_start_record:
+      schema_ref: contracts/schemas/delivery-art-work-start-record.schema.json
+      schema_version: 1
+      target_owner_repo: operator-orchestration-service
+      durable_when: implementation readiness is evaluated
+    review_packet:
+      schema_ref: contracts/schemas/delivery-art-review-packet.schema.json
+      schema_version: 2
+      target_owner_repo: operator-orchestration-service
+      durable_when: packet reaches merge-ready or finalized
+      migration_from_runtime_version: 1
+    readiness_receipt:
+      schema_ref: contracts/schemas/delivery-art-readiness-receipt.schema.json
+      schema_version: 1
+      target_owner_repo: workspace-governance-control-fabric
+      durable_when: readiness evaluation completes
+  proof_obligations:
+    governed_claim_roots:
+      - readiness_model.rules
+      - work_start_gate
+      - evidence_integrity
+      - initiative_architecture_preflight
+    every_true_claim_mapped_once: true
+    active_local_requires_positive_and_negative_case: true
+    obligations:
+      - id: readiness-evidence-semantics
+        claim_refs:
+          - readiness_model.rules.readiness_is_snapshot_bound
+          - readiness_model.rules.failed_required_evidence_blocks_advancement
+          - readiness_model.rules.not_applicable_requires_reason_and_authority_ref
+          - readiness_model.rules.attached_artifact_is_a_reference_not_a_pass_result
+          - evidence_integrity.lifecycle_timestamps_must_be_chronologically_ordered
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - review-evidence-valid
+        negative_case_ids:
+          - review-evidence-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: Structured evidence and chronology are enforced by the local schemas and semantic validator.
+      - id: architecture-structure
+        claim_refs:
+          - readiness_model.rules.architecture_dependency_graph_is_bound_and_acyclic
+          - readiness_model.rules.architecture_parent_map_is_a_rooted_acyclic_forest
+          - readiness_model.rules.architecture_source_snapshot_exactly_covers_owner_repos
+          - readiness_model.rules.architecture_lifecycle_transitions_use_declared_states
+          - readiness_model.rules.architecture_merge_order_respects_dependency_precedence
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - architecture-structure-valid
+        negative_case_ids:
+          - architecture-structure-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: Architecture topology, ownership, lifecycle, and merge precedence are executable local invariants.
+      - id: work-start-structure
+        claim_refs:
+          - work_start_gate.child_isolated_requires_split_reason
+          - work_start_gate.exact_base_revision_required
+          - work_start_gate.owner_branch_and_snapshot_repo_sets_must_match
+          - work_start_gate.branch_base_ref_and_commit_must_match_source_snapshot
+          - work_start_gate.planned_review_packet_ref_required_for_source_work
+          - work_start_gate.architecture_packet_required_when_preflight_applies
+          - work_start_gate.architecture_refs_follow_architecture_readiness
+          - work_start_gate.required_architecture_may_record_blocked_state
+          - work_start_gate.blocked_architecture_prevents_implementation_ready
+          - work_start_gate.complete_invalidation_set_required
+          - work_start_gate.scope_fingerprint_is_deterministic_projection
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - work-start-valid
+        negative_case_ids:
+          - work-start-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+          - reference-resolver
+        rationale: The local contract proves one exact Landing Unit scope before owner runtime activation.
+      - id: runtime-work-start-enforcement
+        claim_refs:
+          - work_start_gate.required_before_branch_or_source_edit
+          - work_start_gate.fresh_target_and_dependency_snapshot_required_before_mutation
+        enforcement_state: pending-owner
+        owner_repo: operator-orchestration-service
+        target_art_refs:
+          - openproject://work_packages/802
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: OOS must enforce the pre-edit gate and final fresh read; this contract cannot claim those runtime controls are active.
+      - id: read-cache-policy
+        claim_refs:
+          - work_start_gate.read_snapshot_cache_allowed
+        enforcement_state: doctrine
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - operator-contract
+        rationale: This is an allowed optimization boundary, not a claim that a cache runtime already exists.
+      - id: review-evidence-integrity
+        claim_refs:
+          - evidence_integrity.landing_unit_decision_and_evidence_kind_must_match
+          - evidence_integrity.non_source_children_prohibit_branch_pr_and_source_landing_evidence
+          - evidence_integrity.source_repo_evidence_unique_by_repo
+          - evidence_integrity.source_changed_surfaces_resolve_to_declared_changed_files
+          - evidence_integrity.source_provenance.exact_base_and_head_commits_required
+          - evidence_integrity.source_provenance.passing_evidence_binds_exact_source_heads
+          - evidence_integrity.source_provenance.git_causality_applicability_is_explicit
+          - evidence_integrity.source_provenance.real_git_required_for_git_causality_claims
+          - evidence_integrity.source_provenance.synthetic_resolver_cannot_prove_git_history
+          - evidence_integrity.acceptance_mapping.exactly_covers_declared_work_items
+          - evidence_integrity.acceptance_mapping.evidence_references_must_resolve
+          - evidence_integrity.acceptance_mapping.evidence_ids_globally_unique
+          - evidence_integrity.exception_authority.direct_land_exception_must_be_time_bound
+          - evidence_integrity.exception_authority.direct_land_exception_must_remain_valid_through_readiness_and_finalization
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - review-evidence-valid
+        negative_case_ids:
+          - review-evidence-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+          - reference-resolver
+        rationale: Review evidence, source provenance, acceptance mapping, and exception authority are validated as structured facts.
+      - id: canonical-integrity
+        claim_refs:
+          - evidence_integrity.canonical_input_requires_unicode_scalar_values
+          - evidence_integrity.duplicate_json_object_keys_rejected
+          - evidence_integrity.floating_point_values_rejected
+          - evidence_integrity.custody.content_addressed_filename_required
+          - evidence_integrity.custody.durable_persisted_at_required
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - canonical-integrity-valid
+        negative_case_ids:
+          - canonical-integrity-invalid
+        enforcement_layers:
+          - integrity-validator
+        rationale: The public artifact validator uses the bounded RFC 8785 domain and verifies content-addressed custody.
+      - id: artifact-reference-chain
+        claim_refs:
+          - readiness_model.rules.later_level_does_not_rewrite_earlier_evidence
+          - evidence_integrity.artifact_reference_chain.opaque_refs_cannot_advance_readiness
+          - evidence_integrity.artifact_reference_chain.work_start_resolves_architecture_packet
+          - evidence_integrity.artifact_reference_chain.review_packet_resolves_work_start_record
+          - evidence_integrity.artifact_reference_chain.readiness_receipt_resolves_exact_subject
+          - evidence_integrity.artifact_reference_chain.readiness_receipt_subject_coverage_and_chronology_must_match
+          - evidence_integrity.artifact_reference_chain.operating_receipt_uses_cycle_safe_readiness_subject
+          - evidence_integrity.artifact_reference_chain.finalized_review_packet_resolves_merge_ready_predecessor
+          - evidence_integrity.artifact_reference_chain.finalized_review_packet_resolves_readiness_receipts
+          - evidence_integrity.artifact_reference_chain.resolved_delivery_coverage_landing_unit_scope_and_source_must_match
+          - evidence_integrity.artifact_reference_chain.dependency_must_exist_before_dependent_readiness
+          - evidence_integrity.artifact_reference_chain.superseded_artifact_must_resolve_with_same_type_and_delivery
+          - evidence_integrity.artifact_reference_chain.local_validator_requires_dependency_artifacts
+          - evidence_integrity.custody.append_only_corrections
+          - evidence_integrity.custody.correction_requires_supersedes_ref
+          - evidence_integrity.custody.supersession_chains_are_acyclic_and_strictly_ordered
+          - evidence_integrity.custody.merge_ready_review_packet_is_immutable_predecessor_evidence
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - reference-chain-valid
+        negative_case_ids:
+          - reference-chain-invalid
+        enforcement_layers:
+          - reference-resolver
+          - semantic-validator
+        rationale: Every readiness dependency must resolve by type, digest, scope, chronology, and immutable predecessor continuity.
+      - id: conformance-plan
+        claim_refs:
+          - evidence_integrity.conformance_case_binding.architecture_cases_declare_applicable_work_items
+          - evidence_integrity.conformance_case_binding.architecture_cases_declare_dimension_ids
+          - evidence_integrity.conformance_case_binding.case_ids_unique_within_architecture_packet
+          - evidence_integrity.conformance_case_binding.required_plan_exactly_covers_architecture_work_items
+          - evidence_integrity.conformance_case_binding.required_plan_exactly_covers_declared_dimensions
+          - evidence_integrity.conformance_case_binding.required_plan_has_positive_and_negative_case_per_work_item
+          - evidence_integrity.conformance_case_binding.required_protocol_dimension_has_merge_ready_positive_and_negative_cases
+          - evidence_integrity.conformance_case_binding.required_protocol_work_item_has_merge_ready_positive_and_negative_cases
+          - evidence_integrity.conformance_case_binding.required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases
+          - evidence_integrity.conformance_case_binding.later_readiness_requires_all_applicable_cases_to_pass
+          - evidence_integrity.conformance_case_binding.evidence_fidelity_must_match_planned_case_fidelity
+          - evidence_integrity.conformance_case_binding.cases_outside_packet_work_item_or_readiness_scope_rejected
+          - evidence_integrity.conformance_case_binding.work_item_dimension_applicability_is_explicit
+          - initiative_architecture_preflight.protocol_conformance_preflight.required_when_cross_repo_protocol_changes
+          - initiative_architecture_preflight.protocol_conformance_preflight.applicability_must_be_explicit
+          - initiative_architecture_preflight.protocol_conformance_preflight.all_required_dimensions_must_be_present_when_applicable
+          - initiative_architecture_preflight.protocol_conformance_preflight.all_required_dimensions_must_have_executable_cases
+          - initiative_architecture_preflight.protocol_conformance_preflight.architecture_ready_requires_conformance_plan
+          - initiative_architecture_preflight.protocol_conformance_preflight.merge_ready_requires_applicable_cases_pass
+          - initiative_architecture_preflight.protocol_conformance_preflight.fidelity_class_required
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - architecture-conformance-valid
+        negative_case_ids:
+          - architecture-conformance-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+          - reference-resolver
+        rationale: Applicability is explicit per work-item and dimension, with positive and negative merge-ready cases at the declared fidelity.
+      - id: architecture-decision-doctrine
+        claim_refs:
+          - initiative_architecture_preflight.required_before_source_implementation
+          - initiative_architecture_preflight.decision_gate.operator_discussion_required
+          - initiative_architecture_preflight.decision_gate.execution_sequence_locked_before_child_work
+          - initiative_architecture_preflight.decision_gate.reopen_when_owner_boundary_or_protocol_changes
+        enforcement_state: doctrine
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - operator-contract
+        rationale: These are operator governance obligations; the source contract defines them without pretending to prove the human decision itself.
+      - id: wgcf-receipt-custody-boundary
+        claim_refs:
+          - evidence_integrity.custody.wgcf_records_receipts_not_source_artifacts
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        target_art_refs: []
+        positive_case_ids:
+          - readiness-receipt-valid
+        negative_case_ids:
+          - readiness-receipt-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: The local receipt contract fixes WGCF to readiness receipts while source artifacts remain under OOS custody.
+  work_start_gate:
+    required_before_branch_or_source_edit: true
+    landing_unit_decisions:
+      - feature_single_landing_unit
+      - child_isolated_landing_unit
+      - non_source_child
+      - defer_decision_blocked
+    child_isolated_requires_split_reason: true
+    exact_base_revision_required: true
+    owner_branch_and_snapshot_repo_sets_must_match: true
+    branch_base_ref_and_commit_must_match_source_snapshot: true
+    planned_review_packet_ref_required_for_source_work: true
+    architecture_packet_required_when_preflight_applies: true
+    architecture_refs_follow_architecture_readiness: true
+    required_architecture_may_record_blocked_state: true
+    blocked_architecture_prevents_implementation_ready: true
+    read_snapshot_cache_allowed: true
+    fresh_target_and_dependency_snapshot_required_before_mutation: true
+    complete_invalidation_set_required: true
+    scope_fingerprint_is_deterministic_projection: true
+    invalidation_inputs:
+      - art-descendant-or-dependency-change
+      - owner-or-rollback-boundary-change
+      - base-ref-or-commit-change
+      - architecture-decision-or-digest-change
+      - validation-or-security-obligation-change
+  evidence_integrity:
+    landing_unit_decision_and_evidence_kind_must_match: true
+    non_source_children_prohibit_branch_pr_and_source_landing_evidence: true
+    source_repo_evidence_unique_by_repo: true
+    source_changed_surfaces_resolve_to_declared_changed_files: true
+    canonicalization: RFC8785
+    canonical_input_requires_unicode_scalar_values: true
+    duplicate_json_object_keys_rejected: true
+    floating_point_values_rejected: true
+    digest_algorithm: sha256
+    digest_scope: artifact content excluding custody metadata and the digest field itself
+    lifecycle_timestamps_must_be_chronologically_ordered: true
+    artifact_reference_chain:
+      opaque_refs_cannot_advance_readiness: true
+      work_start_resolves_architecture_packet: true
+      review_packet_resolves_work_start_record: true
+      readiness_receipt_resolves_exact_subject: true
+      readiness_receipt_subject_coverage_and_chronology_must_match: true
+      operating_receipt_uses_cycle_safe_readiness_subject: true
+      finalized_review_packet_resolves_merge_ready_predecessor: true
+      finalized_review_packet_resolves_readiness_receipts: true
+      resolved_delivery_coverage_landing_unit_scope_and_source_must_match: true
+      dependency_must_exist_before_dependent_readiness: true
+      superseded_artifact_must_resolve_with_same_type_and_delivery: true
+      local_validator_requires_dependency_artifacts: true
+      runtime_resolver_owner: operator-orchestration-service
+    evidence_results:
+      allowed:
+        - pass
+        - fail
+        - not_applicable
+      merge_ready_allows:
+        - pass
+        - not_applicable
+      string_prefixes_are_not_results:
+        - "PASS:"
+        - "FAIL:"
+        - "CHECK:"
+        - "Attached artifact:"
+    test_fidelity_classes:
+      - pure-unit
+      - filesystem
+      - real-git
+      - process-crash
+      - sandbox-runtime
+      - live-backend
+    conformance_case_binding:
+      architecture_cases_declare_applicable_work_items: true
+      architecture_cases_declare_dimension_ids: true
+      case_ids_unique_within_architecture_packet: true
+      required_plan_exactly_covers_architecture_work_items: true
+      required_plan_exactly_covers_declared_dimensions: true
+      required_plan_has_positive_and_negative_case_per_work_item: true
+      required_protocol_dimension_has_merge_ready_positive_and_negative_cases: true
+      required_protocol_work_item_has_merge_ready_positive_and_negative_cases: true
+      required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases: true
+      later_readiness_requires_all_applicable_cases_to_pass: true
+      evidence_fidelity_must_match_planned_case_fidelity: true
+      cases_outside_packet_work_item_or_readiness_scope_rejected: true
+      work_item_dimension_applicability_is_explicit: true
+    source_provenance:
+      exact_base_and_head_commits_required: true
+      passing_evidence_binds_exact_source_heads: true
+      git_causality_applicability_is_explicit: true
+      real_git_required_for_git_causality_claims: true
+      synthetic_resolver_cannot_prove_git_history: true
+    acceptance_mapping:
+      exactly_covers_declared_work_items: true
+      evidence_references_must_resolve: true
+      evidence_ids_globally_unique: true
+    exception_authority:
+      direct_land_exception_must_be_time_bound: true
+      direct_land_exception_must_remain_valid_through_readiness_and_finalization: true
+    custody:
+      draft_backend: local-filesystem
+      durable_backend: openproject-attachment
+      durable_owner: operator-orchestration-service
+      attachment_scope: initiative-epic
+      content_addressed_filename_required: true
+      append_only_corrections: true
+      correction_requires_supersedes_ref: true
+      supersession_chains_are_acyclic_and_strictly_ordered: true
+      merge_ready_review_packet_is_immutable_predecessor_evidence: true
+      durable_persisted_at_required: true
+      wgcf_records_receipts_not_source_artifacts: true
+  authority_boundaries:
+    workspace_governance:
+      - policy and schema authority
+      - readiness meaning and evidence obligations
+    operator_orchestration_service:
+      - ART adapter and mutation authority
+      - scoped snapshot and artifact custody authority
+      - Review Packet and atomic closeout implementation
+    workspace_governance_control_fabric:
+      - readiness composition and receipt authority
+      - no ART mutation authority
+    platform_engineering:
+      - OpenProject runtime and projection authority
+      - no duplicate ART semantic evaluator
+    security_architecture:
+      - trust-boundary and evidence-custody review authority
+  performance_budgets:
+    status: target-until-dogfood-proves-operating-control
+    work_start_cold_seconds_max: 5
+    work_start_warm_seconds_max: 2
+    local_schema_validation_milliseconds_max: 250
+    prohibited_read_pattern: one full initiative graph rebuild or one relation call per work item for every bounded work-start read
+    final_write_rule: cached reads may inform preparation but final mutations must refresh the target and dependency subset
   initiative_architecture_preflight:
     applies_when:
       - an accepted initiative is architecture-shaping
@@ -20,6 +495,7 @@ delivery_art_operator_path:
       - complete initiative descendant tree from Workspace Delivery ART
       - merged implementation and contract truth from every affected owner repo
       - active workspace, platform, orchestration, and security authority contracts
+    packet_schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
     packet_required_sections:
       - descendant-and-owner-map
       - dependency-and-merge-sequence
@@ -29,15 +505,19 @@ delivery_art_operator_path:
       - runtime-boundaries-and-prohibited-actions
       - rollback-cleanup-and-terminal-conditions
       - contradictions-and-open-decisions
+      - conformance-plan
     decision_gate:
       operator_discussion_required: true
       execution_sequence_locked_before_child_work: true
       reopen_when_owner_boundary_or_protocol_changes: true
       allowed_results:
-        - ready-for-child-implementation
+        - architecture-ready
         - blocked-pending-architecture-decision
     protocol_conformance_preflight:
       required_when_cross_repo_protocol_changes: true
+      applicability_must_be_explicit: true
+      all_required_dimensions_must_be_present_when_applicable: true
+      all_required_dimensions_must_have_executable_cases: true
       required_dimensions:
         - command-and-acknowledgement-semantics
         - deterministic-identities-and-idempotency
@@ -54,7 +534,9 @@ delivery_art_operator_path:
       executable_cases_required:
         - positive-contract-cases
         - negative-contract-cases
-      child_ready_only_after_conformance_passes: true
+      architecture_ready_requires_conformance_plan: true
+      merge_ready_requires_applicable_cases_pass: true
+      fidelity_class_required: true
   canonical_read_hierarchy:
     - id: session-bootstrap
       cli: npm run art -- bootstrap

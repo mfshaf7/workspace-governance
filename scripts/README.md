@@ -124,6 +124,21 @@
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
+  - validates Delivery ART architecture, work-start, Review Packet v2, and
+    readiness-receipt fixtures plus the claim-to-proof registry; locally active
+    claims require executed positive and negative cases while pending owner
+    controls remain explicitly linked to their ART activation work
+- `validate_delivery_art_artifact.py`
+  - validates one operator-supplied architecture packet, work-start record,
+    Review Packet, or readiness receipt against its JSON Schema, cross-field
+    semantic bindings, resolved dependency artifacts, applicable architecture
+    conformance cases, and declared content digest
+  - repeat `--dependency-artifact <path>` until the dependency closure is
+    complete; every readiness receipt requires its exact subject artifact, and
+    a finalized source Review Packet requires its architecture packet,
+    work-start record, durable merge-ready predecessor, and readiness receipt
+  - use this contract-authority entrypoint for local artifact review until OOS
+    work item `802` activates equivalent runtime validation
 - `validate_component_contracts.py`
   - executes the component-level interface validation commands declared in
     `contracts/components.yaml` across the local workspace

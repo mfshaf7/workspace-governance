@@ -17,3 +17,10 @@ completion evidence it supports.
 Use one packet for several ART children when they share the same review and
 rollback boundary. Split packets when repo ownership, validation, security
 posture, deployment timing, or rollback scope differs.
+
+This Markdown template remains a human review aid. The target machine contract
+is Review Packet v2 in
+`contracts/schemas/delivery-art-review-packet.schema.json`. OOS still enforces
+its current runtime schema until the activation items in
+`contracts/delivery-art-operator-path.yaml` land; do not present the target
+schema as an already available command path.

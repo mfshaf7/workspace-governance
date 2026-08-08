@@ -1,0 +1,148 @@
+{
+  "schema_version": 2,
+  "artifact_type": "art_review_packet",
+  "packet_id": "review-packet:delivery-698-work-item-801",
+  "delivery_id": "delivery-698",
+  "covered_work_item_ids": ["work-item-801"],
+  "created_at": "2026-08-08T11:00:00+08:00",
+  "operator": {
+    "id": "operator:workspace-owner",
+    "decision_source": "operator"
+  },
+  "work_start": {
+    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b.json",
+    "artifact_digest": "sha256:9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b",
+    "scope_fingerprint": "sha256:13fe75c401e078d791210227e9f263e58e395982069748e306703afc4df4c251"
+  },
+  "landing_unit": {
+    "decision": "child_isolated_landing_unit",
+    "evidence_kind": "merged_pr",
+    "rollback_boundary": "One workspace-governance pull request and its generated contract artifacts roll back together.",
+    "repos": [
+      {
+        "repo_name": "workspace-governance",
+        "branch": "codex/art-801-work-start-contract",
+        "base_ref": "origin/main",
+        "base_commit": "1111111111111111111111111111111111111111",
+        "head_commit": "3333333333333333333333333333333333333333",
+        "pr_url": "https://github.com/mfshaf7/workspace-governance/pull/201",
+        "merge_commit": "4444444444444444444444444444444444444444",
+        "changed_files": ["contracts/delivery-art-operator-path.yaml"],
+        "change_record_refs": []
+      }
+    ]
+  },
+  "evidence": {
+    "changed_surfaces": [
+      {
+        "id": "evidence:contract",
+        "repo": "workspace-governance",
+        "path": "contracts/delivery-art-operator-path.yaml",
+        "summary": "Defines structured readiness, work-start, custody, and owner boundaries."
+      }
+    ],
+    "tests": [
+      {
+        "id": "evidence:schema-negative-cases",
+        "name": "Delivery ART artifact schema cases",
+        "command": "python3 scripts/validate_contracts.py --repo-root .",
+        "fidelity": "filesystem",
+        "result": "pass",
+        "summary": "Valid fixtures pass and malformed readiness evidence fails.",
+        "conformance_case_ids": ["case:contract-positive", "case:contract-negative"],
+        "source_revisions": [
+          {
+            "repo": "workspace-governance",
+            "commit": "3333333333333333333333333333333333333333"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "uri": "artifact://validation/delivery-art-schema-cases",
+            "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "not_applicable_reason": null,
+        "authority_ref": null
+      }
+    ],
+    "validations": [
+      {
+        "id": "evidence:contract-model",
+        "name": "Workspace contract model",
+        "command": "python3 scripts/validate_contracts.py --repo-root .",
+        "fidelity": "filesystem",
+        "result": "pass",
+        "summary": "The operator contract and artifact examples satisfy their schemas.",
+        "conformance_case_ids": [],
+        "source_revisions": [
+          {
+            "repo": "workspace-governance",
+            "commit": "3333333333333333333333333333333333333333"
+          }
+        ],
+        "evidence_refs": [
+          {
+            "uri": "artifact://validation/workspace-contract-model",
+            "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        ],
+        "not_applicable_reason": null,
+        "authority_ref": null
+      }
+    ],
+    "acceptance_mapping": [
+      {
+        "work_item_id": "work-item-801",
+        "acceptance_ref": "openproject://work_packages/801",
+        "evidence_ids": ["evidence:contract", "evidence:schema-negative-cases", "evidence:contract-model"],
+        "summary": "The source defines and validates the executable contract requested by the ART child."
+      }
+    ],
+    "runtime_and_live": [],
+    "security_and_trust": [
+      {
+        "id": "evidence:security-review-planned",
+        "name": "Security custody review",
+        "command": null,
+        "fidelity": "filesystem",
+        "result": "not_applicable",
+        "summary": "The downstream security review is sequenced after runtime implementation.",
+        "conformance_case_ids": [],
+        "source_revisions": [],
+        "evidence_refs": [],
+        "not_applicable_reason": "This landing unit defines policy and schemas but does not activate durable runtime custody.",
+        "authority_ref": "openproject://work_packages/805"
+      }
+    ]
+  },
+  "exceptions": [],
+  "status": "finalized",
+  "readiness": {
+    "level": "operating-ready",
+    "evaluated_at": "2026-08-08T11:30:00+08:00",
+    "subject_digest": "sha256:5435250dba718e9ba0c5e6c49d79d323ac573f3d59198547234b94dd999f01ee",
+    "receipt_refs": [
+      {
+        "uri": "wgcf://receipts/art-readiness/art-readiness-receipt-0123456789abcdef01234567-4e943adde9d8e659056244d85e496ecb4f1addb339f74848dacf13833e47cc25.json",
+        "digest": "sha256:4e943adde9d8e659056244d85e496ecb4f1addb339f74848dacf13833e47cc25"
+      }
+    ]
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:f74b9c786882a7e80409b57e3cc331cb97f3420245fb1761859e0dc6e1b0f67d"
+  },
+  "custody": {
+    "state": "durable",
+    "backend": "openproject-attachment",
+    "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-f74b9c786882a7e80409b57e3cc331cb97f3420245fb1761859e0dc6e1b0f67d.json",
+    "persisted_at": "2026-08-08T11:31:00+08:00",
+    "supersedes": {
+      "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-merge-ready-7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb.json",
+      "digest": "sha256:7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb"
+    }
+  },
+  "finalized_at": "2026-08-08T11:30:00+08:00"
+}

@@ -1,0 +1,536 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
+  "title": "Delivery ART Architecture Packet",
+  "$comment": "Exact descendant/DAG coverage, parent-forest validity, endpoint binding, relation-aware owner merge order, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "artifact_id",
+    "delivery_id",
+    "covered_work_item_ids",
+    "created_at",
+    "operator",
+    "source_snapshot",
+    "scope_fingerprint",
+    "architecture",
+    "conformance_plan",
+    "decision",
+    "integrity",
+    "custody"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "delivery_art_architecture_packet" },
+    "artifact_id": { "$ref": "#/$defs/artifactId" },
+    "delivery_id": { "$ref": "#/$defs/deliveryId" },
+    "covered_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+    "created_at": { "$ref": "#/$defs/timestamp" },
+    "operator": { "$ref": "#/$defs/operator" },
+    "source_snapshot": { "$ref": "#/$defs/sourceSnapshot" },
+    "scope_fingerprint": { "$ref": "#/$defs/digest" },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descendant_owner_map",
+        "dependency_merge_dag",
+        "lifecycle_state_model",
+        "authorization_session_execution_model",
+        "evidence_receipt_handoffs",
+        "runtime_boundaries",
+        "rollback_cleanup_terminal_conditions",
+        "contradictions_open_decisions"
+      ],
+      "properties": {
+        "descendant_owner_map": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["work_item_id", "work_item_type", "owner_repo", "parent_work_item_id"],
+            "properties": {
+              "work_item_id": { "$ref": "#/$defs/workItemId" },
+              "work_item_type": { "$ref": "#/$defs/nonEmptyString" },
+              "owner_repo": { "$ref": "#/$defs/repoName" },
+              "parent_work_item_id": {
+                "oneOf": [
+                  { "$ref": "#/$defs/workItemId" },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        },
+        "dependency_merge_dag": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodes", "edges", "merge_order"],
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/workItemId" }
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["from", "to", "relation"],
+                "properties": {
+                  "from": { "$ref": "#/$defs/workItemId" },
+                  "to": { "$ref": "#/$defs/workItemId" },
+                  "relation": { "enum": ["depends_on", "blocks", "must_merge_before"] }
+                }
+              }
+            },
+            "merge_order": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/repoName" }
+            }
+          }
+        },
+        "lifecycle_state_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["states", "transitions"],
+          "properties": {
+            "states": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/nonEmptyString" }
+            },
+            "transitions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["from", "to", "authority", "evidence"],
+                "properties": {
+                  "from": { "$ref": "#/$defs/nonEmptyString" },
+                  "to": { "$ref": "#/$defs/nonEmptyString" },
+                  "authority": { "$ref": "#/$defs/repoName" },
+                  "evidence": { "$ref": "#/$defs/nonEmptyString" }
+                }
+              }
+            }
+          }
+        },
+        "authorization_session_execution_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "authority_refs", "session_binding", "execution_binding"],
+          "properties": {
+            "summary": { "$ref": "#/$defs/nonEmptyString" },
+            "authority_refs": { "$ref": "#/$defs/artifactRefs" },
+            "session_binding": { "$ref": "#/$defs/nonEmptyString" },
+            "execution_binding": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "evidence_receipt_handoffs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["producer", "consumer", "artifact", "acceptance"],
+            "properties": {
+              "producer": { "$ref": "#/$defs/repoName" },
+              "consumer": { "$ref": "#/$defs/repoName" },
+              "artifact": { "$ref": "#/$defs/nonEmptyString" },
+              "acceptance": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "runtime_boundaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["owner_repo", "allowed", "prohibited"],
+            "properties": {
+              "owner_repo": { "$ref": "#/$defs/repoName" },
+              "allowed": { "$ref": "#/$defs/nonEmptyStrings" },
+              "prohibited": { "$ref": "#/$defs/nonEmptyStrings" }
+            }
+          }
+        },
+        "rollback_cleanup_terminal_conditions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rollback_units", "cleanup_obligations", "terminal_conditions"],
+          "properties": {
+            "rollback_units": { "$ref": "#/$defs/nonEmptyStrings" },
+            "cleanup_obligations": { "$ref": "#/$defs/nonEmptyStrings" },
+            "terminal_conditions": { "$ref": "#/$defs/nonEmptyStrings" }
+          }
+        },
+        "contradictions_open_decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "status", "summary", "resolution"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "status": { "enum": ["open", "resolved"] },
+              "summary": { "$ref": "#/$defs/nonEmptyString" },
+              "resolution": {
+                "oneOf": [
+                  { "$ref": "#/$defs/nonEmptyString" },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "status": { "const": "resolved" } },
+                  "required": ["status"]
+                },
+                "then": {
+                  "properties": {
+                    "resolution": { "$ref": "#/$defs/nonEmptyString" }
+                  }
+                },
+                "else": {
+                  "properties": { "resolution": { "type": "null" } }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "conformance_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "protocol_applicability",
+        "dimensions",
+        "work_item_dimension_applicability",
+        "git_causality",
+        "cases"
+      ],
+      "properties": {
+        "required": { "type": "boolean" },
+        "protocol_applicability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applies", "rationale"],
+          "properties": {
+            "applies": { "type": "boolean" },
+            "rationale": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "work_item_dimension_applicability": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["work_item_id", "dimension_ids"],
+            "properties": {
+              "work_item_id": { "$ref": "#/$defs/workItemId" },
+              "dimension_ids": { "$ref": "#/$defs/nonEmptyStrings" }
+            }
+          }
+        },
+        "git_causality": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applies", "rationale", "claims"],
+          "properties": {
+            "applies": { "type": "boolean" },
+            "rationale": { "$ref": "#/$defs/nonEmptyString" },
+            "claims": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "applies_to_work_item_ids", "dimension_ids"],
+                "properties": {
+                  "id": { "$ref": "#/$defs/identifier" },
+                  "applies_to_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+                  "dimension_ids": { "$ref": "#/$defs/nonEmptyStrings" }
+                }
+              }
+            }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "applies": { "const": true } }, "required": ["applies"] },
+              "then": { "properties": { "claims": { "minItems": 1 } } },
+              "else": { "properties": { "claims": { "maxItems": 0 } } }
+            }
+          ]
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "applies_to_work_item_ids", "dimension_ids", "polarity", "fidelity", "target_readiness", "expected_outcome"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "applies_to_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+              "dimension_ids": { "$ref": "#/$defs/nonEmptyStrings" },
+              "polarity": { "enum": ["positive", "negative"] },
+              "fidelity": { "$ref": "#/$defs/fidelity" },
+              "target_readiness": { "enum": ["merge-ready", "operating-ready"] },
+              "expected_outcome": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          },
+          "allOf": [
+            { "contains": { "type": "object", "properties": { "polarity": { "const": "positive" } }, "required": ["polarity"] } },
+            { "contains": { "type": "object", "properties": { "polarity": { "const": "negative" } }, "required": ["polarity"] } }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "protocol_applicability": {
+                "properties": { "applies": { "const": true } },
+                "required": ["applies"]
+              }
+            },
+            "required": ["protocol_applicability"]
+          },
+          "then": {
+            "properties": {
+              "dimensions": {
+                "minItems": 12,
+                "allOf": [
+                  { "contains": { "const": "command-and-acknowledgement-semantics" } },
+                  { "contains": { "const": "deterministic-identities-and-idempotency" } },
+                  { "contains": { "const": "state-mutation-ordering" } },
+                  { "contains": { "const": "retry-cancel-replay-and-recovery-semantics" } },
+                  { "contains": { "const": "bounded-failure-mapping" } },
+                  { "contains": { "const": "authorization-integrity-and-replay-resistance" } },
+                  { "contains": { "const": "session-scenario-and-execution-binding" } },
+                  { "contains": { "const": "result-and-owner-receipt-completeness" } },
+                  { "contains": { "const": "immutable-baseline-and-restore-evidence" } },
+                  { "contains": { "const": "lifecycle-state-matrix" } },
+                  { "contains": { "const": "cross-artifact-timeline-ordering" } },
+                  { "contains": { "const": "shared-validator-compatibility" } }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "rationale", "decided_by", "decided_at"],
+      "properties": {
+        "status": { "enum": ["draft", "architecture-ready", "blocked-pending-architecture-decision"] },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" },
+        "decided_by": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "decided_at": {
+          "oneOf": [
+            { "$ref": "#/$defs/timestamp" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "custody": { "$ref": "#/$defs/custody" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decision": { "properties": { "status": { "const": "draft" } }, "required": ["status"] } } },
+      "then": {
+        "properties": {
+          "decision": {
+            "properties": {
+              "decided_by": { "type": "null" },
+              "decided_at": { "type": "null" }
+            }
+          },
+          "custody": {
+            "properties": {
+              "state": { "const": "local-draft" },
+              "backend": { "const": "local-filesystem" },
+              "persisted_at": { "type": "null" }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "decision": {
+            "properties": {
+              "decided_by": { "$ref": "#/$defs/nonEmptyString" },
+              "decided_at": { "$ref": "#/$defs/timestamp" }
+            }
+          },
+          "custody": {
+            "properties": {
+              "state": { "const": "durable" },
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "decision": { "properties": { "status": { "const": "architecture-ready" } }, "required": ["status"] } } },
+      "then": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "contradictions_open_decisions": {
+                "not": {
+                  "contains": {
+                    "type": "object",
+                    "properties": { "status": { "const": "open" } },
+                    "required": ["status"]
+                  }
+                }
+              }
+            }
+          },
+          "conformance_plan": {
+            "properties": { "required": { "const": true } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "identifier": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "artifactId": { "type": "string", "pattern": "^architecture-packet:[a-z0-9][a-z0-9._:-]*$" },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "workItemId": { "type": "string", "pattern": "^work-item-[1-9][0-9]*$" },
+    "workItemIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/workItemId" }
+    },
+    "repoName": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "$ref": "#/$defs/nonEmptyString" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "artifactRefs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/artifactRef" }
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "decision_source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "decision_source": { "enum": ["operator", "approved-ai-suggestion"] }
+      }
+    },
+    "repoRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "base_ref", "commit"],
+      "properties": {
+        "repo": { "$ref": "#/$defs/repoName" },
+        "base_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "commit": { "$ref": "#/$defs/gitCommit" }
+      }
+    },
+    "sourceSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["captured_at", "art_ref", "art_digest", "repo_revisions"],
+      "properties": {
+        "captured_at": { "$ref": "#/$defs/timestamp" },
+        "art_ref": { "type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$" },
+        "art_digest": { "$ref": "#/$defs/digest" },
+        "repo_revisions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/repoRevision" }
+        }
+      }
+    },
+    "fidelity": {
+      "enum": ["pure-unit", "filesystem", "real-git", "process-crash", "sandbox-runtime", "live-backend"]
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "backend", "uri", "persisted_at", "supersedes"],
+      "properties": {
+        "state": { "enum": ["local-draft", "durable"] },
+        "backend": { "enum": ["local-filesystem", "openproject-attachment"] },
+        "uri": { "$ref": "#/$defs/nonEmptyString" },
+        "persisted_at": {
+          "oneOf": [
+            { "$ref": "#/$defs/timestamp" },
+            { "type": "null" }
+          ]
+        },
+        "supersedes": {
+          "oneOf": [
+            { "$ref": "#/$defs/artifactRef" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}
