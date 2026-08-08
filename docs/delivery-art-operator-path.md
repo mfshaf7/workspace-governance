@@ -282,6 +282,13 @@ WGCF stores readiness receipts and artifact refs, not duplicate source
 artifacts. The digest uses RFC 8785 canonical JSON and SHA-256 over artifact
 content, excluding custody metadata and the digest field itself.
 
+The accepted canonical input domain contains Unicode scalar values and integral
+numbers only; floating-point spellings such as `1.0` and lone UTF-16 surrogates
+are rejected before hashing. Artifact lifecycle timestamps are chronological:
+source capture precedes architecture decisions and work-start evaluation,
+packet creation precedes evaluation and finalization, and durable persistence
+does not precede the decision it stores.
+
 Generated ART payloads, Review Packets, and completion evidence files must stay
 reviewable. Edit them through a patchable diff path such as `apply_patch` or an
 equivalent reviewed file patch, then rerun the relevant broker preflight before

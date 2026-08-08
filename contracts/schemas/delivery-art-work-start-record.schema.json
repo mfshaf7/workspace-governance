@@ -321,6 +321,23 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "blocked" } },
+            "required": ["level"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "readiness": {
+            "properties": { "blockers": { "minItems": 1 } }
+          }
+        }
+      }
     }
   ],
   "$defs": {

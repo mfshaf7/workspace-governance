@@ -191,7 +191,23 @@
                   { "type": "null" }
                 ]
               }
-            }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": { "status": { "const": "resolved" } },
+                  "required": ["status"]
+                },
+                "then": {
+                  "properties": {
+                    "resolution": { "$ref": "#/$defs/nonEmptyString" }
+                  }
+                },
+                "else": {
+                  "properties": { "resolution": { "type": "null" } }
+                }
+              }
+            ]
           }
         }
       }

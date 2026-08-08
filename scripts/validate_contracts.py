@@ -367,6 +367,61 @@ def _delivery_art_edge_precedence(edge: dict) -> tuple[str, str] | None:
     return None
 
 
+def _artifact_timestamp(value: object) -> datetime | None:
+    if not is_rfc3339_timestamp(value):
+        return None
+    normalized = value[:-1] + "+00:00" if value.endswith(("Z", "z")) else value
+    return datetime.fromisoformat(normalized)
+
+
+def _require_artifact_time_order(
+    errors: list[str],
+    earlier_name: str,
+    earlier_value: object,
+    later_name: str,
+    later_value: object,
+) -> None:
+    earlier = _artifact_timestamp(earlier_value)
+    later = _artifact_timestamp(later_value)
+    if earlier is not None and later is not None and earlier > later:
+        errors.append(f"{earlier_name} must not be later than {later_name}")
+
+
+def _artifact_canonicalization_errors(
+    value: object,
+    path: str = "<root>",
+) -> list[str]:
+    """Restrict artifacts to the RFC 8785 domain used by this contract."""
+    errors: list[str] = []
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            errors.append(f"{path} contains a lone UTF-16 surrogate")
+    elif isinstance(value, float):
+        errors.append(
+            f"{path} uses a floating-point value; Delivery ART artifacts require integral numbers"
+        )
+    elif isinstance(value, int) and not isinstance(value, bool):
+        if abs(value) > 9_007_199_254_740_991:
+            errors.append(f"{path} exceeds the RFC 8785 safe integer range")
+    elif isinstance(value, list):
+        for index, entry in enumerate(value):
+            errors.extend(
+                _artifact_canonicalization_errors(entry, f"{path}[{index}]")
+            )
+    elif isinstance(value, dict):
+        for key, entry in value.items():
+            if not isinstance(key, str):
+                errors.append(f"{path} contains a non-string object key")
+                continue
+            errors.extend(_artifact_canonicalization_errors(key, f"{path} key"))
+            errors.extend(
+                _artifact_canonicalization_errors(entry, f"{path}[{key!r}]")
+            )
+    elif value is not None and not isinstance(value, bool):
+        errors.append(f"{path} contains an unsupported canonical JSON value")
+    return errors
+
+
 def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     """Validate cross-field invariants that JSON Schema cannot express."""
     errors: list[str] = []
@@ -539,6 +594,31 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     + ", ".join(sorted(unknown_states))
                 )
 
+        decision = _artifact_object(payload.get("decision"))
+        custody = _artifact_object(payload.get("custody"))
+        if decision.get("status") != "draft":
+            _require_artifact_time_order(
+                errors,
+                "created_at",
+                payload.get("created_at"),
+                "decision.decided_at",
+                decision.get("decided_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "source_snapshot.captured_at",
+                source_snapshot.get("captured_at"),
+                "decision.decided_at",
+                decision.get("decided_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "decision.decided_at",
+                decision.get("decided_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
+
     if artifact_type == "delivery_art_work_start_record":
         landing_unit = _artifact_object(payload.get("landing_unit"))
         if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
@@ -594,6 +674,32 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     errors.append(
                         f"landing_unit.branch_plan base_commit for {repo} must match the source snapshot"
                     )
+
+        readiness = _artifact_object(payload.get("readiness"))
+        if readiness.get("level") != "draft":
+            source_snapshot = _artifact_object(payload.get("source_snapshot"))
+            custody = _artifact_object(payload.get("custody"))
+            _require_artifact_time_order(
+                errors,
+                "created_at",
+                payload.get("created_at"),
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "source_snapshot.captured_at",
+                source_snapshot.get("captured_at"),
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
 
     if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
         covered_work_items = _artifact_string_list(
@@ -691,11 +797,39 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         f"changed surface {repo}/{path} is absent from landing_unit.repos changed_files"
                     )
 
+        readiness = _artifact_object(payload.get("readiness"))
+        custody = _artifact_object(payload.get("custody"))
+        _require_artifact_time_order(
+            errors,
+            "created_at",
+            payload.get("created_at"),
+            "readiness.evaluated_at",
+            readiness.get("evaluated_at"),
+        )
+        if payload.get("status") == "finalized":
+            _require_artifact_time_order(
+                errors,
+                "readiness.evaluated_at",
+                readiness.get("evaluated_at"),
+                "finalized_at",
+                payload.get("finalized_at"),
+            )
+            _require_artifact_time_order(
+                errors,
+                "finalized_at",
+                payload.get("finalized_at"),
+                "custody.persisted_at",
+                custody.get("persisted_at"),
+            )
+
     return errors
 
 
 def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
     """Validate the declared content digest and durable content-addressed URI."""
+    canonicalization_errors = _artifact_canonicalization_errors(payload)
+    if canonicalization_errors:
+        return canonicalization_errors
     digest_projection = copy.deepcopy(payload)
     digest_projection.pop("custody", None)
     projected_integrity = _artifact_object(digest_projection.get("integrity"))
@@ -792,6 +926,17 @@ def validate_delivery_art_artifact_contracts(
                 + "; ".join(details)
             )
 
+    def require_integrity_error(
+        payload: dict,
+        case_name: str,
+        expected_fragment: str,
+    ) -> None:
+        integrity_errors = delivery_art_artifact_integrity_errors(payload)
+        if not any(expected_fragment in error for error in integrity_errors):
+            errors.append(
+                f"Delivery ART integrity case {case_name!r} must report {expected_fragment!r}"
+            )
+
     architecture = fixtures.get("architecture-packet.valid.json")
     if architecture:
         stale_decision = copy.deepcopy(architecture)
@@ -813,6 +958,16 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             unresolved_decision,
             "architecture-ready packet with an open contradiction",
+        )
+
+        resolved_without_resolution = copy.deepcopy(architecture)
+        resolved_without_resolution["architecture"][
+            "contradictions_open_decisions"
+        ][0]["resolution"] = None
+        require_rejected(
+            "architecture_packet",
+            resolved_without_resolution,
+            "resolved architecture decision without a resolution",
         )
 
         unknown_dag_endpoint = copy.deepcopy(architecture)
@@ -925,6 +1080,16 @@ def validate_delivery_art_artifact_contracts(
             "architecture lifecycle transition with an undeclared endpoint",
         )
 
+        decision_before_snapshot = copy.deepcopy(architecture)
+        decision_before_snapshot["decision"]["decided_at"] = (
+            "2026-08-08T09:50:00+08:00"
+        )
+        require_rejected(
+            "architecture_packet",
+            decision_before_snapshot,
+            "architecture decision recorded before its source snapshot",
+        )
+
         missing_architecture_persistence_time = copy.deepcopy(architecture)
         missing_architecture_persistence_time["custody"]["persisted_at"] = None
         require_rejected(
@@ -1012,6 +1177,24 @@ def validate_delivery_art_artifact_contracts(
             "work_start_record",
             blocked_without_persistence_time,
             "durable blocked work-start record without a persistence timestamp",
+        )
+
+        blocked_without_reason = copy.deepcopy(blocked_architecture)
+        blocked_without_reason["readiness"]["blockers"] = []
+        require_rejected(
+            "work_start_record",
+            blocked_without_reason,
+            "blocked work-start record without an identified blocker",
+        )
+
+        evaluation_before_snapshot = copy.deepcopy(work_start)
+        evaluation_before_snapshot["readiness"]["evaluated_at"] = (
+            "2026-08-08T10:08:00+08:00"
+        )
+        require_rejected(
+            "work_start_record",
+            evaluation_before_snapshot,
+            "work-start evaluation recorded before its source snapshot",
         )
 
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
@@ -1105,6 +1288,32 @@ def validate_delivery_art_artifact_contracts(
             "review_packet",
             missing_readiness_receipt,
             "finalized Review Packet without a readiness receipt",
+        )
+
+        impossible_finalization_timeline = copy.deepcopy(finalized)
+        impossible_finalization_timeline["created_at"] = (
+            "2026-08-08T12:00:00+08:00"
+        )
+        require_rejected(
+            "review_packet",
+            impossible_finalization_timeline,
+            "Review Packet created after evaluation and finalization",
+        )
+
+        floating_schema_version = copy.deepcopy(finalized)
+        floating_schema_version["schema_version"] = 2.0
+        require_integrity_error(
+            floating_schema_version,
+            "floating-point schema version",
+            "floating-point value",
+        )
+
+        lone_surrogate = copy.deepcopy(finalized)
+        lone_surrogate["operator"]["id"] = "\ud800"
+        require_integrity_error(
+            lone_surrogate,
+            "lone surrogate in operator identity",
+            "lone UTF-16 surrogate",
         )
 
         non_source_with_source_evidence = copy.deepcopy(finalized)

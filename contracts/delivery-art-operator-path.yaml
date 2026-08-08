@@ -143,8 +143,11 @@ delivery_art_operator_path:
     source_repo_evidence_unique_by_repo: true
     source_changed_surfaces_resolve_to_declared_changed_files: true
     canonicalization: RFC8785
+    canonical_input_requires_unicode_scalar_values: true
+    floating_point_values_rejected: true
     digest_algorithm: sha256
     digest_scope: artifact content excluding custody metadata and the digest field itself
+    lifecycle_timestamps_must_be_chronologically_ordered: true
     evidence_results:
       allowed:
         - pass
