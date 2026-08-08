@@ -1071,6 +1071,27 @@ def delivery_art_artifact_reference_errors(
             errors.append(
                 "resolved architecture packet must carry an architecture-ready decision"
             )
+        work_start_cutoff = _artifact_object(work_start.get("readiness")).get(
+            "evaluated_at"
+        ) or work_start.get("created_at")
+        _require_artifact_time_order(
+            errors,
+            "resolved architecture decision.decided_at",
+            _artifact_object(architecture_packet.get("decision")).get(
+                "decided_at"
+            ),
+            "work-start evaluation",
+            work_start_cutoff,
+        )
+        _require_artifact_time_order(
+            errors,
+            "resolved architecture custody.persisted_at",
+            _artifact_object(architecture_packet.get("custody")).get(
+                "persisted_at"
+            ),
+            "work-start evaluation",
+            work_start_cutoff,
+        )
         covered_work_items = set(
             _artifact_string_list(work_start.get("covered_work_item_ids"))
         )
@@ -1147,6 +1168,13 @@ def delivery_art_artifact_reference_errors(
             errors,
             "resolved work-start readiness.evaluated_at",
             _artifact_object(work_start.get("readiness")).get("evaluated_at"),
+            "Review Packet created_at",
+            payload.get("created_at"),
+        )
+        _require_artifact_time_order(
+            errors,
+            "resolved work-start custody.persisted_at",
+            _artifact_object(work_start.get("custody")).get("persisted_at"),
             "Review Packet created_at",
             payload.get("created_at"),
         )
@@ -1785,6 +1813,20 @@ def validate_delivery_art_artifact_contracts(
             [],
         )
 
+        future_architecture = copy.deepcopy(architecture)
+        future_architecture["decision"]["decided_at"] = (
+            "2026-08-08T10:20:00+08:00"
+        )
+        future_architecture["custody"]["persisted_at"] = (
+            "2026-08-08T10:21:00+08:00"
+        )
+        require_reference_rejected(
+            work_start,
+            "work-start record depending on a future architecture decision",
+            "resolved architecture decision.decided_at must not be later",
+            [future_architecture],
+        )
+
         deferred_with_source_plan = copy.deepcopy(blocked_architecture)
         deferred_with_source_plan["landing_unit"]["branch_plan"] = copy.deepcopy(
             work_start["landing_unit"]["branch_plan"]
@@ -1907,6 +1949,17 @@ def validate_delivery_art_artifact_contracts(
             mismatched_scope_fingerprint,
             "Review Packet scope diverging from work-start truth",
             "scope_fingerprint",
+        )
+
+        future_work_start_persistence = copy.deepcopy(work_start)
+        future_work_start_persistence["custody"]["persisted_at"] = (
+            "2026-08-08T11:10:00+08:00"
+        )
+        require_reference_rejected(
+            merge_ready,
+            "Review Packet depending on a work-start record persisted in the future",
+            "resolved work-start custody.persisted_at must not be later",
+            [architecture, future_work_start_persistence],
         )
 
         missing_conformance_results = copy.deepcopy(merge_ready)

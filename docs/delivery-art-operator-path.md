@@ -270,6 +270,10 @@ to the packet's work-item and readiness scope must have a passing evidence
 result at the planned fidelity. A required conformance plan covers every
 architecture work item with both positive and negative cases, so a child cannot
 advance merely because its tests were omitted from the plan.
+An architecture decision and its durable attachment must exist before the
+work-start evaluation that consumes it. The durable work-start attachment must
+exist before a Review Packet is created. Internally valid future evidence
+cannot satisfy an earlier readiness decision.
 
 Validate any supplied target-contract artifact locally with:
 

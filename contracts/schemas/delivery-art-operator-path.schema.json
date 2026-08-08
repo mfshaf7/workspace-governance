@@ -355,6 +355,7 @@
             "work_start_resolves_architecture_packet",
             "review_packet_resolves_work_start_record",
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match",
+            "dependency_must_exist_before_dependent_readiness",
             "local_validator_requires_dependency_artifacts",
             "runtime_resolver_owner"
           ],
@@ -363,6 +364,7 @@
             "work_start_resolves_architecture_packet": { "const": true },
             "review_packet_resolves_work_start_record": { "const": true },
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match": { "const": true },
+            "dependency_must_exist_before_dependent_readiness": { "const": true },
             "local_validator_requires_dependency_artifacts": { "const": true },
             "runtime_resolver_owner": { "const": "operator-orchestration-service" }
           }

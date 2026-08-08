@@ -155,6 +155,7 @@ delivery_art_operator_path:
       work_start_resolves_architecture_packet: true
       review_packet_resolves_work_start_record: true
       resolved_delivery_coverage_landing_unit_scope_and_source_must_match: true
+      dependency_must_exist_before_dependent_readiness: true
       local_validator_requires_dependency_artifacts: true
       runtime_resolver_owner: operator-orchestration-service
     evidence_results:
