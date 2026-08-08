@@ -17,6 +17,7 @@
         "primary_surface_path",
         "purpose",
         "authority_model",
+        "validation_modes",
         "admission_contract",
         "profiles",
         "safety_classes",
@@ -49,6 +50,22 @@
             "art_mutation_boundary": { "type": "string", "minLength": 1 },
             "retirement_rule": { "type": "string", "minLength": 1 },
             "evidence_rule": { "type": "string", "minLength": 1 }
+          }
+        },
+        "validation_modes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "owner-smoke",
+            "landing-unit",
+            "workspace-clean-state",
+            "release"
+          ],
+          "properties": {
+            "owner-smoke": { "$ref": "#/$defs/validationMode" },
+            "landing-unit": { "$ref": "#/$defs/validationMode" },
+            "workspace-clean-state": { "$ref": "#/$defs/validationMode" },
+            "release": { "$ref": "#/$defs/validationMode" }
           }
         },
         "admission_contract": {
@@ -143,6 +160,50 @@
       "minItems": 1,
       "items": { "type": "string", "minLength": 1 },
       "uniqueItems": true
+    },
+    "validationMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "source_binding",
+        "invocation_authority",
+        "catalog_tier",
+        "remote_reads_allowed",
+        "clean_workspace_required",
+        "cross_repo_scope"
+      ],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "source_binding": {
+          "type": "string",
+          "enum": [
+            "exact-active-worktree",
+            "exact-pr-head-and-base",
+            "canonical-workspace-heads",
+            "reviewed-release-heads"
+          ]
+        },
+        "invocation_authority": {
+          "type": "string",
+          "enum": [
+            "owner-repo-direct",
+            "owner-repo-ci-equivalent",
+            "wgcf-catalog",
+            "wgcf-catalog-and-owner"
+          ]
+        },
+        "catalog_tier": {
+          "type": "string",
+          "enum": ["smoke", "scoped", "full", "release"]
+        },
+        "remote_reads_allowed": { "type": "boolean" },
+        "clean_workspace_required": { "type": "boolean" },
+        "cross_repo_scope": {
+          "type": "string",
+          "enum": ["none", "affected-only", "source-state-only", "all-declared"]
+        }
+      }
     },
     "commandSurface": {
       "type": "object",

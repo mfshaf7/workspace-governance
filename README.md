@@ -202,8 +202,8 @@ agents, operators, CI automation, or workflow adapters.
 
 The skill model follows the same rule. Governing skill source is not enough by
 itself. `contracts/skills.yaml` and `skills-src/` must also be installed into
-the live Codex skill root under `~/.codex/skills`, and the workspace audit
-fails when that live install drifts from the governed source.
+the live Codex skill root under `~/.codex/skills`, and the explicit skill-install
+check fails when that live install drifts from the governed source.
 
 For Git-tracked docs outside `workspace-root/`, renderer-safe navigation is
 required too. Same-repo docs should use repo-relative links, while cross-repo
@@ -294,7 +294,8 @@ Those stay in the owning repos:
    or the repo's documented workflow says otherwise.
 4. Sync them into the live workspace root.
 5. Run repo-local validation.
-6. Run the workspace audit against `/home/mfshaf7/projects`.
+6. Run the pure workspace layout audit against `/home/mfshaf7/projects` when
+   root sync or repo topology changed.
 7. Reinstall or verify the registered skills if skill source or registry state
    changed.
    The real local install under `~/.codex/skills` matters, not just a temp
@@ -328,8 +329,9 @@ retired, the WGCF clean-state scope is the normal post-#536 proof path:
 wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved
 ```
 
-That scope receipts repo-structure, workspace-layout, and strict branch
-lifecycle checks through the catalog-backed control fabric. Direct
+That scope receipts repo structure, contract model, governance-engine shadow
+parity, workspace layout, and strict branch lifecycle checks through the
+catalog-backed control fabric. Direct
 `audit_branch_lifecycle.py` or `audit_workspace_layout.py` calls remain
 rollback/source-authority paths only; if WGCF cannot run them, record the
 blocker or defect before using a direct command as final evidence.
@@ -374,6 +376,7 @@ Run these from this repo:
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
+python3 -m unittest discover -s tests
 python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
@@ -397,7 +400,6 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
-python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
 python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```
