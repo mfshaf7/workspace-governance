@@ -36,9 +36,11 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = args.repo_root.resolve()
-    artifact_path = args.artifact.resolve()
+    artifact_path = args.artifact.resolve() if args.artifact != Path("-") else None
+    artifact_label = str(artifact_path) if artifact_path else "<stdin>"
     try:
-        payload = json.loads(artifact_path.read_text())
+        raw_payload = artifact_path.read_text() if artifact_path else sys.stdin.read()
+        payload = json.loads(raw_payload)
     except (OSError, json.JSONDecodeError) as exc:
         print(f"delivery ART artifact invalid: {exc}", file=sys.stderr)
         return 1
@@ -79,7 +81,7 @@ def main() -> int:
         return 1
 
     print(
-        f"delivery ART artifact valid: type={artifact_type} path={artifact_path}"
+        f"delivery ART artifact valid: type={artifact_type} path={artifact_label}"
     )
     return 0
 

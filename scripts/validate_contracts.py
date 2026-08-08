@@ -337,18 +337,40 @@ DELIVERY_ART_SOURCE_BACKED_DECISIONS = {
 }
 
 
+def _artifact_object(value: object) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def _artifact_object_list(value: object) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    return [entry for entry in value if isinstance(entry, dict)]
+
+
+def _artifact_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [entry for entry in value if isinstance(entry, str)]
+
+
 def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     """Validate cross-field invariants that JSON Schema cannot express."""
     errors: list[str] = []
     artifact_type = payload.get("artifact_type")
 
     if artifact_type == "delivery_art_architecture_packet":
-        covered_work_items = set(payload.get("covered_work_item_ids") or [])
-        architecture = payload.get("architecture") or {}
-        owner_map = architecture.get("descendant_owner_map") or []
-        dag = architecture.get("dependency_merge_dag") or {}
-        owner_map_ids = [entry.get("work_item_id") for entry in owner_map]
-        dag_nodes = set(dag.get("nodes") or [])
+        covered_work_items = set(
+            _artifact_string_list(payload.get("covered_work_item_ids"))
+        )
+        architecture = _artifact_object(payload.get("architecture"))
+        owner_map = _artifact_object_list(architecture.get("descendant_owner_map"))
+        dag = _artifact_object(architecture.get("dependency_merge_dag"))
+        owner_map_ids = [
+            entry.get("work_item_id")
+            for entry in owner_map
+            if isinstance(entry.get("work_item_id"), str)
+        ]
+        dag_nodes = set(_artifact_string_list(dag.get("nodes")))
 
         if len(owner_map_ids) != len(set(owner_map_ids)):
             errors.append(
@@ -365,16 +387,18 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
 
         for entry in owner_map:
             parent = entry.get("parent_work_item_id")
-            if parent is not None and parent not in dag_nodes:
+            if isinstance(parent, str) and parent not in dag_nodes:
                 errors.append(
                     f"architecture descendant {entry.get('work_item_id')} references unknown parent {parent}"
                 )
 
         adjacency = {node: [] for node in dag_nodes}
         indegree = {node: 0 for node in dag_nodes}
-        for edge in dag.get("edges") or []:
+        for edge in _artifact_object_list(dag.get("edges")):
             source = edge.get("from")
             target = edge.get("to")
+            if not isinstance(source, str) or not isinstance(target, str):
+                continue
             unknown_endpoints = {source, target} - dag_nodes
             if unknown_endpoints:
                 errors.append(
@@ -397,22 +421,35 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         if visited_count != len(dag_nodes):
             errors.append("architecture.dependency_merge_dag must be acyclic")
 
-        owner_repos = {entry.get("owner_repo") for entry in owner_map}
-        if set(dag.get("merge_order") or []) != owner_repos:
+        owner_repos = {
+            entry.get("owner_repo")
+            for entry in owner_map
+            if isinstance(entry.get("owner_repo"), str)
+        }
+        if set(_artifact_string_list(dag.get("merge_order"))) != owner_repos:
             errors.append(
                 "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
             )
 
     if artifact_type == "delivery_art_work_start_record":
-        landing_unit = payload.get("landing_unit") or {}
+        landing_unit = _artifact_object(payload.get("landing_unit"))
         if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
-            owner_repos = landing_unit.get("owner_repos") or []
-            branch_plan = landing_unit.get("branch_plan") or []
-            repo_revisions = (payload.get("source_snapshot") or {}).get(
-                "repo_revisions"
-            ) or []
-            branch_repos = [entry.get("repo") for entry in branch_plan]
-            revision_repos = [entry.get("repo") for entry in repo_revisions]
+            owner_repos = _artifact_string_list(landing_unit.get("owner_repos"))
+            branch_plan = _artifact_object_list(landing_unit.get("branch_plan"))
+            source_snapshot = _artifact_object(payload.get("source_snapshot"))
+            repo_revisions = _artifact_object_list(
+                source_snapshot.get("repo_revisions")
+            )
+            branch_repos = [
+                entry.get("repo")
+                for entry in branch_plan
+                if isinstance(entry.get("repo"), str)
+            ]
+            revision_repos = [
+                entry.get("repo")
+                for entry in repo_revisions
+                if isinstance(entry.get("repo"), str)
+            ]
 
             if len(branch_repos) != len(set(branch_repos)):
                 errors.append("landing_unit.branch_plan must contain one entry per repo")
@@ -430,10 +467,14 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 )
 
             revisions_by_repo = {
-                entry.get("repo"): entry for entry in repo_revisions if entry.get("repo")
+                entry.get("repo"): entry
+                for entry in repo_revisions
+                if isinstance(entry.get("repo"), str)
             }
             for entry in branch_plan:
                 repo = entry.get("repo")
+                if not isinstance(repo, str):
+                    continue
                 revision = revisions_by_repo.get(repo)
                 if revision is None:
                     continue
@@ -447,10 +488,16 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     )
 
     if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
-        covered_work_items = payload.get("covered_work_item_ids") or []
-        evidence = payload.get("evidence") or {}
-        mappings = evidence.get("acceptance_mapping") or []
-        mapped_work_items = [entry.get("work_item_id") for entry in mappings]
+        covered_work_items = _artifact_string_list(
+            payload.get("covered_work_item_ids")
+        )
+        evidence = _artifact_object(payload.get("evidence"))
+        mappings = _artifact_object_list(evidence.get("acceptance_mapping"))
+        mapped_work_items = [
+            entry.get("work_item_id")
+            for entry in mappings
+            if isinstance(entry.get("work_item_id"), str)
+        ]
 
         if len(mapped_work_items) != len(set(mapped_work_items)):
             errors.append(
@@ -464,14 +511,16 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         evidence_ids = [
             entry.get("id")
             for section in DELIVERY_ART_EVIDENCE_SECTIONS
-            for entry in evidence.get(section, [])
-            if isinstance(entry, dict) and entry.get("id")
+            for entry in _artifact_object_list(evidence.get(section))
+            if isinstance(entry.get("id"), str)
         ]
         if len(evidence_ids) != len(set(evidence_ids)):
             errors.append("evidence ids must be unique across all evidence sections")
         known_evidence_ids = set(evidence_ids)
         for mapping in mappings:
-            unknown_ids = set(mapping.get("evidence_ids") or []) - known_evidence_ids
+            unknown_ids = set(
+                _artifact_string_list(mapping.get("evidence_ids"))
+            ) - known_evidence_ids
             if unknown_ids:
                 errors.append(
                     f"acceptance mapping for {mapping.get('work_item_id')} references unknown evidence ids: "
@@ -485,7 +534,8 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
     """Validate the declared content digest and durable content-addressed URI."""
     digest_projection = copy.deepcopy(payload)
     digest_projection.pop("custody", None)
-    digest_projection.get("integrity", {}).pop("content_digest", None)
+    projected_integrity = _artifact_object(digest_projection.get("integrity"))
+    projected_integrity.pop("content_digest", None)
     canonical_bytes = json.dumps(
         digest_projection,
         ensure_ascii=False,
@@ -493,13 +543,13 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
         sort_keys=True,
     ).encode("utf-8")
     expected_digest = "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
-    actual_digest = payload.get("integrity", {}).get("content_digest")
+    actual_digest = _artifact_object(payload.get("integrity")).get("content_digest")
     errors = []
     if actual_digest != expected_digest:
         errors.append(
             f"integrity.content_digest must equal canonical content digest {expected_digest}"
         )
-    custody = payload.get("custody") or {}
+    custody = _artifact_object(payload.get("custody"))
     if custody.get("state") == "durable":
         digest_hex = expected_digest.removeprefix("sha256:")
         if digest_hex not in str(custody.get("uri", "")):
