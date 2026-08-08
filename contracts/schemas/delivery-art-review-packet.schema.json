@@ -380,6 +380,11 @@
               "evidence_kind": { "enum": ["pending", "non_source_evidence"] },
               "repos": { "maxItems": 0 }
             }
+          },
+          "evidence": {
+            "properties": {
+              "changed_surfaces": { "maxItems": 0 }
+            }
           }
         }
       },

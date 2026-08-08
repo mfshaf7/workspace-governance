@@ -618,6 +618,10 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 errors.append(
                     "non_source_child Landing Units must not declare source repository evidence"
                 )
+            if _artifact_object_list(evidence.get("changed_surfaces")):
+                errors.append(
+                    "non_source_child Landing Units must not declare changed source surfaces"
+                )
         elif (
             landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS
             and evidence_kind == "non_source_evidence"
@@ -1111,6 +1115,22 @@ def validate_delivery_art_artifact_contracts(
             "review_packet",
             non_source_with_source_evidence,
             "non-source Review Packet with source landing evidence",
+        )
+
+        valid_non_source_packet = copy.deepcopy(finalized)
+        valid_non_source_packet["landing_unit"]["decision"] = "non_source_child"
+        valid_non_source_packet["landing_unit"]["evidence_kind"] = (
+            "non_source_evidence"
+        )
+        valid_non_source_packet["landing_unit"]["repos"] = []
+        valid_non_source_packet["evidence"]["changed_surfaces"] = []
+        valid_non_source_packet["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ] = ["evidence:schema-negative-cases"]
+        require_accepted(
+            "review_packet",
+            valid_non_source_packet,
+            "finalized non-source Review Packet without source landing evidence",
         )
 
         duplicate_landing_repo = copy.deepcopy(finalized)
