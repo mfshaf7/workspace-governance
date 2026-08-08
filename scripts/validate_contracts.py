@@ -7609,13 +7609,17 @@ def main() -> int:
                     + ", ".join(invalid_invocation_scopes)
                 )
             has_art_target_scope = any(scope.startswith("art:") for scope in invocation_scopes)
+            has_authority_scope = any(
+                scope.startswith("authority:") for scope in invocation_scopes
+            )
             if not (
                 invocation_scopes & (representative_planner_scopes | {"workspace"})
                 or has_art_target_scope
+                or has_authority_scope
             ):
                 errors.append(
                     "contracts/governance-validator-catalog.yaml: entry "
-                    f"{entry_id!r} wgcf_invocation must include workspace, one representative planner_scope, or an ART target scope"
+                    f"{entry_id!r} wgcf_invocation must include workspace, one representative planner_scope, an authority scope, or an ART target scope"
                 )
             effective_command = invocation.get("command_template") or invocation.get("command") or payload["command"]
             template_fields = _command_template_fields(effective_command)

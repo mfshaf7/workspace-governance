@@ -155,6 +155,9 @@ Route those changes back to the owner repos.
 - If the workspace is being described as clean or restart-ready, require the
   WGCF clean-state scope to pass before saying so:
   `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved`
+- Do not run workspace clean-state certification as the implementation feedback
+  loop. Use exact-worktree owner checks while editing and CI-equivalent
+  landing-unit proof before merge.
 - Direct branch-lifecycle or workspace-layout validator commands are rollback
   paths after #536. If WGCF cannot run them, record the blocker or defect before
   using the direct command as evidence.
@@ -254,6 +257,7 @@ Run these after structural changes:
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
+python3 -m unittest discover -s tests
 python3 scripts/validate_delegation_journal.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects
@@ -277,7 +281,6 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --target-root /tmp/workspace-skills --check
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
-python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
 python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```

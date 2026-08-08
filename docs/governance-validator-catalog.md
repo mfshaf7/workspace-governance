@@ -36,6 +36,31 @@ projection sync, dev-integration runner commands, and Kubernetes access.
 required security evidence and missing review posture, but it does not approve
 security risk.
 
+## Validation Modes
+
+Validation is split by source binding and purpose. These modes must not be
+collapsed into one aggregate command:
+
+- `owner-smoke` runs fast owner-repo checks against the exact active worktree.
+  It does not read remotes, require a clean workspace, or inspect unrelated
+  repos.
+- `landing-unit` runs the owner repo's CI-equivalent proof against the exact PR
+  head and fetched base. Cross-repo work is limited to affected dependencies.
+- `workspace-clean-state` certifies canonical workspace heads after landing or
+  before a restart-ready claim. It uses the WGCF
+  `authority:workspace-clean-state` scope and includes strict branch, worktree,
+  remote, and dirty-state checks.
+- `release` validates reviewed release heads and all declared release
+  dependencies through WGCF plus owner-repo release checks.
+
+Do not use `workspace-clean-state` as an implementation feedback loop. WGCF
+currently evaluates canonical workspace source; pre-landing proof for an
+isolated worktree therefore remains owner-repo direct or CI-equivalent until
+WGCF supports an explicit source-root binding.
+
+If `wgcf` is not installed on `PATH`, use the repository-managed executable at
+`workspace-governance-control-fabric/.venv/bin/wgcf` from the workspace root.
+
 ## Safety Classes
 
 The catalog classifies every command before WGCF can use it:

@@ -86,6 +86,10 @@ def list_local_branches(repo_root: Path) -> set[str]:
     return {line.strip() for line in output.splitlines() if line.strip()}
 
 
+def worktree_is_dirty(repo_root: Path) -> bool:
+    return bool(git_output(repo_root, ["status", "--short", "--untracked-files=all"]))
+
+
 def github_repo_name(repo_root: Path) -> str:
     origin = git_output(repo_root, ["remote", "get-url", "origin"])
     match = GITHUB_REPO_RE.search(origin)
@@ -197,6 +201,7 @@ def main() -> int:
         "extra_worktrees": 0,
         "missing_worktrees": 0,
         "stale_remote_branches": 0,
+        "dirty_repos": 0,
     }
 
     for repo_root in discover_repos(workspace_root):
@@ -258,6 +263,9 @@ def main() -> int:
             )
 
         if args.check_clean:
+            if worktree_is_dirty(repo_root):
+                summary["dirty_repos"] += 1
+                errors.append(f"{repo_name}: primary worktree is dirty in clean mode")
             non_main_local_branches = sorted(
                 branch
                 for branch in local_branches
@@ -325,6 +333,7 @@ def main() -> int:
         f"extra_worktrees={summary['extra_worktrees']} "
         f"missing_worktrees={summary['missing_worktrees']} "
         f"stale_remote_branches={summary['stale_remote_branches']} "
+        f"dirty_repos={summary['dirty_repos']} "
         f"clean_mode={clean_mode} "
         f"remote_mode={remote_mode}"
     )

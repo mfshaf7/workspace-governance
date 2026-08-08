@@ -1,15 +1,17 @@
 # Workspace Governance Scripts
 
 - `audit_workspace_layout.py`
-  - audits the active workspace repo inventory, Git SSH origin shape,
-    workspace-root sync state, contract validity, live installed skill sync,
-    generated artifact freshness, and cross-repo truth
+  - audits only active workspace repo presence, required repo guidance, Git SSH
+    origin shape, session-handoff posture, and materialized workspace-root file
+    parity
+  - does not orchestrate contract, skill, cross-repo, security, or branch
+    lifecycle validators
 - `audit_branch_lifecycle.py`
   - audits stale local branches, pinned worktree residue, and, with
     `--include-remote`, remote branches that do not back an open PR or a
     documented exception
-  - `--check-clean` is the strict clean-state gate for restart-readiness and
-    post-merge cleanup claims
+  - `--check-clean` also rejects dirty primary worktrees and is the source-state
+    part of strict restart-readiness and post-merge cleanup certification
   - remote checks require authenticated `gh` access
 - `audit_stale_content.py`
   - audits active documentation against the contract vocabulary and repo-rule
