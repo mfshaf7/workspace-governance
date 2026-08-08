@@ -325,6 +325,9 @@
                 }
               }
             }
+          },
+          "conformance_plan": {
+            "properties": { "required": { "const": true } }
           }
         }
       }

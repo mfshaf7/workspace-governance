@@ -384,6 +384,21 @@ def _delivery_art_ref_digest_errors(
     return []
 
 
+def _delivery_art_identifier_scoped_to(
+    value: object,
+    artifact_prefix: str,
+    delivery_id: object,
+) -> bool:
+    if not isinstance(value, str) or not isinstance(delivery_id, str):
+        return False
+    return bool(
+        re.match(
+            rf"^{re.escape(artifact_prefix)}:{re.escape(delivery_id)}(?:$|[-:.])",
+            value,
+        )
+    )
+
+
 def _delivery_art_edge_precedence(edge: dict) -> tuple[str, str] | None:
     """Return the work-item order implied by one dependency relation."""
     source = edge.get("from")
@@ -479,8 +494,8 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
 
     if artifact_type == "delivery_art_architecture_packet":
         artifact_id = payload.get("artifact_id")
-        if isinstance(delivery_id, str) and not str(artifact_id).startswith(
-            f"architecture-packet:{delivery_id}"
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            artifact_id, "architecture-packet", delivery_id
         ):
             errors.append("artifact_id must be scoped to delivery_id")
         covered_work_items = set(
@@ -735,8 +750,8 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
 
     if artifact_type == "delivery_art_work_start_record":
         artifact_id = payload.get("artifact_id")
-        if isinstance(delivery_id, str) and not str(artifact_id).startswith(
-            f"work-start:{delivery_id}"
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            artifact_id, "work-start", delivery_id
         ):
             errors.append("artifact_id must be scoped to delivery_id")
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
@@ -845,8 +860,8 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
 
     if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
         packet_id = payload.get("packet_id")
-        if isinstance(delivery_id, str) and not str(packet_id).startswith(
-            f"review-packet:{delivery_id}"
+        if isinstance(delivery_id, str) and not _delivery_art_identifier_scoped_to(
+            packet_id, "review-packet", delivery_id
         ):
             errors.append("packet_id must be scoped to delivery_id")
         work_start_ref = _artifact_object(payload.get("work_start"))
@@ -1396,6 +1411,16 @@ def validate_delivery_art_artifact_contracts(
             "legacy architecture decision vocabulary",
         )
 
+        overlapping_delivery_identifier = copy.deepcopy(architecture)
+        overlapping_delivery_identifier["artifact_id"] = (
+            "architecture-packet:delivery-6980-v1"
+        )
+        require_rejected(
+            "architecture_packet",
+            overlapping_delivery_identifier,
+            "architecture artifact id with only a delivery-id prefix overlap",
+        )
+
         unresolved_decision = copy.deepcopy(architecture)
         unresolved_decision["architecture"]["contradictions_open_decisions"][0][
             "status"
@@ -1407,6 +1432,18 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             unresolved_decision,
             "architecture-ready packet with an open contradiction",
+        )
+
+        architecture_ready_without_required_conformance = copy.deepcopy(
+            architecture
+        )
+        architecture_ready_without_required_conformance["conformance_plan"][
+            "required"
+        ] = False
+        require_rejected(
+            "architecture_packet",
+            architecture_ready_without_required_conformance,
+            "architecture-ready packet without a required conformance plan",
         )
 
         resolved_without_resolution = copy.deepcopy(architecture)
