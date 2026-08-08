@@ -26,7 +26,7 @@
       }
     ]
   },
-  "scope_fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "scope_fingerprint": "sha256:a1f7895a0fe28bb896ad71784e7fec62b141b963f78b07e1f0796e1cd956d040",
   "architecture": {
     "descendant_owner_map": [
       {
@@ -124,6 +124,44 @@
       "cross-artifact-timeline-ordering",
       "shared-validator-compatibility"
     ],
+    "work_item_dimension_applicability": [
+      {
+        "work_item_id": "work-item-801",
+        "dimension_ids": [
+          "lifecycle-state-matrix",
+          "cross-artifact-timeline-ordering",
+          "shared-validator-compatibility"
+        ]
+      },
+      {
+        "work_item_id": "work-item-802",
+        "dimension_ids": [
+          "command-and-acknowledgement-semantics",
+          "deterministic-identities-and-idempotency",
+          "state-mutation-ordering",
+          "retry-cancel-replay-and-recovery-semantics",
+          "bounded-failure-mapping",
+          "authorization-integrity-and-replay-resistance",
+          "session-scenario-and-execution-binding",
+          "result-and-owner-receipt-completeness",
+          "immutable-baseline-and-restore-evidence"
+        ]
+      }
+    ],
+    "git_causality": {
+      "applies": true,
+      "rationale": "OOS must prove commit ancestry and immutable source provenance using a real Git repository.",
+      "claims": [
+        {
+          "id": "git-causality:oos-artifact-provenance",
+          "applies_to_work_item_ids": ["work-item-802"],
+          "dimension_ids": [
+            "deterministic-identities-and-idempotency",
+            "immutable-baseline-and-restore-evidence"
+          ]
+        }
+      ]
+    },
     "cases": [
       {
         "id": "case:contract-positive",
@@ -240,12 +278,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50"
+    "content_digest": "sha256:518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50.json",
+    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d.json",
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
   }

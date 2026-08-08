@@ -154,10 +154,16 @@
     "readiness": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["level", "evaluated_at", "receipt_refs"],
+      "required": ["level", "evaluated_at", "subject_digest", "receipt_refs"],
       "properties": {
         "level": { "enum": ["implementation-ready", "merge-ready", "operating-ready"] },
         "evaluated_at": { "$ref": "#/$defs/timestamp" },
+        "subject_digest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        },
         "receipt_refs": {
           "type": "array",
           "uniqueItems": true,
@@ -179,7 +185,12 @@
       "if": { "properties": { "status": { "const": "draft" } }, "required": ["status"] },
       "then": {
         "properties": {
-          "readiness": { "properties": { "level": { "const": "implementation-ready" } } },
+          "readiness": {
+            "properties": {
+              "level": { "const": "implementation-ready" },
+              "subject_digest": { "type": "null" }
+            }
+          },
           "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" }, "persisted_at": { "type": "null" } } },
           "finalized_at": { "type": "null" }
         }
@@ -191,7 +202,7 @@
         "properties": {
           "landing_unit": {
             "properties": {
-              "evidence_kind": { "const": "open_pr" },
+              "evidence_kind": { "enum": ["open_pr", "approved_direct_land"] },
               "repos": {
                 "minItems": 1,
                 "items": {
@@ -199,7 +210,6 @@
                     { "$ref": "#/$defs/repoEvidence" },
                     {
                       "properties": {
-                        "pr_url": { "$ref": "#/$defs/nonEmptyString" },
                         "merge_commit": { "type": "null" }
                       }
                     }
@@ -217,8 +227,19 @@
               "security_and_trust": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
             }
           },
-          "readiness": { "properties": { "level": { "const": "merge-ready" } } },
-          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" }, "persisted_at": { "type": "null" } } },
+          "readiness": {
+            "properties": {
+              "level": { "const": "merge-ready" },
+              "subject_digest": { "type": "null" }
+            }
+          },
+          "custody": {
+            "properties": {
+              "state": { "const": "durable" },
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
+            }
+          },
           "finalized_at": { "type": "null" }
         }
       }
@@ -243,6 +264,7 @@
           "readiness": {
             "properties": {
               "level": { "const": "operating-ready" },
+              "subject_digest": { "$ref": "#/$defs/digest" },
               "receipt_refs": { "minItems": 1 }
             }
           },
@@ -314,10 +336,39 @@
       "if": {
         "properties": {
           "landing_unit": {
-            "properties": { "evidence_kind": { "const": "approved_direct_land" } },
+            "properties": { "evidence_kind": { "const": "open_pr" } },
             "required": ["evidence_kind"]
           }
         }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "repos": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/$defs/repoEvidence" },
+                    { "properties": { "pr_url": { "$ref": "#/$defs/nonEmptyString" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "finalized" },
+          "landing_unit": {
+            "properties": { "evidence_kind": { "const": "approved_direct_land" } },
+            "required": ["evidence_kind"]
+          }
+        },
+        "required": ["status", "landing_unit"]
       },
       "then": {
         "properties": {
@@ -333,6 +384,32 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "evidence_kind": { "const": "approved_direct_land" } },
+            "required": ["evidence_kind"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "repos": {
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/$defs/repoEvidence" },
+                    { "properties": { "pr_url": { "type": "null" } } }
+                  ]
+                }
+              }
+            }
           },
           "exceptions": {
             "contains": {
@@ -343,6 +420,27 @@
               },
               "required": ["kind", "expires_at"]
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "finalized" },
+          "landing_unit": {
+            "properties": {
+              "evidence_kind": { "enum": ["merged_pr", "approved_direct_land"] }
+            },
+            "required": ["evidence_kind"]
+          }
+        },
+        "required": ["status", "landing_unit"]
+      },
+      "then": {
+        "properties": {
+          "custody": {
+            "properties": { "supersedes": { "$ref": "#/$defs/artifactRef" } }
           }
         }
       }
@@ -495,6 +593,7 @@
         "result",
         "summary",
         "conformance_case_ids",
+        "source_revisions",
         "evidence_refs",
         "not_applicable_reason",
         "authority_ref"
@@ -515,6 +614,11 @@
           "type": "array",
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/identifier" }
+        },
+        "source_revisions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourceRevision" }
         },
         "evidence_refs": {
           "type": "array",
@@ -551,8 +655,21 @@
         {
           "if": { "properties": { "result": { "const": "pass" } }, "required": ["result"] },
           "then": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "result": { "const": "not_applicable" } }, "required": ["result"] },
+          "then": { "properties": { "source_revisions": { "maxItems": 0 } } }
         }
       ]
+    },
+    "sourceRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "commit"],
+      "properties": {
+        "repo": { "$ref": "#/$defs/repoName" },
+        "commit": { "$ref": "#/$defs/gitCommit" }
+      }
     },
     "nonFailingEvidenceResult": {
       "allOf": [

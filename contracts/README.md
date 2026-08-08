@@ -171,8 +171,9 @@ Use these contracts to declare:
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     four readiness levels, architecture preflight, work-start gate, evidence
-    integrity, artifact custody, read hierarchy, guided closeout intents,
-    fallback model, compatibility boundary, and activation state
+    integrity, artifact custody, proof-obligation registry, read hierarchy,
+    guided closeout intents, fallback model, compatibility boundary, and
+    activation state
 - `schemas/delivery-art-operator-path.schema.json`
   - validates the operator-path contract, including the explicit boundary
     between contract-defined controls and owner-repo runtime enforcement
@@ -191,15 +192,27 @@ Use these contracts to declare:
     classes, architecture conformance-case bindings, exact source provenance,
     acceptance mapping, rollback boundary, readiness, integrity, and
     append-only durable custody
+- `schemas/delivery-art-readiness-receipt.schema.json`
+  - defines WGCF-owned, content-addressed decisions for all four readiness
+    levels; architecture, implementation, and merge receipts bind exact source
+    artifact content while operating receipts bind the cycle-safe canonical
+    Review Packet readiness-subject projection
+  - trusted runtime issuer verification remains owner implementation work
 - `fixtures/delivery-art-workflow/`
-  - valid architecture, work-start, merge-ready, and finalized artifact
-    examples consumed by `validate_contracts.py`; the validator also proves
+  - valid architecture, work-start, merge-ready, operating-readiness receipt,
+    and finalized artifact examples consumed by `validate_contracts.py`; the
+    validator derives and proves valid receipt subjects for the other three
+    readiness levels as well
+  - the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,
     unknown or cyclic architecture graphs, mismatched work-start repo
     snapshots, unresolved or divergent artifact references, missing applicable
-    conformance results, blocked architecture representation, missing durable
-    timestamps, and local-only finalization
+    conformance results, stale source-head evidence, missing per-item dimension
+    coverage, synthetic Git-history claims, blocked architecture
+    representation, unresolved readiness receipts, rewritten merge-ready
+    evidence, cyclic supersession, missing durable timestamps, and local-only
+    finalization
   - cross-field repo, acceptance, and resolved artifact-chain bindings are
     semantic contract checks in addition to JSON Schema shape validation
 

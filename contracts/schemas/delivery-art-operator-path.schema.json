@@ -18,6 +18,7 @@
         "contract_activation",
         "readiness_model",
         "artifact_contracts",
+        "proof_obligations",
         "work_start_gate",
         "evidence_integrity",
         "authority_boundaries",
@@ -56,6 +57,7 @@
         "contract_activation": { "$ref": "#/$defs/contractActivation" },
         "readiness_model": { "$ref": "#/$defs/readinessModel" },
         "artifact_contracts": { "$ref": "#/$defs/artifactContracts" },
+        "proof_obligations": { "$ref": "#/$defs/proofObligations" },
         "work_start_gate": { "$ref": "#/$defs/workStartGate" },
         "evidence_integrity": { "$ref": "#/$defs/evidenceIntegrity" },
         "authority_boundaries": { "$ref": "#/$defs/authorityBoundaries" },
@@ -222,7 +224,9 @@
       "properties": {
         "schema_ref": { "$ref": "#/$defs/nonEmptyString" },
         "schema_version": { "type": "integer", "minimum": 1 },
-        "target_owner_repo": { "const": "operator-orchestration-service" },
+        "target_owner_repo": {
+          "enum": ["operator-orchestration-service", "workspace-governance-control-fabric"]
+        },
         "durable_when": { "$ref": "#/$defs/nonEmptyString" },
         "migration_from_runtime_version": { "type": "integer", "minimum": 1 }
       }
@@ -230,7 +234,7 @@
     "artifactContracts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["architecture_packet", "work_start_record", "review_packet"],
+      "required": ["architecture_packet", "work_start_record", "review_packet", "readiness_receipt"],
       "properties": {
         "architecture_packet": {
           "allOf": [
@@ -238,7 +242,8 @@
             {
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
-                "schema_version": { "const": 1 }
+                "schema_version": { "const": 1 },
+                "target_owner_repo": { "const": "operator-orchestration-service" }
               }
             }
           ]
@@ -249,7 +254,8 @@
             {
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-work-start-record.schema.json" },
-                "schema_version": { "const": 1 }
+                "schema_version": { "const": 1 },
+                "target_owner_repo": { "const": "operator-orchestration-service" }
               }
             }
           ]
@@ -262,10 +268,148 @@
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-review-packet.schema.json" },
                 "schema_version": { "const": 2 },
+                "target_owner_repo": { "const": "operator-orchestration-service" },
                 "migration_from_runtime_version": { "const": 1 }
               }
             }
           ]
+        },
+        "readiness_receipt": {
+          "allOf": [
+            { "$ref": "#/$defs/artifactContract" },
+            {
+              "properties": {
+                "schema_ref": { "const": "contracts/schemas/delivery-art-readiness-receipt.schema.json" },
+                "schema_version": { "const": 1 },
+                "target_owner_repo": { "const": "workspace-governance-control-fabric" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "proofObligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "claim_refs",
+        "enforcement_state",
+        "owner_repo",
+        "target_art_refs",
+        "positive_case_ids",
+        "negative_case_ids",
+        "enforcement_layers",
+        "rationale"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "claim_refs": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "enforcement_state": {
+          "enum": ["active-local", "pending-owner", "doctrine"]
+        },
+        "owner_repo": { "$ref": "#/$defs/nonEmptyString" },
+        "target_art_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^openproject://work_packages/[1-9][0-9]*$"
+          }
+        },
+        "positive_case_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "negative_case_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "enforcement_layers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "json-schema",
+              "semantic-validator",
+              "reference-resolver",
+              "integrity-validator",
+              "operator-contract",
+              "owner-runtime"
+            ]
+          }
+        },
+        "rationale": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "enforcement_state": { "const": "active-local" } },
+            "required": ["enforcement_state"]
+          },
+          "then": {
+            "properties": {
+              "positive_case_ids": { "minItems": 1 },
+              "negative_case_ids": { "minItems": 1 },
+              "target_art_refs": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "enforcement_state": { "const": "pending-owner" } },
+            "required": ["enforcement_state"]
+          },
+          "then": {
+            "properties": {
+              "target_art_refs": { "minItems": 1 },
+              "positive_case_ids": { "maxItems": 0 },
+              "negative_case_ids": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "enforcement_state": { "const": "doctrine" } },
+            "required": ["enforcement_state"]
+          },
+          "then": {
+            "properties": {
+              "target_art_refs": { "maxItems": 0 },
+              "positive_case_ids": { "maxItems": 0 },
+              "negative_case_ids": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "proofObligations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "governed_claim_roots",
+        "every_true_claim_mapped_once",
+        "active_local_requires_positive_and_negative_case",
+        "obligations"
+      ],
+      "properties": {
+        "governed_claim_roots": {
+          "const": [
+            "readiness_model.rules",
+            "work_start_gate",
+            "evidence_integrity",
+            "initiative_architecture_preflight"
+          ]
+        },
+        "every_true_claim_mapped_once": { "const": true },
+        "active_local_requires_positive_and_negative_case": { "const": true },
+        "obligations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/proofObligation" }
         }
       }
     },
@@ -287,6 +431,7 @@
         "read_snapshot_cache_allowed",
         "fresh_target_and_dependency_snapshot_required_before_mutation",
         "complete_invalidation_set_required",
+        "scope_fingerprint_is_deterministic_projection",
         "invalidation_inputs"
       ],
       "properties": {
@@ -311,6 +456,7 @@
         "read_snapshot_cache_allowed": { "const": true },
         "fresh_target_and_dependency_snapshot_required_before_mutation": { "const": true },
         "complete_invalidation_set_required": { "const": true },
+        "scope_fingerprint_is_deterministic_projection": { "const": true },
         "invalidation_inputs": {
           "const": [
             "art-descendant-or-dependency-change",
@@ -365,6 +511,11 @@
             "opaque_refs_cannot_advance_readiness",
             "work_start_resolves_architecture_packet",
             "review_packet_resolves_work_start_record",
+            "readiness_receipt_resolves_exact_subject",
+            "readiness_receipt_subject_coverage_and_chronology_must_match",
+            "operating_receipt_uses_cycle_safe_readiness_subject",
+            "finalized_review_packet_resolves_merge_ready_predecessor",
+            "finalized_review_packet_resolves_readiness_receipts",
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match",
             "dependency_must_exist_before_dependent_readiness",
             "superseded_artifact_must_resolve_with_same_type_and_delivery",
@@ -375,6 +526,11 @@
             "opaque_refs_cannot_advance_readiness": { "const": true },
             "work_start_resolves_architecture_packet": { "const": true },
             "review_packet_resolves_work_start_record": { "const": true },
+            "readiness_receipt_resolves_exact_subject": { "const": true },
+            "readiness_receipt_subject_coverage_and_chronology_must_match": { "const": true },
+            "operating_receipt_uses_cycle_safe_readiness_subject": { "const": true },
+            "finalized_review_packet_resolves_merge_ready_predecessor": { "const": true },
+            "finalized_review_packet_resolves_readiness_receipts": { "const": true },
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match": { "const": true },
             "dependency_must_exist_before_dependent_readiness": { "const": true },
             "superseded_artifact_must_resolve_with_same_type_and_delivery": { "const": true },
@@ -409,9 +565,11 @@
             "required_plan_has_positive_and_negative_case_per_work_item",
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases",
             "required_protocol_work_item_has_merge_ready_positive_and_negative_cases",
+            "required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases",
             "later_readiness_requires_all_applicable_cases_to_pass",
             "evidence_fidelity_must_match_planned_case_fidelity",
-            "cases_outside_packet_work_item_or_readiness_scope_rejected"
+            "cases_outside_packet_work_item_or_readiness_scope_rejected",
+            "work_item_dimension_applicability_is_explicit"
           ],
           "properties": {
             "architecture_cases_declare_applicable_work_items": { "const": true },
@@ -422,9 +580,11 @@
             "required_plan_has_positive_and_negative_case_per_work_item": { "const": true },
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases": { "const": true },
             "required_protocol_work_item_has_merge_ready_positive_and_negative_cases": { "const": true },
+            "required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases": { "const": true },
             "later_readiness_requires_all_applicable_cases_to_pass": { "const": true },
             "evidence_fidelity_must_match_planned_case_fidelity": { "const": true },
-            "cases_outside_packet_work_item_or_readiness_scope_rejected": { "const": true }
+            "cases_outside_packet_work_item_or_readiness_scope_rejected": { "const": true },
+            "work_item_dimension_applicability_is_explicit": { "const": true }
           }
         },
         "source_provenance": {
@@ -432,11 +592,15 @@
           "additionalProperties": false,
           "required": [
             "exact_base_and_head_commits_required",
+            "passing_evidence_binds_exact_source_heads",
+            "git_causality_applicability_is_explicit",
             "real_git_required_for_git_causality_claims",
             "synthetic_resolver_cannot_prove_git_history"
           ],
           "properties": {
             "exact_base_and_head_commits_required": { "const": true },
+            "passing_evidence_binds_exact_source_heads": { "const": true },
+            "git_causality_applicability_is_explicit": { "const": true },
             "real_git_required_for_git_causality_claims": { "const": true },
             "synthetic_resolver_cannot_prove_git_history": { "const": true }
           }
@@ -478,6 +642,8 @@
             "content_addressed_filename_required",
             "append_only_corrections",
             "correction_requires_supersedes_ref",
+            "supersession_chains_are_acyclic_and_strictly_ordered",
+            "merge_ready_review_packet_is_immutable_predecessor_evidence",
             "durable_persisted_at_required",
             "wgcf_records_receipts_not_source_artifacts"
           ],
@@ -489,6 +655,8 @@
             "content_addressed_filename_required": { "const": true },
             "append_only_corrections": { "const": true },
             "correction_requires_supersedes_ref": { "const": true },
+            "supersession_chains_are_acyclic_and_strictly_ordered": { "const": true },
+            "merge_ready_review_packet_is_immutable_predecessor_evidence": { "const": true },
             "durable_persisted_at_required": { "const": true },
             "wgcf_records_receipts_not_source_artifacts": { "const": true }
           }

@@ -57,17 +57,20 @@ and replay resistance, session and scenario-execution binding, complete owner
 receipts, immutable baseline and restore evidence, lifecycle-state matrices,
 cross-artifact timeline ordering, shared-validator compatibility, and
 `positive and negative contract cases`. Bind every case to the work items and
-dimensions it proves; every mandated protocol dimension requires both positive
-and negative `merge-ready` cases. Architecture readiness requires the
+dimensions it proves; declare the applicable dimensions for each work item,
+and require positive and negative `merge-ready` cases for every applicable
+work-item/dimension pair. Architecture readiness requires the
 approved plan, not implementation results that cannot exist yet. Applicable
 cases must pass before merge readiness. Use a `real-git` case for Git-history
-causality; a synthetic resolver cannot prove a real commit sequence.
+causality, and declare the exact work items and dimensions whose claims require
+that fidelity; a synthetic resolver cannot prove a real commit sequence.
 
 Keep the four readiness decisions distinct:
 
 - `architecture-ready`: approved design, boundaries, sequence, and conformance plan
 - `implementation-ready`: Landing Unit bound to exact ART and repo source truth
-- `merge-ready`: exact open-PR head has passing applicable structured evidence
+- `merge-ready`: exact open-PR or authorized direct-land head has passing
+  applicable structured evidence and a durable content-addressed Review Packet
 - `operating-ready`: finalized durable evidence satisfies closeout obligations
 
 The work-start record and Review Packet v2 schemas are contract-defined but are
@@ -75,6 +78,15 @@ not active commands until OOS, WGCF, Platform, Security, and initiative `698`
 dogfood complete their activation items. Until then, use the currently
 documented OOS command family and Review Packet v1 without claiming the target
 runtime enforcement already exists.
+
+Under the target v2 path, every passing result binds the exact packet repo
+heads. Finalized source packets supersede and preserve a durable merge-ready
+predecessor. WGCF receipts at architecture, implementation, and merge readiness
+bind the exact durable source-artifact content digest; the operating receipt
+binds the final packet's cycle-safe canonical readiness-subject digest. Local
+contract validation resolves those exact subjects; it does not prove trusted
+live WGCF issuer identity before the owner implementation and security
+activation items land.
 
 1. Start from the ART, not from chat memory.
    - if the active `Epic` is already known, start with its fast active-front
@@ -307,23 +319,26 @@ runtime enforcement already exists.
      merged, deployed, and rolled back together
    - use a Review Packet to bind landed or explicitly accepted evidence back to
      one or more ART items
-   - for source-backed ART work, create or refresh the draft Review Packet
-     while the PR is still open and set `landing_unit.evidence_kind` to
-     `open_pr`
-   - before merge, the draft Review Packet must include the PR URL, changed
+   - for the normal source-backed PR path, create or refresh the local draft
+     Review Packet while the PR is still open and set
+     `landing_unit.evidence_kind` to `open_pr`; use
+     `approved_direct_land` only with current explicit exception authority
+   - before merge, the packet must include the PR URL when applicable, changed
      surfaces with explanations, test results, validation results, rollback
-     boundary, and one `completion_mapping` entry per covered work item
+     boundary, and one `acceptance_mapping` entry per covered work item
    - before merge, fetch the PR base and run the local command or command set
      that is CI-equivalent for the changed surface; when required CI uses a
      base-aware validator, use the same base-ref shape after fetching the base,
      such as `--against-ref origin/main`
-   - record the CI-equivalent command, base ref, and result in Review Packet
-     validation evidence; if the proof needs operator-side action outside
-     Codex's safe tool boundary, prompt immediately and record the blocker or
-     operator-approved exception instead of relying on GitHub CI as the first
-     proof
+   - record the CI-equivalent command, base ref, result, and exact repo/head
+     revisions in Review Packet validation evidence; if the proof needs
+     operator-side action outside Codex's safe tool boundary, prompt
+     immediately and record the blocker or operator-approved exception instead
+     of relying on GitHub CI as the first proof
    - after the PR is open and before it is merged, run:
      `npm run art -- review-packet readiness <packet.json>`
+   - treat the resulting content-addressed merge-ready Review Packet as durable
+     immutable predecessor evidence; do not rewrite it after merge
    - do not merge while readiness fails; fix the same PR or explicitly split the
      Landing Unit instead of planning a corrective PR after merge
    - when editing generated ART payloads, Review Packets, or completion
@@ -331,7 +346,9 @@ runtime enforcement already exists.
      rerun the relevant local preflight before broker submission; do not make
      final evidence edits with heredocs, raw redirection, or one-off overwrites
      unless the generator itself is the reviewed control
-   - after merge, update the Review Packet to `merged_pr`, add the merge commit,
+   - after merge, build the final Review Packet from that predecessor, update
+     it to `merged_pr`, add the merge commit and later evidence without
+     rewriting reviewed evidence, resolve the matching WGCF readiness receipt,
      finalize it, and use the finalized digest in ART completion evidence
    - do not mark source-backed ART children `done` until a finalized Review
      Packet covers them with merged PR evidence, approved direct-land evidence,

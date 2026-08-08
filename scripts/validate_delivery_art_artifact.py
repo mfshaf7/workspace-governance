@@ -15,6 +15,7 @@ from validate_contracts import (
     delivery_art_artifact_integrity_errors,
     delivery_art_artifact_reference_errors,
     delivery_art_artifact_semantic_errors,
+    strict_delivery_art_object,
 )
 
 
@@ -22,16 +23,8 @@ ARTIFACT_CASE_BY_TYPE = {
     "delivery_art_architecture_packet": "architecture_packet",
     "delivery_art_work_start_record": "work_start_record",
     "art_review_packet": "review_packet",
+    "delivery_art_readiness_receipt": "readiness_receipt",
 }
-
-
-def _strict_artifact_object(pairs: list[tuple[str, object]]) -> dict:
-    artifact_object = {}
-    for key, value in pairs:
-        if key in artifact_object:
-            raise ValueError(f"duplicate JSON object key {key!r}")
-        artifact_object[key] = value
-    return artifact_object
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,7 +38,7 @@ def parse_args() -> argparse.Namespace:
         action="append",
         default=[],
         type=Path,
-        help="Artifact required to resolve work-start or architecture references; repeat as needed.",
+        help="Artifact required to resolve architecture, work-start, receipt-subject, predecessor, or readiness-receipt references; repeat until the dependency closure is complete.",
     )
     return parser.parse_args()
 
@@ -81,7 +74,7 @@ def _artifact_errors(payload: object, repo_root: Path) -> list[str]:
 
 def _load_artifact(path: Path | None) -> object:
     raw_payload = path.read_text() if path else sys.stdin.read()
-    return json.loads(raw_payload, object_pairs_hook=_strict_artifact_object)
+    return json.loads(raw_payload, object_pairs_hook=strict_delivery_art_object)
 
 
 def main() -> int:
@@ -104,6 +97,11 @@ def main() -> int:
         except (OSError, ValueError) as exc:
             dependency_errors.append(f"{dependency_path}: {exc}")
             continue
+        if not isinstance(dependency, dict):
+            dependency_errors.append(
+                f"{dependency_path}: dependency artifact must be a JSON object"
+            )
+            continue
         dependency_artifacts.append(dependency)
         dependency_errors.extend(
             f"{dependency_path}: {error}"
@@ -123,7 +121,7 @@ def main() -> int:
             dependency_errors.extend(
                 f"dependency reference invariant: {error}"
                 for error in delivery_art_artifact_reference_errors(
-                    dependency, dependency_artifacts
+                    dependency, [payload, *dependency_artifacts]
                 )
             )
     errors.extend(dependency_errors)

@@ -91,7 +91,18 @@ DELIVERY_ART_ARTIFACT_CASES = {
             "contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json",
         ),
     ),
+    "readiness_receipt": (
+        "contracts/schemas/delivery-art-readiness-receipt.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json",),
+    ),
 }
+
+DELIVERY_ART_PROOF_CLAIM_ROOTS = (
+    "readiness_model.rules",
+    "work_start_gate",
+    "evidence_integrity",
+    "initiative_architecture_preflight",
+)
 CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "schema_version",
     "authorization_id",
@@ -454,6 +465,227 @@ def _require_artifact_time_order(
         errors.append(f"{earlier_name} must not be later than {later_name}")
 
 
+def _require_strict_artifact_time_order(
+    errors: list[str],
+    earlier_name: str,
+    earlier_value: object,
+    later_name: str,
+    later_value: object,
+) -> None:
+    earlier = _artifact_timestamp(earlier_value)
+    later = _artifact_timestamp(later_value)
+    if earlier is not None and later is not None and earlier >= later:
+        errors.append(f"{earlier_name} must be earlier than {later_name}")
+
+
+def _delivery_art_canonical_bytes(value: object) -> bytes:
+    """Serialize the integer-only RFC 8785 subset accepted by ART artifacts."""
+    if value is None:
+        return b"null"
+    if value is True:
+        return b"true"
+    if value is False:
+        return b"false"
+    if isinstance(value, int):
+        return str(value).encode("ascii")
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    if isinstance(value, list):
+        return b"[" + b",".join(
+            _delivery_art_canonical_bytes(entry) for entry in value
+        ) + b"]"
+    if isinstance(value, dict):
+        entries = []
+        for key in sorted(value, key=lambda item: item.encode("utf-16be")):
+            entries.append(
+                _delivery_art_canonical_bytes(key)
+                + b":"
+                + _delivery_art_canonical_bytes(value[key])
+            )
+        return b"{" + b",".join(entries) + b"}"
+    raise TypeError(f"unsupported canonical JSON value {type(value).__name__}")
+
+
+def _delivery_art_projection_digest(projection: object) -> str:
+    return "sha256:" + hashlib.sha256(
+        _delivery_art_canonical_bytes(projection)
+    ).hexdigest()
+
+
+def _delivery_art_projection_digest_if_canonical(
+    projection: object,
+) -> str | None:
+    if _artifact_canonicalization_errors(projection):
+        return None
+    return _delivery_art_projection_digest(projection)
+
+
+def _architecture_scope_projection(payload: dict) -> dict:
+    decision = _artifact_object(payload.get("decision"))
+    return {
+        "schema_version": payload.get("schema_version"),
+        "artifact_type": payload.get("artifact_type"),
+        "delivery_id": payload.get("delivery_id"),
+        "covered_work_item_ids": payload.get("covered_work_item_ids"),
+        "source_snapshot": payload.get("source_snapshot"),
+        "architecture": payload.get("architecture"),
+        "conformance_plan": payload.get("conformance_plan"),
+        "decision_status": decision.get("status"),
+    }
+
+
+def _work_start_scope_projection(payload: dict) -> dict:
+    return {
+        "schema_version": payload.get("schema_version"),
+        "artifact_type": payload.get("artifact_type"),
+        "delivery_id": payload.get("delivery_id"),
+        "covered_work_item_ids": payload.get("covered_work_item_ids"),
+        "landing_unit": payload.get("landing_unit"),
+        "architecture": payload.get("architecture"),
+        "source_snapshot": payload.get("source_snapshot"),
+        "invalidation_inputs": payload.get("invalidation_inputs"),
+    }
+
+
+def _review_packet_readiness_subject_projection(payload: dict) -> dict:
+    projection = copy.deepcopy(payload)
+    projection.pop("custody", None)
+    projection.pop("integrity", None)
+    readiness = _artifact_object(projection.get("readiness"))
+    readiness.pop("receipt_refs", None)
+    readiness.pop("subject_digest", None)
+    return projection
+
+
+def delivery_art_review_packet_readiness_subject_digest(payload: dict) -> str:
+    return _delivery_art_projection_digest(
+        _review_packet_readiness_subject_projection(payload)
+    )
+
+
+def _review_packet_predecessor_continuity_errors(
+    finalized: dict,
+    merge_ready: dict,
+) -> list[str]:
+    errors: list[str] = []
+    for field in (
+        "packet_id",
+        "delivery_id",
+        "covered_work_item_ids",
+        "created_at",
+        "operator",
+        "work_start",
+    ):
+        if finalized.get(field) != merge_ready.get(field):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready {field}"
+            )
+
+    final_landing = _artifact_object(finalized.get("landing_unit"))
+    prior_landing = _artifact_object(merge_ready.get("landing_unit"))
+    for field in ("decision", "rollback_boundary"):
+        if final_landing.get(field) != prior_landing.get(field):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready landing_unit.{field}"
+            )
+    expected_final_kind = {
+        "open_pr": "merged_pr",
+        "approved_direct_land": "approved_direct_land",
+    }.get(prior_landing.get("evidence_kind"))
+    if expected_final_kind is None or final_landing.get("evidence_kind") != expected_final_kind:
+        errors.append(
+            "finalized source Review Packet evidence kind must advance from its merge-ready predecessor"
+        )
+
+    prior_repos = {
+        repo.get("repo_name"): repo
+        for repo in _artifact_object_list(prior_landing.get("repos"))
+        if isinstance(repo.get("repo_name"), str)
+    }
+    final_repos = {
+        repo.get("repo_name"): repo
+        for repo in _artifact_object_list(final_landing.get("repos"))
+        if isinstance(repo.get("repo_name"), str)
+    }
+    if set(prior_repos) != set(final_repos):
+        errors.append(
+            "finalized Review Packet repos must match its merge-ready predecessor"
+        )
+    stable_repo_fields = (
+        "branch",
+        "base_ref",
+        "base_commit",
+        "head_commit",
+        "pr_url",
+        "changed_files",
+        "change_record_refs",
+    )
+    for repo_name, prior_repo in prior_repos.items():
+        final_repo = final_repos.get(repo_name)
+        if final_repo is None:
+            continue
+        for field in stable_repo_fields:
+            if final_repo.get(field) != prior_repo.get(field):
+                errors.append(
+                    f"finalized Review Packet must preserve merge-ready {repo_name}.{field}"
+                )
+
+    prior_evidence = _artifact_object(merge_ready.get("evidence"))
+    final_evidence = _artifact_object(finalized.get("evidence"))
+    for section in (
+        "changed_surfaces",
+        "tests",
+        "validations",
+        "runtime_and_live",
+        "security_and_trust",
+    ):
+        final_entries = _artifact_object_list(final_evidence.get(section))
+        for prior_entry in _artifact_object_list(prior_evidence.get(section)):
+            if prior_entry not in final_entries:
+                errors.append(
+                    f"finalized Review Packet must preserve merge-ready evidence {prior_entry.get('id')}"
+                )
+
+    final_mappings = {
+        mapping.get("work_item_id"): mapping
+        for mapping in _artifact_object_list(final_evidence.get("acceptance_mapping"))
+        if isinstance(mapping.get("work_item_id"), str)
+    }
+    for prior_mapping in _artifact_object_list(
+        prior_evidence.get("acceptance_mapping")
+    ):
+        work_item_id = prior_mapping.get("work_item_id")
+        final_mapping = final_mappings.get(work_item_id)
+        if final_mapping is None:
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready acceptance mapping for {work_item_id}"
+            )
+            continue
+        if final_mapping.get("acceptance_ref") != prior_mapping.get(
+            "acceptance_ref"
+        ) or final_mapping.get("summary") != prior_mapping.get("summary") or not set(
+            _artifact_string_list(prior_mapping.get("evidence_ids"))
+        ).issubset(_artifact_string_list(final_mapping.get("evidence_ids"))):
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready acceptance evidence for {work_item_id}"
+            )
+
+    if merge_ready.get("rollback") is not None and finalized.get(
+        "rollback"
+    ) != merge_ready.get("rollback"):
+        errors.append("finalized Review Packet must preserve merge-ready rollback evidence")
+
+    final_exceptions = _artifact_object_list(finalized.get("exceptions"))
+    for prior_exception in _artifact_object_list(merge_ready.get("exceptions")):
+        if prior_exception not in final_exceptions:
+            errors.append(
+                f"finalized Review Packet must preserve merge-ready exception {prior_exception.get('id')}"
+            )
+    return errors
+
+
 def _artifact_canonicalization_errors(
     value: object,
     path: str = "<root>",
@@ -489,6 +721,15 @@ def _artifact_canonicalization_errors(
     return errors
 
 
+def strict_delivery_art_object(pairs: list[tuple[str, object]]) -> dict:
+    artifact_object = {}
+    for key, value in pairs:
+        if key in artifact_object:
+            raise ValueError(f"duplicate JSON object key {key!r}")
+        artifact_object[key] = value
+    return artifact_object
+
+
 def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     """Validate cross-field invariants that JSON Schema cannot express."""
     errors: list[str] = []
@@ -496,7 +737,11 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     delivery_id = payload.get("delivery_id")
     delivery_number = _delivery_art_entity_number(delivery_id, "delivery")
     custody = _artifact_object(payload.get("custody"))
-    if custody.get("state") == "durable" and delivery_number is not None:
+    if (
+        custody.get("state") == "durable"
+        and custody.get("backend") == "openproject-attachment"
+        and delivery_number is not None
+    ):
         expected_prefix = (
             f"openproject://work_packages/{delivery_number}/attachments/"
         )
@@ -519,6 +764,17 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             artifact_id, "architecture-packet", delivery_id
         ):
             errors.append("artifact_id must be scoped to delivery_id")
+        expected_scope_fingerprint = _delivery_art_projection_digest_if_canonical(
+            _architecture_scope_projection(payload)
+        )
+        if (
+            expected_scope_fingerprint is not None
+            and payload.get("scope_fingerprint") != expected_scope_fingerprint
+        ):
+            errors.append(
+                "scope_fingerprint must equal the deterministic architecture scope projection "
+                + expected_scope_fingerprint
+            )
         covered_work_items = set(
             _artifact_string_list(payload.get("covered_work_item_ids"))
         )
@@ -697,6 +953,43 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         conformance_dimensions = set(
             _artifact_string_list(conformance_plan.get("dimensions"))
         )
+        applicability_rows = _artifact_object_list(
+            conformance_plan.get("work_item_dimension_applicability")
+        )
+        applicability_items = [
+            row.get("work_item_id")
+            for row in applicability_rows
+            if isinstance(row.get("work_item_id"), str)
+        ]
+        applicability_by_work_item = {
+            row.get("work_item_id"): set(
+                _artifact_string_list(row.get("dimension_ids"))
+            )
+            for row in applicability_rows
+            if isinstance(row.get("work_item_id"), str)
+        }
+        if len(applicability_items) != len(set(applicability_items)):
+            errors.append(
+                "conformance_plan.work_item_dimension_applicability must contain one row per work item"
+            )
+        if set(applicability_items) != covered_work_items:
+            errors.append(
+                "conformance_plan.work_item_dimension_applicability must exactly cover covered_work_item_ids"
+            )
+        applicable_dimensions = set().union(
+            *applicability_by_work_item.values()
+        ) if applicability_by_work_item else set()
+        if applicable_dimensions != conformance_dimensions:
+            errors.append(
+                "work-item dimension applicability must exactly cover declared conformance dimensions"
+            )
+        for work_item_id, dimensions in applicability_by_work_item.items():
+            unknown_dimensions = dimensions - conformance_dimensions
+            if unknown_dimensions:
+                errors.append(
+                    f"work-item dimension applicability for {work_item_id} references undeclared dimensions: "
+                    + ", ".join(sorted(unknown_dimensions))
+                )
         protocol_applicability = _artifact_object(
             conformance_plan.get("protocol_applicability")
         )
@@ -729,6 +1022,11 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         merge_ready_polarities_by_work_item = {
             work_item_id: set() for work_item_id in covered_work_items
         }
+        merge_ready_polarities_by_pair = {
+            (work_item_id, dimension): set()
+            for work_item_id, dimensions in applicability_by_work_item.items()
+            for dimension in dimensions
+        }
         for case in conformance_cases:
             case_id = case.get("id")
             applicability = set(
@@ -757,6 +1055,14 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         merge_ready_polarities_by_dimension[dimension].add(
                             polarity
                         )
+                for work_item_id in applicability.intersection(covered_work_items):
+                    for dimension in case_dimensions.intersection(
+                        applicability_by_work_item.get(work_item_id, set())
+                    ):
+                        if isinstance(polarity, str):
+                            merge_ready_polarities_by_pair[
+                                (work_item_id, dimension)
+                            ].add(polarity)
             unknown_items = applicability - covered_work_items
             if unknown_items:
                 errors.append(
@@ -769,6 +1075,15 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     f"conformance case {case_id} references undeclared dimensions: "
                     + ", ".join(sorted(unknown_dimensions))
                 )
+            for work_item_id in applicability.intersection(covered_work_items):
+                inapplicable_dimensions = case_dimensions - applicability_by_work_item.get(
+                    work_item_id, set()
+                )
+                if inapplicable_dimensions:
+                    errors.append(
+                        f"conformance case {case_id} references dimensions not applicable to {work_item_id}: "
+                        + ", ".join(sorted(inapplicable_dimensions))
+                    )
         if conformance_plan.get("required") is True:
             if conformance_items != covered_work_items:
                 errors.append(
@@ -801,6 +1116,66 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         "required protocol dimension must have positive and negative merge-ready cases: "
                         + dimension
                     )
+            for (work_item_id, dimension), polarities in (
+                merge_ready_polarities_by_pair.items()
+            ):
+                if polarities != {"positive", "negative"}:
+                    errors.append(
+                        "required work-item/dimension pair must have positive and negative merge-ready cases: "
+                        f"{work_item_id}/{dimension}"
+                    )
+
+        git_causality = _artifact_object(conformance_plan.get("git_causality"))
+        git_claims = _artifact_object_list(git_causality.get("claims"))
+        git_claim_ids = [
+            claim.get("id")
+            for claim in git_claims
+            if isinstance(claim.get("id"), str)
+        ]
+        if len(git_claim_ids) != len(set(git_claim_ids)):
+            errors.append("conformance_plan.git_causality claims must have unique ids")
+        for claim in git_claims:
+            claim_id = claim.get("id")
+            claim_items = set(
+                _artifact_string_list(claim.get("applies_to_work_item_ids"))
+            )
+            claim_dimensions = set(
+                _artifact_string_list(claim.get("dimension_ids"))
+            )
+            for work_item_id in claim_items:
+                if work_item_id not in covered_work_items:
+                    errors.append(
+                        f"Git-causality claim {claim_id} references undeclared work item {work_item_id}"
+                    )
+                    continue
+                outside_dimensions = claim_dimensions - applicability_by_work_item.get(
+                    work_item_id, set()
+                )
+                if outside_dimensions:
+                    errors.append(
+                        f"Git-causality claim {claim_id} is outside declared applicability for {work_item_id}: "
+                        + ", ".join(sorted(outside_dimensions))
+                    )
+                for dimension in claim_dimensions.intersection(
+                    applicability_by_work_item.get(work_item_id, set())
+                ):
+                    real_git_polarities = {
+                        case.get("polarity")
+                        for case in conformance_cases
+                        if case.get("target_readiness") == "merge-ready"
+                        and case.get("fidelity") == "real-git"
+                        and work_item_id
+                        in _artifact_string_list(
+                            case.get("applies_to_work_item_ids")
+                        )
+                        and dimension
+                        in _artifact_string_list(case.get("dimension_ids"))
+                    }
+                    if real_git_polarities != {"positive", "negative"}:
+                        errors.append(
+                            "Git-causality claim requires positive and negative real-git merge-ready cases: "
+                            f"{work_item_id}/{dimension}"
+                        )
 
         decision = _artifact_object(payload.get("decision"))
         if decision.get("status") == "blocked-pending-architecture-decision":
@@ -844,6 +1219,17 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             artifact_id, "work-start", delivery_id
         ):
             errors.append("artifact_id must be scoped to delivery_id")
+        expected_scope_fingerprint = _delivery_art_projection_digest_if_canonical(
+            _work_start_scope_projection(payload)
+        )
+        if (
+            expected_scope_fingerprint is not None
+            and payload.get("scope_fingerprint") != expected_scope_fingerprint
+        ):
+            errors.append(
+                "scope_fingerprint must equal the deterministic work-start scope projection "
+                + expected_scope_fingerprint
+            )
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
         source_art_id = _delivery_art_openproject_id(source_snapshot.get("art_ref"))
         allowed_source_ids = {
@@ -1088,6 +1474,51 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         f"changed surface {repo}/{path} is absent from landing_unit.repos changed_files"
                     )
 
+        expected_source_revisions = {
+            (entry.get("repo_name"), entry.get("head_commit"))
+            for entry in repo_evidence
+            if isinstance(entry.get("repo_name"), str)
+            and isinstance(entry.get("head_commit"), str)
+        }
+        for section in (
+            "tests",
+            "validations",
+            "runtime_and_live",
+            "security_and_trust",
+        ):
+            for result in _artifact_object_list(evidence.get(section)):
+                revisions = _artifact_object_list(result.get("source_revisions"))
+                revision_repos = [
+                    revision.get("repo")
+                    for revision in revisions
+                    if isinstance(revision.get("repo"), str)
+                ]
+                if len(revision_repos) != len(set(revision_repos)):
+                    errors.append(
+                        f"evidence result {result.get('id')} must contain one source revision per repo"
+                    )
+                declared_revisions = {
+                    (revision.get("repo"), revision.get("commit"))
+                    for revision in revisions
+                    if isinstance(revision.get("repo"), str)
+                    and isinstance(revision.get("commit"), str)
+                }
+                if (
+                    landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS
+                    and result.get("result") == "pass"
+                    and declared_revisions != expected_source_revisions
+                ):
+                    errors.append(
+                        f"passing evidence result {result.get('id')} must bind the exact landing-unit source heads"
+                    )
+                if (
+                    landing_decision == "non_source_child"
+                    and declared_revisions
+                ):
+                    errors.append(
+                        f"non-source evidence result {result.get('id')} must not declare source revisions"
+                    )
+
         readiness = _artifact_object(payload.get("readiness"))
         custody = _artifact_object(payload.get("custody"))
         _require_artifact_time_order(
@@ -1098,6 +1529,20 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             readiness.get("evaluated_at"),
         )
         if payload.get("status") == "finalized":
+            subject_projection = _review_packet_readiness_subject_projection(
+                payload
+            )
+            expected_subject_digest = _delivery_art_projection_digest_if_canonical(
+                subject_projection
+            )
+            if (
+                expected_subject_digest is not None
+                and readiness.get("subject_digest") != expected_subject_digest
+            ):
+                errors.append(
+                    "readiness.subject_digest must equal the canonical Review Packet readiness-subject projection "
+                    + expected_subject_digest
+                )
             _require_artifact_time_order(
                 errors,
                 "readiness.evaluated_at",
@@ -1135,6 +1580,72 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     "approved_direct_land requires a direct-land exception valid through readiness evaluation and finalization"
                 )
 
+    if artifact_type == "delivery_art_readiness_receipt":
+        subject = _artifact_object(payload.get("subject"))
+        subject_prefixes = {
+            "delivery_art_architecture_packet": "architecture-packet",
+            "delivery_art_work_start_record": "work-start",
+            "art_review_packet": "review-packet",
+        }
+        subject_prefix = subject_prefixes.get(subject.get("artifact_type"))
+        if (
+            isinstance(delivery_id, str)
+            and isinstance(subject_prefix, str)
+            and not _delivery_art_identifier_scoped_to(
+                subject.get("artifact_id"), subject_prefix, delivery_id
+            )
+        ):
+            errors.append("readiness receipt subject.artifact_id must be scoped to delivery_id")
+        receipt_id = payload.get("receipt_id")
+        receipt_token = (
+            receipt_id.split(":", 1)[1]
+            if isinstance(receipt_id, str) and ":" in receipt_id
+            else None
+        )
+        if receipt_token is not None and (
+            f"art-readiness-receipt-{receipt_token}-"
+            not in str(custody.get("uri", ""))
+        ):
+            errors.append("readiness receipt custody URI must include its receipt id")
+        readiness = _artifact_object(payload.get("readiness"))
+        if delivery_number is not None and readiness.get("target_scope") != (
+            f"art:delivery-{delivery_number}"
+        ):
+            errors.append(
+                "readiness receipt target_scope must match its declared Delivery initiative"
+            )
+        findings = _artifact_object_list(payload.get("findings"))
+        finding_ids = [
+            finding.get("id")
+            for finding in findings
+            if isinstance(finding.get("id"), str)
+        ]
+        if len(finding_ids) != len(set(finding_ids)):
+            errors.append("readiness receipt finding ids must be unique")
+        if readiness.get("outcome") == "ready" and any(
+            finding.get("severity") in {"blocker", "error"}
+            for finding in findings
+        ):
+            errors.append(
+                "ready readiness receipt must not contain blocker or error findings"
+            )
+        if readiness.get("outcome") != "ready" and not findings:
+            errors.append("non-ready readiness receipt must identify at least one finding")
+        if readiness.get("outcome") == "blocked" and not any(
+            finding.get("severity") in {"blocker", "error"}
+            for finding in findings
+        ):
+            errors.append(
+                "blocked readiness receipt must identify a blocker or error finding"
+            )
+        _require_artifact_time_order(
+            errors,
+            "readiness.evaluated_at",
+            readiness.get("evaluated_at"),
+            "custody.persisted_at",
+            custody.get("persisted_at"),
+        )
+
     return errors
 
 
@@ -1145,7 +1656,16 @@ def delivery_art_artifact_reference_errors(
     """Resolve and compare the immutable artifact chain behind readiness."""
     errors: list[str] = []
     artifacts_by_ref: dict[str, list[dict]] = {}
-    for artifact in dependency_artifacts:
+    all_artifacts = []
+    seen_artifact_objects = set()
+    for artifact in [payload, *dependency_artifacts]:
+        if not isinstance(artifact, dict):
+            continue
+        if id(artifact) in seen_artifact_objects:
+            continue
+        seen_artifact_objects.add(id(artifact))
+        all_artifacts.append(artifact)
+    for artifact in all_artifacts:
         custody = _artifact_object(artifact.get("custody"))
         uri = custody.get("uri")
         if isinstance(uri, str):
@@ -1259,42 +1779,194 @@ def delivery_art_artifact_reference_errors(
             )
         return architecture_packet
 
+    def artifact_identifier(artifact: dict) -> object:
+        if artifact.get("artifact_type") == "art_review_packet":
+            return artifact.get("packet_id")
+        return artifact.get("artifact_id")
+
+    def receipt_subject_digest(artifact: dict, digest_kind: object) -> object:
+        if digest_kind == "artifact-content":
+            return _artifact_object(artifact.get("integrity")).get(
+                "content_digest"
+            )
+        if (
+            digest_kind == "readiness-subject"
+            and artifact.get("artifact_type") == "art_review_packet"
+        ):
+            return _delivery_art_projection_digest_if_canonical(
+                _review_packet_readiness_subject_projection(artifact)
+            )
+        return None
+
     artifact_type = payload.get("artifact_type")
-    supersedes = _artifact_object(
-        _artifact_object(payload.get("custody")).get("supersedes")
-    )
-    if supersedes:
+    current_artifact = payload
+    current_uri = _artifact_object(payload.get("custody")).get("uri")
+    visited_supersession_uris = {current_uri} if isinstance(current_uri, str) else set()
+    supersession_cycle_reported = False
+    while True:
+        current_custody = _artifact_object(current_artifact.get("custody"))
+        supersedes = _artifact_object(current_custody.get("supersedes"))
+        if not supersedes:
+            break
+        prior_uri = supersedes.get("uri")
         prior_artifact = resolve(
-            supersedes.get("uri"),
+            prior_uri,
             supersedes.get("digest"),
             "custody.supersedes.uri",
             str(artifact_type),
         )
-        if prior_artifact is not None:
-            if prior_artifact is payload or supersedes.get("uri") == _artifact_object(
-                payload.get("custody")
-            ).get("uri"):
-                errors.append("custody.supersedes must not reference the artifact itself")
-            if prior_artifact.get("delivery_id") != payload.get("delivery_id"):
-                errors.append(
-                    "superseded artifact delivery_id must match the replacement artifact"
-                )
-            if _artifact_object(prior_artifact.get("custody")).get(
-                "state"
-            ) != "durable":
-                errors.append("custody.supersedes must resolve a durable artifact")
-            _require_artifact_time_order(
-                errors,
-                "superseded artifact custody.persisted_at",
-                _artifact_object(prior_artifact.get("custody")).get(
-                    "persisted_at"
-                ),
-                "replacement artifact created_at",
-                payload.get("created_at"),
+        if prior_artifact is None:
+            break
+        if prior_uri in visited_supersession_uris:
+            errors.append("custody.supersedes chain must be acyclic")
+            supersession_cycle_reported = True
+            break
+        if prior_artifact.get("delivery_id") != payload.get("delivery_id"):
+            errors.append(
+                "superseded artifact delivery_id must match the replacement artifact"
             )
+        prior_custody = _artifact_object(prior_artifact.get("custody"))
+        if prior_custody.get("state") != "durable":
+            errors.append("custody.supersedes must resolve a durable artifact")
+        _require_strict_artifact_time_order(
+            errors,
+            "superseded artifact custody.persisted_at",
+            prior_custody.get("persisted_at"),
+            "replacement artifact custody.persisted_at",
+            current_custody.get("persisted_at"),
+        )
+        if isinstance(prior_uri, str):
+            visited_supersession_uris.add(prior_uri)
+        current_artifact = prior_artifact
+    if supersession_cycle_reported:
+        return errors
 
     if artifact_type == "delivery_art_work_start_record":
         resolve_architecture(payload)
+
+    if artifact_type == "delivery_art_readiness_receipt":
+        subject = _artifact_object(payload.get("subject"))
+        subject_candidates = [
+            artifact
+            for artifact in all_artifacts
+            if artifact is not payload
+            and artifact.get("artifact_type") == subject.get("artifact_type")
+            and artifact_identifier(artifact) == subject.get("artifact_id")
+            and receipt_subject_digest(artifact, subject.get("digest_kind"))
+            == subject.get("digest")
+        ]
+        if not subject_candidates:
+            errors.append(
+                "readiness receipt subject does not resolve to a supplied artifact with the declared id and digest"
+            )
+        elif len(subject_candidates) > 1:
+            errors.append("readiness receipt subject resolves ambiguously")
+        else:
+            subject_artifact = subject_candidates[0]
+            if subject_artifact.get("delivery_id") != payload.get("delivery_id"):
+                errors.append(
+                    "readiness receipt subject delivery_id must match the receipt"
+                )
+            if set(
+                _artifact_string_list(subject_artifact.get("covered_work_item_ids"))
+            ) != set(_artifact_string_list(payload.get("covered_work_item_ids"))):
+                errors.append(
+                    "readiness receipt coverage must match its resolved subject artifact"
+                )
+
+            receipt_readiness = _artifact_object(payload.get("readiness"))
+            readiness_level = receipt_readiness.get("level")
+            expected_ready_subjects = {
+                "architecture-ready": (
+                    "delivery_art_architecture_packet",
+                    _artifact_object(subject_artifact.get("decision")).get("status"),
+                    "architecture-ready",
+                ),
+                "implementation-ready": (
+                    "delivery_art_work_start_record",
+                    _artifact_object(subject_artifact.get("readiness")).get("level"),
+                    "implementation-ready",
+                ),
+                "merge-ready": (
+                    "art_review_packet",
+                    (
+                        subject_artifact.get("status"),
+                        _artifact_object(subject_artifact.get("readiness")).get(
+                            "level"
+                        ),
+                    ),
+                    ("merge-ready", "merge-ready"),
+                ),
+                "operating-ready": (
+                    "art_review_packet",
+                    (
+                        subject_artifact.get("status"),
+                        _artifact_object(subject_artifact.get("readiness")).get(
+                            "level"
+                        ),
+                    ),
+                    ("finalized", "operating-ready"),
+                ),
+            }
+            expected_subject = expected_ready_subjects.get(readiness_level)
+            if expected_subject is not None:
+                expected_type, actual_state, expected_state = expected_subject
+                if subject_artifact.get("artifact_type") != expected_type:
+                    errors.append(
+                        "readiness receipt level resolves the wrong subject artifact type"
+                    )
+                if (
+                    receipt_readiness.get("outcome") == "ready"
+                    and actual_state != expected_state
+                ):
+                    errors.append(
+                        "ready readiness receipt subject has not reached the declared readiness level"
+                    )
+
+            subject_state_time = None
+            if readiness_level == "architecture-ready":
+                subject_state_time = _artifact_object(
+                    subject_artifact.get("decision")
+                ).get("decided_at")
+            elif readiness_level in {
+                "implementation-ready",
+                "merge-ready",
+                "operating-ready",
+            }:
+                subject_state_time = _artifact_object(
+                    subject_artifact.get("readiness")
+                ).get("evaluated_at")
+            _require_artifact_time_order(
+                errors,
+                "readiness receipt subject decision",
+                subject_state_time,
+                "readiness receipt evaluation",
+                receipt_readiness.get("evaluated_at"),
+            )
+
+            if subject.get("digest_kind") == "artifact-content":
+                subject_custody = _artifact_object(subject_artifact.get("custody"))
+                if subject_custody.get("state") != "durable":
+                    errors.append(
+                        "artifact-content readiness receipt must resolve a durable subject artifact"
+                    )
+                _require_artifact_time_order(
+                    errors,
+                    "readiness receipt subject custody.persisted_at",
+                    subject_custody.get("persisted_at"),
+                    "readiness receipt evaluation",
+                    receipt_readiness.get("evaluated_at"),
+                )
+            elif (
+                readiness_level == "operating-ready"
+                and _artifact_object(subject_artifact.get("readiness")).get(
+                    "evaluated_at"
+                )
+                != receipt_readiness.get("evaluated_at")
+            ):
+                errors.append(
+                    "operating-readiness receipt evaluation time must match its Review Packet subject"
+                )
 
     if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
         work_start_ref = _artifact_object(payload.get("work_start"))
@@ -1458,6 +2130,94 @@ def delivery_art_artifact_reference_errors(
                                 f"conformance case {case_id} must use planned fidelity {case.get('fidelity')}"
                             )
 
+        if payload.get("status") == "finalized":
+            packet_landing = _artifact_object(payload.get("landing_unit"))
+            if packet_landing.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+                supersedes = _artifact_object(
+                    _artifact_object(payload.get("custody")).get("supersedes")
+                )
+                merge_ready_predecessor = resolve(
+                    supersedes.get("uri"),
+                    supersedes.get("digest"),
+                    "custody.supersedes.uri",
+                    "art_review_packet",
+                )
+                if merge_ready_predecessor is not None:
+                    if merge_ready_predecessor.get("status") != "merge-ready":
+                        errors.append(
+                            "finalized source Review Packet must supersede a merge-ready Review Packet"
+                        )
+                    errors.extend(
+                        _review_packet_predecessor_continuity_errors(
+                            payload, merge_ready_predecessor
+                        )
+                    )
+
+            readiness = _artifact_object(payload.get("readiness"))
+            for receipt_ref in _artifact_object_list(readiness.get("receipt_refs")):
+                receipt = resolve(
+                    receipt_ref.get("uri"),
+                    receipt_ref.get("digest"),
+                    "readiness.receipt_refs.uri",
+                    "delivery_art_readiness_receipt",
+                )
+                if receipt is None:
+                    continue
+                if receipt.get("delivery_id") != payload.get("delivery_id"):
+                    errors.append(
+                        "resolved readiness receipt delivery_id must match the Review Packet"
+                    )
+                if set(
+                    _artifact_string_list(receipt.get("covered_work_item_ids"))
+                ) != set(_artifact_string_list(payload.get("covered_work_item_ids"))):
+                    errors.append(
+                        "resolved readiness receipt coverage must match the Review Packet"
+                    )
+                receipt_subject = _artifact_object(receipt.get("subject"))
+                if receipt_subject.get("artifact_id") != payload.get("packet_id"):
+                    errors.append(
+                        "resolved readiness receipt artifact_id must match the Review Packet"
+                    )
+                if receipt_subject.get("digest_kind") != "readiness-subject":
+                    errors.append(
+                        "finalized Review Packet requires a readiness-subject receipt"
+                    )
+                if receipt_subject.get("digest") != readiness.get("subject_digest"):
+                    errors.append(
+                        "resolved readiness receipt subject digest must match the Review Packet"
+                    )
+                receipt_readiness = _artifact_object(receipt.get("readiness"))
+                if receipt_readiness.get("level") != readiness.get("level"):
+                    errors.append(
+                        "resolved readiness receipt level must match the Review Packet"
+                    )
+                if receipt_readiness.get("outcome") != "ready" or receipt_readiness.get(
+                    "mutation_allowed"
+                ) is not True:
+                    errors.append(
+                        "finalized Review Packet requires a ready receipt that permits mutation"
+                    )
+                if receipt_readiness.get("evaluated_at") != readiness.get(
+                    "evaluated_at"
+                ):
+                    errors.append(
+                        "resolved readiness receipt evaluation time must match the Review Packet"
+                    )
+                _require_artifact_time_order(
+                    errors,
+                    "resolved readiness receipt custody.persisted_at",
+                    _artifact_object(receipt.get("custody")).get("persisted_at"),
+                    "Review Packet finalized_at",
+                    payload.get("finalized_at"),
+                )
+                _require_artifact_time_order(
+                    errors,
+                    "resolved readiness receipt custody.persisted_at",
+                    _artifact_object(receipt.get("custody")).get("persisted_at"),
+                    "Review Packet custody.persisted_at",
+                    _artifact_object(payload.get("custody")).get("persisted_at"),
+                )
+
     return errors
 
 
@@ -1470,13 +2230,7 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
     digest_projection.pop("custody", None)
     projected_integrity = _artifact_object(digest_projection.get("integrity"))
     projected_integrity.pop("content_digest", None)
-    canonical_bytes = json.dumps(
-        digest_projection,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
-    expected_digest = "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
+    expected_digest = _delivery_art_projection_digest(digest_projection)
     actual_digest = _artifact_object(payload.get("integrity")).get("content_digest")
     errors = []
     if actual_digest != expected_digest:
@@ -1494,9 +2248,10 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
 def validate_delivery_art_artifact_contracts(
     errors: list[str],
     repo_root: Path,
-) -> None:
+) -> set[str]:
     validators: dict[str, Draft202012Validator] = {}
     fixtures: dict[str, dict] = {}
+    executed_proof_cases: set[str] = set()
 
     for artifact_name, (schema_ref, fixture_refs) in DELIVERY_ART_ARTIFACT_CASES.items():
         schema_path = repo_root / schema_ref
@@ -1528,11 +2283,25 @@ def validate_delivery_art_artifact_contracts(
             for error in fixture_errors:
                 path = ".".join(str(part) for part in error.absolute_path) or "<root>"
                 errors.append(f"{fixture_ref}: {path}: {error.message}")
-            for error in delivery_art_artifact_semantic_errors(fixture):
-                errors.append(f"{fixture_ref}: semantic invariant: {error}")
-            for error in delivery_art_artifact_integrity_errors(fixture):
-                errors.append(f"{fixture_ref}: integrity invariant: {error}")
-            fixtures[Path(fixture_ref).name] = fixture
+            if isinstance(fixture, dict):
+                for error in delivery_art_artifact_semantic_errors(fixture):
+                    errors.append(f"{fixture_ref}: semantic invariant: {error}")
+                for error in delivery_art_artifact_integrity_errors(fixture):
+                    errors.append(f"{fixture_ref}: integrity invariant: {error}")
+                fixtures[Path(fixture_ref).name] = fixture
+
+    if "architecture-packet.valid.json" in fixtures:
+        executed_proof_cases.update(
+            {"architecture-structure-valid", "architecture-conformance-valid"}
+        )
+    if "work-start-record.valid.json" in fixtures:
+        executed_proof_cases.add("work-start-valid")
+    if "review-packet-merge-ready.valid.json" in fixtures:
+        executed_proof_cases.add("review-evidence-valid")
+    if "readiness-receipt.valid.json" in fixtures:
+        executed_proof_cases.add("readiness-receipt-valid")
+    if fixtures:
+        executed_proof_cases.add("canonical-integrity-valid")
 
     fixture_dependencies = list(fixtures.values())
     for fixture_name, fixture in fixtures.items():
@@ -1540,11 +2309,21 @@ def validate_delivery_art_artifact_contracts(
             fixture, fixture_dependencies
         ):
             errors.append(f"{fixture_name}: reference invariant: {error}")
+    if {
+        "architecture-packet.valid.json",
+        "work-start-record.valid.json",
+        "review-packet-merge-ready.valid.json",
+        "review-packet-finalized.valid.json",
+        "readiness-receipt.valid.json",
+    }.issubset(fixtures):
+        executed_proof_cases.add("reference-chain-valid")
 
     def require_rejected(
         validator_name: str,
         payload: dict,
         case_name: str,
+        proof_case_id: str | None = None,
+        expected_fragment: str | None = None,
     ) -> None:
         validator = validators.get(validator_name)
         schema_errors = list(validator.iter_errors(payload)) if validator else []
@@ -1553,11 +2332,20 @@ def validate_delivery_art_artifact_contracts(
             errors.append(
                 f"Delivery ART contract negative case {case_name!r} must be rejected"
             )
+        if expected_fragment is not None:
+            observed = [error.message for error in schema_errors] + semantic_errors
+            if not any(expected_fragment in error for error in observed):
+                errors.append(
+                    f"Delivery ART contract negative case {case_name!r} must report {expected_fragment!r}"
+                )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
 
     def require_accepted(
         validator_name: str,
         payload: dict,
         case_name: str,
+        proof_case_id: str | None = None,
     ) -> None:
         validator = validators.get(validator_name)
         schema_errors = list(validator.iter_errors(payload)) if validator else []
@@ -1568,23 +2356,29 @@ def validate_delivery_art_artifact_contracts(
                 f"Delivery ART contract positive case {case_name!r} must be accepted: "
                 + "; ".join(details)
             )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
 
     def require_integrity_error(
         payload: dict,
         case_name: str,
         expected_fragment: str,
+        proof_case_id: str | None = None,
     ) -> None:
         integrity_errors = delivery_art_artifact_integrity_errors(payload)
         if not any(expected_fragment in error for error in integrity_errors):
             errors.append(
                 f"Delivery ART integrity case {case_name!r} must report {expected_fragment!r}"
             )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
 
     def require_reference_rejected(
         payload: dict,
         case_name: str,
         expected_fragment: str,
         dependencies: list[dict] | None = None,
+        proof_case_id: str | None = None,
     ) -> None:
         reference_errors = delivery_art_artifact_reference_errors(
             payload,
@@ -1594,6 +2388,60 @@ def validate_delivery_art_artifact_contracts(
             errors.append(
                 f"Delivery ART reference case {case_name!r} must report {expected_fragment!r}"
             )
+        if proof_case_id:
+            executed_proof_cases.add(proof_case_id)
+
+    def require_reference_accepted(
+        payload: dict,
+        case_name: str,
+        dependencies: list[dict] | None = None,
+    ) -> None:
+        reference_errors = delivery_art_artifact_reference_errors(
+            payload,
+            dependencies if dependencies is not None else fixture_dependencies,
+        )
+        if reference_errors:
+            errors.append(
+                f"Delivery ART reference positive case {case_name!r} must be accepted: "
+                + "; ".join(reference_errors)
+            )
+
+    def require_fully_accepted(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+        dependencies: list[dict] | None = None,
+    ) -> None:
+        validator = validators.get(validator_name)
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        observed = [error.message for error in schema_errors]
+        observed.extend(delivery_art_artifact_semantic_errors(payload))
+        observed.extend(delivery_art_artifact_integrity_errors(payload))
+        observed.extend(
+            delivery_art_artifact_reference_errors(
+                payload,
+                dependencies if dependencies is not None else fixture_dependencies,
+            )
+        )
+        if observed:
+            errors.append(
+                f"Delivery ART full-contract positive case {case_name!r} must be accepted: "
+                + "; ".join(observed)
+            )
+
+    try:
+        json.loads(
+            '{"artifact_type":"first","artifact_type":"second"}',
+            object_pairs_hook=strict_delivery_art_object,
+        )
+    except ValueError as exc:
+        if "duplicate JSON object key" not in str(exc):
+            errors.append(
+                "Delivery ART duplicate-key case must identify the duplicate key"
+            )
+    else:
+        errors.append("Delivery ART duplicate JSON object keys must be rejected")
+    executed_proof_cases.add("canonical-integrity-invalid")
 
     architecture = fixtures.get("architecture-packet.valid.json")
     if architecture:
@@ -1656,6 +2504,7 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             incomplete_protocol_dimensions,
             "applicable protocol conformance plan missing a mandated dimension",
+            "architecture-conformance-invalid",
         )
 
         case_without_dimensions = copy.deepcopy(architecture)
@@ -1730,8 +2579,29 @@ def validate_delivery_art_artifact_contracts(
         non_protocol_conformance["conformance_plan"]["dimensions"] = [
             "local-architecture-regression"
         ]
+        non_protocol_conformance["conformance_plan"][
+            "work_item_dimension_applicability"
+        ] = [
+            {
+                "work_item_id": work_item_id,
+                "dimension_ids": ["local-architecture-regression"],
+            }
+            for work_item_id in non_protocol_conformance[
+                "covered_work_item_ids"
+            ]
+        ]
+        non_protocol_conformance["conformance_plan"]["git_causality"] = {
+            "applies": False,
+            "rationale": "The scoped local regression claim does not depend on Git-history causality.",
+            "claims": [],
+        }
         for case in non_protocol_conformance["conformance_plan"]["cases"]:
             case["dimension_ids"] = ["local-architecture-regression"]
+        non_protocol_conformance["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(non_protocol_conformance)
+            )
+        )
         require_accepted(
             "architecture_packet",
             non_protocol_conformance,
@@ -1770,6 +2640,7 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             cyclic_dag,
             "cyclic architecture dependency graph",
+            "architecture-structure-invalid",
         )
 
         cyclic_parent_map = copy.deepcopy(architecture)
@@ -1800,6 +2671,11 @@ def validate_delivery_art_artifact_contracts(
                 "relation": "depends_on",
             }
         ]
+        valid_depends_on_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(valid_depends_on_order)
+            )
+        )
         require_accepted(
             "architecture_packet",
             valid_depends_on_order,
@@ -1905,6 +2781,61 @@ def validate_delivery_art_artifact_contracts(
             "required conformance plan that omits a covered work item",
         )
 
+        arbitrary_architecture_fingerprint = copy.deepcopy(architecture)
+        arbitrary_architecture_fingerprint["scope_fingerprint"] = (
+            "sha256:" + "9" * 64
+        )
+        require_rejected(
+            "architecture_packet",
+            arbitrary_architecture_fingerprint,
+            "architecture packet with an arbitrary scope fingerprint",
+            expected_fragment="deterministic architecture scope projection",
+        )
+
+        missing_work_item_dimension_polarity = copy.deepcopy(architecture)
+        for case in missing_work_item_dimension_polarity["conformance_plan"][
+            "cases"
+        ]:
+            if (
+                case["polarity"] == "negative"
+                and "shared-validator-compatibility" in case["dimension_ids"]
+            ):
+                case["dimension_ids"].remove("shared-validator-compatibility")
+        require_rejected(
+            "architecture_packet",
+            missing_work_item_dimension_polarity,
+            "conformance plan missing one work-item/dimension polarity",
+            expected_fragment="work-item/dimension pair",
+        )
+
+        synthetic_git_causality = copy.deepcopy(architecture)
+        for case in synthetic_git_causality["conformance_plan"]["cases"]:
+            if case["id"].startswith("case:real-git"):
+                case["fidelity"] = "filesystem"
+        require_rejected(
+            "architecture_packet",
+            synthetic_git_causality,
+            "Git-causality claim backed only by synthetic filesystem cases",
+            expected_fragment="real-git merge-ready cases",
+        )
+
+        duplicate_git_claim_id = copy.deepcopy(architecture)
+        duplicate_git_claim_id["conformance_plan"]["git_causality"][
+            "claims"
+        ].append(
+            copy.deepcopy(
+                duplicate_git_claim_id["conformance_plan"]["git_causality"][
+                    "claims"
+                ][0]
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            duplicate_git_claim_id,
+            "duplicate Git-causality claim ids",
+            expected_fragment="unique ids",
+        )
+
         draft_architecture = copy.deepcopy(architecture)
         draft_architecture["decision"]["status"] = "draft"
         draft_architecture["decision"]["decided_by"] = None
@@ -1916,6 +2847,11 @@ def validate_delivery_art_artifact_contracts(
             "persisted_at": None,
             "supersedes": None,
         }
+        draft_architecture["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(draft_architecture)
+            )
+        )
         require_accepted(
             "architecture_packet",
             draft_architecture,
@@ -1943,16 +2879,18 @@ def validate_delivery_art_artifact_contracts(
             "architecture correction with an unresolved superseded artifact",
             "custody.supersedes.uri does not resolve",
             [],
+            "reference-chain-invalid",
         )
 
     work_start = fixtures.get("work-start-record.valid.json")
-    if work_start:
+    if work_start and architecture:
         missing_split_reason = copy.deepcopy(work_start)
         missing_split_reason["landing_unit"]["split_reason"] = None
         require_rejected(
             "work_start_record",
             missing_split_reason,
             "isolated Landing Unit without a split reason",
+            "work-start-invalid",
         )
 
         inexact_base = copy.deepcopy(work_start)
@@ -2007,6 +2945,17 @@ def validate_delivery_art_artifact_contracts(
             "implementation-ready work-start record with an incomplete invalidation set",
         )
 
+        arbitrary_work_start_fingerprint = copy.deepcopy(work_start)
+        arbitrary_work_start_fingerprint["scope_fingerprint"] = (
+            "sha256:" + "9" * 64
+        )
+        require_rejected(
+            "work_start_record",
+            arbitrary_work_start_fingerprint,
+            "work-start record with an arbitrary scope fingerprint",
+            expected_fragment="deterministic work-start scope projection",
+        )
+
         blocked_architecture = copy.deepcopy(work_start)
         blocked_architecture["landing_unit"]["decision"] = "defer_decision_blocked"
         blocked_architecture["landing_unit"]["branch_plan"] = []
@@ -2022,6 +2971,11 @@ def validate_delivery_art_artifact_contracts(
             "evaluated_at": "2026-08-08T10:10:00+08:00",
             "blockers": ["Architecture decision remains unresolved."],
         }
+        blocked_architecture["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _work_start_scope_projection(blocked_architecture)
+            )
+        )
         require_accepted(
             "work_start_record",
             blocked_architecture,
@@ -2124,13 +3078,14 @@ def validate_delivery_art_artifact_contracts(
         )
 
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
-    if merge_ready:
+    if merge_ready and work_start and architecture:
         failed_test = copy.deepcopy(merge_ready)
         failed_test["evidence"]["tests"][0]["result"] = "fail"
         require_rejected(
             "review_packet",
             failed_test,
             "merge-ready Review Packet with failed evidence",
+            "review-evidence-invalid",
         )
 
         prose_result = copy.deepcopy(merge_ready)
@@ -2278,7 +3233,53 @@ def validate_delivery_art_artifact_contracts(
             "outside its work-item or readiness scope",
         )
 
+        stale_evidence_source_head = copy.deepcopy(merge_ready)
+        stale_evidence_source_head["evidence"]["tests"][0]["source_revisions"][
+            0
+        ]["commit"] = "2" * 40
+        require_rejected(
+            "review_packet",
+            stale_evidence_source_head,
+            "passing evidence bound to a stale source head",
+            expected_fragment="exact landing-unit source heads",
+        )
+
+        valid_merge_ready_direct_land = copy.deepcopy(merge_ready)
+        valid_merge_ready_direct_land["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        valid_merge_ready_direct_land["landing_unit"]["repos"][0]["pr_url"] = None
+        valid_merge_ready_direct_land["exceptions"] = [
+            {
+                "id": "exception:direct-land-work-item-801",
+                "kind": "direct-land",
+                "authority_ref": "openproject://work_packages/801",
+                "rationale": "The operator approved this bounded source landing without a pull request.",
+                "expires_at": "2026-08-08T12:00:00+08:00",
+            }
+        ]
+        require_accepted(
+            "review_packet",
+            valid_merge_ready_direct_land,
+            "merge-ready direct-land Review Packet with current exception authority",
+        )
+
+        direct_land_with_pr = copy.deepcopy(valid_merge_ready_direct_land)
+        direct_land_with_pr["landing_unit"]["repos"][0]["pr_url"] = (
+            "https://github.com/mfshaf7/workspace-governance/pull/136"
+        )
+        require_rejected(
+            "review_packet",
+            direct_land_with_pr,
+            "direct-land Review Packet that also claims pull-request evidence",
+        )
+
         local_packet_with_persistence = copy.deepcopy(merge_ready)
+        local_packet_with_persistence["custody"]["state"] = "local-draft"
+        local_packet_with_persistence["custody"]["backend"] = "local-filesystem"
+        local_packet_with_persistence["custody"]["uri"] = (
+            ".art/review-packet-merge-ready.json"
+        )
         local_packet_with_persistence["custody"]["persisted_at"] = (
             "2026-08-08T11:16:00+08:00"
         )
@@ -2288,8 +3289,312 @@ def validate_delivery_art_artifact_contracts(
             "local Review Packet claiming a persistence timestamp",
         )
 
+    readiness_receipt = fixtures.get("readiness-receipt.valid.json")
+    if readiness_receipt:
+        def readiness_receipt_for(
+            subject_artifact: dict,
+            level: str,
+            evaluated_at: str,
+            persisted_at: str,
+        ) -> dict:
+            receipt = copy.deepcopy(readiness_receipt)
+            subject_artifact_type = subject_artifact.get("artifact_type")
+            subject_artifact_id = (
+                subject_artifact.get("packet_id")
+                if subject_artifact_type == "art_review_packet"
+                else subject_artifact.get("artifact_id")
+            )
+            receipt["covered_work_item_ids"] = copy.deepcopy(
+                subject_artifact.get("covered_work_item_ids")
+            )
+            receipt["subject"] = {
+                "artifact_type": subject_artifact_type,
+                "artifact_id": subject_artifact_id,
+                "digest_kind": "artifact-content",
+                "digest": _artifact_object(subject_artifact.get("integrity")).get(
+                    "content_digest"
+                ),
+            }
+            receipt["readiness"]["level"] = level
+            receipt["readiness"]["outcome"] = "ready"
+            receipt["readiness"]["mutation_allowed"] = True
+            receipt["readiness"]["evaluated_at"] = evaluated_at
+            receipt["findings"] = []
+            receipt["custody"]["persisted_at"] = persisted_at
+
+            digest_projection = copy.deepcopy(receipt)
+            digest_projection.pop("custody", None)
+            _artifact_object(digest_projection.get("integrity")).pop(
+                "content_digest", None
+            )
+            content_digest = _delivery_art_projection_digest(digest_projection)
+            receipt["integrity"]["content_digest"] = content_digest
+            receipt_token = receipt["receipt_id"].split(":", 1)[1]
+            receipt["custody"]["uri"] = (
+                "wgcf://receipts/art-readiness/art-readiness-receipt-"
+                f"{receipt_token}-{content_digest.removeprefix('sha256:')}.json"
+            )
+            return receipt
+
+        receipt_level_cases = []
+        if architecture:
+            receipt_level_cases.append(
+                (
+                    "architecture-ready",
+                    readiness_receipt_for(
+                        architecture,
+                        "architecture-ready",
+                        "2026-08-08T10:07:00+08:00",
+                        "2026-08-08T10:08:00+08:00",
+                    ),
+                    architecture,
+                )
+            )
+        if work_start:
+            receipt_level_cases.append(
+                (
+                    "implementation-ready",
+                    readiness_receipt_for(
+                        work_start,
+                        "implementation-ready",
+                        "2026-08-08T10:12:00+08:00",
+                        "2026-08-08T10:13:00+08:00",
+                    ),
+                    work_start,
+                )
+            )
+        if merge_ready:
+            receipt_level_cases.append(
+                (
+                    "merge-ready",
+                    readiness_receipt_for(
+                        merge_ready,
+                        "merge-ready",
+                        "2026-08-08T11:17:00+08:00",
+                        "2026-08-08T11:18:00+08:00",
+                    ),
+                    merge_ready,
+                )
+            )
+        for level, receipt_case, subject_artifact in receipt_level_cases:
+            require_fully_accepted(
+                "readiness_receipt",
+                receipt_case,
+                f"{level} receipt bound to its exact durable subject",
+                [subject_artifact],
+            )
+
+        if architecture:
+            wrong_level_subject = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:07:00+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            wrong_level_subject["readiness"]["level"] = "implementation-ready"
+            require_rejected(
+                "readiness_receipt",
+                wrong_level_subject,
+                "receipt readiness level paired with the wrong artifact type",
+            )
+
+            mismatched_receipt_coverage = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:07:00+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            mismatched_receipt_coverage["covered_work_item_ids"] = [
+                "work-item-801"
+            ]
+            require_reference_rejected(
+                mismatched_receipt_coverage,
+                "readiness receipt with partial subject coverage",
+                "coverage must match",
+                [architecture],
+            )
+
+            premature_receipt = readiness_receipt_for(
+                architecture,
+                "architecture-ready",
+                "2026-08-08T10:05:30+08:00",
+                "2026-08-08T10:08:00+08:00",
+            )
+            require_reference_rejected(
+                premature_receipt,
+                "readiness receipt evaluated before durable subject custody",
+                "must not be later than readiness receipt evaluation",
+                [architecture],
+            )
+
+        source_artifact_claimed_as_receipt = copy.deepcopy(readiness_receipt)
+        source_artifact_claimed_as_receipt["artifact_type"] = (
+            "art_review_packet"
+        )
+        require_rejected(
+            "readiness_receipt",
+            source_artifact_claimed_as_receipt,
+            "WGCF receipt custody claiming a source artifact type",
+            "readiness-receipt-invalid",
+        )
+
+        ready_receipt_with_error = copy.deepcopy(readiness_receipt)
+        ready_receipt_with_error["findings"] = [
+            {
+                "id": "finding:unexpected-error",
+                "severity": "error",
+                "summary": "A required readiness check failed.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_rejected(
+            "readiness_receipt",
+            ready_receipt_with_error,
+            "ready receipt containing an error finding",
+            expected_fragment="must not contain blocker or error findings",
+        )
+
+        blocked_receipt_without_finding = copy.deepcopy(readiness_receipt)
+        blocked_receipt_without_finding["readiness"]["outcome"] = "blocked"
+        blocked_receipt_without_finding["readiness"]["mutation_allowed"] = False
+        require_rejected(
+            "readiness_receipt",
+            blocked_receipt_without_finding,
+            "blocked receipt without an actionable finding",
+            expected_fragment="must identify at least one finding",
+        )
+
+        duplicate_finding_ids = copy.deepcopy(blocked_receipt_without_finding)
+        duplicate_finding_ids["findings"] = [
+            {
+                "id": "finding:duplicate",
+                "severity": "blocker",
+                "summary": "The first readiness condition failed.",
+                "authority_ref": "openproject://work_packages/803",
+            },
+            {
+                "id": "finding:duplicate",
+                "severity": "warning",
+                "summary": "A second condition uses the same identifier.",
+                "authority_ref": "openproject://work_packages/805",
+            },
+        ]
+        require_rejected(
+            "readiness_receipt",
+            duplicate_finding_ids,
+            "readiness receipt with ambiguous finding ids",
+            expected_fragment="finding ids must be unique",
+        )
+
+        blocked_with_warning_only = copy.deepcopy(blocked_receipt_without_finding)
+        blocked_with_warning_only["findings"] = [
+            {
+                "id": "finding:warning-only",
+                "severity": "warning",
+                "summary": "The evaluation produced only an advisory warning.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_rejected(
+            "readiness_receipt",
+            blocked_with_warning_only,
+            "blocked receipt supported only by an advisory warning",
+            expected_fragment="blocker or error finding",
+        )
+
     finalized = fixtures.get("review-packet-finalized.valid.json")
-    if finalized:
+    if (
+        finalized
+        and architecture
+        and work_start
+        and merge_ready
+        and readiness_receipt
+    ):
+        malformed_receipt_subject = copy.deepcopy(finalized)
+        malformed_receipt_subject["schema_version"] = 2.0
+        require_reference_rejected(
+            readiness_receipt,
+            "readiness receipt with a non-canonical subject artifact",
+            "subject does not resolve",
+            [malformed_receipt_subject],
+        )
+
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet without its readiness receipt dependency",
+            "readiness.receipt_refs.uri does not resolve",
+            [architecture, work_start, merge_ready],
+        )
+
+        require_reference_rejected(
+            finalized,
+            "finalized source Review Packet without its merge-ready predecessor",
+            "custody.supersedes.uri does not resolve",
+            [architecture, work_start, readiness_receipt],
+        )
+
+        rewritten_final_evidence = copy.deepcopy(finalized)
+        rewritten_final_evidence["evidence"]["tests"][0]["summary"] = (
+            "Rewritten after merge instead of preserving reviewed evidence."
+        )
+        require_reference_rejected(
+            rewritten_final_evidence,
+            "finalized Review Packet that rewrites merge-ready evidence",
+            "must preserve merge-ready evidence",
+        )
+
+        mismatched_receipt_subject = copy.deepcopy(readiness_receipt)
+        mismatched_receipt_subject["subject"]["digest"] = (
+            "sha256:" + "9" * 64
+        )
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet with a receipt for another subject",
+            "subject digest must match",
+            [architecture, work_start, merge_ready, mismatched_receipt_subject],
+        )
+
+        non_ready_receipt = copy.deepcopy(readiness_receipt)
+        non_ready_receipt["readiness"]["outcome"] = "blocked"
+        non_ready_receipt["readiness"]["mutation_allowed"] = False
+        non_ready_receipt["findings"] = [
+            {
+                "id": "finding:blocked",
+                "severity": "blocker",
+                "summary": "Operating readiness remains blocked.",
+                "authority_ref": "openproject://work_packages/803",
+            }
+        ]
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet with a non-ready receipt",
+            "requires a ready receipt",
+            [architecture, work_start, merge_ready, non_ready_receipt],
+        )
+
+        late_readiness_receipt = copy.deepcopy(readiness_receipt)
+        late_readiness_receipt["custody"]["persisted_at"] = (
+            "2026-08-08T11:30:01+08:00"
+        )
+        require_reference_rejected(
+            finalized,
+            "finalized Review Packet whose readiness receipt was persisted later",
+            "must not be later than Review Packet finalized_at",
+            [architecture, work_start, merge_ready, late_readiness_receipt],
+        )
+
+        cyclic_merge_ready = copy.deepcopy(merge_ready)
+        cyclic_merge_ready["custody"]["supersedes"] = {
+            "uri": finalized["custody"]["uri"],
+            "digest": finalized["integrity"]["content_digest"],
+        }
+        require_reference_rejected(
+            finalized,
+            "cyclic Review Packet supersession chain",
+            "must be acyclic",
+            [architecture, work_start, cyclic_merge_ready, readiness_receipt],
+        )
+
         local_final = copy.deepcopy(finalized)
         local_final["custody"]["state"] = "local-draft"
         local_final["custody"]["backend"] = "local-filesystem"
@@ -2319,6 +3624,7 @@ def validate_delivery_art_artifact_contracts(
         valid_direct_land["landing_unit"]["evidence_kind"] = (
             "approved_direct_land"
         )
+        valid_direct_land["landing_unit"]["repos"][0]["pr_url"] = None
         valid_direct_land["exceptions"] = [
             {
                 "id": "exception:direct-land-work-item-801",
@@ -2328,15 +3634,44 @@ def validate_delivery_art_artifact_contracts(
                 "expires_at": "2026-08-08T12:00:00+08:00",
             }
         ]
+        valid_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(valid_direct_land)
+        )
         require_accepted(
             "review_packet",
             valid_direct_land,
             "finalized direct-land Review Packet with current exception authority",
         )
 
+        direct_land_predecessor = copy.deepcopy(merge_ready)
+        direct_land_predecessor["landing_unit"]["evidence_kind"] = (
+            "approved_direct_land"
+        )
+        direct_land_predecessor["landing_unit"]["repos"][0]["pr_url"] = None
+        direct_land_predecessor["exceptions"] = copy.deepcopy(
+            valid_direct_land["exceptions"]
+        )
+        direct_land_receipt = copy.deepcopy(readiness_receipt)
+        direct_land_receipt["subject"]["digest"] = valid_direct_land[
+            "readiness"
+        ]["subject_digest"]
+        require_reference_accepted(
+            valid_direct_land,
+            "finalized direct-land packet preserving its merge-ready predecessor",
+            [
+                architecture,
+                work_start,
+                direct_land_predecessor,
+                direct_land_receipt,
+            ],
+        )
+
         expired_direct_land = copy.deepcopy(valid_direct_land)
         expired_direct_land["exceptions"][0]["expires_at"] = (
             "2026-08-08T11:29:59+08:00"
+        )
+        expired_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(expired_direct_land)
         )
         require_rejected(
             "review_packet",
@@ -2346,6 +3681,11 @@ def validate_delivery_art_artifact_contracts(
 
         non_expiring_direct_land = copy.deepcopy(valid_direct_land)
         non_expiring_direct_land["exceptions"][0]["expires_at"] = None
+        non_expiring_direct_land["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(
+                non_expiring_direct_land
+            )
+        )
         require_rejected(
             "review_packet",
             non_expiring_direct_land,
@@ -2368,6 +3708,7 @@ def validate_delivery_art_artifact_contracts(
             floating_schema_version,
             "floating-point schema version",
             "floating-point value",
+            "canonical-integrity-invalid",
         )
 
         lone_surrogate = copy.deepcopy(finalized)
@@ -2395,9 +3736,23 @@ def validate_delivery_art_artifact_contracts(
         )
         valid_non_source_packet["landing_unit"]["repos"] = []
         valid_non_source_packet["evidence"]["changed_surfaces"] = []
+        valid_non_source_packet["custody"]["supersedes"] = None
         valid_non_source_packet["evidence"]["acceptance_mapping"][0][
             "evidence_ids"
         ] = ["evidence:schema-negative-cases"]
+        for section in (
+            "tests",
+            "validations",
+            "runtime_and_live",
+            "security_and_trust",
+        ):
+            for result in valid_non_source_packet["evidence"][section]:
+                result["source_revisions"] = []
+        valid_non_source_packet["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(
+                valid_non_source_packet
+            )
+        )
         require_accepted(
             "review_packet",
             valid_non_source_packet,
@@ -2428,6 +3783,8 @@ def validate_delivery_art_artifact_contracts(
             "changed surface absent from exact landing-unit changed files",
         )
 
+    return executed_proof_cases
+
 
 def validate_contract_format_checker(errors: list[str]) -> None:
     schema = {"type": "string", "format": "date-time"}
@@ -2451,6 +3808,189 @@ def validate_contract_format_checker(errors: list[str]) -> None:
             errors.append(
                 f"shared date-time format checker must reject invalid timestamp {value!r}"
             )
+
+
+def _delivery_art_true_claim_refs(operator_path: dict) -> set[str]:
+    true_claims: set[str] = set()
+
+    def walk(value: object, path: str) -> None:
+        if value is True:
+            true_claims.add(path)
+        elif isinstance(value, dict):
+            for key, entry in value.items():
+                walk(entry, f"{path}.{key}")
+
+    for root in DELIVERY_ART_PROOF_CLAIM_ROOTS:
+        value: object = operator_path
+        for part in root.split("."):
+            if not isinstance(value, dict) or part not in value:
+                value = None
+                break
+            value = value[part]
+        if value is not None:
+            walk(value, root)
+    return true_claims
+
+
+def delivery_art_proof_obligation_errors(
+    operator_path: dict,
+    executed_case_ids: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    proof_contract = _artifact_object(operator_path.get("proof_obligations"))
+    declared_roots = tuple(
+        _artifact_string_list(proof_contract.get("governed_claim_roots"))
+    )
+    if declared_roots != DELIVERY_ART_PROOF_CLAIM_ROOTS:
+        errors.append("proof obligations must govern the canonical claim roots")
+
+    obligations = _artifact_object_list(proof_contract.get("obligations"))
+    obligation_ids = [
+        obligation.get("id")
+        for obligation in obligations
+        if isinstance(obligation.get("id"), str)
+    ]
+    if len(obligation_ids) != len(set(obligation_ids)):
+        errors.append("proof obligation ids must be unique")
+
+    claims_to_obligations: dict[str, list[str]] = {}
+    activation_targets = set(
+        _artifact_string_list(
+            _artifact_object(operator_path.get("contract_activation")).get(
+                "target_art_items"
+            )
+        )
+    )
+    for obligation in obligations:
+        obligation_id = str(obligation.get("id"))
+        for claim_ref in _artifact_string_list(obligation.get("claim_refs")):
+            claims_to_obligations.setdefault(claim_ref, []).append(obligation_id)
+        state = obligation.get("enforcement_state")
+        positive_cases = set(
+            _artifact_string_list(obligation.get("positive_case_ids"))
+        )
+        negative_cases = set(
+            _artifact_string_list(obligation.get("negative_case_ids"))
+        )
+        target_refs = set(
+            _artifact_string_list(obligation.get("target_art_refs"))
+        )
+        if state == "active-local":
+            missing_cases = (positive_cases | negative_cases) - executed_case_ids
+            if missing_cases:
+                errors.append(
+                    f"proof obligation {obligation_id} references unexecuted validation cases: "
+                    + ", ".join(sorted(missing_cases))
+                )
+            if not positive_cases or not negative_cases:
+                errors.append(
+                    f"proof obligation {obligation_id} requires positive and negative validation cases"
+                )
+        elif state == "pending-owner":
+            if not target_refs:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} requires target ART refs"
+                )
+            unknown_targets = target_refs - activation_targets
+            if unknown_targets:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} references targets outside contract activation: "
+                    + ", ".join(sorted(unknown_targets))
+                )
+            if positive_cases or negative_cases:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} must not claim local validation cases"
+                )
+        elif state == "doctrine" and (positive_cases or negative_cases or target_refs):
+            errors.append(
+                f"doctrine proof obligation {obligation_id} must not claim execution or target artifacts"
+            )
+
+    true_claims = _delivery_art_true_claim_refs(operator_path)
+    mapped_claims = set(claims_to_obligations)
+    missing_claims = true_claims - mapped_claims
+    if missing_claims:
+        errors.append(
+            "proof obligations leave true claims unmapped: "
+            + ", ".join(sorted(missing_claims))
+        )
+    unknown_claims = mapped_claims - true_claims
+    if unknown_claims:
+        errors.append(
+            "proof obligations reference claims that are absent or not true: "
+            + ", ".join(sorted(unknown_claims))
+        )
+    multiply_mapped = {
+        claim_ref: obligation_ids
+        for claim_ref, obligation_ids in claims_to_obligations.items()
+        if len(obligation_ids) != 1
+    }
+    if multiply_mapped:
+        errors.append(
+            "proof claims must be mapped exactly once: "
+            + ", ".join(sorted(multiply_mapped))
+        )
+    return errors
+
+
+def validate_delivery_art_proof_obligations(
+    errors: list[str],
+    operator_path: dict,
+    executed_case_ids: set[str],
+) -> None:
+    for error in delivery_art_proof_obligation_errors(
+        operator_path, executed_case_ids
+    ):
+        errors.append(f"delivery-art-operator-path proof invariant: {error}")
+
+    proof_contract = _artifact_object(operator_path.get("proof_obligations"))
+    obligations = _artifact_object_list(proof_contract.get("obligations"))
+    if len(obligations) < 2:
+        return
+
+    unmapped = copy.deepcopy(operator_path)
+    unmapped["proof_obligations"]["obligations"][0]["claim_refs"].pop()
+    if not any(
+        "unmapped" in error
+        for error in delivery_art_proof_obligation_errors(
+            unmapped, executed_case_ids
+        )
+    ):
+        errors.append("Delivery ART proof registry must reject an unmapped true claim")
+
+    duplicate = copy.deepcopy(operator_path)
+    duplicated_claim = duplicate["proof_obligations"]["obligations"][0][
+        "claim_refs"
+    ][0]
+    duplicate["proof_obligations"]["obligations"][1]["claim_refs"].append(
+        duplicated_claim
+    )
+    if not any(
+        "mapped exactly once" in error
+        for error in delivery_art_proof_obligation_errors(
+            duplicate, executed_case_ids
+        )
+    ):
+        errors.append(
+            "Delivery ART proof registry must reject a multiply mapped true claim"
+        )
+
+    unexecuted = copy.deepcopy(operator_path)
+    active_obligation = next(
+        obligation
+        for obligation in unexecuted["proof_obligations"]["obligations"]
+        if obligation["enforcement_state"] == "active-local"
+    )
+    active_obligation["positive_case_ids"].append("case-never-executed")
+    if not any(
+        "unexecuted validation cases" in error
+        for error in delivery_art_proof_obligation_errors(
+            unexecuted, executed_case_ids
+        )
+    ):
+        errors.append(
+            "Delivery ART proof registry must reject an unexecuted validation case"
+        )
 
 
 def controlled_proof_authorization_fixture() -> dict:
@@ -3353,7 +4893,17 @@ def main() -> int:
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
 
-    validate_delivery_art_artifact_contracts(errors, repo_root)
+    delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
+        errors, repo_root
+    )
+    delivery_art_contract = yaml.safe_load(
+        instance_paths["delivery_art_operator_path"].read_text()
+    ) or {}
+    validate_delivery_art_proof_obligations(
+        errors,
+        _artifact_object(delivery_art_contract.get("delivery_art_operator_path")),
+        delivery_art_proof_cases,
+    )
 
     controlled_proof_schema_path = repo_root / CONTROLLED_PROOF_SCHEMA_REF
     controlled_proof_schema: dict = {}

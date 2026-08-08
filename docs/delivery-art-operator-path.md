@@ -127,7 +127,11 @@ negative `merge-ready` cases. Every covered work item must also have positive
 and negative `merge-ready` cases, so one item cannot carry protocol proof for a
 different item that defers its own cases until operating readiness. A synthetic
 resolver may support unit tests, but it cannot prove a claim about real Git
-history. Git causality requires a `real-git` case.
+history. The packet therefore declares the exact applicable dimensions for each
+work item. Every declared `(work item, dimension)` pair needs positive and
+negative merge-ready cases. Git-causality claims separately name their work
+items and dimensions, and each such pair requires positive and negative
+`real-git` cases.
 
 The machine schema is
 [`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
@@ -140,13 +144,19 @@ ART readiness is four separate decisions, not one overloaded `ready` flag:
    and conformance plan are explicit and operator-approved.
 2. `implementation-ready`: one Landing Unit is bound to exact ART and owner-repo
    source truth through a durable work-start record.
-3. `merge-ready`: the exact open-PR source head has passing applicable tests,
-   validations, acceptance mapping, and a concrete rollback boundary.
+3. `merge-ready`: the exact open-PR source head, or an explicitly authorized
+   direct-land head, has passing applicable tests, validations, acceptance
+   mapping, and a concrete rollback boundary.
 4. `operating-ready`: merged or explicitly accepted evidence is finalized,
    content-addressed, durably stored, and includes any live, runtime, security,
    or restore proof required by the change class.
 
-Each decision is bound to a source snapshot and scope fingerprint. A material
+Each decision is bound to a source snapshot and scope fingerprint. The
+architecture fingerprint is recomputed from Delivery scope, covered work,
+source snapshot, architecture, conformance plan, and decision status. The
+work-start fingerprint is recomputed from Delivery scope, covered work,
+Landing Unit, architecture binding, source snapshot, and the complete
+invalidation set. Operator-provided arbitrary digests are invalid. A material
 ART dependency, owner boundary, base revision, architecture decision, or
 validation obligation change invalidates the affected later decision instead
 of silently mutating earlier evidence.
@@ -156,6 +166,17 @@ pending the owner-repo work and initiative `698` dogfood listed in the machine
 contract. Until those items land, use the existing OOS operator commands and
 Review Packet v1 path; do not claim that a new work-start command or Review
 Packet v2 persistence path already exists.
+
+The machine contract also carries a proof-obligation registry. Every Boolean
+claim under readiness rules, work-start, evidence integrity, and architecture
+preflight is mapped exactly once as:
+
+- `active-local`, with an executed positive and negative validation case
+- `pending-owner`, with its activation ART item
+- `doctrine`, with an explicit rationale and no false runtime proof
+
+Adding a true claim without that mapping, mapping one claim twice, or naming a
+validation case that did not execute fails the contract validator.
 
 ## Work-Start Gate
 
@@ -238,25 +259,32 @@ direct-land evidence, or equivalent durable source evidence.
 Approved direct landing is an exception path, not timeless authority. Its
 `direct-land` exception must carry an expiry and remain valid through the
 packet's readiness evaluation and finalization. An expired or non-expiring
-exception cannot authorize a finalized direct-land packet.
+exception cannot authorize a finalized direct-land packet, and direct-land
+evidence cannot simultaneously claim a pull-request URL.
 
-Before merging source-backed work, create or refresh the draft Review Packet
-while the PR is still open. The packet must use `open_pr` evidence and include
-the PR URL, changed-surface explanations, tests, validations, rollback
-boundary, and item-level completion mapping. Fetch the PR base and run the
-local command or command set that is CI-equivalent for the changed surface. If
-required CI uses a base-aware validator, use the same base-ref shape after
-fetching the base, such as `--against-ref origin/main`. Record the command,
-base ref, and result in validation evidence. Then run:
+Before merging source-backed work, create or refresh the local draft Review
+Packet. For the normal PR path it uses `open_pr` evidence and includes the PR
+URL, changed-surface explanations, tests, validations, rollback boundary, and
+item-level completion mapping. Fetch the PR base and run the local command or
+command set that is CI-equivalent for the changed surface. If required CI uses
+a base-aware validator, use the same base-ref shape after fetching the base,
+such as `--against-ref origin/main`. Every passing result records the exact
+repo/head revisions it proves; a stale or partial source-revision set is not
+passing evidence. Then run:
 
 ```bash
 npm run art -- review-packet readiness <packet.json>
 ```
 
-Merge only after readiness passes. If it fails, fix the same PR or split the
-Landing Unit; do not merge first and repair the evidence later. After merge,
-set the packet to `merged_pr`, add the merge commit, finalize it, and use the
-final digest in ART completion evidence.
+Passing readiness persists a content-addressed `merge-ready` Review Packet.
+That artifact is the immutable reviewed predecessor, not a local file that can
+be rewritten after merge. Merge only after it exists. If readiness fails, fix
+the same PR or split the Landing Unit; do not merge first and repair the
+evidence later. After merge, build the final packet from that predecessor, set
+the evidence kind to `merged_pr`, add the merge commit and any later evidence,
+and preserve every earlier source, result, mapping, and exception fact.
+Finalize only after the operating-readiness receipt resolves, then use the
+final packet digest in ART completion evidence.
 
 Review Packet v2 replaces prose result lines with structured evidence. Every
 test and validation records its command, fidelity class, result, summary, and
@@ -287,10 +315,36 @@ result at the planned fidelity. A required conformance plan covers every
 architecture work item and every declared dimension with executable cases. A
 child cannot advance merely because its tests were omitted from the plan or
 deferred beyond that child's current readiness gate.
+
+A finalized source Review Packet also resolves the durable merge-ready packet
+named by `custody.supersedes`. The predecessor must be earlier, durable, of the
+same packet and Delivery scope, and its reviewed source/evidence facts must
+remain present. The final packet may add merge and operating evidence; it may
+not rewrite what was reviewed. Supersession is walked as a complete chain, so
+cycles and non-strict persistence order fail even when each immediate ref looks
+well formed.
+
+WGCF can issue receipts for all four readiness levels. Architecture,
+implementation, and merge receipts bind the exact durable source artifact by
+its content digest. Operating readiness is intentionally different: the final
+packet's `readiness.subject_digest` is recomputed over packet content excluding
+custody, integrity, receipt refs, and that digest field, which lets WGCF issue
+the receipt before its content address is inserted into the final packet. The
+receipt resolver still requires the exact subject artifact and matching
+Delivery, covered work, readiness level, chronology, and digest.
+
+Each receipt referenced by a finalized packet must resolve by URI and content
+digest, bind the same packet id and readiness-subject digest, carry a `ready`
+outcome that permits mutation, and be durably persisted before the final
+packet. This local validation proves receipt structure and subject binding;
+trusted WGCF service identity remains target owner work under `803` and the
+security gate under `805`.
+
 An architecture decision and its durable attachment must exist before the
 work-start evaluation that consumes it. The durable work-start attachment must
 exist before a Review Packet is created. Internally valid future evidence
 cannot satisfy an earlier readiness decision.
+
 When an append-only correction declares `custody.supersedes`, that reference
 must resolve to an earlier durable artifact of the same type and Delivery
 initiative. A self-reference or an invented prior digest is not a correction.
@@ -302,10 +356,25 @@ python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root . 
   --dependency-artifact <referenced-artifact.json>
 ```
 
-Repeat `--dependency-artifact` for the architecture packet and work-start
-record required by the target artifact. Architecture packets have no
-dependency argument. This entrypoint validates schema shape, dynamic
-repo/graph/acceptance bindings, resolved cross-artifact continuity, applicable
+Repeat `--dependency-artifact` until the referenced dependency closure is
+complete. An architecture packet has no dependency argument. A work-start
+record needs its architecture packet. A merge-ready Review Packet needs both.
+A readiness receipt needs its exact subject artifact plus that subject's
+dependency closure. An operating-readiness receipt therefore needs the final
+packet, its merge-ready predecessor, work-start record, and architecture
+packet. A finalized source Review Packet needs its durable merge-ready
+predecessor and readiness receipt in addition to the earlier source artifacts:
+
+```bash
+python3 scripts/validate_delivery_art_artifact.py <finalized-packet.json> --repo-root . \
+  --dependency-artifact <architecture-packet.json> \
+  --dependency-artifact <work-start-record.json> \
+  --dependency-artifact <merge-ready-packet.json> \
+  --dependency-artifact <readiness-receipt.json>
+```
+
+This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
+exact evidence source heads, resolved cross-artifact continuity, applicable
 conformance cases, and content integrity. OOS work item `802` must resolve the
 same durable dependencies on the active runtime path before Review Packet v2
 is declared implemented.
@@ -316,15 +385,21 @@ It remains a target contract until OOS work item `802` implements and activates
 the migration from the current runtime schema version.
 
 Draft artifacts remain local and reviewable, carry no persistence timestamp,
-and do not claim durable custody. Once an architecture decision,
-work-start evaluation, or Review Packet finalization is recorded, OOS owns
-durable custody by attaching content-addressed JSON to the initiative Epic.
-Corrections append a superseding artifact; they do not replace prior evidence.
-Every durable architecture, work-start, and finalized Review Packet artifact
+and do not claim durable custody. Once an architecture decision, work-start
+evaluation, or merge-ready/final Review Packet is recorded, OOS owns durable
+custody by attaching content-addressed JSON to the initiative Epic. Corrections
+append a superseding artifact; they do not replace prior evidence. Every
+durable architecture, work-start, merge-ready, and finalized Review Packet
 records when it was persisted.
-WGCF stores readiness receipts and artifact refs, not duplicate source
-artifacts. The digest uses RFC 8785 canonical JSON and SHA-256 over artifact
-content, excluding custody metadata and the digest field itself.
+
+WGCF stores content-addressed readiness receipts and exact source-artifact
+bindings, not duplicate source artifacts. The same receipt schema covers
+architecture, implementation, merge, and operating readiness; only the
+operating receipt uses the cycle-safe Review Packet readiness-subject digest.
+The receipt schema is
+[`delivery-art-readiness-receipt.schema.json`](../contracts/schemas/delivery-art-readiness-receipt.schema.json).
+Artifact digests use the integer-only RFC 8785 canonical domain and SHA-256
+over artifact content, excluding custody metadata and the digest field itself.
 
 The accepted canonical input domain contains unique JSON object keys, Unicode
 scalar values, and integral numbers only; duplicate keys, floating-point

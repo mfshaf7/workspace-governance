@@ -36,14 +36,25 @@ jobs:
         run: |
           architecture=contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
           work_start=contracts/fixtures/delivery-art-workflow/work-start-record.valid.json
+          merge_ready=contracts/fixtures/delivery-art-workflow/review-packet-merge-ready.valid.json
+          receipt=contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json
+          finalized=contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json
           python3 scripts/validate_delivery_art_artifact.py "$architecture" --repo-root .
           python3 scripts/validate_delivery_art_artifact.py "$work_start" --repo-root . \
             --dependency-artifact "$architecture"
-          for packet in contracts/fixtures/delivery-art-workflow/review-packet-*.json; do
-            python3 scripts/validate_delivery_art_artifact.py "$packet" --repo-root . \
-              --dependency-artifact "$architecture" \
-              --dependency-artifact "$work_start"
-          done
+          python3 scripts/validate_delivery_art_artifact.py "$merge_ready" --repo-root . \
+            --dependency-artifact "$architecture" \
+            --dependency-artifact "$work_start"
+          python3 scripts/validate_delivery_art_artifact.py "$receipt" --repo-root . \
+            --dependency-artifact "$architecture" \
+            --dependency-artifact "$work_start" \
+            --dependency-artifact "$merge_ready" \
+            --dependency-artifact "$finalized"
+          python3 scripts/validate_delivery_art_artifact.py "$finalized" --repo-root . \
+            --dependency-artifact "$architecture" \
+            --dependency-artifact "$work_start" \
+            --dependency-artifact "$merge_ready" \
+            --dependency-artifact "$receipt"
 
       - name: Materialize active and admitted repos
         run: |

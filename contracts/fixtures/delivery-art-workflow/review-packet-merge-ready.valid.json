@@ -10,9 +10,9 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d.json",
-    "artifact_digest": "sha256:6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d",
-    "scope_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b.json",
+    "artifact_digest": "sha256:9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b",
+    "scope_fingerprint": "sha256:13fe75c401e078d791210227e9f263e58e395982069748e306703afc4df4c251"
   },
   "landing_unit": {
     "decision": "child_isolated_landing_unit",
@@ -50,6 +50,12 @@
         "result": "pass",
         "summary": "Valid fixtures pass and malformed readiness evidence fails.",
         "conformance_case_ids": ["case:contract-positive", "case:contract-negative"],
+        "source_revisions": [
+          {
+            "repo": "workspace-governance",
+            "commit": "3333333333333333333333333333333333333333"
+          }
+        ],
         "evidence_refs": [
           {
             "uri": "artifact://validation/delivery-art-schema-cases",
@@ -69,6 +75,12 @@
         "result": "pass",
         "summary": "The operator contract and artifact examples satisfy their schemas.",
         "conformance_case_ids": [],
+        "source_revisions": [
+          {
+            "repo": "workspace-governance",
+            "commit": "3333333333333333333333333333333333333333"
+          }
+        ],
         "evidence_refs": [
           {
             "uri": "artifact://validation/workspace-contract-model",
@@ -97,6 +109,7 @@
         "result": "not_applicable",
         "summary": "The downstream security review is sequenced after runtime implementation.",
         "conformance_case_ids": [],
+        "source_revisions": [],
         "evidence_refs": [],
         "not_applicable_reason": "This landing unit defines policy and schemas but does not activate durable runtime custody.",
         "authority_ref": "openproject://work_packages/805"
@@ -108,18 +121,19 @@
   "readiness": {
     "level": "merge-ready",
     "evaluated_at": "2026-08-08T11:15:00+08:00",
+    "subject_digest": null,
     "receipt_refs": []
   },
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:d1ee4980ced5418baec77f6f65d71d47d9bb48928819605923f4e3f80218a688"
+    "content_digest": "sha256:7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb"
   },
   "custody": {
-    "state": "local-draft",
-    "backend": "local-filesystem",
-    "uri": ".art/review-packets/delivery-698-801.json",
-    "persisted_at": null,
+    "state": "durable",
+    "backend": "openproject-attachment",
+    "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-merge-ready-7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb.json",
+    "persisted_at": "2026-08-08T11:16:00+08:00",
     "supersedes": null
   },
   "finalized_at": null

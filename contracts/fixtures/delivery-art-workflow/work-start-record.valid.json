@@ -25,8 +25,8 @@
   },
   "architecture": {
     "required": true,
-    "packet_ref": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50.json",
-    "packet_digest": "sha256:313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50",
+    "packet_ref": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d.json",
+    "packet_digest": "sha256:518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d",
     "readiness": "architecture-ready"
   },
   "source_snapshot": {
@@ -41,7 +41,7 @@
       }
     ]
   },
-  "scope_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "scope_fingerprint": "sha256:13fe75c401e078d791210227e9f263e58e395982069748e306703afc4df4c251",
   "invalidation_inputs": [
     "art-descendant-or-dependency-change",
     "owner-or-rollback-boundary-change",
@@ -57,12 +57,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d"
+    "content_digest": "sha256:9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d.json",
+    "uri": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b.json",
     "persisted_at": "2026-08-08T10:11:00+08:00",
     "supersedes": null
   }

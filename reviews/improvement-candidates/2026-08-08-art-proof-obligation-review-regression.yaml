@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-08-08-art-proof-obligation-review-regression
+title: Stop Delivery ART contract hardening from becoming reactive defect chasing
+recorded_on: '2026-08-08'
+owner_repo: workspace-governance
+summary: Delivery ART contract work repeatedly reached exact-head review with adjacent
+  trust claims declared but not enforced, forcing serial patches that a complete proof-obligation
+  audit should have found before implementation.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-25-broker-regression-fixture-chase-gap.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The operator explicitly identified repeated defect-after-defect correction
+    and excessive elapsed time. The immediate misses were an unresolved readiness
+    receipt reference and a real-Git requirement that existed only as declared policy,
+    not executable validation.
+  source_refs:
+  - 'conversation:2026-08-08 operator repeated-defect callout during Delivery ART
+    #801'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Maps every governed readiness, work-start, evidence, and architecture claim exactly once to active local proof, pending owner activation, or doctrine.
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-readiness-receipt.schema.json
+    owner_repo: workspace-governance
+    note: Defines content-addressed WGCF receipts for all four readiness levels without duplicating OOS source artifacts.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Executes positive and negative proof cases for exact source heads, deterministic fingerprints, real-Git applicability, immutable predecessor continuity, receipt resolution, canonical integrity, and malformed input.
+  - type: validator
+    path: workspace-governance/scripts/validate_delivery_art_artifact.py
+    owner_repo: workspace-governance
+    note: Exposes the same strict parser and complete dependency-chain checks through the public artifact validation entrypoint.
+  - type: workflow
+    path: workspace-governance/.github/workflows/validate.yaml
+    owner_repo: workspace-governance
+    note: Runs the public validator over the complete architecture, work-start, merge-ready, receipt, and finalized artifact chain.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires exact source-head evidence, immutable merge-ready predecessors, explicit work-item and dimension applicability, and honest pending-owner boundaries.
+  note: The correction replaces serial defect discovery with a fail-closed claim-to-proof registry and one executable artifact-chain proof surface.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

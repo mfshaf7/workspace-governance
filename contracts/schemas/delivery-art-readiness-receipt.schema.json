@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-readiness-receipt.schema.json",
+  "title": "Delivery ART Readiness Receipt",
+  "$comment": "The receipt is a WGCF-owned, content-addressed decision over one of the four Delivery ART readiness subjects. Trusted runtime issuer resolution remains an owner implementation obligation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "delivery_id",
+    "covered_work_item_ids",
+    "subject",
+    "readiness",
+    "issuer",
+    "findings",
+    "integrity",
+    "custody"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "delivery_art_readiness_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^art-readiness-receipt:[0-9a-f]{24}$" },
+    "delivery_id": { "$ref": "#/$defs/deliveryId" },
+    "covered_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_type", "artifact_id", "digest_kind", "digest"],
+      "properties": {
+        "artifact_type": {
+          "enum": [
+            "delivery_art_architecture_packet",
+            "delivery_art_work_start_record",
+            "art_review_packet"
+          ]
+        },
+        "artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "digest_kind": { "enum": ["artifact-content", "readiness-subject"] },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "outcome", "mutation_allowed", "evaluated_at", "profile_id", "target_scope"],
+      "properties": {
+        "level": {
+          "enum": [
+            "architecture-ready",
+            "implementation-ready",
+            "merge-ready",
+            "operating-ready"
+          ]
+        },
+        "outcome": { "enum": ["ready", "blocked", "review_required"] },
+        "mutation_allowed": { "type": "boolean" },
+        "evaluated_at": { "$ref": "#/$defs/timestamp" },
+        "profile_id": { "$ref": "#/$defs/nonEmptyString" },
+        "target_scope": { "type": "string", "pattern": "^art:delivery-[1-9][0-9]*$" }
+      }
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_repo", "service_identity_ref", "implementation_ref"],
+      "properties": {
+        "owner_repo": { "const": "workspace-governance-control-fabric" },
+        "service_identity_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "implementation_ref": { "$ref": "#/$defs/gitCommit" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "summary", "authority_ref"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "severity": { "enum": ["blocker", "error", "warning"] },
+          "summary": { "$ref": "#/$defs/nonEmptyString" },
+          "authority_ref": {
+            "oneOf": [
+              { "$ref": "#/$defs/nonEmptyString" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "custody": { "$ref": "#/$defs/custody" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "outcome": { "const": "ready" } },
+            "required": ["outcome"]
+          }
+        },
+        "required": ["readiness"]
+      },
+      "then": {
+        "properties": {
+          "readiness": {
+            "properties": { "mutation_allowed": { "const": true } }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "readiness": {
+            "properties": { "mutation_allowed": { "const": false } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "architecture-ready" } },
+            "required": ["level"]
+          }
+        },
+        "required": ["readiness"]
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": {
+              "artifact_type": { "const": "delivery_art_architecture_packet" },
+              "artifact_id": { "pattern": "^architecture-packet:[a-z0-9][a-z0-9._:-]*$" },
+              "digest_kind": { "const": "artifact-content" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "implementation-ready" } },
+            "required": ["level"]
+          }
+        },
+        "required": ["readiness"]
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": {
+              "artifact_type": { "const": "delivery_art_work_start_record" },
+              "artifact_id": { "pattern": "^work-start:[a-z0-9][a-z0-9._:-]*$" },
+              "digest_kind": { "const": "artifact-content" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "merge-ready" } },
+            "required": ["level"]
+          }
+        },
+        "required": ["readiness"]
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": {
+              "artifact_type": { "const": "art_review_packet" },
+              "artifact_id": { "pattern": "^review-packet:[a-z0-9][a-z0-9._:-]*$" },
+              "digest_kind": { "const": "artifact-content" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "operating-ready" } },
+            "required": ["level"]
+          }
+        },
+        "required": ["readiness"]
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": {
+              "artifact_type": { "const": "art_review_packet" },
+              "artifact_id": { "pattern": "^review-packet:[a-z0-9][a-z0-9._:-]*$" },
+              "digest_kind": { "const": "readiness-subject" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "identifier": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "workItemId": { "type": "string", "pattern": "^work-item-[1-9][0-9]*$" },
+    "workItemIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/workItemId" }
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "receiptUri": {
+      "type": "string",
+      "pattern": "^wgcf://receipts/art-readiness/art-readiness-receipt-[0-9a-f]{24}-[0-9a-f]{64}\\.json$"
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "$ref": "#/$defs/receiptUri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "backend", "uri", "persisted_at", "supersedes"],
+      "properties": {
+        "state": { "const": "durable" },
+        "backend": { "const": "wgcf-receipt-ledger" },
+        "uri": { "$ref": "#/$defs/receiptUri" },
+        "persisted_at": { "$ref": "#/$defs/timestamp" },
+        "supersedes": {
+          "oneOf": [
+            { "$ref": "#/$defs/artifactRef" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}
