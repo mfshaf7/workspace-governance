@@ -248,6 +248,16 @@ ids in that packet. These are packet-level semantic invariants in addition to
 the JSON Schema shape, and partial coverage or unknown references fail
 readiness.
 
+Validate any supplied target-contract artifact locally with:
+
+```bash
+python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root .
+```
+
+This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
+and content integrity. OOS work item `802` must expose equivalent validation on
+the active runtime path before Review Packet v2 is declared implemented.
+
 The v2 schema is
 [`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).
 It remains a target contract until OOS work item `802` implements and activates

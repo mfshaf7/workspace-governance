@@ -113,6 +113,7 @@ REQUIRED_FILES = (
     "scripts/workspace_control_plane_summary.py",
     "scripts/sync_workspace_root.py",
     "scripts/validate_contracts.py",
+    "scripts/validate_delivery_art_artifact.py",
     "scripts/validate_cross_repo_truth.py",
     "scripts/validate_repo_structure.py",
     "workspace-root/ARCHITECTURE.md",

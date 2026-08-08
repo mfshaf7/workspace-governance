@@ -315,7 +315,8 @@
           "custody": {
             "properties": {
               "state": { "const": "durable" },
-              "backend": { "const": "openproject-attachment" }
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
             }
           }
         }

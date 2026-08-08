@@ -125,6 +125,12 @@
   - validates Delivery ART architecture, work-start, and Review Packet v2
     fixtures and negative evidence-integrity cases without claiming the pending
     OOS runtime enforcement is already active
+- `validate_delivery_art_artifact.py`
+  - validates one operator-supplied architecture packet, work-start record, or
+    Review Packet against its JSON Schema, cross-field semantic bindings, and
+    declared content digest
+  - use this contract-authority entrypoint for local artifact review until OOS
+    work item `802` activates equivalent runtime validation
 - `validate_component_contracts.py`
   - executes the component-level interface validation commands declared in
     `contracts/components.yaml` across the local workspace

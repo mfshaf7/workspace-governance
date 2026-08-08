@@ -481,6 +481,32 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     return errors
 
 
+def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
+    """Validate the declared content digest and durable content-addressed URI."""
+    digest_projection = copy.deepcopy(payload)
+    digest_projection.pop("custody", None)
+    digest_projection.get("integrity", {}).pop("content_digest", None)
+    canonical_bytes = json.dumps(
+        digest_projection,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    expected_digest = "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
+    actual_digest = payload.get("integrity", {}).get("content_digest")
+    errors = []
+    if actual_digest != expected_digest:
+        errors.append(
+            f"integrity.content_digest must equal canonical content digest {expected_digest}"
+        )
+    custody = payload.get("custody") or {}
+    if custody.get("state") == "durable":
+        digest_hex = expected_digest.removeprefix("sha256:")
+        if digest_hex not in str(custody.get("uri", "")):
+            errors.append("durable custody URI must include the full content digest")
+    return errors
+
+
 def validate_delivery_art_artifact_contracts(
     errors: list[str],
     repo_root: Path,
@@ -520,32 +546,9 @@ def validate_delivery_art_artifact_contracts(
                 errors.append(f"{fixture_ref}: {path}: {error.message}")
             for error in delivery_art_artifact_semantic_errors(fixture):
                 errors.append(f"{fixture_ref}: semantic invariant: {error}")
+            for error in delivery_art_artifact_integrity_errors(fixture):
+                errors.append(f"{fixture_ref}: integrity invariant: {error}")
             fixtures[Path(fixture_ref).name] = fixture
-
-            # These fixtures use only JCS-stable JSON scalar forms; sorted compact
-            # serialization therefore matches their RFC 8785 projection.
-            digest_projection = copy.deepcopy(fixture)
-            digest_projection.pop("custody", None)
-            digest_projection.get("integrity", {}).pop("content_digest", None)
-            canonical_bytes = json.dumps(
-                digest_projection,
-                ensure_ascii=False,
-                separators=(",", ":"),
-                sort_keys=True,
-            ).encode("utf-8")
-            expected_digest = "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
-            actual_digest = fixture.get("integrity", {}).get("content_digest")
-            if actual_digest != expected_digest:
-                errors.append(
-                    f"{fixture_ref}: integrity.content_digest must equal canonical content digest {expected_digest}"
-                )
-            custody = fixture.get("custody") or {}
-            if custody.get("state") == "durable":
-                digest_hex = expected_digest.removeprefix("sha256:")
-                if digest_hex not in str(custody.get("uri", "")):
-                    errors.append(
-                        f"{fixture_ref}: durable custody URI must include the full content digest"
-                    )
 
     def require_rejected(
         validator_name: str,
@@ -701,6 +704,14 @@ def validate_delivery_art_artifact_contracts(
             "work_start_record",
             blocked_architecture,
             "required architecture represented as a durable blocked work-start record",
+        )
+
+        blocked_without_persistence_time = copy.deepcopy(blocked_architecture)
+        blocked_without_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "work_start_record",
+            blocked_without_persistence_time,
+            "durable blocked work-start record without a persistence timestamp",
         )
 
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
