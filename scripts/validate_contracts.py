@@ -1127,6 +1127,39 @@ def delivery_art_artifact_reference_errors(
         return architecture_packet
 
     artifact_type = payload.get("artifact_type")
+    supersedes = _artifact_object(
+        _artifact_object(payload.get("custody")).get("supersedes")
+    )
+    if supersedes:
+        prior_artifact = resolve(
+            supersedes.get("uri"),
+            supersedes.get("digest"),
+            "custody.supersedes.uri",
+            str(artifact_type),
+        )
+        if prior_artifact is not None:
+            if prior_artifact is payload or supersedes.get("uri") == _artifact_object(
+                payload.get("custody")
+            ).get("uri"):
+                errors.append("custody.supersedes must not reference the artifact itself")
+            if prior_artifact.get("delivery_id") != payload.get("delivery_id"):
+                errors.append(
+                    "superseded artifact delivery_id must match the replacement artifact"
+                )
+            if _artifact_object(prior_artifact.get("custody")).get(
+                "state"
+            ) != "durable":
+                errors.append("custody.supersedes must resolve a durable artifact")
+            _require_artifact_time_order(
+                errors,
+                "superseded artifact custody.persisted_at",
+                _artifact_object(prior_artifact.get("custody")).get(
+                    "persisted_at"
+                ),
+                "replacement artifact created_at",
+                payload.get("created_at"),
+            )
+
     if artifact_type == "delivery_art_work_start_record":
         resolve_architecture(payload)
 
@@ -1665,6 +1698,20 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             draft_architecture_with_persistence,
             "local architecture draft claiming a persistence timestamp",
+        )
+
+        unresolved_supersedes = copy.deepcopy(architecture)
+        unresolved_supersedes["custody"]["supersedes"] = {
+            "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v0-"
+            + "9" * 64
+            + ".json",
+            "digest": "sha256:" + "9" * 64,
+        }
+        require_reference_rejected(
+            unresolved_supersedes,
+            "architecture correction with an unresolved superseded artifact",
+            "custody.supersedes.uri does not resolve",
+            [],
         )
 
     work_start = fixtures.get("work-start-record.valid.json")

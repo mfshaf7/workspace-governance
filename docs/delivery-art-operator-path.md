@@ -274,6 +274,9 @@ An architecture decision and its durable attachment must exist before the
 work-start evaluation that consumes it. The durable work-start attachment must
 exist before a Review Packet is created. Internally valid future evidence
 cannot satisfy an earlier readiness decision.
+When an append-only correction declares `custody.supersedes`, that reference
+must resolve to an earlier durable artifact of the same type and Delivery
+initiative. A self-reference or an invented prior digest is not a correction.
 
 Validate any supplied target-contract artifact locally with:
 

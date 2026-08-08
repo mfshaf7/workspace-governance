@@ -356,6 +356,7 @@
             "review_packet_resolves_work_start_record",
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match",
             "dependency_must_exist_before_dependent_readiness",
+            "superseded_artifact_must_resolve_with_same_type_and_delivery",
             "local_validator_requires_dependency_artifacts",
             "runtime_resolver_owner"
           ],
@@ -365,6 +366,7 @@
             "review_packet_resolves_work_start_record": { "const": true },
             "resolved_delivery_coverage_landing_unit_scope_and_source_must_match": { "const": true },
             "dependency_must_exist_before_dependent_readiness": { "const": true },
+            "superseded_artifact_must_resolve_with_same_type_and_delivery": { "const": true },
             "local_validator_requires_dependency_artifacts": { "const": true },
             "runtime_resolver_owner": { "const": "operator-orchestration-service" }
           }
