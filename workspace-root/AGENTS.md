@@ -325,8 +325,8 @@ Only start implementation after that discussion narrows the target design.
   Review Packet or explicitly marked as non-source evidence only.
 - If the registered skill inventory or any workspace-owned skill source
   changes, the work is not complete until the live installed skills under
-  `~/.codex/skills` are refreshed and the workspace audit confirms they are in
-  sync.
+  `~/.codex/skills` are refreshed and the explicit skill-install check confirms
+  they are in sync.
 - Skill-source changes affect future sessions only after that install step.
 - `AGENTS.md` files are routing and authority controls, not dumping grounds for
   long procedures. Keep detailed repeatable workflow in skills or primary
@@ -348,6 +348,9 @@ Only start implementation after that discussion narrows the target design.
 - If the workspace is being described as clean or restart-ready, require the
   WGCF clean-state scope to pass before saying so:
   - `wgcf catalog check --workspace-root /home/mfshaf7/projects --scope authority:workspace-clean-state --profile dev-integration --tier scoped --operator-approved`
+- Do not use workspace clean-state certification as the implementation feedback
+  loop. Use exact-worktree owner checks while editing and CI-equivalent
+  landing-unit proof before merge.
 - Direct branch-lifecycle or workspace-layout validator commands are rollback
   paths after #536. If WGCF cannot run them, record the blocker or defect before
   using the direct command as evidence.
@@ -534,6 +537,7 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/check_remote_alignment.py --workspace-root /home/mfshaf7/projects --repo-name workspace-governance --refresh-remote`
   - `python3 scripts/validate_repo_structure.py --repo-root .`
   - `python3 scripts/validate_contracts.py --repo-root .`
+  - `python3 -m unittest discover -s tests`
   - `python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_developer_integration.py --repo-root . --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects`
@@ -548,7 +552,6 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check`
   - `python3 scripts/workspace_control_plane_summary.py --workspace-root /home/mfshaf7/projects --refresh-remote`
   - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects`
-  - `python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean`
   - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`
 - other repos
   - follow the local repo `AGENTS.md`

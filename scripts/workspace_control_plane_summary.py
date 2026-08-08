@@ -103,7 +103,7 @@ def main() -> int:
             ],
         ),
         (
-            "workspace audit",
+            "workspace layout audit",
             [
                 "python3",
                 "scripts/audit_workspace_layout.py",

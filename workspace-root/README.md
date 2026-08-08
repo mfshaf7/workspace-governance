@@ -264,6 +264,10 @@ not linger behind the real work. Direct branch-lifecycle or workspace-layout
 commands are rollback paths; if WGCF cannot run them, record the blocker or
 defect before using a direct command as final evidence.
 
+During implementation, use the changed repo's exact-worktree smoke checks.
+Use CI-equivalent landing-unit proof before merge. Do not substitute the
+canonical workspace clean-state scope for either feedback loop.
+
 Session handoffs are local restart-continuity state. Use only
 `workspace-governance/docs/archive/session-handoff-current.md`, keep zero or
 one handoff at a time, and remove stale handoffs when the checkpoint is no
@@ -329,8 +333,8 @@ about a slow debugging session.
 The skill layer is governed too. Updating skill source is not enough by itself.
 If the registered skill inventory or workspace-owned skill source changes, the
 live installed skills under `~/.codex/skills` must be refreshed so future
-sessions actually use the new instructions. The workspace audit now checks that
-live install state directly.
+sessions actually use the new instructions. Verify that state with the explicit
+skill-install check; the workspace layout audit does not invoke skill checks.
 
 The root copies remain materialized in `/home/mfshaf7/projects` because local
 tooling and future sessions read those entrypoints directly.

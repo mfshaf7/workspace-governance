@@ -13,6 +13,39 @@ governance_validator_catalog:
     art_mutation_boundary: operator-orchestration-service remains the only Delivery ART mutation authority; WGCF may emit recommendations and receipts for OOS.
     retirement_rule: no direct validator or command path may be removed until shadow parity, rollback, and replacement receipt evidence are recorded.
     evidence_rule: compact receipts are operator-facing evidence; raw command output must be captured as artifact references when retained.
+  validation_modes:
+    owner-smoke:
+      description: Fast implementation feedback from checks owned by the changed repository and executed against the exact active worktree.
+      source_binding: exact-active-worktree
+      invocation_authority: owner-repo-direct
+      catalog_tier: smoke
+      remote_reads_allowed: false
+      clean_workspace_required: false
+      cross_repo_scope: none
+    landing-unit:
+      description: CI-equivalent proof for the exact landing-unit head against its fetched base before merge readiness.
+      source_binding: exact-pr-head-and-base
+      invocation_authority: owner-repo-ci-equivalent
+      catalog_tier: scoped
+      remote_reads_allowed: true
+      clean_workspace_required: false
+      cross_repo_scope: affected-only
+    workspace-clean-state:
+      description: Explicit post-merge or restart-readiness certification for canonical workspace source state, materialized outputs, branches, worktrees, remotes, and dirty state.
+      source_binding: canonical-workspace-heads
+      invocation_authority: wgcf-catalog
+      catalog_tier: scoped
+      remote_reads_allowed: true
+      clean_workspace_required: true
+      cross_repo_scope: source-state-only
+    release:
+      description: Full governed validation for reviewed release heads and every declared release dependency.
+      source_binding: reviewed-release-heads
+      invocation_authority: wgcf-catalog-and-owner
+      catalog_tier: release
+      remote_reads_allowed: true
+      clean_workspace_required: false
+      cross_repo_scope: all-declared
   admission_contract:
     work_item_ref: openproject://work_packages/504
     intake_policy_ref: contracts/intake-policy.yaml
@@ -309,6 +342,7 @@ governance_validator_catalog:
         scopes:
           - component:workspace-governance
           - repo:workspace-governance
+          - authority:workspace-clean-state
         timeout_seconds: 120
         output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
@@ -406,13 +440,13 @@ governance_validator_catalog:
       executable_path: scripts/validate_governance_engine_shadow_parity.py
       command: python3 scripts/validate_governance_engine_shadow_parity.py
       purpose: validate workspace-root, installed-skill, generated-artifact, and compatibility-entrypoint parity for governance-engine work
-      scope: repo-local
-      safety_class: local-read-only
+      scope: workspace-cross-repo
+      safety_class: workspace-cross-repo-read
       allowed_profiles:
         - local-read-only
         - dev-integration
         - governed-stage
-      requires_workspace_root: false
+      requires_workspace_root: true
       requires_network: false
       mutates_authority: false
       writes_materialized_outputs: false
@@ -421,11 +455,11 @@ governance_validator_catalog:
         - generated/governance-engine-boundary-map.json
       wgcf_invocation:
         enabled: true
-        validation_tier: smoke
+        validation_tier: scoped
         working_directory_repo: workspace-governance
         scopes:
           - component:workspace-governance
-          - repo:workspace-governance
+          - authority:workspace-clean-state
         timeout_seconds: 120
         output_budget_bytes: 20000
       wgcf_posture: candidate-for-wgcf-invocation
@@ -574,7 +608,7 @@ governance_validator_catalog:
       surface_id: workspace-governance-python-scripts
       executable_path: scripts/audit_workspace_layout.py
       command: python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
-      purpose: audit active workspace repo inventory, root sync, skill sync, generated freshness, review coverage, and cross-repo truth
+      purpose: audit active workspace repo inventory, required repo guidance, SSH origin shape, session-handoff posture, and materialized workspace-root file parity
       scope: workspace-cross-repo
       safety_class: workspace-cross-repo-read
       allowed_profiles:
@@ -588,7 +622,7 @@ governance_validator_catalog:
       included_in_validation_matrix: true
       wgcf_invocation:
         enabled: true
-        command: python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects --check-clean
+        command: python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
         validation_tier: scoped
         working_directory_repo: workspace-governance
         scopes:
@@ -701,7 +735,6 @@ governance_validator_catalog:
         validation_tier: scoped
         working_directory_repo: workspace-governance
         scopes:
-          - component:workspace-governance
           - authority:workspace-clean-state
         timeout_seconds: 180
         output_budget_bytes: 30000
