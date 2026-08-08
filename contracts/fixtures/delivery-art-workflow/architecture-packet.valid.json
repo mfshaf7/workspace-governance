@@ -109,7 +109,24 @@
     "dimensions": ["source provenance", "atomic closeout"],
     "cases": [
       {
+        "id": "case:contract-positive",
+        "applies_to_work_item_ids": ["work-item-801"],
+        "polarity": "positive",
+        "fidelity": "filesystem",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "Canonical Delivery ART artifacts and their resolved reference chain pass."
+      },
+      {
+        "id": "case:contract-negative",
+        "applies_to_work_item_ids": ["work-item-801"],
+        "polarity": "negative",
+        "fidelity": "filesystem",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "Malformed artifacts and broken cross-artifact bindings are rejected."
+      },
+      {
         "id": "case:real-git-positive",
+        "applies_to_work_item_ids": ["work-item-802"],
         "polarity": "positive",
         "fidelity": "real-git",
         "target_readiness": "merge-ready",
@@ -117,6 +134,7 @@
       },
       {
         "id": "case:real-git-cycle-negative",
+        "applies_to_work_item_ids": ["work-item-802"],
         "polarity": "negative",
         "fidelity": "real-git",
         "target_readiness": "merge-ready",
@@ -133,12 +151,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:4cbbbd293dc46be1f82143d8fd227b65bf93db1577ba8626063d98804d2fffe3"
+    "content_digest": "sha256:14d83b30c5b4c39f6432586cb55e0bf3857d217670d90d7c41092204724a784d"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-4cbbbd293dc46be1f82143d8fd227b65bf93db1577ba8626063d98804d2fffe3.json",
+    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-14d83b30c5b4c39f6432586cb55e0bf3857d217670d90d7c41092204724a784d.json",
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
   }

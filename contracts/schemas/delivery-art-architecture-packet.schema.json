@@ -230,9 +230,10 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["id", "polarity", "fidelity", "target_readiness", "expected_outcome"],
+            "required": ["id", "applies_to_work_item_ids", "polarity", "fidelity", "target_readiness", "expected_outcome"],
             "properties": {
               "id": { "$ref": "#/$defs/identifier" },
+              "applies_to_work_item_ids": { "$ref": "#/$defs/workItemIds" },
               "polarity": { "enum": ["positive", "negative"] },
               "fidelity": { "$ref": "#/$defs/fidelity" },
               "target_readiness": { "enum": ["merge-ready", "operating-ready"] },
@@ -275,7 +276,19 @@
       "if": { "properties": { "decision": { "properties": { "status": { "const": "draft" } }, "required": ["status"] } } },
       "then": {
         "properties": {
-          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" } } }
+          "decision": {
+            "properties": {
+              "decided_by": { "type": "null" },
+              "decided_at": { "type": "null" }
+            }
+          },
+          "custody": {
+            "properties": {
+              "state": { "const": "local-draft" },
+              "backend": { "const": "local-filesystem" },
+              "persisted_at": { "type": "null" }
+            }
+          }
         }
       },
       "else": {

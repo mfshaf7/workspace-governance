@@ -180,7 +180,7 @@
       "then": {
         "properties": {
           "readiness": { "properties": { "level": { "const": "implementation-ready" } } },
-          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" } } },
+          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" }, "persisted_at": { "type": "null" } } },
           "finalized_at": { "type": "null" }
         }
       }
@@ -218,7 +218,7 @@
             }
           },
           "readiness": { "properties": { "level": { "const": "merge-ready" } } },
-          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" } } },
+          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" }, "persisted_at": { "type": "null" } } },
           "finalized_at": { "type": "null" }
         }
       }
@@ -491,6 +491,7 @@
         "fidelity",
         "result",
         "summary",
+        "conformance_case_ids",
         "evidence_refs",
         "not_applicable_reason",
         "authority_ref"
@@ -507,6 +508,11 @@
         "fidelity": { "$ref": "#/$defs/fidelity" },
         "result": { "enum": ["pass", "fail", "not_applicable"] },
         "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "conformance_case_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
         "evidence_refs": {
           "type": "array",
           "items": { "$ref": "#/$defs/artifactRef" }

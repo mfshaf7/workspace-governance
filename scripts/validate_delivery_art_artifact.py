@@ -13,6 +13,7 @@ from validate_contracts import (
     CONTRACT_FORMAT_CHECKER,
     DELIVERY_ART_ARTIFACT_CASES,
     delivery_art_artifact_integrity_errors,
+    delivery_art_artifact_reference_errors,
     delivery_art_artifact_semantic_errors,
 )
 
@@ -39,30 +40,21 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("artifact", type=Path)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--dependency-artifact",
+        action="append",
+        default=[],
+        type=Path,
+        help="Artifact required to resolve work-start or architecture references; repeat as needed.",
+    )
     return parser.parse_args()
 
 
-def main() -> int:
-    args = parse_args()
-    repo_root = args.repo_root.resolve()
-    artifact_path = args.artifact.resolve() if args.artifact != Path("-") else None
-    artifact_label = str(artifact_path) if artifact_path else "<stdin>"
-    try:
-        raw_payload = artifact_path.read_text() if artifact_path else sys.stdin.read()
-        payload = json.loads(raw_payload, object_pairs_hook=_strict_artifact_object)
-    except (OSError, ValueError) as exc:
-        print(f"delivery ART artifact invalid: {exc}", file=sys.stderr)
-        return 1
-
+def _artifact_errors(payload: object, repo_root: Path) -> list[str]:
     artifact_type = payload.get("artifact_type") if isinstance(payload, dict) else None
     case_name = ARTIFACT_CASE_BY_TYPE.get(artifact_type)
     if case_name is None:
-        print(
-            f"delivery ART artifact invalid: unsupported artifact_type {artifact_type!r}",
-            file=sys.stderr,
-        )
-        return 1
-
+        return [f"unsupported artifact_type {artifact_type!r}"]
     schema_ref = DELIVERY_ART_ARTIFACT_CASES[case_name][0]
     schema = load_json(repo_root / schema_ref)
     validator = Draft202012Validator(
@@ -84,14 +76,64 @@ def main() -> int:
         f"integrity invariant: {error}"
         for error in delivery_art_artifact_integrity_errors(payload)
     )
+    return errors
+
+
+def _load_artifact(path: Path | None) -> object:
+    raw_payload = path.read_text() if path else sys.stdin.read()
+    return json.loads(raw_payload, object_pairs_hook=_strict_artifact_object)
+
+
+def main() -> int:
+    args = parse_args()
+    repo_root = args.repo_root.resolve()
+    artifact_path = args.artifact.resolve() if args.artifact != Path("-") else None
+    artifact_label = str(artifact_path) if artifact_path else "<stdin>"
+    try:
+        payload = _load_artifact(artifact_path)
+    except (OSError, ValueError) as exc:
+        print(f"delivery ART artifact invalid: {exc}", file=sys.stderr)
+        return 1
+
+    dependency_artifacts = []
+    dependency_errors = []
+    for dependency_path_arg in args.dependency_artifact:
+        dependency_path = dependency_path_arg.resolve()
+        try:
+            dependency = _load_artifact(dependency_path)
+        except (OSError, ValueError) as exc:
+            dependency_errors.append(f"{dependency_path}: {exc}")
+            continue
+        dependency_artifacts.append(dependency)
+        dependency_errors.extend(
+            f"{dependency_path}: {error}"
+            for error in _artifact_errors(dependency, repo_root)
+        )
+
+    errors = _artifact_errors(payload, repo_root)
+    if isinstance(payload, dict):
+        errors.extend(
+            f"reference invariant: {error}"
+            for error in delivery_art_artifact_reference_errors(
+                payload, dependency_artifacts
+            )
+        )
+    for dependency in dependency_artifacts:
+        if isinstance(dependency, dict):
+            dependency_errors.extend(
+                f"dependency reference invariant: {error}"
+                for error in delivery_art_artifact_reference_errors(
+                    dependency, dependency_artifacts
+                )
+            )
+    errors.extend(dependency_errors)
     if errors:
         for error in errors:
             print(f"delivery ART artifact invalid: {error}", file=sys.stderr)
         return 1
 
-    print(
-        f"delivery ART artifact valid: type={artifact_type} path={artifact_label}"
-    )
+    artifact_type = payload.get("artifact_type") if isinstance(payload, dict) else None
+    print(f"delivery ART artifact valid: type={artifact_type} path={artifact_label}")
     return 0
 
 

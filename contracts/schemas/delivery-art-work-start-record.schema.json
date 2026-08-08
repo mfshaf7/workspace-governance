@@ -331,10 +331,14 @@
       },
       "then": {
         "properties": {
+          "readiness": {
+            "properties": { "evaluated_at": { "type": "null" } }
+          },
           "custody": {
             "properties": {
               "state": { "const": "local-draft" },
-              "backend": { "const": "local-filesystem" }
+              "backend": { "const": "local-filesystem" },
+              "persisted_at": { "type": "null" }
             }
           }
         }
@@ -348,6 +352,29 @@
               "backend": { "const": "openproject-attachment" },
               "persisted_at": { "$ref": "#/$defs/timestamp" }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "decision": { "const": "defer_decision_blocked" } },
+            "required": ["decision"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "branch_plan": { "maxItems": 0 },
+              "planned_review_packet_ref": { "type": "null" }
+            }
+          },
+          "readiness": {
+            "properties": { "level": { "const": "blocked" } }
           }
         }
       }

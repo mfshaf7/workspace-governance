@@ -150,6 +150,13 @@ delivery_art_operator_path:
     digest_algorithm: sha256
     digest_scope: artifact content excluding custody metadata and the digest field itself
     lifecycle_timestamps_must_be_chronologically_ordered: true
+    artifact_reference_chain:
+      opaque_refs_cannot_advance_readiness: true
+      work_start_resolves_architecture_packet: true
+      review_packet_resolves_work_start_record: true
+      resolved_delivery_coverage_landing_unit_scope_and_source_must_match: true
+      local_validator_requires_dependency_artifacts: true
+      runtime_resolver_owner: operator-orchestration-service
     evidence_results:
       allowed:
         - pass
@@ -170,6 +177,14 @@ delivery_art_operator_path:
       - process-crash
       - sandbox-runtime
       - live-backend
+    conformance_case_binding:
+      architecture_cases_declare_applicable_work_items: true
+      case_ids_unique_within_architecture_packet: true
+      required_plan_exactly_covers_architecture_work_items: true
+      required_plan_has_positive_and_negative_case_per_work_item: true
+      later_readiness_requires_all_applicable_cases_to_pass: true
+      evidence_fidelity_must_match_planned_case_fidelity: true
+      cases_outside_packet_work_item_or_readiness_scope_rejected: true
     source_provenance:
       exact_base_and_head_commits_required: true
       real_git_required_for_git_causality_claims: true

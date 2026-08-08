@@ -260,22 +260,39 @@ declared changed surface must resolve to a file in that repo's exact
 `changed_files` list. This prevents a packet from presenting acceptance
 evidence for source outside its declared landing boundary.
 
+Readiness references are not opaque labels. A work-start record resolves its
+architecture packet; a Review Packet resolves its work-start record and that
+record's architecture packet. The resolved chain must preserve Delivery id,
+work-item coverage, Landing Unit decision, owner and branch plan, exact base
+revisions, scope fingerprint, and architecture decision. Architecture
+conformance cases declare the work items they apply to. Every case applicable
+to the packet's work-item and readiness scope must have a passing evidence
+result at the planned fidelity. A required conformance plan covers every
+architecture work item with both positive and negative cases, so a child cannot
+advance merely because its tests were omitted from the plan.
+
 Validate any supplied target-contract artifact locally with:
 
 ```bash
-python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root .
+python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root . \
+  --dependency-artifact <referenced-artifact.json>
 ```
 
-This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
-and content integrity. OOS work item `802` must expose equivalent validation on
-the active runtime path before Review Packet v2 is declared implemented.
+Repeat `--dependency-artifact` for the architecture packet and work-start
+record required by the target artifact. Architecture packets have no
+dependency argument. This entrypoint validates schema shape, dynamic
+repo/graph/acceptance bindings, resolved cross-artifact continuity, applicable
+conformance cases, and content integrity. OOS work item `802` must resolve the
+same durable dependencies on the active runtime path before Review Packet v2
+is declared implemented.
 
 The v2 schema is
 [`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).
 It remains a target contract until OOS work item `802` implements and activates
 the migration from the current runtime schema version.
 
-Draft artifacts remain local and reviewable. Once an architecture decision,
+Draft artifacts remain local and reviewable, carry no persistence timestamp,
+and do not claim durable custody. Once an architecture decision,
 work-start evaluation, or Review Packet finalization is recorded, OOS owns
 durable custody by attaching content-addressed JSON to the initiative Epic.
 Corrections append a superseding artifact; they do not replace prior evidence.

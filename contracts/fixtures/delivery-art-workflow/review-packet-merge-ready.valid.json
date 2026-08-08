@@ -10,8 +10,8 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-6c1fa3fdda297c97e7839ec7720e293ca00abe0e0cea88a1fb7586ccfc252a0c.json",
-    "artifact_digest": "sha256:6c1fa3fdda297c97e7839ec7720e293ca00abe0e0cea88a1fb7586ccfc252a0c",
+    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-0c43b924c4196c54c2dcc183e53bb633684af4613c02357e745cf89a12e19d1e.json",
+    "artifact_digest": "sha256:0c43b924c4196c54c2dcc183e53bb633684af4613c02357e745cf89a12e19d1e",
     "scope_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   },
   "landing_unit": {
@@ -49,6 +49,7 @@
         "fidelity": "filesystem",
         "result": "pass",
         "summary": "Valid fixtures pass and malformed readiness evidence fails.",
+        "conformance_case_ids": ["case:contract-positive", "case:contract-negative"],
         "evidence_refs": [
           {
             "uri": "artifact://validation/delivery-art-schema-cases",
@@ -67,6 +68,7 @@
         "fidelity": "filesystem",
         "result": "pass",
         "summary": "The operator contract and artifact examples satisfy their schemas.",
+        "conformance_case_ids": [],
         "evidence_refs": [
           {
             "uri": "artifact://validation/workspace-contract-model",
@@ -94,6 +96,7 @@
         "fidelity": "filesystem",
         "result": "not_applicable",
         "summary": "The downstream security review is sequenced after runtime implementation.",
+        "conformance_case_ids": [],
         "evidence_refs": [],
         "not_applicable_reason": "This landing unit defines policy and schemas but does not activate durable runtime custody.",
         "authority_ref": "openproject://work_packages/805"
@@ -110,7 +113,7 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:142963a7b460e3996f5b9bad547da913e5ae79870b34abb4e7b6525d5b97b627"
+    "content_digest": "sha256:878555f8e15d514d62ca17771e6e46eae9a6a1952e9551a9efdf96ecf0e44595"
   },
   "custody": {
     "state": "local-draft",

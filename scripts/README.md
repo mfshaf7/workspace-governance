@@ -127,8 +127,11 @@
     OOS runtime enforcement is already active
 - `validate_delivery_art_artifact.py`
   - validates one operator-supplied architecture packet, work-start record, or
-    Review Packet against its JSON Schema, cross-field semantic bindings, and
-    declared content digest
+    Review Packet against its JSON Schema, cross-field semantic bindings,
+    resolved dependency artifacts, applicable architecture conformance cases,
+    and declared content digest
+  - repeat `--dependency-artifact <path>` for referenced architecture and
+    work-start artifacts; unresolved readiness references fail validation
   - use this contract-authority entrypoint for local artifact review until OOS
     work item `802` activates equivalent runtime validation
 - `validate_component_contracts.py`

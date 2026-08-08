@@ -34,8 +34,15 @@ jobs:
 
       - name: Validate Delivery ART artifact entrypoint
         run: |
-          for artifact in contracts/fixtures/delivery-art-workflow/*.json; do
-            python3 scripts/validate_delivery_art_artifact.py "$artifact" --repo-root .
+          architecture=contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
+          work_start=contracts/fixtures/delivery-art-workflow/work-start-record.valid.json
+          python3 scripts/validate_delivery_art_artifact.py "$architecture" --repo-root .
+          python3 scripts/validate_delivery_art_artifact.py "$work_start" --repo-root . \
+            --dependency-artifact "$architecture"
+          for packet in contracts/fixtures/delivery-art-workflow/review-packet-*.json; do
+            python3 scripts/validate_delivery_art_artifact.py "$packet" --repo-root . \
+              --dependency-artifact "$architecture" \
+              --dependency-artifact "$work_start"
           done
 
       - name: Materialize active and admitted repos

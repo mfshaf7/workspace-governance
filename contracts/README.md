@@ -186,18 +186,20 @@ Use these contracts to declare:
     readiness record required before source work
 - `schemas/delivery-art-review-packet.schema.json`
   - defines Review Packet v2 with structured result semantics, test-fidelity
-    classes, exact source provenance, acceptance mapping, rollback boundary,
-    readiness, integrity, and append-only durable custody
+    classes, architecture conformance-case bindings, exact source provenance,
+    acceptance mapping, rollback boundary, readiness, integrity, and
+    append-only durable custody
 - `fixtures/delivery-art-workflow/`
   - valid architecture, work-start, merge-ready, and finalized artifact
     examples consumed by `validate_contracts.py`; the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,
     unknown or cyclic architecture graphs, mismatched work-start repo
-    snapshots, blocked architecture representation, missing durable timestamps,
-    and local-only finalization
-  - cross-field repo and acceptance bindings are semantic contract checks in
-    addition to JSON Schema shape validation
+    snapshots, unresolved or divergent artifact references, missing applicable
+    conformance results, blocked architecture representation, missing durable
+    timestamps, and local-only finalization
+  - cross-field repo, acceptance, and resolved artifact-chain bindings are
+    semantic contract checks in addition to JSON Schema shape validation
 
 ## Repo Rules
 
