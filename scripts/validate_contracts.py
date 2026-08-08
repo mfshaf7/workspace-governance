@@ -553,7 +553,9 @@ def _review_packet_readiness_subject_projection(payload: dict) -> dict:
     projection = copy.deepcopy(payload)
     projection.pop("custody", None)
     projection.pop("integrity", None)
+    projection.pop("finalized_at", None)
     readiness = _artifact_object(projection.get("readiness"))
+    readiness.pop("evaluated_at", None)
     readiness.pop("receipt_refs", None)
     readiness.pop("subject_digest", None)
     return projection
@@ -3510,6 +3512,36 @@ def validate_delivery_art_artifact_contracts(
         and merge_ready
         and readiness_receipt
     ):
+        readiness_subject_digest = (
+            delivery_art_review_packet_readiness_subject_digest(finalized)
+        )
+        terminal_time_variant = copy.deepcopy(finalized)
+        terminal_time_variant["readiness"]["evaluated_at"] = (
+            "2026-08-08T11:31:00+08:00"
+        )
+        terminal_time_variant["finalized_at"] = "2026-08-08T11:34:00+08:00"
+        if (
+            delivery_art_review_packet_readiness_subject_digest(
+                terminal_time_variant
+            )
+            != readiness_subject_digest
+        ):
+            errors.append(
+                "Review Packet readiness-subject digest must exclude terminal timestamps"
+            )
+
+        semantic_variant = copy.deepcopy(finalized)
+        semantic_variant["landing_unit"]["rollback_boundary"] = (
+            "A materially different rollback boundary."
+        )
+        if (
+            delivery_art_review_packet_readiness_subject_digest(semantic_variant)
+            == readiness_subject_digest
+        ):
+            errors.append(
+                "Review Packet readiness-subject digest must bind final semantic content"
+            )
+
         malformed_receipt_subject = copy.deepcopy(finalized)
         malformed_receipt_subject["schema_version"] = 2.0
         require_reference_rejected(
@@ -3574,7 +3606,7 @@ def validate_delivery_art_artifact_contracts(
 
         late_readiness_receipt = copy.deepcopy(readiness_receipt)
         late_readiness_receipt["custody"]["persisted_at"] = (
-            "2026-08-08T11:30:01+08:00"
+            "2026-08-08T11:32:01+08:00"
         )
         require_reference_rejected(
             finalized,

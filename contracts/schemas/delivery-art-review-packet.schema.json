@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-review-packet.schema.json",
   "title": "Delivery ART Review Packet v2",
-  "$comment": "Exact work-item coverage, source/non-source evidence binding, globally unique evidence ids, evidence-reference resolution, and direct-land exception expiry relative to readiness and finalization are enforced by this schema and scripts/validate_contracts.py because JSON Schema cannot compare dynamic members or timestamps.",
+  "$comment": "Exact work-item coverage, source/non-source evidence binding, globally unique evidence ids, evidence-reference resolution, direct-land exception expiry, readiness-subject projection, and timestamp ordering are enforced by this schema and scripts/validate_contracts.py because JSON Schema cannot compare dynamic members or timestamps. The operating-readiness subject excludes custody, integrity, finalized_at, readiness.evaluated_at, readiness.receipt_refs, and readiness.subject_digest so receipt persistence can truthfully precede finalization.",
   "type": "object",
   "additionalProperties": false,
   "required": [

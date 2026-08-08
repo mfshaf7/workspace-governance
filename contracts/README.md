@@ -197,6 +197,10 @@ Use these contracts to declare:
     levels; architecture, implementation, and merge receipts bind exact source
     artifact content while operating receipts bind the cycle-safe canonical
     Review Packet readiness-subject projection
+  - that projection binds final semantic content but excludes custody,
+    integrity, receipt refs, the subject digest, and terminal evaluation and
+    finalization timestamps; the receipt is evaluated and persisted before the
+    packet receives its final timestamp and durable custody
   - trusted runtime issuer verification remains owner implementation work
 - `fixtures/delivery-art-workflow/`
   - valid architecture, work-start, merge-ready, operating-readiness receipt,
