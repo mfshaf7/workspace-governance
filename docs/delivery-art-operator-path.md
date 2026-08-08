@@ -178,6 +178,9 @@ record remains durable with architecture readiness `blocked` and overall
 readiness `blocked`. It must not invent a packet ref or claim
 `implementation-ready`. Once the architecture decision is ready, a fresh
 work-start evaluation binds its packet ref and digest before source work.
+Those refs follow the architecture substate even when a separate blocker keeps
+overall work-start readiness blocked: `architecture-ready` requires both refs,
+while `blocked` and `not-required` require both to remain null.
 
 Read snapshots may be cached to keep preparation fast. A final mutation must
 refresh the target item and dependency subset. The intended cold work-start

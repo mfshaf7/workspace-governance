@@ -163,6 +163,36 @@
     {
       "if": {
         "properties": {
+          "architecture": {
+            "properties": { "readiness": { "const": "architecture-ready" } },
+            "required": ["readiness"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "packet_ref": { "$ref": "#/$defs/nonEmptyString" },
+              "packet_digest": { "$ref": "#/$defs/digest" }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "packet_ref": { "type": "null" },
+              "packet_digest": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "landing_unit": {
             "properties": { "decision": { "const": "non_source_child" } },
             "required": ["decision"]

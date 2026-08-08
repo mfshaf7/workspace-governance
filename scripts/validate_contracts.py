@@ -1187,6 +1187,44 @@ def validate_delivery_art_artifact_contracts(
             "blocked work-start record without an identified blocker",
         )
 
+        blocked_architecture_with_invented_refs = copy.deepcopy(
+            blocked_architecture
+        )
+        blocked_architecture_with_invented_refs["architecture"]["packet_ref"] = (
+            "openproject-attachment://work_packages/698/architecture.json"
+        )
+        blocked_architecture_with_invented_refs["architecture"][
+            "packet_digest"
+        ] = "sha256:" + "7" * 64
+        require_rejected(
+            "work_start_record",
+            blocked_architecture_with_invented_refs,
+            "blocked architecture substate with invented packet references",
+        )
+
+        unrelated_blocker_after_architecture_ready = copy.deepcopy(work_start)
+        unrelated_blocker_after_architecture_ready["readiness"] = {
+            "level": "blocked",
+            "evaluated_at": "2026-08-08T10:10:00+08:00",
+            "blockers": ["Operator approval remains pending."],
+        }
+        require_accepted(
+            "work_start_record",
+            unrelated_blocker_after_architecture_ready,
+            "overall blocked record retaining exact architecture-ready refs",
+        )
+
+        architecture_ready_without_refs = copy.deepcopy(
+            unrelated_blocker_after_architecture_ready
+        )
+        architecture_ready_without_refs["architecture"]["packet_ref"] = None
+        architecture_ready_without_refs["architecture"]["packet_digest"] = None
+        require_rejected(
+            "work_start_record",
+            architecture_ready_without_refs,
+            "architecture-ready substate without packet references",
+        )
+
         evaluation_before_snapshot = copy.deepcopy(work_start)
         evaluation_before_snapshot["readiness"]["evaluated_at"] = (
             "2026-08-08T10:08:00+08:00"

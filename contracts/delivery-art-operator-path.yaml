@@ -127,6 +127,7 @@ delivery_art_operator_path:
     branch_base_ref_and_commit_must_match_source_snapshot: true
     planned_review_packet_ref_required_for_source_work: true
     architecture_packet_required_when_preflight_applies: true
+    architecture_refs_follow_architecture_readiness: true
     required_architecture_may_record_blocked_state: true
     blocked_architecture_prevents_implementation_ready: true
     read_snapshot_cache_allowed: true
