@@ -282,9 +282,10 @@ WGCF stores readiness receipts and artifact refs, not duplicate source
 artifacts. The digest uses RFC 8785 canonical JSON and SHA-256 over artifact
 content, excluding custody metadata and the digest field itself.
 
-The accepted canonical input domain contains Unicode scalar values and integral
-numbers only; floating-point spellings such as `1.0` and lone UTF-16 surrogates
-are rejected before hashing. Artifact lifecycle timestamps are chronological:
+The accepted canonical input domain contains unique JSON object keys, Unicode
+scalar values, and integral numbers only; duplicate keys, floating-point
+spellings such as `1.0`, and lone UTF-16 surrogates are rejected before
+hashing. Artifact lifecycle timestamps are chronological:
 source capture precedes architecture decisions and work-start evaluation,
 packet creation precedes evaluation and finalization, and durable persistence
 does not precede the decision it stores.

@@ -24,6 +24,15 @@ ARTIFACT_CASE_BY_TYPE = {
 }
 
 
+def _strict_artifact_object(pairs: list[tuple[str, object]]) -> dict:
+    artifact_object = {}
+    for key, value in pairs:
+        if key in artifact_object:
+            raise ValueError(f"duplicate JSON object key {key!r}")
+        artifact_object[key] = value
+    return artifact_object
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate one operator-supplied Delivery ART artifact."
@@ -40,8 +49,8 @@ def main() -> int:
     artifact_label = str(artifact_path) if artifact_path else "<stdin>"
     try:
         raw_payload = artifact_path.read_text() if artifact_path else sys.stdin.read()
-        payload = json.loads(raw_payload)
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = json.loads(raw_payload, object_pairs_hook=_strict_artifact_object)
+    except (OSError, ValueError) as exc:
         print(f"delivery ART artifact invalid: {exc}", file=sys.stderr)
         return 1
 
