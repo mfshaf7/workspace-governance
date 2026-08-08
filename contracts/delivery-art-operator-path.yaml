@@ -88,6 +88,7 @@ delivery_art_operator_path:
       failed_required_evidence_blocks_advancement: true
       not_applicable_requires_reason_and_authority_ref: true
       attached_artifact_is_a_reference_not_a_pass_result: true
+      architecture_dependency_graph_is_bound_and_acyclic: true
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
@@ -118,6 +119,8 @@ delivery_art_operator_path:
     branch_base_ref_and_commit_must_match_source_snapshot: true
     planned_review_packet_ref_required_for_source_work: true
     architecture_packet_required_when_preflight_applies: true
+    required_architecture_may_record_blocked_state: true
+    blocked_architecture_prevents_implementation_ready: true
     read_snapshot_cache_allowed: true
     fresh_target_and_dependency_snapshot_required_before_mutation: true
     invalidation_inputs:
@@ -166,6 +169,7 @@ delivery_art_operator_path:
       content_addressed_filename_required: true
       append_only_corrections: true
       correction_requires_supersedes_ref: true
+      durable_persisted_at_required: true
       wgcf_records_receipts_not_source_artifacts: true
   authority_boundaries:
     workspace_governance:

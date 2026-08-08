@@ -182,14 +182,16 @@
             "later_level_does_not_rewrite_earlier_evidence",
             "failed_required_evidence_blocks_advancement",
             "not_applicable_requires_reason_and_authority_ref",
-            "attached_artifact_is_a_reference_not_a_pass_result"
+            "attached_artifact_is_a_reference_not_a_pass_result",
+            "architecture_dependency_graph_is_bound_and_acyclic"
           ],
           "properties": {
             "readiness_is_snapshot_bound": { "const": true },
             "later_level_does_not_rewrite_earlier_evidence": { "const": true },
             "failed_required_evidence_blocks_advancement": { "const": true },
             "not_applicable_requires_reason_and_authority_ref": { "const": true },
-            "attached_artifact_is_a_reference_not_a_pass_result": { "const": true }
+            "attached_artifact_is_a_reference_not_a_pass_result": { "const": true },
+            "architecture_dependency_graph_is_bound_and_acyclic": { "const": true }
           }
         }
       }
@@ -260,6 +262,8 @@
         "branch_base_ref_and_commit_must_match_source_snapshot",
         "planned_review_packet_ref_required_for_source_work",
         "architecture_packet_required_when_preflight_applies",
+        "required_architecture_may_record_blocked_state",
+        "blocked_architecture_prevents_implementation_ready",
         "read_snapshot_cache_allowed",
         "fresh_target_and_dependency_snapshot_required_before_mutation",
         "invalidation_inputs"
@@ -280,6 +284,8 @@
         "branch_base_ref_and_commit_must_match_source_snapshot": { "const": true },
         "planned_review_packet_ref_required_for_source_work": { "const": true },
         "architecture_packet_required_when_preflight_applies": { "const": true },
+        "required_architecture_may_record_blocked_state": { "const": true },
+        "blocked_architecture_prevents_implementation_ready": { "const": true },
         "read_snapshot_cache_allowed": { "const": true },
         "fresh_target_and_dependency_snapshot_required_before_mutation": { "const": true },
         "invalidation_inputs": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
@@ -356,6 +362,7 @@
             "content_addressed_filename_required",
             "append_only_corrections",
             "correction_requires_supersedes_ref",
+            "durable_persisted_at_required",
             "wgcf_records_receipts_not_source_artifacts"
           ],
           "properties": {
@@ -366,6 +373,7 @@
             "content_addressed_filename_required": { "const": true },
             "append_only_corrections": { "const": true },
             "correction_requires_supersedes_ref": { "const": true },
+            "durable_persisted_at_required": { "const": true },
             "wgcf_records_receipts_not_source_artifacts": { "const": true }
           }
         }

@@ -204,7 +204,7 @@
       "if": {
         "properties": {
           "architecture": {
-            "properties": { "required": { "const": true } },
+            "properties": { "required": { "const": false } },
             "required": ["required"]
           }
         }
@@ -213,9 +213,9 @@
         "properties": {
           "architecture": {
             "properties": {
-              "packet_ref": { "$ref": "#/$defs/nonEmptyString" },
-              "packet_digest": { "$ref": "#/$defs/digest" },
-              "readiness": { "const": "architecture-ready" }
+              "packet_ref": { "type": "null" },
+              "packet_digest": { "type": "null" },
+              "readiness": { "const": "not-required" }
             }
           }
         }
@@ -224,9 +224,33 @@
         "properties": {
           "architecture": {
             "properties": {
-              "packet_ref": { "type": "null" },
-              "packet_digest": { "type": "null" },
-              "readiness": { "const": "not-required" }
+              "readiness": { "enum": ["architecture-ready", "blocked"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "readiness": {
+            "properties": { "level": { "const": "implementation-ready" } },
+            "required": ["level"]
+          },
+          "architecture": {
+            "properties": { "required": { "const": true } },
+            "required": ["required"]
+          }
+        },
+        "required": ["readiness", "architecture"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "packet_ref": { "$ref": "#/$defs/nonEmptyString" },
+              "packet_digest": { "$ref": "#/$defs/digest" },
+              "readiness": { "const": "architecture-ready" }
             }
           }
         }

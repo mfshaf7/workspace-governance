@@ -342,6 +342,67 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     errors: list[str] = []
     artifact_type = payload.get("artifact_type")
 
+    if artifact_type == "delivery_art_architecture_packet":
+        covered_work_items = set(payload.get("covered_work_item_ids") or [])
+        architecture = payload.get("architecture") or {}
+        owner_map = architecture.get("descendant_owner_map") or []
+        dag = architecture.get("dependency_merge_dag") or {}
+        owner_map_ids = [entry.get("work_item_id") for entry in owner_map]
+        dag_nodes = set(dag.get("nodes") or [])
+
+        if len(owner_map_ids) != len(set(owner_map_ids)):
+            errors.append(
+                "architecture.descendant_owner_map must contain one entry per work item"
+            )
+        if set(owner_map_ids) != covered_work_items:
+            errors.append(
+                "architecture.descendant_owner_map must exactly cover covered_work_item_ids"
+            )
+        if dag_nodes != covered_work_items:
+            errors.append(
+                "architecture.dependency_merge_dag.nodes must exactly cover covered_work_item_ids"
+            )
+
+        for entry in owner_map:
+            parent = entry.get("parent_work_item_id")
+            if parent is not None and parent not in dag_nodes:
+                errors.append(
+                    f"architecture descendant {entry.get('work_item_id')} references unknown parent {parent}"
+                )
+
+        adjacency = {node: [] for node in dag_nodes}
+        indegree = {node: 0 for node in dag_nodes}
+        for edge in dag.get("edges") or []:
+            source = edge.get("from")
+            target = edge.get("to")
+            unknown_endpoints = {source, target} - dag_nodes
+            if unknown_endpoints:
+                errors.append(
+                    "architecture dependency edge references unknown nodes: "
+                    + ", ".join(sorted(str(node) for node in unknown_endpoints))
+                )
+                continue
+            adjacency[source].append(target)
+            indegree[target] += 1
+
+        ready = [node for node, degree in indegree.items() if degree == 0]
+        visited_count = 0
+        while ready:
+            node = ready.pop()
+            visited_count += 1
+            for target in adjacency[node]:
+                indegree[target] -= 1
+                if indegree[target] == 0:
+                    ready.append(target)
+        if visited_count != len(dag_nodes):
+            errors.append("architecture.dependency_merge_dag must be acyclic")
+
+        owner_repos = {entry.get("owner_repo") for entry in owner_map}
+        if set(dag.get("merge_order") or []) != owner_repos:
+            errors.append(
+                "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
+            )
+
     if artifact_type == "delivery_art_work_start_record":
         landing_unit = payload.get("landing_unit") or {}
         if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
@@ -499,6 +560,21 @@ def validate_delivery_art_artifact_contracts(
                 f"Delivery ART contract negative case {case_name!r} must be rejected"
             )
 
+    def require_accepted(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+    ) -> None:
+        validator = validators.get(validator_name)
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        semantic_errors = delivery_art_artifact_semantic_errors(payload)
+        if schema_errors or semantic_errors:
+            details = [error.message for error in schema_errors] + semantic_errors
+            errors.append(
+                f"Delivery ART contract positive case {case_name!r} must be accepted: "
+                + "; ".join(details)
+            )
+
     architecture = fixtures.get("architecture-packet.valid.json")
     if architecture:
         stale_decision = copy.deepcopy(architecture)
@@ -520,6 +596,38 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             unresolved_decision,
             "architecture-ready packet with an open contradiction",
+        )
+
+        unknown_dag_endpoint = copy.deepcopy(architecture)
+        unknown_dag_endpoint["architecture"]["dependency_merge_dag"]["edges"][0][
+            "to"
+        ] = "work-item-999"
+        require_rejected(
+            "architecture_packet",
+            unknown_dag_endpoint,
+            "architecture dependency edge with an unknown endpoint",
+        )
+
+        cyclic_dag = copy.deepcopy(architecture)
+        cyclic_dag["architecture"]["dependency_merge_dag"]["edges"].append(
+            {
+                "from": "work-item-802",
+                "to": "work-item-801",
+                "relation": "must_merge_before",
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            cyclic_dag,
+            "cyclic architecture dependency graph",
+        )
+
+        missing_architecture_persistence_time = copy.deepcopy(architecture)
+        missing_architecture_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "architecture_packet",
+            missing_architecture_persistence_time,
+            "durable architecture packet without a persistence timestamp",
         )
 
     work_start = fixtures.get("work-start-record.valid.json")
@@ -574,6 +682,25 @@ def validate_delivery_art_artifact_contracts(
             "work_start_record",
             missing_persistence_time,
             "durable work-start record without a persistence timestamp",
+        )
+
+        blocked_architecture = copy.deepcopy(work_start)
+        blocked_architecture["landing_unit"]["decision"] = "defer_decision_blocked"
+        blocked_architecture["architecture"] = {
+            "required": True,
+            "packet_ref": None,
+            "packet_digest": None,
+            "readiness": "blocked",
+        }
+        blocked_architecture["readiness"] = {
+            "level": "blocked",
+            "evaluated_at": "2026-08-08T10:10:00+08:00",
+            "blockers": ["Architecture decision remains unresolved."],
+        }
+        require_accepted(
+            "work_start_record",
+            blocked_architecture,
+            "required architecture represented as a durable blocked work-start record",
         )
 
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")

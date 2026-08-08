@@ -193,8 +193,9 @@ Use these contracts to declare:
     examples consumed by `validate_contracts.py`; the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,
-    mismatched work-start repo snapshots, missing durable timestamps, and
-    local-only finalization
+    unknown or cyclic architecture graphs, mismatched work-start repo
+    snapshots, blocked architecture representation, missing durable timestamps,
+    and local-only finalization
   - cross-field repo and acceptance bindings are semantic contract checks in
     addition to JSON Schema shape validation
 

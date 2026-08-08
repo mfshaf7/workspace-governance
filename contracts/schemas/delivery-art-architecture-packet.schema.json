@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
+  "$comment": "Exact descendant/DAG coverage, endpoint binding, owner merge-order coverage, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -269,7 +270,13 @@
               "decided_at": { "$ref": "#/$defs/timestamp" }
             }
           },
-          "custody": { "properties": { "state": { "const": "durable" }, "backend": { "const": "openproject-attachment" } } }
+          "custody": {
+            "properties": {
+              "state": { "const": "durable" },
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
+            }
+          }
         }
       }
     },

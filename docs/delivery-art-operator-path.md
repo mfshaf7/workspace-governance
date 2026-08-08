@@ -100,6 +100,11 @@ or
 `blocked-pending-architecture-decision`. Reopen the preflight if an owner
 boundary, protocol, lifecycle, or evidence handoff materially changes.
 
+The descendant owner map and dependency DAG must cover the same declared work
+items. Every parent and edge endpoint must resolve to that set, the merge order
+must cover the declared owner repos, and the dependency graph must be acyclic.
+These graph invariants are semantic checks in addition to JSON Schema shape.
+
 When the initiative changes a cross-repo protocol, the packet must also include
 an executable conformance plan. It must cover command acknowledgement,
 deterministic identity and idempotency, state-mutation ordering, retry, cancel,
@@ -163,6 +168,12 @@ alone is insufficient for these dynamic cross-record comparisons, so the
 contract validator applies the semantic binding as a separate required check.
 Durable work-start or blocked records must also record `persisted_at`; durable
 custody without a persistence timestamp is invalid.
+
+When architecture is required but its decision is unresolved, the work-start
+record remains durable with architecture readiness `blocked` and overall
+readiness `blocked`. It must not invent a packet ref or claim
+`implementation-ready`. Once the architecture decision is ready, a fresh
+work-start evaluation binds its packet ref and digest before source work.
 
 Read snapshots may be cached to keep preparation fast. A final mutation must
 refresh the target item and dependency subset. The intended cold work-start
@@ -246,6 +257,8 @@ Draft artifacts remain local and reviewable. Once an architecture decision,
 work-start evaluation, or Review Packet finalization is recorded, OOS owns
 durable custody by attaching content-addressed JSON to the initiative Epic.
 Corrections append a superseding artifact; they do not replace prior evidence.
+Every durable architecture, work-start, and finalized Review Packet artifact
+records when it was persisted.
 WGCF stores readiness receipts and artifact refs, not duplicate source
 artifacts. The digest uses RFC 8785 canonical JSON and SHA-256 over artifact
 content, excluding custody metadata and the digest field itself.
