@@ -123,8 +123,11 @@ it does not pretend implementation tests have already run. Applicable positive
 and negative cases must pass before `merge-ready`, using the fidelity needed for
 the claim. Each case names the dimensions it proves, required plans cover every
 declared dimension, and every mandated protocol dimension has positive and
-negative `merge-ready` cases. A synthetic resolver may support unit tests, but it cannot prove a
-claim about real Git history. Git causality requires a `real-git` case.
+negative `merge-ready` cases. Every covered work item must also have positive
+and negative `merge-ready` cases, so one item cannot carry protocol proof for a
+different item that defers its own cases until operating readiness. A synthetic
+resolver may support unit tests, but it cannot prove a claim about real Git
+history. Git causality requires a `real-git` case.
 
 The machine schema is
 [`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
@@ -277,8 +280,8 @@ conformance cases declare the work items they apply to. Every case applicable
 to the packet's work-item and readiness scope must have a passing evidence
 result at the planned fidelity. A required conformance plan covers every
 architecture work item and every declared dimension with executable cases. A
-child cannot
-advance merely because its tests were omitted from the plan.
+child cannot advance merely because its tests were omitted from the plan or
+deferred beyond that child's current readiness gate.
 An architecture decision and its durable attachment must exist before the
 work-start evaluation that consumes it. The durable work-start attachment must
 exist before a Review Packet is created. Internally valid future evidence

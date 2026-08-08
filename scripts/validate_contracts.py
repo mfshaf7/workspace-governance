@@ -726,6 +726,9 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         merge_ready_polarities_by_dimension = {
             dimension: set() for dimension in conformance_dimensions
         }
+        merge_ready_polarities_by_work_item = {
+            work_item_id: set() for work_item_id in covered_work_items
+        }
         for case in conformance_cases:
             case_id = case.get("id")
             applicability = set(
@@ -741,10 +744,15 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 if isinstance(polarity, str):
                     polarities_by_work_item[work_item_id].add(polarity)
             if case.get("target_readiness") == "merge-ready":
+                polarity = case.get("polarity")
+                for work_item_id in applicability.intersection(covered_work_items):
+                    if isinstance(polarity, str):
+                        merge_ready_polarities_by_work_item[work_item_id].add(
+                            polarity
+                        )
                 for dimension in case_dimensions.intersection(
                     conformance_dimensions
                 ):
-                    polarity = case.get("polarity")
                     if isinstance(polarity, str):
                         merge_ready_polarities_by_dimension[dimension].add(
                             polarity
@@ -776,6 +784,14 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         f"required conformance plan must include positive and negative cases for {work_item_id}"
                     )
         if protocol_applicability.get("applies") is True:
+            for work_item_id, polarities in (
+                merge_ready_polarities_by_work_item.items()
+            ):
+                if polarities != {"positive", "negative"}:
+                    errors.append(
+                        "required protocol work item must have positive and negative merge-ready cases: "
+                        + work_item_id
+                    )
             for dimension in DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS:
                 if merge_ready_polarities_by_dimension.get(dimension) != {
                     "positive",
@@ -1653,6 +1669,25 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             protocol_dimension_deferred_past_merge,
             "protocol dimension without positive and negative merge-ready cases",
+        )
+
+        protocol_work_item_deferred_past_merge = copy.deepcopy(architecture)
+        original_cases = protocol_work_item_deferred_past_merge[
+            "conformance_plan"
+        ]["cases"]
+        deferred_cases = []
+        for case in original_cases:
+            case["applies_to_work_item_ids"] = ["work-item-801"]
+            deferred_case = copy.deepcopy(case)
+            deferred_case["id"] = f"{case['id']}-deferred-work-item-802"
+            deferred_case["applies_to_work_item_ids"] = ["work-item-802"]
+            deferred_case["target_readiness"] = "operating-ready"
+            deferred_cases.append(deferred_case)
+        original_cases.extend(deferred_cases)
+        require_rejected(
+            "architecture_packet",
+            protocol_work_item_deferred_past_merge,
+            "protocol work item without positive and negative merge-ready cases",
         )
 
         conformance_case_with_undeclared_dimension = copy.deepcopy(architecture)

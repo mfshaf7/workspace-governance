@@ -407,6 +407,7 @@
             "required_plan_exactly_covers_declared_dimensions",
             "required_plan_has_positive_and_negative_case_per_work_item",
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases",
+            "required_protocol_work_item_has_merge_ready_positive_and_negative_cases",
             "later_readiness_requires_all_applicable_cases_to_pass",
             "evidence_fidelity_must_match_planned_case_fidelity",
             "cases_outside_packet_work_item_or_readiness_scope_rejected"
@@ -419,6 +420,7 @@
             "required_plan_exactly_covers_declared_dimensions": { "const": true },
             "required_plan_has_positive_and_negative_case_per_work_item": { "const": true },
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases": { "const": true },
+            "required_protocol_work_item_has_merge_ready_positive_and_negative_cases": { "const": true },
             "later_readiness_requires_all_applicable_cases_to_pass": { "const": true },
             "evidence_fidelity_must_match_planned_case_fidelity": { "const": true },
             "cases_outside_packet_work_item_or_readiness_scope_rejected": { "const": true }
