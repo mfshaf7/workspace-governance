@@ -10,6 +10,180 @@ delivery_art_operator_path:
     workflow_health: platform-engineering/products/openproject/runbooks/check-delivery-art-workflow-health.md
     quality_gate: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
     admin_boundary: platform-engineering/products/openproject/runbooks/openproject-platform-admin-surface.md
+  contract_activation:
+    state: contract-defined
+    runtime_enforcement: pending-owner-implementation-and-dogfood
+    target_art_items:
+      - openproject://work_packages/802
+      - openproject://work_packages/803
+      - openproject://work_packages/804
+      - openproject://work_packages/805
+      - openproject://work_packages/806
+    current_runtime_compatibility:
+      review_packet_schema_version: 1
+      new_work_start_commands_available: false
+      rule: >-
+        Continue using the currently documented OOS commands until the target
+        owner implementations land. This contract defines the next boundary;
+        it does not claim that work-start enforcement or Review Packet v2 is
+        already active.
+    activation_requires:
+      - OOS persists and evaluates the architecture packet and work-start record
+      - OOS implements Review Packet v2 and rejects weak result strings
+      - WGCF evaluates the four readiness levels from structured artifacts
+      - Platform removes duplicate ART quality semantics and consumes OOS projections
+      - Security approves evidence custody and source-provenance controls
+      - the path is dogfooded on delivery initiative 698
+  readiness_model:
+    ordered_levels:
+      - architecture-ready
+      - implementation-ready
+      - merge-ready
+      - operating-ready
+    levels:
+      architecture-ready:
+        purpose: prove the target design, ownership, sequence, and conformance plan before source implementation
+        requires:
+          - finalized architecture packet with an explicit operator decision
+          - complete descendant and owner map
+          - dependency and merge sequence
+          - lifecycle, authority, evidence, runtime, and rollback boundaries
+          - planned positive and negative conformance cases with fidelity classes
+        does_not_require:
+          - implementation tests to have already passed
+          - a source branch or pull request to exist
+      implementation-ready:
+        purpose: bind one Landing Unit to fresh ART and owner-repo source truth before implementation
+        requires:
+          - architecture-ready evidence when architecture preflight applies
+          - explicit Landing Unit Decision
+          - exact owner repos, base refs, base commits, and planned Review Packet ref
+          - fresh scope fingerprint with invalidation inputs
+        does_not_require:
+          - an open pull request
+          - merge or runtime evidence
+      merge-ready:
+        purpose: prove the exact reviewed source head satisfies the Landing Unit before merge
+        requires:
+          - implementation-ready work-start record
+          - open pull request evidence at exact source head
+          - structured changed surfaces and acceptance mapping
+          - applicable test and validation results with no failed result
+          - concrete rollback boundary
+        does_not_require:
+          - merged source evidence
+          - post-merge runtime proof
+      operating-ready:
+        purpose: prove the merged or explicitly accepted change has the evidence required for ART closeout
+        requires:
+          - finalized content-addressed Review Packet
+          - durable source or non-source evidence
+          - applicable live, runtime, security, and restore evidence for the change class
+          - append-only custody ref and receipt refs
+        does_not_require:
+          - runtime proof when the declared change class does not require it
+    rules:
+      readiness_is_snapshot_bound: true
+      later_level_does_not_rewrite_earlier_evidence: true
+      failed_required_evidence_blocks_advancement: true
+      not_applicable_requires_reason_and_authority_ref: true
+      attached_artifact_is_a_reference_not_a_pass_result: true
+  artifact_contracts:
+    architecture_packet:
+      schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
+      schema_version: 1
+      target_owner_repo: operator-orchestration-service
+      durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
+    work_start_record:
+      schema_ref: contracts/schemas/delivery-art-work-start-record.schema.json
+      schema_version: 1
+      target_owner_repo: operator-orchestration-service
+      durable_when: implementation readiness is evaluated
+    review_packet:
+      schema_ref: contracts/schemas/delivery-art-review-packet.schema.json
+      schema_version: 2
+      target_owner_repo: operator-orchestration-service
+      durable_when: packet is finalized
+      migration_from_runtime_version: 1
+  work_start_gate:
+    required_before_branch_or_source_edit: true
+    landing_unit_decisions:
+      - feature_single_landing_unit
+      - child_isolated_landing_unit
+      - non_source_child
+      - defer_decision_blocked
+    child_isolated_requires_split_reason: true
+    exact_base_revision_required: true
+    planned_review_packet_ref_required_for_source_work: true
+    architecture_packet_required_when_preflight_applies: true
+    read_snapshot_cache_allowed: true
+    fresh_target_and_dependency_snapshot_required_before_mutation: true
+    invalidation_inputs:
+      - ART descendant or dependency change
+      - owner-repo or rollback-boundary change
+      - base ref or base commit change
+      - architecture decision or packet digest change
+      - validation or security obligation change
+  evidence_integrity:
+    canonicalization: RFC8785
+    digest_algorithm: sha256
+    digest_scope: artifact content excluding custody metadata and the digest field itself
+    evidence_results:
+      allowed:
+        - pass
+        - fail
+        - not_applicable
+      merge_ready_allows:
+        - pass
+        - not_applicable
+      string_prefixes_are_not_results:
+        - "PASS:"
+        - "FAIL:"
+        - "CHECK:"
+        - "Attached artifact:"
+    test_fidelity_classes:
+      - pure-unit
+      - filesystem
+      - real-git
+      - process-crash
+      - sandbox-runtime
+      - live-backend
+    source_provenance:
+      exact_base_and_head_commits_required: true
+      real_git_required_for_git_causality_claims: true
+      synthetic_resolver_cannot_prove_git_history: true
+    custody:
+      draft_backend: local-filesystem
+      durable_backend: openproject-attachment
+      durable_owner: operator-orchestration-service
+      attachment_scope: initiative-epic
+      content_addressed_filename_required: true
+      append_only_corrections: true
+      correction_requires_supersedes_ref: true
+      wgcf_records_receipts_not_source_artifacts: true
+  authority_boundaries:
+    workspace_governance:
+      - policy and schema authority
+      - readiness meaning and evidence obligations
+    operator_orchestration_service:
+      - ART adapter and mutation authority
+      - scoped snapshot and artifact custody authority
+      - Review Packet and atomic closeout implementation
+    workspace_governance_control_fabric:
+      - readiness composition and receipt authority
+      - no ART mutation authority
+    platform_engineering:
+      - OpenProject runtime and projection authority
+      - no duplicate ART semantic evaluator
+    security_architecture:
+      - trust-boundary and evidence-custody review authority
+  performance_budgets:
+    status: target-until-dogfood-proves-operating-control
+    work_start_cold_seconds_max: 5
+    work_start_warm_seconds_max: 2
+    local_schema_validation_milliseconds_max: 250
+    prohibited_read_pattern: one full initiative graph rebuild or one relation call per work item for every bounded work-start read
+    final_write_rule: cached reads may inform preparation but final mutations must refresh the target and dependency subset
   initiative_architecture_preflight:
     applies_when:
       - an accepted initiative is architecture-shaping
@@ -20,6 +194,7 @@ delivery_art_operator_path:
       - complete initiative descendant tree from Workspace Delivery ART
       - merged implementation and contract truth from every affected owner repo
       - active workspace, platform, orchestration, and security authority contracts
+    packet_schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
     packet_required_sections:
       - descendant-and-owner-map
       - dependency-and-merge-sequence
@@ -29,12 +204,13 @@ delivery_art_operator_path:
       - runtime-boundaries-and-prohibited-actions
       - rollback-cleanup-and-terminal-conditions
       - contradictions-and-open-decisions
+      - conformance-plan
     decision_gate:
       operator_discussion_required: true
       execution_sequence_locked_before_child_work: true
       reopen_when_owner_boundary_or_protocol_changes: true
       allowed_results:
-        - ready-for-child-implementation
+        - architecture-ready
         - blocked-pending-architecture-decision
     protocol_conformance_preflight:
       required_when_cross_repo_protocol_changes: true
@@ -54,7 +230,9 @@ delivery_art_operator_path:
       executable_cases_required:
         - positive-contract-cases
         - negative-contract-cases
-      child_ready_only_after_conformance_passes: true
+      architecture_ready_requires_conformance_plan: true
+      merge_ready_requires_applicable_cases_pass: true
+      fidelity_class_required: true
   canonical_read_hierarchy:
     - id: session-bootstrap
       cli: npm run art -- bootstrap

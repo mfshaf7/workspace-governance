@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import copy
 from datetime import date, datetime
+import hashlib
+import json
 from pathlib import Path
 import re
 import shlex
@@ -73,6 +75,23 @@ CONTROLLED_PROOF_SCHEMA_REF = (
 CONTROLLED_PROOF_RESULT_SCHEMA_REF = (
     "contracts/schemas/controlled-runtime-proof-result.schema.json"
 )
+DELIVERY_ART_ARTIFACT_CASES = {
+    "architecture_packet": (
+        "contracts/schemas/delivery-art-architecture-packet.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json",),
+    ),
+    "work_start_record": (
+        "contracts/schemas/delivery-art-work-start-record.schema.json",
+        ("contracts/fixtures/delivery-art-workflow/work-start-record.valid.json",),
+    ),
+    "review_packet": (
+        "contracts/schemas/delivery-art-review-packet.schema.json",
+        (
+            "contracts/fixtures/delivery-art-workflow/review-packet-merge-ready.valid.json",
+            "contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json",
+        ),
+    ),
+}
 CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "schema_version",
     "authorization_id",
@@ -303,6 +322,215 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
     for error in validator.iter_errors(instance):
         path = ".".join(str(part) for part in error.absolute_path) or "<root>"
         errors.append(f"{instance_path}: {path}: {error.message}")
+
+
+def validate_delivery_art_artifact_contracts(
+    errors: list[str],
+    repo_root: Path,
+) -> None:
+    validators: dict[str, Draft202012Validator] = {}
+    fixtures: dict[str, dict] = {}
+
+    for artifact_name, (schema_ref, fixture_refs) in DELIVERY_ART_ARTIFACT_CASES.items():
+        schema_path = repo_root / schema_ref
+        if not schema_path.exists():
+            errors.append(f"{schema_ref}: Delivery ART artifact schema is missing")
+            continue
+        schema = load_json(schema_path)
+        try:
+            Draft202012Validator.check_schema(schema)
+        except SchemaError as exc:
+            errors.append(f"{schema_ref}: invalid JSON Schema: {exc.message}")
+            continue
+
+        validator = Draft202012Validator(
+            schema,
+            format_checker=CONTRACT_FORMAT_CHECKER,
+        )
+        validators[artifact_name] = validator
+        for fixture_ref in fixture_refs:
+            fixture_path = repo_root / fixture_ref
+            if not fixture_path.exists():
+                errors.append(f"{fixture_ref}: Delivery ART artifact fixture is missing")
+                continue
+            fixture = load_json(fixture_path)
+            fixture_errors = sorted(
+                validator.iter_errors(fixture),
+                key=lambda error: list(error.absolute_path),
+            )
+            for error in fixture_errors:
+                path = ".".join(str(part) for part in error.absolute_path) or "<root>"
+                errors.append(f"{fixture_ref}: {path}: {error.message}")
+            fixtures[Path(fixture_ref).name] = fixture
+
+            # These fixtures use only JCS-stable JSON scalar forms; sorted compact
+            # serialization therefore matches their RFC 8785 projection.
+            digest_projection = copy.deepcopy(fixture)
+            digest_projection.pop("custody", None)
+            digest_projection.get("integrity", {}).pop("content_digest", None)
+            canonical_bytes = json.dumps(
+                digest_projection,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            ).encode("utf-8")
+            expected_digest = "sha256:" + hashlib.sha256(canonical_bytes).hexdigest()
+            actual_digest = fixture.get("integrity", {}).get("content_digest")
+            if actual_digest != expected_digest:
+                errors.append(
+                    f"{fixture_ref}: integrity.content_digest must equal canonical content digest {expected_digest}"
+                )
+            custody = fixture.get("custody") or {}
+            if custody.get("state") == "durable":
+                digest_hex = expected_digest.removeprefix("sha256:")
+                if digest_hex not in str(custody.get("uri", "")):
+                    errors.append(
+                        f"{fixture_ref}: durable custody URI must include the full content digest"
+                    )
+
+    def require_rejected(
+        validator_name: str,
+        payload: dict,
+        case_name: str,
+    ) -> None:
+        validator = validators.get(validator_name)
+        if validator is not None and not list(validator.iter_errors(payload)):
+            errors.append(
+                f"Delivery ART schema negative case {case_name!r} must be rejected"
+            )
+
+    architecture = fixtures.get("architecture-packet.valid.json")
+    if architecture:
+        stale_decision = copy.deepcopy(architecture)
+        stale_decision["decision"]["status"] = "ready-for-child-implementation"
+        require_rejected(
+            "architecture_packet",
+            stale_decision,
+            "legacy architecture decision vocabulary",
+        )
+
+        unresolved_decision = copy.deepcopy(architecture)
+        unresolved_decision["architecture"]["contradictions_open_decisions"][0][
+            "status"
+        ] = "open"
+        unresolved_decision["architecture"]["contradictions_open_decisions"][0][
+            "resolution"
+        ] = None
+        require_rejected(
+            "architecture_packet",
+            unresolved_decision,
+            "architecture-ready packet with an open contradiction",
+        )
+
+    work_start = fixtures.get("work-start-record.valid.json")
+    if work_start:
+        missing_split_reason = copy.deepcopy(work_start)
+        missing_split_reason["landing_unit"]["split_reason"] = None
+        require_rejected(
+            "work_start_record",
+            missing_split_reason,
+            "isolated Landing Unit without a split reason",
+        )
+
+        inexact_base = copy.deepcopy(work_start)
+        inexact_base["landing_unit"]["branch_plan"][0]["base_commit"] = "main"
+        require_rejected(
+            "work_start_record",
+            inexact_base,
+            "work-start record without an exact base commit",
+        )
+
+    merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
+    if merge_ready:
+        mapping_ids = {
+            entry.get("work_item_id")
+            for entry in merge_ready["evidence"]["acceptance_mapping"]
+        }
+        if mapping_ids != set(merge_ready["covered_work_item_ids"]):
+            errors.append(
+                "review-packet-merge-ready.valid.json: acceptance mapping must exactly cover the declared work items"
+            )
+        evidence_ids = {
+            entry.get("id")
+            for section in (
+                "changed_surfaces",
+                "tests",
+                "validations",
+                "runtime_and_live",
+                "security_and_trust",
+            )
+            for entry in merge_ready["evidence"][section]
+        }
+        for mapping in merge_ready["evidence"]["acceptance_mapping"]:
+            unknown_refs = set(mapping["evidence_ids"]) - evidence_ids
+            if unknown_refs:
+                errors.append(
+                    "review-packet-merge-ready.valid.json: acceptance mapping references unknown evidence ids "
+                    + ", ".join(sorted(unknown_refs))
+                )
+
+        failed_test = copy.deepcopy(merge_ready)
+        failed_test["evidence"]["tests"][0]["result"] = "fail"
+        require_rejected(
+            "review_packet",
+            failed_test,
+            "merge-ready Review Packet with failed evidence",
+        )
+
+        prose_result = copy.deepcopy(merge_ready)
+        prose_result["evidence"]["tests"] = [
+            "PASS: a result prefix is not structured evidence"
+        ]
+        require_rejected(
+            "review_packet",
+            prose_result,
+            "Review Packet with prose result strings",
+        )
+
+        missing_mapping = copy.deepcopy(merge_ready)
+        missing_mapping["evidence"]["acceptance_mapping"] = []
+        require_rejected(
+            "review_packet",
+            missing_mapping,
+            "Review Packet without item acceptance mapping",
+        )
+
+        unexplained_not_applicable = copy.deepcopy(merge_ready)
+        unexplained_not_applicable["evidence"]["security_and_trust"][0][
+            "authority_ref"
+        ] = None
+        require_rejected(
+            "review_packet",
+            unexplained_not_applicable,
+            "not-applicable evidence without an authority ref",
+        )
+
+    finalized = fixtures.get("review-packet-finalized.valid.json")
+    if finalized:
+        local_final = copy.deepcopy(finalized)
+        local_final["custody"]["state"] = "local-draft"
+        local_final["custody"]["backend"] = "local-filesystem"
+        require_rejected(
+            "review_packet",
+            local_final,
+            "finalized Review Packet without durable custody",
+        )
+
+        missing_source_tests = copy.deepcopy(finalized)
+        missing_source_tests["evidence"]["tests"] = []
+        require_rejected(
+            "review_packet",
+            missing_source_tests,
+            "source-backed finalized Review Packet without tests",
+        )
+
+        missing_readiness_receipt = copy.deepcopy(finalized)
+        missing_readiness_receipt["readiness"]["receipt_refs"] = []
+        require_rejected(
+            "review_packet",
+            missing_readiness_receipt,
+            "finalized Review Packet without a readiness receipt",
+        )
 
 
 def validate_contract_format_checker(errors: list[str]) -> None:
@@ -1223,10 +1451,13 @@ def main() -> int:
         "governance_validator_catalog": repo_root / "contracts/governance-validator-catalog.yaml",
         "context_behavior": repo_root / "contracts/context-behavior.yaml",
         "raw_context_retirement": repo_root / "contracts/raw-context-retirement.yaml",
+        "delivery_art_operator_path": repo_root / "contracts/delivery-art-operator-path.yaml",
     }
 
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
+
+    validate_delivery_art_artifact_contracts(errors, repo_root)
 
     controlled_proof_schema_path = repo_root / CONTROLLED_PROOF_SCHEMA_REF
     controlled_proof_schema: dict = {}

@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "artifact_type": "delivery_art_architecture_packet",
+  "artifact_id": "architecture-packet:delivery-698-v1",
+  "delivery_id": "delivery-698",
+  "covered_work_item_ids": ["work-item-801", "work-item-802"],
+  "created_at": "2026-08-08T10:00:00+08:00",
+  "operator": {
+    "id": "operator:workspace-owner",
+    "decision_source": "operator"
+  },
+  "source_snapshot": {
+    "captured_at": "2026-08-08T09:55:00+08:00",
+    "art_ref": "openproject://work_packages/698",
+    "art_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "repo_revisions": [
+      {
+        "repo": "workspace-governance",
+        "base_ref": "origin/main",
+        "commit": "1111111111111111111111111111111111111111"
+      },
+      {
+        "repo": "operator-orchestration-service",
+        "base_ref": "origin/main",
+        "commit": "2222222222222222222222222222222222222222"
+      }
+    ]
+  },
+  "scope_fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "architecture": {
+    "descendant_owner_map": [
+      {
+        "work_item_id": "work-item-801",
+        "work_item_type": "Enabler",
+        "owner_repo": "workspace-governance",
+        "parent_work_item_id": null
+      },
+      {
+        "work_item_id": "work-item-802",
+        "work_item_type": "Defect",
+        "owner_repo": "operator-orchestration-service",
+        "parent_work_item_id": "work-item-801"
+      }
+    ],
+    "dependency_merge_dag": {
+      "nodes": ["work-item-801", "work-item-802"],
+      "edges": [
+        {
+          "from": "work-item-801",
+          "to": "work-item-802",
+          "relation": "must_merge_before"
+        }
+      ],
+      "merge_order": ["workspace-governance", "operator-orchestration-service"]
+    },
+    "lifecycle_state_model": {
+      "states": ["architecture-ready", "implementation-ready", "merge-ready", "operating-ready"],
+      "transitions": [
+        {
+          "from": "architecture-ready",
+          "to": "implementation-ready",
+          "authority": "operator-orchestration-service",
+          "evidence": "durable work-start record"
+        }
+      ]
+    },
+    "authorization_session_execution_model": {
+      "summary": "The operator approves architecture; OOS binds implementation to a fresh scoped snapshot.",
+      "authority_refs": [
+        {
+          "uri": "contract://workspace-governance/delivery-art-operator-path",
+          "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ],
+      "session_binding": "One work-start record binds the Landing Unit and source snapshot.",
+      "execution_binding": "Review evidence binds exact base and head commits."
+    },
+    "evidence_receipt_handoffs": [
+      {
+        "producer": "operator-orchestration-service",
+        "consumer": "workspace-governance-control-fabric",
+        "artifact": "work-start record",
+        "acceptance": "schema-valid, digest-valid, and snapshot-current"
+      }
+    ],
+    "runtime_boundaries": [
+      {
+        "owner_repo": "operator-orchestration-service",
+        "allowed": ["read scoped ART state", "persist content-addressed artifacts"],
+        "prohibited": ["claim security acceptance", "mutate platform runtime"]
+      }
+    ],
+    "rollback_cleanup_terminal_conditions": {
+      "rollback_units": ["one owner-repo Landing Unit"],
+      "cleanup_obligations": ["supersede invalidated work-start records"],
+      "terminal_conditions": ["every covered child has durable evidence"]
+    },
+    "contradictions_open_decisions": [
+      {
+        "id": "decision:evidence-custody",
+        "status": "resolved",
+        "summary": "Final artifacts require durable shared custody.",
+        "resolution": "OOS attaches content-addressed artifacts to the initiative Epic."
+      }
+    ]
+  },
+  "conformance_plan": {
+    "required": true,
+    "dimensions": ["source provenance", "atomic closeout"],
+    "cases": [
+      {
+        "id": "case:real-git-positive",
+        "polarity": "positive",
+        "fidelity": "real-git",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "A real commit sequence with valid provenance passes."
+      },
+      {
+        "id": "case:real-git-cycle-negative",
+        "polarity": "negative",
+        "fidelity": "real-git",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "A claims digest that requires its own containing commit is rejected."
+      }
+    ]
+  },
+  "decision": {
+    "status": "architecture-ready",
+    "rationale": "The owner boundaries, sequence, and executable conformance plan are explicit.",
+    "decided_by": "operator:workspace-owner",
+    "decided_at": "2026-08-08T10:05:00+08:00"
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:4cbbbd293dc46be1f82143d8fd227b65bf93db1577ba8626063d98804d2fffe3"
+  },
+  "custody": {
+    "state": "durable",
+    "backend": "openproject-attachment",
+    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-4cbbbd293dc46be1f82143d8fd227b65bf93db1577ba8626063d98804d2fffe3.json",
+    "persisted_at": "2026-08-08T10:06:00+08:00",
+    "supersedes": null
+  }
+}

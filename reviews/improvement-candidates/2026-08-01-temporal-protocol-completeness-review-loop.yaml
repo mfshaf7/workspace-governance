@@ -92,6 +92,48 @@ signals:
   - 'conversation: operator said the #789 run was wasteful because #698 was not fully
     studied and required circular line-by-line correction'
   - 'art: Workspace Delivery ART #698 and its complete descendant structure'
+- id: platform-executor-preflight-recurrence
+  title: Platform executor implementation repeated the review-driven architecture loop.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - diagnostic-ordering-miss
+  - missing-deterministic-test-seam
+  - workflow-doctrine-gap
+  finding: >-
+    Platform work item #792 entered implementation before its acceptance model proved
+    crash-safe exclusive artifact publication, execution from immutable byte-attested
+    source instead of the mutable checkout, and real Bubblewrap user-namespace
+    capability under the CI host's AppArmor posture. Exact-head review and CI exposed
+    those requirements sequentially, causing repeated implementation, review, and
+    correction cycles. The elapsed run was therefore driven primarily by late
+    architecture and environment discovery rather than by the final source volume.
+  source_refs:
+  - 'conversation: operator said the #792 completion run was excessively long and
+    asked whether insufficient planning caused it'
+  - 'github: platform-engineering#198 review and exact-head CI history'
+  - 'art: Workspace Delivery ART #792 controlled Temporal permit issuer and proof
+    executor'
+- id: security-approval-containing-commit-cycle
+  title: The controlled-proof tests did not prove that a per-run Security approval can exist in real Git history.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    The #792 implementation binds the current security-architecture revision into the
+    immutable pre-approval baseline and canonical claims, then requires the per-run
+    Security approval for that claims digest to already exist at that same revision.
+    In real Git, committing the approval changes the Security revision and therefore
+    changes the claims digest, so no revision can satisfy both conditions. Unit tests
+    hid the cycle by inserting approval bytes into a fake resolver at an already fixed
+    revision instead of proving the claims-to-approval sequence in a real repository.
+  source_refs:
+  - 'art: Workspace Delivery ART #799 immutable baseline and canonical claims preflight'
+  - 'source: platform-engineering controlled_proof/authority.py and test_controlled_proof.py at merge commit 7968a92c8c70a0662158957238adc78f6e307d32'
+  - 'source: platform-engineering Temporal operations require claims before the merged per-run Security approval'
 resolution:
   after_action_ref: null
   control_refs:
@@ -104,8 +146,15 @@ resolution:
   - type: validator
     path: workspace-governance/scripts/validate_cross_repo_truth.py
     owner_repo: workspace-governance
-    note: Fail-closes when the initiative architecture packet, decision gate,
-      protocol dimensions, or positive and negative conformance cases disappear.
+    note: Validates the workspace contract, artifact schema refs, readiness
+      vocabulary, and explicit pending-runtime activation boundary. It does not
+      claim that OOS work-start enforcement is already active.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Validates architecture, work-start, and Review Packet schemas plus
+      negative cases for stale decisions, inexact Git refs, failed merge evidence,
+      prose result strings, missing acceptance mapping, and non-durable finalization.
   - type: doc
     path: workspace-governance/docs/delivery-art-operator-path.md
     owner_repo: workspace-governance
@@ -125,9 +174,13 @@ resolution:
     note: Proves positive and negative authorization, session, execution,
       receipt, timeline, and restore bindings.
   note: >-
-    Controls are implemented on the active branch. Closure remains pending until
-    the source change is merged and its finalized Review Packet is bound back to
-    the ART.
+    The earlier prose preflight is merged, but runtime enforcement is not. ART Feature
+    800 now sequences executable workspace contracts, OOS work-start and artifact
+    custody, WGCF readiness, Platform semantic cleanup, Security review, and initiative
+    698 dogfood. Closure remains pending the first successful operator-locked execution
+    sequence and conformance packet used before implementation, plus a real-Git
+    approval-provenance test that cannot synthesize files into an already fixed
+    revision.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-08-08'

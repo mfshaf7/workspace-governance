@@ -334,6 +334,7 @@ def validate_delivery_art_operator_path_contract(
         "runtime-boundaries-and-prohibited-actions",
         "rollback-cleanup-and-terminal-conditions",
         "contradictions-and-open-decisions",
+        "conformance-plan",
     }
     packet_sections = set(architecture_preflight.get("packet_required_sections") or [])
     missing_packet_sections = sorted(required_packet_sections - packet_sections)
@@ -345,7 +346,7 @@ def validate_delivery_art_operator_path_contract(
 
     decision_gate = architecture_preflight.get("decision_gate") or {}
     required_decisions = {
-        "ready-for-child-implementation",
+        "architecture-ready",
         "blocked-pending-architecture-decision",
     }
     allowed_decisions = set(decision_gate.get("allowed_results") or [])
@@ -394,9 +395,54 @@ def validate_delivery_art_operator_path_contract(
         errors.append(
             f"{contract_path}: protocol conformance preflight must require positive and negative cases"
         )
-    if protocol_preflight.get("child_ready_only_after_conformance_passes") is not True:
+    if protocol_preflight.get("architecture_ready_requires_conformance_plan") is not True:
         errors.append(
-            f"{contract_path}: protocol child readiness must fail closed on conformance"
+            f"{contract_path}: architecture readiness must require a conformance plan"
+        )
+    if protocol_preflight.get("merge_ready_requires_applicable_cases_pass") is not True:
+        errors.append(
+            f"{contract_path}: merge readiness must require applicable conformance cases to pass"
+        )
+    if protocol_preflight.get("fidelity_class_required") is not True:
+        errors.append(
+            f"{contract_path}: conformance cases must declare a fidelity class"
+        )
+
+    activation = operator_path.get("contract_activation") or {}
+    if activation.get("state") != "contract-defined":
+        errors.append(
+            f"{contract_path}: work-start hardening must remain contract-defined until owner implementation and dogfood land"
+        )
+    compatibility = activation.get("current_runtime_compatibility") or {}
+    if compatibility.get("new_work_start_commands_available") is not False:
+        errors.append(
+            f"{contract_path}: must not claim new work-start commands are active before OOS implementation"
+        )
+
+    expected_artifact_schemas = {
+        "architecture_packet": "contracts/schemas/delivery-art-architecture-packet.schema.json",
+        "work_start_record": "contracts/schemas/delivery-art-work-start-record.schema.json",
+        "review_packet": "contracts/schemas/delivery-art-review-packet.schema.json",
+    }
+    artifact_contracts = operator_path.get("artifact_contracts") or {}
+    for artifact_name, schema_ref in expected_artifact_schemas.items():
+        artifact_contract = artifact_contracts.get(artifact_name) or {}
+        if artifact_contract.get("schema_ref") != schema_ref:
+            errors.append(
+                f"{contract_path}: {artifact_name} must reference {schema_ref}"
+            )
+        if not (repo_root / schema_ref).exists():
+            errors.append(f"{repo_root / schema_ref}: missing Delivery ART artifact schema")
+
+    readiness = operator_path.get("readiness_model") or {}
+    if readiness.get("ordered_levels") != [
+        "architecture-ready",
+        "implementation-ready",
+        "merge-ready",
+        "operating-ready",
+    ]:
+        errors.append(
+            f"{contract_path}: readiness levels must preserve architecture, implementation, merge, and operating order"
         )
 
     surface_paths = [
@@ -452,7 +498,7 @@ def validate_delivery_art_operator_path_contract(
                 )
         for required in (
             "Initiative Architecture Preflight",
-            "ready-for-child-implementation",
+            "architecture-ready",
             "session and scenario-execution binding",
             "positive and negative contract cases",
         ):

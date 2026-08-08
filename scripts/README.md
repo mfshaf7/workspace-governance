@@ -122,6 +122,9 @@
 - `validate_contracts.py`
   - validates the machine-readable workspace contracts and repo rules against
     their schemas plus semantic checks
+  - validates Delivery ART architecture, work-start, and Review Packet v2
+    fixtures and negative evidence-integrity cases without claiming the pending
+    OOS runtime enforcement is already active
 - `validate_component_contracts.py`
   - executes the component-level interface validation commands declared in
     `contracts/components.yaml` across the local workspace

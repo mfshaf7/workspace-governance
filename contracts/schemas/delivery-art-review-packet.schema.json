@@ -1,0 +1,552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-review-packet.schema.json",
+  "title": "Delivery ART Review Packet v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "packet_id",
+    "delivery_id",
+    "covered_work_item_ids",
+    "created_at",
+    "operator",
+    "work_start",
+    "landing_unit",
+    "evidence",
+    "exceptions",
+    "status",
+    "readiness",
+    "integrity",
+    "custody",
+    "finalized_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_type": { "const": "art_review_packet" },
+    "packet_id": { "type": "string", "pattern": "^review-packet:[a-z0-9][a-z0-9._:-]*$" },
+    "delivery_id": { "$ref": "#/$defs/deliveryId" },
+    "covered_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+    "created_at": { "$ref": "#/$defs/timestamp" },
+    "operator": { "$ref": "#/$defs/operator" },
+    "work_start": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_ref", "artifact_digest", "scope_fingerprint"],
+      "properties": {
+        "artifact_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact_digest": { "$ref": "#/$defs/digest" },
+        "scope_fingerprint": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "landing_unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "evidence_kind", "rollback_boundary", "repos"],
+      "properties": {
+        "decision": {
+          "enum": ["feature_single_landing_unit", "child_isolated_landing_unit", "non_source_child"]
+        },
+        "evidence_kind": {
+          "enum": ["pending", "open_pr", "merged_pr", "approved_direct_land", "non_source_evidence"]
+        },
+        "rollback_boundary": { "$ref": "#/$defs/nonEmptyString" },
+        "repos": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repoEvidence" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changed_surfaces",
+        "tests",
+        "validations",
+        "acceptance_mapping",
+        "runtime_and_live",
+        "security_and_trust"
+      ],
+      "properties": {
+        "changed_surfaces": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "repo", "path", "summary"],
+            "properties": {
+              "id": { "$ref": "#/$defs/evidenceId" },
+              "repo": { "$ref": "#/$defs/repoName" },
+              "path": { "$ref": "#/$defs/nonEmptyString" },
+              "summary": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "tests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evidenceResult" }
+        },
+        "validations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evidenceResult" }
+        },
+        "acceptance_mapping": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["work_item_id", "acceptance_ref", "evidence_ids", "summary"],
+            "properties": {
+              "work_item_id": { "$ref": "#/$defs/workItemId" },
+              "acceptance_ref": { "$ref": "#/$defs/nonEmptyString" },
+              "evidence_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/evidenceId" }
+              },
+              "summary": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        },
+        "runtime_and_live": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evidenceResult" }
+        },
+        "security_and_trust": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evidenceResult" }
+        }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "authority_ref", "rationale", "expires_at"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "kind": { "enum": ["accepted-risk", "direct-land", "evidence-waiver"] },
+          "authority_ref": { "$ref": "#/$defs/nonEmptyString" },
+          "rationale": { "$ref": "#/$defs/nonEmptyString" },
+          "expires_at": {
+            "oneOf": [
+              { "$ref": "#/$defs/timestamp" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    },
+    "status": { "enum": ["draft", "merge-ready", "finalized"] },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "evaluated_at", "receipt_refs"],
+      "properties": {
+        "level": { "enum": ["implementation-ready", "merge-ready", "operating-ready"] },
+        "evaluated_at": { "$ref": "#/$defs/timestamp" },
+        "receipt_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "custody": { "$ref": "#/$defs/custody" },
+    "finalized_at": {
+      "oneOf": [
+        { "$ref": "#/$defs/timestamp" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "draft" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "readiness": { "properties": { "level": { "const": "implementation-ready" } } },
+          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" } } },
+          "finalized_at": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "merge-ready" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "evidence_kind": { "const": "open_pr" },
+              "repos": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/$defs/repoEvidence" },
+                    {
+                      "properties": {
+                        "pr_url": { "$ref": "#/$defs/nonEmptyString" },
+                        "merge_commit": { "type": "null" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "evidence": {
+            "properties": {
+              "changed_surfaces": { "minItems": 1 },
+              "tests": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "validations": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "runtime_and_live": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "security_and_trust": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
+            }
+          },
+          "readiness": { "properties": { "level": { "const": "merge-ready" } } },
+          "custody": { "properties": { "state": { "const": "local-draft" }, "backend": { "const": "local-filesystem" } } },
+          "finalized_at": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "status": { "const": "finalized" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "evidence_kind": { "enum": ["merged_pr", "approved_direct_land", "non_source_evidence"] }
+            }
+          },
+          "evidence": {
+            "properties": {
+              "tests": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "validations": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "runtime_and_live": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "security_and_trust": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
+            }
+          },
+          "readiness": {
+            "properties": {
+              "level": { "const": "operating-ready" },
+              "receipt_refs": { "minItems": 1 }
+            }
+          },
+          "custody": {
+            "properties": {
+              "state": { "const": "durable" },
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
+            }
+          },
+          "finalized_at": { "$ref": "#/$defs/timestamp" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "evidence_kind": { "enum": ["merged_pr", "approved_direct_land"] } },
+            "required": ["evidence_kind"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence": {
+            "properties": {
+              "changed_surfaces": { "minItems": 1 },
+              "tests": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "validations": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "evidence_kind": { "const": "merged_pr" } },
+            "required": ["evidence_kind"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "repos": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/$defs/repoEvidence" },
+                    {
+                      "properties": {
+                        "pr_url": { "$ref": "#/$defs/nonEmptyString" },
+                        "merge_commit": { "$ref": "#/$defs/gitCommit" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "evidence_kind": { "const": "approved_direct_land" } },
+            "required": ["evidence_kind"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "repos": {
+                "minItems": 1,
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/$defs/repoEvidence" },
+                    { "properties": { "merge_commit": { "$ref": "#/$defs/gitCommit" } } }
+                  ]
+                }
+              }
+            }
+          },
+          "exceptions": {
+            "contains": {
+              "type": "object",
+              "properties": { "kind": { "const": "direct-land" } },
+              "required": ["kind"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "evidence_kind": { "const": "non_source_evidence" } },
+            "required": ["evidence_kind"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "decision": { "const": "non_source_child" },
+              "repos": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "identifier": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "workItemId": { "type": "string", "pattern": "^work-item-[1-9][0-9]*$" },
+    "workItemIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/workItemId" }
+    },
+    "repoName": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "evidenceId": { "type": "string", "pattern": "^evidence:[a-z0-9][a-z0-9._:-]*$" },
+    "fidelity": {
+      "enum": ["pure-unit", "filesystem", "real-git", "process-crash", "sandbox-runtime", "live-backend"]
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "decision_source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "decision_source": { "enum": ["operator", "approved-ai-suggestion"] }
+      }
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "$ref": "#/$defs/nonEmptyString" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "repoEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_name",
+        "branch",
+        "base_ref",
+        "base_commit",
+        "head_commit",
+        "pr_url",
+        "merge_commit",
+        "changed_files",
+        "change_record_refs"
+      ],
+      "properties": {
+        "repo_name": { "$ref": "#/$defs/repoName" },
+        "branch": { "$ref": "#/$defs/nonEmptyString" },
+        "base_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "base_commit": { "$ref": "#/$defs/gitCommit" },
+        "head_commit": { "$ref": "#/$defs/gitCommit" },
+        "pr_url": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "merge_commit": {
+          "oneOf": [
+            { "$ref": "#/$defs/gitCommit" },
+            { "type": "null" }
+          ]
+        },
+        "changed_files": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "change_record_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "evidenceResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "command",
+        "fidelity",
+        "result",
+        "summary",
+        "evidence_refs",
+        "not_applicable_reason",
+        "authority_ref"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/evidenceId" },
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "command": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "fidelity": { "$ref": "#/$defs/fidelity" },
+        "result": { "enum": ["pass", "fail", "not_applicable"] },
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifactRef" }
+        },
+        "not_applicable_reason": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        },
+        "authority_ref": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "result": { "const": "not_applicable" } }, "required": ["result"] },
+          "then": {
+            "properties": {
+              "not_applicable_reason": { "$ref": "#/$defs/nonEmptyString" },
+              "authority_ref": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          },
+          "else": {
+            "properties": {
+              "not_applicable_reason": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "result": { "const": "pass" } }, "required": ["result"] },
+          "then": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "nonFailingEvidenceResult": {
+      "allOf": [
+        { "$ref": "#/$defs/evidenceResult" },
+        { "properties": { "result": { "enum": ["pass", "not_applicable"] } } }
+      ]
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "backend", "uri", "persisted_at", "supersedes"],
+      "properties": {
+        "state": { "enum": ["local-draft", "durable"] },
+        "backend": { "enum": ["local-filesystem", "openproject-attachment"] },
+        "uri": { "$ref": "#/$defs/nonEmptyString" },
+        "persisted_at": {
+          "oneOf": [
+            { "$ref": "#/$defs/timestamp" },
+            { "type": "null" }
+          ]
+        },
+        "supersedes": {
+          "oneOf": [
+            { "$ref": "#/$defs/artifactRef" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}

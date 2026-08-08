@@ -170,8 +170,29 @@ Use these contracts to declare:
     repo/component admission contract for validation behavior
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
-    read hierarchy, guided closeout intents, fallback model, compatibility
-    boundary, and success metrics
+    four readiness levels, architecture preflight, work-start gate, evidence
+    integrity, artifact custody, read hierarchy, guided closeout intents,
+    fallback model, compatibility boundary, and activation state
+- `schemas/delivery-art-operator-path.schema.json`
+  - validates the operator-path contract, including the explicit boundary
+    between contract-defined controls and owner-repo runtime enforcement
+- `schemas/delivery-art-architecture-packet.schema.json`
+  - defines the operator-decided architecture packet, source snapshot,
+    dependency and merge DAG, lifecycle and authority model, conformance plan,
+    contradictions, integrity, and durable custody
+- `schemas/delivery-art-work-start-record.schema.json`
+  - defines the Landing Unit decision, exact base revisions, architecture
+    binding, scope fingerprint, invalidation inputs, and implementation
+    readiness record required before source work
+- `schemas/delivery-art-review-packet.schema.json`
+  - defines Review Packet v2 with structured result semantics, test-fidelity
+    classes, exact source provenance, acceptance mapping, rollback boundary,
+    readiness, integrity, and append-only durable custody
+- `fixtures/delivery-art-workflow/`
+  - valid architecture, work-start, merge-ready, and finalized artifact
+    examples consumed by `validate_contracts.py`; the validator also proves
+    negative cases for stale decisions, inexact Git refs, failed merge
+    evidence, prose result strings, missing mapping, and local-only finalization
 
 ## Repo Rules
 

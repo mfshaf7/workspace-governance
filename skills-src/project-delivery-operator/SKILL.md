@@ -41,20 +41,37 @@ cross-repo protocol, or control-plane change:
    - runtime boundaries and prohibited actions
    - rollback, cleanup, and terminal conditions
    - contradictions and unresolved decisions
+   - planned positive and negative conformance cases with fidelity classes
 4. Discuss the packet with the operator and lock the execution sequence.
-5. Record either `ready-for-child-implementation` or
+5. Record either `architecture-ready` or
    `blocked-pending-architecture-decision` before child source work begins.
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
-For cross-repo protocol work, also prove an executable conformance plan before
+For cross-repo protocol work, define an executable conformance plan before
 implementation is declared ready. It must cover command acknowledgement,
 deterministic identity and idempotency, state-mutation ordering, retry, cancel,
 replay and recovery semantics, bounded failure mapping, authorization integrity
 and replay resistance, session and scenario-execution binding, complete owner
 receipts, immutable baseline and restore evidence, lifecycle-state matrices,
 cross-artifact timeline ordering, shared-validator compatibility, and
-`positive and negative contract cases`.
+`positive and negative contract cases`. Architecture readiness requires the
+approved plan, not implementation results that cannot exist yet. Applicable
+cases must pass before merge readiness. Use a `real-git` case for Git-history
+causality; a synthetic resolver cannot prove a real commit sequence.
+
+Keep the four readiness decisions distinct:
+
+- `architecture-ready`: approved design, boundaries, sequence, and conformance plan
+- `implementation-ready`: Landing Unit bound to exact ART and repo source truth
+- `merge-ready`: exact open-PR head has passing applicable structured evidence
+- `operating-ready`: finalized durable evidence satisfies closeout obligations
+
+The work-start record and Review Packet v2 schemas are contract-defined but are
+not active commands until OOS, WGCF, Platform, Security, and initiative `698`
+dogfood complete their activation items. Until then, use the currently
+documented OOS command family and Review Packet v1 without claiming the target
+runtime enforcement already exists.
 
 1. Start from the ART, not from chat memory.
    - if the active `Epic` is already known, start with its fast active-front

@@ -1,0 +1,465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-operator-path.schema.json",
+  "title": "Delivery ART Operator Path",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "delivery_art_operator_path"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "delivery_art_operator_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_repo",
+        "canonical_entrypoint",
+        "governance_surface",
+        "supporting_platform_surfaces",
+        "contract_activation",
+        "readiness_model",
+        "artifact_contracts",
+        "work_start_gate",
+        "evidence_integrity",
+        "authority_boundaries",
+        "performance_budgets",
+        "initiative_architecture_preflight",
+        "canonical_read_hierarchy",
+        "optimized_path",
+        "guided_write_intents",
+        "fallback_model",
+        "compatibility_boundary",
+        "success_metrics"
+      ],
+      "properties": {
+        "owner_repo": { "const": "workspace-governance" },
+        "canonical_entrypoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repo", "command", "primary_operator_surface"],
+          "properties": {
+            "repo": { "const": "operator-orchestration-service" },
+            "command": { "const": "npm run art" },
+            "primary_operator_surface": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "governance_surface": { "$ref": "#/$defs/nonEmptyString" },
+        "supporting_platform_surfaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workflow_health", "quality_gate", "admin_boundary"],
+          "properties": {
+            "workflow_health": { "$ref": "#/$defs/nonEmptyString" },
+            "quality_gate": { "$ref": "#/$defs/nonEmptyString" },
+            "admin_boundary": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "contract_activation": { "$ref": "#/$defs/contractActivation" },
+        "readiness_model": { "$ref": "#/$defs/readinessModel" },
+        "artifact_contracts": { "$ref": "#/$defs/artifactContracts" },
+        "work_start_gate": { "$ref": "#/$defs/workStartGate" },
+        "evidence_integrity": { "$ref": "#/$defs/evidenceIntegrity" },
+        "authority_boundaries": { "$ref": "#/$defs/authorityBoundaries" },
+        "performance_budgets": { "$ref": "#/$defs/performanceBudgets" },
+        "initiative_architecture_preflight": { "$ref": "#/$defs/architecturePreflight" },
+        "canonical_read_hierarchy": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/operatorIntent" }
+        },
+        "optimized_path": { "type": "object", "minProperties": 1 },
+        "guided_write_intents": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/operatorIntent" }
+        },
+        "fallback_model": { "type": "object", "minProperties": 1 },
+        "compatibility_boundary": { "type": "object", "minProperties": 1 },
+        "success_metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "outcome"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "outcome": { "$ref": "#/$defs/nonEmptyString" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "operatorIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cli", "route", "purpose"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "cli": { "$ref": "#/$defs/nonEmptyString" },
+        "route": { "$ref": "#/$defs/nonEmptyString" },
+        "purpose": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "contractActivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "runtime_enforcement",
+        "target_art_items",
+        "current_runtime_compatibility",
+        "activation_requires"
+      ],
+      "properties": {
+        "state": { "const": "contract-defined" },
+        "runtime_enforcement": { "const": "pending-owner-implementation-and-dogfood" },
+        "target_art_items": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$" }
+        },
+        "current_runtime_compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["review_packet_schema_version", "new_work_start_commands_available", "rule"],
+          "properties": {
+            "review_packet_schema_version": { "const": 1 },
+            "new_work_start_commands_available": { "const": false },
+            "rule": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "activation_requires": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+      }
+    },
+    "readinessLevel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "requires", "does_not_require"],
+      "properties": {
+        "purpose": { "$ref": "#/$defs/nonEmptyString" },
+        "requires": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "does_not_require": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+      }
+    },
+    "readinessModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ordered_levels", "levels", "rules"],
+      "properties": {
+        "ordered_levels": {
+          "const": ["architecture-ready", "implementation-ready", "merge-ready", "operating-ready"]
+        },
+        "levels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["architecture-ready", "implementation-ready", "merge-ready", "operating-ready"],
+          "properties": {
+            "architecture-ready": { "$ref": "#/$defs/readinessLevel" },
+            "implementation-ready": { "$ref": "#/$defs/readinessLevel" },
+            "merge-ready": { "$ref": "#/$defs/readinessLevel" },
+            "operating-ready": { "$ref": "#/$defs/readinessLevel" }
+          }
+        },
+        "rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "readiness_is_snapshot_bound",
+            "later_level_does_not_rewrite_earlier_evidence",
+            "failed_required_evidence_blocks_advancement",
+            "not_applicable_requires_reason_and_authority_ref",
+            "attached_artifact_is_a_reference_not_a_pass_result"
+          ],
+          "properties": {
+            "readiness_is_snapshot_bound": { "const": true },
+            "later_level_does_not_rewrite_earlier_evidence": { "const": true },
+            "failed_required_evidence_blocks_advancement": { "const": true },
+            "not_applicable_requires_reason_and_authority_ref": { "const": true },
+            "attached_artifact_is_a_reference_not_a_pass_result": { "const": true }
+          }
+        }
+      }
+    },
+    "artifactContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_ref", "schema_version", "target_owner_repo", "durable_when"],
+      "properties": {
+        "schema_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "schema_version": { "type": "integer", "minimum": 1 },
+        "target_owner_repo": { "const": "operator-orchestration-service" },
+        "durable_when": { "$ref": "#/$defs/nonEmptyString" },
+        "migration_from_runtime_version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "artifactContracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["architecture_packet", "work_start_record", "review_packet"],
+      "properties": {
+        "architecture_packet": {
+          "allOf": [
+            { "$ref": "#/$defs/artifactContract" },
+            {
+              "properties": {
+                "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
+                "schema_version": { "const": 1 }
+              }
+            }
+          ]
+        },
+        "work_start_record": {
+          "allOf": [
+            { "$ref": "#/$defs/artifactContract" },
+            {
+              "properties": {
+                "schema_ref": { "const": "contracts/schemas/delivery-art-work-start-record.schema.json" },
+                "schema_version": { "const": 1 }
+              }
+            }
+          ]
+        },
+        "review_packet": {
+          "allOf": [
+            { "$ref": "#/$defs/artifactContract" },
+            {
+              "required": ["migration_from_runtime_version"],
+              "properties": {
+                "schema_ref": { "const": "contracts/schemas/delivery-art-review-packet.schema.json" },
+                "schema_version": { "const": 2 },
+                "migration_from_runtime_version": { "const": 1 }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "workStartGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_before_branch_or_source_edit",
+        "landing_unit_decisions",
+        "child_isolated_requires_split_reason",
+        "exact_base_revision_required",
+        "planned_review_packet_ref_required_for_source_work",
+        "architecture_packet_required_when_preflight_applies",
+        "read_snapshot_cache_allowed",
+        "fresh_target_and_dependency_snapshot_required_before_mutation",
+        "invalidation_inputs"
+      ],
+      "properties": {
+        "required_before_branch_or_source_edit": { "const": true },
+        "landing_unit_decisions": {
+          "const": [
+            "feature_single_landing_unit",
+            "child_isolated_landing_unit",
+            "non_source_child",
+            "defer_decision_blocked"
+          ]
+        },
+        "child_isolated_requires_split_reason": { "const": true },
+        "exact_base_revision_required": { "const": true },
+        "planned_review_packet_ref_required_for_source_work": { "const": true },
+        "architecture_packet_required_when_preflight_applies": { "const": true },
+        "read_snapshot_cache_allowed": { "const": true },
+        "fresh_target_and_dependency_snapshot_required_before_mutation": { "const": true },
+        "invalidation_inputs": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+      }
+    },
+    "evidenceIntegrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonicalization",
+        "digest_algorithm",
+        "digest_scope",
+        "evidence_results",
+        "test_fidelity_classes",
+        "source_provenance",
+        "custody"
+      ],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "digest_algorithm": { "const": "sha256" },
+        "digest_scope": { "$ref": "#/$defs/nonEmptyString" },
+        "evidence_results": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "merge_ready_allows", "string_prefixes_are_not_results"],
+          "properties": {
+            "allowed": { "const": ["pass", "fail", "not_applicable"] },
+            "merge_ready_allows": { "const": ["pass", "not_applicable"] },
+            "string_prefixes_are_not_results": {
+              "const": ["PASS:", "FAIL:", "CHECK:", "Attached artifact:"]
+            }
+          }
+        },
+        "test_fidelity_classes": {
+          "const": ["pure-unit", "filesystem", "real-git", "process-crash", "sandbox-runtime", "live-backend"]
+        },
+        "source_provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "exact_base_and_head_commits_required",
+            "real_git_required_for_git_causality_claims",
+            "synthetic_resolver_cannot_prove_git_history"
+          ],
+          "properties": {
+            "exact_base_and_head_commits_required": { "const": true },
+            "real_git_required_for_git_causality_claims": { "const": true },
+            "synthetic_resolver_cannot_prove_git_history": { "const": true }
+          }
+        },
+        "custody": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "draft_backend",
+            "durable_backend",
+            "durable_owner",
+            "attachment_scope",
+            "content_addressed_filename_required",
+            "append_only_corrections",
+            "correction_requires_supersedes_ref",
+            "wgcf_records_receipts_not_source_artifacts"
+          ],
+          "properties": {
+            "draft_backend": { "const": "local-filesystem" },
+            "durable_backend": { "const": "openproject-attachment" },
+            "durable_owner": { "const": "operator-orchestration-service" },
+            "attachment_scope": { "const": "initiative-epic" },
+            "content_addressed_filename_required": { "const": true },
+            "append_only_corrections": { "const": true },
+            "correction_requires_supersedes_ref": { "const": true },
+            "wgcf_records_receipts_not_source_artifacts": { "const": true }
+          }
+        }
+      }
+    },
+    "authorityBoundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_governance",
+        "operator_orchestration_service",
+        "workspace_governance_control_fabric",
+        "platform_engineering",
+        "security_architecture"
+      ],
+      "properties": {
+        "workspace_governance": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "operator_orchestration_service": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "workspace_governance_control_fabric": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "platform_engineering": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "security_architecture": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+      }
+    },
+    "performanceBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "work_start_cold_seconds_max",
+        "work_start_warm_seconds_max",
+        "local_schema_validation_milliseconds_max",
+        "prohibited_read_pattern",
+        "final_write_rule"
+      ],
+      "properties": {
+        "status": { "const": "target-until-dogfood-proves-operating-control" },
+        "work_start_cold_seconds_max": { "type": "number", "exclusiveMinimum": 0 },
+        "work_start_warm_seconds_max": { "type": "number", "exclusiveMinimum": 0 },
+        "local_schema_validation_milliseconds_max": { "type": "integer", "minimum": 1 },
+        "prohibited_read_pattern": { "$ref": "#/$defs/nonEmptyString" },
+        "final_write_rule": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "architecturePreflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applies_when",
+        "required_before_source_implementation",
+        "authoritative_inputs",
+        "packet_schema_ref",
+        "packet_required_sections",
+        "decision_gate",
+        "protocol_conformance_preflight"
+      ],
+      "properties": {
+        "applies_when": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "required_before_source_implementation": { "const": true },
+        "authoritative_inputs": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "packet_schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
+        "packet_required_sections": {
+          "type": "array",
+          "uniqueItems": true,
+          "allOf": [
+            { "contains": { "const": "descendant-and-owner-map" } },
+            { "contains": { "const": "dependency-and-merge-sequence" } },
+            { "contains": { "const": "lifecycle-and-state-model" } },
+            { "contains": { "const": "authorization-session-and-execution-model" } },
+            { "contains": { "const": "evidence-and-receipt-handoffs" } },
+            { "contains": { "const": "runtime-boundaries-and-prohibited-actions" } },
+            { "contains": { "const": "rollback-cleanup-and-terminal-conditions" } },
+            { "contains": { "const": "contradictions-and-open-decisions" } },
+            { "contains": { "const": "conformance-plan" } }
+          ],
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "decision_gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operator_discussion_required",
+            "execution_sequence_locked_before_child_work",
+            "reopen_when_owner_boundary_or_protocol_changes",
+            "allowed_results"
+          ],
+          "properties": {
+            "operator_discussion_required": { "const": true },
+            "execution_sequence_locked_before_child_work": { "const": true },
+            "reopen_when_owner_boundary_or_protocol_changes": { "const": true },
+            "allowed_results": { "const": ["architecture-ready", "blocked-pending-architecture-decision"] }
+          }
+        },
+        "protocol_conformance_preflight": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_when_cross_repo_protocol_changes",
+            "required_dimensions",
+            "executable_cases_required",
+            "architecture_ready_requires_conformance_plan",
+            "merge_ready_requires_applicable_cases_pass",
+            "fidelity_class_required"
+          ],
+          "properties": {
+            "required_when_cross_repo_protocol_changes": { "const": true },
+            "required_dimensions": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+            "executable_cases_required": { "const": ["positive-contract-cases", "negative-contract-cases"] },
+            "architecture_ready_requires_conformance_plan": { "const": true },
+            "merge_ready_requires_applicable_cases_pass": { "const": true },
+            "fidelity_class_required": { "const": true }
+          }
+        }
+      }
+    }
+  }
+}
