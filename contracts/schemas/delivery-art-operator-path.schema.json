@@ -183,7 +183,12 @@
             "failed_required_evidence_blocks_advancement",
             "not_applicable_requires_reason_and_authority_ref",
             "attached_artifact_is_a_reference_not_a_pass_result",
-            "architecture_dependency_graph_is_bound_and_acyclic"
+            "architecture_dependency_graph_is_bound_and_acyclic",
+            "architecture_parent_map_is_a_rooted_acyclic_forest",
+            "architecture_source_snapshot_exactly_covers_owner_repos",
+            "architecture_lifecycle_transitions_use_declared_states",
+            "architecture_merge_order_respects_dependency_precedence",
+            "dependency_relation_precedence"
           ],
           "properties": {
             "readiness_is_snapshot_bound": { "const": true },
@@ -191,7 +196,21 @@
             "failed_required_evidence_blocks_advancement": { "const": true },
             "not_applicable_requires_reason_and_authority_ref": { "const": true },
             "attached_artifact_is_a_reference_not_a_pass_result": { "const": true },
-            "architecture_dependency_graph_is_bound_and_acyclic": { "const": true }
+            "architecture_dependency_graph_is_bound_and_acyclic": { "const": true },
+            "architecture_parent_map_is_a_rooted_acyclic_forest": { "const": true },
+            "architecture_source_snapshot_exactly_covers_owner_repos": { "const": true },
+            "architecture_lifecycle_transitions_use_declared_states": { "const": true },
+            "architecture_merge_order_respects_dependency_precedence": { "const": true },
+            "dependency_relation_precedence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["depends_on", "blocks", "must_merge_before"],
+              "properties": {
+                "depends_on": { "const": "the target work item and its owner repo precede the source" },
+                "blocks": { "const": "the source work item and its owner repo precede the target" },
+                "must_merge_before": { "const": "the source work item and its owner repo precede the target" }
+              }
+            }
           }
         }
       }
@@ -295,6 +314,10 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "landing_unit_decision_and_evidence_kind_must_match",
+        "non_source_children_prohibit_branch_pr_and_source_landing_evidence",
+        "source_repo_evidence_unique_by_repo",
+        "source_changed_surfaces_resolve_to_declared_changed_files",
         "canonicalization",
         "digest_algorithm",
         "digest_scope",
@@ -305,6 +328,10 @@
         "custody"
       ],
       "properties": {
+        "landing_unit_decision_and_evidence_kind_must_match": { "const": true },
+        "non_source_children_prohibit_branch_pr_and_source_landing_evidence": { "const": true },
+        "source_repo_evidence_unique_by_repo": { "const": true },
+        "source_changed_surfaces_resolve_to_declared_changed_files": { "const": true },
         "canonicalization": { "const": "RFC8785" },
         "digest_algorithm": { "const": "sha256" },
         "digest_scope": { "$ref": "#/$defs/nonEmptyString" },

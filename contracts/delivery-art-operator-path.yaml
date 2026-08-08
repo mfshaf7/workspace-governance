@@ -89,6 +89,14 @@ delivery_art_operator_path:
       not_applicable_requires_reason_and_authority_ref: true
       attached_artifact_is_a_reference_not_a_pass_result: true
       architecture_dependency_graph_is_bound_and_acyclic: true
+      architecture_parent_map_is_a_rooted_acyclic_forest: true
+      architecture_source_snapshot_exactly_covers_owner_repos: true
+      architecture_lifecycle_transitions_use_declared_states: true
+      architecture_merge_order_respects_dependency_precedence: true
+      dependency_relation_precedence:
+        depends_on: the target work item and its owner repo precede the source
+        blocks: the source work item and its owner repo precede the target
+        must_merge_before: the source work item and its owner repo precede the target
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
@@ -130,6 +138,10 @@ delivery_art_operator_path:
       - architecture decision or packet digest change
       - validation or security obligation change
   evidence_integrity:
+    landing_unit_decision_and_evidence_kind_must_match: true
+    non_source_children_prohibit_branch_pr_and_source_landing_evidence: true
+    source_repo_evidence_unique_by_repo: true
+    source_changed_surfaces_resolve_to_declared_changed_files: true
     canonicalization: RFC8785
     digest_algorithm: sha256
     digest_scope: artifact content excluding custody metadata and the digest field itself

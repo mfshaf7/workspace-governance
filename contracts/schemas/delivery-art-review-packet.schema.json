@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-review-packet.schema.json",
   "title": "Delivery ART Review Packet v2",
-  "$comment": "Exact work-item coverage, globally unique evidence ids, and evidence-reference resolution are enforced by scripts/validate_contracts.py because JSON Schema cannot compare dynamic array members.",
+  "$comment": "Exact work-item coverage, source/non-source evidence binding, globally unique evidence ids, and evidence-reference resolution are enforced by this schema and scripts/validate_contracts.py because JSON Schema cannot compare dynamic array members.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -359,6 +359,35 @@
             "properties": {
               "decision": { "const": "non_source_child" },
               "repos": { "maxItems": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "landing_unit": {
+            "properties": { "decision": { "const": "non_source_child" } },
+            "required": ["decision"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "evidence_kind": { "enum": ["pending", "non_source_evidence"] },
+              "repos": { "maxItems": 0 }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "landing_unit": {
+            "properties": {
+              "evidence_kind": { "not": { "const": "non_source_evidence" } }
             }
           }
         }

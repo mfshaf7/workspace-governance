@@ -353,6 +353,20 @@ def _artifact_string_list(value: object) -> list[str]:
     return [entry for entry in value if isinstance(entry, str)]
 
 
+def _delivery_art_edge_precedence(edge: dict) -> tuple[str, str] | None:
+    """Return the work-item order implied by one dependency relation."""
+    source = edge.get("from")
+    target = edge.get("to")
+    relation = edge.get("relation")
+    if not isinstance(source, str) or not isinstance(target, str):
+        return None
+    if relation == "depends_on":
+        return target, source
+    if relation in {"blocks", "must_merge_before"}:
+        return source, target
+    return None
+
+
 def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     """Validate cross-field invariants that JSON Schema cannot express."""
     errors: list[str] = []
@@ -370,6 +384,12 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             for entry in owner_map
             if isinstance(entry.get("work_item_id"), str)
         ]
+        owner_by_work_item = {
+            entry.get("work_item_id"): entry.get("owner_repo")
+            for entry in owner_map
+            if isinstance(entry.get("work_item_id"), str)
+            and isinstance(entry.get("owner_repo"), str)
+        }
         dag_nodes = set(_artifact_string_list(dag.get("nodes")))
 
         if len(owner_map_ids) != len(set(owner_map_ids)):
@@ -385,15 +405,49 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 "architecture.dependency_merge_dag.nodes must exactly cover covered_work_item_ids"
             )
 
+        parent_by_work_item = {}
+        root_work_items = []
         for entry in owner_map:
+            work_item_id = entry.get("work_item_id")
             parent = entry.get("parent_work_item_id")
+            if isinstance(work_item_id, str):
+                parent_by_work_item[work_item_id] = parent
+                if parent is None:
+                    root_work_items.append(work_item_id)
             if isinstance(parent, str) and parent not in dag_nodes:
                 errors.append(
-                    f"architecture descendant {entry.get('work_item_id')} references unknown parent {parent}"
+                    f"architecture descendant {work_item_id} references unknown parent {parent}"
                 )
+        if owner_map_ids and not root_work_items:
+            errors.append(
+                "architecture.descendant_owner_map must contain at least one root"
+            )
+
+        parent_cycle_nodes = set()
+        parent_walk_complete = set()
+        for start in parent_by_work_item:
+            chain = []
+            chain_positions = {}
+            current = start
+            while isinstance(current, str) and current in parent_by_work_item:
+                if current in chain_positions:
+                    parent_cycle_nodes.update(chain[chain_positions[current] :])
+                    break
+                if current in parent_walk_complete:
+                    break
+                chain_positions[current] = len(chain)
+                chain.append(current)
+                current = parent_by_work_item[current]
+            parent_walk_complete.update(chain)
+        if parent_cycle_nodes:
+            errors.append(
+                "architecture.descendant_owner_map parent links must be acyclic; cycle includes: "
+                + ", ".join(sorted(parent_cycle_nodes))
+            )
 
         adjacency = {node: [] for node in dag_nodes}
         indegree = {node: 0 for node in dag_nodes}
+        precedence_edges = []
         for edge in _artifact_object_list(dag.get("edges")):
             source = edge.get("from")
             target = edge.get("to")
@@ -406,8 +460,13 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     + ", ".join(sorted(str(node) for node in unknown_endpoints))
                 )
                 continue
-            adjacency[source].append(target)
-            indegree[target] += 1
+            precedence = _delivery_art_edge_precedence(edge)
+            if precedence is None:
+                continue
+            before, after = precedence
+            precedence_edges.append(precedence)
+            adjacency[before].append(after)
+            indegree[after] += 1
 
         ready = [node for node, degree in indegree.items() if degree == 0]
         visited_count = 0
@@ -426,10 +485,59 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             for entry in owner_map
             if isinstance(entry.get("owner_repo"), str)
         }
-        if set(_artifact_string_list(dag.get("merge_order"))) != owner_repos:
+        merge_order = _artifact_string_list(dag.get("merge_order"))
+        if set(merge_order) != owner_repos:
             errors.append(
                 "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
             )
+        else:
+            merge_positions = {
+                repo: position for position, repo in enumerate(merge_order)
+            }
+            for before, after in precedence_edges:
+                before_repo = owner_by_work_item.get(before)
+                after_repo = owner_by_work_item.get(after)
+                if (
+                    before_repo is not None
+                    and after_repo is not None
+                    and before_repo != after_repo
+                    and merge_positions[before_repo] >= merge_positions[after_repo]
+                ):
+                    errors.append(
+                        "architecture.dependency_merge_dag.merge_order violates "
+                        f"{before} before {after}: {before_repo} must precede {after_repo}"
+                    )
+
+        source_snapshot = _artifact_object(payload.get("source_snapshot"))
+        repo_revisions = _artifact_object_list(source_snapshot.get("repo_revisions"))
+        revision_repos = [
+            entry.get("repo")
+            for entry in repo_revisions
+            if isinstance(entry.get("repo"), str)
+        ]
+        if len(revision_repos) != len(set(revision_repos)):
+            errors.append(
+                "source_snapshot.repo_revisions must contain one entry per owner repo"
+            )
+        if set(revision_repos) != owner_repos:
+            errors.append(
+                "source_snapshot.repo_revisions must exactly cover descendant owner repos"
+            )
+
+        lifecycle = _artifact_object(architecture.get("lifecycle_state_model"))
+        lifecycle_states = set(_artifact_string_list(lifecycle.get("states")))
+        for transition in _artifact_object_list(lifecycle.get("transitions")):
+            endpoints = {
+                endpoint
+                for endpoint in (transition.get("from"), transition.get("to"))
+                if isinstance(endpoint, str)
+            }
+            unknown_states = endpoints - lifecycle_states
+            if unknown_states:
+                errors.append(
+                    "architecture lifecycle transition references undeclared states: "
+                    + ", ".join(sorted(unknown_states))
+                )
 
     if artifact_type == "delivery_art_work_start_record":
         landing_unit = _artifact_object(payload.get("landing_unit"))
@@ -492,6 +600,34 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             payload.get("covered_work_item_ids")
         )
         evidence = _artifact_object(payload.get("evidence"))
+        landing_unit = _artifact_object(payload.get("landing_unit"))
+        landing_decision = landing_unit.get("decision")
+        evidence_kind = landing_unit.get("evidence_kind")
+        repo_evidence = _artifact_object_list(landing_unit.get("repos"))
+        repo_names = [
+            entry.get("repo_name")
+            for entry in repo_evidence
+            if isinstance(entry.get("repo_name"), str)
+        ]
+        if landing_decision == "non_source_child":
+            if evidence_kind not in {"pending", "non_source_evidence"}:
+                errors.append(
+                    "non_source_child Landing Units may use only pending or non_source_evidence"
+                )
+            if repo_evidence:
+                errors.append(
+                    "non_source_child Landing Units must not declare source repository evidence"
+                )
+        elif (
+            landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS
+            and evidence_kind == "non_source_evidence"
+        ):
+            errors.append(
+                "source-backed Landing Units must not use non_source_evidence"
+            )
+        if len(repo_names) != len(set(repo_names)):
+            errors.append("landing_unit.repos must contain one entry per repo")
+
         mappings = _artifact_object_list(evidence.get("acceptance_mapping"))
         mapped_work_items = [
             entry.get("work_item_id")
@@ -526,6 +662,30 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     f"acceptance mapping for {mapping.get('work_item_id')} references unknown evidence ids: "
                     + ", ".join(sorted(unknown_ids))
                 )
+
+        if landing_decision in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+            changed_files_by_repo = {
+                entry.get("repo_name"): set(
+                    _artifact_string_list(entry.get("changed_files"))
+                )
+                for entry in repo_evidence
+                if isinstance(entry.get("repo_name"), str)
+            }
+            for changed_surface in _artifact_object_list(
+                evidence.get("changed_surfaces")
+            ):
+                repo = changed_surface.get("repo")
+                path = changed_surface.get("path")
+                if not isinstance(repo, str) or not isinstance(path, str):
+                    continue
+                if repo not in changed_files_by_repo:
+                    errors.append(
+                        f"changed surface {path} references undeclared landing repo {repo}"
+                    )
+                elif path not in changed_files_by_repo[repo]:
+                    errors.append(
+                        f"changed surface {repo}/{path} is absent from landing_unit.repos changed_files"
+                    )
 
     return errors
 
@@ -673,6 +833,92 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             cyclic_dag,
             "cyclic architecture dependency graph",
+        )
+
+        cyclic_parent_map = copy.deepcopy(architecture)
+        cyclic_parent_map["architecture"]["descendant_owner_map"][0][
+            "parent_work_item_id"
+        ] = "work-item-802"
+        require_rejected(
+            "architecture_packet",
+            cyclic_parent_map,
+            "cyclic architecture descendant parent map without a root",
+        )
+
+        reversed_merge_order = copy.deepcopy(architecture)
+        reversed_merge_order["architecture"]["dependency_merge_dag"][
+            "merge_order"
+        ].reverse()
+        require_rejected(
+            "architecture_packet",
+            reversed_merge_order,
+            "architecture merge order that violates cross-repo dependency precedence",
+        )
+
+        valid_depends_on_order = copy.deepcopy(architecture)
+        valid_depends_on_order["architecture"]["dependency_merge_dag"]["edges"] = [
+            {
+                "from": "work-item-802",
+                "to": "work-item-801",
+                "relation": "depends_on",
+            }
+        ]
+        require_accepted(
+            "architecture_packet",
+            valid_depends_on_order,
+            "depends_on relation with dependency owner first in merge order",
+        )
+
+        invalid_depends_on_order = copy.deepcopy(architecture)
+        invalid_depends_on_order["architecture"]["dependency_merge_dag"]["edges"] = [
+            {
+                "from": "work-item-801",
+                "to": "work-item-802",
+                "relation": "depends_on",
+            }
+        ]
+        require_rejected(
+            "architecture_packet",
+            invalid_depends_on_order,
+            "depends_on relation with dependent owner first in merge order",
+        )
+
+        unrelated_source_snapshot = copy.deepcopy(architecture)
+        unrelated_source_snapshot["source_snapshot"]["repo_revisions"] = [
+            {
+                "repo": "unrelated-repo",
+                "base_ref": "origin/main",
+                "commit": "3" * 40,
+            }
+        ]
+        require_rejected(
+            "architecture_packet",
+            unrelated_source_snapshot,
+            "architecture source snapshot that omits declared owner repos",
+        )
+
+        duplicate_snapshot_owner = copy.deepcopy(architecture)
+        duplicate_snapshot_owner["source_snapshot"]["repo_revisions"].append(
+            {
+                "repo": "workspace-governance",
+                "base_ref": "origin/release",
+                "commit": "4" * 40,
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            duplicate_snapshot_owner,
+            "architecture source snapshot with duplicate owner repo revisions",
+        )
+
+        undeclared_lifecycle_state = copy.deepcopy(architecture)
+        undeclared_lifecycle_state["architecture"]["lifecycle_state_model"][
+            "transitions"
+        ][0]["to"] = "untracked-state"
+        require_rejected(
+            "architecture_packet",
+            undeclared_lifecycle_state,
+            "architecture lifecycle transition with an undeclared endpoint",
         )
 
         missing_architecture_persistence_time = copy.deepcopy(architecture)
@@ -855,6 +1101,40 @@ def validate_delivery_art_artifact_contracts(
             "review_packet",
             missing_readiness_receipt,
             "finalized Review Packet without a readiness receipt",
+        )
+
+        non_source_with_source_evidence = copy.deepcopy(finalized)
+        non_source_with_source_evidence["landing_unit"]["decision"] = (
+            "non_source_child"
+        )
+        require_rejected(
+            "review_packet",
+            non_source_with_source_evidence,
+            "non-source Review Packet with source landing evidence",
+        )
+
+        duplicate_landing_repo = copy.deepcopy(finalized)
+        duplicate_repo_entry = copy.deepcopy(
+            duplicate_landing_repo["landing_unit"]["repos"][0]
+        )
+        duplicate_repo_entry["branch"] = "codex/duplicate-repo-entry"
+        duplicate_landing_repo["landing_unit"]["repos"].append(
+            duplicate_repo_entry
+        )
+        require_rejected(
+            "review_packet",
+            duplicate_landing_repo,
+            "source Review Packet with duplicate repo evidence",
+        )
+
+        unbound_changed_surface = copy.deepcopy(finalized)
+        unbound_changed_surface["evidence"]["changed_surfaces"][0][
+            "path"
+        ] = "contracts/unreported-surface.yaml"
+        require_rejected(
+            "review_packet",
+            unbound_changed_surface,
+            "changed surface absent from exact landing-unit changed files",
         )
 
 

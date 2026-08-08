@@ -101,9 +101,13 @@ or
 boundary, protocol, lifecycle, or evidence handoff materially changes.
 
 The descendant owner map and dependency DAG must cover the same declared work
-items. Every parent and edge endpoint must resolve to that set, the merge order
-must cover the declared owner repos, and the dependency graph must be acyclic.
-These graph invariants are semantic checks in addition to JSON Schema shape.
+items. Parent links form a rooted acyclic forest, every edge endpoint resolves,
+and the source snapshot contains exactly one revision for every declared owner
+repo. Dependency relations have explicit precedence: the target precedes the
+source for `depends_on`; the source precedes the target for `blocks` and
+`must_merge_before`. Cross-repo edges must be honored by `merge_order`, and
+every lifecycle transition endpoint must be a declared lifecycle state. These
+invariants are semantic checks in addition to JSON Schema shape.
 
 When the initiative changes a cross-repo protocol, the packet must also include
 an executable conformance plan. It must cover command acknowledgement,
@@ -248,6 +252,11 @@ ids in that packet. These are packet-level semantic invariants in addition to
 the JSON Schema shape, and partial coverage or unknown references fail
 readiness.
 
+For source-backed packets, repository evidence is unique per repo and every
+declared changed surface must resolve to a file in that repo's exact
+`changed_files` list. This prevents a packet from presenting acceptance
+evidence for source outside its declared landing boundary.
+
 Validate any supplied target-contract artifact locally with:
 
 ```bash
@@ -287,7 +296,10 @@ the operator explicitly accepts that blocker or exception.
 
 Non-source work, such as risk disposition, live verification, planning, or ART
 metadata repair, closes with non-source evidence and should not invent merge
-evidence.
+evidence. A `non_source_child` may remain `pending` while its packet is a draft,
+but it may finalize only with `non_source_evidence` and no repository, branch,
+pull-request, or merge evidence. Source-backed Landing Units cannot use
+`non_source_evidence`.
 
 Feature and Epic closeout must verify coverage: every child is either covered
 by a finalized Review Packet or explicitly marked as non-source evidence only.
