@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-review-packet.schema.json",
   "title": "Delivery ART Review Packet v2",
+  "$comment": "Exact work-item coverage, globally unique evidence ids, and evidence-reference resolution are enforced by scripts/validate_contracts.py because JSON Schema cannot compare dynamic array members.",
   "type": "object",
   "additionalProperties": false,
   "required": [

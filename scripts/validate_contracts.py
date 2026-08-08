@@ -324,6 +324,102 @@ def validate_schema(errors: list[str], instance_path: Path, schema_path: Path) -
         errors.append(f"{instance_path}: {path}: {error.message}")
 
 
+DELIVERY_ART_EVIDENCE_SECTIONS = (
+    "changed_surfaces",
+    "tests",
+    "validations",
+    "runtime_and_live",
+    "security_and_trust",
+)
+DELIVERY_ART_SOURCE_BACKED_DECISIONS = {
+    "feature_single_landing_unit",
+    "child_isolated_landing_unit",
+}
+
+
+def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
+    """Validate cross-field invariants that JSON Schema cannot express."""
+    errors: list[str] = []
+    artifact_type = payload.get("artifact_type")
+
+    if artifact_type == "delivery_art_work_start_record":
+        landing_unit = payload.get("landing_unit") or {}
+        if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
+            owner_repos = landing_unit.get("owner_repos") or []
+            branch_plan = landing_unit.get("branch_plan") or []
+            repo_revisions = (payload.get("source_snapshot") or {}).get(
+                "repo_revisions"
+            ) or []
+            branch_repos = [entry.get("repo") for entry in branch_plan]
+            revision_repos = [entry.get("repo") for entry in repo_revisions]
+
+            if len(branch_repos) != len(set(branch_repos)):
+                errors.append("landing_unit.branch_plan must contain one entry per repo")
+            if len(revision_repos) != len(set(revision_repos)):
+                errors.append(
+                    "source_snapshot.repo_revisions must contain one entry per repo"
+                )
+            if set(owner_repos) != set(branch_repos):
+                errors.append(
+                    "landing_unit.owner_repos must exactly match landing_unit.branch_plan repos"
+                )
+            if set(owner_repos) != set(revision_repos):
+                errors.append(
+                    "landing_unit.owner_repos must exactly match source_snapshot.repo_revisions repos"
+                )
+
+            revisions_by_repo = {
+                entry.get("repo"): entry for entry in repo_revisions if entry.get("repo")
+            }
+            for entry in branch_plan:
+                repo = entry.get("repo")
+                revision = revisions_by_repo.get(repo)
+                if revision is None:
+                    continue
+                if entry.get("base_ref") != revision.get("base_ref"):
+                    errors.append(
+                        f"landing_unit.branch_plan base_ref for {repo} must match the source snapshot"
+                    )
+                if entry.get("base_commit") != revision.get("commit"):
+                    errors.append(
+                        f"landing_unit.branch_plan base_commit for {repo} must match the source snapshot"
+                    )
+
+    if artifact_type == "art_review_packet" and payload.get("schema_version") == 2:
+        covered_work_items = payload.get("covered_work_item_ids") or []
+        evidence = payload.get("evidence") or {}
+        mappings = evidence.get("acceptance_mapping") or []
+        mapped_work_items = [entry.get("work_item_id") for entry in mappings]
+
+        if len(mapped_work_items) != len(set(mapped_work_items)):
+            errors.append(
+                "evidence.acceptance_mapping must contain one entry per work item"
+            )
+        if set(mapped_work_items) != set(covered_work_items):
+            errors.append(
+                "evidence.acceptance_mapping must exactly cover covered_work_item_ids"
+            )
+
+        evidence_ids = [
+            entry.get("id")
+            for section in DELIVERY_ART_EVIDENCE_SECTIONS
+            for entry in evidence.get(section, [])
+            if isinstance(entry, dict) and entry.get("id")
+        ]
+        if len(evidence_ids) != len(set(evidence_ids)):
+            errors.append("evidence ids must be unique across all evidence sections")
+        known_evidence_ids = set(evidence_ids)
+        for mapping in mappings:
+            unknown_ids = set(mapping.get("evidence_ids") or []) - known_evidence_ids
+            if unknown_ids:
+                errors.append(
+                    f"acceptance mapping for {mapping.get('work_item_id')} references unknown evidence ids: "
+                    + ", ".join(sorted(unknown_ids))
+                )
+
+    return errors
+
+
 def validate_delivery_art_artifact_contracts(
     errors: list[str],
     repo_root: Path,
@@ -361,6 +457,8 @@ def validate_delivery_art_artifact_contracts(
             for error in fixture_errors:
                 path = ".".join(str(part) for part in error.absolute_path) or "<root>"
                 errors.append(f"{fixture_ref}: {path}: {error.message}")
+            for error in delivery_art_artifact_semantic_errors(fixture):
+                errors.append(f"{fixture_ref}: semantic invariant: {error}")
             fixtures[Path(fixture_ref).name] = fixture
 
             # These fixtures use only JCS-stable JSON scalar forms; sorted compact
@@ -394,9 +492,11 @@ def validate_delivery_art_artifact_contracts(
         case_name: str,
     ) -> None:
         validator = validators.get(validator_name)
-        if validator is not None and not list(validator.iter_errors(payload)):
+        schema_errors = list(validator.iter_errors(payload)) if validator else []
+        semantic_errors = delivery_art_artifact_semantic_errors(payload)
+        if validator is not None and not schema_errors and not semantic_errors:
             errors.append(
-                f"Delivery ART schema negative case {case_name!r} must be rejected"
+                f"Delivery ART contract negative case {case_name!r} must be rejected"
             )
 
     architecture = fixtures.get("architecture-packet.valid.json")
@@ -440,35 +540,44 @@ def validate_delivery_art_artifact_contracts(
             "work-start record without an exact base commit",
         )
 
+        mismatched_owner = copy.deepcopy(work_start)
+        mismatched_owner["landing_unit"]["owner_repos"] = ["unrelated-repo"]
+        require_rejected(
+            "work_start_record",
+            mismatched_owner,
+            "work-start owner repo not represented by branch and snapshot truth",
+        )
+
+        mismatched_base_ref = copy.deepcopy(work_start)
+        mismatched_base_ref["landing_unit"]["branch_plan"][0][
+            "base_ref"
+        ] = "origin/release"
+        require_rejected(
+            "work_start_record",
+            mismatched_base_ref,
+            "work-start branch base ref that differs from its source snapshot",
+        )
+
+        mismatched_base_commit = copy.deepcopy(work_start)
+        mismatched_base_commit["landing_unit"]["branch_plan"][0][
+            "base_commit"
+        ] = "2" * 40
+        require_rejected(
+            "work_start_record",
+            mismatched_base_commit,
+            "work-start branch base commit that differs from its source snapshot",
+        )
+
+        missing_persistence_time = copy.deepcopy(work_start)
+        missing_persistence_time["custody"]["persisted_at"] = None
+        require_rejected(
+            "work_start_record",
+            missing_persistence_time,
+            "durable work-start record without a persistence timestamp",
+        )
+
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
     if merge_ready:
-        mapping_ids = {
-            entry.get("work_item_id")
-            for entry in merge_ready["evidence"]["acceptance_mapping"]
-        }
-        if mapping_ids != set(merge_ready["covered_work_item_ids"]):
-            errors.append(
-                "review-packet-merge-ready.valid.json: acceptance mapping must exactly cover the declared work items"
-            )
-        evidence_ids = {
-            entry.get("id")
-            for section in (
-                "changed_surfaces",
-                "tests",
-                "validations",
-                "runtime_and_live",
-                "security_and_trust",
-            )
-            for entry in merge_ready["evidence"][section]
-        }
-        for mapping in merge_ready["evidence"]["acceptance_mapping"]:
-            unknown_refs = set(mapping["evidence_ids"]) - evidence_ids
-            if unknown_refs:
-                errors.append(
-                    "review-packet-merge-ready.valid.json: acceptance mapping references unknown evidence ids "
-                    + ", ".join(sorted(unknown_refs))
-                )
-
         failed_test = copy.deepcopy(merge_ready)
         failed_test["evidence"]["tests"][0]["result"] = "fail"
         require_rejected(
@@ -493,6 +602,34 @@ def validate_delivery_art_artifact_contracts(
             "review_packet",
             missing_mapping,
             "Review Packet without item acceptance mapping",
+        )
+
+        partial_mapping = copy.deepcopy(merge_ready)
+        partial_mapping["covered_work_item_ids"].append("work-item-802")
+        require_rejected(
+            "review_packet",
+            partial_mapping,
+            "Review Packet whose acceptance mapping covers only some work items",
+        )
+
+        unknown_evidence = copy.deepcopy(merge_ready)
+        unknown_evidence["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ].append("evidence:missing")
+        require_rejected(
+            "review_packet",
+            unknown_evidence,
+            "Review Packet acceptance mapping with an unknown evidence reference",
+        )
+
+        duplicate_evidence_id = copy.deepcopy(merge_ready)
+        duplicate_evidence_id["evidence"]["validations"][0]["id"] = (
+            duplicate_evidence_id["evidence"]["tests"][0]["id"]
+        )
+        require_rejected(
+            "review_packet",
+            duplicate_evidence_id,
+            "Review Packet with duplicate ids across evidence sections",
         )
 
         unexplained_not_applicable = copy.deepcopy(merge_ready)

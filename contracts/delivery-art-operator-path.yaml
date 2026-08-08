@@ -114,6 +114,8 @@ delivery_art_operator_path:
       - defer_decision_blocked
     child_isolated_requires_split_reason: true
     exact_base_revision_required: true
+    owner_branch_and_snapshot_repo_sets_must_match: true
+    branch_base_ref_and_commit_must_match_source_snapshot: true
     planned_review_packet_ref_required_for_source_work: true
     architecture_packet_required_when_preflight_applies: true
     read_snapshot_cache_allowed: true
@@ -152,6 +154,10 @@ delivery_art_operator_path:
       exact_base_and_head_commits_required: true
       real_git_required_for_git_causality_claims: true
       synthetic_resolver_cannot_prove_git_history: true
+    acceptance_mapping:
+      exactly_covers_declared_work_items: true
+      evidence_references_must_resolve: true
+      evidence_ids_globally_unique: true
     custody:
       draft_backend: local-filesystem
       durable_backend: openproject-attachment

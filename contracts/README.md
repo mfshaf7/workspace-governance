@@ -192,7 +192,11 @@ Use these contracts to declare:
   - valid architecture, work-start, merge-ready, and finalized artifact
     examples consumed by `validate_contracts.py`; the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
-    evidence, prose result strings, missing mapping, and local-only finalization
+    evidence, prose result strings, partial or unresolved acceptance mapping,
+    mismatched work-start repo snapshots, missing durable timestamps, and
+    local-only finalization
+  - cross-field repo and acceptance bindings are semantic contract checks in
+    addition to JSON Schema shape validation
 
 ## Repo Rules
 

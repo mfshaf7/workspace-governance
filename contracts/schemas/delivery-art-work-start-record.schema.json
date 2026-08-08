@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-work-start-record.schema.json",
   "title": "Delivery ART Work Start Record",
+  "$comment": "Cross-field repo, branch-plan, and source-snapshot bindings are enforced by scripts/validate_contracts.py because JSON Schema cannot compare dynamic array members.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -258,7 +259,8 @@
           "custody": {
             "properties": {
               "state": { "const": "durable" },
-              "backend": { "const": "openproject-attachment" }
+              "backend": { "const": "openproject-attachment" },
+              "persisted_at": { "$ref": "#/$defs/timestamp" }
             }
           }
         }

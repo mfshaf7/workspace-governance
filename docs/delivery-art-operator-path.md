@@ -156,6 +156,14 @@ that records:
 - the scoped ART/source snapshot, fingerprint, and invalidation inputs
 - the operator decision and resulting implementation readiness
 
+For a source-backed Landing Unit, owner repos, branch-plan repos, and source
+snapshot repos must be the same set. Each planned base ref and base commit must
+also equal the corresponding captured source revision. Schema shape validation
+alone is insufficient for these dynamic cross-record comparisons, so the
+contract validator applies the semantic binding as a separate required check.
+Durable work-start or blocked records must also record `persisted_at`; durable
+custody without a persistence timestamp is invalid.
+
 Read snapshots may be cached to keep preparation fast. A final mutation must
 refresh the target item and dependency subset. The intended cold work-start
 budget is five seconds, the warm budget is two seconds, and local schema
@@ -222,6 +230,12 @@ evidence refs. `fail` blocks merge readiness. `not_applicable` requires both a
 reason and an authority ref. `Attached artifact` is a reference, not a passing
 result, and prefixes such as `PASS:`, `FAIL:`, and `CHECK:` are not evidence
 types.
+
+The acceptance mapping must contain exactly one mapping for every declared
+covered work item. Mapping references must resolve to globally unique evidence
+ids in that packet. These are packet-level semantic invariants in addition to
+the JSON Schema shape, and partial coverage or unknown references fail
+readiness.
 
 The v2 schema is
 [`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).

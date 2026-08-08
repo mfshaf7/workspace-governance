@@ -256,6 +256,8 @@
         "landing_unit_decisions",
         "child_isolated_requires_split_reason",
         "exact_base_revision_required",
+        "owner_branch_and_snapshot_repo_sets_must_match",
+        "branch_base_ref_and_commit_must_match_source_snapshot",
         "planned_review_packet_ref_required_for_source_work",
         "architecture_packet_required_when_preflight_applies",
         "read_snapshot_cache_allowed",
@@ -274,6 +276,8 @@
         },
         "child_isolated_requires_split_reason": { "const": true },
         "exact_base_revision_required": { "const": true },
+        "owner_branch_and_snapshot_repo_sets_must_match": { "const": true },
+        "branch_base_ref_and_commit_must_match_source_snapshot": { "const": true },
         "planned_review_packet_ref_required_for_source_work": { "const": true },
         "architecture_packet_required_when_preflight_applies": { "const": true },
         "read_snapshot_cache_allowed": { "const": true },
@@ -291,6 +295,7 @@
         "evidence_results",
         "test_fidelity_classes",
         "source_provenance",
+        "acceptance_mapping",
         "custody"
       ],
       "properties": {
@@ -324,6 +329,20 @@
             "exact_base_and_head_commits_required": { "const": true },
             "real_git_required_for_git_causality_claims": { "const": true },
             "synthetic_resolver_cannot_prove_git_history": { "const": true }
+          }
+        },
+        "acceptance_mapping": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "exactly_covers_declared_work_items",
+            "evidence_references_must_resolve",
+            "evidence_ids_globally_unique"
+          ],
+          "properties": {
+            "exactly_covers_declared_work_items": { "const": true },
+            "evidence_references_must_resolve": { "const": true },
+            "evidence_ids_globally_unique": { "const": true }
           }
         },
         "custody": {
