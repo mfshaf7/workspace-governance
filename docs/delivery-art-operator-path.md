@@ -328,10 +328,14 @@ WGCF can issue receipts for all four readiness levels. Architecture,
 implementation, and merge receipts bind the exact durable source artifact by
 its content digest. Operating readiness is intentionally different: the final
 packet's `readiness.subject_digest` is recomputed over packet content excluding
-custody, integrity, receipt refs, and that digest field, which lets WGCF issue
-the receipt before its content address is inserted into the final packet. The
-receipt resolver still requires the exact subject artifact and matching
-Delivery, covered work, readiness level, chronology, and digest.
+custody, integrity, `finalized_at`, `readiness.evaluated_at`, receipt refs, and
+that digest field. The remaining projection binds the final semantic content
+before receipt issuance without committing timestamps that do not exist yet.
+WGCF then evaluates and persists the receipt, the packet copies the receipt's
+evaluation time, finalizes no earlier than receipt persistence, and finally
+persists its own content-addressed artifact. The receipt resolver still
+requires the exact subject artifact and matching Delivery, covered work,
+readiness level, chronology, and digest.
 
 Each receipt referenced by a finalized packet must resolve by URI and content
 digest, bind the same packet id and readiness-subject digest, carry a `ready`

@@ -8,7 +8,7 @@
     "artifact_type": "art_review_packet",
     "artifact_id": "review-packet:delivery-698-work-item-801",
     "digest_kind": "readiness-subject",
-    "digest": "sha256:5435250dba718e9ba0c5e6c49d79d323ac573f3d59198547234b94dd999f01ee"
+    "digest": "sha256:d8e16a6e0ba850e40803138c1e0486fbc7938e32d59dc37db247201fc11e1c5a"
   },
   "readiness": {
     "level": "operating-ready",
@@ -27,13 +27,13 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:4e943adde9d8e659056244d85e496ecb4f1addb339f74848dacf13833e47cc25"
+    "content_digest": "sha256:1223fbfaba286e44659d4d89c7aa1e091a33061f2c0883c421841f62f19c63fb"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-receipt-ledger",
-    "uri": "wgcf://receipts/art-readiness/art-readiness-receipt-0123456789abcdef01234567-4e943adde9d8e659056244d85e496ecb4f1addb339f74848dacf13833e47cc25.json",
-    "persisted_at": "2026-08-08T11:30:00+08:00",
+    "uri": "wgcf://receipts/art-readiness/art-readiness-receipt-0123456789abcdef01234567-1223fbfaba286e44659d4d89c7aa1e091a33061f2c0883c421841f62f19c63fb.json",
+    "persisted_at": "2026-08-08T11:31:00+08:00",
     "supersedes": null
   }
 }

@@ -388,6 +388,22 @@ delivery_art_operator_path:
     floating_point_values_rejected: true
     digest_algorithm: sha256
     digest_scope: artifact content excluding custody metadata and the digest field itself
+    review_packet_readiness_subject:
+      purpose: bind final semantic content before receipt issuance without committing terminal timing or self-referential evidence
+      excluded_top_level_fields:
+        - custody
+        - integrity
+        - finalized_at
+      excluded_readiness_fields:
+        - evaluated_at
+        - receipt_refs
+        - subject_digest
+      finalization_order:
+        - readiness-subject-computed
+        - readiness-receipt-evaluated
+        - readiness-receipt-persisted
+        - review-packet-finalized
+        - review-packet-persisted
     lifecycle_timestamps_must_be_chronologically_ordered: true
     artifact_reference_chain:
       opaque_refs_cannot_advance_readiness: true
