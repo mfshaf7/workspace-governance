@@ -128,6 +128,11 @@
       {
         "id": "case:contract-positive",
         "applies_to_work_item_ids": ["work-item-801"],
+        "dimension_ids": [
+          "lifecycle-state-matrix",
+          "cross-artifact-timeline-ordering",
+          "shared-validator-compatibility"
+        ],
         "polarity": "positive",
         "fidelity": "filesystem",
         "target_readiness": "merge-ready",
@@ -136,6 +141,11 @@
       {
         "id": "case:contract-negative",
         "applies_to_work_item_ids": ["work-item-801"],
+        "dimension_ids": [
+          "lifecycle-state-matrix",
+          "cross-artifact-timeline-ordering",
+          "shared-validator-compatibility"
+        ],
         "polarity": "negative",
         "fidelity": "filesystem",
         "target_readiness": "merge-ready",
@@ -144,6 +154,10 @@
       {
         "id": "case:real-git-positive",
         "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "deterministic-identities-and-idempotency",
+          "immutable-baseline-and-restore-evidence"
+        ],
         "polarity": "positive",
         "fidelity": "real-git",
         "target_readiness": "merge-ready",
@@ -152,10 +166,68 @@
       {
         "id": "case:real-git-cycle-negative",
         "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "deterministic-identities-and-idempotency",
+          "immutable-baseline-and-restore-evidence"
+        ],
         "polarity": "negative",
         "fidelity": "real-git",
         "target_readiness": "merge-ready",
         "expected_outcome": "A claims digest that requires its own containing commit is rejected."
+      },
+      {
+        "id": "case:recovery-positive",
+        "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "command-and-acknowledgement-semantics",
+          "state-mutation-ordering",
+          "retry-cancel-replay-and-recovery-semantics",
+          "bounded-failure-mapping"
+        ],
+        "polarity": "positive",
+        "fidelity": "process-crash",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "Acknowledged artifact writes recover idempotently after an interrupted process."
+      },
+      {
+        "id": "case:recovery-negative",
+        "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "command-and-acknowledgement-semantics",
+          "state-mutation-ordering",
+          "retry-cancel-replay-and-recovery-semantics",
+          "bounded-failure-mapping"
+        ],
+        "polarity": "negative",
+        "fidelity": "process-crash",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "Interrupted or replayed writes cannot advance readiness without one complete durable artifact."
+      },
+      {
+        "id": "case:authority-positive",
+        "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "authorization-integrity-and-replay-resistance",
+          "session-scenario-and-execution-binding",
+          "result-and-owner-receipt-completeness"
+        ],
+        "polarity": "positive",
+        "fidelity": "sandbox-runtime",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "An authorized session receives a complete owner receipt for its bound artifact write."
+      },
+      {
+        "id": "case:authority-negative",
+        "applies_to_work_item_ids": ["work-item-802"],
+        "dimension_ids": [
+          "authorization-integrity-and-replay-resistance",
+          "session-scenario-and-execution-binding",
+          "result-and-owner-receipt-completeness"
+        ],
+        "polarity": "negative",
+        "fidelity": "sandbox-runtime",
+        "target_readiness": "merge-ready",
+        "expected_outcome": "Unbound, unauthorized, or replayed artifact writes fail without a success receipt."
       }
     ]
   },
@@ -168,12 +240,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:1edba8879340158b8021cce81c5122b541cc296ee2dd5243f4f4a059a67d3938"
+    "content_digest": "sha256:313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-1edba8879340158b8021cce81c5122b541cc296ee2dd5243f4f4a059a67d3938.json",
+    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-313684e813b5ae853d9e5444be02854098a3f8fef8a02bf940913c46b8aebe50.json",
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
   }

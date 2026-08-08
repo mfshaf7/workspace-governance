@@ -182,9 +182,12 @@ delivery_art_operator_path:
       - live-backend
     conformance_case_binding:
       architecture_cases_declare_applicable_work_items: true
+      architecture_cases_declare_dimension_ids: true
       case_ids_unique_within_architecture_packet: true
       required_plan_exactly_covers_architecture_work_items: true
+      required_plan_exactly_covers_declared_dimensions: true
       required_plan_has_positive_and_negative_case_per_work_item: true
+      required_protocol_dimension_has_positive_and_negative_cases: true
       later_readiness_requires_all_applicable_cases_to_pass: true
       evidence_fidelity_must_match_planned_case_fidelity: true
       cases_outside_packet_work_item_or_readiness_scope_rejected: true
@@ -261,6 +264,7 @@ delivery_art_operator_path:
       required_when_cross_repo_protocol_changes: true
       applicability_must_be_explicit: true
       all_required_dimensions_must_be_present_when_applicable: true
+      all_required_dimensions_must_have_executable_cases: true
       required_dimensions:
         - command-and-acknowledgement-semantics
         - deterministic-identities-and-idempotency

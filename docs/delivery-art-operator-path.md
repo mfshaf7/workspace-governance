@@ -121,7 +121,9 @@ validator compatibility.
 Architecture readiness proves that this plan is complete and operator-approved;
 it does not pretend implementation tests have already run. Applicable positive
 and negative cases must pass before `merge-ready`, using the fidelity needed for
-the claim. A synthetic resolver may support unit tests, but it cannot prove a
+the claim. Each case names the dimensions it proves, required plans cover every
+declared dimension, and every mandated protocol dimension has positive and
+negative cases. A synthetic resolver may support unit tests, but it cannot prove a
 claim about real Git history. Git causality requires a `real-git` case.
 
 The machine schema is
@@ -274,7 +276,8 @@ revisions, scope fingerprint, and architecture decision. Architecture
 conformance cases declare the work items they apply to. Every case applicable
 to the packet's work-item and readiness scope must have a passing evidence
 result at the planned fidelity. A required conformance plan covers every
-architecture work item with both positive and negative cases, so a child cannot
+architecture work item and every declared dimension with executable cases. A
+child cannot
 advance merely because its tests were omitted from the plan.
 An architecture decision and its durable attachment must exist before the
 work-start evaluation that consumes it. The durable work-start attachment must

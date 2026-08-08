@@ -239,10 +239,11 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["id", "applies_to_work_item_ids", "polarity", "fidelity", "target_readiness", "expected_outcome"],
+            "required": ["id", "applies_to_work_item_ids", "dimension_ids", "polarity", "fidelity", "target_readiness", "expected_outcome"],
             "properties": {
               "id": { "$ref": "#/$defs/identifier" },
               "applies_to_work_item_ids": { "$ref": "#/$defs/workItemIds" },
+              "dimension_ids": { "$ref": "#/$defs/nonEmptyStrings" },
               "polarity": { "enum": ["positive", "negative"] },
               "fidelity": { "$ref": "#/$defs/fidelity" },
               "target_readiness": { "enum": ["merge-ready", "operating-ready"] },

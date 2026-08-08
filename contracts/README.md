@@ -180,7 +180,8 @@ Use these contracts to declare:
   - defines the operator-decided architecture packet, source snapshot,
     dependency and merge DAG, lifecycle and authority model, explicit protocol
     applicability, complete protocol conformance dimensions when applicable,
-    contradictions, integrity, and durable custody
+    dimension-bound executable cases, contradictions, integrity, and durable
+    custody
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and

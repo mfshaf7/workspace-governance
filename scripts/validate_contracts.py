@@ -694,13 +694,13 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 )
 
         conformance_plan = _artifact_object(payload.get("conformance_plan"))
+        conformance_dimensions = set(
+            _artifact_string_list(conformance_plan.get("dimensions"))
+        )
         protocol_applicability = _artifact_object(
             conformance_plan.get("protocol_applicability")
         )
         if protocol_applicability.get("applies") is True:
-            conformance_dimensions = set(
-                _artifact_string_list(conformance_plan.get("dimensions"))
-            )
             missing_dimensions = (
                 DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS
                 - conformance_dimensions
@@ -719,34 +719,66 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         if len(conformance_case_ids) != len(set(conformance_case_ids)):
             errors.append("conformance_plan.cases must contain unique case ids")
         conformance_items = set()
+        executable_dimensions = set()
         polarities_by_work_item = {
             work_item_id: set() for work_item_id in covered_work_items
+        }
+        polarities_by_dimension = {
+            dimension: set() for dimension in conformance_dimensions
         }
         for case in conformance_cases:
             case_id = case.get("id")
             applicability = set(
                 _artifact_string_list(case.get("applies_to_work_item_ids"))
             )
+            case_dimensions = set(
+                _artifact_string_list(case.get("dimension_ids"))
+            )
             conformance_items.update(applicability)
+            executable_dimensions.update(case_dimensions)
             for work_item_id in applicability.intersection(covered_work_items):
                 polarity = case.get("polarity")
                 if isinstance(polarity, str):
                     polarities_by_work_item[work_item_id].add(polarity)
+            for dimension in case_dimensions.intersection(conformance_dimensions):
+                polarity = case.get("polarity")
+                if isinstance(polarity, str):
+                    polarities_by_dimension[dimension].add(polarity)
             unknown_items = applicability - covered_work_items
             if unknown_items:
                 errors.append(
                     f"conformance case {case_id} applies to undeclared work items: "
                     + ", ".join(sorted(unknown_items))
                 )
+            unknown_dimensions = case_dimensions - conformance_dimensions
+            if unknown_dimensions:
+                errors.append(
+                    f"conformance case {case_id} references undeclared dimensions: "
+                    + ", ".join(sorted(unknown_dimensions))
+                )
         if conformance_plan.get("required") is True:
             if conformance_items != covered_work_items:
                 errors.append(
                     "required conformance plan must exactly cover covered_work_item_ids"
                 )
+            if executable_dimensions != conformance_dimensions:
+                errors.append(
+                    "required conformance cases must exactly cover declared dimensions"
+                )
             for work_item_id, polarities in polarities_by_work_item.items():
                 if polarities != {"positive", "negative"}:
                     errors.append(
                         f"required conformance plan must include positive and negative cases for {work_item_id}"
+                    )
+        if protocol_applicability.get("applies") is True:
+            for dimension in DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS:
+                if polarities_by_dimension.get(dimension) != {
+                    "positive",
+                    "negative",
+                }:
+                    errors.append(
+                        "required protocol dimension must have positive and negative cases: "
+                        + dimension
                     )
 
         decision = _artifact_object(payload.get("decision"))
@@ -1583,6 +1615,39 @@ def validate_delivery_art_artifact_contracts(
             "applicable protocol conformance plan missing a mandated dimension",
         )
 
+        case_without_dimensions = copy.deepcopy(architecture)
+        del case_without_dimensions["conformance_plan"]["cases"][0][
+            "dimension_ids"
+        ]
+        require_rejected(
+            "architecture_packet",
+            case_without_dimensions,
+            "architecture conformance case without dimension bindings",
+        )
+
+        untested_protocol_dimension = copy.deepcopy(architecture)
+        for case in untested_protocol_dimension["conformance_plan"]["cases"]:
+            case["dimension_ids"] = [
+                dimension
+                for dimension in case["dimension_ids"]
+                if dimension != "shared-validator-compatibility"
+            ]
+        require_rejected(
+            "architecture_packet",
+            untested_protocol_dimension,
+            "protocol conformance plan with a declared but untested dimension",
+        )
+
+        conformance_case_with_undeclared_dimension = copy.deepcopy(architecture)
+        conformance_case_with_undeclared_dimension["conformance_plan"]["cases"][
+            0
+        ]["dimension_ids"].append("undeclared-protocol-dimension")
+        require_rejected(
+            "architecture_packet",
+            conformance_case_with_undeclared_dimension,
+            "architecture conformance case referencing an undeclared dimension",
+        )
+
         non_protocol_conformance = copy.deepcopy(architecture)
         non_protocol_conformance["conformance_plan"]["protocol_applicability"] = {
             "applies": False,
@@ -1591,6 +1656,8 @@ def validate_delivery_art_artifact_contracts(
         non_protocol_conformance["conformance_plan"]["dimensions"] = [
             "local-architecture-regression"
         ]
+        for case in non_protocol_conformance["conformance_plan"]["cases"]:
+            case["dimension_ids"] = ["local-architecture-regression"]
         require_accepted(
             "architecture_packet",
             non_protocol_conformance,

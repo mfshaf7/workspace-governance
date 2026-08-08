@@ -10,8 +10,8 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-761d53c1c294105f04c39b6708d5211a40e858597a06998f60b8f6c8421e38df.json",
-    "artifact_digest": "sha256:761d53c1c294105f04c39b6708d5211a40e858597a06998f60b8f6c8421e38df",
+    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d.json",
+    "artifact_digest": "sha256:6788599a836043828d813c1853d1ad6f82b9e1fe4e28448bb26820bc0a67cc0d",
     "scope_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   },
   "landing_unit": {
@@ -113,7 +113,7 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:806b9ee693f344ee96fe9e7aaa5b1326db7dac27ab385aa4f34403f810f1c1f2"
+    "content_digest": "sha256:d1ee4980ced5418baec77f6f65d71d47d9bb48928819605923f4e3f80218a688"
   },
   "custody": {
     "state": "local-draft",
