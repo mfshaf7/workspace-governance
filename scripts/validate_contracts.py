@@ -723,7 +723,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         polarities_by_work_item = {
             work_item_id: set() for work_item_id in covered_work_items
         }
-        polarities_by_dimension = {
+        merge_ready_polarities_by_dimension = {
             dimension: set() for dimension in conformance_dimensions
         }
         for case in conformance_cases:
@@ -740,10 +740,15 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 polarity = case.get("polarity")
                 if isinstance(polarity, str):
                     polarities_by_work_item[work_item_id].add(polarity)
-            for dimension in case_dimensions.intersection(conformance_dimensions):
-                polarity = case.get("polarity")
-                if isinstance(polarity, str):
-                    polarities_by_dimension[dimension].add(polarity)
+            if case.get("target_readiness") == "merge-ready":
+                for dimension in case_dimensions.intersection(
+                    conformance_dimensions
+                ):
+                    polarity = case.get("polarity")
+                    if isinstance(polarity, str):
+                        merge_ready_polarities_by_dimension[dimension].add(
+                            polarity
+                        )
             unknown_items = applicability - covered_work_items
             if unknown_items:
                 errors.append(
@@ -772,12 +777,12 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     )
         if protocol_applicability.get("applies") is True:
             for dimension in DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS:
-                if polarities_by_dimension.get(dimension) != {
+                if merge_ready_polarities_by_dimension.get(dimension) != {
                     "positive",
                     "negative",
                 }:
                     errors.append(
-                        "required protocol dimension must have positive and negative cases: "
+                        "required protocol dimension must have positive and negative merge-ready cases: "
                         + dimension
                     )
 
@@ -1636,6 +1641,18 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             untested_protocol_dimension,
             "protocol conformance plan with a declared but untested dimension",
+        )
+
+        protocol_dimension_deferred_past_merge = copy.deepcopy(architecture)
+        for case in protocol_dimension_deferred_past_merge["conformance_plan"][
+            "cases"
+        ]:
+            if "shared-validator-compatibility" in case["dimension_ids"]:
+                case["target_readiness"] = "operating-ready"
+        require_rejected(
+            "architecture_packet",
+            protocol_dimension_deferred_past_merge,
+            "protocol dimension without positive and negative merge-ready cases",
         )
 
         conformance_case_with_undeclared_dimension = copy.deepcopy(architecture)

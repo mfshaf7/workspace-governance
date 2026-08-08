@@ -123,7 +123,7 @@ it does not pretend implementation tests have already run. Applicable positive
 and negative cases must pass before `merge-ready`, using the fidelity needed for
 the claim. Each case names the dimensions it proves, required plans cover every
 declared dimension, and every mandated protocol dimension has positive and
-negative cases. A synthetic resolver may support unit tests, but it cannot prove a
+negative `merge-ready` cases. A synthetic resolver may support unit tests, but it cannot prove a
 claim about real Git history. Git causality requires a `real-git` case.
 
 The machine schema is

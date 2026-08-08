@@ -58,7 +58,7 @@ receipts, immutable baseline and restore evidence, lifecycle-state matrices,
 cross-artifact timeline ordering, shared-validator compatibility, and
 `positive and negative contract cases`. Bind every case to the work items and
 dimensions it proves; every mandated protocol dimension requires both positive
-and negative cases. Architecture readiness requires the
+and negative `merge-ready` cases. Architecture readiness requires the
 approved plan, not implementation results that cannot exist yet. Applicable
 cases must pass before merge readiness. Use a `real-git` case for Git-history
 causality; a synthetic resolver cannot prove a real commit sequence.
