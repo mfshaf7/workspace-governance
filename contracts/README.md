@@ -178,12 +178,13 @@ Use these contracts to declare:
     between contract-defined controls and owner-repo runtime enforcement
 - `schemas/delivery-art-architecture-packet.schema.json`
   - defines the operator-decided architecture packet, source snapshot,
-    dependency and merge DAG, lifecycle and authority model, conformance plan,
+    dependency and merge DAG, lifecycle and authority model, explicit protocol
+    applicability, complete protocol conformance dimensions when applicable,
     contradictions, integrity, and durable custody
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
-    binding, scope fingerprint, invalidation inputs, and implementation
-    readiness record required before source work
+    binding, scope fingerprint, the complete readiness invalidation set, and
+    implementation readiness record required before source work
 - `schemas/delivery-art-review-packet.schema.json`
   - defines Review Packet v2 with structured result semantics, test-fidelity
     classes, architecture conformance-case bindings, exact source provenance,

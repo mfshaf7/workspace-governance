@@ -48,8 +48,9 @@ cross-repo protocol, or control-plane change:
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
-For cross-repo protocol work, define an executable conformance plan before
-implementation is declared ready. It must cover command acknowledgement,
+Record protocol applicability explicitly in every architecture packet. For
+cross-repo protocol work, define an executable conformance plan before
+implementation is declared ready and include every mandated dimension. It must cover command acknowledgement,
 deterministic identity and idempotency, state-mutation ordering, retry, cancel,
 replay and recovery semantics, bounded failure mapping, authorization integrity
 and replay resistance, session and scenario-execution binding, complete owner

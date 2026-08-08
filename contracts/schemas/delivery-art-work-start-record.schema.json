@@ -108,7 +108,8 @@
     "scope_fingerprint": { "$ref": "#/$defs/digest" },
     "invalidation_inputs": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 5,
+      "maxItems": 5,
       "uniqueItems": true,
       "items": {
         "enum": [

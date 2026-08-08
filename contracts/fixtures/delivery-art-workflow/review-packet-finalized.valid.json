@@ -10,8 +10,8 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-0c43b924c4196c54c2dcc183e53bb633684af4613c02357e745cf89a12e19d1e.json",
-    "artifact_digest": "sha256:0c43b924c4196c54c2dcc183e53bb633684af4613c02357e745cf89a12e19d1e",
+    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-761d53c1c294105f04c39b6708d5211a40e858597a06998f60b8f6c8421e38df.json",
+    "artifact_digest": "sha256:761d53c1c294105f04c39b6708d5211a40e858597a06998f60b8f6c8421e38df",
     "scope_fingerprint": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   },
   "landing_unit": {
@@ -118,12 +118,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:39739e8742f0971cb1e7245cf00603e9bb8db588b264ac0c11b0542a8ea454bd"
+    "content_digest": "sha256:8d1c1a5a6c0f5e2d62ad7b982897920554f7c8ceaf6d955412b68de0d66a8189"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-39739e8742f0971cb1e7245cf00603e9bb8db588b264ac0c11b0542a8ea454bd.json",
+    "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-8d1c1a5a6c0f5e2d62ad7b982897920554f7c8ceaf6d955412b68de0d66a8189.json",
     "persisted_at": "2026-08-08T11:31:00+08:00",
     "supersedes": null
   },

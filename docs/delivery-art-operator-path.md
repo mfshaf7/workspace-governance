@@ -109,8 +109,9 @@ source for `depends_on`; the source precedes the target for `blocks` and
 every lifecycle transition endpoint must be a declared lifecycle state. These
 invariants are semantic checks in addition to JSON Schema shape.
 
-When the initiative changes a cross-repo protocol, the packet must also include
-an executable conformance plan. It must cover command acknowledgement,
+Every architecture packet records whether it changes a cross-repo protocol and
+why. When protocol conformance applies, the packet must include every mandated
+dimension in its executable conformance plan. It must cover command acknowledgement,
 deterministic identity and idempotency, state-mutation ordering, retry, cancel,
 replay and recovery semantics, bounded failure mapping, authorization integrity,
 session and scenario-execution binding, complete owner receipts, immutable
@@ -172,6 +173,11 @@ alone is insufficient for these dynamic cross-record comparisons, so the
 contract validator applies the semantic binding as a separate required check.
 Durable work-start or blocked records must also record `persisted_at`; durable
 custody without a persistence timestamp is invalid.
+
+The invalidation input list is a complete machine set, not an operator-selected
+subset. Every work-start record carries all five declared change classes so a
+later ART, ownership, source, architecture, validation, or security change
+forces reevaluation instead of silently relying on stale readiness.
 
 When architecture is required but its decision is unresolved, the work-start
 record remains durable with architecture readiness `blocked` and overall

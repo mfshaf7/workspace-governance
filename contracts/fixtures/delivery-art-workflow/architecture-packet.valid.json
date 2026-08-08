@@ -106,7 +106,24 @@
   },
   "conformance_plan": {
     "required": true,
-    "dimensions": ["source provenance", "atomic closeout"],
+    "protocol_applicability": {
+      "applies": true,
+      "rationale": "The Landing Unit changes a cross-repo Delivery ART artifact and custody protocol."
+    },
+    "dimensions": [
+      "command-and-acknowledgement-semantics",
+      "deterministic-identities-and-idempotency",
+      "state-mutation-ordering",
+      "retry-cancel-replay-and-recovery-semantics",
+      "bounded-failure-mapping",
+      "authorization-integrity-and-replay-resistance",
+      "session-scenario-and-execution-binding",
+      "result-and-owner-receipt-completeness",
+      "immutable-baseline-and-restore-evidence",
+      "lifecycle-state-matrix",
+      "cross-artifact-timeline-ordering",
+      "shared-validator-compatibility"
+    ],
     "cases": [
       {
         "id": "case:contract-positive",
@@ -151,12 +168,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:14d83b30c5b4c39f6432586cb55e0bf3857d217670d90d7c41092204724a784d"
+    "content_digest": "sha256:1edba8879340158b8021cce81c5122b541cc296ee2dd5243f4f4a059a67d3938"
   },
   "custody": {
     "state": "durable",
     "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-14d83b30c5b4c39f6432586cb55e0bf3857d217670d90d7c41092204724a784d.json",
+    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-1edba8879340158b8021cce81c5122b541cc296ee2dd5243f4f4a059a67d3938.json",
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
   }

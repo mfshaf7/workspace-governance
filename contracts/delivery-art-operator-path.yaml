@@ -132,12 +132,13 @@ delivery_art_operator_path:
     blocked_architecture_prevents_implementation_ready: true
     read_snapshot_cache_allowed: true
     fresh_target_and_dependency_snapshot_required_before_mutation: true
+    complete_invalidation_set_required: true
     invalidation_inputs:
-      - ART descendant or dependency change
-      - owner-repo or rollback-boundary change
-      - base ref or base commit change
-      - architecture decision or packet digest change
-      - validation or security obligation change
+      - art-descendant-or-dependency-change
+      - owner-or-rollback-boundary-change
+      - base-ref-or-commit-change
+      - architecture-decision-or-digest-change
+      - validation-or-security-obligation-change
   evidence_integrity:
     landing_unit_decision_and_evidence_kind_must_match: true
     non_source_children_prohibit_branch_pr_and_source_landing_evidence: true
@@ -258,6 +259,8 @@ delivery_art_operator_path:
         - blocked-pending-architecture-decision
     protocol_conformance_preflight:
       required_when_cross_repo_protocol_changes: true
+      applicability_must_be_explicit: true
+      all_required_dimensions_must_be_present_when_applicable: true
       required_dimensions:
         - command-and-acknowledgement-semantics
         - deterministic-identities-and-idempotency

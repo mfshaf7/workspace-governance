@@ -335,6 +335,27 @@ DELIVERY_ART_SOURCE_BACKED_DECISIONS = {
     "feature_single_landing_unit",
     "child_isolated_landing_unit",
 }
+DELIVERY_ART_WORK_START_INVALIDATION_INPUTS = {
+    "art-descendant-or-dependency-change",
+    "owner-or-rollback-boundary-change",
+    "base-ref-or-commit-change",
+    "architecture-decision-or-digest-change",
+    "validation-or-security-obligation-change",
+}
+DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS = {
+    "command-and-acknowledgement-semantics",
+    "deterministic-identities-and-idempotency",
+    "state-mutation-ordering",
+    "retry-cancel-replay-and-recovery-semantics",
+    "bounded-failure-mapping",
+    "authorization-integrity-and-replay-resistance",
+    "session-scenario-and-execution-binding",
+    "result-and-owner-receipt-completeness",
+    "immutable-baseline-and-restore-evidence",
+    "lifecycle-state-matrix",
+    "cross-artifact-timeline-ordering",
+    "shared-validator-compatibility",
+}
 DELIVERY_ART_READINESS_RANK = {
     "merge-ready": 1,
     "operating-ready": 2,
@@ -673,6 +694,22 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 )
 
         conformance_plan = _artifact_object(payload.get("conformance_plan"))
+        protocol_applicability = _artifact_object(
+            conformance_plan.get("protocol_applicability")
+        )
+        if protocol_applicability.get("applies") is True:
+            conformance_dimensions = set(
+                _artifact_string_list(conformance_plan.get("dimensions"))
+            )
+            missing_dimensions = (
+                DELIVERY_ART_PROTOCOL_CONFORMANCE_DIMENSIONS
+                - conformance_dimensions
+            )
+            if missing_dimensions:
+                errors.append(
+                    "protocol conformance plan is missing required dimensions: "
+                    + ", ".join(sorted(missing_dimensions))
+                )
         conformance_cases = _artifact_object_list(conformance_plan.get("cases"))
         conformance_case_ids = [
             case.get("id")
@@ -779,6 +816,27 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             )
         )
         landing_unit = _artifact_object(payload.get("landing_unit"))
+        invalidation_inputs = set(
+            _artifact_string_list(payload.get("invalidation_inputs"))
+        )
+        if invalidation_inputs != DELIVERY_ART_WORK_START_INVALIDATION_INPUTS:
+            missing_inputs = (
+                DELIVERY_ART_WORK_START_INVALIDATION_INPUTS - invalidation_inputs
+            )
+            unexpected_inputs = (
+                invalidation_inputs - DELIVERY_ART_WORK_START_INVALIDATION_INPUTS
+            )
+            details = []
+            if missing_inputs:
+                details.append("missing " + ", ".join(sorted(missing_inputs)))
+            if unexpected_inputs:
+                details.append(
+                    "unexpected " + ", ".join(sorted(unexpected_inputs))
+                )
+            errors.append(
+                "work-start invalidation_inputs must contain the complete declared set"
+                + (": " + "; ".join(details) if details else "")
+            )
         if landing_unit.get("decision") in DELIVERY_ART_SOURCE_BACKED_DECISIONS:
             owner_repos = _artifact_string_list(landing_unit.get("owner_repos"))
             branch_plan = _artifact_object_list(landing_unit.get("branch_plan"))
@@ -1507,6 +1565,38 @@ def validate_delivery_art_artifact_contracts(
             "architecture-ready packet without a required conformance plan",
         )
 
+        missing_protocol_applicability = copy.deepcopy(architecture)
+        del missing_protocol_applicability["conformance_plan"][
+            "protocol_applicability"
+        ]
+        require_rejected(
+            "architecture_packet",
+            missing_protocol_applicability,
+            "architecture packet without an explicit protocol applicability decision",
+        )
+
+        incomplete_protocol_dimensions = copy.deepcopy(architecture)
+        incomplete_protocol_dimensions["conformance_plan"]["dimensions"].pop()
+        require_rejected(
+            "architecture_packet",
+            incomplete_protocol_dimensions,
+            "applicable protocol conformance plan missing a mandated dimension",
+        )
+
+        non_protocol_conformance = copy.deepcopy(architecture)
+        non_protocol_conformance["conformance_plan"]["protocol_applicability"] = {
+            "applies": False,
+            "rationale": "The architecture decision is local and does not change a cross-repo protocol.",
+        }
+        non_protocol_conformance["conformance_plan"]["dimensions"] = [
+            "local-architecture-regression"
+        ]
+        require_accepted(
+            "architecture_packet",
+            non_protocol_conformance,
+            "non-protocol architecture packet with a scoped conformance dimension",
+        )
+
         resolved_without_resolution = copy.deepcopy(architecture)
         resolved_without_resolution["architecture"][
             "contradictions_open_decisions"
@@ -1766,6 +1856,14 @@ def validate_delivery_art_artifact_contracts(
             "work_start_record",
             missing_persistence_time,
             "durable work-start record without a persistence timestamp",
+        )
+
+        incomplete_invalidation_set = copy.deepcopy(work_start)
+        incomplete_invalidation_set["invalidation_inputs"].pop()
+        require_rejected(
+            "work_start_record",
+            incomplete_invalidation_set,
+            "implementation-ready work-start record with an incomplete invalidation set",
         )
 
         blocked_architecture = copy.deepcopy(work_start)

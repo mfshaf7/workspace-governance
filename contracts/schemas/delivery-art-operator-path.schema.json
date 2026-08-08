@@ -286,6 +286,7 @@
         "blocked_architecture_prevents_implementation_ready",
         "read_snapshot_cache_allowed",
         "fresh_target_and_dependency_snapshot_required_before_mutation",
+        "complete_invalidation_set_required",
         "invalidation_inputs"
       ],
       "properties": {
@@ -309,7 +310,16 @@
         "blocked_architecture_prevents_implementation_ready": { "const": true },
         "read_snapshot_cache_allowed": { "const": true },
         "fresh_target_and_dependency_snapshot_required_before_mutation": { "const": true },
-        "invalidation_inputs": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+        "complete_invalidation_set_required": { "const": true },
+        "invalidation_inputs": {
+          "const": [
+            "art-descendant-or-dependency-change",
+            "owner-or-rollback-boundary-change",
+            "base-ref-or-commit-change",
+            "architecture-decision-or-digest-change",
+            "validation-or-security-obligation-change"
+          ]
+        }
       }
     },
     "evidenceIntegrity": {
@@ -556,6 +566,8 @@
           "additionalProperties": false,
           "required": [
             "required_when_cross_repo_protocol_changes",
+            "applicability_must_be_explicit",
+            "all_required_dimensions_must_be_present_when_applicable",
             "required_dimensions",
             "executable_cases_required",
             "architecture_ready_requires_conformance_plan",
@@ -564,7 +576,24 @@
           ],
           "properties": {
             "required_when_cross_repo_protocol_changes": { "const": true },
-            "required_dimensions": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+            "applicability_must_be_explicit": { "const": true },
+            "all_required_dimensions_must_be_present_when_applicable": { "const": true },
+            "required_dimensions": {
+              "const": [
+                "command-and-acknowledgement-semantics",
+                "deterministic-identities-and-idempotency",
+                "state-mutation-ordering",
+                "retry-cancel-replay-and-recovery-semantics",
+                "bounded-failure-mapping",
+                "authorization-integrity-and-replay-resistance",
+                "session-scenario-and-execution-binding",
+                "result-and-owner-receipt-completeness",
+                "immutable-baseline-and-restore-evidence",
+                "lifecycle-state-matrix",
+                "cross-artifact-timeline-ordering",
+                "shared-validator-compatibility"
+              ]
+            },
             "executable_cases_required": { "const": ["positive-contract-cases", "negative-contract-cases"] },
             "architecture_ready_requires_conformance_plan": { "const": true },
             "merge_ready_requires_applicable_cases_pass": { "const": true },

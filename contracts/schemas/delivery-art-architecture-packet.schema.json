@@ -215,9 +215,18 @@
     "conformance_plan": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["required", "dimensions", "cases"],
+      "required": ["required", "protocol_applicability", "dimensions", "cases"],
       "properties": {
         "required": { "type": "boolean" },
+        "protocol_applicability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applies", "rationale"],
+          "properties": {
+            "applies": { "type": "boolean" },
+            "rationale": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
         "dimensions": {
           "type": "array",
           "minItems": 1,
@@ -245,7 +254,41 @@
             { "contains": { "type": "object", "properties": { "polarity": { "const": "negative" } }, "required": ["polarity"] } }
           ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "protocol_applicability": {
+                "properties": { "applies": { "const": true } },
+                "required": ["applies"]
+              }
+            },
+            "required": ["protocol_applicability"]
+          },
+          "then": {
+            "properties": {
+              "dimensions": {
+                "minItems": 12,
+                "allOf": [
+                  { "contains": { "const": "command-and-acknowledgement-semantics" } },
+                  { "contains": { "const": "deterministic-identities-and-idempotency" } },
+                  { "contains": { "const": "state-mutation-ordering" } },
+                  { "contains": { "const": "retry-cancel-replay-and-recovery-semantics" } },
+                  { "contains": { "const": "bounded-failure-mapping" } },
+                  { "contains": { "const": "authorization-integrity-and-replay-resistance" } },
+                  { "contains": { "const": "session-scenario-and-execution-binding" } },
+                  { "contains": { "const": "result-and-owner-receipt-completeness" } },
+                  { "contains": { "const": "immutable-baseline-and-restore-evidence" } },
+                  { "contains": { "const": "lifecycle-state-matrix" } },
+                  { "contains": { "const": "cross-artifact-timeline-ordering" } },
+                  { "contains": { "const": "shared-validator-compatibility" } }
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     "decision": {
       "type": "object",
