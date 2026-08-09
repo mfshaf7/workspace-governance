@@ -166,7 +166,7 @@ profiles:
         - profile-scoped evidence storage availability
         - storage credential and network isolation
         - version-bound content digest and storage receipt verification
-        - content-address-preserving backup and restore
+        - content-address-preserving backup and receipt-rebinding restore
         - explicit retention and deletion boundary
         - governed encryption identity and Security approval
     actions:
