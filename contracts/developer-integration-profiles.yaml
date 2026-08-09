@@ -144,6 +144,8 @@ profiles:
           path: docs/reviews/components/2026-04-30-workspace-governance-control-fabric-devint-runtime.md
         - repo: security-architecture
           path: docs/reviews/components/2026-08-09-art-evidence-custody-and-source-provenance.md
+          source_commit: 2ad9700c86dfd3a762bcfdb2aba17adbc814ce43
+          content_sha256: d0a16096a9ac3f26c85dbeca68364a566aeb9817cd56f7e730995db8ae367158
     shared_dependencies:
       - platform-engineering
       - workspace-governance
