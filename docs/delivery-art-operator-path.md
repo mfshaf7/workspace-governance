@@ -428,7 +428,9 @@ The custody-receipt schema is
 The readiness-receipt schema is
 [`delivery-art-readiness-receipt.schema.json`](../contracts/schemas/delivery-art-readiness-receipt.schema.json).
 Artifact digests use the integer-only RFC 8785 canonical domain and SHA-256
-over artifact content, excluding custody metadata and the digest field itself.
+over artifact content. The digest excludes its own field and self-referential
+custody values such as the artifact URI and persistence timestamp, but retains
+every non-null `custody.supersedes` predecessor reference.
 
 This is still a target contract. Work item `809` corrects contract ownership;
 `805` approves the custody boundary; `811` provides profile-scoped object

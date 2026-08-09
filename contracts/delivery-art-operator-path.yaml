@@ -425,7 +425,7 @@ delivery_art_operator_path:
     duplicate_json_object_keys_rejected: true
     floating_point_values_rejected: true
     digest_algorithm: sha256
-    digest_scope: artifact content excluding custody metadata and the digest field itself
+    digest_scope: artifact content excluding the digest field and self-referential custody values while retaining every non-null custody.supersedes reference
     review_packet_readiness_subject:
       purpose: bind final semantic content before receipt issuance without committing terminal timing or self-referential evidence
       excluded_top_level_fields:
