@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
+import re
+import subprocess
 import sys
 
 import yaml
@@ -122,6 +125,8 @@ CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "exception_handling",
     "stop_conditions",
 }
+FULL_GIT_COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 def load_yaml(path: Path) -> dict:
@@ -143,6 +148,44 @@ def has_required_scalar(payload: dict, key: str) -> bool:
     if isinstance(value, list) and not value:
         return False
     return True
+
+
+def validate_security_review_ref(review_repo: Path, ref: dict) -> list[str]:
+    review_path = ref["path"]
+    source_commit = ref.get("source_commit")
+    expected_digest = ref.get("content_sha256")
+
+    if source_commit is None and expected_digest is None:
+        current_path = review_repo / review_path
+        if not current_path.exists():
+            return [f"security review path missing: {current_path}"]
+        return []
+
+    if not isinstance(source_commit, str) or not FULL_GIT_COMMIT_PATTERN.fullmatch(source_commit):
+        return [f"security review source_commit must be a full lowercase Git commit: {source_commit!r}"]
+    if not isinstance(expected_digest, str) or not SHA256_PATTERN.fullmatch(expected_digest):
+        return [f"security review content_sha256 must be a lowercase SHA-256 digest: {expected_digest!r}"]
+
+    result = subprocess.run(
+        ["git", "cat-file", "blob", f"{source_commit}:{review_path}"],
+        cwd=review_repo,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        return [
+            f"security review source unavailable at {source_commit}:{review_path}"
+            + (f": {detail}" if detail else "")
+        ]
+
+    actual_digest = hashlib.sha256(result.stdout).hexdigest()
+    if actual_digest != expected_digest:
+        return [
+            f"security review digest mismatch at {source_commit}:{review_path}: "
+            f"expected {expected_digest}, got {actual_digest}"
+        ]
+    return []
 
 
 def validate(repo_root: Path, workspace_root: Path) -> list[str]:
@@ -728,10 +771,11 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                     errors.append(
                         f"contracts/developer-integration-profiles.yaml: {profile_name} security review repo {review_repo!r} is not active"
                     )
-                review_path = workspace_root / review_repo / ref["path"]
-                if not review_path.exists():
+                    continue
+                review_repo_path = workspace_root / review_repo
+                for ref_error in validate_security_review_ref(review_repo_path, ref):
                     errors.append(
-                        f"contracts/developer-integration-profiles.yaml: {profile_name} security review path missing: {review_path}"
+                        f"contracts/developer-integration-profiles.yaml: {profile_name} {ref_error}"
                     )
 
         profile_path = workspace_root / payload["owner_repo"] / payload["profile_path"]

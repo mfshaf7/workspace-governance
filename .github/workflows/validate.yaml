@@ -98,10 +98,20 @@ jobs:
 
           repos = yaml.safe_load((repo_root / "contracts" / "repos.yaml").read_text())["repos"]
           intake_repos = yaml.safe_load((repo_root / "contracts" / "intake-register.yaml").read_text()).get("repos", {})
+          profiles = yaml.safe_load(
+              (repo_root / "contracts" / "developer-integration-profiles.yaml").read_text()
+          )["profiles"]
           admitted_repos = {
               repo_name
               for repo_name, payload in intake_repos.items()
               if payload.get("status") == "admitted"
+          }
+          pinned_review_repos = {
+              ref["repo"]
+              for profile in profiles.values()
+              for admission_key in ("build_admission", "admission")
+              for ref in (profile.get(admission_key) or {}).get("security_review_refs", [])
+              if ref.get("source_commit")
           }
           owner_repos = sorted(set(repos.keys()) | admitted_repos)
 
@@ -109,21 +119,23 @@ jobs:
               if repo_name == "workspace-governance":
                   continue
               target = workspace_root / repo_name
+              clone_command = ["git", "clone"]
+              if repo_name not in pinned_review_repos:
+                  clone_command.extend(["--depth", "1"])
+              clone_command.extend(
+                  [f"https://github.com/mfshaf7/{repo_name}.git", str(target)]
+              )
               subprocess.run(
-                  [
-                      "git",
-                      "clone",
-                      "--depth",
-                      "1",
-                      f"https://github.com/mfshaf7/{repo_name}.git",
-                      str(target),
-                  ],
+                  clone_command,
                   check=True,
               )
           PY
 
       - name: Validate intake model
         run: python3 scripts/validate_intake.py --workspace-root .workspace-ci
+
+      - name: Validate developer integration profiles
+        run: python3 scripts/validate_developer_integration.py --repo-root . --workspace-root .workspace-ci
 
       - name: Validate component contracts
         run: python3 scripts/validate_component_contracts.py --workspace-root .workspace-ci --prepare-node-deps
