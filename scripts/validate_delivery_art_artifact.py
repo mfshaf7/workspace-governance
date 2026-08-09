@@ -23,6 +23,7 @@ ARTIFACT_CASE_BY_TYPE = {
     "delivery_art_architecture_packet": "architecture_packet",
     "delivery_art_work_start_record": "work_start_record",
     "art_review_packet": "review_packet",
+    "delivery_art_custody_receipt": "custody_receipt",
     "delivery_art_readiness_receipt": "readiness_receipt",
 }
 
@@ -38,7 +39,7 @@ def parse_args() -> argparse.Namespace:
         action="append",
         default=[],
         type=Path,
-        help="Artifact required to resolve architecture, work-start, receipt-subject, predecessor, or readiness-receipt references; repeat until the dependency closure is complete.",
+        help="Artifact required to resolve custody, architecture, work-start, receipt-subject, predecessor, or readiness-receipt references; repeat until the dependency closure is complete.",
     )
     return parser.parse_args()
 

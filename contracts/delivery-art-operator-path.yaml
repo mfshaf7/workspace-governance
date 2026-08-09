@@ -14,10 +14,13 @@ delivery_art_operator_path:
     state: contract-defined
     runtime_enforcement: pending-owner-implementation-and-dogfood
     target_art_items:
+      - openproject://work_packages/809
+      - openproject://work_packages/805
+      - openproject://work_packages/811
+      - openproject://work_packages/810
       - openproject://work_packages/802
       - openproject://work_packages/803
       - openproject://work_packages/804
-      - openproject://work_packages/805
       - openproject://work_packages/806
     current_runtime_compatibility:
       review_packet_schema_version: 1
@@ -28,11 +31,14 @@ delivery_art_operator_path:
         it does not claim that work-start enforcement or Review Packet v2 is
         already active.
     activation_requires:
-      - OOS persists and evaluates the architecture packet and work-start record
+      - Workspace Governance publishes the corrected custody contract and artifact-reference schemas
+      - Security approves evidence custody, access, retention, deletion, backup, restore, and source-provenance controls
+      - Platform provides profile-scoped object storage for the WGCF artifact registry
+      - WGCF implements content-addressed artifact custody, registry metadata, and immutable custody receipts
+      - OOS produces and validates artifacts, persists them through WGCF, and projects only safe references into OpenProject
       - OOS implements Review Packet v2 and rejects weak result strings
       - WGCF evaluates the four readiness levels from structured artifacts
       - Platform removes duplicate ART quality semantics and consumes OOS projections
-      - Security approves evidence custody and source-provenance controls
       - the path is dogfooded on delivery initiative 698
   readiness_model:
     ordered_levels:
@@ -102,24 +108,34 @@ delivery_art_operator_path:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
       schema_version: 1
-      target_owner_repo: operator-orchestration-service
+      producer_repo: operator-orchestration-service
+      custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
     work_start_record:
       schema_ref: contracts/schemas/delivery-art-work-start-record.schema.json
       schema_version: 1
-      target_owner_repo: operator-orchestration-service
+      producer_repo: operator-orchestration-service
+      custody_repo: workspace-governance-control-fabric
       durable_when: implementation readiness is evaluated
     review_packet:
       schema_ref: contracts/schemas/delivery-art-review-packet.schema.json
       schema_version: 2
-      target_owner_repo: operator-orchestration-service
+      producer_repo: operator-orchestration-service
+      custody_repo: workspace-governance-control-fabric
       durable_when: packet reaches merge-ready or finalized
       migration_from_runtime_version: 1
     readiness_receipt:
       schema_ref: contracts/schemas/delivery-art-readiness-receipt.schema.json
       schema_version: 1
-      target_owner_repo: workspace-governance-control-fabric
+      producer_repo: workspace-governance-control-fabric
+      custody_repo: workspace-governance-control-fabric
       durable_when: readiness evaluation completes
+    custody_receipt:
+      schema_ref: contracts/schemas/delivery-art-custody-receipt.schema.json
+      schema_version: 1
+      producer_repo: workspace-governance-control-fabric
+      custody_repo: workspace-governance-control-fabric
+      durable_when: Platform storage and WGCF registry persistence complete
   proof_obligations:
     governed_claim_roots:
       - readiness_model.rules
@@ -247,7 +263,8 @@ delivery_art_operator_path:
           - evidence_integrity.canonical_input_requires_unicode_scalar_values
           - evidence_integrity.duplicate_json_object_keys_rejected
           - evidence_integrity.floating_point_values_rejected
-          - evidence_integrity.custody.content_addressed_filename_required
+          - evidence_integrity.custody.content_addressed_reference_required
+          - evidence_integrity.custody.supersedes_reference_digest_bound
           - evidence_integrity.custody.durable_persisted_at_required
         enforcement_state: active-local
         owner_repo: workspace-governance
@@ -337,20 +354,41 @@ delivery_art_operator_path:
         enforcement_layers:
           - operator-contract
         rationale: These are operator governance obligations; the source contract defines them without pretending to prove the human decision itself.
-      - id: wgcf-receipt-custody-boundary
+      - id: wgcf-artifact-custody-boundary
         claim_refs:
-          - evidence_integrity.custody.wgcf_records_receipts_not_source_artifacts
-        enforcement_state: active-local
+          - evidence_integrity.custody.wgcf_custodies_artifacts_metadata_and_receipts_without_artifact_authorship
+        enforcement_state: pending-owner
+        owner_repo: workspace-governance-control-fabric
+        target_art_refs:
+          - openproject://work_packages/810
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: The schemas define an opaque WGCF registry and custody-receipt reference, but WGCF work item 810 must implement custody without taking artifact authorship or workspace policy authority.
+      - id: openproject-evidence-reference-boundary
+        claim_refs:
+          - evidence_integrity.custody.openproject_stores_safe_references_only
+        enforcement_state: pending-owner
+        owner_repo: operator-orchestration-service
+        target_art_refs:
+          - openproject://work_packages/802
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: OOS must project only the artifact ref, digest, and custody receipt ref into OpenProject after WGCF persistence succeeds.
+      - id: artifact-retention-boundary
+        claim_refs:
+          - evidence_integrity.custody.automatic_workflow_deletion_prohibited
+        enforcement_state: doctrine
         owner_repo: workspace-governance
         target_art_refs: []
-        positive_case_ids:
-          - readiness-receipt-valid
-        negative_case_ids:
-          - readiness-receipt-invalid
+        positive_case_ids: []
+        negative_case_ids: []
         enforcement_layers:
-          - json-schema
-          - semantic-validator
-        rationale: The local receipt contract fixes WGCF to readiness receipts while source artifacts remain under OOS custody.
+          - operator-contract
+        rationale: A failed ART projection leaves the immutable artifact in custody; retention or deletion is a separate explicit lifecycle decision, not workflow compensation.
   work_start_gate:
     required_before_branch_or_source_edit: true
     landing_unit_decisions:
@@ -387,7 +425,7 @@ delivery_art_operator_path:
     duplicate_json_object_keys_rejected: true
     floating_point_values_rejected: true
     digest_algorithm: sha256
-    digest_scope: artifact content excluding custody metadata and the digest field itself
+    digest_scope: artifact content excluding the digest field and self-referential custody values while retaining every non-null custody.supersedes reference
     review_packet_readiness_subject:
       purpose: bind final semantic content before receipt issuance without committing terminal timing or self-referential evidence
       excluded_top_level_fields:
@@ -468,30 +506,55 @@ delivery_art_operator_path:
       direct_land_exception_must_remain_valid_through_readiness_and_finalization: true
     custody:
       draft_backend: local-filesystem
-      durable_backend: openproject-attachment
-      durable_owner: operator-orchestration-service
-      attachment_scope: initiative-epic
-      content_addressed_filename_required: true
+      durable_backend: wgcf-artifact-registry
+      durable_owner: workspace-governance-control-fabric
+      logical_scope: delivery-art
+      physical_storage_owner: platform-engineering
+      projection_record_system: openproject
+      content_addressed_reference_required: true
+      supersedes_reference_digest_bound: true
       append_only_corrections: true
       correction_requires_supersedes_ref: true
       supersession_chains_are_acyclic_and_strictly_ordered: true
       merge_ready_review_packet_is_immutable_predecessor_evidence: true
       durable_persisted_at_required: true
-      wgcf_records_receipts_not_source_artifacts: true
+      wgcf_custodies_artifacts_metadata_and_receipts_without_artifact_authorship: true
+      openproject_stores_safe_references_only: true
+      automatic_workflow_deletion_prohibited: true
+      write_sequence:
+        - OOS validates the artifact and computes its canonical digest
+        - WGCF persists the content-addressed artifact through Platform object storage
+        - WGCF records registry metadata and returns the artifact ref plus custody receipt ref
+        - OOS writes safe evidence references to OpenProject and performs the guarded ART transition
+      failure_semantics:
+        registry_unavailable: fail-before-art-mutation
+        art_projection_write_failure: preserve-durable-artifact-and-retry-reference-projection
+        duplicate_digest_retry: reuse-existing-artifact-and-custody-receipt
+        retention_or_deletion: explicit-lifecycle-control-only
+      runtime_maturity:
+        contract: contract-defined
+        dev_integration: pending-security-platform-and-wgcf-owner-work
+        stage_and_prod: denied-until-identity-encryption-retention-deletion-backup-restore-and-security-approval
   authority_boundaries:
     workspace_governance:
       - policy and schema authority
       - readiness meaning and evidence obligations
     operator_orchestration_service:
       - ART adapter and mutation authority
-      - scoped snapshot and artifact custody authority
+      - scoped snapshot, artifact production, and semantic validation authority
       - Review Packet and atomic closeout implementation
     workspace_governance_control_fabric:
       - readiness composition and receipt authority
+      - governance artifact registry, custody receipt, and ledger metadata authority
+      - no artifact authorship or workspace policy authority
       - no ART mutation authority
     platform_engineering:
+      - profile-scoped object storage runtime authority
       - OpenProject runtime and projection authority
       - no duplicate ART semantic evaluator
+    context_governance_gateway:
+      - operational context admission and context artifact custody only
+      - no Delivery ART evidence custody authority
     security_architecture:
       - trust-boundary and evidence-custody review authority
   performance_budgets:

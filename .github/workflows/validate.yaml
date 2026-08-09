@@ -35,25 +35,43 @@ jobs:
       - name: Validate Delivery ART artifact entrypoint
         run: |
           architecture=contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
+          architecture_custody=contracts/fixtures/delivery-art-workflow/architecture-custody-receipt.valid.json
           work_start=contracts/fixtures/delivery-art-workflow/work-start-record.valid.json
+          work_start_custody=contracts/fixtures/delivery-art-workflow/work-start-custody-receipt.valid.json
           merge_ready=contracts/fixtures/delivery-art-workflow/review-packet-merge-ready.valid.json
+          merge_ready_custody=contracts/fixtures/delivery-art-workflow/merge-ready-custody-receipt.valid.json
           receipt=contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json
           finalized=contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json
-          python3 scripts/validate_delivery_art_artifact.py "$architecture" --repo-root .
+          finalized_custody=contracts/fixtures/delivery-art-workflow/finalized-custody-receipt.valid.json
+          python3 scripts/validate_delivery_art_artifact.py "$architecture" --repo-root . \
+            --dependency-artifact "$architecture_custody"
           python3 scripts/validate_delivery_art_artifact.py "$work_start" --repo-root . \
-            --dependency-artifact "$architecture"
+            --dependency-artifact "$architecture" \
+            --dependency-artifact "$architecture_custody" \
+            --dependency-artifact "$work_start_custody"
           python3 scripts/validate_delivery_art_artifact.py "$merge_ready" --repo-root . \
             --dependency-artifact "$architecture" \
-            --dependency-artifact "$work_start"
+            --dependency-artifact "$architecture_custody" \
+            --dependency-artifact "$work_start" \
+            --dependency-artifact "$work_start_custody" \
+            --dependency-artifact "$merge_ready_custody"
           python3 scripts/validate_delivery_art_artifact.py "$receipt" --repo-root . \
             --dependency-artifact "$architecture" \
+            --dependency-artifact "$architecture_custody" \
             --dependency-artifact "$work_start" \
+            --dependency-artifact "$work_start_custody" \
             --dependency-artifact "$merge_ready" \
-            --dependency-artifact "$finalized"
+            --dependency-artifact "$merge_ready_custody" \
+            --dependency-artifact "$finalized" \
+            --dependency-artifact "$finalized_custody"
           python3 scripts/validate_delivery_art_artifact.py "$finalized" --repo-root . \
             --dependency-artifact "$architecture" \
+            --dependency-artifact "$architecture_custody" \
             --dependency-artifact "$work_start" \
+            --dependency-artifact "$work_start_custody" \
             --dependency-artifact "$merge_ready" \
+            --dependency-artifact "$merge_ready_custody" \
+            --dependency-artifact "$finalized_custody" \
             --dependency-artifact "$receipt"
 
       - name: Validate validation boundaries

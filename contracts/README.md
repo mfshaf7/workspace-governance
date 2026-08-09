@@ -181,17 +181,18 @@ Use these contracts to declare:
   - defines the operator-decided architecture packet, source snapshot,
     dependency and merge DAG, lifecycle and authority model, explicit protocol
     applicability, complete protocol conformance dimensions when applicable,
-    dimension-bound executable cases, contradictions, integrity, and durable
-    custody
+    dimension-bound executable cases, contradictions, integrity, and opaque
+    WGCF artifact-registry custody with a digest-bound custody receipt
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and
-    implementation readiness record required before source work
+    implementation readiness record required before source work, with durable
+    source-artifact references resolved through the WGCF registry
 - `schemas/delivery-art-review-packet.schema.json`
   - defines Review Packet v2 with structured result semantics, test-fidelity
     classes, architecture conformance-case bindings, exact source provenance,
     acceptance mapping, rollback boundary, readiness, integrity, and
-    append-only durable custody
+    append-only WGCF registry custody without exposing object-store internals
 - `schemas/delivery-art-readiness-receipt.schema.json`
   - defines WGCF-owned, content-addressed decisions for all four readiness
     levels; architecture, implementation, and merge receipts bind exact source
@@ -202,11 +203,18 @@ Use these contracts to declare:
     finalization timestamps; the receipt is evaluated and persisted before the
     packet receives its final timestamp and durable custody
   - trusted runtime issuer verification remains owner implementation work
+- `schemas/delivery-art-custody-receipt.schema.json`
+  - defines the WGCF-issued receipt that binds one source artifact's type,
+    identity, Delivery scope, digest, and opaque registry URI to a
+    Platform-owned storage receipt without exposing bucket, endpoint, or object
+    key details
+  - the receipt schema is contract truth for work item `810`; it does not claim
+    that the registry runtime is active
 - `fixtures/delivery-art-workflow/`
   - valid architecture, work-start, merge-ready, operating-readiness receipt,
-    and finalized artifact examples consumed by `validate_contracts.py`; the
-    validator derives and proves valid receipt subjects for the other three
-    readiness levels as well
+    finalized artifact, and source-artifact custody receipt examples consumed
+    by `validate_contracts.py`; the validator derives and proves valid receipt
+    subjects for the other three readiness levels as well
   - the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,

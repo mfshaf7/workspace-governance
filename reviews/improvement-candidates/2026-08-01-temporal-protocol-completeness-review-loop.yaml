@@ -175,29 +175,19 @@ resolution:
       receipt, timeline, and restore bindings.
   note: >-
     The earlier prose preflight is merged, but runtime enforcement is not. ART Feature
-    800 now sequences executable workspace contracts, OOS work-start and artifact
-    custody, WGCF readiness, Platform semantic cleanup, Security review, and initiative
-    698 dogfood. Closure remains pending the first successful operator-locked execution
+    800 now sequences executable workspace contracts, Security custody review,
+    Platform object storage, WGCF artifact custody and readiness, OOS work-start
+    integration, Platform semantic cleanup, and initiative 698 dogfood. Closure
+    remains pending the first successful operator-locked execution
     sequence and conformance packet used before implementation, plus a real-Git
     approval-provenance test that cannot synthesize files into an already fixed
     revision.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-08-08'
+  due_on: '2026-08-18'
   note: >-
-    First produce a read-only initiative architecture packet for #698 from the
-    authoritative ART and merged owner-repo sources. It must enumerate every descendant,
-    owner, dependency, lifecycle transition, evidence handoff, runtime boundary,
-    contradiction, and terminal completion condition, then propose one locked execution
-    sequence. After operator approval, propose an initiative-preflight control plus the
-    protocol conformance preflight that proves command acknowledgement, deterministic
-    IDs, state-mutation ordering, retry/recovery semantics, bounded failure mapping,
-    authorization replay resistance, semantic source uniqueness and exact revision
-    widths, approval-to-claims binding, immutable restore state, cross-artifact result
-    equality, exact result coverage, complete authorization artifact binding, exact
-    owner-keyed receipt coverage, per-receipt authorization, commissioning
-    session, and scenario-execution binding,
-    permit/result timeline ordering, shared-validator compatibility, complete
-    lifecycle-state matrices, and executable positive and negative schema cases before
-    child implementation is declared ready. Do not land either control without operator
-    approval.
+    Complete Feature 800 through the corrected owner sequence: contract correction
+    #809, Security review #805, Platform storage #811, WGCF registry #810, OOS
+    integration #802, and dogfood #806 after the independent #803 and #804 controls.
+    Close this candidate only when dogfood proves that the initiative architecture
+    packet and executable conformance plan are used before source implementation.

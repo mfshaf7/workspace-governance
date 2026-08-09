@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-custody-receipt.schema.json",
+  "title": "Delivery ART Artifact Custody Receipt",
+  "$comment": "WGCF issues this content-addressed receipt after Platform-owned storage has accepted one canonical Delivery ART source artifact. The receipt binds only opaque registry and platform-storage references; it does not expose object-store topology or transfer artifact authorship to WGCF.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "subject",
+    "issuer",
+    "storage",
+    "integrity",
+    "custody"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "delivery_art_custody_receipt" },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^artifact-custody-receipt:[0-9a-f]{24}$"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_type", "artifact_id", "delivery_id", "content_digest", "registry_uri"],
+      "properties": {
+        "artifact_type": {
+          "enum": [
+            "delivery_art_architecture_packet",
+            "delivery_art_work_start_record",
+            "art_review_packet"
+          ]
+        },
+        "artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "delivery_id": { "$ref": "#/$defs/deliveryId" },
+        "content_digest": { "$ref": "#/$defs/digest" },
+        "registry_uri": { "$ref": "#/$defs/artifactUri" }
+      }
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_repo", "service_identity_ref", "implementation_ref"],
+      "properties": {
+        "owner_repo": { "const": "workspace-governance-control-fabric" },
+        "service_identity_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "implementation_ref": { "$ref": "#/$defs/gitCommit" }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime_owner", "receipt_ref", "persisted_at"],
+      "properties": {
+        "runtime_owner": { "const": "platform-engineering" },
+        "receipt_ref": {
+          "type": "string",
+          "pattern": "^platform-storage://receipts/[a-z0-9][a-z0-9._:-]*$"
+        },
+        "persisted_at": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" },
+    "custody": { "$ref": "#/$defs/custody" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_type": { "const": "delivery_art_architecture_packet" } },
+            "required": ["artifact_type"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_id": { "pattern": "^architecture-packet:[a-z0-9][a-z0-9._:-]*$" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_type": { "const": "delivery_art_work_start_record" } },
+            "required": ["artifact_type"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_id": { "pattern": "^work-start:[a-z0-9][a-z0-9._:-]*$" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_type": { "const": "art_review_packet" } },
+            "required": ["artifact_type"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": { "artifact_id": { "pattern": "^review-packet:[a-z0-9][a-z0-9._:-]*$" } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "artifactUri": {
+      "type": "string",
+      "pattern": "^wgcf://artifacts/delivery-art/sha256/[0-9a-f]{64}$"
+    },
+    "receiptUri": {
+      "type": "string",
+      "pattern": "^wgcf://receipts/artifact-custody/[0-9a-f]{24}-[0-9a-f]{64}\\.json$"
+    },
+    "receiptRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "$ref": "#/$defs/receiptUri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "backend", "uri", "persisted_at", "supersedes"],
+      "properties": {
+        "state": { "const": "durable" },
+        "backend": { "const": "wgcf-receipt-ledger" },
+        "uri": { "$ref": "#/$defs/receiptUri" },
+        "persisted_at": { "$ref": "#/$defs/timestamp" },
+        "supersedes": {
+          "$comment": "A corrected receipt may supersede only a custody receipt for the same subject delivery_id, artifact_type, and artifact_id. Cross-field enforcement is owned by validate_contracts.py.",
+          "oneOf": [
+            { "$ref": "#/$defs/receiptRef" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}

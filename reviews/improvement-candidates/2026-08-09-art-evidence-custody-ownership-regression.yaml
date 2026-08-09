@@ -1,0 +1,71 @@
+schema_version: 1
+id: 2026-08-09-art-evidence-custody-ownership-regression
+title: Prove owner boundaries before hardening cross-repo workflow mechanics
+recorded_on: '2026-08-09'
+owner_repo: workspace-governance
+summary: Delivery ART hardening validated an incorrect evidence-custody owner and
+  then forced OOS to build attachment transaction mechanics around that error.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator identified another long reactive implementation loop caused
+    by a contract-level ownership mistake.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The completed proof-obligation work proved that declared custody claims
+    had validators, but it did not prove that OpenProject attachments and OOS were
+    the correct custody backend and owner. OOS PR 119 consequently grew into a
+    distributed attachment transaction instead of implementing its bounded packet
+    producer and ART coordinator role.
+  source_refs:
+  - 'conversation:2026-08-09 operator called out the six-hour correction loop'
+  - 'art:Workspace Delivery ART defect #809'
+  - 'github:operator-orchestration-service pull request #119 closed without merge'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Separates artifact production, governance custody, physical storage,
+      security review, and OpenProject projection ownership and records the
+      dependency sequence before downstream implementation resumes.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Rejects the retired OpenProject attachment backend and fails closed on
+      missing, mismatched, or incorrectly owned custody receipts.
+  - type: workflow
+    path: workspace-governance/.github/workflows/validate.yaml
+    owner_repo: workspace-governance
+    note: Exercises the complete source-artifact and custody-receipt dependency
+      chain in the repository validation workflow.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Gives operators one current surface for the corrected write order,
+      failure semantics, ownership boundaries, and activation posture.
+  note: >-
+    Closed through the approved ART 809 contract correction and its executable
+    validation controls. WGCF registry and Platform storage implementation
+    remain separate activation work under ART 810 and ART 811; this closure does
+    not claim those runtimes are active.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

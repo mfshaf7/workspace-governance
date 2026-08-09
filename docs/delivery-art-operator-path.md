@@ -344,14 +344,18 @@ packet. This local validation proves receipt structure and subject binding;
 trusted WGCF service identity remains target owner work under `803` and the
 security gate under `805`.
 
-An architecture decision and its durable attachment must exist before the
-work-start evaluation that consumes it. The durable work-start attachment must
+An architecture decision and its durable WGCF artifact must exist before the
+work-start evaluation that consumes it. The durable work-start artifact must
 exist before a Review Packet is created. Internally valid future evidence
 cannot satisfy an earlier readiness decision.
 
 When an append-only correction declares `custody.supersedes`, that reference
 must resolve to an earlier durable artifact of the same type and Delivery
-initiative. A self-reference or an invented prior digest is not a correction.
+initiative. The complete predecessor reference is included in the replacement
+artifact's canonical content digest; only self-referential custody fields such
+as the replacement URI and persistence timestamp stay outside that digest. A
+self-reference, invented prior digest, or redirected predecessor that retains
+the old content digest is not a correction.
 
 Validate any supplied target-contract artifact locally with:
 
@@ -361,49 +365,81 @@ python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root . 
 ```
 
 Repeat `--dependency-artifact` until the referenced dependency closure is
-complete. An architecture packet has no dependency argument. A work-start
-record needs its architecture packet. A merge-ready Review Packet needs both.
-A readiness receipt needs its exact subject artifact plus that subject's
-dependency closure. An operating-readiness receipt therefore needs the final
-packet, its merge-ready predecessor, work-start record, and architecture
-packet. A finalized source Review Packet needs its durable merge-ready
-predecessor and readiness receipt in addition to the earlier source artifacts:
+complete. Every durable source artifact needs its WGCF custody receipt, and
+every custody receipt needs its exact source artifact. A work-start record also
+needs its architecture packet. A merge-ready Review Packet needs both earlier
+source artifacts. A readiness receipt needs its exact subject artifact plus
+that subject's dependency closure. An operating-readiness receipt therefore
+needs the final packet, its custody receipt, merge-ready predecessor and
+custody receipt, work-start record and custody receipt, and architecture packet
+and custody receipt. A finalized source Review Packet needs that same closure
+plus its readiness receipt:
 
 ```bash
 python3 scripts/validate_delivery_art_artifact.py <finalized-packet.json> --repo-root . \
   --dependency-artifact <architecture-packet.json> \
+  --dependency-artifact <architecture-custody-receipt.json> \
   --dependency-artifact <work-start-record.json> \
+  --dependency-artifact <work-start-custody-receipt.json> \
   --dependency-artifact <merge-ready-packet.json> \
+  --dependency-artifact <merge-ready-custody-receipt.json> \
+  --dependency-artifact <finalized-custody-receipt.json> \
   --dependency-artifact <readiness-receipt.json>
 ```
 
 This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
 exact evidence source heads, resolved cross-artifact continuity, applicable
 conformance cases, and content integrity. OOS work item `802` must resolve the
-same durable dependencies on the active runtime path before Review Packet v2
-is declared implemented.
+same WGCF registry dependencies on the active runtime path before Review Packet
+v2 is declared implemented.
 
 The v2 schema is
 [`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).
 It remains a target contract until OOS work item `802` implements and activates
 the migration from the current runtime schema version.
 
-Draft artifacts remain local and reviewable, carry no persistence timestamp,
-and do not claim durable custody. Once an architecture decision, work-start
-evaluation, or merge-ready/final Review Packet is recorded, OOS owns durable
-custody by attaching content-addressed JSON to the initiative Epic. Corrections
-append a superseding artifact; they do not replace prior evidence. Every
-durable architecture, work-start, merge-ready, and finalized Review Packet
-records when it was persisted.
+Draft artifacts remain local and reviewable, carry no persistence timestamp or
+custody receipt, and do not claim durable custody. OOS authors and validates an
+architecture packet, work-start record, or Review Packet, but it does not own
+durable evidence storage. It sends the canonical content and digest to the WGCF
+artifact registry. WGCF persists the bytes through Platform-owned object
+storage, records registry metadata, and returns an opaque artifact reference
+plus an immutable custody-receipt reference. The physical bucket, endpoint,
+and object key never appear in the Delivery ART artifact contract.
 
-WGCF stores content-addressed readiness receipts and exact source-artifact
-bindings, not duplicate source artifacts. The same receipt schema covers
-architecture, implementation, merge, and operating readiness; only the
-operating receipt uses the cycle-safe Review Packet readiness-subject digest.
-The receipt schema is
+Only after WGCF persistence succeeds may OOS write the artifact reference,
+digest, and custody-receipt reference into OpenProject and perform the guarded
+ART transition. OpenProject remains work-state and safe-reference projection;
+it is not canonical evidence custody. If registry persistence fails, no ART
+mutation occurs. If the later OpenProject write fails, the immutable artifact
+remains in custody and a retry reuses its digest-bound reference. Workflow
+compensation must not delete evidence; retention or deletion is a separate,
+explicit lifecycle control.
+
+Corrections append a superseding artifact; they do not replace prior evidence.
+Every durable architecture, work-start, merge-ready, and finalized Review
+Packet records when it was persisted and carries its WGCF custody receipt.
+WGCF also stores content-addressed readiness receipts and exact source-artifact
+bindings. The same readiness-receipt schema covers architecture,
+implementation, merge, and operating readiness; only the operating receipt
+uses the cycle-safe Review Packet readiness-subject digest.
+The custody-receipt schema is
+[`delivery-art-custody-receipt.schema.json`](../contracts/schemas/delivery-art-custody-receipt.schema.json).
+The readiness-receipt schema is
 [`delivery-art-readiness-receipt.schema.json`](../contracts/schemas/delivery-art-readiness-receipt.schema.json).
 Artifact digests use the integer-only RFC 8785 canonical domain and SHA-256
-over artifact content, excluding custody metadata and the digest field itself.
+over artifact content. The digest excludes its own field and self-referential
+custody values such as the artifact URI and persistence timestamp, but retains
+every non-null `custody.supersedes` predecessor reference.
+
+This is still a target contract. Work item `809` corrects contract ownership;
+`805` approves the custody boundary; `811` provides profile-scoped object
+storage; `810` implements the WGCF registry and custody receipts; and `802`
+then integrates OOS with that boundary. Stage and production custody remain
+denied until identity, encryption, access, retention, deletion, backup,
+restore, and Security approval are proven. Context Governance Gateway remains
+the owner of operational-context admission and is not reused as Delivery ART
+evidence custody.
 
 The accepted canonical input domain contains unique JSON object keys, Unicode
 scalar values, and integral numbers only; duplicate keys, floating-point
