@@ -1948,7 +1948,16 @@ def delivery_art_artifact_reference_errors(
             errors.append("custody.supersedes chain must be acyclic")
             supersession_cycle_reported = True
             break
-        if prior_artifact.get("delivery_id") != payload.get("delivery_id"):
+        if artifact_type == "delivery_art_custody_receipt":
+            replacement_subject = _artifact_object(payload.get("subject"))
+            prior_subject = _artifact_object(prior_artifact.get("subject"))
+            for field in ("delivery_id", "artifact_type", "artifact_id"):
+                if prior_subject.get(field) != replacement_subject.get(field):
+                    errors.append(
+                        "superseded custody receipt "
+                        f"subject.{field} must match the replacement receipt"
+                    )
+        elif prior_artifact.get("delivery_id") != payload.get("delivery_id"):
             errors.append(
                 "superseded artifact delivery_id must match the replacement artifact"
             )
@@ -2643,6 +2652,79 @@ def validate_delivery_art_artifact_contracts(
                 wrong_storage_owner,
                 "custody receipt claiming the wrong physical storage owner",
             )
+
+            def custody_receipt_variant(
+                receipt_token: str,
+                subject_overrides: dict | None = None,
+            ) -> dict:
+                receipt = copy.deepcopy(architecture_custody_receipt)
+                receipt["receipt_id"] = (
+                    f"artifact-custody-receipt:{receipt_token}"
+                )
+                receipt["subject"].update(subject_overrides or {})
+                receipt["storage"]["persisted_at"] = (
+                    "2026-08-08T10:05:56+08:00"
+                )
+                receipt["custody"]["persisted_at"] = (
+                    "2026-08-08T10:05:57+08:00"
+                )
+                receipt["custody"]["supersedes"] = None
+                digest_projection = copy.deepcopy(receipt)
+                digest_projection.pop("custody", None)
+                _artifact_object(digest_projection.get("integrity")).pop(
+                    "content_digest", None
+                )
+                content_digest = _delivery_art_projection_digest(
+                    digest_projection
+                )
+                receipt["integrity"]["content_digest"] = content_digest
+                receipt["custody"]["uri"] = (
+                    "wgcf://receipts/artifact-custody/"
+                    f"{receipt_token}-"
+                    f"{content_digest.removeprefix('sha256:')}.json"
+                )
+                return receipt
+
+            prior_same_subject = custody_receipt_variant("e" * 24)
+            replacement_receipt = copy.deepcopy(
+                architecture_custody_receipt
+            )
+            replacement_receipt["custody"]["supersedes"] = {
+                "uri": prior_same_subject["custody"]["uri"],
+                "digest": prior_same_subject["integrity"]["content_digest"],
+            }
+            require_reference_accepted(
+                replacement_receipt,
+                "corrected custody receipt superseding the same subject",
+                [architecture, prior_same_subject],
+            )
+
+            unrelated_subject_values = {
+                "delivery_id": "delivery-699",
+                "artifact_type": "delivery_art_work_start_record",
+                "artifact_id": "architecture-packet:delivery-698-unrelated",
+            }
+            for index, (field, value) in enumerate(
+                unrelated_subject_values.items()
+            ):
+                unrelated_prior_receipt = custody_receipt_variant(
+                    str(index + 1) * 24,
+                    {field: value},
+                )
+                replacement_receipt["custody"]["supersedes"] = {
+                    "uri": unrelated_prior_receipt["custody"]["uri"],
+                    "digest": unrelated_prior_receipt["integrity"][
+                        "content_digest"
+                    ],
+                }
+                require_reference_rejected(
+                    replacement_receipt,
+                    "custody receipt superseding an unrelated subject "
+                    f"by {field}",
+                    "superseded custody receipt "
+                    f"subject.{field} must match the replacement receipt",
+                    [architecture, unrelated_prior_receipt],
+                )
 
         stale_decision = copy.deepcopy(architecture)
         stale_decision["decision"]["status"] = "ready-for-child-implementation"

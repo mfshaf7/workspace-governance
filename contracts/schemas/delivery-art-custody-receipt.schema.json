@@ -162,6 +162,7 @@
         "uri": { "$ref": "#/$defs/receiptUri" },
         "persisted_at": { "$ref": "#/$defs/timestamp" },
         "supersedes": {
+          "$comment": "A corrected receipt may supersede only a custody receipt for the same subject delivery_id, artifact_type, and artifact_id. Cross-field enforcement is owned by validate_contracts.py.",
           "oneOf": [
             { "$ref": "#/$defs/receiptRef" },
             { "type": "null" }
