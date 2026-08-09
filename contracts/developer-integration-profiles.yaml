@@ -163,7 +163,7 @@ profiles:
         - receipt and ledger metadata read
         - profile-scoped evidence storage availability
         - storage credential and network isolation
-        - content digest and storage receipt verification
+        - version-bound content digest and storage receipt verification
         - content-address-preserving backup and restore
         - explicit retention and deletion boundary
         - governed encryption identity and Security approval
