@@ -282,8 +282,12 @@
   },
   "custody": {
     "state": "durable",
-    "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v1-518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d.json",
+    "backend": "wgcf-artifact-registry",
+    "uri": "wgcf://artifacts/delivery-art/sha256/518313047e3a558519770f178e766a910028de00dddb3c0e7f7a533b620aa68d",
+    "receipt_ref": {
+      "uri": "wgcf://receipts/artifact-custody/aaaaaaaaaaaaaaaaaaaaaaaa-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
   }

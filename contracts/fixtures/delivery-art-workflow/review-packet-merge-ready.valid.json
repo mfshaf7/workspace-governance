@@ -10,9 +10,9 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "openproject://work_packages/698/attachments/work-start-delivery-698-work-item-801-9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b.json",
-    "artifact_digest": "sha256:9067af90a5b0d055f6de91db6f8b9356d35fb1ca5603afd97047351b13f0e76b",
-    "scope_fingerprint": "sha256:13fe75c401e078d791210227e9f263e58e395982069748e306703afc4df4c251"
+    "artifact_ref": "wgcf://artifacts/delivery-art/sha256/910664a42fff1137a71ffb223fd9749a90e8bf9fda0ef557da79067c094a6060",
+    "artifact_digest": "sha256:910664a42fff1137a71ffb223fd9749a90e8bf9fda0ef557da79067c094a6060",
+    "scope_fingerprint": "sha256:f350122c1aafbd7e97048dc2f30da60522342259e5db54fdf3faaea278cea565"
   },
   "landing_unit": {
     "decision": "child_isolated_landing_unit",
@@ -107,7 +107,7 @@
         "command": null,
         "fidelity": "filesystem",
         "result": "not_applicable",
-        "summary": "The downstream security review is sequenced after runtime implementation.",
+        "summary": "The required Security review is sequenced before Platform storage and WGCF runtime custody.",
         "conformance_case_ids": [],
         "source_revisions": [],
         "evidence_refs": [],
@@ -127,12 +127,16 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb"
+    "content_digest": "sha256:5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c"
   },
   "custody": {
     "state": "durable",
-    "backend": "openproject-attachment",
-    "uri": "openproject://work_packages/698/attachments/review-packet-delivery-698-work-item-801-merge-ready-7be91ae0173f42f77af2930ebb55fcb4551a3c2547d3e2b1e17d702cbfca38cb.json",
+    "backend": "wgcf-artifact-registry",
+    "uri": "wgcf://artifacts/delivery-art/sha256/5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c",
+    "receipt_ref": {
+      "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.json",
+      "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
     "persisted_at": "2026-08-08T11:16:00+08:00",
     "supersedes": null
   },

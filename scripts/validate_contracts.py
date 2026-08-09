@@ -741,16 +741,23 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
     custody = _artifact_object(payload.get("custody"))
     if (
         custody.get("state") == "durable"
-        and custody.get("backend") == "openproject-attachment"
-        and delivery_number is not None
+        and custody.get("backend") == "wgcf-artifact-registry"
     ):
-        expected_prefix = (
-            f"openproject://work_packages/{delivery_number}/attachments/"
-        )
-        if not str(custody.get("uri", "")).startswith(expected_prefix):
+        if not re.fullmatch(
+            r"wgcf://artifacts/delivery-art/sha256/[0-9a-f]{64}",
+            str(custody.get("uri", "")),
+        ):
             errors.append(
-                "durable custody URI must attach the artifact to its declared Delivery initiative"
+                "durable custody URI must be an opaque Delivery ART reference from the WGCF artifact registry"
             )
+        custody_receipt = _artifact_object(custody.get("receipt_ref"))
+        errors.extend(
+            _delivery_art_ref_digest_errors(
+                custody_receipt.get("uri"),
+                custody_receipt.get("digest"),
+                "custody.receipt_ref.uri",
+            )
+        )
     supersedes = _artifact_object(custody.get("supersedes"))
     errors.extend(
         _delivery_art_ref_digest_errors(
@@ -2447,6 +2454,38 @@ def validate_delivery_art_artifact_contracts(
 
     architecture = fixtures.get("architecture-packet.valid.json")
     if architecture:
+        legacy_attachment_custody = copy.deepcopy(architecture)
+        legacy_attachment_custody["custody"]["backend"] = (
+            "openproject-attachment"
+        )
+        legacy_attachment_custody["custody"]["uri"] = (
+            "openproject://work_packages/698/attachments/architecture.json"
+        )
+        require_rejected(
+            "architecture_packet",
+            legacy_attachment_custody,
+            "legacy OpenProject attachment custody",
+        )
+
+        missing_custody_receipt = copy.deepcopy(architecture)
+        missing_custody_receipt["custody"].pop("receipt_ref")
+        require_rejected(
+            "architecture_packet",
+            missing_custody_receipt,
+            "durable WGCF artifact without a custody receipt reference",
+        )
+
+        mismatched_custody_receipt_digest = copy.deepcopy(architecture)
+        mismatched_custody_receipt_digest["custody"]["receipt_ref"]["digest"] = (
+            "sha256:" + "b" * 64
+        )
+        require_rejected(
+            "architecture_packet",
+            mismatched_custody_receipt_digest,
+            "custody receipt reference whose URI does not bind its digest",
+            expected_fragment="custody.receipt_ref.uri must include its declared content digest",
+        )
+
         stale_decision = copy.deepcopy(architecture)
         stale_decision["decision"]["status"] = "ready-for-child-implementation"
         require_rejected(
@@ -2846,6 +2885,7 @@ def validate_delivery_art_artifact_contracts(
             "state": "local-draft",
             "backend": "local-filesystem",
             "uri": ".art/drafts/architecture-packet-delivery-698-v1.json",
+            "receipt_ref": None,
             "persisted_at": None,
             "supersedes": None,
         }
@@ -2871,9 +2911,7 @@ def validate_delivery_art_artifact_contracts(
 
         unresolved_supersedes = copy.deepcopy(architecture)
         unresolved_supersedes["custody"]["supersedes"] = {
-            "uri": "openproject://work_packages/698/attachments/architecture-packet-delivery-698-v0-"
-            + "9" * 64
-            + ".json",
+            "uri": "wgcf://artifacts/delivery-art/sha256/" + "9" * 64,
             "digest": "sha256:" + "9" * 64,
         }
         require_reference_rejected(
@@ -3004,7 +3042,7 @@ def validate_delivery_art_artifact_contracts(
             blocked_architecture
         )
         blocked_architecture_with_invented_refs["architecture"]["packet_ref"] = (
-            "openproject-attachment://work_packages/698/architecture.json"
+            "wgcf://artifacts/delivery-art/sha256/" + "7" * 64
         )
         blocked_architecture_with_invented_refs["architecture"][
             "packet_digest"

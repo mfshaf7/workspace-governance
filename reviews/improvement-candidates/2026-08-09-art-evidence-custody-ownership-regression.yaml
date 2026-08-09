@@ -1,0 +1,48 @@
+schema_version: 1
+id: 2026-08-09-art-evidence-custody-ownership-regression
+title: Prove owner boundaries before hardening cross-repo workflow mechanics
+recorded_on: '2026-08-09'
+owner_repo: workspace-governance
+summary: Delivery ART hardening validated an incorrect evidence-custody owner and
+  then forced OOS to build attachment transaction mechanics around that error.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator identified another long reactive implementation loop caused
+    by a contract-level ownership mistake.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The completed proof-obligation work proved that declared custody claims
+    had validators, but it did not prove that OpenProject attachments and OOS were
+    the correct custody backend and owner. OOS PR 119 consequently grew into a
+    distributed attachment transaction instead of implementing its bounded packet
+    producer and ART coordinator role.
+  source_refs:
+  - 'conversation:2026-08-09 operator called out the six-hour correction loop'
+  - 'art:Workspace Delivery ART defect #809'
+  - 'github:operator-orchestration-service pull request #119 closed without merge'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-08-11'
+  note: Land ART defect 809 so architecture-shaping workflow contracts separate
+    producer, custody, physical runtime, security, and projection ownership before
+    downstream implementation starts.

@@ -181,17 +181,18 @@ Use these contracts to declare:
   - defines the operator-decided architecture packet, source snapshot,
     dependency and merge DAG, lifecycle and authority model, explicit protocol
     applicability, complete protocol conformance dimensions when applicable,
-    dimension-bound executable cases, contradictions, integrity, and durable
-    custody
+    dimension-bound executable cases, contradictions, integrity, and opaque
+    WGCF artifact-registry custody with a digest-bound custody receipt
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and
-    implementation readiness record required before source work
+    implementation readiness record required before source work, with durable
+    source-artifact references resolved through the WGCF registry
 - `schemas/delivery-art-review-packet.schema.json`
   - defines Review Packet v2 with structured result semantics, test-fidelity
     classes, architecture conformance-case bindings, exact source provenance,
     acceptance mapping, rollback boundary, readiness, integrity, and
-    append-only durable custody
+    append-only WGCF registry custody without exposing object-store internals
 - `schemas/delivery-art-readiness-receipt.schema.json`
   - defines WGCF-owned, content-addressed decisions for all four readiness
     levels; architecture, implementation, and merge receipts bind exact source

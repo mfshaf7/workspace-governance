@@ -380,6 +380,7 @@
             "properties": {
               "state": { "const": "local-draft" },
               "backend": { "const": "local-filesystem" },
+              "receipt_ref": { "type": "null" },
               "persisted_at": { "type": "null" }
             }
           }
@@ -396,7 +397,9 @@
           "custody": {
             "properties": {
               "state": { "const": "durable" },
-              "backend": { "const": "openproject-attachment" },
+              "backend": { "const": "wgcf-artifact-registry" },
+              "uri": { "$ref": "#/$defs/artifactUri" },
+              "receipt_ref": { "$ref": "#/$defs/custodyReceiptRef" },
               "persisted_at": { "$ref": "#/$defs/timestamp" }
             }
           }
@@ -458,6 +461,23 @@
         "digest": { "$ref": "#/$defs/digest" }
       }
     },
+    "artifactUri": {
+      "type": "string",
+      "pattern": "^wgcf://artifacts/delivery-art/sha256/[0-9a-f]{64}$"
+    },
+    "custodyReceiptUri": {
+      "type": "string",
+      "pattern": "^wgcf://receipts/artifact-custody/[0-9a-f]{24}-[0-9a-f]{64}\\.json$"
+    },
+    "custodyReceiptRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "$ref": "#/$defs/custodyReceiptUri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
     "artifactRefs": {
       "type": "array",
       "minItems": 1,
@@ -513,11 +533,17 @@
     "custody": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["state", "backend", "uri", "persisted_at", "supersedes"],
+      "required": ["state", "backend", "uri", "receipt_ref", "persisted_at", "supersedes"],
       "properties": {
         "state": { "enum": ["local-draft", "durable"] },
-        "backend": { "enum": ["local-filesystem", "openproject-attachment"] },
+        "backend": { "enum": ["local-filesystem", "wgcf-artifact-registry"] },
         "uri": { "$ref": "#/$defs/nonEmptyString" },
+        "receipt_ref": {
+          "oneOf": [
+            { "$ref": "#/$defs/custodyReceiptRef" },
+            { "type": "null" }
+          ]
+        },
         "persisted_at": {
           "oneOf": [
             { "$ref": "#/$defs/timestamp" },

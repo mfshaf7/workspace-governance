@@ -220,11 +220,14 @@
     "artifactContract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_ref", "schema_version", "target_owner_repo", "durable_when"],
+      "required": ["schema_ref", "schema_version", "producer_repo", "custody_repo", "durable_when"],
       "properties": {
         "schema_ref": { "$ref": "#/$defs/nonEmptyString" },
         "schema_version": { "type": "integer", "minimum": 1 },
-        "target_owner_repo": {
+        "producer_repo": {
+          "enum": ["operator-orchestration-service", "workspace-governance-control-fabric"]
+        },
+        "custody_repo": {
           "enum": ["operator-orchestration-service", "workspace-governance-control-fabric"]
         },
         "durable_when": { "$ref": "#/$defs/nonEmptyString" },
@@ -243,7 +246,8 @@
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
                 "schema_version": { "const": 1 },
-                "target_owner_repo": { "const": "operator-orchestration-service" }
+                "producer_repo": { "const": "operator-orchestration-service" },
+                "custody_repo": { "const": "workspace-governance-control-fabric" }
               }
             }
           ]
@@ -255,7 +259,8 @@
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-work-start-record.schema.json" },
                 "schema_version": { "const": 1 },
-                "target_owner_repo": { "const": "operator-orchestration-service" }
+                "producer_repo": { "const": "operator-orchestration-service" },
+                "custody_repo": { "const": "workspace-governance-control-fabric" }
               }
             }
           ]
@@ -268,7 +273,8 @@
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-review-packet.schema.json" },
                 "schema_version": { "const": 2 },
-                "target_owner_repo": { "const": "operator-orchestration-service" },
+                "producer_repo": { "const": "operator-orchestration-service" },
+                "custody_repo": { "const": "workspace-governance-control-fabric" },
                 "migration_from_runtime_version": { "const": 1 }
               }
             }
@@ -281,7 +287,8 @@
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-readiness-receipt.schema.json" },
                 "schema_version": { "const": 1 },
-                "target_owner_repo": { "const": "workspace-governance-control-fabric" }
+                "producer_repo": { "const": "workspace-governance-control-fabric" },
+                "custody_repo": { "const": "workspace-governance-control-fabric" }
               }
             }
           ]
@@ -667,27 +674,72 @@
             "draft_backend",
             "durable_backend",
             "durable_owner",
-            "attachment_scope",
-            "content_addressed_filename_required",
+            "logical_scope",
+            "physical_storage_owner",
+            "projection_record_system",
+            "content_addressed_reference_required",
             "append_only_corrections",
             "correction_requires_supersedes_ref",
             "supersession_chains_are_acyclic_and_strictly_ordered",
             "merge_ready_review_packet_is_immutable_predecessor_evidence",
             "durable_persisted_at_required",
-            "wgcf_records_receipts_not_source_artifacts"
+            "wgcf_custodies_artifacts_metadata_and_receipts_without_artifact_authorship",
+            "openproject_stores_safe_references_only",
+            "automatic_workflow_deletion_prohibited",
+            "write_sequence",
+            "failure_semantics",
+            "runtime_maturity"
           ],
           "properties": {
             "draft_backend": { "const": "local-filesystem" },
-            "durable_backend": { "const": "openproject-attachment" },
-            "durable_owner": { "const": "operator-orchestration-service" },
-            "attachment_scope": { "const": "initiative-epic" },
-            "content_addressed_filename_required": { "const": true },
+            "durable_backend": { "const": "wgcf-artifact-registry" },
+            "durable_owner": { "const": "workspace-governance-control-fabric" },
+            "logical_scope": { "const": "delivery-art" },
+            "physical_storage_owner": { "const": "platform-engineering" },
+            "projection_record_system": { "const": "openproject" },
+            "content_addressed_reference_required": { "const": true },
             "append_only_corrections": { "const": true },
             "correction_requires_supersedes_ref": { "const": true },
             "supersession_chains_are_acyclic_and_strictly_ordered": { "const": true },
             "merge_ready_review_packet_is_immutable_predecessor_evidence": { "const": true },
             "durable_persisted_at_required": { "const": true },
-            "wgcf_records_receipts_not_source_artifacts": { "const": true }
+            "wgcf_custodies_artifacts_metadata_and_receipts_without_artifact_authorship": { "const": true },
+            "openproject_stores_safe_references_only": { "const": true },
+            "automatic_workflow_deletion_prohibited": { "const": true },
+            "write_sequence": {
+              "const": [
+                "OOS validates the artifact and computes its canonical digest",
+                "WGCF persists the content-addressed artifact through Platform object storage",
+                "WGCF records registry metadata and returns the artifact ref plus custody receipt ref",
+                "OOS writes safe evidence references to OpenProject and performs the guarded ART transition"
+              ]
+            },
+            "failure_semantics": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "registry_unavailable",
+                "art_projection_write_failure",
+                "duplicate_digest_retry",
+                "retention_or_deletion"
+              ],
+              "properties": {
+                "registry_unavailable": { "const": "fail-before-art-mutation" },
+                "art_projection_write_failure": { "const": "preserve-durable-artifact-and-retry-reference-projection" },
+                "duplicate_digest_retry": { "const": "reuse-existing-artifact-and-custody-receipt" },
+                "retention_or_deletion": { "const": "explicit-lifecycle-control-only" }
+              }
+            },
+            "runtime_maturity": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["contract", "dev_integration", "stage_and_prod"],
+              "properties": {
+                "contract": { "const": "contract-defined" },
+                "dev_integration": { "const": "pending-security-platform-and-wgcf-owner-work" },
+                "stage_and_prod": { "const": "denied-until-identity-encryption-retention-deletion-backup-restore-and-security-approval" }
+              }
+            }
           }
         }
       }
@@ -700,6 +752,7 @@
         "operator_orchestration_service",
         "workspace_governance_control_fabric",
         "platform_engineering",
+        "context_governance_gateway",
         "security_architecture"
       ],
       "properties": {
@@ -707,6 +760,7 @@
         "operator_orchestration_service": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
         "workspace_governance_control_fabric": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
         "platform_engineering": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+        "context_governance_gateway": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
         "security_architecture": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
       }
     },
