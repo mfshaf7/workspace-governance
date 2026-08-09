@@ -132,15 +132,15 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:1efb95fb37c8b1f1bdd1958b370ecfc1b6432b9135b44ed84651b1cdfee59751"
+    "content_digest": "sha256:142b3b61035ff666ac4b5636e687c324fb6498e1d36835ae99c069c353202a32"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-artifact-registry",
-    "uri": "wgcf://artifacts/delivery-art/sha256/1efb95fb37c8b1f1bdd1958b370ecfc1b6432b9135b44ed84651b1cdfee59751",
+    "uri": "wgcf://artifacts/delivery-art/sha256/142b3b61035ff666ac4b5636e687c324fb6498e1d36835ae99c069c353202a32",
     "receipt_ref": {
-      "uri": "wgcf://receipts/artifact-custody/dddddddddddddddddddddddd-ffb01021c822270386b6a85c61a6622d85b7fb8ce66a1f8dc1612a1cc5e47a40.json",
-      "digest": "sha256:ffb01021c822270386b6a85c61a6622d85b7fb8ce66a1f8dc1612a1cc5e47a40"
+      "uri": "wgcf://receipts/artifact-custody/dddddddddddddddddddddddd-078ae4027dddb474a05bb59fc770ee91eaaad9cc545e5b3adf102c24f0017c6f.json",
+      "digest": "sha256:078ae4027dddb474a05bb59fc770ee91eaaad9cc545e5b3adf102c24f0017c6f"
     },
     "persisted_at": "2026-08-08T11:33:00+08:00",
     "supersedes": {

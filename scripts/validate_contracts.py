@@ -531,6 +531,16 @@ def _delivery_art_projection_digest_if_canonical(
     return _delivery_art_projection_digest(projection)
 
 
+def _delivery_art_content_digest_projection(payload: dict) -> dict:
+    projection = copy.deepcopy(payload)
+    custody = _artifact_object(projection.pop("custody", None))
+    supersedes = _artifact_object(custody.get("supersedes"))
+    if supersedes:
+        projection["custody"] = {"supersedes": supersedes}
+    _artifact_object(projection.get("integrity")).pop("content_digest", None)
+    return projection
+
+
 def _architecture_scope_projection(payload: dict) -> dict:
     decision = _artifact_object(payload.get("decision"))
     return {
@@ -2362,10 +2372,7 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
     canonicalization_errors = _artifact_canonicalization_errors(payload)
     if canonicalization_errors:
         return canonicalization_errors
-    digest_projection = copy.deepcopy(payload)
-    digest_projection.pop("custody", None)
-    projected_integrity = _artifact_object(digest_projection.get("integrity"))
-    projected_integrity.pop("content_digest", None)
+    digest_projection = _delivery_art_content_digest_projection(payload)
     expected_digest = _delivery_art_projection_digest(digest_projection)
     actual_digest = _artifact_object(payload.get("integrity")).get("content_digest")
     errors = []
@@ -2656,23 +2663,20 @@ def validate_delivery_art_artifact_contracts(
             def custody_receipt_variant(
                 receipt_token: str,
                 subject_overrides: dict | None = None,
+                supersedes: dict | None = None,
+                storage_persisted_at: str = "2026-08-08T10:05:56+08:00",
+                custody_persisted_at: str = "2026-08-08T10:05:57+08:00",
             ) -> dict:
                 receipt = copy.deepcopy(architecture_custody_receipt)
                 receipt["receipt_id"] = (
                     f"artifact-custody-receipt:{receipt_token}"
                 )
                 receipt["subject"].update(subject_overrides or {})
-                receipt["storage"]["persisted_at"] = (
-                    "2026-08-08T10:05:56+08:00"
-                )
-                receipt["custody"]["persisted_at"] = (
-                    "2026-08-08T10:05:57+08:00"
-                )
-                receipt["custody"]["supersedes"] = None
-                digest_projection = copy.deepcopy(receipt)
-                digest_projection.pop("custody", None)
-                _artifact_object(digest_projection.get("integrity")).pop(
-                    "content_digest", None
+                receipt["storage"]["persisted_at"] = storage_persisted_at
+                receipt["custody"]["persisted_at"] = custody_persisted_at
+                receipt["custody"]["supersedes"] = copy.deepcopy(supersedes)
+                digest_projection = _delivery_art_content_digest_projection(
+                    receipt
                 )
                 content_digest = _delivery_art_projection_digest(
                     digest_projection
@@ -2686,17 +2690,32 @@ def validate_delivery_art_artifact_contracts(
                 return receipt
 
             prior_same_subject = custody_receipt_variant("e" * 24)
-            replacement_receipt = copy.deepcopy(
-                architecture_custody_receipt
+            replacement_receipt = custody_receipt_variant(
+                "f" * 24,
+                supersedes={
+                    "uri": prior_same_subject["custody"]["uri"],
+                    "digest": prior_same_subject["integrity"][
+                        "content_digest"
+                    ],
+                },
+                storage_persisted_at="2026-08-08T10:05:58+08:00",
+                custody_persisted_at="2026-08-08T10:05:59+08:00",
             )
-            replacement_receipt["custody"]["supersedes"] = {
-                "uri": prior_same_subject["custody"]["uri"],
-                "digest": prior_same_subject["integrity"]["content_digest"],
-            }
-            require_reference_accepted(
+            require_fully_accepted(
+                "custody_receipt",
                 replacement_receipt,
                 "corrected custody receipt superseding the same subject",
                 [architecture, prior_same_subject],
+            )
+
+            redirected_supersession = copy.deepcopy(replacement_receipt)
+            redirected_supersession["custody"]["supersedes"]["digest"] = (
+                "sha256:" + "9" * 64
+            )
+            require_integrity_error(
+                redirected_supersession,
+                "custody receipt with redirected supersession metadata",
+                "integrity.content_digest must equal canonical content digest",
             )
 
             unrelated_subject_values = {
@@ -2711,12 +2730,17 @@ def validate_delivery_art_artifact_contracts(
                     str(index + 1) * 24,
                     {field: value},
                 )
-                replacement_receipt["custody"]["supersedes"] = {
-                    "uri": unrelated_prior_receipt["custody"]["uri"],
-                    "digest": unrelated_prior_receipt["integrity"][
-                        "content_digest"
-                    ],
-                }
+                replacement_receipt = custody_receipt_variant(
+                    "f" * 24,
+                    supersedes={
+                        "uri": unrelated_prior_receipt["custody"]["uri"],
+                        "digest": unrelated_prior_receipt["integrity"][
+                            "content_digest"
+                        ],
+                    },
+                    storage_persisted_at="2026-08-08T10:05:58+08:00",
+                    custody_persisted_at="2026-08-08T10:05:59+08:00",
+                )
                 require_reference_rejected(
                     replacement_receipt,
                     "custody receipt superseding an unrelated subject "
@@ -3602,11 +3626,7 @@ def validate_delivery_art_artifact_contracts(
             receipt["findings"] = []
             receipt["custody"]["persisted_at"] = persisted_at
 
-            digest_projection = copy.deepcopy(receipt)
-            digest_projection.pop("custody", None)
-            _artifact_object(digest_projection.get("integrity")).pop(
-                "content_digest", None
-            )
+            digest_projection = _delivery_art_content_digest_projection(receipt)
             content_digest = _delivery_art_projection_digest(digest_projection)
             receipt["integrity"]["content_digest"] = content_digest
             receipt_token = receipt["receipt_id"].split(":", 1)[1]
@@ -3903,6 +3923,16 @@ def validate_delivery_art_artifact_contracts(
             "cyclic Review Packet supersession chain",
             "must be acyclic",
             [architecture, work_start, cyclic_merge_ready, readiness_receipt],
+        )
+
+        redirected_final_predecessor = copy.deepcopy(finalized)
+        redirected_final_predecessor["custody"]["supersedes"]["digest"] = (
+            "sha256:" + "9" * 64
+        )
+        require_integrity_error(
+            redirected_final_predecessor,
+            "finalized Review Packet with redirected predecessor metadata",
+            "integrity.content_digest must equal canonical content digest",
         )
 
         local_final = copy.deepcopy(finalized)

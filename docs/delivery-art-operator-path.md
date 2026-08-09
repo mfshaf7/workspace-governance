@@ -351,7 +351,11 @@ cannot satisfy an earlier readiness decision.
 
 When an append-only correction declares `custody.supersedes`, that reference
 must resolve to an earlier durable artifact of the same type and Delivery
-initiative. A self-reference or an invented prior digest is not a correction.
+initiative. The complete predecessor reference is included in the replacement
+artifact's canonical content digest; only self-referential custody fields such
+as the replacement URI and persistence timestamp stay outside that digest. A
+self-reference, invented prior digest, or redirected predecessor that retains
+the old content digest is not a correction.
 
 Validate any supplied target-contract artifact locally with:
 

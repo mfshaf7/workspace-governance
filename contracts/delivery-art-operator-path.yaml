@@ -264,6 +264,7 @@ delivery_art_operator_path:
           - evidence_integrity.duplicate_json_object_keys_rejected
           - evidence_integrity.floating_point_values_rejected
           - evidence_integrity.custody.content_addressed_reference_required
+          - evidence_integrity.custody.supersedes_reference_digest_bound
           - evidence_integrity.custody.durable_persisted_at_required
         enforcement_state: active-local
         owner_repo: workspace-governance
@@ -511,6 +512,7 @@ delivery_art_operator_path:
       physical_storage_owner: platform-engineering
       projection_record_system: openproject
       content_addressed_reference_required: true
+      supersedes_reference_digest_bound: true
       append_only_corrections: true
       correction_requires_supersedes_ref: true
       supersession_chains_are_acyclic_and_strictly_ordered: true
