@@ -130,6 +130,12 @@ delivery_art_operator_path:
       producer_repo: workspace-governance-control-fabric
       custody_repo: workspace-governance-control-fabric
       durable_when: readiness evaluation completes
+    custody_receipt:
+      schema_ref: contracts/schemas/delivery-art-custody-receipt.schema.json
+      schema_version: 1
+      producer_repo: workspace-governance-control-fabric
+      custody_repo: workspace-governance-control-fabric
+      durable_when: Platform storage and WGCF registry persistence complete
   proof_obligations:
     governed_claim_roots:
       - readiness_model.rules

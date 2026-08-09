@@ -134,8 +134,8 @@
     "backend": "wgcf-artifact-registry",
     "uri": "wgcf://artifacts/delivery-art/sha256/5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c",
     "receipt_ref": {
-      "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.json",
-      "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a.json",
+      "digest": "sha256:ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a"
     },
     "persisted_at": "2026-08-08T11:16:00+08:00",
     "supersedes": null

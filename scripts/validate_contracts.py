@@ -91,6 +91,15 @@ DELIVERY_ART_ARTIFACT_CASES = {
             "contracts/fixtures/delivery-art-workflow/review-packet-finalized.valid.json",
         ),
     ),
+    "custody_receipt": (
+        "contracts/schemas/delivery-art-custody-receipt.schema.json",
+        (
+            "contracts/fixtures/delivery-art-workflow/architecture-custody-receipt.valid.json",
+            "contracts/fixtures/delivery-art-workflow/work-start-custody-receipt.valid.json",
+            "contracts/fixtures/delivery-art-workflow/merge-ready-custody-receipt.valid.json",
+            "contracts/fixtures/delivery-art-workflow/finalized-custody-receipt.valid.json",
+        ),
+    ),
     "readiness_receipt": (
         "contracts/schemas/delivery-art-readiness-receipt.schema.json",
         ("contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json",),
@@ -1655,6 +1664,29 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             custody.get("persisted_at"),
         )
 
+    if artifact_type == "delivery_art_custody_receipt":
+        receipt_id = payload.get("receipt_id")
+        if isinstance(receipt_id, str) and receipt_id.removeprefix(
+            "artifact-custody-receipt:"
+        ) not in str(custody.get("uri", "")):
+            errors.append("custody receipt URI must include receipt_id")
+        subject = _artifact_object(payload.get("subject"))
+        errors.extend(
+            _delivery_art_ref_digest_errors(
+                subject.get("registry_uri"),
+                subject.get("content_digest"),
+                "subject.registry_uri",
+            )
+        )
+        storage = _artifact_object(payload.get("storage"))
+        _require_strict_artifact_time_order(
+            errors,
+            "storage.persisted_at",
+            storage.get("persisted_at"),
+            "custody.persisted_at",
+            custody.get("persisted_at"),
+        )
+
     return errors
 
 
@@ -1791,7 +1823,40 @@ def delivery_art_artifact_reference_errors(
     def artifact_identifier(artifact: dict) -> object:
         if artifact.get("artifact_type") == "art_review_packet":
             return artifact.get("packet_id")
+        if artifact.get("artifact_type") == "delivery_art_custody_receipt":
+            return artifact.get("receipt_id")
         return artifact.get("artifact_id")
+
+    def validate_custody_receipt_binding(
+        source_artifact: dict,
+        receipt: dict,
+        label: str,
+    ) -> None:
+        source_type = source_artifact.get("artifact_type")
+        source_custody = _artifact_object(source_artifact.get("custody"))
+        receipt_subject = _artifact_object(receipt.get("subject"))
+        expected_identifier = artifact_identifier(source_artifact)
+        expected_digest = _artifact_object(source_artifact.get("integrity")).get(
+            "content_digest"
+        )
+        expected_values = {
+            "artifact_type": source_type,
+            "artifact_id": expected_identifier,
+            "delivery_id": source_artifact.get("delivery_id"),
+            "content_digest": expected_digest,
+            "registry_uri": source_custody.get("uri"),
+        }
+        for field, expected in expected_values.items():
+            if receipt_subject.get(field) != expected:
+                errors.append(f"{label} subject.{field} must match the source artifact")
+        receipt_custody = _artifact_object(receipt.get("custody"))
+        _require_strict_artifact_time_order(
+            errors,
+            f"{label} custody.persisted_at",
+            receipt_custody.get("persisted_at"),
+            "source artifact custody.persisted_at",
+            source_custody.get("persisted_at"),
+        )
 
     def receipt_subject_digest(artifact: dict, digest_kind: object) -> object:
         if digest_kind == "artifact-content":
@@ -1808,6 +1873,59 @@ def delivery_art_artifact_reference_errors(
         return None
 
     artifact_type = payload.get("artifact_type")
+
+    if artifact_type in {
+        "delivery_art_architecture_packet",
+        "delivery_art_work_start_record",
+        "art_review_packet",
+    }:
+        payload_custody = _artifact_object(payload.get("custody"))
+        if (
+            payload_custody.get("state") == "durable"
+            and payload_custody.get("backend") == "wgcf-artifact-registry"
+        ):
+            custody_receipt_ref = _artifact_object(
+                payload_custody.get("receipt_ref")
+            )
+            custody_receipt = resolve(
+                custody_receipt_ref.get("uri"),
+                custody_receipt_ref.get("digest"),
+                "custody.receipt_ref.uri",
+                "delivery_art_custody_receipt",
+            )
+            if custody_receipt is not None:
+                validate_custody_receipt_binding(
+                    payload,
+                    custody_receipt,
+                    "custody receipt",
+                )
+
+    if artifact_type == "delivery_art_custody_receipt":
+        subject = _artifact_object(payload.get("subject"))
+        subject_candidates = [
+            artifact
+            for artifact in all_artifacts
+            if artifact is not payload
+            and artifact.get("artifact_type") == subject.get("artifact_type")
+            and artifact_identifier(artifact) == subject.get("artifact_id")
+            and _artifact_object(artifact.get("integrity")).get("content_digest")
+            == subject.get("content_digest")
+            and _artifact_object(artifact.get("custody")).get("uri")
+            == subject.get("registry_uri")
+        ]
+        if not subject_candidates:
+            errors.append(
+                "custody receipt subject does not resolve to the declared source artifact"
+            )
+        elif len(subject_candidates) > 1:
+            errors.append("custody receipt subject resolves ambiguously")
+        else:
+            validate_custody_receipt_binding(
+                subject_candidates[0],
+                payload,
+                "custody receipt",
+            )
+
     current_artifact = payload
     current_uri = _artifact_object(payload.get("custody")).get("uri")
     visited_supersession_uris = {current_uri} if isinstance(current_uri, str) else set()
@@ -2324,6 +2442,10 @@ def validate_delivery_art_artifact_contracts(
         "review-packet-merge-ready.valid.json",
         "review-packet-finalized.valid.json",
         "readiness-receipt.valid.json",
+        "architecture-custody-receipt.valid.json",
+        "work-start-custody-receipt.valid.json",
+        "merge-ready-custody-receipt.valid.json",
+        "finalized-custody-receipt.valid.json",
     }.issubset(fixtures):
         executed_proof_cases.add("reference-chain-valid")
 
@@ -2453,6 +2575,18 @@ def validate_delivery_art_artifact_contracts(
     executed_proof_cases.add("canonical-integrity-invalid")
 
     architecture = fixtures.get("architecture-packet.valid.json")
+    architecture_custody_receipt = fixtures.get(
+        "architecture-custody-receipt.valid.json"
+    )
+    work_start_custody_receipt = fixtures.get(
+        "work-start-custody-receipt.valid.json"
+    )
+    merge_ready_custody_receipt = fixtures.get(
+        "merge-ready-custody-receipt.valid.json"
+    )
+    finalized_custody_receipt = fixtures.get(
+        "finalized-custody-receipt.valid.json"
+    )
     if architecture:
         legacy_attachment_custody = copy.deepcopy(architecture)
         legacy_attachment_custody["custody"]["backend"] = (
@@ -2485,6 +2619,30 @@ def validate_delivery_art_artifact_contracts(
             "custody receipt reference whose URI does not bind its digest",
             expected_fragment="custody.receipt_ref.uri must include its declared content digest",
         )
+
+        if architecture_custody_receipt:
+            wrong_custody_subject = copy.deepcopy(
+                architecture_custody_receipt
+            )
+            wrong_custody_subject["subject"]["artifact_id"] = (
+                "architecture-packet:delivery-698-wrong"
+            )
+            require_reference_rejected(
+                architecture,
+                "source artifact whose custody receipt binds another subject",
+                "custody receipt subject.artifact_id must match the source artifact",
+                [wrong_custody_subject],
+            )
+
+            wrong_storage_owner = copy.deepcopy(architecture_custody_receipt)
+            wrong_storage_owner["storage"]["runtime_owner"] = (
+                "operator-orchestration-service"
+            )
+            require_rejected(
+                "custody_receipt",
+                wrong_storage_owner,
+                "custody receipt claiming the wrong physical storage owner",
+            )
 
         stale_decision = copy.deepcopy(architecture)
         stale_decision["decision"]["status"] = "ready-for-child-implementation"
@@ -3730,9 +3888,13 @@ def validate_delivery_art_artifact_contracts(
             "finalized direct-land packet preserving its merge-ready predecessor",
             [
                 architecture,
+                architecture_custody_receipt,
                 work_start,
+                work_start_custody_receipt,
                 direct_land_predecessor,
+                merge_ready_custody_receipt,
                 direct_land_receipt,
+                finalized_custody_receipt,
             ],
         )
 

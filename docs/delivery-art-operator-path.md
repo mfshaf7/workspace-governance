@@ -361,19 +361,25 @@ python3 scripts/validate_delivery_art_artifact.py <artifact.json> --repo-root . 
 ```
 
 Repeat `--dependency-artifact` until the referenced dependency closure is
-complete. An architecture packet has no dependency argument. A work-start
-record needs its architecture packet. A merge-ready Review Packet needs both.
-A readiness receipt needs its exact subject artifact plus that subject's
-dependency closure. An operating-readiness receipt therefore needs the final
-packet, its merge-ready predecessor, work-start record, and architecture
-packet. A finalized source Review Packet needs its durable merge-ready
-predecessor and readiness receipt in addition to the earlier source artifacts:
+complete. Every durable source artifact needs its WGCF custody receipt, and
+every custody receipt needs its exact source artifact. A work-start record also
+needs its architecture packet. A merge-ready Review Packet needs both earlier
+source artifacts. A readiness receipt needs its exact subject artifact plus
+that subject's dependency closure. An operating-readiness receipt therefore
+needs the final packet, its custody receipt, merge-ready predecessor and
+custody receipt, work-start record and custody receipt, and architecture packet
+and custody receipt. A finalized source Review Packet needs that same closure
+plus its readiness receipt:
 
 ```bash
 python3 scripts/validate_delivery_art_artifact.py <finalized-packet.json> --repo-root . \
   --dependency-artifact <architecture-packet.json> \
+  --dependency-artifact <architecture-custody-receipt.json> \
   --dependency-artifact <work-start-record.json> \
+  --dependency-artifact <work-start-custody-receipt.json> \
   --dependency-artifact <merge-ready-packet.json> \
+  --dependency-artifact <merge-ready-custody-receipt.json> \
+  --dependency-artifact <finalized-custody-receipt.json> \
   --dependency-artifact <readiness-receipt.json>
 ```
 
@@ -413,7 +419,9 @@ WGCF also stores content-addressed readiness receipts and exact source-artifact
 bindings. The same readiness-receipt schema covers architecture,
 implementation, merge, and operating readiness; only the operating receipt
 uses the cycle-safe Review Packet readiness-subject digest.
-The receipt schema is
+The custody-receipt schema is
+[`delivery-art-custody-receipt.schema.json`](../contracts/schemas/delivery-art-custody-receipt.schema.json).
+The readiness-receipt schema is
 [`delivery-art-readiness-receipt.schema.json`](../contracts/schemas/delivery-art-readiness-receipt.schema.json).
 Artifact digests use the integer-only RFC 8785 canonical domain and SHA-256
 over artifact content, excluding custody metadata and the digest field itself.

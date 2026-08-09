@@ -237,7 +237,7 @@
     "artifactContracts": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["architecture_packet", "work_start_record", "review_packet", "readiness_receipt"],
+      "required": ["architecture_packet", "work_start_record", "review_packet", "readiness_receipt", "custody_receipt"],
       "properties": {
         "architecture_packet": {
           "allOf": [
@@ -286,6 +286,19 @@
             {
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-readiness-receipt.schema.json" },
+                "schema_version": { "const": 1 },
+                "producer_repo": { "const": "workspace-governance-control-fabric" },
+                "custody_repo": { "const": "workspace-governance-control-fabric" }
+              }
+            }
+          ]
+        },
+        "custody_receipt": {
+          "allOf": [
+            { "$ref": "#/$defs/artifactContract" },
+            {
+              "properties": {
+                "schema_ref": { "const": "contracts/schemas/delivery-art-custody-receipt.schema.json" },
                 "schema_version": { "const": 1 },
                 "producer_repo": { "const": "workspace-governance-control-fabric" },
                 "custody_repo": { "const": "workspace-governance-control-fabric" }

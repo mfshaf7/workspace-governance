@@ -203,11 +203,18 @@ Use these contracts to declare:
     finalization timestamps; the receipt is evaluated and persisted before the
     packet receives its final timestamp and durable custody
   - trusted runtime issuer verification remains owner implementation work
+- `schemas/delivery-art-custody-receipt.schema.json`
+  - defines the WGCF-issued receipt that binds one source artifact's type,
+    identity, Delivery scope, digest, and opaque registry URI to a
+    Platform-owned storage receipt without exposing bucket, endpoint, or object
+    key details
+  - the receipt schema is contract truth for work item `810`; it does not claim
+    that the registry runtime is active
 - `fixtures/delivery-art-workflow/`
   - valid architecture, work-start, merge-ready, operating-readiness receipt,
-    and finalized artifact examples consumed by `validate_contracts.py`; the
-    validator derives and proves valid receipt subjects for the other three
-    readiness levels as well
+    finalized artifact, and source-artifact custody receipt examples consumed
+    by `validate_contracts.py`; the validator derives and proves valid receipt
+    subjects for the other three readiness levels as well
   - the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "artifact_type": "delivery_art_custody_receipt",
+  "receipt_id": "artifact-custody-receipt:cccccccccccccccccccccccc",
+  "subject": {
+    "artifact_type": "art_review_packet",
+    "artifact_id": "review-packet:delivery-698-work-item-801",
+    "delivery_id": "delivery-698",
+    "content_digest": "sha256:5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c",
+    "registry_uri": "wgcf://artifacts/delivery-art/sha256/5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c"
+  },
+  "issuer": {
+    "owner_repo": "workspace-governance-control-fabric",
+    "service_identity_ref": "service-identity://workspace-governance-control-fabric/dev-integration",
+    "implementation_ref": "5555555555555555555555555555555555555555"
+  },
+  "storage": {
+    "runtime_owner": "platform-engineering",
+    "receipt_ref": "platform-storage://receipts/delivery-art-review-698-801-merge-ready",
+    "persisted_at": "2026-08-08T11:15:58+08:00"
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a"
+  },
+  "custody": {
+    "state": "durable",
+    "backend": "wgcf-receipt-ledger",
+    "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a.json",
+    "persisted_at": "2026-08-08T11:15:59+08:00",
+    "supersedes": null
+  }
+}
