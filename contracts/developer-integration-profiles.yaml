@@ -111,10 +111,12 @@ profiles:
     lane_class: governed-devint
     owner_repo: workspace-governance-control-fabric
     summary: Persistent local-k3s dev-integration profile for the Workspace
-      Governance Control Fabric API runtime and PostgreSQL metadata store.
-    purpose: Provide a real local-k3s API Service and persistent PostgreSQL
-      metadata store for WGCF contract and Governance Operations Console
-      consumption work while keeping governed stage/prod deployment and worker
+      Governance Control Fabric API, PostgreSQL metadata, and isolated
+      S3-compatible evidence custody.
+    purpose: Provide a real local-k3s API Service, persistent PostgreSQL
+      metadata store, and profile-scoped object storage for WGCF contract,
+      evidence-custody, and Governance Operations Console work while keeping
+      governed stage/prod deployment, enterprise encryption, and worker
       activation gated.
     validation_behavior:
       posture: runtime-consumer
@@ -140,6 +142,8 @@ profiles:
       security_review_refs:
         - repo: security-architecture
           path: docs/reviews/components/2026-04-30-workspace-governance-control-fabric-devint-runtime.md
+        - repo: security-architecture
+          path: docs/reviews/components/2026-08-09-art-evidence-custody-and-source-provenance.md
     shared_dependencies:
       - platform-engineering
       - workspace-governance
@@ -157,6 +161,12 @@ profiles:
         - database migration
         - validation planner dry run
         - receipt and ledger metadata read
+        - profile-scoped evidence storage availability
+        - storage credential and network isolation
+        - content digest and storage receipt verification
+        - content-address-preserving backup and restore
+        - explicit retention and deletion boundary
+        - governed encryption identity and Security approval
     actions:
       - up
       - status
@@ -164,6 +174,8 @@ profiles:
       - smoke
       - down
       - reset
+      - backup
+      - restore
       - promote_check
   context-governance-gateway:
     lifecycle: active
