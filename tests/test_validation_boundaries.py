@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 from pathlib import Path
 import subprocess
 import sys
@@ -15,6 +16,7 @@ SCRIPTS_ROOT = REPO_ROOT / "scripts"
 CATALOG_PATH = REPO_ROOT / "contracts" / "governance-validator-catalog.yaml"
 LAYOUT_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_workspace_layout.py"
 BRANCH_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_branch_lifecycle.py"
+DEV_INTEGRATION_VALIDATOR_PATH = REPO_ROOT / "scripts" / "validate_developer_integration.py"
 
 
 def load_catalog() -> dict:
@@ -151,6 +153,181 @@ class AuditBoundaryTests(unittest.TestCase):
             self.assertFalse(branch_audit.worktree_is_dirty(repo_root))
             (repo_root / "untracked.txt").write_text("dirty\n")
             self.assertTrue(branch_audit.worktree_is_dirty(repo_root))
+
+
+class SecurityReviewRefTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.validator = load_script_module(
+            "validate_developer_integration",
+            DEV_INTEGRATION_VALIDATOR_PATH,
+        )
+
+    def test_pinned_review_ref_uses_declared_commit_content(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "validation@example.invalid"],
+                cwd=repo_root,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Validation Test"],
+                cwd=repo_root,
+                check=True,
+            )
+            review_path = Path("docs/review.md")
+            absolute_review_path = repo_root / review_path
+            absolute_review_path.parent.mkdir(parents=True)
+            committed_content = b"approved review\n"
+            absolute_review_path.write_bytes(committed_content)
+            subprocess.run(["git", "add", str(review_path)], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Add review"],
+                cwd=repo_root,
+                check=True,
+            )
+            source_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", source_commit],
+                cwd=repo_root,
+                check=True,
+            )
+            ref = {
+                "path": review_path.as_posix(),
+                "source_commit": source_commit,
+                "content_sha256": hashlib.sha256(committed_content).hexdigest(),
+            }
+
+            absolute_review_path.write_text("mutable checkout changed\n")
+
+            self.assertEqual(
+                self.validator.validate_security_review_ref(repo_root, ref),
+                [],
+            )
+
+    def test_pinned_review_ref_rejects_digest_for_other_content(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "validation@example.invalid"],
+                cwd=repo_root,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Validation Test"],
+                cwd=repo_root,
+                check=True,
+            )
+            review_path = Path("docs/review.md")
+            absolute_review_path = repo_root / review_path
+            absolute_review_path.parent.mkdir(parents=True)
+            absolute_review_path.write_text("approved review\n")
+            subprocess.run(["git", "add", str(review_path)], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Add review"],
+                cwd=repo_root,
+                check=True,
+            )
+            source_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", source_commit],
+                cwd=repo_root,
+                check=True,
+            )
+            ref = {
+                "path": review_path.as_posix(),
+                "source_commit": source_commit,
+                "content_sha256": hashlib.sha256(b"different review\n").hexdigest(),
+            }
+
+            errors = self.validator.validate_security_review_ref(repo_root, ref)
+
+            self.assertEqual(len(errors), 1)
+            self.assertIn("security review digest mismatch", errors[0])
+
+    def test_pinned_review_ref_reports_missing_checkout(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_repo = Path(temp_dir) / "security-architecture"
+            ref = {
+                "path": "docs/review.md",
+                "source_commit": "a" * 40,
+                "content_sha256": "b" * 64,
+            }
+
+            errors = self.validator.validate_security_review_ref(missing_repo, ref)
+
+            self.assertEqual(
+                errors,
+                [f"security review repo checkout missing: {missing_repo}"],
+            )
+
+    def test_pinned_review_ref_rejects_unmerged_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "validation@example.invalid"],
+                cwd=repo_root,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Validation Test"],
+                cwd=repo_root,
+                check=True,
+            )
+            (repo_root / "README.md").write_text("main\n")
+            subprocess.run(["git", "add", "README.md"], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Establish main"],
+                cwd=repo_root,
+                check=True,
+            )
+            main_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", main_commit],
+                cwd=repo_root,
+                check=True,
+            )
+            review_path = Path("docs/review.md")
+            absolute_review_path = repo_root / review_path
+            absolute_review_path.parent.mkdir(parents=True)
+            review_content = b"unmerged review\n"
+            absolute_review_path.write_bytes(review_content)
+            subprocess.run(["git", "add", str(review_path)], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Add unmerged review"],
+                cwd=repo_root,
+                check=True,
+            )
+            source_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            ref = {
+                "path": review_path.as_posix(),
+                "source_commit": source_commit,
+                "content_sha256": hashlib.sha256(review_content).hexdigest(),
+            }
+
+            errors = self.validator.validate_security_review_ref(repo_root, ref)
+
+            self.assertEqual(len(errors), 1)
+            self.assertIn("is not landed on origin/main", errors[0])
 
 
 if __name__ == "__main__":

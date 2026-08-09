@@ -76,15 +76,7 @@
               "security_review_required": { "type": "boolean" },
               "security_review_refs": {
                 "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": ["repo", "path"],
-                  "properties": {
-                    "repo": { "type": "string", "minLength": 1 },
-                    "path": { "type": "string", "minLength": 1 }
-                  },
-                  "additionalProperties": false
-                }
+                "items": { "$ref": "#/$defs/securityReviewRef" }
               },
               "implementation_allowed": { "type": "boolean" },
               "self_serve_launch_allowed": { "type": "boolean" },
@@ -114,15 +106,7 @@
               "security_review_required": { "type": "boolean" },
               "security_review_refs": {
                 "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": ["repo", "path"],
-                  "properties": {
-                    "repo": { "type": "string", "minLength": 1 },
-                    "path": { "type": "string", "minLength": 1 }
-                  },
-                  "additionalProperties": false
-                }
+                "items": { "$ref": "#/$defs/securityReviewRef" }
               }
             },
             "additionalProperties": false
@@ -162,6 +146,27 @@
     }
   },
   "$defs": {
+    "securityReviewRef": {
+      "type": "object",
+      "required": ["repo", "path"],
+      "properties": {
+        "repo": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "dependentRequired": {
+        "source_commit": ["content_sha256"],
+        "content_sha256": ["source_commit"]
+      },
+      "additionalProperties": false
+    },
     "validationBehavior": {
       "type": "object",
       "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
