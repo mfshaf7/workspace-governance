@@ -137,7 +137,7 @@ profiles:
     admission:
       approved_by: mfshaf7
       approved_on: "2026-04-30"
-      platform_acceptance_ref: repo://platform-engineering/docs/records/change-records/2026-04-30-wgcf-devint-runtime-access.md
+      platform_acceptance_ref: repo://platform-engineering/docs/records/change-records/2026-08-09-wgcf-devint-evidence-storage.md
       security_review_required: true
       security_review_refs:
         - repo: security-architecture
