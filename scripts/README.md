@@ -104,9 +104,9 @@
 - `validate_developer_integration.py`
   - validates the shared `dev-integration` lane contracts plus the registered
     repo-owned profile files and command paths
-  - resolves pinned Security review references from their declared Git commit
-    and verifies the exact file-byte SHA-256 instead of trusting mutable
-    checkout content
+  - requires pinned Security review commits to be landed on `origin/main`, then
+    resolves the referenced file from that commit and verifies its exact-byte
+    SHA-256 instead of trusting mutable checkout content
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata

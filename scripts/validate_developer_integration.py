@@ -182,6 +182,25 @@ def validate_security_review_ref(review_repo: Path, ref: dict) -> list[str]:
             + (f": {detail}" if detail else "")
         ]
 
+    landed_result = subprocess.run(
+        [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            source_commit,
+            "refs/remotes/origin/main",
+        ],
+        cwd=review_repo,
+        capture_output=True,
+        check=False,
+    )
+    if landed_result.returncode != 0:
+        detail = landed_result.stderr.decode("utf-8", errors="replace").strip()
+        return [
+            f"security review source_commit is not landed on origin/main: {source_commit}"
+            + (f": {detail}" if detail else "")
+        ]
+
     result = subprocess.run(
         ["git", "cat-file", "blob", f"{source_commit}:{review_path}"],
         cwd=review_repo,

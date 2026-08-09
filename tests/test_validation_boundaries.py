@@ -192,6 +192,11 @@ class SecurityReviewRefTests(unittest.TestCase):
                 cwd=repo_root,
                 text=True,
             ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", source_commit],
+                cwd=repo_root,
+                check=True,
+            )
             ref = {
                 "path": review_path.as_posix(),
                 "source_commit": source_commit,
@@ -234,6 +239,11 @@ class SecurityReviewRefTests(unittest.TestCase):
                 cwd=repo_root,
                 text=True,
             ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", source_commit],
+                cwd=repo_root,
+                check=True,
+            )
             ref = {
                 "path": review_path.as_posix(),
                 "source_commit": source_commit,
@@ -260,6 +270,64 @@ class SecurityReviewRefTests(unittest.TestCase):
                 errors,
                 [f"security review repo checkout missing: {missing_repo}"],
             )
+
+    def test_pinned_review_ref_rejects_unmerged_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "validation@example.invalid"],
+                cwd=repo_root,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Validation Test"],
+                cwd=repo_root,
+                check=True,
+            )
+            (repo_root / "README.md").write_text("main\n")
+            subprocess.run(["git", "add", "README.md"], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Establish main"],
+                cwd=repo_root,
+                check=True,
+            )
+            main_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            subprocess.run(
+                ["git", "update-ref", "refs/remotes/origin/main", main_commit],
+                cwd=repo_root,
+                check=True,
+            )
+            review_path = Path("docs/review.md")
+            absolute_review_path = repo_root / review_path
+            absolute_review_path.parent.mkdir(parents=True)
+            review_content = b"unmerged review\n"
+            absolute_review_path.write_bytes(review_content)
+            subprocess.run(["git", "add", str(review_path)], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "commit", "--quiet", "-m", "Add unmerged review"],
+                cwd=repo_root,
+                check=True,
+            )
+            source_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo_root,
+                text=True,
+            ).strip()
+            ref = {
+                "path": review_path.as_posix(),
+                "source_commit": source_commit,
+                "content_sha256": hashlib.sha256(review_content).hexdigest(),
+            }
+
+            errors = self.validator.validate_security_review_ref(repo_root, ref)
+
+            self.assertEqual(len(errors), 1)
+            self.assertIn("is not landed on origin/main", errors[0])
 
 
 if __name__ == "__main__":
