@@ -245,6 +245,22 @@ class SecurityReviewRefTests(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("security review digest mismatch", errors[0])
 
+    def test_pinned_review_ref_reports_missing_checkout(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_repo = Path(temp_dir) / "security-architecture"
+            ref = {
+                "path": "docs/review.md",
+                "source_commit": "a" * 40,
+                "content_sha256": "b" * 64,
+            }
+
+            errors = self.validator.validate_security_review_ref(missing_repo, ref)
+
+            self.assertEqual(
+                errors,
+                [f"security review repo checkout missing: {missing_repo}"],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

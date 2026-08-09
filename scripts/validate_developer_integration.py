@@ -155,6 +155,9 @@ def validate_security_review_ref(review_repo: Path, ref: dict) -> list[str]:
     source_commit = ref.get("source_commit")
     expected_digest = ref.get("content_sha256")
 
+    if not review_repo.is_dir():
+        return [f"security review repo checkout missing: {review_repo}"]
+
     if source_commit is None and expected_digest is None:
         current_path = review_repo / review_path
         if not current_path.exists():
@@ -165,6 +168,19 @@ def validate_security_review_ref(review_repo: Path, ref: dict) -> list[str]:
         return [f"security review source_commit must be a full lowercase Git commit: {source_commit!r}"]
     if not isinstance(expected_digest, str) or not SHA256_PATTERN.fullmatch(expected_digest):
         return [f"security review content_sha256 must be a lowercase SHA-256 digest: {expected_digest!r}"]
+
+    commit_result = subprocess.run(
+        ["git", "cat-file", "-e", f"{source_commit}^{{commit}}"],
+        cwd=review_repo,
+        capture_output=True,
+        check=False,
+    )
+    if commit_result.returncode != 0:
+        detail = commit_result.stderr.decode("utf-8", errors="replace").strip()
+        return [
+            f"security review source_commit unavailable: {source_commit}"
+            + (f": {detail}" if detail else "")
+        ]
 
     result = subprocess.run(
         ["git", "cat-file", "blob", f"{source_commit}:{review_path}"],
