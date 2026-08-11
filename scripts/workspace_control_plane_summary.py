@@ -75,10 +75,10 @@ def main() -> int:
             ],
         ),
         (
-            "Codex review-control compliance",
+            "pull-request control compliance",
             [
                 "python3",
-                "scripts/validate_codex_review_controls.py",
+                "scripts/validate_pull_request_controls.py",
                 "--workspace-root",
                 str(workspace_root),
             ],

@@ -412,8 +412,8 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 
 - Architecture snapshot for new sessions:
   [ARCHITECTURE.md](/home/mfshaf7/projects/ARCHITECTURE.md)
-- Codex GitHub review and control-plane summary procedure:
-  [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
+- Pull-request review and control-plane summary procedure:
+  [workspace-governance/docs/pull-request-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/pull-request-review-and-automation.md)
 - Workspace routing: [AGENTS.md](/home/mfshaf7/projects/AGENTS.md)
 - Workspace governance repo: [workspace-governance/README.md](/home/mfshaf7/projects/workspace-governance/README.md)
 - Workspace governance control fabric:

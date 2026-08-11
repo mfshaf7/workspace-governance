@@ -1,0 +1,47 @@
+schema_version: 1
+id: 2026-08-11-mandatory-codex-review-loop-regression
+title: Bound advisory review before it expands Landing Unit scope
+recorded_on: '2026-08-11'
+owner_repo: workspace-governance
+summary: 'ART #811 repeated a previously closed reactive-review failure: mandatory
+  exact-head Codex review drove architecture discovery and cross-boundary patching
+  while stale Review Packet heads still passed readiness.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The workspace treated an advisory PR reviewer as a mandatory authority,
+    had no bounded review-round stop rule, and did not require findings to be triaged
+    against the accepted trust model, owner boundary, Landing Unit scope, and ART
+    dependency front before implementation.
+  source_refs:
+  - 'conversation: operator identified a repeated six-hour patch loop while delivering
+    ART #811'
+  - 'art:Workspace Delivery ART defect #812'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-08-14'
+  note: >-
+    Land the operator-approved bounded advisory-review contract, stale-source
+    Review Packet guard, and truthful #811 reconciliation before treating this
+    lesson as closed.

@@ -43,7 +43,7 @@ Report:
 - cross-repo ownership drift
 - stale or retired language in active docs
 - generated artifact drift
-- Codex review-control drift
+- pull-request control drift
 - installed skill drift
 - AGENTS or skill guidance that contradicts current WGCF, CGG, OOS, or ART
   operator-path contracts

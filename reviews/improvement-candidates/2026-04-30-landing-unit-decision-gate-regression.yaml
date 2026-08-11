@@ -52,7 +52,7 @@ resolution:
     note: Adds the Landing Unit Decision Gate to the primary ART operator path
       before source branch or implementation work starts.
   - type: doc
-    path: workspace-governance/docs/codex-github-review-and-automation.md
+    path: workspace-governance/docs/pull-request-review-and-automation.md
     owner_repo: workspace-governance
     note: Updates the standard PR flow so the Landing Unit decision happens
       before branch creation, PR creation, and source work.

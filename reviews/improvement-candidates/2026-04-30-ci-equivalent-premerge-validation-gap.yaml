@@ -34,7 +34,7 @@ resolution:
   after_action_ref: null
   control_refs:
   - type: doc
-    path: workspace-governance/docs/codex-github-review-and-automation.md
+    path: workspace-governance/docs/pull-request-review-and-automation.md
     owner_repo: workspace-governance
     note: Requires pre-merge CI-equivalent local proof with base-ref parity before source-backed PR merge.
   - type: doc

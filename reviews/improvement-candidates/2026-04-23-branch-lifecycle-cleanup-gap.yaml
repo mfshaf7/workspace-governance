@@ -58,7 +58,7 @@ resolution:
     owner_repo: workspace-governance
     note: Teaches restart-readiness to require the clean-state branch lifecycle audit.
   - type: doc
-    path: workspace-governance/docs/codex-github-review-and-automation.md
+    path: workspace-governance/docs/pull-request-review-and-automation.md
     owner_repo: workspace-governance
     note: Documents post-merge branch retirement and the new control-plane summary check.
   note: Closed by the landed branch lifecycle validator, the restart-readiness gate wiring, and the updated operator guidance in workspace-governance.

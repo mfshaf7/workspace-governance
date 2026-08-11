@@ -110,10 +110,10 @@
 - `validate_review_coverage.py`
   - validates that active security-owned repos, components, and products have
     concrete baseline review coverage and non-stale review inventory metadata
-- `validate_codex_review_controls.py`
-  - validates that active repos keep repo-specific Codex review guidance,
-    required GitHub control surfaces, PR-template evidence sections, and usable
-    review-check workflows
+- `validate_pull_request_controls.py`
+  - validates that active repos keep provider-neutral review guidance,
+    required GitHub control surfaces, PR-template evidence sections, bounded
+    optional advisory-review disposition, and usable review-check workflows
 - `validate_security_evidence.py`
   - runs the security-architecture evidence validator so stale assessment
     metadata and unlinked findings or risks fail at workspace level too

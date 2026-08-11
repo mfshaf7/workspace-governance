@@ -27,7 +27,7 @@ repos:
         - intake-model
         - component-contracts
         - workspace-layout
-        - codex-review-controls
+        - pull-request-controls
       notes: Owns validator identity, admission policy, and catalog truth consumed by WGCF.
   workspace-governance-control-fabric:
     lifecycle: active

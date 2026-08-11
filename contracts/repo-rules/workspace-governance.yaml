@@ -37,13 +37,13 @@ review_control_requirements:
     - "## Governance Declaration"
     - "## Documentation Updates"
     - "## Validation"
-    - "## Codex Review"
+    - "## Advisory Review"
     - "## Review Gates"
 operator_workflow_requirements:
   workflows:
-    - id: codex-github-review-and-control-plane-summary
-      summary: Primary operator procedure for workspace-level Codex GitHub review and the read-only control-plane summary.
-      primary_surface_path: docs/codex-github-review-and-automation.md
+    - id: pull-request-review-and-control-plane-summary
+      summary: Primary operator procedure for workspace-level pull-request review, bounded optional advisory review, and the read-only control-plane summary.
+      primary_surface_path: docs/pull-request-review-and-automation.md
       required_in_docs:
         - readme
         - agents

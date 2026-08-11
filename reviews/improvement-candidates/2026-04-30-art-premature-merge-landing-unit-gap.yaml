@@ -77,7 +77,7 @@ resolution:
     owner_repo: workspace-governance
     note: Adds the readiness command to the workspace Delivery ART operator path.
   - type: doc
-    path: workspace-governance/docs/codex-github-review-and-automation.md
+    path: workspace-governance/docs/pull-request-review-and-automation.md
     owner_repo: workspace-governance
     note: Updates the standard PR flow so readiness runs before merge and
       finalization runs after merge.

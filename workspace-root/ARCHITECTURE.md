@@ -258,8 +258,8 @@ operator interaction layer, not just a UI skin.
 - Governance Operations Console owner guidance, public-source controls, or
   durable product source after graduation
   - [governance-operations-console/README.md](/home/mfshaf7/projects/governance-operations-console/README.md)
-- Codex GitHub review, PR flow, or read-only control-plane summary
-  - [workspace-governance/docs/codex-github-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md)
+- pull-request review, optional advisory review, or read-only control-plane summary
+  - [workspace-governance/docs/pull-request-review-and-automation.md](/home/mfshaf7/projects/workspace-governance/docs/pull-request-review-and-automation.md)
 - platform, promotion flow, environments, or product integration
   - [platform-engineering/README.md](/home/mfshaf7/projects/platform-engineering/README.md)
 - OpenProject runtime or delivery execution model

@@ -277,9 +277,10 @@ Only start implementation after that discussion narrows the target design.
 
 - The workspace root is not a Git repo. The canonical source for its governance
   files now lives in `workspace-governance/`.
-- For workspace-level Codex GitHub review, PR flow, and the read-only daily
+- For workspace-level pull-request review, bounded optional advisory review,
+  PR flow, and the read-only daily
   control-plane summary, use:
-  - `/home/mfshaf7/projects/workspace-governance/docs/codex-github-review-and-automation.md`
+  - `/home/mfshaf7/projects/workspace-governance/docs/pull-request-review-and-automation.md`
 - Do not hand-maintain long-lived edits directly in:
   - `/home/mfshaf7/projects/ARCHITECTURE.md`
   - `/home/mfshaf7/projects/README.md`
@@ -543,7 +544,7 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/validate_improvement_candidates.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_structured_record.py reviews/improvement-candidates/<record>.yaml --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --check-generated`
-  - `python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects`
+  - `python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects`
   - `python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects`
