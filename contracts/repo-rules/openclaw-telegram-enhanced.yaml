@@ -38,7 +38,7 @@ review_control_requirements:
     - "## Governance Declaration"
     - "## Documentation Updates"
     - "## Validation"
-    - "## Codex Review"
+    - "## Advisory Review"
     - "## Review Gates"
 security_requirements:
   security_owner: security-architecture

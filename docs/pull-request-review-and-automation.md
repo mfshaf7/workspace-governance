@@ -1,7 +1,8 @@
-# Codex GitHub Review And Automation
+# Pull Request Review And Automation
 
-This is the primary operator surface for workspace-level Codex GitHub review,
-PR flow, and the read-only daily control-plane summary.
+This is the primary operator surface for workspace-level pull-request review,
+optional advisory review, PR flow, and the read-only daily control-plane
+summary.
 
 Use this procedure when you want workspace changes to be reviewable,
 machine-checked, and repeatable instead of reconstructed from chat.
@@ -10,7 +11,8 @@ machine-checked, and repeatable instead of reconstructed from chat.
 
 This procedure covers:
 
-- repo-level Codex GitHub review expectations
+- repo-level owner and pull-request review expectations
+- bounded optional advisory review expectations
 - the required PR flow for meaningful git-tracked changes
 - the read-only workspace control-plane summary
 - how repeated review/control failures feed the self-improvement loop
@@ -35,17 +37,18 @@ summary or PR because future sessions are no longer reading plain `main`.
 
 ## Repo Preparation Model
 
-Codex GitHub review is only high-signal after each active repo has:
+Pull-request review is only trustworthy after each active repo has:
 
 - repo-specific `## Review guidelines` in the relevant `AGENTS.md`
 - `CODEOWNERS`
-- a PR template that captures governance evidence and Codex review status
+- a PR template that captures governance evidence and optional advisory review
+  disposition
 - a validation workflow that can be used as a required status check
 
 Those controls are validated from `workspace-governance` by:
 
 ```bash
-python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7/projects
 ```
 
 ## Standard PR Flow
@@ -77,14 +80,20 @@ python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7
 9. Run `npm run art -- review-packet readiness <packet.json>` before merge.
    Do not merge while readiness fails; fix the same PR or explicitly split the
    Landing Unit.
-10. Request Codex review manually with `@codex review` until the repo has
-   stable automatic review enabled.
-11. Resolve or explicitly acknowledge the findings in the PR before merge.
-12. Merge only after readiness, repo-local checks, and required governance checks
-   pass.
-13. After merge, finalize the Review Packet with PR, commit, validation, and
+10. Request one advisory review only when the operator decides that a stable
+    candidate head benefits from it. Advisory review is not a merge authority.
+11. Triage every advisory finding against reachability, the accepted trust
+    model, owner boundary, Landing Unit scope, architecture compatibility, and
+    severity. Record `fix-now`, `separate-work`, or `reject-with-reason`.
+12. Allow at most one advisory pass and one verification pass. If a new
+    architecture dimension appears after that, stop and reopen architecture or
+    Landing Unit scope instead of continuing a patch loop.
+13. Merge only after readiness, repo-local checks, required owner review, and
+    required governance checks pass. Do not re-request advisory review merely
+    because the commit changed.
+14. After merge, finalize the Review Packet with PR, commit, validation, and
    rollback evidence before closing covered source-backed ART items.
-14. After closeout, retire the local branch, remote branch, and any temporary
+15. After closeout, retire the local branch, remote branch, and any temporary
    worktrees unless an open PR or a documented exception still requires them.
 
 ## Landing Units And Review Packets
@@ -138,23 +147,39 @@ The Review Packet template lives at:
 
 - `templates/review-packet/TEMPLATE.md`
 
-## Codex GitHub Review Setup
+## Optional Advisory Review
 
-The repo-owned controls live in Git. The Codex repo toggle does not.
+AI-assisted review is an optional evidence source. It is not an owner,
+security authority, architecture authority, approval gate, or substitute for
+deterministic validation.
 
-Per active repo, turn on the Codex GitHub integration and enable:
+Keep automatic AI reviews disabled. GitHub Codex automatic review is an
+external repository preference, not a repo-owned control: turn off
+**Automatic reviews** for each governed repository in
+[Codex code review settings](https://chatgpt.com/codex/settings/code-review).
+The workspace validator rejects stale mandatory-provider instructions, but it
+cannot attest that external setting.
 
-- `Code review`
-- `Automatic reviews` after the manual rollout is producing useful findings
+When advisory review is useful, request it once against a stable candidate
+head and give it a bounded question. The request must name the accepted
+architecture, trust model, and Landing Unit scope that constrain the review.
 
-Use a manual kickoff comment such as:
+Before implementing a finding, classify it:
 
-```text
-@codex review for security regressions, owner-boundary drift, missing validation, and missing governance evidence
-```
+- `fix-now`: reproducible or reachable under the accepted trust model, owned by
+  the current Landing Unit, and material to its acceptance criteria
+- `separate-work`: valid, but owned by another repo, rollback boundary,
+  architecture decision, or ART item
+- `reject-with-reason`: unreachable, based on a rejected threat model, already
+  covered by an authoritative control, or incorrect
 
-The repo-specific `## Review guidelines` teach Codex which workflow and control
-regressions should be treated as `P1`.
+One verification pass may confirm `fix-now` corrections. A new architecture
+dimension discovered after that pass stops the Landing Unit for replanning. It
+does not start another review-and-patch cycle.
+
+The repo-specific `## Review guidelines` describe material failure classes for
+human or optional advisory reviewers. They do not grant a review provider
+decision authority.
 
 ## Read-Only Control-Plane Summary
 
@@ -170,7 +195,7 @@ The summary checks:
 - remote freshness for the local `workspace-governance` control plane
 - workspace-root sync state
 - live skill install sync
-- Codex review-control compliance
+- pull-request control compliance
 - stale-content drift
 - branch lifecycle hygiene, including stale remote branches that no longer back
   an open PR

@@ -55,7 +55,9 @@ Before telling the operator that a restart is safe or recommended:
   states the non-source proof instead of inventing merge evidence
 - if a Feature or Epic is being closed, every child is covered by a finalized
   Review Packet or explicitly marked as non-source evidence only
-- if repo review controls exist and the work is landing through a PR, Codex review was requested or explicitly waived and the PR records the result
+- if optional advisory review was requested for a PR, the PR records its
+  provider, scope, finding disposition, and verification result; advisory
+  review is not required when owner review and deterministic proof are enough
 - skills are reinstalled and live-skill sync is verified when skill source or registry changed
 - instruction-and-skill governance validation is complete when AGENTS, skill
   source, skill registry, or installed skill behavior changed

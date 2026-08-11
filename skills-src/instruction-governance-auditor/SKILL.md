@@ -30,7 +30,7 @@ installed skill behavior.
 7. If skill source or registration changes, reinstall skills and verify the
    live install.
 8. If workspace-root files change, sync the root and verify the live root.
-9. Validate contracts, cross-repo truth, Codex review controls, stale content,
+9. Validate contracts, cross-repo truth, pull-request controls, stale content,
    and workspace layout before closeout.
 
 ## Guardrails

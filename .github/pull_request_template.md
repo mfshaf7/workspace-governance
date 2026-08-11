@@ -29,11 +29,19 @@ If any answer is `No`, explain why briefly.
 - Live workspace sync and audit:
 - Live skill install check:
 
-## Codex Review
+## Advisory Review
 
-- Codex review requested:
-- Automatic or manual review path:
-- Findings resolved or explicitly acknowledged:
+Optional; leave this section blank when no advisory review was requested.
+
+- Requested: `Yes` or `No`
+- Provider:
+- Scope and accepted trust model:
+- Stable candidate commit:
+- Finding disposition:
+  - `fix-now`:
+  - `separate-work`:
+  - `reject-with-reason`:
+- Verification pass:
 
 ## Review Gates
 

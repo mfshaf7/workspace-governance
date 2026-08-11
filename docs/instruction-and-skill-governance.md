@@ -88,7 +88,7 @@ python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_repo_structure.py --repo-root .
 python3 scripts/validate_contracts.py --repo-root .
 python3 scripts/validate_cross_repo_truth.py --workspace-root /home/mfshaf7/projects --write-generated
-python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects
 python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --check

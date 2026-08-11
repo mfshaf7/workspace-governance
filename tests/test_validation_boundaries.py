@@ -17,6 +17,7 @@ CATALOG_PATH = REPO_ROOT / "contracts" / "governance-validator-catalog.yaml"
 LAYOUT_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_workspace_layout.py"
 BRANCH_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_branch_lifecycle.py"
 DEV_INTEGRATION_VALIDATOR_PATH = REPO_ROOT / "scripts" / "validate_developer_integration.py"
+PULL_REQUEST_VALIDATOR_PATH = REPO_ROOT / "scripts" / "validate_pull_request_controls.py"
 
 
 def load_catalog() -> dict:
@@ -153,6 +154,79 @@ class AuditBoundaryTests(unittest.TestCase):
             self.assertFalse(branch_audit.worktree_is_dirty(repo_root))
             (repo_root / "untracked.txt").write_text("dirty\n")
             self.assertTrue(branch_audit.worktree_is_dirty(repo_root))
+
+
+class PullRequestControlTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.validator = load_script_module(
+            "validate_pull_request_controls",
+            PULL_REQUEST_VALIDATOR_PATH,
+        )
+
+    def test_bounded_optional_advisory_section_is_valid(self) -> None:
+        section = """
+Optional; leave blank when not requested.
+Provider:
+Scope:
+fix-now:
+separate-work:
+reject-with-reason:
+"""
+
+        self.assertEqual(self.validator.advisory_review_issues(section), [])
+
+    def test_advisory_section_rejects_automatic_review_path(self) -> None:
+        section = """
+Optional advisory review requested.
+Provider:
+Scope:
+fix-now:
+separate-work:
+reject-with-reason:
+Automatic review enabled.
+"""
+
+        issues = self.validator.advisory_review_issues(section)
+
+        self.assertEqual(len(issues), 1)
+        self.assertIn("automatic review", issues[0])
+
+    def test_operator_guidance_rejects_obsolete_provider_specific_review(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            guidance = repo_root / "docs" / "operator.md"
+            guidance.parent.mkdir(parents=True)
+            guidance.write_text(
+                "Follow the workspace-level Codex review and PR procedure.\n"
+            )
+            subprocess.run(
+                ["git", "add", "docs/operator.md"],
+                cwd=repo_root,
+                check=True,
+            )
+
+            issues = self.validator.stale_provider_review_reference_issues(repo_root)
+
+            self.assertEqual(len(issues), 1)
+            self.assertIn("codex review", issues[0])
+
+    def test_historical_evidence_can_name_the_previous_review_control(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(repo_root)], check=True)
+            evidence = repo_root / "reviews" / "improvement-candidates" / "record.md"
+            evidence.parent.mkdir(parents=True)
+            evidence.write_text("The former workspace-level Codex review caused a loop.\n")
+            subprocess.run(
+                ["git", "add", "reviews/improvement-candidates/record.md"],
+                cwd=repo_root,
+                check=True,
+            )
+
+            issues = self.validator.stale_provider_review_reference_issues(repo_root)
+
+            self.assertEqual(issues, [])
 
 
 class SecurityReviewRefTests(unittest.TestCase):

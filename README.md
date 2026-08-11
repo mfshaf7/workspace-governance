@@ -186,10 +186,10 @@ debugging expanded. That is not just a debugging anecdote. It is a governed
 self-improvement signal that should route through the improvement-candidate and
 after-action layers.
 
-Workspace-level Codex GitHub review and the read-only control-plane summary
-have their own primary operator surface:
+Workspace-level pull-request review, bounded optional advisory review, and the
+read-only control-plane summary have their own primary operator surface:
 
-- [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
+- [docs/pull-request-review-and-automation.md](docs/pull-request-review-and-automation.md)
 
 Operational context admission now has its own primary operator surface:
 
@@ -387,7 +387,7 @@ python3 scripts/validate_security_bindings.py --workspace-root /home/mfshaf7/pro
 python3 scripts/validate_component_contracts.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_review_coverage.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_security_change_record_lanes.py --workspace-root /home/mfshaf7/projects
-python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_improvement_signals.py --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_learning_closure.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects
@@ -401,13 +401,13 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_codex_review_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_pull_request_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```
 
 ## Read First
 
 - [AGENTS.md](AGENTS.md)
-- [docs/codex-github-review-and-automation.md](docs/codex-github-review-and-automation.md)
+- [docs/pull-request-review-and-automation.md](docs/pull-request-review-and-automation.md)
 - [workspace-root/ARCHITECTURE.md](workspace-root/ARCHITECTURE.md)
 - [contracts/README.md](contracts/README.md)
 - [contracts/skills.yaml](contracts/skills.yaml)

@@ -206,7 +206,7 @@ governance_validator_catalog:
         - improvement-candidates
         - improvement-signals
         - learning-closure
-        - codex-review-controls
+        - pull-request-controls
         - structured-record
         - touched-records-preflight
       current_posture: direct commands are retained as compatibility entrypoints while WGCF learns to plan and receipt them
@@ -759,13 +759,13 @@ governance_validator_catalog:
       included_in_validation_matrix: false
       wgcf_posture: profile-gated-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
-    codex-review-controls:
+    pull-request-controls:
       kind: validator
       owner_repo: workspace-governance
       surface_id: workspace-governance-python-scripts
-      executable_path: scripts/validate_codex_review_controls.py
-      command: python3 scripts/validate_codex_review_controls.py --workspace-root /home/mfshaf7/projects
-      purpose: validate repo-specific Codex review guidance, GitHub control surfaces, PR-template evidence sections, and review-check workflows
+      executable_path: scripts/validate_pull_request_controls.py
+      command: python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7/projects
+      purpose: validate repo-specific review guidance, GitHub control surfaces, PR-template evidence sections, and review-check workflows without requiring a specific advisory provider
       scope: workspace-cross-repo
       safety_class: workspace-cross-repo-read
       allowed_profiles:
