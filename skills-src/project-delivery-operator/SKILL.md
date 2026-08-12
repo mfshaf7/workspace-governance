@@ -73,13 +73,19 @@ Keep the four readiness decisions distinct:
   applicable structured evidence and a durable content-addressed Review Packet
 - `operating-ready`: finalized durable evidence satisfies closeout obligations
 
-The work-start record and Review Packet v2 schemas are contract-defined but are
-not active commands until OOS, WGCF, Platform, Security, and initiative `698`
-dogfood complete their activation items. Until then, use the currently
-documented OOS command family and Review Packet v1 without claiming the target
-runtime enforcement already exists.
+The OOS lifecycle path is active in `dev-integration`. Its capability manifest
+is source authority and Workspace Governance validates an exact capability
+projection. Use a `delivery_art_lifecycle_plan` and the normal commands:
 
-Under the target v2 path, every passing result binds the exact packet repo
+- `npm run art -- lifecycle status <plan.json>`
+- `npm run art -- lifecycle reconcile <plan.json>`
+
+Reconciliation stops at declared human gates. Durable work-start, Review Packet
+v2, readiness, finalization, and closeout are normal-path capabilities. Review
+Packet v1 is compatibility-only. This does not grant stage or production
+authority.
+
+Under the v2 path, every passing result binds the exact packet repo
 heads. Finalized source packets supersede and preserve a durable merge-ready
 predecessor. WGCF receipts at architecture, implementation, and merge readiness
 bind the exact durable source-artifact content digest; the operating receipt

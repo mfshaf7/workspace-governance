@@ -4265,11 +4265,13 @@ def delivery_art_proof_obligation_errors(
         errors.append("proof obligation ids must be unique")
 
     claims_to_obligations: dict[str, list[str]] = {}
-    activation_targets = set(
+    activation_evidence = set(
         _artifact_string_list(
-            _artifact_object(operator_path.get("contract_activation")).get(
-                "target_art_items"
-            )
+            _artifact_object(
+                _artifact_object(operator_path.get("contract_activation")).get(
+                    "activation_evidence"
+                )
+            ).get("art_refs")
         )
     )
     for obligation in obligations:
@@ -4283,8 +4285,8 @@ def delivery_art_proof_obligation_errors(
         negative_cases = set(
             _artifact_string_list(obligation.get("negative_case_ids"))
         )
-        target_refs = set(
-            _artifact_string_list(obligation.get("target_art_refs"))
+        owner_refs = set(
+            _artifact_string_list(obligation.get("owner_art_refs"))
         )
         if state == "active-local":
             missing_cases = (positive_cases | negative_cases) - executed_case_ids
@@ -4297,24 +4299,33 @@ def delivery_art_proof_obligation_errors(
                 errors.append(
                     f"proof obligation {obligation_id} requires positive and negative validation cases"
                 )
-        elif state == "pending-owner":
-            if not target_refs:
+        elif state == "active-owner-runtime":
+            if not owner_refs:
                 errors.append(
-                    f"pending-owner proof obligation {obligation_id} requires target ART refs"
+                    f"active-owner-runtime proof obligation {obligation_id} requires owner ART evidence"
                 )
-            unknown_targets = target_refs - activation_targets
-            if unknown_targets:
+            unknown_evidence = owner_refs - activation_evidence
+            if unknown_evidence:
                 errors.append(
-                    f"pending-owner proof obligation {obligation_id} references targets outside contract activation: "
-                    + ", ".join(sorted(unknown_targets))
+                    f"active-owner-runtime proof obligation {obligation_id} references evidence outside contract activation: "
+                    + ", ".join(sorted(unknown_evidence))
+                )
+            if positive_cases or negative_cases:
+                errors.append(
+                    f"active-owner-runtime proof obligation {obligation_id} must not claim local validation cases"
+                )
+        elif state == "pending-owner":
+            if not owner_refs:
+                errors.append(
+                    f"pending-owner proof obligation {obligation_id} requires owner ART refs"
                 )
             if positive_cases or negative_cases:
                 errors.append(
                     f"pending-owner proof obligation {obligation_id} must not claim local validation cases"
                 )
-        elif state == "doctrine" and (positive_cases or negative_cases or target_refs):
+        elif state == "doctrine" and (positive_cases or negative_cases or owner_refs):
             errors.append(
-                f"doctrine proof obligation {obligation_id} must not claim execution or target artifacts"
+                f"doctrine proof obligation {obligation_id} must not claim execution or owner artifacts"
             )
 
     true_claims = _delivery_art_true_claim_refs(operator_path)
@@ -4401,6 +4412,23 @@ def validate_delivery_art_proof_obligations(
     ):
         errors.append(
             "Delivery ART proof registry must reject an unexecuted validation case"
+        )
+
+    unknown_owner_evidence = copy.deepcopy(operator_path)
+    owner_obligation = next(
+        obligation
+        for obligation in unknown_owner_evidence["proof_obligations"]["obligations"]
+        if obligation["enforcement_state"] == "active-owner-runtime"
+    )
+    owner_obligation["owner_art_refs"].append("openproject://work_packages/999999")
+    if not any(
+        "evidence outside contract activation" in error
+        for error in delivery_art_proof_obligation_errors(
+            unknown_owner_evidence, executed_case_ids
+        )
+    ):
+        errors.append(
+            "Delivery ART proof registry must reject unbound owner runtime evidence"
         )
 
 

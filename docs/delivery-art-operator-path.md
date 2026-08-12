@@ -167,17 +167,29 @@ ART dependency, owner boundary, base revision, architecture decision, or
 validation obligation change invalidates the affected later decision instead
 of silently mutating earlier evidence.
 
-The contract and schemas define this target now. Runtime enforcement remains
-pending the owner-repo work and initiative `698` dogfood listed in the machine
-contract. Until those items land, use the existing OOS operator commands and
-Review Packet v1 path; do not claim that a new work-start command or Review
-Packet v2 persistence path already exists.
+The owner runtime implements this path in `dev-integration`. The OOS lifecycle
+capability manifest is source authority; the Workspace Governance machine
+contract carries an exact projection and rejects drift in commands, human
+gates, versions, or normal-path status. This activation does not grant stage or
+production authority.
+
+Use a `delivery_art_lifecycle_plan` as the resumable operator artifact:
+
+```bash
+npm run art -- lifecycle status <plan.json>
+npm run art -- lifecycle reconcile <plan.json>
+```
+
+Lifecycle reconciliation advances through implemented steps and stops at the
+declared human gates. Review Packet v2, durable work-start, readiness,
+finalization, and closeout are normal. Review Packet v1 is compatibility-only.
 
 The machine contract also carries a proof-obligation registry. Every Boolean
 claim under readiness rules, work-start, evidence integrity, and architecture
 preflight is mapped exactly once as:
 
 - `active-local`, with an executed positive and negative validation case
+- `active-owner-runtime`, with owner ART evidence bound to activation
 - `pending-owner`, with its activation ART item
 - `doctrine`, with an explicit rationale and no false runtime proof
 
@@ -186,7 +198,7 @@ validation case that did not execute fails the contract validator.
 
 ## Work-Start Gate
 
-Before creating a branch or editing source, the target OOS path will persist a
+Before creating a branch or editing source, the OOS lifecycle path persists a
 [`delivery-art-work-start-record`](../contracts/schemas/delivery-art-work-start-record.schema.json)
 that records:
 
@@ -395,14 +407,13 @@ python3 scripts/validate_delivery_art_artifact.py <finalized-packet.json> --repo
 
 This entrypoint validates schema shape, dynamic repo/graph/acceptance bindings,
 exact evidence source heads, resolved cross-artifact continuity, applicable
-conformance cases, and content integrity. OOS work item `802` must resolve the
-same WGCF registry dependencies on the active runtime path before Review Packet
-v2 is declared implemented.
+conformance cases, and content integrity. The active OOS path resolves the same
+WGCF registry dependencies before Review Packet v2 can advance.
 
-The v2 schema is
-[`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json).
-It remains a target contract until OOS work item `802` implements and activates
-the migration from the current runtime schema version.
+The normal schema is
+[`delivery-art-review-packet.schema.json`](../contracts/schemas/delivery-art-review-packet.schema.json)
+version 2. Version 1 remains available only for compatibility with earlier
+records; new lifecycle work must not select it as the normal path.
 
 Draft artifacts remain local and reviewable, carry no persistence timestamp or
 custody receipt, and do not claim durable custody. OOS authors and validates an

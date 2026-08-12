@@ -11,35 +11,104 @@ delivery_art_operator_path:
     quality_gate: platform-engineering/products/openproject/runbooks/check-delivery-art-quality.md
     admin_boundary: platform-engineering/products/openproject/runbooks/openproject-platform-admin-surface.md
   contract_activation:
-    state: contract-defined
-    runtime_enforcement: pending-owner-implementation-and-dogfood
-    target_art_items:
-      - openproject://work_packages/809
-      - openproject://work_packages/805
-      - openproject://work_packages/811
-      - openproject://work_packages/810
-      - openproject://work_packages/802
-      - openproject://work_packages/803
-      - openproject://work_packages/804
-      - openproject://work_packages/806
-    current_runtime_compatibility:
-      review_packet_schema_version: 1
-      new_work_start_commands_available: false
+    state: active-dev-integration
+    runtime_enforcement: owner-manifest-parity
+    capability_source:
+      repo: operator-orchestration-service
+      manifest_path: contracts/delivery-art-lifecycle/capabilities.json
+      manifest_digest: sha256:c822a3098662dc0e9ec96186620eac621aaf2121a90d5ed9a80873fe2eb1917b
+      activated_at_commit: a0d4a49167ca55a3173e6b77acd37522d62a8b1b
+    capability_projection:
+      schema_version: 1
+      contract_id: operator-orchestration-service.delivery-art-lifecycle.v1
+      owner_repo: operator-orchestration-service
+      normal_operator_surface:
+        plan_artifact_type: delivery_art_lifecycle_plan
+        status_command: npm run art -- lifecycle status <plan.json>
+        reconcile_command: npm run art -- lifecycle reconcile <plan.json>
+      human_gates:
+        - architecture-decision
+        - source-work
+        - evidence
+        - pull-request
+        - source-merge
+        - exception-acceptance
+        - art-closeout
+        - blocked
+      capabilities:
+        - id: scoped-art-snapshot
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: architecture-decision
+          state: human-gated
+          contract_version: 1
+          normal_path: true
+        - id: architecture-packet-persistence
+          state: implemented
+          contract_version: 1
+          normal_path: true
+        - id: work-start-authoring
+          state: implemented
+          contract_version: 1
+          normal_path: true
+        - id: work-start-persistence
+          state: implemented
+          contract_version: 1
+          normal_path: true
+        - id: review-packet-v2-authoring
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: review-packet-merge-readiness
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: operating-readiness
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: review-packet-finalization
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: art-closeout
+          state: implemented
+          contract_version: 2
+          normal_path: true
+        - id: resumable-lifecycle-reconciliation
+          state: implemented
+          contract_version: 1
+          normal_path: true
+        - id: review-packet-v1-compatibility
+          state: compatibility
+          contract_version: 1
+          normal_path: false
+        - id: temporal-lifecycle-adapter
+          state: planned
+          contract_version: 1
+          normal_path: false
+    runtime_scope:
+      normal_path: dev-integration
+      stage_and_prod: not-activated
+    compatibility:
+      normal_review_packet_schema_version: 2
+      work_start_commands_available: true
+      review_packet_v1: compatibility-only
       rule: >-
-        Continue using the currently documented OOS commands until the target
-        owner implementations land. This contract defines the next boundary;
-        it does not claim that work-start enforcement or Review Packet v2 is
-        already active.
-    activation_requires:
-      - Workspace Governance publishes the corrected custody contract and artifact-reference schemas
-      - Security approves evidence custody, access, retention, deletion, backup, restore, and source-provenance controls
-      - Platform provides profile-scoped object storage for the WGCF artifact registry
-      - WGCF implements content-addressed artifact custody, registry metadata, and immutable custody receipts
-      - OOS produces and validates artifacts, persists them through WGCF, and projects only safe references into OpenProject
-      - OOS implements Review Packet v2 and rejects weak result strings
-      - WGCF evaluates the four readiness levels from structured artifacts
-      - Platform removes duplicate ART quality semantics and consumes OOS projections
-      - the path is dogfooded on delivery initiative 698
+        Lifecycle reconciliation, durable work-start, Review Packet v2,
+        readiness, finalization, and closeout are the normal dev-integration
+        path. Review Packet v1 remains compatibility-only.
+    activation_evidence:
+      profile_id: accepted-idea-delivery
+      art_refs:
+        - openproject://work_packages/802
+        - openproject://work_packages/810
+        - openproject://work_packages/819
+      rule: >-
+        Activation is bounded to the proven dev-integration owner runtime.
+        Stage and production still require their own platform and security
+        promotion evidence.
   readiness_model:
     ordered_levels:
       - architecture-ready
@@ -154,7 +223,7 @@ delivery_art_operator_path:
           - evidence_integrity.lifecycle_timestamps_must_be_chronologically_ordered
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - review-evidence-valid
         negative_case_ids:
@@ -172,7 +241,7 @@ delivery_art_operator_path:
           - readiness_model.rules.architecture_merge_order_respects_dependency_precedence
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - architecture-structure-valid
         negative_case_ids:
@@ -196,7 +265,7 @@ delivery_art_operator_path:
           - work_start_gate.scope_fingerprint_is_deterministic_projection
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - work-start-valid
         negative_case_ids:
@@ -210,21 +279,21 @@ delivery_art_operator_path:
         claim_refs:
           - work_start_gate.required_before_branch_or_source_edit
           - work_start_gate.fresh_target_and_dependency_snapshot_required_before_mutation
-        enforcement_state: pending-owner
+        enforcement_state: active-owner-runtime
         owner_repo: operator-orchestration-service
-        target_art_refs:
-          - openproject://work_packages/802
+        owner_art_refs:
+          - openproject://work_packages/819
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
           - owner-runtime
-        rationale: OOS must enforce the pre-edit gate and final fresh read; this contract cannot claim those runtime controls are active.
+        rationale: OOS lifecycle reconciliation enforces durable work-start and refreshes scoped ART truth before source work advances.
       - id: read-cache-policy
         claim_refs:
           - work_start_gate.read_snapshot_cache_allowed
         enforcement_state: doctrine
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
@@ -248,7 +317,7 @@ delivery_art_operator_path:
           - evidence_integrity.exception_authority.direct_land_exception_must_remain_valid_through_readiness_and_finalization
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - review-evidence-valid
         negative_case_ids:
@@ -268,7 +337,7 @@ delivery_art_operator_path:
           - evidence_integrity.custody.durable_persisted_at_required
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - canonical-integrity-valid
         negative_case_ids:
@@ -297,7 +366,7 @@ delivery_art_operator_path:
           - evidence_integrity.custody.merge_ready_review_packet_is_immutable_predecessor_evidence
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - reference-chain-valid
         negative_case_ids:
@@ -330,7 +399,7 @@ delivery_art_operator_path:
           - initiative_architecture_preflight.protocol_conformance_preflight.fidelity_class_required
         enforcement_state: active-local
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids:
           - architecture-conformance-valid
         negative_case_ids:
@@ -348,7 +417,7 @@ delivery_art_operator_path:
           - initiative_architecture_preflight.decision_gate.reopen_when_owner_boundary_or_protocol_changes
         enforcement_state: doctrine
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
@@ -357,33 +426,33 @@ delivery_art_operator_path:
       - id: wgcf-artifact-custody-boundary
         claim_refs:
           - evidence_integrity.custody.wgcf_custodies_artifacts_metadata_and_receipts_without_artifact_authorship
-        enforcement_state: pending-owner
+        enforcement_state: active-owner-runtime
         owner_repo: workspace-governance-control-fabric
-        target_art_refs:
+        owner_art_refs:
           - openproject://work_packages/810
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
           - owner-runtime
-        rationale: The schemas define an opaque WGCF registry and custody-receipt reference, but WGCF work item 810 must implement custody without taking artifact authorship or workspace policy authority.
+        rationale: WGCF persists content-addressed artifacts and custody receipts without taking artifact authorship or workspace policy authority.
       - id: openproject-evidence-reference-boundary
         claim_refs:
           - evidence_integrity.custody.openproject_stores_safe_references_only
-        enforcement_state: pending-owner
+        enforcement_state: active-owner-runtime
         owner_repo: operator-orchestration-service
-        target_art_refs:
+        owner_art_refs:
           - openproject://work_packages/802
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
           - owner-runtime
-        rationale: OOS must project only the artifact ref, digest, and custody receipt ref into OpenProject after WGCF persistence succeeds.
+        rationale: OOS projects only the artifact ref, digest, and custody receipt ref into OpenProject after WGCF persistence succeeds.
       - id: artifact-retention-boundary
         claim_refs:
           - evidence_integrity.custody.automatic_workflow_deletion_prohibited
         enforcement_state: doctrine
         owner_repo: workspace-governance
-        target_art_refs: []
+        owner_art_refs: []
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
@@ -532,8 +601,8 @@ delivery_art_operator_path:
         duplicate_digest_retry: reuse-existing-artifact-and-custody-receipt
         retention_or_deletion: explicit-lifecycle-control-only
       runtime_maturity:
-        contract: contract-defined
-        dev_integration: pending-security-platform-and-wgcf-owner-work
+        contract: active-dev-integration
+        dev_integration: active-owner-runtime
         stage_and_prod: denied-until-identity-encryption-retention-deletion-backup-restore-and-security-approval
   authority_boundaries:
     workspace_governance:
