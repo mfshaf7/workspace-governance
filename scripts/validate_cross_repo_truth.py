@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 from pathlib import Path
+import subprocess
 import sys
 
 import yaml
@@ -79,9 +81,23 @@ DELIVERY_ART_INITIATIVE_LINEAGE_CONTRACT_PATHS = {
     ),
 }
 
-DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH = Path(
-    "workspace-governance/contracts/delivery-art-operator-path.yaml"
+DELIVERY_ART_LIFECYCLE_CAPABILITY_PATH = Path(
+    "operator-orchestration-service/contracts/delivery-art-lifecycle/capabilities.json"
 )
+
+DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
+    "scoped-art-snapshot",
+    "architecture-decision",
+    "architecture-packet-persistence",
+    "work-start-authoring",
+    "work-start-persistence",
+    "review-packet-v2-authoring",
+    "review-packet-merge-readiness",
+    "operating-readiness",
+    "review-packet-finalization",
+    "art-closeout",
+    "resumable-lifecycle-reconciliation",
+}
 
 
 def gather_active_docs(repo_root: Path) -> list[Path]:
@@ -301,12 +317,132 @@ def validate_delivery_art_initiative_lineage_contract(
         )
 
 
+def delivery_art_lifecycle_capability_parity_errors(
+    workspace_root: Path,
+    activation: dict,
+) -> list[str]:
+    errors: list[str] = []
+    source = activation.get("capability_source") or {}
+    projection = activation.get("capability_projection") or {}
+    source_repo = source.get("repo")
+    manifest_relative = source.get("manifest_path")
+    manifest_digest = source.get("manifest_digest")
+    activated_at_commit = source.get("activated_at_commit")
+
+    expected_repo = DELIVERY_ART_LIFECYCLE_CAPABILITY_PATH.parts[0]
+    expected_relative = Path(*DELIVERY_ART_LIFECYCLE_CAPABILITY_PATH.parts[1:])
+    if source_repo != expected_repo or manifest_relative != str(expected_relative):
+        errors.append(
+            "capability source must resolve to the canonical OOS lifecycle manifest"
+        )
+        return errors
+
+    source_repo_root = workspace_root / expected_repo
+    manifest_path = source_repo_root / expected_relative
+    if not manifest_path.exists():
+        errors.append(f"missing owner capability manifest {manifest_path}")
+        return errors
+
+    try:
+        source_manifest = load_json(manifest_path)
+    except (OSError, ValueError) as exc:
+        errors.append(f"owner capability manifest is unreadable: {exc}")
+        return errors
+    actual_manifest_digest = "sha256:" + hashlib.sha256(
+        manifest_path.read_bytes()
+    ).hexdigest()
+    if manifest_digest != actual_manifest_digest:
+        errors.append("capability source digest differs from the owner manifest")
+    if projection != source_manifest:
+        errors.append(
+            "capability projection differs from the OOS lifecycle source manifest"
+        )
+
+    capabilities = source_manifest.get("capabilities") or []
+    capability_ids = [entry.get("id") for entry in capabilities]
+    if len(capability_ids) != len(set(capability_ids)):
+        errors.append("owner lifecycle capability ids must be unique")
+
+    normal_capabilities = {
+        entry.get("id") for entry in capabilities if entry.get("normal_path") is True
+    }
+    if normal_capabilities != DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES:
+        errors.append(
+            "owner lifecycle normal capabilities do not match the governed dev-integration path"
+        )
+
+    compatibility = next(
+        (
+            entry
+            for entry in capabilities
+            if entry.get("id") == "review-packet-v1-compatibility"
+        ),
+        None,
+    )
+    if compatibility != {
+        "id": "review-packet-v1-compatibility",
+        "state": "compatibility",
+        "contract_version": 1,
+        "normal_path": False,
+    }:
+        errors.append("Review Packet v1 must remain compatibility-only")
+
+    if not isinstance(activated_at_commit, str) or not re.fullmatch(
+        r"[0-9a-f]{40}", activated_at_commit
+    ):
+        errors.append("capability activation must bind a full source commit")
+        return errors
+
+    commit_exists = subprocess.run(
+        ["git", "cat-file", "-e", f"{activated_at_commit}^{{commit}}"],
+        cwd=source_repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if commit_exists.returncode != 0:
+        shallow = subprocess.run(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=source_repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if shallow.returncode != 0 or shallow.stdout.strip() != "true":
+            errors.append("capability activation commit is absent from the OOS repository")
+        return errors
+
+    ancestor = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", activated_at_commit, "HEAD"],
+        cwd=source_repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if ancestor.returncode != 0:
+        errors.append("capability activation commit is not an ancestor of OOS HEAD")
+
+    manifest_unchanged = subprocess.run(
+        ["git", "diff", "--quiet", activated_at_commit, "--", str(expected_relative)],
+        cwd=source_repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if manifest_unchanged.returncode != 0:
+        errors.append(
+            "owner lifecycle manifest differs from the activation commit; activation evidence must be refreshed"
+        )
+
+    return errors
+
+
 def validate_delivery_art_operator_path_contract(
     workspace_root: Path,
     repo_root: Path,
     errors: list[str],
 ) -> None:
-    contract_path = workspace_root / DELIVERY_ART_OPERATOR_PATH_CONTRACT_PATH
+    contract_path = repo_root / "contracts/delivery-art-operator-path.yaml"
     if not contract_path.exists():
         errors.append(f"{contract_path}: missing delivery-art operator path contract")
         return
@@ -409,15 +545,35 @@ def validate_delivery_art_operator_path_contract(
         )
 
     activation = operator_path.get("contract_activation") or {}
-    if activation.get("state") != "contract-defined":
+    if activation.get("state") != "active-dev-integration":
         errors.append(
-            f"{contract_path}: work-start hardening must remain contract-defined until owner implementation and dogfood land"
+            f"{contract_path}: Delivery ART lifecycle must declare its active dev-integration scope"
         )
-    compatibility = activation.get("current_runtime_compatibility") or {}
-    if compatibility.get("new_work_start_commands_available") is not False:
+    if activation.get("runtime_enforcement") != "owner-manifest-parity":
         errors.append(
-            f"{contract_path}: must not claim new work-start commands are active before OOS implementation"
+            f"{contract_path}: lifecycle activation must be bound to owner-manifest parity"
         )
+    runtime_scope = activation.get("runtime_scope") or {}
+    if runtime_scope != {
+        "normal_path": "dev-integration",
+        "stage_and_prod": "not-activated",
+    }:
+        errors.append(
+            f"{contract_path}: lifecycle activation must not imply stage or production authority"
+        )
+    compatibility = activation.get("compatibility") or {}
+    if (
+        compatibility.get("normal_review_packet_schema_version") != 2
+        or compatibility.get("work_start_commands_available") is not True
+        or compatibility.get("review_packet_v1") != "compatibility-only"
+    ):
+        errors.append(
+            f"{contract_path}: Review Packet v2 and work-start must be normal while v1 remains compatibility-only"
+        )
+    for parity_error in delivery_art_lifecycle_capability_parity_errors(
+        workspace_root, activation
+    ):
+        errors.append(f"{contract_path}: {parity_error}")
 
     expected_artifact_schemas = {
         "architecture_packet": "contracts/schemas/delivery-art-architecture-packet.schema.json",
@@ -488,6 +644,8 @@ def validate_delivery_art_operator_path_contract(
             "npm run art -- workflow-health",
             "npm run art -- initiative planning <delivery-id>",
             "npm run art -- item continuation <work-item-id>",
+            "npm run art -- lifecycle status <plan.json>",
+            "npm run art -- lifecycle reconcile <plan.json>",
         ):
             if required not in skill_text:
                 errors.append(f"{skill_path}: missing ART operator-path command {required!r}")

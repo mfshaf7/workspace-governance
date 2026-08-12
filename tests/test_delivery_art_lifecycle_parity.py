@@ -1,0 +1,202 @@
+from __future__ import annotations
+
+import copy
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS_ROOT = REPO_ROOT / "scripts"
+VALIDATOR_PATH = SCRIPTS_ROOT / "validate_cross_repo_truth.py"
+
+
+def load_validator():
+    if str(SCRIPTS_ROOT) not in sys.path:
+        sys.path.insert(0, str(SCRIPTS_ROOT))
+    spec = importlib.util.spec_from_file_location(
+        "validate_cross_repo_truth_lifecycle_parity",
+        VALIDATOR_PATH,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"unable to load {VALIDATOR_PATH}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def capability_manifest() -> dict:
+    normal_capabilities = [
+        ("scoped-art-snapshot", "implemented", 2),
+        ("architecture-decision", "human-gated", 1),
+        ("architecture-packet-persistence", "implemented", 1),
+        ("work-start-authoring", "implemented", 1),
+        ("work-start-persistence", "implemented", 1),
+        ("review-packet-v2-authoring", "implemented", 2),
+        ("review-packet-merge-readiness", "implemented", 2),
+        ("operating-readiness", "implemented", 2),
+        ("review-packet-finalization", "implemented", 2),
+        ("art-closeout", "implemented", 2),
+        ("resumable-lifecycle-reconciliation", "implemented", 1),
+    ]
+    return {
+        "schema_version": 1,
+        "contract_id": "operator-orchestration-service.delivery-art-lifecycle.v1",
+        "owner_repo": "operator-orchestration-service",
+        "normal_operator_surface": {
+            "plan_artifact_type": "delivery_art_lifecycle_plan",
+            "status_command": "npm run art -- lifecycle status <plan.json>",
+            "reconcile_command": "npm run art -- lifecycle reconcile <plan.json>",
+        },
+        "human_gates": [
+            "architecture-decision",
+            "source-work",
+            "evidence",
+            "pull-request",
+            "source-merge",
+            "exception-acceptance",
+            "art-closeout",
+            "blocked",
+        ],
+        "capabilities": [
+            {
+                "id": capability_id,
+                "state": state,
+                "contract_version": version,
+                "normal_path": True,
+            }
+            for capability_id, state, version in normal_capabilities
+        ]
+        + [
+            {
+                "id": "review-packet-v1-compatibility",
+                "state": "compatibility",
+                "contract_version": 1,
+                "normal_path": False,
+            },
+            {
+                "id": "temporal-lifecycle-adapter",
+                "state": "planned",
+                "contract_version": 1,
+                "normal_path": False,
+            },
+        ],
+    }
+
+
+class DeliveryArtLifecycleParityTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.validator = load_validator()
+
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.workspace_root = Path(self.temp_dir.name)
+        self.owner_repo = self.workspace_root / "operator-orchestration-service"
+        self.manifest_path = (
+            self.owner_repo
+            / "contracts"
+            / "delivery-art-lifecycle"
+            / "capabilities.json"
+        )
+        self.manifest_path.parent.mkdir(parents=True)
+        self.manifest = capability_manifest()
+        self.manifest_path.write_text(
+            json.dumps(self.manifest, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        self.manifest_digest = "sha256:" + hashlib.sha256(
+            self.manifest_path.read_bytes()
+        ).hexdigest()
+        subprocess.run(["git", "init", "--quiet", str(self.owner_repo)], check=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.invalid"],
+            cwd=self.owner_repo,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Lifecycle Parity Test"],
+            cwd=self.owner_repo,
+            check=True,
+        )
+        subprocess.run(["git", "add", "."], cwd=self.owner_repo, check=True)
+        subprocess.run(
+            ["git", "commit", "--quiet", "-m", "Add lifecycle manifest"],
+            cwd=self.owner_repo,
+            check=True,
+        )
+        self.commit = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.owner_repo,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def activation(self) -> dict:
+        return {
+            "capability_source": {
+                "repo": "operator-orchestration-service",
+                "manifest_path": "contracts/delivery-art-lifecycle/capabilities.json",
+                "manifest_digest": self.manifest_digest,
+                "activated_at_commit": self.commit,
+            },
+            "capability_projection": copy.deepcopy(self.manifest),
+        }
+
+    def test_exact_owner_manifest_projection_passes(self) -> None:
+        errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
+            self.workspace_root,
+            self.activation(),
+        )
+
+        self.assertEqual(errors, [])
+
+    def test_projection_drift_fails(self) -> None:
+        activation = self.activation()
+        activation["capability_projection"]["normal_operator_surface"][
+            "reconcile_command"
+        ] = "npm run art -- lifecycle run <plan.json>"
+
+        errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
+            self.workspace_root,
+            activation,
+        )
+
+        self.assertIn(
+            "capability projection differs from the OOS lifecycle source manifest",
+            errors,
+        )
+
+    def test_manifest_change_requires_refreshed_activation_commit(self) -> None:
+        changed_manifest = copy.deepcopy(self.manifest)
+        changed_manifest["capabilities"][-1]["contract_version"] = 2
+        self.manifest_path.write_text(
+            json.dumps(changed_manifest, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        activation = self.activation()
+        activation["capability_projection"] = changed_manifest
+
+        errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
+            self.workspace_root,
+            activation,
+        )
+
+        self.assertIn(
+            "owner lifecycle manifest differs from the activation commit; activation evidence must be refreshed",
+            errors,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

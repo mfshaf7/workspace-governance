@@ -121,30 +121,129 @@
       "required": [
         "state",
         "runtime_enforcement",
-        "target_art_items",
-        "current_runtime_compatibility",
-        "activation_requires"
+        "capability_source",
+        "capability_projection",
+        "runtime_scope",
+        "compatibility",
+        "activation_evidence"
       ],
       "properties": {
-        "state": { "const": "contract-defined" },
-        "runtime_enforcement": { "const": "pending-owner-implementation-and-dogfood" },
-        "target_art_items": {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": { "type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$" }
-        },
-        "current_runtime_compatibility": {
+        "state": { "const": "active-dev-integration" },
+        "runtime_enforcement": { "const": "owner-manifest-parity" },
+        "capability_source": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["review_packet_schema_version", "new_work_start_commands_available", "rule"],
+          "required": ["repo", "manifest_path", "manifest_digest", "activated_at_commit"],
           "properties": {
-            "review_packet_schema_version": { "const": 1 },
-            "new_work_start_commands_available": { "const": false },
+            "repo": { "const": "operator-orchestration-service" },
+            "manifest_path": { "const": "contracts/delivery-art-lifecycle/capabilities.json" },
+            "manifest_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+            "activated_at_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+          }
+        },
+        "capability_projection": { "$ref": "#/$defs/lifecycleCapabilityManifest" },
+        "runtime_scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["normal_path", "stage_and_prod"],
+          "properties": {
+            "normal_path": { "const": "dev-integration" },
+            "stage_and_prod": { "const": "not-activated" }
+          }
+        },
+        "compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal_review_packet_schema_version",
+            "work_start_commands_available",
+            "review_packet_v1",
+            "rule"
+          ],
+          "properties": {
+            "normal_review_packet_schema_version": { "const": 2 },
+            "work_start_commands_available": { "const": true },
+            "review_packet_v1": { "const": "compatibility-only" },
             "rule": { "$ref": "#/$defs/nonEmptyString" }
           }
         },
-        "activation_requires": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+        "activation_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["profile_id", "art_refs", "rule"],
+          "properties": {
+            "profile_id": { "$ref": "#/$defs/identifier" },
+            "art_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/artWorkPackageRef" }
+            },
+            "rule": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        }
+      }
+    },
+    "artWorkPackageRef": {
+      "type": "string",
+      "pattern": "^openproject://work_packages/[1-9][0-9]*$"
+    },
+    "lifecycleCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "state", "contract_version", "normal_path"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "state": {
+          "enum": ["implemented", "human-gated", "compatibility", "planned"]
+        },
+        "contract_version": { "type": "integer", "minimum": 1 },
+        "normal_path": { "type": "boolean" }
+      }
+    },
+    "lifecycleCapabilityManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "contract_id",
+        "owner_repo",
+        "normal_operator_surface",
+        "human_gates",
+        "capabilities"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "contract_id": { "const": "operator-orchestration-service.delivery-art-lifecycle.v1" },
+        "owner_repo": { "const": "operator-orchestration-service" },
+        "normal_operator_surface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["plan_artifact_type", "status_command", "reconcile_command"],
+          "properties": {
+            "plan_artifact_type": { "const": "delivery_art_lifecycle_plan" },
+            "status_command": { "const": "npm run art -- lifecycle status <plan.json>" },
+            "reconcile_command": { "const": "npm run art -- lifecycle reconcile <plan.json>" }
+          }
+        },
+        "human_gates": {
+          "const": [
+            "architecture-decision",
+            "source-work",
+            "evidence",
+            "pull-request",
+            "source-merge",
+            "exception-acceptance",
+            "art-closeout",
+            "blocked"
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/lifecycleCapability" }
+        }
       }
     },
     "readinessLevel": {
@@ -316,7 +415,7 @@
         "claim_refs",
         "enforcement_state",
         "owner_repo",
-        "target_art_refs",
+        "owner_art_refs",
         "positive_case_ids",
         "negative_case_ids",
         "enforcement_layers",
@@ -326,16 +425,13 @@
         "id": { "$ref": "#/$defs/identifier" },
         "claim_refs": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
         "enforcement_state": {
-          "enum": ["active-local", "pending-owner", "doctrine"]
+          "enum": ["active-local", "active-owner-runtime", "pending-owner", "doctrine"]
         },
         "owner_repo": { "$ref": "#/$defs/nonEmptyString" },
-        "target_art_refs": {
+        "owner_art_refs": {
           "type": "array",
           "uniqueItems": true,
-          "items": {
-            "type": "string",
-            "pattern": "^openproject://work_packages/[1-9][0-9]*$"
-          }
+          "items": { "$ref": "#/$defs/artWorkPackageRef" }
         },
         "positive_case_ids": {
           "type": "array",
@@ -374,7 +470,20 @@
             "properties": {
               "positive_case_ids": { "minItems": 1 },
               "negative_case_ids": { "minItems": 1 },
-              "target_art_refs": { "maxItems": 0 }
+              "owner_art_refs": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "enforcement_state": { "const": "active-owner-runtime" } },
+            "required": ["enforcement_state"]
+          },
+          "then": {
+            "properties": {
+              "owner_art_refs": { "minItems": 1 },
+              "positive_case_ids": { "maxItems": 0 },
+              "negative_case_ids": { "maxItems": 0 }
             }
           }
         },
@@ -385,7 +494,7 @@
           },
           "then": {
             "properties": {
-              "target_art_refs": { "minItems": 1 },
+              "owner_art_refs": { "minItems": 1 },
               "positive_case_ids": { "maxItems": 0 },
               "negative_case_ids": { "maxItems": 0 }
             }
@@ -398,7 +507,7 @@
           },
           "then": {
             "properties": {
-              "target_art_refs": { "maxItems": 0 },
+              "owner_art_refs": { "maxItems": 0 },
               "positive_case_ids": { "maxItems": 0 },
               "negative_case_ids": { "maxItems": 0 }
             }
@@ -750,8 +859,8 @@
               "additionalProperties": false,
               "required": ["contract", "dev_integration", "stage_and_prod"],
               "properties": {
-                "contract": { "const": "contract-defined" },
-                "dev_integration": { "const": "pending-security-platform-and-wgcf-owner-work" },
+                "contract": { "const": "active-dev-integration" },
+                "dev_integration": { "const": "active-owner-runtime" },
                 "stage_and_prod": { "const": "denied-until-identity-encryption-retention-deletion-backup-restore-and-security-approval" }
               }
             }
