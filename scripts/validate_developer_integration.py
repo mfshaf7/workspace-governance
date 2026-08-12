@@ -372,9 +372,9 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "contracts/developer-integration-policy.yaml: controlled_proof.permit.required_sections "
                 "must preserve the complete authorization envelope"
             )
-        if permit.get("schema_version") != 3:
+        if permit.get("schema_version") != 4:
             errors.append(
-                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 3"
+                "contracts/developer-integration-policy.yaml: controlled proof permit schema_version must be 4"
             )
         if (
             permit.get("permit_issuer_binding_required") is not True
@@ -385,7 +385,7 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             )
         expected_semantic_validation = {
             "unique_binding_keys": {
-                "source_revisions": "repo",
+                "execution_source_revisions": "repo",
                 "runtime_artifacts": "artifact_id",
                 "runtime_images": "image_ref",
             },
@@ -394,6 +394,17 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
                 "projection": "all-authorization-fields-except-approvals",
                 "approvals_bind_complete_claims": True,
                 "approval_artifact_digests_required": True,
+                "execution_source_revisions_exclude_security_authorization_source": True,
+            },
+            "approval_provenance": {
+                "security_authorization": {
+                    "source_repo_required": True,
+                    "merged_source_revision_required": True,
+                    "source_path_required": True,
+                    "artifact_ref_required": True,
+                    "artifact_digest_required": True,
+                    "excluded_from_canonical_claims": True,
+                },
             },
             "session_consumption": {
                 "mode": "atomic-single-use",

@@ -469,6 +469,7 @@
         "proof_classification",
         "permit_schema_ref",
         "result_schema_ref",
+        "authorization_source_model",
         "permit_issuer",
         "executor",
         "target",
@@ -496,6 +497,64 @@
         },
         "result_schema_ref": {
           "const": "contracts/schemas/controlled-runtime-proof-result.schema.json"
+        },
+        "authorization_source_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_source_revisions",
+            "security_authorization_provenance"
+          ],
+          "properties": {
+            "execution_source_revisions": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "security_authorization_source_excluded"
+              ],
+              "properties": {
+                "field": {
+                  "const": "scope.execution_source_revisions"
+                },
+                "security_authorization_source_excluded": {
+                  "const": true
+                }
+              }
+            },
+            "security_authorization_provenance": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "source_repo",
+                "merged_source_revision_required",
+                "source_path_required",
+                "artifact_ref_and_digest_required",
+                "excluded_from_canonical_claims"
+              ],
+              "properties": {
+                "field": {
+                  "const": "approvals"
+                },
+                "source_repo": {
+                  "const": "security-architecture"
+                },
+                "merged_source_revision_required": {
+                  "const": true
+                },
+                "source_path_required": {
+                  "const": true
+                },
+                "artifact_ref_and_digest_required": {
+                  "const": true
+                },
+                "excluded_from_canonical_claims": {
+                  "const": true
+                }
+              }
+            }
+          }
         },
         "permit_issuer": {
           "$ref": "#/$defs/controlledProofSourceReview"

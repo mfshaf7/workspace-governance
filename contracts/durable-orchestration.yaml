@@ -201,6 +201,17 @@ durable_orchestration:
       proof_classification: component-commissioning-proof
       permit_schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
       result_schema_ref: contracts/schemas/controlled-runtime-proof-result.schema.json
+      authorization_source_model:
+        execution_source_revisions:
+          field: scope.execution_source_revisions
+          security_authorization_source_excluded: true
+        security_authorization_provenance:
+          field: approvals
+          source_repo: security-architecture
+          merged_source_revision_required: true
+          source_path_required: true
+          artifact_ref_and_digest_required: true
+          excluded_from_canonical_claims: true
       permit_issuer:
         owner_repo: platform-engineering
         source_review_work_item_ref: openproject://work_packages/792

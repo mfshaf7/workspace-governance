@@ -51,11 +51,12 @@ Use these contracts to declare:
     evidence phases, and the first safe and business proof order
 - `schemas/controlled-runtime-proof-authorization.schema.json`
   - defines the expiring pre-run permit envelope for an exact build-admitted
-    commissioning proof; it binds the target profile, definitions, source
-    revisions, immutable runtime images and artifacts, the exact reviewed
+    commissioning proof; it binds the target profile, definitions, executable
+    source revisions, immutable runtime images and artifacts, the exact reviewed
     permit-issuer and executor revisions, namespaces, identities, queues,
     scenarios, exact scenario-execution ids and required receipt owners, an RFC
-    8785 digest over every field outside the approval envelope, one atomically
+    8785 digest over every field outside the approval envelope, exact merged
+    Security approval source provenance inside that envelope, one atomically
     consumed commissioning session, evidence owner, and an immutable pre-issued
     exact-baseline snapshot without granting normal activation
   - denies new proof work after any terminal stop condition while preserving

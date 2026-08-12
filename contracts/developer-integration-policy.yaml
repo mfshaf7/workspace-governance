@@ -52,7 +52,7 @@ controlled_proof:
   normal_profile_launch_remains_denied: true
   permit:
     schema_ref: contracts/schemas/controlled-runtime-proof-authorization.schema.json
-    schema_version: 3
+    schema_version: 4
     required_sections:
       - schema_version
       - authorization_id
@@ -75,7 +75,7 @@ controlled_proof:
     executor_binding_required: true
     semantic_validation:
       unique_binding_keys:
-        source_revisions: repo
+        execution_source_revisions: repo
         runtime_artifacts: artifact_id
         runtime_images: image_ref
       canonical_claims:
@@ -83,6 +83,15 @@ controlled_proof:
         projection: all-authorization-fields-except-approvals
         approvals_bind_complete_claims: true
         approval_artifact_digests_required: true
+        execution_source_revisions_exclude_security_authorization_source: true
+      approval_provenance:
+        security_authorization:
+          source_repo_required: true
+          merged_source_revision_required: true
+          source_path_required: true
+          artifact_ref_required: true
+          artifact_digest_required: true
+          excluded_from_canonical_claims: true
       session_consumption:
         mode: atomic-single-use
         keyed_by: authorization_id

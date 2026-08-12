@@ -138,7 +138,7 @@ CONTROLLED_PROOF_REQUIRED_SESSION_FIELDS = {
 }
 CONTROLLED_PROOF_REQUIRED_SCOPE_FIELDS = {
     "allowed_definitions",
-    "source_revisions",
+    "execution_source_revisions",
     "runtime_artifacts",
     "runtime_images",
     "target_namespaces",
@@ -159,6 +159,9 @@ CONTROLLED_PROOF_REQUIRED_APPROVAL_FIELDS = {
     "canonical_claims_digest",
     "operator_approval_ref",
     "operator_approval_digest",
+    "security_authorization_source_repo",
+    "security_authorization_source_revision",
+    "security_authorization_source_path",
     "security_authorization_ref",
     "security_authorization_digest",
 }
@@ -4453,7 +4456,7 @@ def controlled_proof_authorization_fixture() -> dict:
         "review_packet_ref": "artifact://review-packets/platform-source",
     }
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "authorization_id": "artifact://controlled-proof/authorizations/validation-run",
         "authority_type": "runtime-drill",
         "drill_type": "component-commissioning-proof",
@@ -4469,7 +4472,7 @@ def controlled_proof_authorization_fixture() -> dict:
                     "definition_version": 1,
                 }
             ],
-            "source_revisions": [
+            "execution_source_revisions": [
                 {
                     "repo": "platform-engineering",
                     "commit": source_revision,
@@ -4521,6 +4524,9 @@ def controlled_proof_authorization_fixture() -> dict:
             "canonical_claims_digest": digest,
             "operator_approval_ref": "artifact://controlled-proof/approvals/operator",
             "operator_approval_digest": digest,
+            "security_authorization_source_repo": "security-architecture",
+            "security_authorization_source_revision": source_revision,
+            "security_authorization_source_path": "docs/reviews/components/temporal-controlled-proof-authorization.json",
             "security_authorization_ref": "artifact://controlled-proof/approvals/security",
             "security_authorization_digest": digest,
         },
@@ -4564,7 +4570,7 @@ def controlled_proof_authorization_binding_errors(
 ) -> list[str]:
     binding_errors: list[str] = []
     semantic_keys = {
-        "source_revisions": "repo",
+        "execution_source_revisions": "repo",
         "runtime_artifacts": "artifact_id",
         "runtime_images": "image_ref",
     }
@@ -4576,6 +4582,14 @@ def controlled_proof_authorization_binding_errors(
             binding_errors.append(
                 f"scope.{collection_name} contains duplicate {key_name} bindings"
             )
+    execution_repos = {
+        item["repo"]
+        for item in authorization["scope"]["execution_source_revisions"]
+    }
+    if authorization["approvals"]["security_authorization_source_repo"] in execution_repos:
+        binding_errors.append(
+            "scope.execution_source_revisions must exclude Security authorization provenance"
+        )
 
     scenario_executions = authorization["commissioning_session"][
         "scenario_executions"
@@ -4631,7 +4645,8 @@ def validate_controlled_proof_authorization_invariants(
     valid_sha256_revision = copy.deepcopy(valid_authorization)
     valid_sha256_revision["permit_issuer"]["source_revision"] = "c" * 64
     valid_sha256_revision["executor"]["source_revision"] = "c" * 64
-    valid_sha256_revision["scope"]["source_revisions"][0]["commit"] = "c" * 64
+    valid_sha256_revision["scope"]["execution_source_revisions"][0]["commit"] = "c" * 64
+    valid_sha256_revision["approvals"]["security_authorization_source_revision"] = "c" * 64
     if validation_errors := list(validator.iter_errors(valid_sha256_revision)):
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: valid 64-character source revisions "
@@ -4648,8 +4663,26 @@ def validate_controlled_proof_authorization_invariants(
     invalid_cases["non-exact reviewed-source revision"] = invalid_source_revision
 
     invalid_scope_revision = copy.deepcopy(valid_authorization)
-    invalid_scope_revision["scope"]["source_revisions"][0]["commit"] = "a" * 63
-    invalid_cases["non-exact scoped source revision"] = invalid_scope_revision
+    invalid_scope_revision["scope"]["execution_source_revisions"][0]["commit"] = "a" * 63
+    invalid_cases["non-exact executable source revision"] = invalid_scope_revision
+
+    invalid_security_revision = copy.deepcopy(valid_authorization)
+    invalid_security_revision["approvals"]["security_authorization_source_revision"] = "a" * 63
+    invalid_cases["non-exact Security authorization source revision"] = invalid_security_revision
+
+    invalid_security_path = copy.deepcopy(valid_authorization)
+    invalid_security_path["approvals"]["security_authorization_source_path"] = "../approval.json"
+    invalid_cases["unsafe Security authorization source path"] = invalid_security_path
+
+    missing_security_path = copy.deepcopy(valid_authorization)
+    del missing_security_path["approvals"]["security_authorization_source_path"]
+    invalid_cases["missing Security authorization source path"] = missing_security_path
+
+    legacy_source_shape = copy.deepcopy(valid_authorization)
+    legacy_source_shape["scope"]["source_revisions"] = legacy_source_shape["scope"].pop(
+        "execution_source_revisions"
+    )
+    invalid_cases["legacy self-referential source revision shape"] = legacy_source_shape
 
     invalid_timestamp = copy.deepcopy(valid_authorization)
     invalid_timestamp["window"]["expires_at"] = "2026-13-40T25:61:00Z"
@@ -4661,7 +4694,7 @@ def validate_controlled_proof_authorization_invariants(
 
     invalid_binding_cases: dict[str, dict] = {}
     duplicate_source_repo = copy.deepcopy(valid_authorization)
-    duplicate_source_repo["scope"]["source_revisions"].append(
+    duplicate_source_repo["scope"]["execution_source_revisions"].append(
         {
             "repo": "platform-engineering",
             "commit": "c" * 40,
@@ -4669,6 +4702,17 @@ def validate_controlled_proof_authorization_invariants(
     )
     invalid_binding_cases["duplicate semantic source-revision key"] = (
         duplicate_source_repo
+    )
+
+    security_as_execution_source = copy.deepcopy(valid_authorization)
+    security_as_execution_source["scope"]["execution_source_revisions"].append(
+        {
+            "repo": "security-architecture",
+            "commit": "c" * 40,
+        }
+    )
+    invalid_binding_cases["Security approval source used as executable source"] = (
+        security_as_execution_source
     )
 
     duplicate_scenario_execution = copy.deepcopy(valid_authorization)
@@ -5712,7 +5756,7 @@ def main() -> int:
         )
     expected_semantic_validation = {
         "unique_binding_keys": {
-            "source_revisions": "repo",
+            "execution_source_revisions": "repo",
             "runtime_artifacts": "artifact_id",
             "runtime_images": "image_ref",
         },
@@ -5721,6 +5765,17 @@ def main() -> int:
             "projection": "all-authorization-fields-except-approvals",
             "approvals_bind_complete_claims": True,
             "approval_artifact_digests_required": True,
+            "execution_source_revisions_exclude_security_authorization_source": True,
+        },
+        "approval_provenance": {
+            "security_authorization": {
+                "source_repo_required": True,
+                "merged_source_revision_required": True,
+                "source_path_required": True,
+                "artifact_ref_required": True,
+                "artifact_digest_required": True,
+                "excluded_from_canonical_claims": True,
+            },
         },
         "session_consumption": {
             "mode": "atomic-single-use",
@@ -5920,6 +5975,22 @@ def main() -> int:
     ):
         errors.append(
             f"{CONTROLLED_PROOF_SCHEMA_REF}: approvals must bind every authorization field outside the approval envelope"
+        )
+    if (
+        approval_schema_properties.get("security_authorization_source_repo", {}).get("const")
+        != "security-architecture"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: Security approval provenance must bind security-architecture"
+        )
+    if (
+        approval_schema_properties.get("security_authorization_source_revision", {}).get("$ref")
+        != "#/$defs/sourceRevision"
+        or approval_schema_properties.get("security_authorization_source_path", {}).get("$ref")
+        != "#/$defs/repoPath"
+    ):
+        errors.append(
+            f"{CONTROLLED_PROOF_SCHEMA_REF}: Security approval provenance must bind an exact source revision and safe repo path"
         )
     reviewed_source_schema = (controlled_proof_schema.get("$defs") or {}).get(
         "reviewedPlatformSource", {}

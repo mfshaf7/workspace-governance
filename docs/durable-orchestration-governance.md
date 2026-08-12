@@ -42,10 +42,13 @@ themselves justify durable orchestration.
    ART #792.
 5. Before permit issuance, Platform captures the immutable pre-run baseline
    artifact and assembles the complete authorization claims, including its
-   reference and digest.
+   reference, digest, and exact executable source revisions. Security approval
+   provenance is not an executable source revision.
 6. Security and the operator approve the RFC 8785 digest of every authorization
-   field outside the approval envelope. Platform may then issue one expiring
-   controlled-proof permit carrying both approval artifact refs and digests.
+   field outside the approval envelope. After the Security artifact is merged,
+   Platform may issue one expiring controlled-proof permit. Its approval
+   envelope binds the Security source repo, merged revision, path, artifact ref,
+   and digest without changing the canonical claims digest.
 7. Consume that permit once to open its declared commissioning session. Run
    only the exact scenario executions, receipt owners, definition, revisions,
    artifacts, namespaces, identities, queues, and actions enumerated by the
@@ -71,10 +74,10 @@ normal activation:
 - it is available only to a `build-admitted` profile
 - it is operator-approved, Security-authorized, expiring, exact-scope, and
   limited to one commissioning session
-- it binds exact source revisions and immutable runtime image and artifact
-  digests, the exact reviewed permit-issuer and executor revisions, and the
-  permitted namespaces, identities, queues, definition versions, scenarios,
-  and actions
+- it binds exact executable source revisions and immutable runtime image and
+  artifact digests, the exact reviewed permit-issuer and executor revisions,
+  and the permitted namespaces, identities, queues, definition versions,
+  scenarios, and actions
 - it binds the immutable baseline artifact captured before issuance and one
   commissioning session that must be atomically consumed before the first
   mutation
@@ -98,7 +101,11 @@ profile.
 Schema validity is necessary but not sufficient. The future permit issuer and
 executor must also compare the permit with the current orchestration allowlist,
 reject duplicate logical bindings by their declared semantic keys, verify both
-exact merged source bindings, and verify the issue and expiry window. They must
+exact merged Platform source bindings, and verify the issue and expiry window.
+The Security approval source is excluded from executable claims. The issuer
+must add its exact merged repo revision and path to the approval envelope, and
+the validator must load and verify that artifact at the recorded source before
+accepting its ref and digest. They must
 canonicalize every authorization field except the approval envelope with RFC
 8785, verify that both approval artifacts bind that canonical digest,
 atomically consume the permit for its one declared commissioning session before

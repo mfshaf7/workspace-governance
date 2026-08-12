@@ -180,7 +180,7 @@
               "minLength": 1
             },
             "schema_version": {
-              "const": 3
+              "const": 4
             },
             "required_sections": {
               "type": "array",
@@ -208,6 +208,7 @@
               "required": [
                 "unique_binding_keys",
                 "canonical_claims",
+                "approval_provenance",
                 "session_consumption",
                 "scenario_execution_binding",
                 "window_validation",
@@ -217,12 +218,12 @@
                 "unique_binding_keys": {
                   "type": "object",
                   "required": [
-                    "source_revisions",
+                    "execution_source_revisions",
                     "runtime_artifacts",
                     "runtime_images"
                   ],
                   "properties": {
-                    "source_revisions": {
+                    "execution_source_revisions": {
                       "const": "repo"
                     },
                     "runtime_artifacts": {
@@ -234,13 +235,55 @@
                   },
                   "additionalProperties": false
                 },
+                "approval_provenance": {
+                  "type": "object",
+                  "required": [
+                    "security_authorization"
+                  ],
+                  "properties": {
+                    "security_authorization": {
+                      "type": "object",
+                      "required": [
+                        "source_repo_required",
+                        "merged_source_revision_required",
+                        "source_path_required",
+                        "artifact_ref_required",
+                        "artifact_digest_required",
+                        "excluded_from_canonical_claims"
+                      ],
+                      "properties": {
+                        "source_repo_required": {
+                          "const": true
+                        },
+                        "merged_source_revision_required": {
+                          "const": true
+                        },
+                        "source_path_required": {
+                          "const": true
+                        },
+                        "artifact_ref_required": {
+                          "const": true
+                        },
+                        "artifact_digest_required": {
+                          "const": true
+                        },
+                        "excluded_from_canonical_claims": {
+                          "const": true
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                },
                 "canonical_claims": {
                   "type": "object",
                   "required": [
                     "canonicalization",
                     "projection",
                     "approvals_bind_complete_claims",
-                    "approval_artifact_digests_required"
+                    "approval_artifact_digests_required",
+                    "execution_source_revisions_exclude_security_authorization_source"
                   ],
                   "properties": {
                     "canonicalization": {
@@ -253,6 +296,9 @@
                       "const": true
                     },
                     "approval_artifact_digests_required": {
+                      "const": true
+                    },
+                    "execution_source_revisions_exclude_security_authorization_source": {
                       "const": true
                     }
                   },
