@@ -100,6 +100,12 @@ or
 `blocked-pending-architecture-decision`. Reopen the preflight if an owner
 boundary, protocol, lifecycle, or evidence handoff materially changes.
 
+`architecture-ready` records the approved decision; it does not by itself
+claim durable custody. An approved candidate may validate while it remains a
+local draft so that persistence can evaluate the exact candidate. Work-start
+may reference the packet only after WGCF has persisted it with durable custody
+and a receipt.
+
 The descendant owner map and dependency DAG must cover the same declared work
 items. Parent links form a rooted acyclic forest, every edge endpoint resolves,
 and the source snapshot contains exactly one revision for every declared owner

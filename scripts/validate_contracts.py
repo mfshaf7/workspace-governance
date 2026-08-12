@@ -1233,13 +1233,17 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 "decision.decided_at",
                 decision.get("decided_at"),
             )
-            _require_artifact_time_order(
-                errors,
-                "decision.decided_at",
-                decision.get("decided_at"),
-                "custody.persisted_at",
-                custody.get("persisted_at"),
-            )
+            if (
+                custody.get("state") == "durable"
+                and custody.get("backend") == "wgcf-artifact-registry"
+            ):
+                _require_artifact_time_order(
+                    errors,
+                    "decision.decided_at",
+                    decision.get("decided_at"),
+                    "custody.persisted_at",
+                    custody.get("persisted_at"),
+                )
 
     if artifact_type == "delivery_art_work_start_record":
         artifact_id = payload.get("artifact_id")
@@ -1763,6 +1767,18 @@ def delivery_art_artifact_reference_errors(
             "delivery_art_architecture_packet",
         )
         if architecture_packet is None:
+            return None
+        architecture_custody = _artifact_object(
+            architecture_packet.get("custody")
+        )
+        if (
+            architecture_custody.get("state") != "durable"
+            or architecture_custody.get("backend")
+            != "wgcf-artifact-registry"
+        ):
+            errors.append(
+                "architecture.packet_ref must resolve to a durable WGCF artifact"
+            )
             return None
         if architecture_packet.get("delivery_id") != work_start.get("delivery_id"):
             errors.append(
@@ -3163,6 +3179,34 @@ def validate_delivery_art_artifact_contracts(
             draft_architecture,
             "local architecture draft without durable persistence claims",
         )
+
+        approved_architecture_candidate = copy.deepcopy(architecture)
+        approved_architecture_candidate["custody"] = {
+            "state": "local-draft",
+            "backend": "local-filesystem",
+            "uri": ".art/drafts/architecture-packet-delivery-698-approved.json",
+            "receipt_ref": None,
+            "persisted_at": None,
+            "supersedes": None,
+        }
+        require_accepted(
+            "architecture_packet",
+            approved_architecture_candidate,
+            "approved local architecture candidate before durable persistence",
+        )
+
+        approved_candidate_with_persistence = copy.deepcopy(
+            approved_architecture_candidate
+        )
+        approved_candidate_with_persistence["custody"]["persisted_at"] = (
+            "2026-08-08T10:06:00+08:00"
+        )
+        require_rejected(
+            "architecture_packet",
+            approved_candidate_with_persistence,
+            "approved local architecture candidate claiming persistence",
+        )
+
         draft_architecture_with_persistence = copy.deepcopy(draft_architecture)
         draft_architecture_with_persistence["custody"]["persisted_at"] = (
             "2026-08-08T10:06:00+08:00"
@@ -3188,6 +3232,29 @@ def validate_delivery_art_artifact_contracts(
 
     work_start = fixtures.get("work-start-record.valid.json")
     if work_start and architecture:
+        local_dependency = copy.deepcopy(approved_architecture_candidate)
+        local_dependency_digest = _artifact_object(
+            local_dependency.get("integrity")
+        ).get("content_digest")
+        local_dependency["custody"]["uri"] = (
+            "local://delivery-art/sha256/"
+            + str(local_dependency_digest).removeprefix("sha256:")
+            + "/architecture.json"
+        )
+        work_start_with_local_architecture = copy.deepcopy(work_start)
+        work_start_with_local_architecture["architecture"]["packet_ref"] = (
+            local_dependency["custody"]["uri"]
+        )
+        work_start_with_local_architecture["architecture"]["packet_digest"] = (
+            local_dependency_digest
+        )
+        require_reference_rejected(
+            work_start_with_local_architecture,
+            "work-start record resolving an approved but unpersisted architecture candidate",
+            "must resolve to a durable WGCF artifact",
+            [local_dependency],
+        )
+
         missing_split_reason = copy.deepcopy(work_start)
         missing_split_reason["landing_unit"]["split_reason"] = None
         require_rejected(
