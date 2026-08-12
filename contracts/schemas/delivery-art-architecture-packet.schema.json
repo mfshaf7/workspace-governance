@@ -375,7 +375,32 @@
               "decided_by": { "type": "null" },
               "decided_at": { "type": "null" }
             }
-          },
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "decision": {
+            "properties": {
+              "decided_by": { "$ref": "#/$defs/nonEmptyString" },
+              "decided_at": { "$ref": "#/$defs/timestamp" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "custody": {
+            "properties": { "state": { "const": "local-draft" } },
+            "required": ["state"]
+          }
+        },
+        "required": ["custody"]
+      },
+      "then": {
+        "properties": {
           "custody": {
             "properties": {
               "state": { "const": "local-draft" },
@@ -388,12 +413,6 @@
       },
       "else": {
         "properties": {
-          "decision": {
-            "properties": {
-              "decided_by": { "$ref": "#/$defs/nonEmptyString" },
-              "decided_at": { "$ref": "#/$defs/timestamp" }
-            }
-          },
           "custody": {
             "properties": {
               "state": { "const": "durable" },
