@@ -7,7 +7,7 @@ summary: A Delivery ART contract change passed its owned checks but the aggregat
   workspace layout audit failed on unrelated stale branches after running cross-repo
   suites, repeating the broad-validation patch loop.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-25-broker-regression-fixture-chase-gap.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -34,10 +34,25 @@ signals:
   - 'command:audit_workspace_layout.py failed after ART #801 owned checks passed'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: workspace-governance/.github/workflows/validate.yaml
+    owner_repo: workspace-governance
+    note: Runs focused repository controls directly instead of using the workspace layout audit as an aggregate orchestrator.
+  - type: contract
+    path: workspace-governance/contracts/governance-validator-catalog.yaml
+    owner_repo: workspace-governance
+    note: Separates development feedback, premerge proof, and workspace clean-state scopes.
+  - type: validator
+    path: workspace-governance/scripts/audit_workspace_layout.py
+    owner_repo: workspace-governance
+    note: Keeps the workspace layout audit bounded to repository layout and owner-map truth.
+  - type: test
+    path: workspace-governance/tests/test_validation_boundaries.py
+    owner_repo: workspace-governance
+    note: Prevents the layout audit from absorbing unrelated validation and branch-lifecycle controls again.
+  note: Closed by the validation-boundary controls landed for ART defect 807 in workspace-governance PR 137.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-08-11'
-  note: Land ART defect 807 with the four-mode validation contract, pure layout
-    audit, strict branch clean-state ownership, and focused regression tests.
+  owner_repo: null
+  due_on: null
+  note: null
