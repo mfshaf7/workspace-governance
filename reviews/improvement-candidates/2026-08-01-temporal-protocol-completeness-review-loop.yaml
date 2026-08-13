@@ -134,6 +134,51 @@ signals:
   - 'art: Workspace Delivery ART #799 immutable baseline and canonical claims preflight'
   - 'source: platform-engineering controlled_proof/authority.py and test_controlled_proof.py at merge commit 7968a92c8c70a0662158957238adc78f6e307d32'
   - 'source: platform-engineering Temporal operations require claims before the merged per-run Security approval'
+- id: commissioning-runtime-semantics-and-cleanup-gap
+  title: Source validation did not prove mounted execution or recoverable terminal cleanup.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    The first permit-bound Temporal commissioning session passed source and contract
+    validation but failed before scenario execution because the PostgreSQL init
+    ConfigMap used root-owned mode 0550, which the PostgreSQL container could not
+    execute. The validator checked only the script content and unit tests replaced
+    the real runtime adapter, so mounted execution semantics were never proved before
+    permit consumption. The same run exposed two lifecycle defects: snapshot recovery
+    deleted preauthorization artifacts stored below the canonical run directory, and
+    the documented status command created local operator state despite being treated
+    as read-only. Automated exact-baseline cleanup then failed and emitted a stopped
+    draft without a supported operator command for retrying the exact authorized
+    cleanup, leaving the scoped namespace and local state present.
+  source_refs:
+  - 'art: Workspace Delivery ART #751 first permit-bound Temporal commissioning session'
+  - 'art: Workspace Delivery ART #829 and #830 commissioning preflight and runtime-semantic defects'
+  - 'artifact: platform-controlled-proof://stopped-drafts/delivery-698-799-temporal-commissioning-20260813-v2'
+  - 'source: platform-engineering dev-integration/profiles/temporal/runtime/postgresql.yaml.tpl at 9085c7a76616979713a9120635233030a55f7dc2'
+  - 'conversation: operator asked whether the late permission discovery represented a broader miss'
+- id: review-packet-premerge-sequencing-bypass
+  title: Source merged before the governed Review Packet reached merge-ready state.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - diagnostic-ordering-miss
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    Platform PR #205 passed its source checks and was merged before a schema-v2
+    Review Packet for ART #829 and #830 was authored and made merge-ready. The source
+    evidence is durable and truthful, but the normal lifecycle controller can no
+    longer create its required pre-merge source binding. This requires bounded
+    schema-v1 compatibility recovery and proves that documented sequencing alone did
+    not prevent a manual GitHub merge from bypassing the ART completion gate.
+  source_refs:
+  - 'github: platform-engineering#205 merged source correction'
+  - 'art: Workspace Delivery ART #829 and #830 Landing Unit completion evidence'
+  - 'source: operator-orchestration-service Review Packet lifecycle requires merge-ready custody before source merge'
+  - 'conversation: correction work discovered the missing pre-merge packet after PR #205 merged'
 resolution:
   after_action_ref: null
   control_refs:
@@ -181,7 +226,12 @@ resolution:
     remains pending the first successful operator-locked execution
     sequence and conformance packet used before implementation, plus a real-Git
     approval-provenance test that cannot synthesize files into an already fixed
-    revision.
+    revision. The first commissioning attempt also requires a Platform correction
+    that proves mounted runtime semantics, side-effect-free read operations,
+    authorization input custody outside destructive recovery scope, and a supported
+    exact-scope terminal cleanup retry before another permit is issued. Review Packet
+    sequencing also requires an enforcement control that prevents source merge from
+    bypassing the lifecycle controller's durable merge-ready gate.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-08-18'
@@ -190,4 +240,8 @@ follow_up:
     #809, Security review #805, Platform storage #811, WGCF registry #810, OOS
     integration #802, and dogfood #806 after the independent #803 and #804 controls.
     Close this candidate only when dogfood proves that the initiative architecture
-    packet and executable conformance plan are used before source implementation.
+    packet and executable conformance plan are used before source implementation,
+    and a fresh Temporal commissioning session passes after the runtime-semantic and
+    terminal-cleanup controls linked from ART #829 and #830 have landed. The follow-up
+    must also replace compatibility recovery with an enforced schema-v2 pre-merge
+    Review Packet gate for normal source-backed Landing Units.
