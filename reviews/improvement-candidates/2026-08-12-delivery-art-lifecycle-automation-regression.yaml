@@ -1,0 +1,136 @@
+schema_version: 1
+id: 2026-08-12-delivery-art-lifecycle-automation-regression
+title: Close Delivery ART lifecycle instruction and automation drift
+recorded_on: '2026-08-12'
+owner_repo: operator-orchestration-service
+summary: Delivery ART closeout and controlled commissioning still discover cross-repo
+  protocol obligations serially at late runtime gates, causing repeated child defects,
+  fresh authorization cycles, and manual recovery despite previously closed controls.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: During work item 818, the operator had to correct repeated manual closeout
+    mistakes. The installed project-delivery skill matches source, but that source
+    still says Review Packet v2 is inactive while the active OOS operator surface
+    prescribes and executes v2 commands; the API contract also places a schema-v1
+    Review Packet contract inside the schema-v2 lifecycle section. Existing lifecycle
+    commands do not provide one resumable end-to-end path.
+  source_refs:
+  - conversation:2026-08-12 operator repeated-miss and manual-process callout after
+    Delivery ART work item 818
+  - openproject://work_packages/818
+  - openproject://work_packages/819
+  - operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  - workspace-governance/skills-src/project-delivery-operator/SKILL.md
+- id: live-art-mutation-proof-gap
+  title: The landed lifecycle still fails at sibling closeout and standalone dependency
+    validation seams.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: After the resumable lifecycle and capability-parity controls landed through
+    work items 819 and 820, closing Security item 824 changed the shared ART snapshot
+    before Platform item 825 could finalize. The safety guard correctly rejected the
+    stale chain, but the operator path required a new architecture, work-start, and
+    Review Packet identity. The same closeout also proved standalone packet validation
+    reports missing custody dependencies that direct artifact resolution can resolve.
+    The exact correction gaps are now ART Defects 826 and 827; neither blocks resumed
+    commissioning-baseline work item 799.
+  source_refs:
+  - openproject://work_packages/824
+  - openproject://work_packages/825
+  - openproject://work_packages/826
+  - openproject://work_packages/827
+  - operator-orchestration-service:.art/review-packets/delivery-698-825.json
+- id: controlled-commissioning-conformance-discovered-serially
+  title: Controlled commissioning exposed missing protocol obligations one boundary
+    at a time
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The first governed Temporal commissioning path was used as the effective
+    end-to-end integration test. After ART hardening Feature 800 had already added
+    22 children, including 16 Defects, commissioning correction work 823 through
+    842 added 15 more Defects and five fresh Security authorization items. Source
+    provenance, authorization chronology, baseline serialization, preflight state
+    preservation, exact cleanup scope, worker readiness, diagnostic retention, and
+    lifecycle projection were proven only when the next live gate rejected them.
+    Because permits and approval evidence are immutable and source-bound, every
+    material correction correctly invalidated the previous authorization but forced
+    another Security child. The safety controls worked; the missing control is one
+    executable pre-authorization conformance rehearsal covering the complete
+    claims-to-cleanup chain across all owner repos.
+  source_refs:
+  - 'conversation:2026-08-14 operator repeated defect-after-defect and child-growth
+    callout during Delivery ART #751'
+  - openproject://work_packages/751
+  - openproject://work_packages/800
+  - openproject://work_packages/823
+  - openproject://work_packages/842
+- id: controlled-commissioning-runtime-artifact-retrievability-gap
+  title: Permit issuance accepted an image digest that the target runtime could not
+    retrieve
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Controlled commissioning session
+    delivery-698-751-temporal-commissioning-20260814-v5 passed claims validation,
+    Security authorization, permit issuance, and permit consumption, then failed in
+    the Temporal install phase before any workflow scenario ran. Exact baseline
+    cleanup passed. The locked Temporal server index digest matched the published
+    tag metadata but could not be pulled by exact digest on the amd64 target, while
+    the corresponding amd64 manifest digest was retrievable. The pre-authorization
+    path validated digest syntax and binding but did not prove target-architecture
+    artifact retrievability before consuming the one-shot permit.
+  source_refs:
+  - openproject://work_packages/751
+  - platform-controlled-proof://results/delivery-698-751-temporal-commissioning-20260814-v5
+  - platform-controlled-proof://runtime-command-failures/25a6fbea31340847425dad5db26220d4c280da2393422b3fe2560bfe4a14784e
+  - platform-controlled-proof://restore/delivery-698-751-temporal-commissioning-20260814-v5
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+    owner_repo: operator-orchestration-service
+    note: PR 126 landed the resumable schema-v2 lifecycle that ART Defect 826
+      must extend for multi-item snapshot continuity.
+  - type: validator
+    path: workspace-governance/tests/test_delivery_art_lifecycle_parity.py
+    owner_repo: workspace-governance
+    note: PR 144 landed capability parity validation; the candidate remains open
+      because ART Defects 826 and 827 expose narrower runtime seams outside that
+      parity proof.
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-08-16'
+  note: Keep the landed schema-v2 lifecycle and immutable authorization controls.
+    Before another workflow family is commissioned, design one bounded executable
+    pre-authorization conformance rehearsal that validates the complete source,
+    claims, authorization, permit, target-architecture artifact retrievability,
+    runtime, receipt, cleanup, and ART-closeout chain across owner repos. Close
+    Defects 826 and 827 through that same coherent model instead of adding another
+    isolated repair sequence. Do not auto-land this control until the operator
+    approves its exact architecture and owner split.

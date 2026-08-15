@@ -1,0 +1,73 @@
+schema_version: 1
+id: 2026-08-15-security-index-landing-unit-custody-regression
+title: Security index dependency reached work-start custody without its own ART child
+recorded_on: '2026-08-15'
+owner_repo: workspace-governance
+summary: >-
+  Proposal contract parity correctly identified the generated security index as
+  a separate Landing Unit, but the sequence was initially reversed and the
+  second Landing Unit reused ART child #851 until WGCF rejected duplicate
+  work-start custody with a 409 conflict.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-29-security-change-record-index-sequencing-regression.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - security-architecture
+    - workspace-governance
+  related_products:
+    - governance-operations-console
+  related_components:
+    - operator-orchestration-service
+  change_classes:
+    - platform-contract
+    - architecture-shaping
+signals:
+  - id: proposal-security-index-sequence-regression
+    title: Generated dependency sequencing contradicted its source authority
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - routing-miss
+      - workflow-doctrine-gap
+    finding: >-
+      Security PR #116 was first planned to merge before OOS PR #132, although
+      security CI deterministically regenerates the index from OOS remote main.
+      CI proved the security index can become reproducible only after the OOS
+      change record lands.
+    source_refs:
+      - github://operator-orchestration-service/pulls/132
+      - github://security-architecture/pulls/116
+      - openproject://work_packages/851
+  - id: duplicate-work-start-custody-conflict
+    title: A second owner-repo Landing Unit reused one ART child
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      The second lifecycle plan reused ART child #851 and reached WGCF before
+      failing with wgcf_artifact_registry_conflict (409). Review Packet v2
+      work-start identity is bound to the ART child, so the security Landing
+      Unit required its own source-backed child #855 before implementation.
+    source_refs:
+      - openproject://work_packages/851
+      - openproject://work_packages/855
+      - github://security-architecture/pulls/116
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    The operator approved extending the existing sequencing and lifecycle
+    controls. The closing control remains open and must not be treated as
+    implemented by this candidate-record Landing Unit.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-08-22'
+  note: >-
+    Propose one pre-work check that derives generated dependency direction from
+    source authority and requires a distinct ART child before a second
+    owner-repo Landing Unit can create work-start custody. OOS should return an
+    actionable distinct-art-child-required projection before any registry
+    request; workspace governance should own the sequencing doctrine.
