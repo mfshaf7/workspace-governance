@@ -1,0 +1,57 @@
+schema_version: 1
+id: 2026-08-12-delivery-art-architecture-fixture-custody-regression
+title: Keep valid Delivery ART architecture fixtures aligned with owner boundaries
+recorded_on: '2026-08-12'
+owner_repo: workspace-governance
+summary: >-
+  The canonical Delivery ART custody contract correctly assigns durable artifact
+  custody to WGCF, but the valid architecture-packet fixture still describes OOS
+  persistence and OpenProject attachment custody in two architecture prose fields.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-09-art-evidence-custody-ownership-regression.yaml
+status: accepted
+source_type: review
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+    - workspace-governance-control-fabric
+  related_products: []
+  related_components:
+    - workspace-governance-control-fabric
+    - operator-orchestration-service
+  change_classes:
+    - platform-contract
+    - architecture-shaping
+signals:
+  - id: valid-fixture-retains-retired-custody-owner
+    title: A valid architecture fixture retains the retired evidence-custody design
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - contract-drift
+    finding: >-
+      contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
+      allows OOS to persist content-addressed artifacts and says OOS attaches
+      them to the initiative Epic, while the canonical contract requires OOS to
+      send canonical content to the WGCF artifact registry and project only safe
+      references into OpenProject.
+    source_refs:
+      - workspace-governance/contracts/delivery-art-operator-path.yaml
+      - workspace-governance/contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
+      - art:Workspace Delivery ART work item 802
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    The operator approved extending the existing custody contract rather than
+    introducing another custody mechanism. The correction remains open until
+    the canonical fixture, its semantic validation, and independently owned
+    OOS and WGCF fixture copies all express the same owner boundary.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-08-22'
+  note: >-
+    Correct the canonical fixture so OOS authors and submits canonical content,
+    WGCF owns durable registry custody, and OpenProject receives only safe
+    references. Add semantic owner-boundary assertions, then sequence the OOS
+    and WGCF fixture-copy corrections as separate owner-repo Landing Units.

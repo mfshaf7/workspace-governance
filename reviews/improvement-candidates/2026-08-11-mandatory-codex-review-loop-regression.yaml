@@ -7,7 +7,7 @@ summary: 'ART #811 repeated a previously closed reactive-review failure: mandato
   exact-head Codex review drove architecture discovery and cross-boundary patching
   while stale Review Packet heads still passed readiness.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -34,14 +34,27 @@ signals:
   - 'conversation: operator identified a repeated six-hour patch loop while delivering
     ART #811'
   - 'art:Workspace Delivery ART defect #812'
+  - openproject://work_packages/811
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-08-14'
+  control_refs:
+  - type: contract
+    path: workspace-governance/docs/pull-request-review-and-automation.md
+    owner_repo: workspace-governance
+    note: >-
+      PR #141 replaced mandatory provider-specific review with one bounded,
+      optional advisory-review path and an explicit stop rule.
+  - type: workflow
+    path: operator-orchestration-service/src/art-workflow-artifacts.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR #120 binds a source-backed Review Packet to one owner-repo Landing
+      Unit and rejects dirty, stale, unpushed, merged, or mismatched PR heads.
   note: >-
-    Land the operator-approved bounded advisory-review contract, stale-source
-    Review Packet guard, and truthful #811 reconciliation before treating this
-    lesson as closed.
+    Closed after the bounded review contract, exact-head Review Packet guard,
+    and truthful ART #811 reconciliation through separate finalized owner-repo
+    Review Packets were all proven active.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
