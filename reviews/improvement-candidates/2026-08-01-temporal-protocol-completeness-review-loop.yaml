@@ -234,8 +234,11 @@ resolution:
     bypassing the lifecycle controller's durable merge-ready gate.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-08-18'
+  due_on: '2026-09-01'
   note: >-
+    The operator paused Epic 698 commissioning while the workspace returned to
+    the primary governed-project workflow. Reassess this candidate by the new
+    review date; do not treat the schedule change as control closure.
     Complete Feature 800 through the corrected owner sequence: contract correction
     #809, Security review #805, Platform storage #811, WGCF registry #810, OOS
     integration #802, and dogfood #806 after the independent #803 and #804 controls.
