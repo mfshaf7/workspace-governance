@@ -197,6 +197,43 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             errors,
         )
 
+    def test_shallow_checkout_cannot_skip_missing_activation_commit(self) -> None:
+        (self.owner_repo / "README.md").write_text(
+            "Unrelated owner-repo change.\n",
+            encoding="utf-8",
+        )
+        subprocess.run(["git", "add", "README.md"], cwd=self.owner_repo, check=True)
+        subprocess.run(
+            ["git", "commit", "--quiet", "-m", "Add unrelated owner change"],
+            cwd=self.owner_repo,
+            check=True,
+        )
+        validation_workspace = self.workspace_root / "validation-workspace"
+        validation_workspace.mkdir()
+        shallow_owner_repo = validation_workspace / "operator-orchestration-service"
+        subprocess.run(
+            [
+                "git",
+                "clone",
+                "--quiet",
+                "--depth",
+                "1",
+                self.owner_repo.as_uri(),
+                str(shallow_owner_repo),
+            ],
+            check=True,
+        )
+
+        errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
+            validation_workspace,
+            self.activation(),
+        )
+
+        self.assertIn(
+            "capability activation commit is absent from the OOS repository",
+            errors,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
