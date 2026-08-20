@@ -51,10 +51,15 @@
   - creates a new intake classification entry so a repo, product, or component
     is explicitly marked out-of-scope, proposed, or admitted before it joins
     the active contracts
-  - when `--decision-source ai-suggested` is used, records the governed
-    intake-assist profile, caller, invocation path, suggested decision,
-    operator decision, acceptance state, and audit reference required by
-    `contracts/governed-intake-assist.yaml`
+  - when `--decision-source ai-suggested` is used, requires a validated
+    `--ai-suggestion-file` produced by the governed client plus an explicit
+    operator decision, acceptance state, identity, and timestamp before it can
+    record workspace truth; one gateway decision can be applied only once
+- `governed_intake_assist.py`
+  - validates the active workspace, platform, and security-backed consumer
+  boundary, invokes only the governed AI gateway, validates the bounded
+    candidate response, and writes a local pre-acceptance artifact only under
+    `.art/intake-assist/` without changing canonical workspace truth
 - `record_after_action.py`
   - creates a scaffolded after-action review record under `reviews/after-action/`
 - `record_improvement_candidate.py`

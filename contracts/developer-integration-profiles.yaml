@@ -90,6 +90,7 @@ profiles:
     source_repos:
       - operator-orchestration-service
       - platform-engineering
+      - governance-operations-console
     stage_handoff:
       owner_repo: platform-engineering
       governed_surface: openproject-stage-delivery-art-consumption
@@ -98,6 +99,10 @@ profiles:
         - delivery-art project verification
         - consume accepted idea
         - backlink verification
+        - Console Proposal capture and refresh
+        - Proposal triage, disposition, and prepared handoff
+        - Proposal replay, stale-version, and backend-outage rejection
+        - repository gate blocking and target non-application
     actions:
       - up
       - status
@@ -274,7 +279,7 @@ profiles:
     build_admission:
       approved_by: mfshaf7
       approved_on: "2026-05-06"
-      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/pending-governed-ai-gateway-devint-runtime
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/190
       security_review_required: true
       security_review_refs:
         - repo: security-architecture
@@ -284,12 +289,14 @@ profiles:
       work_item_ref: openproject://work_packages/412
     admission:
       approved_by: mfshaf7
-      approved_on: "2026-05-06"
-      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/pending-governed-ai-gateway-devint-runtime
+      approved_on: "2026-08-20"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/214
       security_review_required: true
       security_review_refs:
         - repo: security-architecture
-          path: docs/reviews/platform/2026-05-06-governed-ai-gateway-devint-runtime.md
+          path: docs/reviews/platform/2026-08-20-intake-classifier-v1-local-ollama-binding.md
+          source_commit: 780a040a5487c914f86ee55449b7d20be8bd3ae4
+          content_sha256: 48f92b07e9102632024d39d8c3098b547e82376ae15a2a58e711763bcec507c3
     shared_dependencies:
       - platform-engineering
       - security-architecture
@@ -308,6 +315,9 @@ profiles:
         - audit ledger emission
         - gateway-only consumer egress proof
         - direct-provider sentinel denial
+        - direct Ollama denial from governed consumer
+        - pinned Ollama version and model digest
+        - strict provider output and bounded failure handling
         - current security delta review
     actions:
       - up

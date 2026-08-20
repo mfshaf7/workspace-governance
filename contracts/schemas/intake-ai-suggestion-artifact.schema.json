@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/intake-ai-suggestion-artifact.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "status",
+    "captured_at",
+    "input_digest",
+    "initiating_operator_id",
+    "suggestion"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "governed_intake_suggestion_candidate" },
+    "status": { "const": "awaiting-operator-decision" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "input_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "initiating_operator_id": { "type": "string", "minLength": 1 },
+    "suggestion": { "type": "object" }
+  }
+}

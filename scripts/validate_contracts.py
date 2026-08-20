@@ -6508,7 +6508,15 @@ def main() -> int:
             "contracts/governed-intake-assist.yaml: primary_operator_surface must point to an existing markdown operator surface"
         )
     governed_intake_consumer = governed_intake_assist["consumer"]
-    governed_output_schema_ref = {
+    governed_provider_output_schema_ref = {
+        "repo": "platform-engineering",
+        "path": "security/schemas/intake-classification-result.schema.json",
+    }
+    governed_candidate_schema_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/schemas/intake-ai-suggestion-candidate.schema.json",
+    }
+    governed_accepted_record_schema_ref = {
         "repo": "workspace-governance",
         "path": "contracts/schemas/intake-ai-suggestion.schema.json",
     }
@@ -6532,14 +6540,23 @@ def main() -> int:
         errors.append(
             "contracts/governed-intake-assist.yaml: consumer.invocation_path must be governed-ai-gateway"
         )
-    if governed_intake_consumer["output_schema_ref"] != governed_output_schema_ref:
+    if governed_intake_consumer["provider_output_schema_ref"] != governed_provider_output_schema_ref:
         errors.append(
-            "contracts/governed-intake-assist.yaml: consumer.output_schema_ref must point to contracts/schemas/intake-ai-suggestion.schema.json"
+            "contracts/governed-intake-assist.yaml: consumer.provider_output_schema_ref must point to the platform provider-output schema"
         )
-    if not (repo_root / governed_output_schema_ref["path"]).exists():
+    if governed_intake_consumer["suggestion_candidate_schema_ref"] != governed_candidate_schema_ref:
         errors.append(
-            "contracts/governed-intake-assist.yaml: consumer.output_schema_ref path does not exist"
+            "contracts/governed-intake-assist.yaml: consumer.suggestion_candidate_schema_ref must point to contracts/schemas/intake-ai-suggestion-candidate.schema.json"
         )
+    if governed_intake_consumer["accepted_record_schema_ref"] != governed_accepted_record_schema_ref:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: consumer.accepted_record_schema_ref must point to contracts/schemas/intake-ai-suggestion.schema.json"
+        )
+    for schema_ref in (governed_candidate_schema_ref, governed_accepted_record_schema_ref):
+        if not (repo_root / schema_ref["path"]).exists():
+            errors.append(
+                f"contracts/governed-intake-assist.yaml: referenced schema path does not exist: {schema_ref['path']}"
+            )
     governed_contract_refs = governed_intake_assist["platform_contract_refs"]
     if (
         governed_contract_refs["profile_registry"]
@@ -6557,18 +6574,34 @@ def main() -> int:
         "security-delta-review-current",
     }
     activation_state = governed_intake_assist["activation_state"]
-    if activation_state["source_contract_status"] != "source-defined":
+    activation_status = activation_state["source_contract_status"]
+    live_consumption_allowed = activation_state["live_consumption_allowed"]
+    if activation_status not in {"active", "suspended"}:
         errors.append(
-            "contracts/governed-intake-assist.yaml: activation_state.source_contract_status must be source-defined"
+            "contracts/governed-intake-assist.yaml: activation_state.source_contract_status must be active or suspended"
         )
-    if activation_state["live_consumption_allowed"] is not False:
+    if activation_status == "active" and live_consumption_allowed is not True:
         errors.append(
-            "contracts/governed-intake-assist.yaml: activation_state.live_consumption_allowed must remain false until live gates are proven"
+            "contracts/governed-intake-assist.yaml: active intake assist requires live_consumption_allowed true"
+        )
+    if activation_status == "suspended" and live_consumption_allowed is not False:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: suspended intake assist requires live_consumption_allowed false"
         )
     if set(activation_state["required_live_gates"]) != expected_required_live_gates:
         errors.append(
             "contracts/governed-intake-assist.yaml: activation_state.required_live_gates must match the platform runtime-assist gate ids"
         )
+    gate_evidence = activation_state["gate_evidence"]
+    if set(gate_evidence) != expected_required_live_gates:
+        errors.append(
+            "contracts/governed-intake-assist.yaml: activation_state.gate_evidence must cover every required live gate exactly"
+        )
+    for gate_id, evidence_refs in gate_evidence.items():
+        if not evidence_refs or not all(isinstance(ref, str) and ref for ref in evidence_refs):
+            errors.append(
+                f"contracts/governed-intake-assist.yaml: activation_state.gate_evidence.{gate_id} must contain evidence references"
+            )
     suggestion_contract = governed_intake_assist["suggestion_contract"]
     if suggestion_contract["authority"] != "suggestion-only":
         errors.append(
@@ -6578,10 +6611,15 @@ def main() -> int:
         errors.append(
             "contracts/governed-intake-assist.yaml: suggestion_contract.autonomous_mutation_allowed must be false"
         )
-    if suggestion_contract["structured_output_schema_ref"] != governed_output_schema_ref:
-        errors.append(
-            "contracts/governed-intake-assist.yaml: suggestion_contract.structured_output_schema_ref must match the consumer output schema"
-        )
+    for field, expected_ref in (
+        ("provider_output_schema_ref", governed_provider_output_schema_ref),
+        ("suggestion_candidate_schema_ref", governed_candidate_schema_ref),
+        ("accepted_record_schema_ref", governed_accepted_record_schema_ref),
+    ):
+        if suggestion_contract[field] != expected_ref:
+            errors.append(
+                f"contracts/governed-intake-assist.yaml: suggestion_contract.{field} must match the consumer contract"
+            )
     if set(suggestion_contract["allowed_decisions"]) != expected_intake_statuses:
         errors.append(
             "contracts/governed-intake-assist.yaml: suggestion_contract.allowed_decisions must match intake-policy statuses"
@@ -6656,6 +6694,15 @@ def main() -> int:
         "operator_identity",
         "approved_profile_id",
         "invocation_path",
+        "upstream_provider",
+        "provider_route",
+        "upstream_model",
+        "upstream_model_digest",
+        "provider_runtime_version",
+        "prompt_version",
+        "provider_schema_valid",
+        "provider_latency_ms",
+        "provider_usage",
         "purpose",
         "output_schema_ref",
         "policy_decision",

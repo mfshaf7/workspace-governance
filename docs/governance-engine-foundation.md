@@ -407,11 +407,12 @@ separately from platform model access:
 - `contracts/governed-intake-assist.yaml`
 - `docs/governed-intake-assist.md`
 
-That contract binds the workspace caller identity, profile, purpose, output
-schema, operator-acceptance fields, workspace-truth update target, and audit
-minimum. It intentionally keeps live consumption disabled until the platform
-profile, governed access plane, audit sink, caller identity, provider-egress
-block, and security review gates are proven.
+That contract binds the workspace caller identity, profile, purpose, separate
+provider-output, candidate, and accepted-record schemas, operator-acceptance
+fields, workspace-truth update target, and audit minimum. Local
+dev-integration consumption is active because the platform profile, governed
+access plane, audit sink, caller identity, provider-egress block, and current
+security review gates are proven and recorded in the contract.
 
 This keeps AI assistance as a governed suggestion path. It does not let a model
 write `contracts/intake-register.yaml` directly, and it does not move provider

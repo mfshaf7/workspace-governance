@@ -132,8 +132,20 @@ def validate_governed_intake_assist_contract(
         errors.append(f"{label}: consumer.caller_id must be allowed by the governed profile")
     if consumer.get("invocation_path") != profile.get("invocation_path"):
         errors.append(f"{label}: consumer.invocation_path must match the governed profile invocation_path")
-    if not refs_match(consumer.get("output_schema_ref") or {}, profile.get("output_schema_ref") or {}):
-        errors.append(f"{label}: consumer.output_schema_ref must match the governed profile output_schema_ref")
+    if not refs_match(
+        consumer.get("provider_output_schema_ref") or {},
+        profile.get("provider_output_schema_ref") or {},
+    ):
+        errors.append(
+            f"{label}: consumer.provider_output_schema_ref must match the governed profile provider_output_schema_ref"
+        )
+    if not refs_match(
+        consumer.get("accepted_record_schema_ref") or {},
+        profile.get("accepted_record_schema_ref") or {},
+    ):
+        errors.append(
+            f"{label}: consumer.accepted_record_schema_ref must match the governed profile accepted_record_schema_ref"
+        )
     if set(consumer.get("allowed_data_scope") or []) != set(profile.get("allowed_data_scope") or []):
         errors.append(f"{label}: consumer.allowed_data_scope must match the governed profile allowed_data_scope")
     if profile.get("direct_provider_access_allowed") is not False:
@@ -170,8 +182,20 @@ def validate_governed_intake_assist_contract(
                 errors.append(f"{label}: access-plane caller purpose must match the consumer purpose")
             if caller.get("required_profile") != consumer.get("profile_id"):
                 errors.append(f"{label}: access-plane caller required_profile must match the consumer profile")
-            if not refs_match(caller.get("required_output_schema_ref") or {}, consumer.get("output_schema_ref") or {}):
-                errors.append(f"{label}: access-plane caller output schema must match the consumer output schema")
+            if not refs_match(
+                caller.get("required_provider_output_schema_ref") or {},
+                consumer.get("provider_output_schema_ref") or {},
+            ):
+                errors.append(
+                    f"{label}: access-plane caller provider output schema must match the consumer provider output schema"
+                )
+            if not refs_match(
+                caller.get("accepted_record_schema_ref") or {},
+                consumer.get("accepted_record_schema_ref") or {},
+            ):
+                errors.append(
+                    f"{label}: access-plane caller accepted record schema must match the consumer accepted record schema"
+                )
         admission_policy = access_plane.get("admission_policy") or {}
         if admission_policy.get("direct_provider_passthrough_allowed") is not False:
             errors.append(f"{label}: access plane must deny direct provider passthrough")
@@ -183,6 +207,14 @@ def validate_governed_intake_assist_contract(
             and activation_state.get("live_consumption_allowed") is not False
         ):
             errors.append(f"{label}: live consumption cannot be allowed while the platform access plane blocks activation")
+        if (
+            activation_state.get("live_consumption_allowed") is True
+            and (
+                access_plane.get("status") != "active"
+                or access_plane_activation.get("profile_activation_allowed") is not True
+            )
+        ):
+            errors.append(f"{label}: live consumption requires an active platform access plane")
 
     runtime_contract_payload = load_ref_yaml(
         workspace_root,
@@ -216,11 +248,29 @@ def validate_governed_intake_assist_contract(
             and activation_state.get("live_consumption_allowed") is not False
         ):
             errors.append(f"{label}: live consumption cannot be allowed while the runtime-assist contract is blocked")
+        if (
+            activation_state.get("live_consumption_allowed") is True
+            and runtime_contract.get("status") != "active"
+        ):
+            errors.append(f"{label}: live consumption requires an active runtime-assist contract")
 
     security_review_ref = contract_refs.get("security_review") or {}
     security_review_path = ref_path(workspace_root, security_review_ref) if security_review_ref else None
     if security_review_path and not security_review_path.exists():
         errors.append(f"{label}: security review reference is missing: {ref_value(security_review_ref)}")
+
+    required_live_gates = set(activation_state.get("required_live_gates") or [])
+    gate_evidence = activation_state.get("gate_evidence") or {}
+    if set(gate_evidence) != required_live_gates:
+        errors.append(f"{label}: activation_state.gate_evidence must cover every required live gate exactly")
+    for gate_id, refs in gate_evidence.items():
+        if not isinstance(refs, list) or not refs or not all(isinstance(ref, str) and ref for ref in refs):
+            errors.append(f"{label}: activation_state.gate_evidence.{gate_id} must contain evidence references")
+    if activation_state.get("live_consumption_allowed") is True:
+        if activation_state.get("source_contract_status") != "active":
+            errors.append(f"{label}: active live consumption requires source_contract_status active")
+        if profile.get("status") != intake_policy["ai_suggestions"]["required_profile_status"]:
+            errors.append(f"{label}: live consumption requires the governed profile to be active")
 
     expected_decisions = set(intake_policy["statuses"])
     if set(suggestion_contract.get("allowed_decisions") or []) != expected_decisions:
@@ -229,8 +279,13 @@ def validate_governed_intake_assist_contract(
         errors.append(f"{label}: suggestion_contract.authority must be suggestion-only")
     if suggestion_contract.get("autonomous_mutation_allowed") is not False:
         errors.append(f"{label}: suggestion_contract.autonomous_mutation_allowed must be false")
-    if not refs_match(suggestion_contract.get("structured_output_schema_ref") or {}, consumer.get("output_schema_ref") or {}):
-        errors.append(f"{label}: suggestion_contract.structured_output_schema_ref must match consumer.output_schema_ref")
+    for field in (
+        "provider_output_schema_ref",
+        "suggestion_candidate_schema_ref",
+        "accepted_record_schema_ref",
+    ):
+        if not refs_match(suggestion_contract.get(field) or {}, consumer.get(field) or {}):
+            errors.append(f"{label}: suggestion_contract.{field} must match consumer.{field}")
 
     if operator_acceptance.get("human_approval_required") is not True:
         errors.append(f"{label}: operator_acceptance.human_approval_required must be true")
@@ -463,12 +518,14 @@ def main() -> int:
             errors=errors,
         )
 
+    ai_decision_owners: dict[str, str] = {}
     for collection_name in ("repos", "products", "components"):
         for entry_name, payload in intake_register[collection_name].items():
+            label = f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}"
             if collection_name in {"repos", "products", "components"}:
                 scope_policy = validation_behavior_policy[collection_name]
                 validate_validation_behavior(
-                    label=f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}",
+                    label=label,
                     payload=payload,
                     required=(
                         payload["status"] in in_scope_statuses
@@ -476,13 +533,22 @@ def main() -> int:
                     ),
                 )
             validate_ai_suggestion(
-                label=f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}",
+                label=label,
                 payload=payload,
                 intake_policy=intake_policy,
                 governed_contract=governed_intake_assist,
                 profiles=profiles,
                 errors=errors,
             )
+            ai_suggestion = payload.get("ai_suggestion") or {}
+            decision_id = ai_suggestion.get("decision_id")
+            if decision_id:
+                if decision_id in ai_decision_owners:
+                    errors.append(
+                        f"{label}: ai_suggestion.decision_id {decision_id!r} is already applied by {ai_decision_owners[decision_id]}"
+                    )
+                else:
+                    ai_decision_owners[decision_id] = label
 
     if errors:
         for error in errors:

@@ -2,16 +2,17 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
+
+from jsonschema import Draft202012Validator, FormatChecker
 
 from contracts_lib import dump_yaml, load_yaml
 
 
 DEFAULT_SECURITY_OWNER = "security-architecture"
 DEFAULT_DECISION_SOURCE = "operator"
-AI_POLICY_STATUS_CHOICES = ("active", "suspended", "retired", "exception")
-AI_CONFIDENCE_CHOICES = ("low", "medium", "high")
 INTAKE_STATUS_CHOICES = ("out-of-scope", "proposed", "admitted")
 AI_ACCEPTANCE_STATE_CHOICES = ("accepted", "overridden")
 
@@ -29,24 +30,67 @@ def write_intake(repo_root: Path, payload: dict) -> None:
     dump_yaml(repo_root / "contracts" / "intake-register.yaml", payload)
 
 
+def load_ai_candidate(repo_root: Path, path: Path) -> dict:
+    try:
+        artifact = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise SystemExit(f"AI suggestion candidate is missing: {path}") from exc
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"AI suggestion candidate is invalid JSON: {path}: {exc}") from exc
+
+    schema_root = repo_root / "contracts" / "schemas"
+    artifact_schema = json.loads(
+        (schema_root / "intake-ai-suggestion-artifact.schema.json").read_text(encoding="utf-8")
+    )
+    suggestion_schema = json.loads(
+        (schema_root / "intake-ai-suggestion-candidate.schema.json").read_text(encoding="utf-8")
+    )
+    artifact_errors = sorted(
+        Draft202012Validator(
+            artifact_schema,
+            format_checker=FormatChecker(),
+        ).iter_errors(artifact),
+        key=lambda error: list(error.path),
+    )
+    suggestion_errors = sorted(
+        Draft202012Validator(
+            suggestion_schema,
+            format_checker=FormatChecker(),
+        ).iter_errors(artifact.get("suggestion")),
+        key=lambda error: list(error.path),
+    )
+    errors = artifact_errors + suggestion_errors
+    if errors:
+        raise SystemExit(
+            "AI suggestion candidate failed schema validation: "
+            + "; ".join(error.message for error in errors)
+        )
+    return artifact["suggestion"]
+
+
 def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     if args.decision_source != "ai-suggested":
+        if args.ai_suggestion_file:
+            raise SystemExit("--ai-suggestion-file requires --decision-source ai-suggested")
         return None
+    if not args.ai_suggestion_file:
+        raise SystemExit("--ai-suggestion-file required when --decision-source ai-suggested")
+    activation = args.governed_intake_assist.get("activation_state") or {}
+    if (
+        activation.get("source_contract_status") != "active"
+        or activation.get("live_consumption_allowed") is not True
+    ):
+        raise SystemExit("governed intake-assist is not active for AI-backed truth updates")
+    suggestion_candidate = load_ai_candidate(args.repo_root, args.ai_suggestion_file.resolve())
     consumer = args.governed_intake_assist["consumer"]
-    suggested_decision = args.ai_suggested_decision or args.status
-    operator_decision = args.operator_decision or args.status
+    suggested_decision = suggestion_candidate["suggested_decision"]
+    operator_decision = args.operator_decision
     acceptance_state = args.acceptance_state
-    if acceptance_state is None:
-        acceptance_state = "accepted" if suggested_decision == operator_decision else "overridden"
-    audit_ref = args.ai_audit_ref or f"intake-register:{args.kind}:{args.name}:{args.ai_decision_id}"
     missing = [
         flag
         for flag, value in (
-            ("--ai-profile-id", args.ai_profile_id),
-            ("--ai-policy-status", args.ai_policy_status),
-            ("--ai-decision-id", args.ai_decision_id),
-            ("--ai-generated-at", args.ai_generated_at),
-            ("--ai-confidence", args.ai_confidence),
+            ("--operator-decision", operator_decision),
+            ("--acceptance-state", acceptance_state),
             ("--accepted-by", args.accepted_by),
             ("--accepted-at", args.accepted_at),
         )
@@ -62,20 +106,28 @@ def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
         raise SystemExit("--override-reason required when --acceptance-state overridden")
     if operator_decision != args.status:
         raise SystemExit("--operator-decision must match the recorded --status for intake-register truth")
+    if suggestion_candidate["profile_id"] != consumer["profile_id"]:
+        raise SystemExit("AI suggestion candidate profile_id does not match the governed consumer")
+    if suggestion_candidate["caller_id"] != consumer["caller_id"]:
+        raise SystemExit("AI suggestion candidate caller_id does not match the governed consumer")
+    if suggestion_candidate["invocation_path"] != consumer["invocation_path"]:
+        raise SystemExit("AI suggestion candidate invocation_path does not match the governed consumer")
+    if suggestion_candidate["decision_id"] in args.used_ai_decision_ids:
+        raise SystemExit("AI suggestion candidate decision_id has already been applied")
     suggestion = {
-        "profile_id": args.ai_profile_id,
-        "policy_status": args.ai_policy_status,
-        "decision_id": args.ai_decision_id,
-        "generated_at": args.ai_generated_at,
-        "confidence": args.ai_confidence,
-        "caller_id": args.ai_caller_id or consumer["caller_id"],
-        "invocation_path": args.ai_invocation_path or consumer["invocation_path"],
+        "profile_id": suggestion_candidate["profile_id"],
+        "policy_status": suggestion_candidate["policy_status"],
+        "decision_id": suggestion_candidate["decision_id"],
+        "generated_at": suggestion_candidate["generated_at"],
+        "confidence": suggestion_candidate["confidence"],
+        "caller_id": suggestion_candidate["caller_id"],
+        "invocation_path": suggestion_candidate["invocation_path"],
         "suggested_decision": suggested_decision,
         "operator_decision": operator_decision,
         "acceptance_state": acceptance_state,
         "accepted_by": args.accepted_by,
         "accepted_at": args.accepted_at,
-        "audit_ref": audit_ref,
+        "audit_ref": suggestion_candidate["audit_ref"],
     }
     if args.override_reason:
         suggestion["override_reason"] = args.override_reason
@@ -174,18 +226,10 @@ def add_component_entry(register: dict, args: argparse.Namespace) -> str:
 
 
 def add_ai_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--ai-profile-id")
-    parser.add_argument("--ai-policy-status", choices=AI_POLICY_STATUS_CHOICES)
-    parser.add_argument("--ai-decision-id")
-    parser.add_argument("--ai-generated-at")
-    parser.add_argument("--ai-confidence", choices=AI_CONFIDENCE_CHOICES)
-    parser.add_argument("--ai-caller-id")
-    parser.add_argument("--ai-invocation-path")
-    parser.add_argument("--ai-suggested-decision", choices=INTAKE_STATUS_CHOICES)
+    parser.add_argument("--ai-suggestion-file", type=Path)
     parser.add_argument("--operator-decision", choices=INTAKE_STATUS_CHOICES)
     parser.add_argument("--acceptance-state", choices=AI_ACCEPTANCE_STATE_CHOICES)
     parser.add_argument("--override-reason")
-    parser.add_argument("--ai-audit-ref")
     parser.add_argument("--accepted-by")
     parser.add_argument("--accepted-at")
 
@@ -246,8 +290,16 @@ def main() -> int:
     args = parser.parse_args()
 
     repo_root = args.repo_root.resolve()
+    args.repo_root = repo_root
     args.governed_intake_assist = load_governed_intake_assist(repo_root)
     register = load_intake(repo_root)
+    args.used_ai_decision_ids = {
+        suggestion["decision_id"]
+        for collection_name in ("repos", "products", "components")
+        for entry in register[collection_name].values()
+        if isinstance((suggestion := entry.get("ai_suggestion")), dict)
+        and suggestion.get("decision_id")
+    }
     entry_id = args.handler(register, args)
     write_intake(repo_root, register)
 

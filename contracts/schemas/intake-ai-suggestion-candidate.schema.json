@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/intake-ai-suggestion-candidate.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile_id",
+    "policy_status",
+    "policy_decision",
+    "decision_id",
+    "generated_at",
+    "confidence",
+    "caller_id",
+    "invocation_path",
+    "suggested_decision",
+    "audit_ref"
+  ],
+  "properties": {
+    "profile_id": { "type": "string", "minLength": 1 },
+    "policy_status": { "const": "active" },
+    "policy_decision": { "const": "allow" },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "caller_id": { "type": "string", "minLength": 1 },
+    "invocation_path": { "type": "string", "minLength": 1 },
+    "suggested_decision": {
+      "type": "string",
+      "enum": ["out-of-scope", "proposed", "admitted"]
+    },
+    "audit_ref": { "type": "string", "minLength": 1 }
+  }
+}

@@ -201,8 +201,9 @@ Current non-goals:
 
 ## AI Governance Truth
 
-The platform has a governed AI policy model, but the live governed invocation
-path is still intentionally suspended.
+The platform has an active local dev-integration governed AI invocation path.
+It remains suggestion-only and does not authorize stage, production, or
+autonomous governance mutation.
 
 Current state:
 
@@ -210,7 +211,9 @@ Current state:
 - the control-plane runtime foundation now requires an explicit model-access
   and audit contract before any governed AI runtime activation
 - security review exists for governed intake-assist model profiles
-- the reserved `intake-classifier-v1` profile is `suspended`
+- `intake-classifier-v1` is active in dev-integration through the reviewed
+  local Ollama `qwen3:8b` binding and the governed AI gateway
+- the paid OpenAI binding remains selected but inactive
 - operator approval is still required for intake, admission, approval, and
   promotion decisions
 
