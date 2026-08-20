@@ -401,15 +401,7 @@ def delivery_art_lifecycle_capability_parity_errors(
         check=False,
     )
     if commit_exists.returncode != 0:
-        shallow = subprocess.run(
-            ["git", "rev-parse", "--is-shallow-repository"],
-            cwd=source_repo_root,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if shallow.returncode != 0 or shallow.stdout.strip() != "true":
-            errors.append("capability activation commit is absent from the OOS repository")
+        errors.append("capability activation commit is absent from the OOS repository")
         return errors
 
     ancestor = subprocess.run(

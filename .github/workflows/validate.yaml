@@ -113,6 +113,15 @@ jobs:
               for ref in (profile.get(admission_key) or {}).get("security_review_refs", [])
               if ref.get("source_commit")
           }
+          delivery_art_path = yaml.safe_load(
+              (repo_root / "contracts" / "delivery-art-operator-path.yaml").read_text()
+          )["delivery_art_operator_path"]
+          capability_source = (
+              delivery_art_path.get("contract_activation", {}).get("capability_source", {})
+          )
+          history_bound_repos = set(pinned_review_repos)
+          if capability_source.get("activated_at_commit"):
+              history_bound_repos.add(capability_source["repo"])
           owner_repos = sorted(set(repos.keys()) | admitted_repos)
 
           for repo_name in owner_repos:
@@ -120,7 +129,7 @@ jobs:
                   continue
               target = workspace_root / repo_name
               clone_command = ["git", "clone"]
-              if repo_name not in pinned_review_repos:
+              if repo_name not in history_bound_repos:
                   clone_command.extend(["--depth", "1"])
               clone_command.extend(
                   [f"https://github.com/mfshaf7/{repo_name}.git", str(target)]
