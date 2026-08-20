@@ -67,7 +67,11 @@
             "purpose",
             "profile_id",
             "invocation_path",
-            "output_schema_ref",
+            "endpoint_path",
+            "devint_loopback_origin",
+            "provider_output_schema_ref",
+            "suggestion_candidate_schema_ref",
+            "accepted_record_schema_ref",
             "allowed_data_scope"
           ],
           "properties": {
@@ -95,7 +99,21 @@
               "type": "string",
               "minLength": 1
             },
-            "output_schema_ref": {
+            "endpoint_path": {
+              "type": "string",
+              "pattern": "^/"
+            },
+            "devint_loopback_origin": {
+              "type": "string",
+              "format": "uri"
+            },
+            "provider_output_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "suggestion_candidate_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "accepted_record_schema_ref": {
               "$ref": "#/$defs/repoPathRef"
             },
             "allowed_data_scope": {
@@ -110,12 +128,13 @@
             "source_contract_status",
             "live_consumption_allowed",
             "reason",
-            "required_live_gates"
+            "required_live_gates",
+            "gate_evidence"
           ],
           "properties": {
             "source_contract_status": {
               "type": "string",
-              "minLength": 1
+              "enum": ["active", "suspended"]
             },
             "live_consumption_allowed": {
               "type": "boolean"
@@ -126,6 +145,13 @@
             },
             "required_live_gates": {
               "$ref": "#/$defs/stringList"
+            },
+            "gate_evidence": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/stringList"
+              }
             }
           }
         },
@@ -135,7 +161,9 @@
           "required": [
             "authority",
             "autonomous_mutation_allowed",
-            "structured_output_schema_ref",
+            "provider_output_schema_ref",
+            "suggestion_candidate_schema_ref",
+            "accepted_record_schema_ref",
             "allowed_decisions",
             "denied_actions"
           ],
@@ -147,7 +175,13 @@
             "autonomous_mutation_allowed": {
               "type": "boolean"
             },
-            "structured_output_schema_ref": {
+            "provider_output_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "suggestion_candidate_schema_ref": {
+              "$ref": "#/$defs/repoPathRef"
+            },
+            "accepted_record_schema_ref": {
               "$ref": "#/$defs/repoPathRef"
             },
             "allowed_decisions": {

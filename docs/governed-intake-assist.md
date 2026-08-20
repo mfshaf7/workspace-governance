@@ -2,71 +2,81 @@
 
 This is the primary operator surface for AI-assisted workspace intake.
 
-The current state is source-defined only. Do not record `decision_source:
-ai-suggested` in `contracts/intake-register.yaml` until the platform profile is
-active and the governed access-plane activation gates are proven.
+Local `dev-integration` consumption is active through the platform-owned
+governed AI gateway and the reviewed `intake-classifier-v1` profile. The model
+only produces a suggestion. An operator must separately accept or override it
+before `contracts/intake-register.yaml` can change.
 
 ## Purpose
 
-Governed intake assist may help classify a new repo, product, or component as:
+Governed intake assist may suggest that a new repo, product, or component is:
 
 - `out-of-scope`
 - `proposed`
 - `admitted`
 
-The model is never the authority. It produces a bounded suggestion through the
-platform-owned governed AI access plane. The operator remains the decision
-authority and must explicitly accept or override the suggestion before workspace
-truth changes.
+The active dev-integration binding is local Ollama `qwen3:8b`. Consumers remain
+provider-neutral and request the logical profile, so the future paid OpenAI
+binding can be activated without changing this workflow.
 
 ## Control Split
 
-- `workspace-governance` owns the consumer contract, output schema, intake
-  register, scaffold command, and validation.
-- `platform-engineering` owns the model profile registry, governed access
-  plane, provider credential custody, and activation gates.
-- `security-architecture` owns the security review and findings that approve or
-  block live activation.
+- `workspace-governance` owns the consumer, candidate and accepted-record
+  schemas, intake register, controlled apply command, and validation.
+- `platform-engineering` owns the gateway, provider binding, runtime integrity,
+  network boundary, and audit ledger.
+- `security-architecture` owns the binding review and activation findings.
 
-The workspace consumer contract is:
+The model cannot write canonical workspace truth, carry provider credentials,
+or bypass the governed endpoint.
 
-- `contracts/governed-intake-assist.yaml`
+## Prerequisites
 
-The platform contracts it consumes are:
+1. Start and verify the platform profile:
 
-- `platform-engineering/security/governed-ai-model-profiles.yaml`
-- `platform-engineering/security/governed-ai-access-plane.yaml`
-- `platform-engineering/security/governed-ai-runtime-assist-contract.yaml`
+   ```bash
+   cd /home/mfshaf7/projects/platform-engineering
+   make devint-up PROFILE=governed-ai-gateway
+   make devint-smoke PROFILE=governed-ai-gateway
+   ```
 
-## Current Allowed Path
+2. Keep the loopback access process running in a separate terminal:
 
-Use operator-only intake today:
+   ```bash
+   make devint-access PROFILE=governed-ai-gateway
+   ```
+
+The workspace client defaults to `http://127.0.0.1:18290`. Plain HTTP is
+rejected for any non-loopback endpoint.
+
+## Request A Suggestion
+
+Run from `workspace-governance`:
 
 ```bash
-python3 scripts/scaffold_intake.py component \
-  --name example-component \
-  --status proposed \
-  --decision-source operator \
-  --component-class shared-platform \
-  --owner-repo platform-engineering \
-  --security-owner security-architecture \
-  --notes "Operator-classified intake entry."
-python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+python3 scripts/governed_intake_assist.py \
+  --notes "A shared component that validates workspace contract ownership." \
+  --operator-id operator-login \
+  --output .art/intake-assist/example-component.json
 ```
 
-## Future AI-Suggested Path
+The command:
 
-Only after live activation gates are proven, the AI-assisted flow is:
+- validates the active workspace and platform contracts
+- sends only operator-supplied notes to the governed gateway
+- validates caller, profile, decision, and schema identity on the response
+- stores the note digest rather than the note in the local candidate artifact
+- confines candidate output to the ignored `.art/intake-assist/` directory
+- preserves the gateway audit reference
+- does not modify `contracts/intake-register.yaml`
 
-1. Invoke the platform governed access plane as caller
-   `workspace-governance/intake-assist`.
-2. Require profile `intake-classifier-v1`, purpose `workspace-intake-assist`,
-   and output schema `contracts/schemas/intake-ai-suggestion.schema.json`.
-3. Review the suggestion as an operator.
-4. Record the final intake decision only after acceptance or override.
-5. Validate the intake model before merging the workspace truth update.
+Review the candidate before proceeding. To reject it, stop here; rejected
+suggestions never enter workspace truth.
 
-Example accepted suggestion shape:
+## Accept A Suggestion
+
+The recorded `--status` and `--operator-decision` must agree. Acceptance must
+also be explicit. Each gateway `decision_id` may be applied only once:
 
 ```bash
 python3 scripts/scaffold_intake.py component \
@@ -76,59 +86,60 @@ python3 scripts/scaffold_intake.py component \
   --component-class shared-platform \
   --owner-repo platform-engineering \
   --security-owner security-architecture \
-  --notes "Operator accepted governed AI intake suggestion." \
-  --ai-profile-id intake-classifier-v1 \
-  --ai-policy-status active \
-  --ai-decision-id intake-example-20260429 \
-  --ai-generated-at 2026-04-29T00:00:00Z \
-  --ai-confidence medium \
-  --ai-suggested-decision proposed \
+  --notes "Operator accepted the governed intake suggestion." \
+  --ai-suggestion-file .art/intake-assist/example-component.json \
+  --operator-decision proposed \
+  --acceptance-state accepted \
   --accepted-by operator-login \
-  --accepted-at 2026-04-29T00:05:00Z
-python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+  --accepted-at 2026-08-20T12:05:00Z
 ```
 
-Example operator override:
+## Override A Suggestion
+
+An override requires a different operator decision and a reason:
 
 ```bash
 python3 scripts/scaffold_intake.py component \
   --name example-component \
   --status out-of-scope \
   --decision-source ai-suggested \
-  --notes "Operator overrode governed AI intake suggestion." \
-  --ai-profile-id intake-classifier-v1 \
-  --ai-policy-status active \
-  --ai-decision-id intake-example-override-20260429 \
-  --ai-generated-at 2026-04-29T00:00:00Z \
-  --ai-confidence low \
-  --ai-suggested-decision proposed \
+  --notes "Operator overrode the governed intake suggestion." \
+  --ai-suggestion-file .art/intake-assist/example-component.json \
   --operator-decision out-of-scope \
   --acceptance-state overridden \
-  --override-reason "The entrant is not intended to join this workspace." \
+  --override-reason "The component is not intended to join this workspace." \
   --accepted-by operator-login \
-  --accepted-at 2026-04-29T00:05:00Z
+  --accepted-at 2026-08-20T12:05:00Z
+```
+
+## Validate The Result
+
+After an accepted or overridden decision changes workspace truth, run:
+
+```bash
+python3 scripts/validate_structured_record.py contracts/intake-register.yaml \
+  --workspace-root /home/mfshaf7/projects
 python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
 ```
+
+## Failure And Rollback
+
+- Gateway denial, timeout, malformed output, identity mismatch, or inactive
+  contracts fail without changing workspace truth.
+- If caller attribution, audit emission, provider isolation, or security posture
+  regresses, set `activation_state.source_contract_status` to `suspended` and
+  `activation_state.live_consumption_allowed` to `false`, stop using the
+  client, preserve the audit reference, and suspend the platform profile
+  through its owner workflow.
+- Revert the workspace activation pull request to restore the source-defined
+  disabled consumer path without changing provider runtime state.
 
 ## Denied Paths
 
-- Do not put provider credentials in `workspace-governance`.
-- Do not call a provider directly from the intake workflow.
-- Do not let model output mutate canonical contracts directly.
-- Do not write rejected suggestions into `intake-register.yaml`; rejected
-  suggestions stay in the future audit trail, not workspace truth.
-- Do not record `ai-suggested` entries while
-  `contracts/governed-intake-assist.yaml` has
-  `activation_state.live_consumption_allowed: false`.
-
-## Validation
-
-Run these after changing the contract, schema, scaffold command, or intake
-register:
-
-```bash
-python3 scripts/validate_structured_record.py contracts/governed-intake-assist.yaml --workspace-root /home/mfshaf7/projects
-python3 scripts/validate_structured_record.py contracts/intake-policy.yaml --workspace-root /home/mfshaf7/projects
-python3 scripts/validate_contracts.py --repo-root .
-python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
-```
+- provider credentials in `workspace-governance`
+- direct Ollama or external-provider clients
+- model output written directly to canonical contracts
+- manually fabricated profile, decision, or audit metadata
+- replay of a gateway decision already applied to another intake entry
+- unaccepted or rejected suggestions in `intake-register.yaml`
+- stage or production claims from dev-integration evidence

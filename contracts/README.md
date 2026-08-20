@@ -37,9 +37,10 @@ Use these contracts to declare:
     that the operator then records
 - `governed-intake-assist.yaml`
   - workspace-owned consumer contract for bounded AI-assisted intake, including
-    caller identity, profile, output schema, operator acceptance, workspace
-    truth-update limits, and audit-field expectations; live consumption remains
-    disabled until platform and security activation gates are proven
+    caller identity, provider output, candidate and accepted-record schemas,
+    operator acceptance, workspace truth-update limits, gate evidence, and
+    audit-field expectations; local dev-integration consumption is active while
+    canonical writes remain operator-controlled
 - `developer-integration-policy.yaml`
   - defines the shared `dev-integration` lane semantics, trigger guidance,
     forbidden targets, required actions, controlled component-commissioning

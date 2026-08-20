@@ -14,7 +14,7 @@ governed_intake_assist:
       path: security/governed-ai-runtime-assist-contract.yaml
     security_review:
       repo: security-architecture
-      path: docs/reviews/platform/2026-04-29-bounded-governed-ai-runtime-assist-activation.md
+      path: docs/reviews/platform/2026-08-20-intake-classifier-v1-local-ollama-binding.md
   consumer:
     caller_id: workspace-governance/intake-assist
     caller_repo: workspace-governance
@@ -22,7 +22,15 @@ governed_intake_assist:
     purpose: workspace-intake-assist
     profile_id: intake-classifier-v1
     invocation_path: governed-ai-gateway
-    output_schema_ref:
+    endpoint_path: /v1/governed-ai/invoke
+    devint_loopback_origin: http://127.0.0.1:18290
+    provider_output_schema_ref:
+      repo: platform-engineering
+      path: security/schemas/intake-classification-result.schema.json
+    suggestion_candidate_schema_ref:
+      repo: workspace-governance
+      path: contracts/schemas/intake-ai-suggestion-candidate.schema.json
+    accepted_record_schema_ref:
       repo: workspace-governance
       path: contracts/schemas/intake-ai-suggestion.schema.json
     allowed_data_scope:
@@ -32,13 +40,13 @@ governed_intake_assist:
       - AGENTS excerpts
       - operator-supplied intake notes
   activation_state:
-    source_contract_status: source-defined
-    live_consumption_allowed: false
+    source_contract_status: active
+    live_consumption_allowed: true
     reason: >
-      The workspace consumer contract is defined, but live AI-assisted intake
-      remains blocked until the platform profile is active, the governed access
-      plane is deployed, caller identity and audit emission are live, provider
-      bypass is blocked, and security review approves activation.
+      The local dev-integration binding, governed access plane, caller and
+      operator identity boundary, audit ledger, provider-bypass denial, and
+      current security review are proven. Workspace consumption remains
+      suggestion-only and still requires explicit operator acceptance.
     required_live_gates:
       - profile-active
       - access-plane-live
@@ -46,10 +54,32 @@ governed_intake_assist:
       - audit-retention-live
       - provider-egress-blocked
       - security-delta-review-current
+    gate_evidence:
+      profile-active:
+        - repo://platform-engineering/security/governed-ai-model-profiles.yaml
+        - github://mfshaf7/platform-engineering/pull/214
+      access-plane-live:
+        - repo://platform-engineering/security/governed-ai-access-plane.yaml
+        - openproject://work_packages/866
+      identity-boundary-live:
+        - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/scripts/smoke.sh
+      audit-retention-live:
+        - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/profile.yaml
+      provider-egress-blocked:
+        - repo://platform-engineering/security/governed-ai-devint-egress-policy.yaml
+      security-delta-review-current:
+        - repo://security-architecture/docs/reviews/platform/2026-08-20-intake-classifier-v1-local-ollama-binding.md
+        - openproject://work_packages/854
   suggestion_contract:
     authority: suggestion-only
     autonomous_mutation_allowed: false
-    structured_output_schema_ref:
+    provider_output_schema_ref:
+      repo: platform-engineering
+      path: security/schemas/intake-classification-result.schema.json
+    suggestion_candidate_schema_ref:
+      repo: workspace-governance
+      path: contracts/schemas/intake-ai-suggestion-candidate.schema.json
+    accepted_record_schema_ref:
       repo: workspace-governance
       path: contracts/schemas/intake-ai-suggestion.schema.json
     allowed_decisions:
@@ -99,6 +129,15 @@ governed_intake_assist:
       - operator_identity
       - approved_profile_id
       - invocation_path
+      - upstream_provider
+      - provider_route
+      - upstream_model
+      - upstream_model_digest
+      - provider_runtime_version
+      - prompt_version
+      - provider_schema_valid
+      - provider_latency_ms
+      - provider_usage
       - purpose
       - output_schema_ref
       - policy_decision
