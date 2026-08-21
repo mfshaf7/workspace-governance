@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "project_lifecycle_proof"],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "project_lifecycle_proof": {
+      "type": "object",
+      "required": [
+        "owner_repo",
+        "lifecycle_contract_ref",
+        "proof_posture",
+        "report_outputs",
+        "representative_project",
+        "capability_postures",
+        "scenarios"
+      ],
+      "properties": {
+        "owner_repo": { "const": "workspace-governance" },
+        "lifecycle_contract_ref": { "const": "contracts/project-lifecycle.yaml" },
+        "proof_posture": { "const": "local-deterministic" },
+        "report_outputs": {
+          "type": "object",
+          "required": ["json", "markdown"],
+          "properties": {
+            "json": { "type": "string", "minLength": 1 },
+            "markdown": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "representative_project": {
+          "type": "object",
+          "required": [
+            "project_ref",
+            "title",
+            "source_ref",
+            "incubation_repo_ref",
+            "owner_repo_ref",
+            "operator_ref"
+          ],
+          "properties": {
+            "project_ref": { "type": "string", "minLength": 1 },
+            "title": { "type": "string", "minLength": 1 },
+            "source_ref": { "type": "string", "minLength": 1 },
+            "incubation_repo_ref": { "type": "string", "minLength": 1 },
+            "owner_repo_ref": { "type": "string", "minLength": 1 },
+            "operator_ref": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "capability_postures": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/capabilityPosture" }
+        },
+        "scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/scenario" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "axisId": {
+      "enum": [
+        "project-phase",
+        "source-custody",
+        "runtime-environment",
+        "release-posture",
+        "publication-posture"
+      ]
+    },
+    "stateVector": {
+      "type": "object",
+      "required": [
+        "project-phase",
+        "source-custody",
+        "runtime-environment",
+        "release-posture",
+        "publication-posture"
+      ],
+      "properties": {
+        "project-phase": { "type": "string", "minLength": 1 },
+        "source-custody": { "type": "string", "minLength": 1 },
+        "runtime-environment": { "type": "string", "minLength": 1 },
+        "release-posture": { "type": "string", "minLength": 1 },
+        "publication-posture": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "capabilityPosture": {
+      "type": "object",
+      "required": ["capability_id", "posture", "reason"],
+      "properties": {
+        "capability_id": { "type": "string", "minLength": 1 },
+        "posture": {
+          "enum": ["implemented", "contract-only", "blocked-future-wiring"]
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "recovery": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["decision"],
+          "properties": {
+            "decision": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+            "resolution_evidence_ref": { "type": "string", "minLength": 1 },
+            "justification": { "type": "string", "minLength": 1 },
+            "owner": { "type": "string", "minLength": 1 },
+            "review_at": { "type": "string", "minLength": 1 },
+            "security_decision_ref": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "step_id",
+        "transition_id",
+        "state_changes",
+        "source_authority_role",
+        "target_owner_role",
+        "implementation_maturity",
+        "envelope_type",
+        "omit_envelope_fields",
+        "evidence_types",
+        "recovery",
+        "expected"
+      ],
+      "properties": {
+        "step_id": { "type": "string", "minLength": 1 },
+        "transition_id": { "type": "string", "minLength": 1 },
+        "state_changes": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/axisId" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "source_authority_role": { "type": "string", "minLength": 1 },
+        "target_owner_role": { "type": "string", "minLength": 1 },
+        "implementation_maturity": {
+          "enum": ["contract-only", "locally-proven", "dev-integration", "governed"]
+        },
+        "envelope_type": { "type": "string", "minLength": 1 },
+        "omit_envelope_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "recovery": { "$ref": "#/$defs/recovery" },
+        "expected": {
+          "type": "object",
+          "required": ["outcome", "issue_contains"],
+          "properties": {
+            "outcome": { "enum": ["accepted", "rejected"] },
+            "issue_contains": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "required": [
+        "scenario_id",
+        "class",
+        "purpose",
+        "initial_state",
+        "steps",
+        "expected_final_state"
+      ],
+      "properties": {
+        "scenario_id": { "type": "string", "minLength": 1 },
+        "class": { "enum": ["positive", "negative"] },
+        "purpose": { "type": "string", "minLength": 1 },
+        "initial_state": { "$ref": "#/$defs/stateVector" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/step" }
+        },
+        "expected_final_state": { "$ref": "#/$defs/stateVector" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

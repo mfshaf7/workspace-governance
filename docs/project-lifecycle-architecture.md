@@ -85,6 +85,7 @@ source, runtime, release, or publication truth.
 Every allowed transition names:
 
 - the axis and allowed source and target states
+- its explicit implementation maturity
 - source authority and target owner
 - the required typed envelope
 - required evidence
@@ -157,12 +158,30 @@ It rejects:
 - unknown states, evidence, envelopes, or recovery decisions
 - unsupported transition identifiers
 - hidden changes to more than one lifecycle axis
-- missing preconditions or evidence
+- wrong source authority or target ownership claims
+- incomplete typed envelopes, preconditions, or evidence
+- implementation claims above the transition's declared maturity
 - state vectors that contradict lifecycle invariants
+
+## Deterministic Proof
+
+[`contracts/project-lifecycle-proof.yaml`](../contracts/project-lifecycle-proof.yaml)
+defines a representative synthetic product and the positive and negative
+scenarios required for local lifecycle proof. The runner in
+[`scripts/project_lifecycle_proof.py`](../scripts/project_lifecycle_proof.py)
+chains accepted transitions, preserves state after rejection, and emits a
+content-addressed receipt for every step.
+
+The generated readiness projection is available in
+[`reports/project-lifecycle-baseline-readiness.md`](../reports/project-lifecycle-baseline-readiness.md).
+It distinguishes implemented local validation from contract-only adapters and
+blocked future wiring. Regenerate it with `--write` and verify it with
+`--check`.
 
 ## Current Maturity
 
-This is a `contract-only` architecture baseline. It defines the oracle for
-follow-on end-to-end simulation and later owner implementation. It does not
-claim that every transition adapter, backend field, or Console workflow is
-active today.
+The transition architecture remains `contract-only`. Its schema, semantic
+validator, and deterministic local simulation are implemented and locally
+proven, but transition adapters, governed runtime actions, backend fields, and
+Console projection wiring are not claimed as live. A passing proof is ready
+for baseline review, not evidence of production operation.

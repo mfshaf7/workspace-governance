@@ -301,6 +301,7 @@ project_lifecycle:
   transitions:
     proposal-route-incubation:
       axis: project-phase
+      implementation_maturity: &transition_maturity contract-only
       from_states:
         - proposed
       to_states:
@@ -320,6 +321,7 @@ project_lifecycle:
       preconditions: []
     proposal-route-delivery:
       axis: project-phase
+      implementation_maturity: *transition_maturity
       from_states:
         - proposed
       to_states:
@@ -335,6 +337,7 @@ project_lifecycle:
       preconditions: []
     incubation-promote-delivery:
       axis: project-phase
+      implementation_maturity: *transition_maturity
       from_states:
         - incubating
       to_states:
@@ -351,6 +354,7 @@ project_lifecycle:
       preconditions: []
     delivery-complete-operational:
       axis: project-phase
+      implementation_maturity: *transition_maturity
       from_states:
         - delivery-governed
       to_states:
@@ -371,6 +375,7 @@ project_lifecycle:
             - shared-owner-repo
     retire-project:
       axis: project-phase
+      implementation_maturity: *transition_maturity
       from_states:
         - proposed
         - incubating
@@ -398,6 +403,7 @@ project_lifecycle:
             - unlisted
     source-admit-incubation:
       axis: source-custody
+      implementation_maturity: *transition_maturity
       from_states:
         - none
       to_states:
@@ -415,6 +421,7 @@ project_lifecycle:
             - incubating
     source-create-durable-owner:
       axis: source-custody
+      implementation_maturity: *transition_maturity
       from_states:
         - none
       to_states:
@@ -435,6 +442,7 @@ project_lifecycle:
             - delivery-governed
     source-graduate-durable-owner:
       axis: source-custody
+      implementation_maturity: *transition_maturity
       from_states:
         - incubation-repo
       to_states:
@@ -456,6 +464,7 @@ project_lifecycle:
             - delivery-governed
     runtime-start-incubation-preview:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - none
       to_states:
@@ -473,6 +482,7 @@ project_lifecycle:
             - incubation-repo
     runtime-start-owner-preview:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - none
       to_states:
@@ -491,6 +501,7 @@ project_lifecycle:
             - shared-owner-repo
     runtime-enter-dev-integration:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - none
         - local-preview
@@ -512,6 +523,7 @@ project_lifecycle:
             - shared-owner-repo
     runtime-promote-stage:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - dev-integration
       to_states:
@@ -532,6 +544,7 @@ project_lifecycle:
             - operational
     runtime-promote-production:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - stage
       to_states:
@@ -553,6 +566,7 @@ project_lifecycle:
             - released
     runtime-stop-local-preview:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - local-preview
       to_states:
@@ -566,6 +580,7 @@ project_lifecycle:
       preconditions: []
     runtime-stop-governed:
       axis: runtime-environment
+      implementation_maturity: *transition_maturity
       from_states:
         - dev-integration
         - stage
@@ -583,6 +598,7 @@ project_lifecycle:
       preconditions: []
     release-create-candidate:
       axis: release-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - unreleased
       to_states:
@@ -602,6 +618,7 @@ project_lifecycle:
             - stage
     release-publish:
       axis: release-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - candidate
       to_states:
@@ -623,6 +640,7 @@ project_lifecycle:
             - production
     release-withdraw:
       axis: release-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - candidate
         - released
@@ -639,6 +657,7 @@ project_lifecycle:
       preconditions: []
     publication-list:
       axis: publication-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - unlisted
       to_states:
@@ -664,6 +683,7 @@ project_lifecycle:
             - released
     publication-change-audience:
       axis: publication-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - internal
         - client
@@ -685,6 +705,7 @@ project_lifecycle:
             - operational
     publication-unlist:
       axis: publication-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - internal
         - client
@@ -701,6 +722,7 @@ project_lifecycle:
       preconditions: []
     publication-archive:
       axis: publication-posture
+      implementation_maturity: *transition_maturity
       from_states:
         - unlisted
       to_states:

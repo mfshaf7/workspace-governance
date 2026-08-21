@@ -12,6 +12,12 @@ EXPECTED_AXES = {
     "source-custody",
 }
 ALLOWED_DYNAMIC_OWNERS = {"project-owner-repo"}
+IMPLEMENTATION_MATURITY = {
+    "contract-only": 0,
+    "locally-proven": 1,
+    "dev-integration": 2,
+    "governed": 3,
+}
 
 
 def lifecycle_model(contract: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -52,6 +58,10 @@ def contract_issues(
     recovery = model.get("recovery_contract", {})
     transitions = model.get("transitions", {})
     issues: list[str] = []
+    model_maturity = model.get("implementation_posture")
+
+    if model_maturity not in IMPLEMENTATION_MATURITY:
+        issues.append(f"unknown lifecycle implementation posture {model_maturity!r}")
 
     if set(model.get("axis_order", [])) != EXPECTED_AXES:
         issues.append("axis_order must contain the five lifecycle axes exactly once")
@@ -118,6 +128,18 @@ def contract_issues(
             issues.append(f"transition {transition_id} references unknown axis {axis_id!r}")
             continue
         known_states = set(axes[axis_id]["states"])
+        transition_maturity = transition.get("implementation_maturity")
+        if transition_maturity not in IMPLEMENTATION_MATURITY:
+            issues.append(
+                f"transition {transition_id} has unknown implementation maturity {transition_maturity!r}"
+            )
+        elif model_maturity in IMPLEMENTATION_MATURITY and (
+            IMPLEMENTATION_MATURITY[transition_maturity]
+            > IMPLEMENTATION_MATURITY[model_maturity]
+        ):
+            issues.append(
+                f"transition {transition_id} maturity {transition_maturity!r} exceeds lifecycle posture {model_maturity!r}"
+            )
         for field in ("from_states", "to_states"):
             unknown_states = sorted(set(transition.get(field, [])) - known_states)
             if unknown_states:
@@ -254,10 +276,49 @@ def transition_request_issues(
         issues.append(
             f"transition {transition_id} does not allow target state {requested_state[axis_id]!r}"
         )
+    if request.get("source_authority_role") != transition["source_authority_role"]:
+        issues.append(
+            f"transition {transition_id} requires source authority {transition['source_authority_role']!r}"
+        )
+    if request.get("target_owner_role") != transition["target_owner_role"]:
+        issues.append(
+            f"transition {transition_id} requires target owner {transition['target_owner_role']!r}"
+        )
+    claimed_maturity = request.get("implementation_maturity")
+    transition_maturity = transition["implementation_maturity"]
+    if claimed_maturity not in IMPLEMENTATION_MATURITY:
+        issues.append(
+            f"transition {transition_id} requires a recognized implementation maturity claim"
+        )
+    elif IMPLEMENTATION_MATURITY[claimed_maturity] > IMPLEMENTATION_MATURITY[transition_maturity]:
+        issues.append(
+            f"transition {transition_id} maturity claim {claimed_maturity!r} exceeds contract maturity {transition_maturity!r}"
+        )
     if request.get("envelope_type") != transition["required_envelope"]:
         issues.append(
             f"transition {transition_id} requires envelope {transition['required_envelope']!r}"
         )
+    envelope = request.get("envelope")
+    if not isinstance(envelope, Mapping):
+        issues.append(f"transition {transition_id} requires a structured envelope")
+    else:
+        required_fields = model["envelopes"][transition["required_envelope"]][
+            "required_fields"
+        ]
+        missing_fields = sorted(
+            field
+            for field in required_fields
+            if field not in envelope
+            or (field != "recovery" and not envelope.get(field))
+        )
+        if missing_fields:
+            issues.append(
+                f"transition {transition_id} envelope is missing fields: {', '.join(missing_fields)}"
+            )
+        if envelope.get("transition_id") != transition_id:
+            issues.append(
+                f"transition {transition_id} envelope transition_id does not match the request"
+            )
     missing_evidence = sorted(
         set(transition["required_evidence"]) - set(request.get("evidence_types", []))
     )

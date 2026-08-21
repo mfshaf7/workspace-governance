@@ -227,6 +227,7 @@
       "type": "object",
       "required": [
         "axis",
+        "implementation_maturity",
         "from_states",
         "to_states",
         "source_authority_role",
@@ -238,6 +239,7 @@
       ],
       "properties": {
         "axis": { "$ref": "#/$defs/axisId" },
+        "implementation_maturity": { "$ref": "#/$defs/implementationMaturity" },
         "from_states": {
           "type": "array",
           "minItems": 1,
@@ -271,6 +273,9 @@
         }
       },
       "additionalProperties": false
+    },
+    "implementationMaturity": {
+      "enum": ["contract-only", "locally-proven", "dev-integration", "governed"]
     },
     "stateInvariant": {
       "type": "object",
