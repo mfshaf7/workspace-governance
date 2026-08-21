@@ -1,0 +1,806 @@
+schema_version: 1
+project_lifecycle:
+  owner_repo: workspace-governance
+  implementation_posture: contract-only
+  primary_architecture_surface: docs/project-lifecycle-architecture.md
+  purpose: Define product-neutral project lifecycle, ownership, handoff, evidence, and recovery truth without creating a new runtime authority.
+  axis_order:
+    - project-phase
+    - source-custody
+    - runtime-environment
+    - release-posture
+    - publication-posture
+  axes:
+    project-phase:
+      responsibility: project-workflow-record
+      authority_roles:
+        - operator-workflow-authority
+      description: The governed work context currently responsible for progressing the project.
+      states:
+        proposed:
+          description: The project is an idea or request awaiting an explicit route decision.
+        incubating:
+          description: The project is being explored in a bounded prototype or product-incubation home.
+        delivery-governed:
+          description: The project is accepted into governed delivery planning and execution.
+        operational:
+          description: Delivery is complete and a durable owner maintains the resulting product or capability.
+        retired:
+          description: Active pursuit and operation have ended under an explicit retirement decision.
+    source-custody:
+      responsibility: source-custody-handoff-record
+      authority_roles:
+        - incubation-source-authority
+        - durable-source-authority
+      description: The owner holding the authoritative project source, independent of workflow progress.
+      states:
+        none:
+          description: No project source exists yet.
+        incubation-repo:
+          description: Workspace Prototype Studio holds the exploratory source.
+        dedicated-owner-repo:
+          description: A durable product repo owns the source exclusively.
+        shared-owner-repo:
+          description: A durable existing owner repo contains the project source as a bounded component.
+    runtime-environment:
+      responsibility: runtime-environment-record
+      authority_roles:
+        - durable-source-authority
+        - platform-runtime-authority
+      description: The highest environment where an admitted project runtime currently exists.
+      states:
+        none:
+          description: No runtime is active.
+        local-preview:
+          description: An owner-repo loopback or local preview exists without governed environment authority.
+        dev-integration:
+          description: The project runs in the standardized fast local integration lane.
+        stage:
+          description: The project runs in a governed stage environment.
+        production:
+          description: The project runs in a governed production environment.
+    release-posture:
+      responsibility: release-posture-record
+      authority_roles:
+        - platform-runtime-authority
+      description: The release decision for the project, independent of where source lives.
+      states:
+        not-applicable:
+          description: The project does not produce a deployed release.
+        unreleased:
+          description: No release candidate has been accepted.
+        candidate:
+          description: A bounded release candidate is under governed evaluation.
+        released:
+          description: A governed release decision and evidence exist.
+        withdrawn:
+          description: A former candidate or release has been withdrawn.
+    publication-posture:
+      responsibility: publication-posture-record
+      authority_roles:
+        - publication-contract-authority
+      description: Whether an operational result is listed in the product portfolio and for which audience.
+      states:
+        unlisted:
+          description: The project is not represented in the product portfolio.
+        internal:
+          description: The product is listed for internal visibility.
+        client:
+          description: The product is listed for a bounded client audience.
+        public:
+          description: The product is listed for public visibility.
+        archived:
+          description: A retired product retains historical portfolio visibility only.
+  ownership_roles:
+    lifecycle-contract-authority:
+      owner_kind: repo
+      owner_ref: workspace-governance
+      mode: authority
+      responsibilities:
+        - lifecycle-contract
+    operator-workflow-authority:
+      owner_kind: repo
+      owner_ref: operator-orchestration-service
+      mode: authority
+      responsibilities:
+        - project-workflow-record
+        - lifecycle-transition-command
+        - lifecycle-transition-journal
+        - source-custody-handoff-record
+    readiness-evaluation-authority:
+      owner_kind: repo
+      owner_ref: workspace-governance-control-fabric
+      mode: authority
+      responsibilities:
+        - lifecycle-readiness-evaluation
+        - lifecycle-evidence-receipt
+    incubation-source-authority:
+      owner_kind: repo
+      owner_ref: workspace-prototype-studio
+      mode: authority
+      responsibilities:
+        - incubation-source-content
+        - incubation-graduation-record
+    durable-source-authority:
+      owner_kind: dynamic
+      owner_ref: project-owner-repo
+      mode: authority
+      responsibilities:
+        - durable-source-content
+    platform-runtime-authority:
+      owner_kind: repo
+      owner_ref: platform-engineering
+      mode: authority
+      responsibilities:
+        - runtime-environment-record
+        - release-posture-record
+        - runtime-promotion
+        - runtime-rollback
+    security-acceptance-authority:
+      owner_kind: repo
+      owner_ref: security-architecture
+      mode: authority
+      responsibilities:
+        - security-acceptance
+        - risk-acceptance
+    publication-contract-authority:
+      owner_kind: repo
+      owner_ref: workspace-governance
+      mode: authority
+      responsibilities:
+        - publication-posture-record
+        - publication-vocabulary
+    console-projection:
+      owner_kind: repo
+      owner_ref: governance-operations-console
+      mode: projection
+      responsibilities:
+        - lifecycle-operator-projection
+  evidence_types:
+    operator-decision:
+      owner_role: operator-workflow-authority
+    incubation-source-record:
+      owner_role: incubation-source-authority
+    durable-source-record:
+      owner_role: durable-source-authority
+    target-admission:
+      owner_role: operator-workflow-authority
+    owner-receipt:
+      owner_role: readiness-evaluation-authority
+    validation-receipt:
+      owner_role: readiness-evaluation-authority
+    security-decision:
+      owner_role: security-acceptance-authority
+    runtime-evidence:
+      owner_role: platform-runtime-authority
+    release-evidence:
+      owner_role: platform-runtime-authority
+    publication-decision:
+      owner_role: publication-contract-authority
+    rollback-record:
+      owner_role: platform-runtime-authority
+  envelopes:
+    project-handoff:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - source_record_ref
+        - target_owner_ref
+        - evidence_refs
+        - recovery
+    source-custody-transfer:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - source_repo_ref
+        - target_repo_ref
+        - source_revision
+        - transfer_receipt_ref
+        - evidence_refs
+        - recovery
+    source-custody-assignment:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - target_repo_ref
+        - initial_revision
+        - admission_receipt_ref
+        - evidence_refs
+        - recovery
+    runtime-promotion:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - runtime_profile_ref
+        - source_environment
+        - target_environment
+        - artifact_refs
+        - rollback_ref
+        - evidence_refs
+        - recovery
+    release-decision:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - release_candidate_ref
+        - target_environment
+        - security_decision_ref
+        - rollback_ref
+        - evidence_refs
+        - recovery
+    publication-decision:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - audience
+        - product_owner_ref
+        - access_ref
+        - evidence_refs
+        - recovery
+    retirement-decision:
+      required_fields:
+        - transition_id
+        - project_ref
+        - expected_state_version
+        - decision_ref
+        - requested_by
+        - idempotency_key
+        - reason
+        - cleanup_owner
+        - retention_ref
+        - reopen_policy
+        - evidence_refs
+        - recovery
+  recovery_contract:
+    allowed_decisions:
+      - remove
+      - workaround
+      - accept-risk
+      - defer
+    requirements:
+      remove:
+        - resolution_evidence_ref
+      workaround:
+        - justification
+        - owner
+        - review_at
+      accept-risk:
+        - justification
+        - owner
+        - review_at
+        - security_decision_ref
+      defer:
+        - justification
+        - owner
+        - review_at
+    rule: A failed transition remains at its prior durable state until one allowed recovery decision and its required evidence are recorded.
+  transitions:
+    proposal-route-incubation:
+      axis: project-phase
+      from_states:
+        - proposed
+      to_states:
+        - incubating
+      source_authority_role: operator-workflow-authority
+      target_owner_role: incubation-source-authority
+      required_envelope: project-handoff
+      required_evidence:
+        - operator-decision
+        - target-admission
+        - owner-receipt
+      allowed_recovery_decisions: &standard_recovery
+        - remove
+        - workaround
+        - accept-risk
+        - defer
+      preconditions: []
+    proposal-route-delivery:
+      axis: project-phase
+      from_states:
+        - proposed
+      to_states:
+        - delivery-governed
+      source_authority_role: operator-workflow-authority
+      target_owner_role: operator-workflow-authority
+      required_envelope: project-handoff
+      required_evidence:
+        - operator-decision
+        - target-admission
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    incubation-promote-delivery:
+      axis: project-phase
+      from_states:
+        - incubating
+      to_states:
+        - delivery-governed
+      source_authority_role: incubation-source-authority
+      target_owner_role: operator-workflow-authority
+      required_envelope: project-handoff
+      required_evidence:
+        - operator-decision
+        - validation-receipt
+        - target-admission
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    delivery-complete-operational:
+      axis: project-phase
+      from_states:
+        - delivery-governed
+      to_states:
+        - operational
+      source_authority_role: operator-workflow-authority
+      target_owner_role: durable-source-authority
+      required_envelope: project-handoff
+      required_evidence:
+        - operator-decision
+        - durable-source-record
+        - validation-receipt
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: source-custody
+          allowed_states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+    retire-project:
+      axis: project-phase
+      from_states:
+        - proposed
+        - incubating
+        - delivery-governed
+        - operational
+      to_states:
+        - retired
+      source_authority_role: operator-workflow-authority
+      target_owner_role: operator-workflow-authority
+      required_envelope: retirement-decision
+      required_evidence:
+        - operator-decision
+        - validation-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: runtime-environment
+          allowed_states:
+            - none
+        - axis: release-posture
+          allowed_states:
+            - not-applicable
+            - withdrawn
+        - axis: publication-posture
+          allowed_states:
+            - unlisted
+    source-admit-incubation:
+      axis: source-custody
+      from_states:
+        - none
+      to_states:
+        - incubation-repo
+      source_authority_role: incubation-source-authority
+      target_owner_role: incubation-source-authority
+      required_envelope: source-custody-assignment
+      required_evidence:
+        - incubation-source-record
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - incubating
+    source-create-durable-owner:
+      axis: source-custody
+      from_states:
+        - none
+      to_states:
+        - dedicated-owner-repo
+        - shared-owner-repo
+      source_authority_role: operator-workflow-authority
+      target_owner_role: durable-source-authority
+      required_envelope: source-custody-assignment
+      required_evidence:
+        - operator-decision
+        - durable-source-record
+        - validation-receipt
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - delivery-governed
+    source-graduate-durable-owner:
+      axis: source-custody
+      from_states:
+        - incubation-repo
+      to_states:
+        - dedicated-owner-repo
+        - shared-owner-repo
+      source_authority_role: incubation-source-authority
+      target_owner_role: durable-source-authority
+      required_envelope: source-custody-transfer
+      required_evidence:
+        - operator-decision
+        - incubation-source-record
+        - durable-source-record
+        - validation-receipt
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - delivery-governed
+    runtime-start-incubation-preview:
+      axis: runtime-environment
+      from_states:
+        - none
+      to_states:
+        - local-preview
+      source_authority_role: incubation-source-authority
+      target_owner_role: incubation-source-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - incubation-source-record
+        - validation-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: source-custody
+          allowed_states:
+            - incubation-repo
+    runtime-start-owner-preview:
+      axis: runtime-environment
+      from_states:
+        - none
+      to_states:
+        - local-preview
+      source_authority_role: durable-source-authority
+      target_owner_role: durable-source-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - durable-source-record
+        - validation-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: source-custody
+          allowed_states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+    runtime-enter-dev-integration:
+      axis: runtime-environment
+      from_states:
+        - none
+        - local-preview
+      to_states:
+        - dev-integration
+      source_authority_role: durable-source-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - durable-source-record
+        - validation-receipt
+        - runtime-evidence
+        - owner-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: source-custody
+          allowed_states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+    runtime-promote-stage:
+      axis: runtime-environment
+      from_states:
+        - dev-integration
+      to_states:
+        - stage
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - validation-receipt
+        - security-decision
+        - runtime-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - delivery-governed
+            - operational
+    runtime-promote-production:
+      axis: runtime-environment
+      from_states:
+        - stage
+      to_states:
+        - production
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - validation-receipt
+        - security-decision
+        - runtime-evidence
+        - release-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: release-posture
+          allowed_states:
+            - candidate
+            - released
+    runtime-stop-local-preview:
+      axis: runtime-environment
+      from_states:
+        - local-preview
+      to_states:
+        - none
+      source_authority_role: durable-source-authority
+      target_owner_role: durable-source-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - validation-receipt
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    runtime-stop-governed:
+      axis: runtime-environment
+      from_states:
+        - dev-integration
+        - stage
+        - production
+      to_states:
+        - none
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: runtime-promotion
+      required_evidence:
+        - operator-decision
+        - runtime-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    release-create-candidate:
+      axis: release-posture
+      from_states:
+        - unreleased
+      to_states:
+        - candidate
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: release-decision
+      required_evidence:
+        - validation-receipt
+        - security-decision
+        - release-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: runtime-environment
+          allowed_states:
+            - stage
+    release-publish:
+      axis: release-posture
+      from_states:
+        - candidate
+      to_states:
+        - released
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: release-decision
+      required_evidence:
+        - operator-decision
+        - validation-receipt
+        - security-decision
+        - release-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: runtime-environment
+          allowed_states:
+            - stage
+            - production
+    release-withdraw:
+      axis: release-posture
+      from_states:
+        - candidate
+        - released
+      to_states:
+        - withdrawn
+      source_authority_role: platform-runtime-authority
+      target_owner_role: platform-runtime-authority
+      required_envelope: release-decision
+      required_evidence:
+        - operator-decision
+        - release-evidence
+        - rollback-record
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    publication-list:
+      axis: publication-posture
+      from_states:
+        - unlisted
+      to_states:
+        - internal
+        - client
+        - public
+      source_authority_role: publication-contract-authority
+      target_owner_role: publication-contract-authority
+      required_envelope: publication-decision
+      required_evidence:
+        - operator-decision
+        - durable-source-record
+        - validation-receipt
+        - publication-decision
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - operational
+        - axis: release-posture
+          allowed_states:
+            - not-applicable
+            - released
+    publication-change-audience:
+      axis: publication-posture
+      from_states:
+        - internal
+        - client
+        - public
+      to_states:
+        - internal
+        - client
+        - public
+      source_authority_role: publication-contract-authority
+      target_owner_role: publication-contract-authority
+      required_envelope: publication-decision
+      required_evidence:
+        - operator-decision
+        - publication-decision
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - operational
+    publication-unlist:
+      axis: publication-posture
+      from_states:
+        - internal
+        - client
+        - public
+      to_states:
+        - unlisted
+      source_authority_role: publication-contract-authority
+      target_owner_role: publication-contract-authority
+      required_envelope: publication-decision
+      required_evidence:
+        - operator-decision
+        - publication-decision
+      allowed_recovery_decisions: *standard_recovery
+      preconditions: []
+    publication-archive:
+      axis: publication-posture
+      from_states:
+        - unlisted
+      to_states:
+        - archived
+      source_authority_role: publication-contract-authority
+      target_owner_role: publication-contract-authority
+      required_envelope: publication-decision
+      required_evidence:
+        - operator-decision
+        - publication-decision
+      allowed_recovery_decisions: *standard_recovery
+      preconditions:
+        - axis: project-phase
+          allowed_states:
+            - retired
+  state_invariants:
+    - invariant_id: operational-source-is-durable
+      when:
+        axis: project-phase
+        states:
+          - operational
+      requires:
+        - axis: source-custody
+          states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+    - invariant_id: governed-runtime-requires-durable-source
+      when:
+        axis: runtime-environment
+        states:
+          - dev-integration
+          - stage
+          - production
+      requires:
+        - axis: source-custody
+          states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+    - invariant_id: governed-runtime-requires-admitted-work
+      when:
+        axis: runtime-environment
+        states:
+          - stage
+          - production
+      requires:
+        - axis: project-phase
+          states:
+            - delivery-governed
+            - operational
+    - invariant_id: released-posture-requires-governed-runtime
+      when:
+        axis: release-posture
+        states:
+          - released
+      requires:
+        - axis: runtime-environment
+          states:
+            - stage
+            - production
+    - invariant_id: listed-portfolio-entry-requires-operational-project
+      when:
+        axis: publication-posture
+        states:
+          - internal
+          - client
+          - public
+      requires:
+        - axis: project-phase
+          states:
+            - operational
+        - axis: source-custody
+          states:
+            - dedicated-owner-repo
+            - shared-owner-repo
+        - axis: release-posture
+          states:
+            - not-applicable
+            - released
+    - invariant_id: retired-project-is-not-running
+      when:
+        axis: project-phase
+        states:
+          - retired
+      requires:
+        - axis: runtime-environment
+          states:
+            - none
+        - axis: release-posture
+          states:
+            - not-applicable
+            - withdrawn
+        - axis: publication-posture
+          states:
+            - unlisted
+            - archived
+  denied_claims:
+    - workflow progress implies source custody
+    - source custody implies runtime admission
+    - runtime presence implies release approval
+    - release approval implies portfolio publication
+    - portfolio publication grants runtime or source authority
+    - console projection is canonical lifecycle truth
+    - contract-only transition definitions claim active backend implementation

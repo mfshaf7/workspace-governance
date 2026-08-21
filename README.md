@@ -46,6 +46,13 @@ Primary architecture surface:
 
 - [docs/governance-engine-foundation.md](docs/governance-engine-foundation.md)
 
+The governed project lifecycle is defined separately from the governance
+engine itself. It keeps project phase, source custody, runtime environment,
+release posture, and portfolio publication independent:
+
+- [docs/project-lifecycle-architecture.md](docs/project-lifecycle-architecture.md)
+- [contracts/project-lifecycle.yaml](contracts/project-lifecycle.yaml)
+
 This repo also holds the workspace doctrine for operator workflows, delegated
 execution, troubleshooting, and self-improvement. Those controls exist so the
 workspace behaves like a deliberate system of record rather than a set of

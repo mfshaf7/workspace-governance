@@ -112,6 +112,13 @@ Use these contracts to declare:
   - workspace-level routing and discussion gates by task type
 - `lifecycle.yaml`
   - allowed lifecycle states for repos, products, and components
+- `project-lifecycle.yaml`
+  - product-neutral project lifecycle contract covering independent project
+    phase, source custody, runtime environment, release posture, and
+    publication posture axes
+  - defines owner roles, typed transition envelopes, evidence, preconditions,
+    recovery decisions, and stable-state invariants without claiming runtime
+    implementation
 - `dependency-types.yaml`
   - approved cross-repo dependency semantics
 - `change-classes.yaml`
