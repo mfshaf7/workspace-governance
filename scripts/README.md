@@ -29,8 +29,16 @@
     generated outputs are declared once instead of hard-coded in multiple scripts
 - `project_lifecycle_contract.py`
   - focused semantic support for the product-neutral project lifecycle contract
-  - validates owner uniqueness, state vectors, transition support, evidence,
-    preconditions, and recovery decisions through `validate_contracts.py`
+  - validates owner uniqueness, state vectors, transition support, authority,
+    typed envelopes, evidence, preconditions, recovery, and maturity claims
+    through `validate_contracts.py`
+- `project_lifecycle_proof.py`
+  - executes the registered lifecycle proof scenarios without a runtime or
+    backend dependency
+  - emits deterministic step receipts and generated JSON/Markdown baseline
+    readiness reports
+  - use `python3 scripts/project_lifecycle_proof.py --repo-root . --check` to
+    detect stale reports or a failed scenario
 - `governance_engine_materializer.py`
   - shared materialization layer for workspace-root sync, managed live skill
     install, and generated governance artifacts

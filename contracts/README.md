@@ -119,6 +119,12 @@ Use these contracts to declare:
   - defines owner roles, typed transition envelopes, evidence, preconditions,
     recovery decisions, and stable-state invariants without claiming runtime
     implementation
+- `project-lifecycle-proof.yaml`
+  - deterministic positive and negative lifecycle scenarios built only from
+    canonical transition identifiers
+  - declares the representative synthetic project, expected state changes,
+    fail-closed cases, generated report paths, and truthful capability posture
+  - does not contain deployable product source or claim live backend wiring
 - `dependency-types.yaml`
   - approved cross-repo dependency semantics
 - `change-classes.yaml`

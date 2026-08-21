@@ -1,0 +1,546 @@
+schema_version: 1
+project_lifecycle_proof:
+  owner_repo: workspace-governance
+  lifecycle_contract_ref: contracts/project-lifecycle.yaml
+  proof_posture: local-deterministic
+  report_outputs:
+    json: reports/project-lifecycle-baseline-readiness.json
+    markdown: reports/project-lifecycle-baseline-readiness.md
+  representative_project:
+    project_ref: synthetic:lifecycle-proof:operator-notebook
+    title: Operator Notebook
+    source_ref: synthetic://source/operator-notebook
+    incubation_repo_ref: workspace-prototype-studio
+    owner_repo_ref: synthetic-operator-notebook
+    operator_ref: operator:local-proof
+  capability_postures:
+    - capability_id: canonical-lifecycle-contract
+      posture: implemented
+      reason: The five-axis lifecycle, authorities, envelopes, transitions, and invariants are machine-readable and schema validated.
+    - capability_id: semantic-transition-validator
+      posture: implemented
+      reason: Local validation rejects unsupported state, authority, envelope, evidence, recovery, and maturity claims.
+    - capability_id: deterministic-local-simulation
+      posture: implemented
+      reason: Positive and negative scenarios produce stable state projections and content-addressed receipts.
+    - capability_id: transition-backend-adapters
+      posture: contract-only
+      reason: Owner services have typed obligations, but this proof does not claim their transition adapters are active.
+    - capability_id: governed-runtime-wiring
+      posture: blocked-future-wiring
+      reason: Stage and production execution require later platform and security implementation and evidence.
+    - capability_id: console-projection-wiring
+      posture: blocked-future-wiring
+      reason: The Console projection remains fixture-backed until canonical backend reads and writes are implemented.
+  scenarios:
+    - scenario_id: direct-delivery-release-and-publication
+      class: positive
+      purpose: Prove direct delivery, durable source, governed runtime, release, operational completion, and optional publication.
+      initial_state: &initial_proposed
+        project-phase: proposed
+        source-custody: none
+        runtime-environment: none
+        release-posture: unreleased
+        publication-posture: unlisted
+      steps:
+        - step_id: route-delivery
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: &contract_only contract-only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected: &accepted
+            outcome: accepted
+            issue_contains: []
+        - step_id: create-durable-source
+          transition_id: source-create-durable-owner
+          state_changes:
+            source-custody: dedicated-owner-repo
+          source_authority_role: operator-workflow-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: source-custody-assignment
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, durable-source-record, validation-receipt, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: start-owner-preview
+          transition_id: runtime-start-owner-preview
+          state_changes:
+            runtime-environment: local-preview
+          source_authority_role: durable-source-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [durable-source-record, validation-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: enter-dev-integration
+          transition_id: runtime-enter-dev-integration
+          state_changes:
+            runtime-environment: dev-integration
+          source_authority_role: durable-source-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [durable-source-record, validation-receipt, runtime-evidence, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: promote-stage
+          transition_id: runtime-promote-stage
+          state_changes:
+            runtime-environment: stage
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [validation-receipt, security-decision, runtime-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: create-release-candidate
+          transition_id: release-create-candidate
+          state_changes:
+            release-posture: candidate
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: release-decision
+          omit_envelope_fields: []
+          evidence_types: [validation-receipt, security-decision, release-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: promote-production
+          transition_id: runtime-promote-production
+          state_changes:
+            runtime-environment: production
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [validation-receipt, security-decision, runtime-evidence, release-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: publish-release
+          transition_id: release-publish
+          state_changes:
+            release-posture: released
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: release-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, validation-receipt, security-decision, release-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: complete-delivery
+          transition_id: delivery-complete-operational
+          state_changes:
+            project-phase: operational
+          source_authority_role: operator-workflow-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, durable-source-record, validation-receipt, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: list-publicly
+          transition_id: publication-list
+          state_changes:
+            publication-posture: public
+          source_authority_role: publication-contract-authority
+          target_owner_role: publication-contract-authority
+          implementation_maturity: *contract_only
+          envelope_type: publication-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, durable-source-record, validation-receipt, publication-decision]
+          recovery: null
+          expected: *accepted
+      expected_final_state:
+        project-phase: operational
+        source-custody: dedicated-owner-repo
+        runtime-environment: production
+        release-posture: released
+        publication-posture: public
+
+    - scenario_id: incubation-graduation
+      class: positive
+      purpose: Prove incubation admission, preview, baseline promotion, exact custody transfer, and preview shutdown under the durable owner.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: route-incubation
+          transition_id: proposal-route-incubation
+          state_changes:
+            project-phase: incubating
+          source_authority_role: operator-workflow-authority
+          target_owner_role: incubation-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: admit-incubation-source
+          transition_id: source-admit-incubation
+          state_changes:
+            source-custody: incubation-repo
+          source_authority_role: incubation-source-authority
+          target_owner_role: incubation-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: source-custody-assignment
+          omit_envelope_fields: []
+          evidence_types: [incubation-source-record, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: start-incubation-preview
+          transition_id: runtime-start-incubation-preview
+          state_changes:
+            runtime-environment: local-preview
+          source_authority_role: incubation-source-authority
+          target_owner_role: incubation-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [incubation-source-record, validation-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: promote-baseline
+          transition_id: incubation-promote-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: incubation-source-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, validation-receipt, target-admission, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: transfer-source-custody
+          transition_id: source-graduate-durable-owner
+          state_changes:
+            source-custody: shared-owner-repo
+          source_authority_role: incubation-source-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: source-custody-transfer
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, incubation-source-record, durable-source-record, validation-receipt, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: stop-graduated-preview
+          transition_id: runtime-stop-local-preview
+          state_changes:
+            runtime-environment: none
+          source_authority_role: durable-source-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [validation-receipt]
+          recovery: null
+          expected: *accepted
+      expected_final_state:
+        project-phase: delivery-governed
+        source-custody: shared-owner-repo
+        runtime-environment: none
+        release-posture: unreleased
+        publication-posture: unlisted
+
+    - scenario_id: non-deployed-operational-publication
+      class: positive
+      purpose: Prove that a durable non-deployed product can complete delivery and be listed without inventing a runtime or release.
+      initial_state:
+        project-phase: delivery-governed
+        source-custody: shared-owner-repo
+        runtime-environment: none
+        release-posture: not-applicable
+        publication-posture: unlisted
+      steps:
+        - step_id: complete-non-deployed-delivery
+          transition_id: delivery-complete-operational
+          state_changes:
+            project-phase: operational
+          source_authority_role: operator-workflow-authority
+          target_owner_role: durable-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, durable-source-record, validation-receipt, owner-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: list-internally
+          transition_id: publication-list
+          state_changes:
+            publication-posture: internal
+          source_authority_role: publication-contract-authority
+          target_owner_role: publication-contract-authority
+          implementation_maturity: *contract_only
+          envelope_type: publication-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, durable-source-record, validation-receipt, publication-decision]
+          recovery: null
+          expected: *accepted
+      expected_final_state:
+        project-phase: operational
+        source-custody: shared-owner-repo
+        runtime-environment: none
+        release-posture: not-applicable
+        publication-posture: internal
+
+    - scenario_id: governed-retirement
+      class: positive
+      purpose: Prove ordered unlisting, release withdrawal, runtime shutdown, retirement, and historical archival.
+      initial_state:
+        project-phase: operational
+        source-custody: dedicated-owner-repo
+        runtime-environment: production
+        release-posture: released
+        publication-posture: public
+      steps:
+        - step_id: unlist-product
+          transition_id: publication-unlist
+          state_changes:
+            publication-posture: unlisted
+          source_authority_role: publication-contract-authority
+          target_owner_role: publication-contract-authority
+          implementation_maturity: *contract_only
+          envelope_type: publication-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, publication-decision]
+          recovery: null
+          expected: *accepted
+        - step_id: withdraw-release
+          transition_id: release-withdraw
+          state_changes:
+            release-posture: withdrawn
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: release-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, release-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: stop-production
+          transition_id: runtime-stop-governed
+          state_changes:
+            runtime-environment: none
+          source_authority_role: platform-runtime-authority
+          target_owner_role: platform-runtime-authority
+          implementation_maturity: *contract_only
+          envelope_type: runtime-promotion
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, runtime-evidence, rollback-record]
+          recovery: null
+          expected: *accepted
+        - step_id: retire-project
+          transition_id: retire-project
+          state_changes:
+            project-phase: retired
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: retirement-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, validation-receipt]
+          recovery: null
+          expected: *accepted
+        - step_id: archive-publication
+          transition_id: publication-archive
+          state_changes:
+            publication-posture: archived
+          source_authority_role: publication-contract-authority
+          target_owner_role: publication-contract-authority
+          implementation_maturity: *contract_only
+          envelope_type: publication-decision
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, publication-decision]
+          recovery: null
+          expected: *accepted
+      expected_final_state:
+        project-phase: retired
+        source-custody: dedicated-owner-repo
+        runtime-environment: none
+        release-posture: withdrawn
+        publication-posture: archived
+
+    - scenario_id: reject-unsupported-transition
+      class: negative
+      purpose: Reject a route that is absent from the canonical transition matrix.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: skip-to-publication
+          transition_id: prototype-skip-to-publication
+          state_changes:
+            publication-posture: public
+          source_authority_role: operator-workflow-authority
+          target_owner_role: publication-contract-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: []
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [unsupported transition]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-hidden-axis-mutation
+      class: negative
+      purpose: Reject a transition request that hides a second lifecycle mutation.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: route-and-assign-source
+          transition_id: proposal-route-incubation
+          state_changes:
+            project-phase: incubating
+            source-custody: incubation-repo
+          source_authority_role: operator-workflow-authority
+          target_owner_role: incubation-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [must change only project-phase]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-wrong-source-authority
+      class: negative
+      purpose: Reject a request submitted by a projection role instead of the transition authority.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: project-from-console
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: console-projection
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [requires source authority]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-wrong-target-owner
+      class: negative
+      purpose: Reject delivery routing that claims an incubation owner.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: route-to-wrong-owner
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: incubation-source-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [requires target owner]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-incomplete-envelope
+      class: negative
+      purpose: Reject a typed handoff that omits one required owner field.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: omit-target-owner-ref
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: [target_owner_ref]
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [target_owner_ref]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-missing-evidence
+      class: negative
+      purpose: Reject a route without the target admission evidence required by its transition.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: omit-target-admission
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: ["missing evidence: target-admission"]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-incomplete-recovery
+      class: negative
+      purpose: Reject a deferred transition that has no accountable owner or review date.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: incomplete-defer
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: *contract_only
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery:
+            decision: defer
+            justification: Target capacity is unavailable.
+          expected:
+            outcome: rejected
+            issue_contains: [owner, review_at]
+      expected_final_state: *initial_proposed
+
+    - scenario_id: reject-maturity-overstatement
+      class: negative
+      purpose: Reject a dev-integration implementation claim for a contract-only transition.
+      initial_state: *initial_proposed
+      steps:
+        - step_id: claim-live-adapter
+          transition_id: proposal-route-delivery
+          state_changes:
+            project-phase: delivery-governed
+          source_authority_role: operator-workflow-authority
+          target_owner_role: operator-workflow-authority
+          implementation_maturity: dev-integration
+          envelope_type: project-handoff
+          omit_envelope_fields: []
+          evidence_types: [operator-decision, target-admission, owner-receipt]
+          recovery: null
+          expected:
+            outcome: rejected
+            issue_contains: [exceeds contract maturity]
+      expected_final_state: *initial_proposed

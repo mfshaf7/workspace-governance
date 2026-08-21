@@ -23,6 +23,7 @@ from contracts_lib import (
     load_json,
 )
 from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
+from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
 
 
 CONTRACT_FORMAT_CHECKER = FormatChecker()
@@ -5340,6 +5341,7 @@ def main() -> int:
         "version": repo_root / "contracts/version.yaml",
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
+        "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
@@ -5462,6 +5464,14 @@ def main() -> int:
     errors.extend(
         f"contracts/project-lifecycle.yaml: {error}"
         for error in project_lifecycle_errors
+    )
+    project_lifecycle_proof_errors = project_lifecycle_proof_issues(
+        contracts["project_lifecycle"],
+        contracts["project_lifecycle_proof"],
+    )
+    errors.extend(
+        f"contracts/project-lifecycle-proof.yaml: {error}"
+        for error in project_lifecycle_proof_errors
     )
     intake_repos = set(intake_register["repos"].keys())
     retired_repos = set(contracts["repos"].get("retired_repos", {}).keys())

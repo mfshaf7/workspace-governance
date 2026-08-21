@@ -39,6 +39,44 @@ def base_state(**overrides: str) -> dict[str, str]:
     return state
 
 
+def complete_request(
+    contract: dict,
+    transition_id: str,
+    current_state: dict[str, str],
+    requested_state: dict[str, str],
+    *,
+    recovery: dict | None = None,
+) -> dict:
+    model = contract["project_lifecycle"]
+    transition = model["transitions"][transition_id]
+    envelope = {}
+    for field in model["envelopes"][transition["required_envelope"]][
+        "required_fields"
+    ]:
+        if field == "transition_id":
+            envelope[field] = transition_id
+        elif field == "expected_state_version":
+            envelope[field] = 1
+        elif field == "evidence_refs":
+            envelope[field] = ["proof://evidence/1"]
+        elif field == "recovery":
+            envelope[field] = recovery
+        else:
+            envelope[field] = f"proof://{field}/1"
+    return {
+        "transition_id": transition_id,
+        "current_state": current_state,
+        "requested_state": requested_state,
+        "source_authority_role": transition["source_authority_role"],
+        "target_owner_role": transition["target_owner_role"],
+        "implementation_maturity": transition["implementation_maturity"],
+        "envelope_type": transition["required_envelope"],
+        "envelope": envelope,
+        "evidence_types": list(transition["required_evidence"]),
+        "recovery": recovery,
+    }
+
+
 class ProjectLifecycleContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.contract = load_contract()
@@ -72,18 +110,12 @@ class ProjectLifecycleContractTests(unittest.TestCase):
         )
 
     def test_supported_transition_with_complete_evidence_passes(self) -> None:
-        request = {
-            "transition_id": "proposal-route-delivery",
-            "current_state": base_state(),
-            "requested_state": base_state(**{"project-phase": "delivery-governed"}),
-            "envelope_type": "project-handoff",
-            "evidence_types": [
-                "operator-decision",
-                "target-admission",
-                "owner-receipt",
-            ],
-            "recovery": None,
-        }
+        request = complete_request(
+            self.contract,
+            "proposal-route-delivery",
+            base_state(),
+            base_state(**{"project-phase": "delivery-governed"}),
+        )
 
         self.assertEqual(transition_request_issues(self.contract, request), [])
 
@@ -95,14 +127,12 @@ class ProjectLifecycleContractTests(unittest.TestCase):
                 "source-custody": "incubation-repo",
             }
         )
-        request = {
-            "transition_id": "source-admit-incubation",
-            "current_state": current,
-            "requested_state": requested,
-            "envelope_type": "source-custody-assignment",
-            "evidence_types": ["incubation-source-record", "owner-receipt"],
-            "recovery": None,
-        }
+        request = complete_request(
+            self.contract,
+            "source-admit-incubation",
+            current,
+            requested,
+        )
 
         self.assertEqual(transition_request_issues(self.contract, request), [])
 
@@ -115,14 +145,12 @@ class ProjectLifecycleContractTests(unittest.TestCase):
             }
         )
         requested = dict(current, **{"project-phase": "retired"})
-        request = {
-            "transition_id": "retire-project",
-            "current_state": current,
-            "requested_state": requested,
-            "envelope_type": "retirement-decision",
-            "evidence_types": ["operator-decision", "validation-receipt"],
-            "recovery": None,
-        }
+        request = complete_request(
+            self.contract,
+            "retire-project",
+            current,
+            requested,
+        )
 
         self.assertEqual(transition_request_issues(self.contract, request), [])
 
@@ -131,7 +159,11 @@ class ProjectLifecycleContractTests(unittest.TestCase):
             "transition_id": "prototype-skip-to-publication",
             "current_state": base_state(),
             "requested_state": base_state(),
+            "source_authority_role": "operator-workflow-authority",
+            "target_owner_role": "operator-workflow-authority",
+            "implementation_maturity": "contract-only",
             "envelope_type": "project-handoff",
+            "envelope": {},
             "evidence_types": [],
             "recovery": None,
         }
@@ -142,23 +174,17 @@ class ProjectLifecycleContractTests(unittest.TestCase):
         )
 
     def test_transition_cannot_hide_an_extra_axis_change(self) -> None:
-        request = {
-            "transition_id": "proposal-route-incubation",
-            "current_state": base_state(),
-            "requested_state": base_state(
+        request = complete_request(
+            self.contract,
+            "proposal-route-incubation",
+            base_state(),
+            base_state(
                 **{
                     "project-phase": "incubating",
                     "source-custody": "incubation-repo",
                 }
             ),
-            "envelope_type": "project-handoff",
-            "evidence_types": [
-                "operator-decision",
-                "target-admission",
-                "owner-receipt",
-            ],
-            "recovery": None,
-        }
+        )
 
         issues = transition_request_issues(self.contract, request)
 
@@ -180,25 +206,59 @@ class ProjectLifecycleContractTests(unittest.TestCase):
         )
 
     def test_non_removal_recovery_requires_governed_fields(self) -> None:
-        request = {
-            "transition_id": "proposal-route-delivery",
-            "current_state": base_state(),
-            "requested_state": base_state(**{"project-phase": "delivery-governed"}),
-            "envelope_type": "project-handoff",
-            "evidence_types": [
-                "operator-decision",
-                "target-admission",
-                "owner-receipt",
-            ],
-            "recovery": {
+        request = complete_request(
+            self.contract,
+            "proposal-route-delivery",
+            base_state(),
+            base_state(**{"project-phase": "delivery-governed"}),
+            recovery={
                 "decision": "defer",
                 "justification": "Target capacity is unavailable.",
             },
-        }
+        )
 
         issues = transition_request_issues(self.contract, request)
 
         self.assertTrue(any("owner, review_at" in issue for issue in issues), issues)
+
+    def test_wrong_transition_authority_is_rejected(self) -> None:
+        request = complete_request(
+            self.contract,
+            "proposal-route-delivery",
+            base_state(),
+            base_state(**{"project-phase": "delivery-governed"}),
+        )
+        request["source_authority_role"] = "console-projection"
+
+        issues = transition_request_issues(self.contract, request)
+
+        self.assertTrue(any("requires source authority" in issue for issue in issues), issues)
+
+    def test_incomplete_typed_envelope_is_rejected(self) -> None:
+        request = complete_request(
+            self.contract,
+            "proposal-route-delivery",
+            base_state(),
+            base_state(**{"project-phase": "delivery-governed"}),
+        )
+        del request["envelope"]["target_owner_ref"]
+
+        issues = transition_request_issues(self.contract, request)
+
+        self.assertTrue(any("target_owner_ref" in issue for issue in issues), issues)
+
+    def test_implementation_maturity_cannot_be_overstated(self) -> None:
+        request = complete_request(
+            self.contract,
+            "proposal-route-delivery",
+            base_state(),
+            base_state(**{"project-phase": "delivery-governed"}),
+        )
+        request["implementation_maturity"] = "dev-integration"
+
+        issues = transition_request_issues(self.contract, request)
+
+        self.assertTrue(any("exceeds contract maturity" in issue for issue in issues), issues)
 
 
 if __name__ == "__main__":
