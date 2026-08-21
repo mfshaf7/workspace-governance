@@ -3455,6 +3455,30 @@ def validate_delivery_art_artifact_contracts(
 
     merge_ready = fixtures.get("review-packet-merge-ready.valid.json")
     if merge_ready and work_start and architecture:
+        validation_only_merge_ready = copy.deepcopy(merge_ready)
+        validation_only_merge_ready["evidence"]["tests"] = []
+        validation_only_merge_ready["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ] = [
+            evidence_id
+            for evidence_id in validation_only_merge_ready["evidence"][
+                "acceptance_mapping"
+            ][0]["evidence_ids"]
+            if evidence_id != "evidence:schema-negative-cases"
+        ]
+        validation_only_merge_ready["integrity"]["content_digest"] = (
+            _delivery_art_projection_digest(
+                _delivery_art_content_digest_projection(
+                    validation_only_merge_ready
+                )
+            )
+        )
+        require_accepted(
+            "review_packet",
+            validation_only_merge_ready,
+            "validation-only merge-ready Review Packet without fabricated tests",
+        )
+
         failed_test = copy.deepcopy(merge_ready)
         failed_test["evidence"]["tests"][0]["result"] = "fail"
         require_rejected(
@@ -4016,12 +4040,48 @@ def validate_delivery_art_artifact_contracts(
             "finalized Review Packet without durable custody",
         )
 
-        missing_source_tests = copy.deepcopy(finalized)
-        missing_source_tests["evidence"]["tests"] = []
+        validation_only_source = copy.deepcopy(finalized)
+        validation_only_source["evidence"]["tests"] = []
+        validation_only_source["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ] = [
+            evidence_id
+            for evidence_id in validation_only_source["evidence"][
+                "acceptance_mapping"
+            ][0]["evidence_ids"]
+            if evidence_id != "evidence:schema-negative-cases"
+        ]
+        validation_only_source["readiness"]["subject_digest"] = (
+            delivery_art_review_packet_readiness_subject_digest(
+                validation_only_source
+            )
+        )
+        validation_only_source["integrity"]["content_digest"] = (
+            _delivery_art_projection_digest(
+                _delivery_art_content_digest_projection(validation_only_source)
+            )
+        )
+        require_accepted(
+            "review_packet",
+            validation_only_source,
+            "validation-only source Review Packet without fabricated tests",
+        )
+
+        missing_source_validations = copy.deepcopy(finalized)
+        missing_source_validations["evidence"]["validations"] = []
+        missing_source_validations["evidence"]["acceptance_mapping"][0][
+            "evidence_ids"
+        ] = [
+            evidence_id
+            for evidence_id in missing_source_validations["evidence"][
+                "acceptance_mapping"
+            ][0]["evidence_ids"]
+            if evidence_id != "evidence:contract-model"
+        ]
         require_rejected(
             "review_packet",
-            missing_source_tests,
-            "source-backed finalized Review Packet without tests",
+            missing_source_validations,
+            "source-backed finalized Review Packet without validations",
         )
 
         missing_readiness_receipt = copy.deepcopy(finalized)

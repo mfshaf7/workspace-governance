@@ -221,7 +221,7 @@
           "evidence": {
             "properties": {
               "changed_surfaces": { "minItems": 1 },
-              "tests": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "tests": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
               "validations": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
               "runtime_and_live": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
               "security_and_trust": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
@@ -297,7 +297,7 @@
           "evidence": {
             "properties": {
               "changed_surfaces": { "minItems": 1 },
-              "tests": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
+              "tests": { "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } },
               "validations": { "minItems": 1, "items": { "$ref": "#/$defs/nonFailingEvidenceResult" } }
             }
           }
