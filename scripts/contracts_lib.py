@@ -11,6 +11,7 @@ import yaml
 CONTRACT_FILES = {
     "version": "contracts/version.yaml",
     "lifecycle": "contracts/lifecycle.yaml",
+    "project_lifecycle": "contracts/project-lifecycle.yaml",
     "intake_policy": "contracts/intake-policy.yaml",
     "intake_register": "contracts/intake-register.yaml",
     "governed_intake_assist": "contracts/governed-intake-assist.yaml",
@@ -49,6 +50,7 @@ CONTRACT_FILES = {
 SCHEMA_FILES = {
     "version": "contracts/schemas/version.schema.json",
     "lifecycle": "contracts/schemas/lifecycle.schema.json",
+    "project_lifecycle": "contracts/schemas/project-lifecycle.schema.json",
     "intake_policy": "contracts/schemas/intake-policy.schema.json",
     "intake_register": "contracts/schemas/intake-register.schema.json",
     "governed_intake_assist": "contracts/schemas/governed-intake-assist.schema.json",

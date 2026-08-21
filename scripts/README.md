@@ -27,6 +27,10 @@
   - shared YAML and generated-artifact loader for the governance scripts
   - also resolves the governance-engine output manifest so materialized and
     generated outputs are declared once instead of hard-coded in multiple scripts
+- `project_lifecycle_contract.py`
+  - focused semantic support for the product-neutral project lifecycle contract
+  - validates owner uniqueness, state vectors, transition support, evidence,
+    preconditions, and recovery decisions through `validate_contracts.py`
 - `governance_engine_materializer.py`
   - shared materialization layer for workspace-root sync, managed live skill
     install, and generated governance artifacts

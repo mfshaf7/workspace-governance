@@ -22,6 +22,7 @@ from contracts_lib import (
     load_contracts,
     load_json,
 )
+from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
 
 
 CONTRACT_FORMAT_CHECKER = FormatChecker()
@@ -5338,6 +5339,7 @@ def main() -> int:
     instance_paths = {
         "version": repo_root / "contracts/version.yaml",
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
+        "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
@@ -5453,6 +5455,14 @@ def main() -> int:
     work_home_routing = contracts["work_home_routing"]["work_home_routing"]
     intake_statuses = set(intake_policy["statuses"])
     active_repos = set(active_repo_names(contracts))
+    project_lifecycle_errors = project_lifecycle_contract_issues(
+        contracts["project_lifecycle"],
+        known_repos=active_repos,
+    )
+    errors.extend(
+        f"contracts/project-lifecycle.yaml: {error}"
+        for error in project_lifecycle_errors
+    )
     intake_repos = set(intake_register["repos"].keys())
     retired_repos = set(contracts["repos"].get("retired_repos", {}).keys())
     product_names = set(contracts["products"]["products"].keys())

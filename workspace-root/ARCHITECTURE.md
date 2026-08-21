@@ -86,6 +86,29 @@ Primary source:
 
 - [workspace-governance/docs/governance-engine-foundation.md](/home/mfshaf7/projects/workspace-governance/docs/governance-engine-foundation.md)
 
+## Governed Project Lifecycle
+
+Project lifecycle truth is modeled on five independent axes instead of one
+overloaded status:
+
+- project phase
+- source custody
+- runtime environment
+- release posture
+- publication posture
+
+The primary phase routes are proposal to incubation or governed delivery,
+incubation to governed delivery, governed delivery to operational ownership,
+and explicit retirement. Portfolio publication is optional after operational
+ownership; it is not a build lane. Runtime and release decisions remain under
+Platform authority, and the Console remains a projection rather than canonical
+lifecycle truth.
+
+Primary source:
+
+- [workspace-governance/docs/project-lifecycle-architecture.md](/home/mfshaf7/projects/workspace-governance/docs/project-lifecycle-architecture.md)
+- [workspace-governance/contracts/project-lifecycle.yaml](/home/mfshaf7/projects/workspace-governance/contracts/project-lifecycle.yaml)
+
 ## Active Owner Repos
 
 - `workspace-governance/`
