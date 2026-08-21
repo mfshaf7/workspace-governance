@@ -68,8 +68,8 @@ python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7
 5. Open a PR with the repo's required governance declaration, meaningful
    summary, and draft Review Packet coverage for the ART items it supports.
 6. Fill the Review Packet with `open_pr` evidence, changed-surface
-   explanations, tests, validations, rollback boundary, and item-level
-   completion mapping.
+   explanations, applicable tests, mandatory validations, rollback boundary,
+   and item-level completion mapping.
 7. Fetch the PR base and run the local command or command set that is
    CI-equivalent for the changed surface before merge. If CI runs a validator
    with a base ref, such as `--against-ref origin/main`, the local proof must

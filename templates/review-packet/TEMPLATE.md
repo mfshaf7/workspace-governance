@@ -16,7 +16,7 @@
 
 ## Validation Evidence
 
-- Tests:
+- Tests, when applicable (leave empty instead of inventing a result):
 - Linters or validators:
 - Live checks:
 - Security or trust-boundary review:

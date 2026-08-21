@@ -151,8 +151,8 @@ ART readiness is four separate decisions, not one overloaded `ready` flag:
 2. `implementation-ready`: one Landing Unit is bound to exact ART and owner-repo
    source truth through a durable work-start record.
 3. `merge-ready`: the exact open-PR source head, or an explicitly authorized
-   direct-land head, has passing applicable tests, validations, acceptance
-   mapping, and a concrete rollback boundary.
+   direct-land head, has passing tests when applicable, mandatory validations,
+   acceptance mapping, and a concrete rollback boundary.
 4. `operating-ready`: merged or explicitly accepted evidence is finalized,
    content-addressed, durably stored, and includes any live, runtime, security,
    or restore proof required by the change class.
@@ -282,8 +282,8 @@ evidence cannot simultaneously claim a pull-request URL.
 
 Before merging source-backed work, create or refresh the local draft Review
 Packet. For the normal PR path it uses `open_pr` evidence and includes the PR
-URL, changed-surface explanations, tests, validations, rollback boundary, and
-item-level completion mapping. Fetch the PR base and run the local command or
+URL, changed-surface explanations, applicable tests, mandatory validations,
+rollback boundary, and item-level completion mapping. Fetch the PR base and run the local command or
 command set that is CI-equivalent for the changed surface. If required CI uses
 a base-aware validator, use the same base-ref shape after fetching the base,
 such as `--against-ref origin/main`. Every passing result records the exact
@@ -305,8 +305,11 @@ Finalize only after the operating-readiness receipt resolves, then use the
 final packet digest in ART completion evidence.
 
 Review Packet v2 replaces prose result lines with structured evidence. Every
-test and validation records its command, fidelity class, result, summary, and
-evidence refs. `fail` blocks merge readiness. `not_applicable` requires both a
+applicable test and every validation records its command, fidelity class,
+result, summary, and evidence refs. A validation-only source Landing Unit keeps
+an explicit empty `tests` array instead of manufacturing a `not_applicable`
+test row; at least one non-failing validation is still mandatory. `fail` blocks
+merge readiness. `not_applicable` requires both a
 reason and an authority ref. `Attached artifact` is a reference, not a passing
 result, and prefixes such as `PASS:`, `FAIL:`, and `CHECK:` are not evidence
 types.
