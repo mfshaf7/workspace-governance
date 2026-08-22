@@ -310,6 +310,10 @@ Only start implementation after that discussion narrows the target design.
 - ART items track delivery state. Landing Units track source landing and
   rollback truth. Review Packets bind landed or explicitly accepted evidence
   back to one or more ART items.
+- For source-backed ART work, the normal `dev-integration` operator path is the
+  OOS `work start`, `work status`, `work continue`, and `work close` command
+  family. Lifecycle-plan and direct artifact commands are recovery or contract
+  verification paths, not the normal workflow.
 - Source-backed ART children should not be marked `done` until a finalized
   Review Packet covers them with merged PR evidence, approved direct-land
   evidence, or equivalent durable source evidence. Multiple children may close

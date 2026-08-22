@@ -36,6 +36,11 @@ def load_validator():
 def capability_manifest() -> dict:
     normal_capabilities = [
         ("scoped-art-snapshot", "implemented", 2),
+        ("historical-material-freshness", "implemented", 2),
+        ("persistent-work-session", "implemented", 2),
+        ("process-restart-reconstruction", "implemented", 2),
+        ("worktree-relocation-reconstruction", "implemented", 2),
+        ("exact-next-action", "implemented", 2),
         ("architecture-decision", "human-gated", 1),
         ("architecture-packet-persistence", "implemented", 1),
         ("work-start-authoring", "implemented", 1),
@@ -45,26 +50,40 @@ def capability_manifest() -> dict:
         ("operating-readiness", "implemented", 2),
         ("review-packet-finalization", "implemented", 2),
         ("art-closeout", "implemented", 2),
-        ("resumable-lifecycle-reconciliation", "implemented", 1),
     ]
     return {
-        "schema_version": 1,
-        "contract_id": "operator-orchestration-service.delivery-art-lifecycle.v1",
+        "schema_version": 2,
+        "contract_id": "operator-orchestration-service.delivery-art-lifecycle.v2",
         "owner_repo": "operator-orchestration-service",
         "normal_operator_surface": {
+            "session_artifact_type": "delivery_art_work_session",
+            "start_command": "npm run art -- work start <work-item-id>",
+            "status_command": "npm run art -- work status <work-item-id>",
+            "continue_command": "npm run art -- work continue <work-item-id>",
+            "close_command": "npm run art -- work close <work-item-id>",
+            "help_command": "npm run art -- work --help",
+        },
+        "compatibility_operator_surface": {
             "plan_artifact_type": "delivery_art_lifecycle_plan",
             "status_command": "npm run art -- lifecycle status <plan.json>",
             "reconcile_command": "npm run art -- lifecycle reconcile <plan.json>",
         },
+        "state_store": {
+            "classification": "reconstructable-operator-coordination",
+            "default_root": "${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work",
+            "override_environment_variable": "OOS_ART_WORK_STATE_ROOT",
+            "atomic_replace": True,
+            "absolute_worktree_paths": False,
+            "secrets": False,
+        },
         "human_gates": [
             "architecture-decision",
-            "source-work",
-            "evidence",
-            "pull-request",
+            "landing-unit-decision",
+            "exception-or-risk-acceptance",
+            "pull-request-review",
             "source-merge",
-            "exception-acceptance",
+            "security-acceptance",
             "art-closeout",
-            "blocked",
         ],
         "capabilities": [
             {
@@ -76,6 +95,12 @@ def capability_manifest() -> dict:
             for capability_id, state, version in normal_capabilities
         ]
         + [
+            {
+                "id": "resumable-lifecycle-reconciliation",
+                "state": "compatibility",
+                "contract_version": 1,
+                "normal_path": False,
+            },
             {
                 "id": "review-packet-v1-compatibility",
                 "state": "compatibility",
@@ -171,23 +196,23 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
-    def test_pending_work_session_contract_passes(self) -> None:
+    def test_active_work_session_contract_passes(self) -> None:
         errors = self.validator.delivery_art_work_session_contract_errors(
             copy.deepcopy(self.work_session_contract)
         )
 
         self.assertEqual(errors, [])
 
-    def test_work_session_cannot_claim_activation_before_owner_sequence(self) -> None:
+    def test_work_session_cannot_downgrade_after_activation(self) -> None:
         work_session = copy.deepcopy(self.work_session_contract)
-        work_session["state"] = "active-dev-integration"
+        work_session["state"] = "implemented-pending-activation"
 
         errors = self.validator.delivery_art_work_session_contract_errors(
             work_session
         )
 
         self.assertIn(
-            "work-session lifecycle must remain pending until owner implementation, Security review, and activation land",
+            "work-session lifecycle must remain active in dev-integration after governed activation",
             errors,
         )
 
@@ -206,25 +231,27 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             errors,
         )
 
-    def test_pending_work_session_does_not_replace_active_manifest(self) -> None:
+    def test_active_work_session_is_owner_manifest_normal_surface(self) -> None:
         active_commands = self.manifest["normal_operator_surface"]
-        pending_commands = self.work_session_contract["commands"]
+        work_session_commands = self.work_session_contract["commands"]
 
         self.assertEqual(
             active_commands,
             {
-                "plan_artifact_type": "delivery_art_lifecycle_plan",
-                "status_command": "npm run art -- lifecycle status <plan.json>",
-                "reconcile_command": "npm run art -- lifecycle reconcile <plan.json>",
+                "session_artifact_type": "delivery_art_work_session",
+                "start_command": work_session_commands["start"],
+                "status_command": work_session_commands["status"],
+                "continue_command": work_session_commands["continue"],
+                "close_command": work_session_commands["close"],
+                "help_command": work_session_commands["help"],
             },
         )
-        self.assertNotIn(pending_commands["start"], active_commands.values())
 
     def test_projection_drift_fails(self) -> None:
         activation = self.activation()
         activation["capability_projection"]["normal_operator_surface"][
-            "reconcile_command"
-        ] = "npm run art -- lifecycle run <plan.json>"
+            "continue_command"
+        ] = "npm run art -- work reconcile <work-item-id>"
 
         errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
             self.workspace_root,

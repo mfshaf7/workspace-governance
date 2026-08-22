@@ -196,6 +196,9 @@ paths:
   - [operator-orchestration-service](/home/mfshaf7/projects/operator-orchestration-service/README.md)
     owns broker-backed operator workflows, delivery-control APIs, and
     OpenProject workflow adapters that span product boundaries
+  - its persistent Delivery ART work-session commands are the normal
+    `dev-integration` path; lifecycle plans and direct artifact commands remain
+    recovery or contract-verification surfaces
   - broad runtime rehearsal and restore requests should be classified as
     `product-runtime-drill`, `active-stack-runtime-drill`,
     `environment-complete-runtime-drill`, or `lifecycle-control-drill` and

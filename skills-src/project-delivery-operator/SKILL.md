@@ -79,21 +79,9 @@ Keep the four readiness decisions distinct:
   applicable structured evidence and a durable content-addressed Review Packet
 - `operating-ready`: finalized durable evidence satisfies closeout obligations
 
-The currently active OOS lifecycle path uses a `delivery_art_lifecycle_plan` in
+The active OOS lifecycle path uses a persistent `delivery_art_work_session` in
 `dev-integration`. Its capability manifest is source authority and Workspace
-Governance validates an exact capability projection. Until OOS work item `963`,
-Security work item `962`, and activation work item `964` land, use:
-
-- `npm run art -- lifecycle status <plan.json>`
-- `npm run art -- lifecycle reconcile <plan.json>`
-
-Reconciliation stops at declared human gates. Durable work-start, Review Packet
-v2, readiness, finalization, and closeout are normal-path capabilities. Review
-Packet v1 is compatibility-only. This does not grant stage or production
-authority.
-
-The approved v2 work-session command family is contract-ready but not yet
-active:
+Governance validates an exact capability projection. Use:
 
 - `npm run art -- work start <work-item-id>`
 - `npm run art -- work status <work-item-id>`
@@ -101,10 +89,18 @@ active:
 - `npm run art -- work close <work-item-id>`
 - `npm run art -- work --help`
 
-Do not advertise or depend on those commands before activation `964`. After
-activation, use them as the normal path and treat lifecycle-plan and direct
-artifact commands as generated compatibility, recovery, or contract-verification
-surfaces. Work-session state is reconstructable coordination under
+Work-session reconciliation stops at declared human gates. Durable work-start,
+Review Packet v2, readiness, finalization, and closeout are normal-path
+capabilities. This does not grant stage or production authority.
+
+Lifecycle-plan commands remain available for recovery and compatibility only:
+
+- `npm run art -- lifecycle status <plan.json>`
+- `npm run art -- lifecycle reconcile <plan.json>`
+
+Treat lifecycle-plan and direct artifact commands as generated compatibility,
+recovery, or contract-verification surfaces. Review Packet v1 is
+compatibility-only. Work-session state is reconstructable coordination under
 `${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work`
 unless `OOS_ART_WORK_STATE_ROOT` overrides it. It is not canonical ART, Git,
 WGCF, or Review Packet truth and must not contain secrets or absolute worktree
