@@ -135,7 +135,8 @@
         "artifact_discovery",
         "freshness",
         "compatibility",
-        "activation"
+        "activation",
+        "resource_retirement"
       ],
       "properties": {
         "contract_version": { "const": 2 },
@@ -367,6 +368,213 @@
             "security_work_item_ref": { "$ref": "#/$defs/artWorkPackageRef" },
             "target_state": { "const": "active-dev-integration" },
             "temporal_adapter": { "const": "deferred-until-durable-wait-evidence" }
+          }
+        },
+        "resource_retirement": { "$ref": "#/$defs/resourceRetirement" }
+      }
+    },
+    "resourceRetirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "state",
+        "owner_repo",
+        "activation_sequence",
+        "coordination_artifacts",
+        "resource_types",
+        "ownership_provenance",
+        "retention_classes",
+        "target_session_states",
+        "cleanup_states",
+        "resource_outcomes",
+        "cleanup_order",
+        "fail_closed_predicates",
+        "retry",
+        "terminal_receipt",
+        "protected_evidence",
+        "scope_exclusions",
+        "rules"
+      ],
+      "properties": {
+        "contract_version": { "const": 1 },
+        "state": { "const": "contract-ready-pending-owner-implementation" },
+        "owner_repo": { "const": "operator-orchestration-service" },
+        "activation_sequence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "implementation_work_item_ref",
+            "security_work_item_ref",
+            "custody_projection_work_item_ref",
+            "activation_work_item_ref"
+          ],
+          "properties": {
+            "implementation_work_item_ref": { "const": "openproject://work_packages/968" },
+            "security_work_item_ref": { "const": "openproject://work_packages/969" },
+            "custody_projection_work_item_ref": { "const": "openproject://work_packages/971" },
+            "activation_work_item_ref": { "const": "openproject://work_packages/970" }
+          }
+        },
+        "coordination_artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["resource_manifest", "cleanup_receipt"],
+          "properties": {
+            "resource_manifest": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["artifact_type", "schema_ref", "classification", "storage", "relative_path", "write_model"],
+              "properties": {
+                "artifact_type": { "const": "delivery_art_work_session_resource_manifest" },
+                "schema_ref": { "const": "contracts/schemas/delivery-art-work-session-resource-manifest.schema.json" },
+                "classification": { "const": "reconstructable-operator-coordination" },
+                "storage": { "const": "active-session-directory" },
+                "relative_path": { "const": "resource-manifest.json" },
+                "write_model": { "const": "atomic-replace" }
+              }
+            },
+            "cleanup_receipt": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["artifact_type", "schema_ref", "classification", "storage", "relative_path_template", "write_model"],
+              "properties": {
+                "artifact_type": { "const": "delivery_art_work_session_cleanup_receipt" },
+                "schema_ref": { "const": "contracts/schemas/delivery-art-work-session-cleanup-receipt.schema.json" },
+                "classification": { "const": "retained-terminal-local-evidence" },
+                "storage": { "const": "state-root-cleanup-receipts" },
+                "relative_path_template": { "const": "cleanup-receipts/<encoded-session-id>.json" },
+                "write_model": { "const": "create-once-idempotent" }
+              }
+            }
+          }
+        },
+        "resource_types": {
+          "const": ["git-worktree", "git-local-branch", "git-remote-branch", "managed-session-state"]
+        },
+        "ownership_provenance": {
+          "const": ["session-created", "pre-existing", "ambiguous"]
+        },
+        "retention_classes": {
+          "const": ["retire-on-terminal-close", "operator-retained", "policy-retained"]
+        },
+        "target_session_states": {
+          "const": ["cleanup-required", "cleanup-running", "cleanup-blocked"]
+        },
+        "cleanup_states": {
+          "const": ["not-required", "required", "planning", "ready", "running", "blocked", "complete"]
+        },
+        "resource_outcomes": {
+          "const": ["pending", "eligible", "removed", "retained", "blocked"]
+        },
+        "cleanup_order": {
+          "const": [
+            "verify-durable-close-evidence",
+            "persist-cleanup-plan",
+            "retire-git-worktree",
+            "retire-git-local-branch",
+            "retire-git-remote-branch",
+            "retire-managed-session-state",
+            "persist-terminal-cleanup-receipt",
+            "retire-active-session-and-index"
+          ]
+        },
+        "fail_closed_predicates": {
+          "const": [
+            "dirty-worktree",
+            "head-mismatch",
+            "ownership-marker-mismatch",
+            "branch-attached-to-another-worktree",
+            "unmerged-local-branch",
+            "open-or-unmerged-pull-request",
+            "remote-head-mismatch",
+            "managed-state-outside-allowlist",
+            "resource-delete-failed",
+            "manifest-or-receipt-write-failed",
+            "absolute-or-parent-traversal-path"
+          ]
+        },
+        "retry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "blocked_session_state",
+            "revalidate_before_retry",
+            "retry_scope",
+            "completed_resource_behavior",
+            "art_or_evidence_rollback"
+          ],
+          "properties": {
+            "blocked_session_state": { "const": "cleanup-blocked" },
+            "revalidate_before_retry": { "const": true },
+            "retry_scope": { "const": "pending-or-blocked-resources-only" },
+            "completed_resource_behavior": { "const": "idempotent-no-op" },
+            "art_or_evidence_rollback": { "const": "prohibited" }
+          }
+        },
+        "terminal_receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "outcomes",
+            "blocked_attempt_record_location",
+            "receipt_before_session_retirement",
+            "active_session_retired_after_receipt"
+          ],
+          "properties": {
+            "outcomes": { "const": ["complete", "complete-with-retained-resources"] },
+            "blocked_attempt_record_location": { "const": "active-session-resource-manifest" },
+            "receipt_before_session_retirement": { "const": true },
+            "active_session_retired_after_receipt": { "const": true }
+          }
+        },
+        "protected_evidence": {
+          "const": [
+            "workspace-delivery-art",
+            "owner-repo-git-history",
+            "wgcf-artifacts-and-receipts",
+            "security-review-evidence",
+            "review-packets",
+            "cleanup-receipts"
+          ]
+        },
+        "scope_exclusions": { "const": ["docker-resources", "unrelated-historical-residue"] },
+        "rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "explicit_close_intent_required",
+            "provenance_required_before_delete",
+            "exact_head_match_required",
+            "local_branch_detached_before_delete",
+            "remote_branch_merged_pr_required",
+            "managed_state_allowlist_required",
+            "unknown_ownership_retained",
+            "preexisting_resources_retained",
+            "durable_evidence_deletion_prohibited",
+            "force_delete_prohibited",
+            "broad_prune_prohibited",
+            "docker_cleanup_excluded",
+            "partial_failure_retryable",
+            "terminal_receipt_retained",
+            "unrelated_historical_residue_out_of_scope"
+          ],
+          "properties": {
+            "explicit_close_intent_required": { "const": true },
+            "provenance_required_before_delete": { "const": true },
+            "exact_head_match_required": { "const": true },
+            "local_branch_detached_before_delete": { "const": true },
+            "remote_branch_merged_pr_required": { "const": true },
+            "managed_state_allowlist_required": { "const": true },
+            "unknown_ownership_retained": { "const": true },
+            "preexisting_resources_retained": { "const": true },
+            "durable_evidence_deletion_prohibited": { "const": true },
+            "force_delete_prohibited": { "const": true },
+            "broad_prune_prohibited": { "const": true },
+            "docker_cleanup_excluded": { "const": true },
+            "partial_failure_retryable": { "const": true },
+            "terminal_receipt_retained": { "const": true },
+            "unrelated_historical_residue_out_of_scope": { "const": true }
           }
         }
       }
@@ -629,7 +837,15 @@
           "enum": ["operator-orchestration-service", "workspace-governance-control-fabric"]
         },
         "durable_when": { "$ref": "#/$defs/nonEmptyString" },
-        "migration_from_runtime_version": { "type": "integer", "minimum": 1 }
+        "migration_from_runtime_version": { "type": "integer", "minimum": 1 },
+        "target_schema_version": { "type": "integer", "minimum": 1 },
+        "compatibility_schema_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "target_activation_ref": { "$ref": "#/$defs/artWorkPackageRef" }
       }
     },
     "artifactContracts": {
@@ -641,9 +857,13 @@
           "allOf": [
             { "$ref": "#/$defs/artifactContract" },
             {
+              "required": ["target_schema_version", "compatibility_schema_versions", "target_activation_ref"],
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
                 "schema_version": { "const": 1 },
+                "target_schema_version": { "const": 2 },
+                "compatibility_schema_versions": { "const": [1] },
+                "target_activation_ref": { "const": "openproject://work_packages/970" },
                 "producer_repo": { "const": "operator-orchestration-service" },
                 "custody_repo": { "const": "workspace-governance-control-fabric" }
               }
@@ -829,7 +1049,8 @@
             "readiness_model.rules",
             "work_start_gate",
             "evidence_integrity",
-            "initiative_architecture_preflight"
+            "initiative_architecture_preflight",
+            "work_session_lifecycle.resource_retirement.rules"
           ]
         },
         "every_true_claim_mapped_once": { "const": true },

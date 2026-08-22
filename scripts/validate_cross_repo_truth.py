@@ -10,6 +10,10 @@ import sys
 
 import yaml
 
+from delivery_art_resource_retirement_contract import (
+    resource_retirement_definition_issues,
+)
+
 from contracts_lib import (
     active_repo_names,
     generated_paths,
@@ -535,6 +539,12 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
         "temporal_adapter": "deferred-until-durable-wait-evidence",
     }:
         errors.append("work-session activation boundary differs from the approved sequence")
+
+    errors.extend(
+        resource_retirement_definition_issues(
+            work_session.get("resource_retirement") or {}
+        )
+    )
 
     return errors
 

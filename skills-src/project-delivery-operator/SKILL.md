@@ -65,11 +65,14 @@ cases must pass before merge readiness. Use a `real-git` case for Git-history
 causality, and declare the exact work items and dimensions whose claims require
 that fidelity; a synthetic resolver cannot prove a real commit sequence.
 
-Architecture packet v1 retains repo-level `merge_order` for compatibility.
-Use architecture packet v2 `landing_unit_order` when one owner repo appears in
-more than one Landing Unit or when review and activation are separate landings.
-That order covers work items, not unique repo names, and must honor every
-dependency precedence edge.
+Workspace Governance accepts architecture packet v1 and v2. The active OOS and
+WGCF projections remain v1 until work items `968`, `971`, `969`, and `970` land
+in that dependency order. Use v1 for a bounded bootstrap packet before that
+activation. After activation, use v2 `landing_unit_order` whenever one owner
+repo appears in more than one Landing Unit or review and activation are
+separate landings. That order covers work items, not unique repo names, and
+must honor every dependency precedence edge. V1 then remains compatibility
+only.
 
 Keep the four readiness decisions distinct:
 
@@ -105,6 +108,26 @@ compatibility-only. Work-session state is reconstructable coordination under
 unless `OOS_ART_WORK_STATE_ROOT` overrides it. It is not canonical ART, Git,
 WGCF, or Review Packet truth and must not contain secrets or absolute worktree
 paths.
+
+Work-session resource retirement is contract-ready but remains pending owner
+implementation, Security review, custody projection, and activation through ART
+items `968`, `969`, `971`, and `970`. Before activation, do not claim that
+`work close` retired Git or managed temporary resources. After the active
+capability projection includes resource retirement, the same `work close`
+command must:
+
+- require explicit close intent and durable completion evidence
+- delete only resources marked `session-created` in the session manifest
+- retain pre-existing, ambiguous, operator-retained, and policy-retained state
+- fail closed on dirty state, ownership or head mismatch, unmerged work, unsafe
+  paths, or deletion and receipt-write failures
+- preserve ART, Git history, WGCF artifacts and receipts, Security evidence,
+  Review Packets, and earlier cleanup receipts
+- persist a terminal cleanup receipt before retiring active session state
+- leave partial failures retryable from `cleanup-blocked`
+
+Docker resources and unrelated historical residue are not part of this close
+path. Do not broaden cleanup with `--force`, broad prune, or ad hoc deletion.
 
 Initial architecture persistence and every new transition candidate require a
 fresh scoped snapshot. Historical architecture remains immutable and valid

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-work-session-resource-manifest.schema.json",
+  "title": "Delivery ART Work-Session Resource Manifest",
+  "$comment": "Reconstructable OOS coordination that records only resources explicitly bound to one work session. Cross-resource identity, ownership-marker, path-safety, and state-transition invariants are enforced by scripts/delivery_art_resource_retirement_contract.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "session_id",
+    "delivery_id",
+    "landing_unit_id",
+    "generation",
+    "updated_at",
+    "cleanup",
+    "resources"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "delivery_art_work_session_resource_manifest" },
+    "session_id": { "$ref": "#/$defs/sessionId" },
+    "delivery_id": { "$ref": "#/$defs/deliveryId" },
+    "landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+    "generation": { "type": "integer", "minimum": 1 },
+    "updated_at": { "$ref": "#/$defs/timestamp" },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "close_intent", "attempt", "last_error"],
+      "properties": {
+        "state": {
+          "enum": [
+            "not-required",
+            "required",
+            "planning",
+            "ready",
+            "running",
+            "blocked",
+            "complete"
+          ]
+        },
+        "close_intent": { "type": "boolean" },
+        "attempt": { "type": "integer", "minimum": 0 },
+        "last_error": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/resource" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "landingUnitId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "repoName": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "relativePath": { "type": "string", "minLength": 1 },
+    "ownershipProvenance": {
+      "enum": ["session-created", "pre-existing", "ambiguous"]
+    },
+    "retentionClass": {
+      "enum": ["retire-on-terminal-close", "operator-retained", "policy-retained"]
+    },
+    "resourceOutcome": {
+      "enum": ["pending", "eligible", "removed", "retained", "blocked"]
+    },
+    "worktreeLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "repo", "workspace_relative_path", "expected_head_commit", "ownership_marker"],
+      "properties": {
+        "kind": { "const": "worktree" },
+        "repo": { "$ref": "#/$defs/repoName" },
+        "workspace_relative_path": { "$ref": "#/$defs/relativePath" },
+        "expected_head_commit": { "$ref": "#/$defs/gitCommit" },
+        "ownership_marker": { "$ref": "#/$defs/sessionId" }
+      }
+    },
+    "localBranchLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "repo", "branch", "base_ref", "expected_head_commit", "ownership_marker"],
+      "properties": {
+        "kind": { "const": "local-branch" },
+        "repo": { "$ref": "#/$defs/repoName" },
+        "branch": { "$ref": "#/$defs/nonEmptyString" },
+        "base_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "expected_head_commit": { "$ref": "#/$defs/gitCommit" },
+        "ownership_marker": { "$ref": "#/$defs/sessionId" }
+      }
+    },
+    "remoteBranchLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "repo", "remote", "branch", "expected_head_commit", "pull_request_ref", "ownership_marker"],
+      "properties": {
+        "kind": { "const": "remote-branch" },
+        "repo": { "$ref": "#/$defs/repoName" },
+        "remote": { "$ref": "#/$defs/nonEmptyString" },
+        "branch": { "$ref": "#/$defs/nonEmptyString" },
+        "expected_head_commit": { "$ref": "#/$defs/gitCommit" },
+        "pull_request_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "ownership_marker": { "$ref": "#/$defs/sessionId" }
+      }
+    },
+    "managedStateLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "relative_path", "ownership_marker"],
+      "properties": {
+        "kind": { "const": "managed-session-state" },
+        "relative_path": { "$ref": "#/$defs/relativePath" },
+        "ownership_marker": { "$ref": "#/$defs/sessionId" }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "resource_type",
+        "ownership_provenance",
+        "retention_class",
+        "outcome",
+        "locator",
+        "last_error"
+      ],
+      "properties": {
+        "resource_id": { "type": "string", "pattern": "^resource:[a-z0-9][a-z0-9._:-]*$" },
+        "resource_type": {
+          "enum": ["git-worktree", "git-local-branch", "git-remote-branch", "managed-session-state"]
+        },
+        "ownership_provenance": { "$ref": "#/$defs/ownershipProvenance" },
+        "retention_class": { "$ref": "#/$defs/retentionClass" },
+        "outcome": { "$ref": "#/$defs/resourceOutcome" },
+        "locator": {
+          "oneOf": [
+            { "$ref": "#/$defs/worktreeLocator" },
+            { "$ref": "#/$defs/localBranchLocator" },
+            { "$ref": "#/$defs/remoteBranchLocator" },
+            { "$ref": "#/$defs/managedStateLocator" }
+          ]
+        },
+        "last_error": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "resource_type": { "const": "git-worktree" } }, "required": ["resource_type"] },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/worktreeLocator" } } }
+        },
+        {
+          "if": { "properties": { "resource_type": { "const": "git-local-branch" } }, "required": ["resource_type"] },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/localBranchLocator" } } }
+        },
+        {
+          "if": { "properties": { "resource_type": { "const": "git-remote-branch" } }, "required": ["resource_type"] },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/remoteBranchLocator" } } }
+        },
+        {
+          "if": { "properties": { "resource_type": { "const": "managed-session-state" } }, "required": ["resource_type"] },
+          "then": { "properties": { "locator": { "$ref": "#/$defs/managedStateLocator" } } }
+        }
+      ]
+    }
+  }
+}

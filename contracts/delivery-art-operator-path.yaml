@@ -176,6 +176,9 @@ delivery_art_operator_path:
         Require explicit operator closeout intent, resolve finalized evidence,
         submit bounded ART completion and eligible parent closeout, reconcile
         projection state, and retire the local work session only after success.
+        Once resource retirement is activated, close must first persist a cleanup
+        plan, remove only proven session-owned resources, retain the terminal
+        cleanup receipt, and then retire active session state.
       help: >-
         Show only the work-session command family, required arguments, current
         authority boundaries, state location, compatibility path, and examples.
@@ -267,6 +270,121 @@ delivery_art_operator_path:
       security_work_item_ref: openproject://work_packages/962
       target_state: active-dev-integration
       temporal_adapter: deferred-until-durable-wait-evidence
+    resource_retirement:
+      contract_version: 1
+      state: contract-ready-pending-owner-implementation
+      owner_repo: operator-orchestration-service
+      activation_sequence:
+        implementation_work_item_ref: openproject://work_packages/968
+        security_work_item_ref: openproject://work_packages/969
+        custody_projection_work_item_ref: openproject://work_packages/971
+        activation_work_item_ref: openproject://work_packages/970
+      coordination_artifacts:
+        resource_manifest:
+          artifact_type: delivery_art_work_session_resource_manifest
+          schema_ref: contracts/schemas/delivery-art-work-session-resource-manifest.schema.json
+          classification: reconstructable-operator-coordination
+          storage: active-session-directory
+          relative_path: resource-manifest.json
+          write_model: atomic-replace
+        cleanup_receipt:
+          artifact_type: delivery_art_work_session_cleanup_receipt
+          schema_ref: contracts/schemas/delivery-art-work-session-cleanup-receipt.schema.json
+          classification: retained-terminal-local-evidence
+          storage: state-root-cleanup-receipts
+          relative_path_template: cleanup-receipts/<encoded-session-id>.json
+          write_model: create-once-idempotent
+      resource_types:
+        - git-worktree
+        - git-local-branch
+        - git-remote-branch
+        - managed-session-state
+      ownership_provenance:
+        - session-created
+        - pre-existing
+        - ambiguous
+      retention_classes:
+        - retire-on-terminal-close
+        - operator-retained
+        - policy-retained
+      target_session_states:
+        - cleanup-required
+        - cleanup-running
+        - cleanup-blocked
+      cleanup_states:
+        - not-required
+        - required
+        - planning
+        - ready
+        - running
+        - blocked
+        - complete
+      resource_outcomes:
+        - pending
+        - eligible
+        - removed
+        - retained
+        - blocked
+      cleanup_order:
+        - verify-durable-close-evidence
+        - persist-cleanup-plan
+        - retire-git-worktree
+        - retire-git-local-branch
+        - retire-git-remote-branch
+        - retire-managed-session-state
+        - persist-terminal-cleanup-receipt
+        - retire-active-session-and-index
+      fail_closed_predicates:
+        - dirty-worktree
+        - head-mismatch
+        - ownership-marker-mismatch
+        - branch-attached-to-another-worktree
+        - unmerged-local-branch
+        - open-or-unmerged-pull-request
+        - remote-head-mismatch
+        - managed-state-outside-allowlist
+        - resource-delete-failed
+        - manifest-or-receipt-write-failed
+        - absolute-or-parent-traversal-path
+      retry:
+        blocked_session_state: cleanup-blocked
+        revalidate_before_retry: true
+        retry_scope: pending-or-blocked-resources-only
+        completed_resource_behavior: idempotent-no-op
+        art_or_evidence_rollback: prohibited
+      terminal_receipt:
+        outcomes:
+          - complete
+          - complete-with-retained-resources
+        blocked_attempt_record_location: active-session-resource-manifest
+        receipt_before_session_retirement: true
+        active_session_retired_after_receipt: true
+      protected_evidence:
+        - workspace-delivery-art
+        - owner-repo-git-history
+        - wgcf-artifacts-and-receipts
+        - security-review-evidence
+        - review-packets
+        - cleanup-receipts
+      scope_exclusions:
+        - docker-resources
+        - unrelated-historical-residue
+      rules:
+        explicit_close_intent_required: true
+        provenance_required_before_delete: true
+        exact_head_match_required: true
+        local_branch_detached_before_delete: true
+        remote_branch_merged_pr_required: true
+        managed_state_allowlist_required: true
+        unknown_ownership_retained: true
+        preexisting_resources_retained: true
+        durable_evidence_deletion_prohibited: true
+        force_delete_prohibited: true
+        broad_prune_prohibited: true
+        docker_cleanup_excluded: true
+        partial_failure_retryable: true
+        terminal_receipt_retained: true
+        unrelated_historical_residue_out_of_scope: true
   readiness_model:
     ordered_levels:
       - architecture-ready
@@ -335,6 +453,10 @@ delivery_art_operator_path:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
       schema_version: 1
+      target_schema_version: 2
+      compatibility_schema_versions:
+        - 1
+      target_activation_ref: openproject://work_packages/970
       producer_repo: operator-orchestration-service
       custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
@@ -369,6 +491,7 @@ delivery_art_operator_path:
       - work_start_gate
       - evidence_integrity
       - initiative_architecture_preflight
+      - work_session_lifecycle.resource_retirement.rules
     every_true_claim_mapped_once: true
     active_local_requires_positive_and_negative_case: true
     obligations:
@@ -466,6 +589,35 @@ delivery_art_operator_path:
           approved architecture packet as immutable historical evidence. It
           must block only when current ART truth changes a material
           architecture semantic covered by the approved decision.
+      - id: work-session-resource-retirement
+        claim_refs:
+          - work_session_lifecycle.resource_retirement.rules.explicit_close_intent_required
+          - work_session_lifecycle.resource_retirement.rules.provenance_required_before_delete
+          - work_session_lifecycle.resource_retirement.rules.exact_head_match_required
+          - work_session_lifecycle.resource_retirement.rules.local_branch_detached_before_delete
+          - work_session_lifecycle.resource_retirement.rules.remote_branch_merged_pr_required
+          - work_session_lifecycle.resource_retirement.rules.managed_state_allowlist_required
+          - work_session_lifecycle.resource_retirement.rules.unknown_ownership_retained
+          - work_session_lifecycle.resource_retirement.rules.preexisting_resources_retained
+          - work_session_lifecycle.resource_retirement.rules.durable_evidence_deletion_prohibited
+          - work_session_lifecycle.resource_retirement.rules.force_delete_prohibited
+          - work_session_lifecycle.resource_retirement.rules.broad_prune_prohibited
+          - work_session_lifecycle.resource_retirement.rules.docker_cleanup_excluded
+          - work_session_lifecycle.resource_retirement.rules.partial_failure_retryable
+          - work_session_lifecycle.resource_retirement.rules.terminal_receipt_retained
+          - work_session_lifecycle.resource_retirement.rules.unrelated_historical_residue_out_of_scope
+        enforcement_state: pending-owner
+        owner_repo: operator-orchestration-service
+        owner_art_refs:
+          - openproject://work_packages/968
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: >-
+          Workspace Governance defines the deletion boundary and artifact shape,
+          but OOS work item 968 must implement and prove the runtime behavior before
+          these rules can become active-owner-runtime claims.
       - id: read-cache-policy
         claim_refs:
           - work_start_gate.read_snapshot_cache_allowed

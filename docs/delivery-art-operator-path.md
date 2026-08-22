@@ -123,6 +123,13 @@ order must exactly cover the dependency nodes and honor every dependency
 precedence edge. This permits a contract owner, runtime owner, then
 contract-owner activation sequence without inventing two owner identities.
 
+Workspace Governance accepts both schema versions. The active OOS producer and
+WGCF custodian remain on v1 until activation work item `970`. Use v1 for the
+bounded bootstrap packet during that interval. Work items `968` and `971` add
+v2 producer and custody support; Security and activation work items `969` and
+`970` must then complete before v2 becomes the normal shape and v1 becomes
+compatibility-only.
+
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
 dimension in its executable conformance plan. It must cover command acknowledgement,
@@ -245,6 +252,56 @@ Architecture, Landing Unit, exception or risk, PR review, source merge,
 Security acceptance, and ART closeout remain human gates. Lifecycle plans and
 direct artifact commands are generated compatibility, recovery, or contract
 verification surfaces, not the normal operator path.
+
+### Resource Retirement Contract
+
+Resource retirement is contract-ready but is not active runtime behavior yet.
+OOS work item `968` owns implementation, Security work item `969` owns the
+trust-boundary review, WGCF work item `971` owns architecture packet v2 custody,
+and Workspace Governance work item `970` owns final activation. Until those
+items land, `work close` must not be represented as proof that Git or managed
+temporary resources were retired.
+
+The target close path extends the existing command; it does not add a second
+cleanup command or service. After explicit close intent and durable ART/source
+evidence are verified, OOS will persist a
+[`delivery_art_work_session_resource_manifest`](../contracts/schemas/delivery-art-work-session-resource-manifest.schema.json)
+inside the active session directory and process only resources bound to that
+session. The allowed resource types are Git worktrees, local branches, remote
+branches, and allowlisted managed session state.
+
+Every resource records `session-created`, `pre-existing`, or `ambiguous`
+provenance. Only a `session-created` resource with the retirement retention
+class can be deleted. Pre-existing, ambiguous, explicitly retained, and
+policy-retained resources remain in place. Absolute paths, parent traversal,
+ownership-marker mismatch, dirty worktrees, head mismatch, unmerged branches,
+open or unmerged pull requests, and deletion or receipt-write failure block the
+cleanup attempt.
+
+Cleanup order is fixed:
+
+1. verify durable close evidence
+2. persist the cleanup plan
+3. retire the worktree
+4. retire the local branch
+5. retire the remote branch
+6. retire allowlisted managed session state
+7. persist the terminal cleanup receipt outside the active session directory
+8. retire the active session and index entry
+
+A partial failure leaves the session in `cleanup-blocked` with per-resource
+state intact. A retry revalidates and processes only pending or blocked
+resources; already removed or retained resources are idempotent no-ops. A
+terminal
+[`delivery_art_work_session_cleanup_receipt`](../contracts/schemas/delivery-art-work-session-cleanup-receipt.schema.json)
+is written under `cleanup-receipts/<encoded-session-id>.json` before active
+session retirement and records either `complete` or
+`complete-with-retained-resources`.
+
+The cleanup boundary never deletes Delivery ART records, Git history, WGCF
+artifacts or receipts, Security evidence, Review Packets, or cleanup receipts.
+Docker resources and unrelated historical residue are explicitly outside this
+Landing Unit and require separate owner decisions.
 
 ## Work-Start Gate
 
