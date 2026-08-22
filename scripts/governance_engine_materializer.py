@@ -17,6 +17,9 @@ from contracts_lib import (
 )
 
 
+LOCAL_OWNER_REPO = "workspace-governance"
+
+
 def directories_match(left: Path, right: Path) -> bool:
     if not left.exists() or not right.exists():
         return False
@@ -130,7 +133,13 @@ def install_registered_skills(
     for skill_name, payload in sorted(registered_skills.items()):
         if selected and skill_name not in selected:
             continue
-        source_dir = workspace_root / payload["owner_repo"] / payload["source_path"]
+        owner_repo = payload["owner_repo"]
+        source_repo_root = (
+            repo_root
+            if owner_repo == LOCAL_OWNER_REPO
+            else workspace_root / owner_repo
+        )
+        source_dir = source_repo_root / payload["source_path"]
         target_dir = target_root / source_dir.name
         current_skill_dirs.append(source_dir.name)
         if not source_dir.exists():

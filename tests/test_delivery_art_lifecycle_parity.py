@@ -10,6 +10,8 @@ import sys
 import tempfile
 import unittest
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_ROOT = REPO_ROOT / "scripts"
@@ -94,6 +96,14 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.validator = load_validator()
+        contract = yaml.safe_load(
+            (REPO_ROOT / "contracts/delivery-art-operator-path.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        cls.work_session_contract = contract["delivery_art_operator_path"][
+            "work_session_lifecycle"
+        ]
 
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -160,6 +170,55 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         )
 
         self.assertEqual(errors, [])
+
+    def test_pending_work_session_contract_passes(self) -> None:
+        errors = self.validator.delivery_art_work_session_contract_errors(
+            copy.deepcopy(self.work_session_contract)
+        )
+
+        self.assertEqual(errors, [])
+
+    def test_work_session_cannot_claim_activation_before_owner_sequence(self) -> None:
+        work_session = copy.deepcopy(self.work_session_contract)
+        work_session["state"] = "active-dev-integration"
+
+        errors = self.validator.delivery_art_work_session_contract_errors(
+            work_session
+        )
+
+        self.assertIn(
+            "work-session lifecycle must remain pending until owner implementation, Security review, and activation land",
+            errors,
+        )
+
+    def test_work_session_command_drift_fails(self) -> None:
+        work_session = copy.deepcopy(self.work_session_contract)
+        work_session["commands"]["continue"] = (
+            "npm run art -- work reconcile <work-item-id>"
+        )
+
+        errors = self.validator.delivery_art_work_session_contract_errors(
+            work_session
+        )
+
+        self.assertIn(
+            "work-session lifecycle command family differs from the approved contract",
+            errors,
+        )
+
+    def test_pending_work_session_does_not_replace_active_manifest(self) -> None:
+        active_commands = self.manifest["normal_operator_surface"]
+        pending_commands = self.work_session_contract["commands"]
+
+        self.assertEqual(
+            active_commands,
+            {
+                "plan_artifact_type": "delivery_art_lifecycle_plan",
+                "status_command": "npm run art -- lifecycle status <plan.json>",
+                "reconcile_command": "npm run art -- lifecycle reconcile <plan.json>",
+            },
+        )
+        self.assertNotIn(pending_commands["start"], active_commands.values())
 
     def test_projection_drift_fails(self) -> None:
         activation = self.activation()

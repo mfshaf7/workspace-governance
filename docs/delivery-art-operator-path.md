@@ -111,9 +111,17 @@ items. Parent links form a rooted acyclic forest, every edge endpoint resolves,
 and the source snapshot contains exactly one revision for every declared owner
 repo. Dependency relations have explicit precedence: the target precedes the
 source for `depends_on`; the source precedes the target for `blocks` and
-`must_merge_before`. Cross-repo edges must be honored by `merge_order`, and
-every lifecycle transition endpoint must be a declared lifecycle state. These
-invariants are semantic checks in addition to JSON Schema shape.
+`must_merge_before`. Every lifecycle transition endpoint must be a declared
+lifecycle state. These invariants are semantic checks in addition to JSON
+Schema shape.
+
+Architecture packet v1 retains repo-level `merge_order` for compatibility. It
+can represent each owner repo only once. Architecture packet v2 uses
+work-item-level `landing_unit_order` and is required when one owner repo lands
+more than once or when review and activation are separate Landing Units. The
+order must exactly cover the dependency nodes and honor every dependency
+precedence edge. This permits a contract owner, runtime owner, then
+contract-owner activation sequence without inventing two owner identities.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
@@ -167,22 +175,22 @@ ART dependency, owner boundary, base revision, architecture decision, or
 validation obligation change invalidates the affected later decision instead
 of silently mutating earlier evidence.
 
-The owner runtime implements this path in `dev-integration`. The OOS lifecycle
-capability manifest is source authority; the Workspace Governance machine
-contract carries an exact projection and rejects drift in commands, human
-gates, versions, or normal-path status. This activation does not grant stage or
-production authority.
-
-Use a `delivery_art_lifecycle_plan` as the resumable operator artifact:
+The currently active owner runtime implements lifecycle-plan reconciliation in
+`dev-integration`. Its OOS capability manifest remains source authority; the
+Workspace Governance machine contract carries an exact projection and rejects
+drift in commands, human gates, versions, or normal-path status. Until the new
+work-session implementation, Security review, and activation work land, use:
 
 ```bash
 npm run art -- lifecycle status <plan.json>
 npm run art -- lifecycle reconcile <plan.json>
 ```
 
-Lifecycle reconciliation advances through implemented steps and stops at the
-declared human gates. Review Packet v2, durable work-start, readiness,
+The `delivery_art_lifecycle_plan` is the active resumable artifact during this
+transition. Lifecycle reconciliation advances through implemented steps and
+stops at declared human gates. Review Packet v2, durable work-start, readiness,
 finalization, and closeout are normal. Review Packet v1 is compatibility-only.
+This activation does not grant stage or production authority.
 
 The machine contract also carries a proof-obligation registry. Every Boolean
 claim under readiness rules, work-start, evidence integrity, and architecture
@@ -195,6 +203,45 @@ preflight is mapped exactly once as:
 
 Adding a true claim without that mapping, mapping one claim twice, or naming a
 validation case that did not execute fails the contract validator.
+
+## Target Work-Session Lifecycle
+
+The v2 work-session contract is
+`contract-ready-pending-owner-implementation`. It becomes the normal operator
+surface only after OOS implementation work item `963`, Security review work
+item `962`, and Workspace Governance activation work item `964` all land:
+
+```bash
+npm run art -- work start <work-item-id>
+npm run art -- work status <work-item-id>
+npm run art -- work continue <work-item-id>
+npm run art -- work close <work-item-id>
+npm run art -- work --help
+```
+
+Do not advertise or depend on these commands as active before activation
+`964`. After activation, `start` resolves the initiative and active leaf,
+collects or stops at Landing Unit and architecture decisions, authors durable
+work-start evidence, and returns one exact next action. `status` is read-only.
+`continue` performs only safe mechanical reconciliation and stops at the next
+human gate. `close` requires explicit operator closeout intent and retires the
+session only after durable completion succeeds.
+
+Work-session state is reconstructable operator coordination, not a canonical
+database. By default it lives under
+`${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work`;
+`OOS_ART_WORK_STATE_ROOT` may override that location. Writes are atomic, secrets
+and absolute worktree paths are prohibited, and the state survives process
+restart, context compaction, worktree relocation, and disposable-worktree
+cleanup. ART, owner-repo Git, WGCF artifacts, and Review Packets remain the
+canonical sources.
+
+Every result exposes exactly one next action with a code, command, reason, and
+authority. Ambiguity blocks instead of presenting several guessed actions.
+Architecture, Landing Unit, exception or risk, PR review, source merge,
+Security acceptance, and ART closeout remain human gates. The current lifecycle
+plan and direct artifact commands become generated compatibility or recovery
+surfaces only after the work-session path is activated.
 
 ## Work-Start Gate
 
@@ -222,6 +269,16 @@ The invalidation input list is a complete machine set, not an operator-selected
 subset. Every work-start record carries all five declared change classes so a
 later ART, ownership, source, architecture, validation, or security change
 forces reevaluation instead of silently relying on stale readiness.
+
+Freshness is evaluated at the transition that needs it. Initial architecture
+persistence requires a fresh scoped snapshot, and every later transition
+requires a fresh candidate snapshot. A persisted architecture packet remains
+immutable historical evidence; ordinary lifecycle status, percent-complete,
+work-note, and evidence-reference updates do not expire it. Covered scope or
+parent, owner or rollback boundary, dependency or Landing Unit order,
+architecture or protocol, and validation or Security-obligation changes are
+material. Those changes block the transition and require a new architecture
+decision instead of rewriting the earlier packet.
 
 When architecture is required but its decision is unresolved, the work-start
 record remains durable with architecture readiness `blocked` and overall
@@ -655,6 +712,12 @@ parent closeout, final evidence, or roadmap/quality checkpoints.
 
 ## Compatibility Boundary
 
+Until activation work item `964` lands, lifecycle-plan `status` and `reconcile`
+remain the active normal path. After activation, they are recovery-only and the
+plan is a generated compatibility projection. Direct artifact commands remain
+available for recovery and contract verification rather than ordinary operator
+work. Review Packet v1 remains compatibility-only in both states.
+
 Broker-owned normal ART surfaces:
 
 - session bootstrap and workflow health
@@ -688,6 +751,9 @@ The operator path is only considered complete when all of these are true:
 - direct item completion and stale-open close remain bounded fallback write
   paths for non-Review Packet closure
 - initiative closeout is one guided write path
+- one work item can be started, resumed after restart, continued, and closed
+  through the work-session command family after activation
+- every work-session response returns one exact next action or `work-complete`
 - normal ART sessions do not use direct Rails query
 - normal ART sessions do not use raw pod exec plus ad hoc node one-liners
 

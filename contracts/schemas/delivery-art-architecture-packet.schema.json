@@ -22,7 +22,7 @@
     "custody"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "enum": [1, 2] },
     "artifact_type": { "const": "delivery_art_architecture_packet" },
     "artifact_id": { "$ref": "#/$defs/artifactId" },
     "delivery_id": { "$ref": "#/$defs/deliveryId" },
@@ -68,7 +68,7 @@
         "dependency_merge_dag": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["nodes", "edges", "merge_order"],
+          "required": ["nodes", "edges"],
           "properties": {
             "nodes": {
               "type": "array",
@@ -94,6 +94,9 @@
               "minItems": 1,
               "uniqueItems": true,
               "items": { "$ref": "#/$defs/repoName" }
+            },
+            "landing_unit_order": {
+              "$ref": "#/$defs/workItemIds"
             }
           }
         },
@@ -366,6 +369,42 @@
     "custody": { "$ref": "#/$defs/custody" }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 1 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "dependency_merge_dag": {
+                "required": ["nodes", "edges", "merge_order"],
+                "not": { "required": ["landing_unit_order"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 2 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "properties": {
+              "dependency_merge_dag": {
+                "required": ["nodes", "edges", "landing_unit_order"],
+                "not": { "required": ["merge_order"] }
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "if": { "properties": { "decision": { "properties": { "status": { "const": "draft" } }, "required": ["status"] } } },
       "then": {

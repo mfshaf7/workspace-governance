@@ -108,6 +108,40 @@ signals:
   - platform-controlled-proof://results/delivery-698-751-temporal-commissioning-20260814-v5
   - platform-controlled-proof://runtime-command-failures/25a6fbea31340847425dad5db26220d4c280da2393422b3fe2560bfe4a14784e
   - platform-controlled-proof://restore/delivery-698-751-temporal-commissioning-20260814-v5
+- id: operator-work-session-manual-reconstruction-regression
+  title: Normal ART work still requires manual lifecycle reconstruction across sessions
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The active lifecycle-plan path still makes the operator or agent hand-author
+    a plan, rediscover low-level commands, and reconstruct artifact locations after
+    restart, context compaction, or disposable-worktree cleanup. Runtime transition
+    checks also compare immutable historical architecture evidence with a fresh raw
+    ART digest, so ordinary status, progress, work-note, or evidence-reference updates
+    can falsely expire an approved architecture decision. Architecture packet v1 adds
+    a separate sequencing defect because repo-level merge_order cannot represent one
+    owner repo landing a contract before OOS and returning later for activation. The
+    approved correction is one persistent, reconstructable work-session command family,
+    material-versus-ordinary freshness semantics, and architecture packet v2
+    work-item-level Landing Unit ordering. The target must remain inactive until OOS
+    implementation, Security review, and Workspace Governance activation land.
+    Immediate structured-record preflight also derived record identity from the
+    physical worktree folder, which made valid canonical regression links fail from
+    the required branch worktree. Skill installation similarly ignored the active
+    Workspace Governance repo root and could report false parity against the stale
+    main checkout instead of the delivery worktree.
+  source_refs:
+  - conversation:2026-08-22 operator ART lifecycle complexity and repeated command-discovery
+    callout
+  - openproject://work_packages/957
+  - openproject://work_packages/958
+  - openproject://work_packages/961
+  - openproject://work_packages/962
+  - openproject://work_packages/963
+  - openproject://work_packages/964
+  - workspace-governance/contracts/delivery-art-operator-path.yaml
+  - workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -122,6 +156,38 @@ resolution:
     note: PR 144 landed capability parity validation; the candidate remains open
       because ART Defects 826 and 827 expose narrower runtime seams outside that
       parity proof.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: ART work item 961 defines the pending intent-level work-session command,
+      state, freshness, compatibility, and activation contract without falsely
+      changing the active OOS capability projection.
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+    owner_repo: workspace-governance
+    note: Architecture packet v2 replaces unique-repo merge ordering with
+      work-item-level Landing Unit ordering when an owner lands more than once.
+  - type: validator
+    path: workspace-governance/scripts/validate_improvement_candidates.py
+    owner_repo: workspace-governance
+    note: Candidate identity now remains workspace-governance-relative from both
+      canonical checkouts and named delivery worktrees.
+  - type: test
+    path: workspace-governance/tests/test_improvement_candidate_validation.py
+    owner_repo: workspace-governance
+    note: The regression test proves physical worktree names cannot change canonical
+      candidate and after-action references.
+  - type: validator
+    path: workspace-governance/scripts/governance_engine_materializer.py
+    owner_repo: workspace-governance
+    note: Same-owner skill installation now resolves source from the active
+      Workspace Governance repo root while other owners still resolve through the
+      workspace root.
+  - type: test
+    path: workspace-governance/tests/test_governance_engine_materializer.py
+    owner_repo: workspace-governance
+    note: The regression test proves a branch worktree source wins over a stale main
+      checkout for Workspace Governance-owned skills.
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
@@ -135,5 +201,7 @@ follow_up:
     claims, authorization, permit, target-architecture artifact retrievability,
     runtime, receipt, cleanup, and ART-closeout chain across owner repos. Close
     Defects 826 and 827 through that same coherent model instead of adding another
-    isolated repair sequence. Do not auto-land this control until the operator
-    approves its exact architecture and owner split.
+    isolated repair sequence. Keep the candidate open through OOS work item 963,
+    Security review 962, Workspace Governance activation 964, and restart plus
+    multi-Landing-Unit dogfood. Do not treat the contract-only stage as operating
+    closure.
