@@ -64,8 +64,11 @@ resolution:
     implemented by this candidate-record Landing Unit.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-08-22'
+  due_on: '2026-09-01'
   note: >-
+    Reassessed during Delivery ART work item 964 validation on 2026-08-23;
+    the sequencing and distinct-child correction remains open and no closure
+    is claimed.
     Propose one pre-work check that derives generated dependency direction from
     source authority and requires a distinct ART child before a second
     owner-repo Landing Unit can create work-start custody. OOS should return an
