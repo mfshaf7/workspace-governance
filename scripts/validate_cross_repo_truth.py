@@ -87,6 +87,11 @@ DELIVERY_ART_LIFECYCLE_CAPABILITY_PATH = Path(
 
 DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "scoped-art-snapshot",
+    "historical-material-freshness",
+    "persistent-work-session",
+    "process-restart-reconstruction",
+    "worktree-relocation-reconstruction",
+    "exact-next-action",
     "architecture-decision",
     "architecture-packet-persistence",
     "work-start-authoring",
@@ -96,7 +101,6 @@ DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "operating-readiness",
     "review-packet-finalization",
     "art-closeout",
-    "resumable-lifecycle-reconciliation",
 }
 
 
@@ -440,9 +444,9 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
     }
     if work_session.get("contract_version") != 2:
         errors.append("work-session lifecycle contract version must be 2")
-    if work_session.get("state") != "contract-ready-pending-owner-implementation":
+    if work_session.get("state") != "active-dev-integration":
         errors.append(
-            "work-session lifecycle must remain pending until owner implementation, Security review, and activation land"
+            "work-session lifecycle must remain active in dev-integration after governed activation"
         )
     if work_session.get("owner_repo") != "operator-orchestration-service":
         errors.append("work-session lifecycle owner must be operator-orchestration-service")
@@ -751,7 +755,7 @@ def validate_delivery_art_operator_path_contract(
                     f"{governance_surface_path}: missing target work-session command {command!r}"
                 )
         for required in (
-            "contract-ready-pending-owner-implementation",
+            "active-dev-integration",
             "reconstructable operator coordination",
             "ordinary lifecycle status",
             "material",

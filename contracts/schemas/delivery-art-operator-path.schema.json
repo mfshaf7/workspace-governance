@@ -465,14 +465,36 @@
         "contract_id",
         "owner_repo",
         "normal_operator_surface",
+        "compatibility_operator_surface",
+        "state_store",
         "human_gates",
         "capabilities"
       ],
       "properties": {
-        "schema_version": { "const": 1 },
-        "contract_id": { "const": "operator-orchestration-service.delivery-art-lifecycle.v1" },
+        "schema_version": { "const": 2 },
+        "contract_id": { "const": "operator-orchestration-service.delivery-art-lifecycle.v2" },
         "owner_repo": { "const": "operator-orchestration-service" },
         "normal_operator_surface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "session_artifact_type",
+            "start_command",
+            "status_command",
+            "continue_command",
+            "close_command",
+            "help_command"
+          ],
+          "properties": {
+            "session_artifact_type": { "const": "delivery_art_work_session" },
+            "start_command": { "const": "npm run art -- work start <work-item-id>" },
+            "status_command": { "const": "npm run art -- work status <work-item-id>" },
+            "continue_command": { "const": "npm run art -- work continue <work-item-id>" },
+            "close_command": { "const": "npm run art -- work close <work-item-id>" },
+            "help_command": { "const": "npm run art -- work --help" }
+          }
+        },
+        "compatibility_operator_surface": {
           "type": "object",
           "additionalProperties": false,
           "required": ["plan_artifact_type", "status_command", "reconcile_command"],
@@ -482,16 +504,37 @@
             "reconcile_command": { "const": "npm run art -- lifecycle reconcile <plan.json>" }
           }
         },
+        "state_store": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "classification",
+            "default_root",
+            "override_environment_variable",
+            "atomic_replace",
+            "absolute_worktree_paths",
+            "secrets"
+          ],
+          "properties": {
+            "classification": { "const": "reconstructable-operator-coordination" },
+            "default_root": {
+              "const": "${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work"
+            },
+            "override_environment_variable": { "const": "OOS_ART_WORK_STATE_ROOT" },
+            "atomic_replace": { "const": true },
+            "absolute_worktree_paths": { "const": false },
+            "secrets": { "const": false }
+          }
+        },
         "human_gates": {
           "const": [
             "architecture-decision",
-            "source-work",
-            "evidence",
-            "pull-request",
+            "landing-unit-decision",
+            "exception-or-risk-acceptance",
+            "pull-request-review",
             "source-merge",
-            "exception-acceptance",
-            "art-closeout",
-            "blocked"
+            "security-acceptance",
+            "art-closeout"
           ]
         },
         "capabilities": {

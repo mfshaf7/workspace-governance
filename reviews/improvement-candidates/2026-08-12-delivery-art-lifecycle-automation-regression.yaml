@@ -188,6 +188,21 @@ resolution:
     owner_repo: workspace-governance
     note: The regression test proves a branch worktree source wins over a stale main
       checkout for Workspace Governance-owned skills.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 142 landed the persistent work-session command family and exact
+      next-action reconstruction at merge commit
+      a044f616d89e53927832edd17575edd366063f9e.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Work item 964 activates the exact merged OOS schema-v2 capability
+      manifest in dev-integration and moves lifecycle plans to recovery-only.
+      Fresh-process status, registered-worktree relocation, and
+      disposable-worktree removal plus continue all reconstructed the same
+      session, source head, state, and exact next action without manual path
+      repair on the activation branch.
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
@@ -203,5 +218,8 @@ follow_up:
     Defects 826 and 827 through that same coherent model instead of adding another
     isolated repair sequence. Keep the candidate open through OOS work item 963,
     Security review 962, Workspace Governance activation 964, and restart plus
-    multi-Landing-Unit dogfood. Do not treat the contract-only stage as operating
-    closure.
+    worktree reconstruction dogfood. Multi-Landing-Unit behavior is covered by
+    owner tests; run live dogfood only when a truthful multi-Landing-Unit ART
+    candidate exists rather than fabricating one for closure. Do not treat this
+    activation as closure of the separate Temporal conformance, Defect 826, or
+    Defect 827 obligations.

@@ -175,22 +175,27 @@ ART dependency, owner boundary, base revision, architecture decision, or
 validation obligation change invalidates the affected later decision instead
 of silently mutating earlier evidence.
 
-The currently active owner runtime implements lifecycle-plan reconciliation in
-`dev-integration`. Its OOS capability manifest remains source authority; the
+The active owner runtime implements the persistent work-session command family
+in `dev-integration`. Its OOS capability manifest remains source authority; the
 Workspace Governance machine contract carries an exact projection and rejects
-drift in commands, human gates, versions, or normal-path status. Until the new
-work-session implementation, Security review, and activation work land, use:
+drift in commands, state storage, human gates, versions, or normal-path status.
+Use:
 
 ```bash
-npm run art -- lifecycle status <plan.json>
-npm run art -- lifecycle reconcile <plan.json>
+npm run art -- work start <work-item-id>
+npm run art -- work status <work-item-id>
+npm run art -- work continue <work-item-id>
+npm run art -- work close <work-item-id>
+npm run art -- work --help
 ```
 
-The `delivery_art_lifecycle_plan` is the active resumable artifact during this
-transition. Lifecycle reconciliation advances through implemented steps and
-stops at declared human gates. Review Packet v2, durable work-start, readiness,
-finalization, and closeout are normal. Review Packet v1 is compatibility-only.
-This activation does not grant stage or production authority.
+The `delivery_art_work_session` is reconstructable operator coordination. It
+resolves authoritative ART, Git, WGCF, and Review Packet truth, advances only
+safe mechanical transitions, and stops at declared human gates. Review Packet
+v2, durable work-start, readiness, finalization, and closeout are normal.
+Lifecycle plans, direct artifact commands, and Review Packet v1 are recovery or
+compatibility surfaces only. This activation does not grant stage or production
+authority.
 
 The machine contract also carries a proof-obligation registry. Every Boolean
 claim under readiness rules, work-start, evidence integrity, and architecture
@@ -204,12 +209,11 @@ preflight is mapped exactly once as:
 Adding a true claim without that mapping, mapping one claim twice, or naming a
 validation case that did not execute fails the contract validator.
 
-## Target Work-Session Lifecycle
+## Active Work-Session Lifecycle
 
-The v2 work-session contract is
-`contract-ready-pending-owner-implementation`. It becomes the normal operator
-surface only after OOS implementation work item `963`, Security review work
-item `962`, and Workspace Governance activation work item `964` all land:
+The v2 work-session contract is `active-dev-integration`. OOS implementation
+work item `963`, Security review work item `962`, and Workspace Governance
+activation work item `964` establish the governed activation sequence:
 
 ```bash
 npm run art -- work start <work-item-id>
@@ -219,13 +223,12 @@ npm run art -- work close <work-item-id>
 npm run art -- work --help
 ```
 
-Do not advertise or depend on these commands as active before activation
-`964`. After activation, `start` resolves the initiative and active leaf,
-collects or stops at Landing Unit and architecture decisions, authors durable
-work-start evidence, and returns one exact next action. `status` is read-only.
-`continue` performs only safe mechanical reconciliation and stops at the next
-human gate. `close` requires explicit operator closeout intent and retires the
-session only after durable completion succeeds.
+`start` resolves the initiative and active leaf, collects or stops at Landing
+Unit and architecture decisions, authors durable work-start evidence, and
+returns one exact next action. `status` is read-only. `continue` performs only
+safe mechanical reconciliation and stops at the next human gate. `close`
+requires explicit operator closeout intent and retires the session only after
+durable completion succeeds.
 
 Work-session state is reconstructable operator coordination, not a canonical
 database. By default it lives under
@@ -239,9 +242,9 @@ canonical sources.
 Every result exposes exactly one next action with a code, command, reason, and
 authority. Ambiguity blocks instead of presenting several guessed actions.
 Architecture, Landing Unit, exception or risk, PR review, source merge,
-Security acceptance, and ART closeout remain human gates. The current lifecycle
-plan and direct artifact commands become generated compatibility or recovery
-surfaces only after the work-session path is activated.
+Security acceptance, and ART closeout remain human gates. Lifecycle plans and
+direct artifact commands are generated compatibility, recovery, or contract
+verification surfaces, not the normal operator path.
 
 ## Work-Start Gate
 
@@ -712,11 +715,11 @@ parent closeout, final evidence, or roadmap/quality checkpoints.
 
 ## Compatibility Boundary
 
-Until activation work item `964` lands, lifecycle-plan `status` and `reconcile`
-remain the active normal path. After activation, they are recovery-only and the
-plan is a generated compatibility projection. Direct artifact commands remain
-available for recovery and contract verification rather than ordinary operator
-work. Review Packet v1 remains compatibility-only in both states.
+The work-session command family is the active normal path in `dev-integration`.
+Lifecycle-plan `status` and `reconcile` are recovery-only and the plan is a
+generated compatibility projection. Direct artifact commands remain available
+for recovery and contract verification rather than ordinary operator work.
+Review Packet v1 remains compatibility-only.
 
 Broker-owned normal ART surfaces:
 

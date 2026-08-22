@@ -49,8 +49,10 @@ resolution:
     OOS and WGCF fixture copies all express the same owner boundary.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-08-22'
+  due_on: '2026-09-01'
   note: >-
+    Reassessed during Delivery ART work item 964 validation on 2026-08-23;
+    the owner-boundary correction remains open and no closure is claimed.
     Correct the canonical fixture so OOS authors and submits canonical content,
     WGCF owns durable registry custody, and OpenProject receives only safe
     references. Add semantic owner-boundary assertions, then sequence the OOS
