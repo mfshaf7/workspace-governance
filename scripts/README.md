@@ -32,6 +32,11 @@
   - validates owner uniqueness, state vectors, transition support, authority,
     typed envelopes, evidence, preconditions, recovery, and maturity claims
     through `validate_contracts.py`
+- `delivery_art_resource_retirement_contract.py`
+  - focused semantic support for Delivery ART work-session resource manifests
+    and terminal cleanup receipts
+  - rejects unsafe paths, unowned deletion, false terminal outcomes, and receipt
+    drift from the exact final manifest through `validate_contracts.py`
 - `project_lifecycle_proof.py`
   - executes the registered lifecycle proof scenarios without a runtime or
     backend dependency

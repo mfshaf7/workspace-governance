@@ -22,6 +22,9 @@ from contracts_lib import (
     load_contracts,
     load_json,
 )
+from delivery_art_resource_retirement_contract import (
+    contract_fixture_issues as delivery_art_resource_retirement_fixture_issues,
+)
 from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
 
@@ -131,6 +134,7 @@ DELIVERY_ART_PROOF_CLAIM_ROOTS = (
     "work_start_gate",
     "evidence_integrity",
     "initiative_architecture_preflight",
+    "work_session_lifecycle.resource_retirement.rules",
 )
 CONTROLLED_PROOF_REQUIRED_SECTIONS = {
     "schema_version",
@@ -5664,6 +5668,8 @@ def main() -> int:
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
     )
+    for issue in delivery_art_resource_retirement_fixture_issues(repo_root):
+        errors.append(f"Delivery ART resource-retirement contract: {issue}")
     validate_agent_action_artifact_contracts(errors, repo_root)
     delivery_art_contract = yaml.safe_load(
         instance_paths["delivery_art_operator_path"].read_text()

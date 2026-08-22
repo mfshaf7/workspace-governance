@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "artifact_type": "delivery_art_work_session_resource_manifest",
+  "session_id": "work-session:delivery-958:delivery-958-work-item-967",
+  "delivery_id": "delivery-958",
+  "landing_unit_id": "delivery-958-work-item-967",
+  "generation": 4,
+  "updated_at": "2026-08-23T15:24:00+08:00",
+  "cleanup": {
+    "state": "complete",
+    "close_intent": true,
+    "attempt": 1,
+    "last_error": null
+  },
+  "resources": [
+    {
+      "resource_id": "resource:worktree:workspace-governance",
+      "resource_type": "git-worktree",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "locator": {
+        "kind": "worktree",
+        "repo": "workspace-governance",
+        "workspace_relative_path": ".worktrees/delivery-958-work-item-967/workspace-governance",
+        "expected_head_commit": "1111111111111111111111111111111111111111",
+        "ownership_marker": "work-session:delivery-958:delivery-958-work-item-967"
+      },
+      "last_error": null
+    },
+    {
+      "resource_id": "resource:local-branch:workspace-governance",
+      "resource_type": "git-local-branch",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "locator": {
+        "kind": "local-branch",
+        "repo": "workspace-governance",
+        "branch": "feature/967-work-session-resource-retirement-contract",
+        "base_ref": "origin/main",
+        "expected_head_commit": "1111111111111111111111111111111111111111",
+        "ownership_marker": "work-session:delivery-958:delivery-958-work-item-967"
+      },
+      "last_error": null
+    },
+    {
+      "resource_id": "resource:remote-branch:workspace-governance",
+      "resource_type": "git-remote-branch",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "locator": {
+        "kind": "remote-branch",
+        "repo": "workspace-governance",
+        "remote": "origin",
+        "branch": "feature/967-work-session-resource-retirement-contract",
+        "expected_head_commit": "1111111111111111111111111111111111111111",
+        "pull_request_ref": "https://github.com/mfshaf7/workspace-governance/pull/967",
+        "ownership_marker": "work-session:delivery-958:delivery-958-work-item-967"
+      },
+      "last_error": null
+    },
+    {
+      "resource_id": "resource:session-state:workspace-governance",
+      "resource_type": "managed-session-state",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "locator": {
+        "kind": "managed-session-state",
+        "relative_path": "sessions/work-session%3Adelivery-958%3Adelivery-958-work-item-967",
+        "ownership_marker": "work-session:delivery-958:delivery-958-work-item-967"
+      },
+      "last_error": null
+    },
+    {
+      "resource_id": "resource:preexisting-branch:workspace-governance",
+      "resource_type": "git-local-branch",
+      "ownership_provenance": "pre-existing",
+      "retention_class": "policy-retained",
+      "outcome": "retained",
+      "locator": {
+        "kind": "local-branch",
+        "repo": "workspace-governance",
+        "branch": "operator-owned-investigation",
+        "base_ref": "origin/main",
+        "expected_head_commit": "2222222222222222222222222222222222222222",
+        "ownership_marker": "work-session:delivery-958:delivery-958-work-item-967"
+      },
+      "last_error": null
+    }
+  ]
+}

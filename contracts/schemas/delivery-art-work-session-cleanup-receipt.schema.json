@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-work-session-cleanup-receipt.schema.json",
+  "title": "Delivery ART Work-Session Cleanup Receipt",
+  "$comment": "Immutable local terminal evidence written outside the active session directory before session retirement. Blocked attempts remain in the active resource manifest and cannot produce this receipt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "session_id",
+    "delivery_id",
+    "landing_unit_id",
+    "closed_by",
+    "manifest",
+    "outcome",
+    "resources",
+    "protected_evidence_refs",
+    "finalized_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "delivery_art_work_session_cleanup_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^cleanup-receipt:work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "session_id": { "$ref": "#/$defs/sessionId" },
+    "delivery_id": { "$ref": "#/$defs/deliveryId" },
+    "landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+    "closed_by": { "type": "string", "pattern": "^operator:[a-z0-9][a-z0-9._:-]*$" },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generation", "content_digest"],
+      "properties": {
+        "generation": { "type": "integer", "minimum": 1 },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "outcome": { "enum": ["complete", "complete-with-retained-resources"] },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/resourceResult" }
+    },
+    "protected_evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "finalized_at": { "$ref": "#/$defs/timestamp" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
+    "landingUnitId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "resourceResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "resource_type", "ownership_provenance", "retention_class", "outcome", "reason"],
+      "properties": {
+        "resource_id": { "type": "string", "pattern": "^resource:[a-z0-9][a-z0-9._:-]*$" },
+        "resource_type": {
+          "enum": ["git-worktree", "git-local-branch", "git-remote-branch", "managed-session-state"]
+        },
+        "ownership_provenance": { "enum": ["session-created", "pre-existing", "ambiguous"] },
+        "retention_class": { "enum": ["retire-on-terminal-close", "operator-retained", "policy-retained"] },
+        "outcome": { "enum": ["removed", "retained"] },
+        "reason": {
+          "oneOf": [
+            { "$ref": "#/$defs/nonEmptyString" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "retained" } }, "required": ["outcome"] },
+          "then": { "properties": { "reason": { "$ref": "#/$defs/nonEmptyString" } } },
+          "else": { "properties": { "reason": { "type": "null" } } }
+        }
+      ]
+    }
+  }
+}

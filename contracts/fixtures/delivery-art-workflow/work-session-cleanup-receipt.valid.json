@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "artifact_type": "delivery_art_work_session_cleanup_receipt",
+  "receipt_id": "cleanup-receipt:work-session:delivery-958:delivery-958-work-item-967",
+  "session_id": "work-session:delivery-958:delivery-958-work-item-967",
+  "delivery_id": "delivery-958",
+  "landing_unit_id": "delivery-958-work-item-967",
+  "closed_by": "operator:workspace-owner",
+  "manifest": {
+    "generation": 4,
+    "content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "outcome": "complete-with-retained-resources",
+  "resources": [
+    {
+      "resource_id": "resource:worktree:workspace-governance",
+      "resource_type": "git-worktree",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "reason": null
+    },
+    {
+      "resource_id": "resource:local-branch:workspace-governance",
+      "resource_type": "git-local-branch",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "reason": null
+    },
+    {
+      "resource_id": "resource:remote-branch:workspace-governance",
+      "resource_type": "git-remote-branch",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "reason": null
+    },
+    {
+      "resource_id": "resource:session-state:workspace-governance",
+      "resource_type": "managed-session-state",
+      "ownership_provenance": "session-created",
+      "retention_class": "retire-on-terminal-close",
+      "outcome": "removed",
+      "reason": null
+    },
+    {
+      "resource_id": "resource:preexisting-branch:workspace-governance",
+      "resource_type": "git-local-branch",
+      "ownership_provenance": "pre-existing",
+      "retention_class": "policy-retained",
+      "outcome": "retained",
+      "reason": "The branch existed before the session and is outside session deletion authority."
+    }
+  ],
+  "protected_evidence_refs": [
+    "openproject://work_packages/967",
+    "wgcf://artifacts/delivery-art/sha256/bbdda117fb1b95855e3f948ea023975296755f547ed47418655188baacc6b4b3",
+    "operator-orchestration-service/.art/review-packets/delivery-958-work-item-967.json"
+  ],
+  "finalized_at": "2026-08-23T15:25:00+08:00"
+}

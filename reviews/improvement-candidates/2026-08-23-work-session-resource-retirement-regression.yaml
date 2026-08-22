@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-08-23-work-session-resource-retirement-regression
+title: Close the Delivery ART work-session resource-retirement regression
+recorded_on: '2026-08-23'
+owner_repo: operator-orchestration-service
+summary: Delivery ART work closeout retires reconstructable session state but does
+  not own or safely retire the Git worktree, local branch, remote branch, and managed
+  temporary resources created for that session. The earlier branch-lifecycle lesson
+  closed on detection rather than lifecycle ownership, so completed Landing Units
+  still require manual cleanup.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-23-branch-lifecycle-cleanup-gap.yaml
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Epic 958 proved resumable work sessions, but its final closeout left resource
+    retirement outside the normal command path. The operator again had to request
+    manual Git and temporary-file cleanup, and the workspace clean-state gate continued
+    to report unrelated historical residue. The normal lifecycle needs a scoped ownership
+    manifest, conservative cleanup plan, idempotent retry, and retained cleanup receipt
+    that never deletes unowned resources or durable evidence.
+  source_refs:
+  - conversation:2026-08-23 operator asked why Git and temporary-file cleanup is not
+    automated after Epic 958 closeout
+  - openproject://work_packages/958
+- id: architecture-contract-projection-regression
+  title: The completed activation did not propagate architecture packet v2 custody.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  finding: Workspace Governance accepts architecture packet v2 with work-item-level
+    Landing Unit ordering, while the active OOS and WGCF contract copies still accept
+    only v1. The stale consumers cannot represent separate contract and activation
+    Landing Units in one owner repo, so the correction needs a bounded v1 bootstrap
+    packet followed by a v2 superseding packet before activation closes.
+  source_refs:
+  - openproject://work_packages/966
+  - openproject://work_packages/967
+  - openproject://work_packages/971
+  - workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+  - operator-orchestration-service/contracts/delivery-art/delivery-art-architecture-packet.schema.json
+  - workspace-governance-control-fabric/contracts/delivery-art/delivery-art-architecture-packet.schema.json
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-08-30'
+  note: Extend the existing Delivery ART work-session lifecycle with scoped resource
+    ownership, safe terminal cleanup, idempotent recovery, cleanup receipts, and exact
+    architecture-contract projection across its active custodians. Keep Docker cleanup
+    outside the first implementation and require a separate adapter decision later.
