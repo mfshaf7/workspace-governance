@@ -10,7 +10,7 @@
     "packet",
     "audit_journal",
     "scope_discovery",
-    "future_enforcement_boundary"
+    "agent_action_authority"
   ],
   "properties": {
     "schema_version": { "type": "integer", "minimum": 1 },
@@ -151,14 +151,24 @@
       },
       "additionalProperties": false
     },
-    "future_enforcement_boundary": {
+    "agent_action_authority": {
       "type": "object",
-      "required": ["parked_architecture_ref", "not_in_current_scope"],
+      "required": [
+        "active_architecture_ref",
+        "supersedes_retired_ref",
+        "canonical_contract_ref",
+        "current_boundary",
+        "runtime_activation_requires"
+      ],
       "properties": {
-        "parked_architecture_ref": { "type": "string", "minLength": 1 },
-        "not_in_current_scope": {
+        "active_architecture_ref": { "type": "string", "minLength": 1 },
+        "supersedes_retired_ref": { "type": "string", "minLength": 1 },
+        "canonical_contract_ref": { "type": "string", "minLength": 1 },
+        "current_boundary": { "const": "contract-foundation" },
+        "runtime_activation_requires": {
           "type": "array",
           "minItems": 1,
+          "uniqueItems": true,
           "items": { "type": "string", "minLength": 1 }
         }
       },

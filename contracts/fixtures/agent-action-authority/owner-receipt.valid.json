@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agent_action_owner_receipt",
+  "receipt_id": "agent-action-owner-receipt:example-001",
+  "request_ref": {
+    "uri": "wgcf://agent-actions/requests/example-001",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "decision_ref": {
+    "uri": "wgcf://agent-actions/decisions/example-001",
+    "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "action_class": "mutate",
+  "owner": {
+    "repo": "operator-orchestration-service",
+    "adapter": "openproject-delivery-adapter-v1",
+    "authority_ref": {
+      "uri": "repo://operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md",
+      "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  },
+  "target": {
+    "resource_id": "work-item-951",
+    "before_version": "lock-version:4",
+    "after_version": "lock-version:5"
+  },
+  "mutation_outcome": "applied",
+  "result_ref": {
+    "uri": "openproject://work_packages/951?lockVersion=5",
+    "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "audit_ref": {
+    "uri": "oos-audit://events/example-001",
+    "digest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "executed_at": "2026-08-22T10:00:03Z",
+  "idempotency_key": "agent-action:example-001",
+  "failure": null,
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+  }
+}

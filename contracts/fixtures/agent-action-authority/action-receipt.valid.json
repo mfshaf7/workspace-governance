@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agent_action_receipt",
+  "receipt_id": "agent-action-receipt:example-001",
+  "request_ref": {
+    "uri": "wgcf://agent-actions/requests/example-001",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "decision_ref": {
+    "uri": "wgcf://agent-actions/decisions/example-001",
+    "digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "action_class": "mutate",
+  "outcome": "succeeded",
+  "execution": {
+    "workflow_execution_id": "workflow-execution:example-001",
+    "backend_executor_id": "owner-executor:openproject-delivery-adapter-v1",
+    "acknowledged_at": "2026-08-22T10:00:02Z",
+    "started_at": "2026-08-22T10:00:02Z",
+    "completed_at": "2026-08-22T10:00:04Z"
+  },
+  "target": {
+    "owner_repo": "operator-orchestration-service",
+    "resource_id": "work-item-951",
+    "before_version": "lock-version:4",
+    "after_version": "lock-version:5"
+  },
+  "approval_ref": {
+    "uri": "wgcf://approvals/action-example-001",
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "result_ref": {
+    "uri": "openproject://work_packages/951?lockVersion=5",
+    "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "owner_receipt_ref": {
+    "uri": "wgcf://agent-actions/owner-receipts/example-001",
+    "digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+  },
+  "mutation_state": "applied",
+  "failure": null,
+  "correlation": {
+    "correlation_id": "correlation:example-001",
+    "causation_id": "causation:example-001"
+  },
+  "idempotency_key": "agent-action:example-001",
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1"
+  }
+}

@@ -38,6 +38,12 @@ Delegated workers may own:
 
 Delegated workers do not own workflow authority.
 
+When delegated work invokes an AI-assisted `read`, `advise`, `draft`, or
+`mutate` action, the separate
+[agent-action authority](agent-action-authority.md) contract also applies.
+Delegation identifies the operator-granted execution boundary; it never turns
+the logical agent identity into an authorization principal.
+
 ## Eligibility Gate
 
 Do not delegate until all of these are true:

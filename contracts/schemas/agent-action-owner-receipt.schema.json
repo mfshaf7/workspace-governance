@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-action-owner-receipt.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "request_ref",
+    "decision_ref",
+    "action_class",
+    "owner",
+    "target",
+    "mutation_outcome",
+    "result_ref",
+    "audit_ref",
+    "executed_at",
+    "idempotency_key",
+    "failure",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "agent_action_owner_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^agent-action-owner-receipt:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "action_class": { "const": "mutate" },
+    "owner": {
+      "type": "object",
+      "required": ["repo", "adapter", "authority_ref"],
+      "properties": {
+        "repo": { "$ref": "#/$defs/nonEmptyString" },
+        "adapter": { "$ref": "#/$defs/nonEmptyString" },
+        "authority_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["resource_id", "before_version", "after_version"],
+      "properties": {
+        "resource_id": { "$ref": "#/$defs/nonEmptyString" },
+        "before_version": { "$ref": "#/$defs/nonEmptyString" },
+        "after_version": { "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "mutation_outcome": { "enum": ["applied", "not-applied", "unknown"] },
+    "result_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "audit_ref": { "$ref": "#/$defs/artifactRef" },
+    "executed_at": { "type": "string", "format": "date-time" },
+    "idempotency_key": { "$ref": "#/$defs/nonEmptyString" },
+    "failure": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["code", "retryable"],
+          "properties": {
+            "code": { "$ref": "#/$defs/nonEmptyString" },
+            "retryable": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mutation_outcome": { "const": "applied" } }, "required": ["mutation_outcome"] },
+      "then": {
+        "properties": {
+          "target": { "properties": { "after_version": { "$ref": "#/$defs/nonEmptyString" } } },
+          "result_ref": { "$ref": "#/$defs/artifactRef" },
+          "failure": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "mutation_outcome": { "enum": ["not-applied", "unknown"] } }, "required": ["mutation_outcome"] },
+      "then": { "properties": { "failure": { "type": "object" } } }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

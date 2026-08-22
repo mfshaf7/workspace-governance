@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agent_action_request",
+  "request_id": "agent-action-request:example-001",
+  "requested_at": "2026-08-22T10:00:00Z",
+  "expires_at": "2026-08-22T10:15:00Z",
+  "action_class": "mutate",
+  "operator": {
+    "principal_id": "operator:workspace-owner",
+    "session_ref": {
+      "uri": "wgcf://sessions/example-001",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "acceptance_ref": {
+      "uri": "wgcf://approvals/request-example-001",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  },
+  "caller": {
+    "workload_id": "operator-orchestration-service",
+    "credential_binding_ref": {
+      "uri": "wgcf://identities/oos-dev-integration",
+      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  },
+  "agent": {
+    "logical_agent_id": "agent:planning-assistant",
+    "instance_id": "agent-instance:example-001"
+  },
+  "model_invocation_ref": {
+    "uri": "platform://model-invocations/example-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "workflow": {
+    "workflow_id": "delivery-art-work-item-update",
+    "workflow_version": "1",
+    "execution_id": "workflow-execution:example-001",
+    "command": "update-work-item"
+  },
+  "target": {
+    "owner_repo": "operator-orchestration-service",
+    "resource_type": "delivery-work-item",
+    "resource_id": "work-item-951",
+    "source_version": "lock-version:4"
+  },
+  "intent": {
+    "summary": "Apply the operator-approved bounded work-item update.",
+    "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "context": {
+    "packet_ref": {
+      "uri": "cgg://packets/example-001",
+      "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+    },
+    "receipt_ref": {
+      "uri": "cgg://receipts/example-001",
+      "digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+    }
+  },
+  "authority": {
+    "delegation_ref": {
+      "uri": "wgcf://delegations/example-001",
+      "digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+    },
+    "policy_profile_ref": {
+      "uri": "wgcf://policy-profiles/agent-action-v1",
+      "digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+    },
+    "approval_ref": {
+      "uri": "wgcf://approvals/action-example-001",
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "correlation": {
+    "correlation_id": "correlation:example-001",
+    "causation_id": "causation:example-001"
+  },
+  "idempotency_key": "agent-action:example-001",
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}

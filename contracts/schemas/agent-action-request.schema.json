@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-action-request.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "request_id",
+    "requested_at",
+    "expires_at",
+    "action_class",
+    "operator",
+    "caller",
+    "agent",
+    "model_invocation_ref",
+    "workflow",
+    "target",
+    "intent",
+    "context",
+    "authority",
+    "correlation",
+    "idempotency_key",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "agent_action_request" },
+    "request_id": { "type": "string", "pattern": "^agent-action-request:[A-Za-z0-9._:-]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "action_class": { "$ref": "#/$defs/actionClass" },
+    "operator": {
+      "type": "object",
+      "required": ["principal_id", "session_ref", "acceptance_ref"],
+      "properties": {
+        "principal_id": { "$ref": "#/$defs/nonEmptyString" },
+        "session_ref": { "$ref": "#/$defs/artifactRef" },
+        "acceptance_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "caller": {
+      "type": "object",
+      "required": ["workload_id", "credential_binding_ref"],
+      "properties": {
+        "workload_id": { "$ref": "#/$defs/nonEmptyString" },
+        "credential_binding_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "agent": {
+      "type": "object",
+      "required": ["logical_agent_id", "instance_id"],
+      "properties": {
+        "logical_agent_id": { "$ref": "#/$defs/nonEmptyString" },
+        "instance_id": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "model_invocation_ref": {
+      "oneOf": [
+        { "$ref": "#/$defs/artifactRef" },
+        { "type": "null" }
+      ]
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["workflow_id", "workflow_version", "execution_id", "command"],
+      "properties": {
+        "workflow_id": { "$ref": "#/$defs/nonEmptyString" },
+        "workflow_version": { "$ref": "#/$defs/nonEmptyString" },
+        "execution_id": { "$ref": "#/$defs/nonEmptyString" },
+        "command": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["owner_repo", "resource_type", "resource_id", "source_version"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/nonEmptyString" },
+        "resource_type": { "$ref": "#/$defs/nonEmptyString" },
+        "resource_id": { "$ref": "#/$defs/nonEmptyString" },
+        "source_version": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "intent": {
+      "type": "object",
+      "required": ["summary", "digest"],
+      "properties": {
+        "summary": { "$ref": "#/$defs/nonEmptyString" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "required": ["packet_ref", "receipt_ref"],
+      "properties": {
+        "packet_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["delegation_ref", "policy_profile_ref", "approval_ref"],
+      "properties": {
+        "delegation_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "policy_profile_ref": { "$ref": "#/$defs/artifactRef" },
+        "approval_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "correlation": {
+      "type": "object",
+      "required": ["correlation_id", "causation_id"],
+      "properties": {
+        "correlation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "causation_id": { "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": { "$ref": "#/$defs/nonEmptyString" },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action_class": { "enum": ["advise", "draft"] } }, "required": ["action_class"] },
+      "then": {
+        "properties": {
+          "model_invocation_ref": { "$ref": "#/$defs/artifactRef" },
+          "context": {
+            "properties": {
+              "packet_ref": { "$ref": "#/$defs/artifactRef" },
+              "receipt_ref": { "$ref": "#/$defs/artifactRef" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "authority": {
+          "properties": {
+            "delegation_ref": { "$ref": "#/$defs/artifactRef" }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action_class": { "const": "mutate" } }, "required": ["action_class"] },
+      "then": {
+        "properties": {
+          "context": {
+            "properties": {
+              "packet_ref": { "$ref": "#/$defs/artifactRef" },
+              "receipt_ref": { "$ref": "#/$defs/artifactRef" }
+            }
+          },
+          "authority": {
+            "properties": {
+              "approval_ref": { "$ref": "#/$defs/artifactRef" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "actionClass": { "enum": ["read", "advise", "draft", "mutate"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -107,6 +107,24 @@ DELIVERY_ART_ARTIFACT_CASES = {
         ("contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json",),
     ),
 }
+AGENT_ACTION_ARTIFACT_CASES = {
+    "request": (
+        "contracts/schemas/agent-action-request.schema.json",
+        "contracts/fixtures/agent-action-authority/request.valid.json",
+    ),
+    "policy_decision": (
+        "contracts/schemas/agent-action-policy-decision.schema.json",
+        "contracts/fixtures/agent-action-authority/policy-decision.valid.json",
+    ),
+    "action_receipt": (
+        "contracts/schemas/agent-action-receipt.schema.json",
+        "contracts/fixtures/agent-action-authority/action-receipt.valid.json",
+    ),
+    "owner_receipt": (
+        "contracts/schemas/agent-action-owner-receipt.schema.json",
+        "contracts/fixtures/agent-action-authority/owner-receipt.valid.json",
+    ),
+}
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
     "readiness_model.rules",
@@ -4262,6 +4280,73 @@ def validate_delivery_art_artifact_contracts(
     return executed_proof_cases
 
 
+def validate_agent_action_artifact_contracts(
+    errors: list[str],
+    repo_root: Path,
+) -> None:
+    fixtures: dict[str, dict] = {}
+    for artifact_name, (schema_ref, fixture_ref) in AGENT_ACTION_ARTIFACT_CASES.items():
+        schema_path = repo_root / schema_ref
+        fixture_path = repo_root / fixture_ref
+        if not schema_path.exists():
+            errors.append(f"{schema_ref}: agent-action schema is missing")
+            continue
+        if not fixture_path.exists():
+            errors.append(f"{fixture_ref}: agent-action fixture is missing")
+            continue
+
+        schema = load_json(schema_path)
+        try:
+            Draft202012Validator.check_schema(schema)
+        except SchemaError as exc:
+            errors.append(f"{schema_ref}: invalid JSON Schema: {exc.message}")
+            continue
+
+        fixture = load_json(fixture_path)
+        validator = Draft202012Validator(
+            schema,
+            format_checker=CONTRACT_FORMAT_CHECKER,
+        )
+        for error in sorted(
+            validator.iter_errors(fixture),
+            key=lambda item: list(item.absolute_path),
+        ):
+            field_path = ".".join(str(part) for part in error.absolute_path) or "<root>"
+            errors.append(f"{fixture_ref}: {field_path}: {error.message}")
+        fixtures[artifact_name] = fixture
+
+    request = fixtures.get("request", {})
+    decision = fixtures.get("policy_decision", {})
+    action_receipt = fixtures.get("action_receipt", {})
+    owner_receipt = fixtures.get("owner_receipt", {})
+    if request and decision:
+        if decision.get("action_class") != request.get("action_class"):
+            errors.append("agent-action fixtures: policy decision action_class must match request")
+        if decision.get("request_ref", {}).get("digest") != request.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: policy decision must bind the request digest")
+    if decision and action_receipt:
+        if action_receipt.get("request_ref", {}).get("digest") != request.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: action receipt must bind the request digest")
+        if action_receipt.get("decision_ref", {}).get("digest") != decision.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: action receipt must bind the policy decision digest")
+    if owner_receipt and action_receipt:
+        if owner_receipt.get("request_ref", {}).get("digest") != request.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: owner receipt must bind the request digest")
+        if owner_receipt.get("decision_ref", {}).get("digest") != decision.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: owner receipt must bind the policy decision digest")
+        if action_receipt.get("owner_receipt_ref", {}).get("digest") != owner_receipt.get("integrity", {}).get("content_digest"):
+            errors.append("agent-action fixtures: action receipt must bind the owner receipt digest")
+        if action_receipt.get("target", {}).get("owner_repo") != owner_receipt.get("owner", {}).get("repo"):
+            errors.append("agent-action fixtures: action and owner receipts must bind the same owner repo")
+        for field_name in ("resource_id", "before_version", "after_version"):
+            if action_receipt.get("target", {}).get(field_name) != owner_receipt.get("target", {}).get(field_name):
+                errors.append(
+                    f"agent-action fixtures: action and owner receipts must bind the same target {field_name}"
+                )
+        if action_receipt.get("idempotency_key") != owner_receipt.get("idempotency_key"):
+            errors.append("agent-action fixtures: action and owner receipts must bind the same idempotency key")
+
+
 def validate_contract_format_checker(errors: list[str]) -> None:
     schema = {"type": "string", "format": "date-time"}
     validator = Draft202012Validator(
@@ -5409,6 +5494,7 @@ def main() -> int:
         "developer_integration_profiles": repo_root / "contracts/developer-integration-profiles.yaml",
         "durable_orchestration": repo_root / "contracts/durable-orchestration.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
+        "agent_action_authority": repo_root / "contracts/agent-action-authority.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
         "work_home_routing": repo_root / "contracts/work-home-routing.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
@@ -5443,6 +5529,7 @@ def main() -> int:
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
     )
+    validate_agent_action_artifact_contracts(errors, repo_root)
     delivery_art_contract = yaml.safe_load(
         instance_paths["delivery_art_operator_path"].read_text()
     ) or {}
@@ -5513,6 +5600,7 @@ def main() -> int:
     developer_integration_profiles = contracts["developer_integration_profiles"]
     durable_orchestration = contracts["durable_orchestration"]["durable_orchestration"]
     delegation_policy = contracts["delegation_policy"]
+    agent_action_authority = contracts["agent_action_authority"]
     self_improvement_policy = contracts["self_improvement_policy"]
     work_home_routing = contracts["work_home_routing"]["work_home_routing"]
     intake_statuses = set(intake_policy["statuses"])
@@ -6934,9 +7022,119 @@ def main() -> int:
         errors.append("contracts/delegation-policy.yaml: task_class 'live-control' must keep max_sub_agents=0")
     if delegation_task_classes.get("live-control", {}).get("allows_delegated_write") is not False:
         errors.append("contracts/delegation-policy.yaml: task_class 'live-control' must not allow delegated write")
-    if delegation_policy["future_enforcement_boundary"]["parked_architecture_ref"] != "openproject://work_packages/77":
+    delegation_agent_authority = delegation_policy["agent_action_authority"]
+    if delegation_agent_authority["active_architecture_ref"] != "openproject://work_packages/906":
         errors.append(
-            "contracts/delegation-policy.yaml: future_enforcement_boundary.parked_architecture_ref must point to openproject://work_packages/77"
+            "contracts/delegation-policy.yaml: agent_action_authority.active_architecture_ref must point to openproject://work_packages/906"
+        )
+    if delegation_agent_authority["supersedes_retired_ref"] != "openproject://work_packages/77":
+        errors.append(
+            "contracts/delegation-policy.yaml: agent_action_authority.supersedes_retired_ref must preserve the retired #77 lineage"
+        )
+    if delegation_agent_authority["canonical_contract_ref"] != "contracts/agent-action-authority.yaml":
+        errors.append(
+            "contracts/delegation-policy.yaml: agent_action_authority.canonical_contract_ref must point to contracts/agent-action-authority.yaml"
+        )
+
+    if agent_action_authority["architecture"]["active_ref"] != "openproject://work_packages/906":
+        errors.append(
+            "contracts/agent-action-authority.yaml: architecture.active_ref must point to openproject://work_packages/906"
+        )
+    if agent_action_authority["architecture"]["supersedes_retired_ref"] != "openproject://work_packages/77":
+        errors.append(
+            "contracts/agent-action-authority.yaml: architecture.supersedes_retired_ref must preserve the retired #77 lineage"
+        )
+    agent_operator_surface = repo_root / agent_action_authority["operator_surface_path"]
+    if not agent_operator_surface.exists():
+        errors.append(
+            "contracts/agent-action-authority.yaml: operator_surface_path does not exist"
+        )
+    expected_authority_inputs = {
+        "operator_delegation",
+        "authenticated_caller",
+        "admitted_workflow",
+        "action_class",
+        "exact_target",
+        "source_version",
+        "current_policy_decision",
+        "exact_approval_for_mutate",
+    }
+    if set(agent_action_authority["principles"]["authority_inputs"]) != expected_authority_inputs:
+        errors.append(
+            "contracts/agent-action-authority.yaml: principles.authority_inputs must define the complete authority binding without treating agent identity as authority"
+        )
+    expected_action_classes = {
+        "read": {
+            "canonical_mutation": False,
+            "model_invocation": "optional",
+            "context_packet": "optional",
+            "approval": "not-required",
+            "output_authority": "read-only",
+            "owner_receipt": "not-required",
+            "terminal_receipt": "required",
+        },
+        "advise": {
+            "canonical_mutation": False,
+            "model_invocation": "required",
+            "context_packet": "required",
+            "approval": "not-required",
+            "output_authority": "advisory",
+            "owner_receipt": "not-required",
+            "terminal_receipt": "required",
+        },
+        "draft": {
+            "canonical_mutation": False,
+            "model_invocation": "required",
+            "context_packet": "required",
+            "approval": "operator-accepted-output",
+            "output_authority": "noncanonical-draft",
+            "owner_receipt": "not-required",
+            "terminal_receipt": "required",
+        },
+        "mutate": {
+            "canonical_mutation": True,
+            "model_invocation": "optional",
+            "context_packet": "required",
+            "approval": "exact-operator-approval",
+            "output_authority": "canonical-owner-mutation",
+            "owner_receipt": "required-when-owner-invoked",
+            "terminal_receipt": "required",
+        },
+    }
+    if agent_action_authority["action_classes"] != expected_action_classes:
+        errors.append(
+            "contracts/agent-action-authority.yaml: action_classes must preserve the canonical read, advise, draft, and mutate semantics"
+        )
+    expected_agent_schema_refs = {
+        "request": "contracts/schemas/agent-action-request.schema.json",
+        "policy_decision": "contracts/schemas/agent-action-policy-decision.schema.json",
+        "action_receipt": "contracts/schemas/agent-action-receipt.schema.json",
+        "owner_receipt": "contracts/schemas/agent-action-owner-receipt.schema.json",
+    }
+    if agent_action_authority["schema_refs"] != expected_agent_schema_refs:
+        errors.append(
+            "contracts/agent-action-authority.yaml: schema_refs must point to the four canonical agent-action schemas"
+        )
+    for schema_ref in agent_action_authority["schema_refs"].values():
+        if not (repo_root / schema_ref).exists():
+            errors.append(
+                f"contracts/agent-action-authority.yaml: schema reference {schema_ref!r} does not exist"
+            )
+    expected_agent_activation_refs = {
+        "openproject://work_packages/952",
+        "openproject://work_packages/953",
+        "openproject://work_packages/954",
+        "openproject://work_packages/955",
+    }
+    if set(agent_action_authority["runtime_activation"]["required_work_item_refs"]) != expected_agent_activation_refs:
+        errors.append(
+            "contracts/agent-action-authority.yaml: runtime activation must remain gated by work items #952 through #955"
+        )
+    if set(delegation_agent_authority["runtime_activation_requires"]) != set(
+        agent_action_authority["runtime_activation"]["required_outcomes"]
+    ):
+        errors.append(
+            "contracts/delegation-policy.yaml: agent-action runtime activation outcomes must match the canonical agent-action contract"
         )
     if work_home_routing["owner_repo"] != "workspace-governance":
         errors.append("contracts/work-home-routing.yaml: owner_repo must be 'workspace-governance'")

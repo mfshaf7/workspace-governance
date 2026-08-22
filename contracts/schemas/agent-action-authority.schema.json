@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "owner_repo",
+    "operator_surface_path",
+    "architecture",
+    "principles",
+    "identity_bindings",
+    "action_classes",
+    "schema_refs",
+    "receipt_ownership",
+    "evidence_rules",
+    "runtime_activation",
+    "denied_shortcuts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "operator_surface_path": { "const": "docs/agent-action-authority.md" },
+    "architecture": {
+      "type": "object",
+      "required": ["active_ref", "supersedes_retired_ref"],
+      "properties": {
+        "active_ref": { "type": "string", "minLength": 1 },
+        "supersedes_retired_ref": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "principles": {
+      "type": "object",
+      "required": ["agent_identity_role", "implicit_authority", "authority_inputs"],
+      "properties": {
+        "agent_identity_role": { "const": "attribution-only" },
+        "implicit_authority": { "const": "denied" },
+        "authority_inputs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "identity_bindings": {
+      "type": "object",
+      "required": ["operator", "caller", "agent", "model_invocation", "backend_executor"],
+      "properties": {
+        "operator": { "const": "accountable-authority" },
+        "caller": { "const": "authenticated-workload" },
+        "agent": { "const": "attributed-executor" },
+        "model_invocation": { "const": "attributed-provider-invocation" },
+        "backend_executor": { "const": "owner-controlled-executor" }
+      },
+      "additionalProperties": false
+    },
+    "action_classes": {
+      "type": "object",
+      "required": ["read", "advise", "draft", "mutate"],
+      "properties": {
+        "read": { "$ref": "#/$defs/actionClass" },
+        "advise": { "$ref": "#/$defs/actionClass" },
+        "draft": { "$ref": "#/$defs/actionClass" },
+        "mutate": { "$ref": "#/$defs/actionClass" }
+      },
+      "additionalProperties": false
+    },
+    "schema_refs": {
+      "type": "object",
+      "required": ["request", "policy_decision", "action_receipt", "owner_receipt"],
+      "properties": {
+        "request": { "type": "string", "minLength": 1 },
+        "policy_decision": { "type": "string", "minLength": 1 },
+        "action_receipt": { "type": "string", "minLength": 1 },
+        "owner_receipt": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "receipt_ownership": {
+      "type": "object",
+      "required": ["policy_decision", "action_receipt", "owner_receipt", "security_acceptance"],
+      "properties": {
+        "policy_decision": { "const": "workspace-governance-control-fabric" },
+        "action_receipt": { "const": "operator-orchestration-service" },
+        "owner_receipt": { "const": "domain-owner-repo" },
+        "security_acceptance": { "const": "security-architecture" }
+      },
+      "additionalProperties": false
+    },
+    "evidence_rules": {
+      "type": "object",
+      "required": [
+        "raw_context_in_envelopes",
+        "raw_model_output_in_receipts",
+        "secret_material_in_refs",
+        "references_require_digest_binding",
+        "terminal_action_receipt_required",
+        "owner_receipt_required_after_owner_invocation"
+      ],
+      "properties": {
+        "raw_context_in_envelopes": { "const": "denied" },
+        "raw_model_output_in_receipts": { "const": "denied" },
+        "secret_material_in_refs": { "const": "denied" },
+        "references_require_digest_binding": { "const": true },
+        "terminal_action_receipt_required": { "const": true },
+        "owner_receipt_required_after_owner_invocation": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "runtime_activation": {
+      "type": "object",
+      "required": ["enabled", "required_work_item_refs", "required_outcomes"],
+      "properties": {
+        "enabled": { "const": false },
+        "required_work_item_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "denied_shortcuts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "actionClass": {
+      "type": "object",
+      "required": [
+        "canonical_mutation",
+        "model_invocation",
+        "context_packet",
+        "approval",
+        "output_authority",
+        "owner_receipt",
+        "terminal_receipt"
+      ],
+      "properties": {
+        "canonical_mutation": { "type": "boolean" },
+        "model_invocation": { "enum": ["not-required", "optional", "required"] },
+        "context_packet": { "enum": ["not-required", "optional", "required"] },
+        "approval": { "enum": ["not-required", "operator-accepted-output", "exact-operator-approval"] },
+        "output_authority": { "enum": ["read-only", "advisory", "noncanonical-draft", "canonical-owner-mutation"] },
+        "owner_receipt": { "enum": ["not-required", "required-when-owner-invoked"] },
+        "terminal_receipt": { "const": "required" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

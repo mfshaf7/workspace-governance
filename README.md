@@ -161,6 +161,7 @@ instead of symptom-driven debugging:
 
 Primary operator surfaces:
 
+- [docs/agent-action-authority.md](docs/agent-action-authority.md)
 - [docs/delivery-art-operator-path.md](docs/delivery-art-operator-path.md)
 - [docs/instruction-and-skill-governance.md](docs/instruction-and-skill-governance.md)
 - [docs/troubleshooting-preflight.md](docs/troubleshooting-preflight.md)

@@ -85,9 +85,13 @@ scope_discovery:
   meaningful_in_scope_follow_up: create-or-update-work-record
   out_of_scope_follow_up: route-to-owner-or-intake
   main_agent_classification_required: true
-future_enforcement_boundary:
-  parked_architecture_ref: openproject://work_packages/77
-  not_in_current_scope:
-    - runtime capability envelopes
-    - automatic write-scope collision enforcement
-    - work-system-native delegation state
+agent_action_authority:
+  active_architecture_ref: openproject://work_packages/906
+  supersedes_retired_ref: openproject://work_packages/77
+  canonical_contract_ref: contracts/agent-action-authority.yaml
+  current_boundary: contract-foundation
+  runtime_activation_requires:
+    - policy-evaluator-merged
+    - workflow-enforcement-merged
+    - conformance-proven
+    - security-accepted

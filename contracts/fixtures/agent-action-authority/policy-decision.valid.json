@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "agent_action_policy_decision",
+  "decision_id": "agent-action-decision:example-001",
+  "request_ref": {
+    "uri": "wgcf://agent-actions/requests/example-001",
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "action_class": "mutate",
+  "outcome": "allow",
+  "reason_codes": [
+    "authority-bindings-current",
+    "owner-workflow-admitted"
+  ],
+  "obligations": [
+    "record-terminal-action-receipt",
+    "require-exact-operator-approval",
+    "require-current-source-version",
+    "require-owner-receipt-after-invocation",
+    "deny-raw-context-projection"
+  ],
+  "decided_at": "2026-08-22T10:00:01Z",
+  "expires_at": "2026-08-22T10:15:00Z",
+  "bindings": {
+    "operator_principal_id": "operator:workspace-owner",
+    "operator_session_ref": {
+      "uri": "wgcf://sessions/example-001",
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "caller_workload_id": "operator-orchestration-service",
+    "agent_instance_id": "agent-instance:example-001",
+    "workflow_execution_id": "workflow-execution:example-001",
+    "target_owner_repo": "operator-orchestration-service",
+    "target_resource_id": "work-item-951",
+    "source_version": "lock-version:4",
+    "approval_ref": {
+      "uri": "wgcf://approvals/action-example-001",
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "policy_refs": [
+    {
+      "uri": "repo://workspace-governance/contracts/agent-action-authority.yaml",
+      "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  }
+}
