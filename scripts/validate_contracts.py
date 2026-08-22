@@ -938,28 +938,48 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             for entry in owner_map
             if isinstance(entry.get("owner_repo"), str)
         }
-        merge_order = _artifact_string_list(dag.get("merge_order"))
-        if set(merge_order) != owner_repos:
-            errors.append(
-                "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
+        if payload.get("schema_version") == 2:
+            landing_unit_order = _artifact_string_list(
+                dag.get("landing_unit_order")
             )
+            if set(landing_unit_order) != dag_nodes:
+                errors.append(
+                    "architecture.dependency_merge_dag.landing_unit_order must exactly cover dependency nodes"
+                )
+            else:
+                merge_positions = {
+                    work_item_id: position
+                    for position, work_item_id in enumerate(landing_unit_order)
+                }
+                for before, after in precedence_edges:
+                    if merge_positions[before] >= merge_positions[after]:
+                        errors.append(
+                            "architecture.dependency_merge_dag.landing_unit_order violates "
+                            f"{before} before {after}"
+                        )
         else:
-            merge_positions = {
-                repo: position for position, repo in enumerate(merge_order)
-            }
-            for before, after in precedence_edges:
-                before_repo = owner_by_work_item.get(before)
-                after_repo = owner_by_work_item.get(after)
-                if (
-                    before_repo is not None
-                    and after_repo is not None
-                    and before_repo != after_repo
-                    and merge_positions[before_repo] >= merge_positions[after_repo]
-                ):
-                    errors.append(
-                        "architecture.dependency_merge_dag.merge_order violates "
-                        f"{before} before {after}: {before_repo} must precede {after_repo}"
-                    )
+            merge_order = _artifact_string_list(dag.get("merge_order"))
+            if set(merge_order) != owner_repos:
+                errors.append(
+                    "architecture.dependency_merge_dag.merge_order must exactly cover descendant owner repos"
+                )
+            else:
+                merge_positions = {
+                    repo: position for position, repo in enumerate(merge_order)
+                }
+                for before, after in precedence_edges:
+                    before_repo = owner_by_work_item.get(before)
+                    after_repo = owner_by_work_item.get(after)
+                    if (
+                        before_repo is not None
+                        and after_repo is not None
+                        and before_repo != after_repo
+                        and merge_positions[before_repo] >= merge_positions[after_repo]
+                    ):
+                        errors.append(
+                            "architecture.dependency_merge_dag.merge_order violates "
+                            f"{before} before {after}: {before_repo} must precede {after_repo}"
+                        )
 
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
         if (
@@ -3005,6 +3025,121 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             reversed_merge_order,
             "architecture merge order that violates cross-repo dependency precedence",
+        )
+
+        repeated_owner_landing_order = copy.deepcopy(architecture)
+        repeated_owner_landing_order["schema_version"] = 2
+        repeated_owner_landing_order["artifact_id"] = (
+            "architecture-packet:delivery-698-v2"
+        )
+        repeated_owner_landing_order["covered_work_item_ids"].append(
+            "work-item-803"
+        )
+        repeated_owner_landing_order["architecture"][
+            "descendant_owner_map"
+        ].append(
+            {
+                "work_item_id": "work-item-803",
+                "work_item_type": "Enabler",
+                "owner_repo": "workspace-governance",
+                "parent_work_item_id": "work-item-801",
+            }
+        )
+        repeated_owner_dag = repeated_owner_landing_order["architecture"][
+            "dependency_merge_dag"
+        ]
+        repeated_owner_dag["nodes"].append("work-item-803")
+        repeated_owner_dag["edges"].append(
+            {
+                "from": "work-item-802",
+                "to": "work-item-803",
+                "relation": "must_merge_before",
+            }
+        )
+        repeated_owner_dag.pop("merge_order")
+        repeated_owner_dag["landing_unit_order"] = [
+            "work-item-801",
+            "work-item-802",
+            "work-item-803",
+        ]
+        contract_applicability = copy.deepcopy(
+            repeated_owner_landing_order["conformance_plan"][
+                "work_item_dimension_applicability"
+            ][0]
+        )
+        contract_applicability["work_item_id"] = "work-item-803"
+        repeated_owner_landing_order["conformance_plan"][
+            "work_item_dimension_applicability"
+        ].append(contract_applicability)
+        for source_case, case_id in (
+            (
+                repeated_owner_landing_order["conformance_plan"]["cases"][0],
+                "case:activation-positive",
+            ),
+            (
+                repeated_owner_landing_order["conformance_plan"]["cases"][1],
+                "case:activation-negative",
+            ),
+        ):
+            activation_case = copy.deepcopy(source_case)
+            activation_case["id"] = case_id
+            activation_case["applies_to_work_item_ids"] = ["work-item-803"]
+            repeated_owner_landing_order["conformance_plan"]["cases"].append(
+                activation_case
+            )
+        repeated_owner_landing_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(repeated_owner_landing_order)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            repeated_owner_landing_order,
+            "architecture Landing Unit order with a repeated owner repo",
+        )
+
+        v1_with_landing_unit_order = copy.deepcopy(architecture)
+        v1_with_landing_unit_order["architecture"]["dependency_merge_dag"][
+            "landing_unit_order"
+        ] = ["work-item-801", "work-item-802"]
+        require_rejected(
+            "architecture_packet",
+            v1_with_landing_unit_order,
+            "architecture packet v1 with a v2 Landing Unit order",
+        )
+
+        v2_with_repo_merge_order = copy.deepcopy(repeated_owner_landing_order)
+        v2_with_repo_merge_order["architecture"]["dependency_merge_dag"][
+            "merge_order"
+        ] = ["workspace-governance", "operator-orchestration-service"]
+        require_rejected(
+            "architecture_packet",
+            v2_with_repo_merge_order,
+            "architecture packet v2 with a v1 repo merge order",
+        )
+
+        invalid_repeated_owner_landing_order = copy.deepcopy(
+            repeated_owner_landing_order
+        )
+        invalid_repeated_owner_landing_order["architecture"][
+            "dependency_merge_dag"
+        ]["landing_unit_order"] = [
+            "work-item-801",
+            "work-item-803",
+            "work-item-802",
+        ]
+        invalid_repeated_owner_landing_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(
+                    invalid_repeated_owner_landing_order
+                )
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            invalid_repeated_owner_landing_order,
+            "architecture Landing Unit order that violates repeated-owner dependency precedence",
+            expected_fragment="landing_unit_order violates work-item-802 before work-item-803",
         )
 
         valid_depends_on_order = copy.deepcopy(architecture)

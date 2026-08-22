@@ -109,6 +109,125 @@ delivery_art_operator_path:
         Activation is bounded to the proven dev-integration owner runtime.
         Stage and production still require their own platform and security
         promotion evidence.
+  work_session_lifecycle:
+    contract_version: 2
+    state: contract-ready-pending-owner-implementation
+    owner_repo: operator-orchestration-service
+    session_artifact_type: delivery_art_work_session
+    commands:
+      start: npm run art -- work start <work-item-id>
+      status: npm run art -- work status <work-item-id>
+      continue: npm run art -- work continue <work-item-id>
+      close: npm run art -- work close <work-item-id>
+      help: npm run art -- work --help
+    command_semantics:
+      start: >-
+        Resolve the ART initiative and active leaf, collect or stop at the
+        Landing Unit and architecture decisions, author durable work-start
+        evidence, scaffold stable artifact locations, and return one exact
+        next action.
+      status: >-
+        Read the persistent work session and authoritative ART, Git, WGCF, and
+        Review Packet truth without mutating any of them.
+      continue: >-
+        Reconstruct current paths, refresh transition truth, perform only safe
+        mechanical reconciliation, stop at the next human gate, and return one
+        exact next action.
+      close: >-
+        Require explicit operator closeout intent, resolve finalized evidence,
+        submit bounded ART completion and eligible parent closeout, reconcile
+        projection state, and retire the local work session only after success.
+      help: >-
+        Show only the work-session command family, required arguments, current
+        authority boundaries, state location, compatibility path, and examples.
+    state_store:
+      classification: reconstructable-operator-coordination
+      default_root: ${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work
+      override_environment_variable: OOS_ART_WORK_STATE_ROOT
+      worktree_storage: prohibited
+      write_model: atomic-replace
+      secret_storage: prohibited
+      canonical_sources:
+        - workspace-delivery-art
+        - owner-repo-git
+        - wgcf-delivery-art-artifacts
+        - review-packets
+    session_identity:
+      key: delivery-id-plus-landing-unit
+      aliases:
+        - covered-work-item-id
+        - landing-unit-id
+      stable_across:
+        - process-restart
+        - context-compaction
+        - worktree-relocation
+        - disposable-worktree-cleanup
+    states:
+      - decision-required
+      - architecture-required
+      - implementation-ready
+      - source-work
+      - evidence-required
+      - pull-request-required
+      - merge-required
+      - operating-readiness-required
+      - closeout-required
+      - blocked
+      - closed
+    next_action:
+      cardinality: exactly-one
+      required_fields:
+        - code
+        - command
+        - reason
+        - authority
+      no_action_code: work-complete
+      ambiguous_action_result: blocked
+    human_gates:
+      - architecture-decision
+      - landing-unit-decision
+      - exception-or-risk-acceptance
+      - pull-request-review
+      - source-merge
+      - security-acceptance
+      - art-closeout
+    artifact_discovery:
+      lookup_order:
+        - persistent-session-registry
+        - durable-artifact-reference
+        - planned-stable-path
+        - deterministic-reconstruction
+      missing_artifact_result: bounded-next-action
+      absolute_worktree_path_persistence: prohibited
+    freshness:
+      architecture_initial_persistence: fresh-current-scope-required
+      historical_architecture_consumption: immutable-decision-plus-material-semantic-check
+      transition_candidate: fresh-current-scope-required
+      material_change_inputs:
+        - covered-scope-or-parent-change
+        - owner-or-rollback-boundary-change
+        - dependency-or-merge-order-change
+        - architecture-decision-or-protocol-change
+        - validation-or-security-obligation-change
+      ordinary_progress_inputs:
+        - lifecycle-status-change
+        - percent-complete-change
+        - work-note-change
+        - evidence-reference-append
+      ordinary_progress_result: historical-architecture-remains-valid
+      material_change_result: block-and-require-architecture-refresh
+    compatibility:
+      lifecycle_plan_artifact: generated-compatibility-projection
+      lifecycle_status_command: recovery-only
+      lifecycle_reconcile_command: recovery-only
+      direct_artifact_commands: recovery-and-contract-verification-only
+      review_packet_v1: compatibility-only
+    activation:
+      activation_work_item_ref: openproject://work_packages/964
+      implementation_work_item_ref: openproject://work_packages/963
+      security_work_item_ref: openproject://work_packages/962
+      target_state: active-dev-integration
+      temporal_adapter: deferred-until-durable-wait-evidence
   readiness_model:
     ordered_levels:
       - architecture-ready
@@ -279,6 +398,8 @@ delivery_art_operator_path:
         claim_refs:
           - work_start_gate.required_before_branch_or_source_edit
           - work_start_gate.fresh_target_and_dependency_snapshot_required_before_mutation
+          - work_start_gate.architecture_freshness.initial_persistence_requires_fresh_scoped_snapshot
+          - work_start_gate.architecture_freshness.later_transition_requires_fresh_candidate_snapshot
         enforcement_state: active-owner-runtime
         owner_repo: operator-orchestration-service
         owner_art_refs:
@@ -288,6 +409,24 @@ delivery_art_operator_path:
         enforcement_layers:
           - owner-runtime
         rationale: OOS lifecycle reconciliation enforces durable work-start and refreshes scoped ART truth before source work advances.
+      - id: historical-architecture-transition-semantics
+        claim_refs:
+          - work_start_gate.architecture_freshness.later_transition_revalidates_material_architecture_semantics
+          - work_start_gate.architecture_freshness.ordinary_progress_preserves_immutable_architecture_decision
+          - work_start_gate.architecture_freshness.material_architecture_change_requires_new_decision
+        enforcement_state: pending-owner
+        owner_repo: operator-orchestration-service
+        owner_art_refs:
+          - openproject://work_packages/963
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: >-
+          OOS must refresh the current transition candidate while treating an
+          approved architecture packet as immutable historical evidence. It
+          must block only when current ART truth changes a material
+          architecture semantic covered by the approved decision.
       - id: read-cache-policy
         claim_refs:
           - work_start_gate.read_snapshot_cache_allowed
@@ -476,6 +615,23 @@ delivery_art_operator_path:
     blocked_architecture_prevents_implementation_ready: true
     read_snapshot_cache_allowed: true
     fresh_target_and_dependency_snapshot_required_before_mutation: true
+    architecture_freshness:
+      initial_persistence_requires_fresh_scoped_snapshot: true
+      later_transition_requires_fresh_candidate_snapshot: true
+      later_transition_revalidates_material_architecture_semantics: true
+      ordinary_progress_preserves_immutable_architecture_decision: true
+      material_architecture_change_requires_new_decision: true
+      material_change_inputs:
+        - covered-scope-or-parent-change
+        - owner-or-rollback-boundary-change
+        - dependency-or-merge-order-change
+        - architecture-decision-or-protocol-change
+        - validation-or-security-obligation-change
+      ordinary_progress_inputs:
+        - lifecycle-status-change
+        - percent-complete-change
+        - work-note-change
+        - evidence-reference-append
     complete_invalidation_set_required: true
     scope_fingerprint_is_deterministic_projection: true
     invalidation_inputs:

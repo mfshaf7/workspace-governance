@@ -16,6 +16,7 @@
         "governance_surface",
         "supporting_platform_surfaces",
         "contract_activation",
+        "work_session_lifecycle",
         "readiness_model",
         "artifact_contracts",
         "proof_obligations",
@@ -55,6 +56,7 @@
           }
         },
         "contract_activation": { "$ref": "#/$defs/contractActivation" },
+        "work_session_lifecycle": { "$ref": "#/$defs/workSessionLifecycle" },
         "readiness_model": { "$ref": "#/$defs/readinessModel" },
         "artifact_contracts": { "$ref": "#/$defs/artifactContracts" },
         "proof_obligations": { "$ref": "#/$defs/proofObligations" },
@@ -113,6 +115,260 @@
         "cli": { "$ref": "#/$defs/nonEmptyString" },
         "route": { "$ref": "#/$defs/nonEmptyString" },
         "purpose": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "workSessionLifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "state",
+        "owner_repo",
+        "session_artifact_type",
+        "commands",
+        "command_semantics",
+        "state_store",
+        "session_identity",
+        "states",
+        "next_action",
+        "human_gates",
+        "artifact_discovery",
+        "freshness",
+        "compatibility",
+        "activation"
+      ],
+      "properties": {
+        "contract_version": { "const": 2 },
+        "state": {
+          "enum": [
+            "contract-ready-pending-owner-implementation",
+            "implemented-pending-security-acceptance",
+            "implemented-pending-activation",
+            "active-dev-integration"
+          ]
+        },
+        "owner_repo": { "const": "operator-orchestration-service" },
+        "session_artifact_type": { "const": "delivery_art_work_session" },
+        "commands": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "status", "continue", "close", "help"],
+          "properties": {
+            "start": { "const": "npm run art -- work start <work-item-id>" },
+            "status": { "const": "npm run art -- work status <work-item-id>" },
+            "continue": { "const": "npm run art -- work continue <work-item-id>" },
+            "close": { "const": "npm run art -- work close <work-item-id>" },
+            "help": { "const": "npm run art -- work --help" }
+          }
+        },
+        "command_semantics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "status", "continue", "close", "help"],
+          "properties": {
+            "start": { "$ref": "#/$defs/nonEmptyString" },
+            "status": { "$ref": "#/$defs/nonEmptyString" },
+            "continue": { "$ref": "#/$defs/nonEmptyString" },
+            "close": { "$ref": "#/$defs/nonEmptyString" },
+            "help": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "state_store": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "classification",
+            "default_root",
+            "override_environment_variable",
+            "worktree_storage",
+            "write_model",
+            "secret_storage",
+            "canonical_sources"
+          ],
+          "properties": {
+            "classification": { "const": "reconstructable-operator-coordination" },
+            "default_root": {
+              "const": "${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work"
+            },
+            "override_environment_variable": { "const": "OOS_ART_WORK_STATE_ROOT" },
+            "worktree_storage": { "const": "prohibited" },
+            "write_model": { "const": "atomic-replace" },
+            "secret_storage": { "const": "prohibited" },
+            "canonical_sources": {
+              "const": [
+                "workspace-delivery-art",
+                "owner-repo-git",
+                "wgcf-delivery-art-artifacts",
+                "review-packets"
+              ]
+            }
+          }
+        },
+        "session_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["key", "aliases", "stable_across"],
+          "properties": {
+            "key": { "const": "delivery-id-plus-landing-unit" },
+            "aliases": {
+              "const": ["covered-work-item-id", "landing-unit-id"]
+            },
+            "stable_across": {
+              "const": [
+                "process-restart",
+                "context-compaction",
+                "worktree-relocation",
+                "disposable-worktree-cleanup"
+              ]
+            }
+          }
+        },
+        "states": {
+          "const": [
+            "decision-required",
+            "architecture-required",
+            "implementation-ready",
+            "source-work",
+            "evidence-required",
+            "pull-request-required",
+            "merge-required",
+            "operating-readiness-required",
+            "closeout-required",
+            "blocked",
+            "closed"
+          ]
+        },
+        "next_action": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cardinality",
+            "required_fields",
+            "no_action_code",
+            "ambiguous_action_result"
+          ],
+          "properties": {
+            "cardinality": { "const": "exactly-one" },
+            "required_fields": {
+              "const": ["code", "command", "reason", "authority"]
+            },
+            "no_action_code": { "const": "work-complete" },
+            "ambiguous_action_result": { "const": "blocked" }
+          }
+        },
+        "human_gates": {
+          "const": [
+            "architecture-decision",
+            "landing-unit-decision",
+            "exception-or-risk-acceptance",
+            "pull-request-review",
+            "source-merge",
+            "security-acceptance",
+            "art-closeout"
+          ]
+        },
+        "artifact_discovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lookup_order",
+            "missing_artifact_result",
+            "absolute_worktree_path_persistence"
+          ],
+          "properties": {
+            "lookup_order": {
+              "const": [
+                "persistent-session-registry",
+                "durable-artifact-reference",
+                "planned-stable-path",
+                "deterministic-reconstruction"
+              ]
+            },
+            "missing_artifact_result": { "const": "bounded-next-action" },
+            "absolute_worktree_path_persistence": { "const": "prohibited" }
+          }
+        },
+        "freshness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "architecture_initial_persistence",
+            "historical_architecture_consumption",
+            "transition_candidate",
+            "material_change_inputs",
+            "ordinary_progress_inputs",
+            "ordinary_progress_result",
+            "material_change_result"
+          ],
+          "properties": {
+            "architecture_initial_persistence": { "const": "fresh-current-scope-required" },
+            "historical_architecture_consumption": {
+              "const": "immutable-decision-plus-material-semantic-check"
+            },
+            "transition_candidate": { "const": "fresh-current-scope-required" },
+            "material_change_inputs": {
+              "const": [
+                "covered-scope-or-parent-change",
+                "owner-or-rollback-boundary-change",
+                "dependency-or-merge-order-change",
+                "architecture-decision-or-protocol-change",
+                "validation-or-security-obligation-change"
+              ]
+            },
+            "ordinary_progress_inputs": {
+              "const": [
+                "lifecycle-status-change",
+                "percent-complete-change",
+                "work-note-change",
+                "evidence-reference-append"
+              ]
+            },
+            "ordinary_progress_result": {
+              "const": "historical-architecture-remains-valid"
+            },
+            "material_change_result": {
+              "const": "block-and-require-architecture-refresh"
+            }
+          }
+        },
+        "compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lifecycle_plan_artifact",
+            "lifecycle_status_command",
+            "lifecycle_reconcile_command",
+            "direct_artifact_commands",
+            "review_packet_v1"
+          ],
+          "properties": {
+            "lifecycle_plan_artifact": { "const": "generated-compatibility-projection" },
+            "lifecycle_status_command": { "const": "recovery-only" },
+            "lifecycle_reconcile_command": { "const": "recovery-only" },
+            "direct_artifact_commands": {
+              "const": "recovery-and-contract-verification-only"
+            },
+            "review_packet_v1": { "const": "compatibility-only" }
+          }
+        },
+        "activation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "activation_work_item_ref",
+            "implementation_work_item_ref",
+            "security_work_item_ref",
+            "target_state",
+            "temporal_adapter"
+          ],
+          "properties": {
+            "activation_work_item_ref": { "$ref": "#/$defs/artWorkPackageRef" },
+            "implementation_work_item_ref": { "$ref": "#/$defs/artWorkPackageRef" },
+            "security_work_item_ref": { "$ref": "#/$defs/artWorkPackageRef" },
+            "target_state": { "const": "active-dev-integration" },
+            "temporal_adapter": { "const": "deferred-until-durable-wait-evidence" }
+          }
+        }
       }
     },
     "contractActivation": {
@@ -559,6 +815,7 @@
         "blocked_architecture_prevents_implementation_ready",
         "read_snapshot_cache_allowed",
         "fresh_target_and_dependency_snapshot_required_before_mutation",
+        "architecture_freshness",
         "complete_invalidation_set_required",
         "scope_fingerprint_is_deterministic_projection",
         "invalidation_inputs"
@@ -584,6 +841,43 @@
         "blocked_architecture_prevents_implementation_ready": { "const": true },
         "read_snapshot_cache_allowed": { "const": true },
         "fresh_target_and_dependency_snapshot_required_before_mutation": { "const": true },
+        "architecture_freshness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "initial_persistence_requires_fresh_scoped_snapshot",
+            "later_transition_requires_fresh_candidate_snapshot",
+            "later_transition_revalidates_material_architecture_semantics",
+            "ordinary_progress_preserves_immutable_architecture_decision",
+            "material_architecture_change_requires_new_decision",
+            "material_change_inputs",
+            "ordinary_progress_inputs"
+          ],
+          "properties": {
+            "initial_persistence_requires_fresh_scoped_snapshot": { "const": true },
+            "later_transition_requires_fresh_candidate_snapshot": { "const": true },
+            "later_transition_revalidates_material_architecture_semantics": { "const": true },
+            "ordinary_progress_preserves_immutable_architecture_decision": { "const": true },
+            "material_architecture_change_requires_new_decision": { "const": true },
+            "material_change_inputs": {
+              "const": [
+                "covered-scope-or-parent-change",
+                "owner-or-rollback-boundary-change",
+                "dependency-or-merge-order-change",
+                "architecture-decision-or-protocol-change",
+                "validation-or-security-obligation-change"
+              ]
+            },
+            "ordinary_progress_inputs": {
+              "const": [
+                "lifecycle-status-change",
+                "percent-complete-change",
+                "work-note-change",
+                "evidence-reference-append"
+              ]
+            }
+          }
+        },
         "complete_invalidation_set_required": { "const": true },
         "scope_fingerprint_is_deterministic_projection": { "const": true },
         "invalidation_inputs": {

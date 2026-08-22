@@ -429,6 +429,112 @@ def delivery_art_lifecycle_capability_parity_errors(
     return errors
 
 
+def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
+    errors: list[str] = []
+    expected_commands = {
+        "start": "npm run art -- work start <work-item-id>",
+        "status": "npm run art -- work status <work-item-id>",
+        "continue": "npm run art -- work continue <work-item-id>",
+        "close": "npm run art -- work close <work-item-id>",
+        "help": "npm run art -- work --help",
+    }
+    if work_session.get("contract_version") != 2:
+        errors.append("work-session lifecycle contract version must be 2")
+    if work_session.get("state") != "contract-ready-pending-owner-implementation":
+        errors.append(
+            "work-session lifecycle must remain pending until owner implementation, Security review, and activation land"
+        )
+    if work_session.get("owner_repo") != "operator-orchestration-service":
+        errors.append("work-session lifecycle owner must be operator-orchestration-service")
+    if work_session.get("commands") != expected_commands:
+        errors.append("work-session lifecycle command family differs from the approved contract")
+
+    state_store = work_session.get("state_store") or {}
+    if state_store.get("classification") != "reconstructable-operator-coordination":
+        errors.append("work-session state must remain reconstructable coordination")
+    if state_store.get("default_root") != (
+        "${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work"
+    ):
+        errors.append("work-session state root differs from the approved contract")
+    if state_store.get("override_environment_variable") != "OOS_ART_WORK_STATE_ROOT":
+        errors.append("work-session state override differs from the approved contract")
+    if state_store.get("worktree_storage") != "prohibited":
+        errors.append("work-session state must not be stored in disposable worktrees")
+    if state_store.get("write_model") != "atomic-replace":
+        errors.append("work-session state writes must use atomic replacement")
+    if state_store.get("secret_storage") != "prohibited":
+        errors.append("work-session state must not store secrets")
+    if set(state_store.get("canonical_sources") or []) != {
+        "workspace-delivery-art",
+        "owner-repo-git",
+        "wgcf-delivery-art-artifacts",
+        "review-packets",
+    }:
+        errors.append("work-session canonical source set differs from the approved contract")
+
+    next_action = work_session.get("next_action") or {}
+    if next_action.get("cardinality") != "exactly-one":
+        errors.append("work-session results must expose exactly one next action")
+    if set(next_action.get("required_fields") or []) != {
+        "code",
+        "command",
+        "reason",
+        "authority",
+    }:
+        errors.append("work-session next action fields differ from the approved contract")
+    if next_action.get("no_action_code") != "work-complete":
+        errors.append("work-session terminal next-action code must be work-complete")
+    if next_action.get("ambiguous_action_result") != "blocked":
+        errors.append("ambiguous work-session next actions must fail closed")
+
+    freshness = work_session.get("freshness") or {}
+    if freshness.get("architecture_initial_persistence") != "fresh-current-scope-required":
+        errors.append("initial architecture persistence must require fresh scoped truth")
+    if freshness.get("historical_architecture_consumption") != (
+        "immutable-decision-plus-material-semantic-check"
+    ):
+        errors.append("historical architecture must use immutable evidence plus material semantic checks")
+    if freshness.get("transition_candidate") != "fresh-current-scope-required":
+        errors.append("each transition candidate must require fresh scoped truth")
+    if set(freshness.get("material_change_inputs") or []) != {
+        "covered-scope-or-parent-change",
+        "owner-or-rollback-boundary-change",
+        "dependency-or-merge-order-change",
+        "architecture-decision-or-protocol-change",
+        "validation-or-security-obligation-change",
+    }:
+        errors.append("work-session material architecture inputs differ from the approved contract")
+    if set(freshness.get("ordinary_progress_inputs") or []) != {
+        "lifecycle-status-change",
+        "percent-complete-change",
+        "work-note-change",
+        "evidence-reference-append",
+    }:
+        errors.append("work-session ordinary progress inputs differ from the approved contract")
+
+    compatibility = work_session.get("compatibility") or {}
+    if compatibility != {
+        "lifecycle_plan_artifact": "generated-compatibility-projection",
+        "lifecycle_status_command": "recovery-only",
+        "lifecycle_reconcile_command": "recovery-only",
+        "direct_artifact_commands": "recovery-and-contract-verification-only",
+        "review_packet_v1": "compatibility-only",
+    }:
+        errors.append("work-session compatibility boundary differs from the approved contract")
+
+    activation = work_session.get("activation") or {}
+    if activation != {
+        "activation_work_item_ref": "openproject://work_packages/964",
+        "implementation_work_item_ref": "openproject://work_packages/963",
+        "security_work_item_ref": "openproject://work_packages/962",
+        "target_state": "active-dev-integration",
+        "temporal_adapter": "deferred-until-durable-wait-evidence",
+    }:
+        errors.append("work-session activation boundary differs from the approved sequence")
+
+    return errors
+
+
 def validate_delivery_art_operator_path_contract(
     workspace_root: Path,
     repo_root: Path,
@@ -567,6 +673,12 @@ def validate_delivery_art_operator_path_contract(
     ):
         errors.append(f"{contract_path}: {parity_error}")
 
+    work_session = operator_path.get("work_session_lifecycle") or {}
+    for work_session_error in delivery_art_work_session_contract_errors(
+        work_session
+    ):
+        errors.append(f"{contract_path}: {work_session_error}")
+
     expected_artifact_schemas = {
         "architecture_packet": "contracts/schemas/delivery-art-architecture-packet.schema.json",
         "work_start_record": "contracts/schemas/delivery-art-work-start-record.schema.json",
@@ -593,6 +705,9 @@ def validate_delivery_art_operator_path_contract(
             f"{contract_path}: readiness levels must preserve architecture, implementation, merge, and operating order"
         )
 
+    governance_surface_path = repo_root / operator_path.get(
+        "governance_surface", ""
+    )
     surface_paths = [
         workspace_root / canonical_entrypoint.get("primary_operator_surface", ""),
         workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
@@ -604,7 +719,7 @@ def validate_delivery_art_operator_path_contract(
         workspace_root / operator_path.get("supporting_platform_surfaces", {}).get(
             "admin_boundary", ""
         ),
-        repo_root / operator_path.get("governance_surface", ""),
+        governance_surface_path,
     ]
     for path in surface_paths:
         if not path.exists():
@@ -628,6 +743,24 @@ def validate_delivery_art_operator_path_contract(
                     f"{primary_surface_path}: missing guided ART write command {cli!r}"
                 )
 
+    if governance_surface_path.exists():
+        governance_surface_text = governance_surface_path.read_text(encoding="utf-8")
+        for command in (work_session.get("commands") or {}).values():
+            if command not in governance_surface_text:
+                errors.append(
+                    f"{governance_surface_path}: missing target work-session command {command!r}"
+                )
+        for required in (
+            "contract-ready-pending-owner-implementation",
+            "reconstructable operator coordination",
+            "ordinary lifecycle status",
+            "material",
+        ):
+            if required not in governance_surface_text:
+                errors.append(
+                    f"{governance_surface_path}: missing work-session transition guidance {required!r}"
+                )
+
     skill_path = repo_root / "skills-src/project-delivery-operator/SKILL.md"
     if skill_path.exists():
         skill_text = skill_path.read_text(encoding="utf-8")
@@ -638,6 +771,11 @@ def validate_delivery_art_operator_path_contract(
             "npm run art -- item continuation <work-item-id>",
             "npm run art -- lifecycle status <plan.json>",
             "npm run art -- lifecycle reconcile <plan.json>",
+            "npm run art -- work start <work-item-id>",
+            "npm run art -- work status <work-item-id>",
+            "npm run art -- work continue <work-item-id>",
+            "npm run art -- work close <work-item-id>",
+            "npm run art -- work --help",
         ):
             if required not in skill_text:
                 errors.append(f"{skill_path}: missing ART operator-path command {required!r}")

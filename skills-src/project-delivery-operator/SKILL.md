@@ -65,6 +65,12 @@ cases must pass before merge readiness. Use a `real-git` case for Git-history
 causality, and declare the exact work items and dimensions whose claims require
 that fidelity; a synthetic resolver cannot prove a real commit sequence.
 
+Architecture packet v1 retains repo-level `merge_order` for compatibility.
+Use architecture packet v2 `landing_unit_order` when one owner repo appears in
+more than one Landing Unit or when review and activation are separate landings.
+That order covers work items, not unique repo names, and must honor every
+dependency precedence edge.
+
 Keep the four readiness decisions distinct:
 
 - `architecture-ready`: approved design, boundaries, sequence, and conformance plan
@@ -73,9 +79,10 @@ Keep the four readiness decisions distinct:
   applicable structured evidence and a durable content-addressed Review Packet
 - `operating-ready`: finalized durable evidence satisfies closeout obligations
 
-The OOS lifecycle path is active in `dev-integration`. Its capability manifest
-is source authority and Workspace Governance validates an exact capability
-projection. Use a `delivery_art_lifecycle_plan` and the normal commands:
+The currently active OOS lifecycle path uses a `delivery_art_lifecycle_plan` in
+`dev-integration`. Its capability manifest is source authority and Workspace
+Governance validates an exact capability projection. Until OOS work item `963`,
+Security work item `962`, and activation work item `964` land, use:
 
 - `npm run art -- lifecycle status <plan.json>`
 - `npm run art -- lifecycle reconcile <plan.json>`
@@ -84,6 +91,31 @@ Reconciliation stops at declared human gates. Durable work-start, Review Packet
 v2, readiness, finalization, and closeout are normal-path capabilities. Review
 Packet v1 is compatibility-only. This does not grant stage or production
 authority.
+
+The approved v2 work-session command family is contract-ready but not yet
+active:
+
+- `npm run art -- work start <work-item-id>`
+- `npm run art -- work status <work-item-id>`
+- `npm run art -- work continue <work-item-id>`
+- `npm run art -- work close <work-item-id>`
+- `npm run art -- work --help`
+
+Do not advertise or depend on those commands before activation `964`. After
+activation, use them as the normal path and treat lifecycle-plan and direct
+artifact commands as generated compatibility, recovery, or contract-verification
+surfaces. Work-session state is reconstructable coordination under
+`${XDG_STATE_HOME:-${HOME}/.local/state}/operator-orchestration-service/delivery-art/work`
+unless `OOS_ART_WORK_STATE_ROOT` overrides it. It is not canonical ART, Git,
+WGCF, or Review Packet truth and must not contain secrets or absolute worktree
+paths.
+
+Initial architecture persistence and every new transition candidate require a
+fresh scoped snapshot. Historical architecture remains immutable and valid
+across ordinary status, percent-complete, work-note, and evidence-reference
+updates. A covered-scope, parent, owner, rollback, dependency, Landing Unit
+order, protocol, validation, or Security-obligation change is material and
+must block for a new architecture decision.
 
 Under the v2 path, every passing result binds the exact packet repo
 heads. Finalized source packets supersede and preserve a durable merge-ready

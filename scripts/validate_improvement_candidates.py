@@ -14,6 +14,7 @@ from contracts_lib import load_contracts, load_json
 
 
 IMPROVEMENT_CANDIDATE_SCHEMA = "contracts/schemas/improvement-candidate-record.schema.json"
+CANONICAL_REPO_NAME = "workspace-governance"
 
 
 def load_yaml(path: Path) -> dict:
@@ -55,9 +56,22 @@ def parse_iso_date(raw: object, *, field_name: str, record_path: Path, errors: l
 
 def workspace_relative_path(path: Path, *, repo_root: Path, workspace_root: Path) -> str:
     try:
-        return path.relative_to(workspace_root).as_posix()
+        repo_relative = path.relative_to(repo_root)
     except ValueError:
-        return f"{repo_root.name}/{path.relative_to(repo_root).as_posix()}"
+        return path.relative_to(workspace_root).as_posix()
+    return f"{CANONICAL_REPO_NAME}/{repo_relative.as_posix()}"
+
+
+def resolve_workspace_reference(
+    reference: str,
+    *,
+    repo_root: Path,
+    workspace_root: Path,
+) -> Path:
+    reference_path = Path(reference)
+    if reference_path.parts and reference_path.parts[0] == CANONICAL_REPO_NAME:
+        return repo_root.joinpath(*reference_path.parts[1:])
+    return workspace_root / reference_path
 
 
 def main() -> int:
@@ -189,7 +203,11 @@ def main() -> int:
                 errors.append(f"{record_path}: control path must be workspace-relative, got {path!r}")
             if not path.startswith(f"{owner_repo}/"):
                 errors.append(f"{record_path}: control path {path!r} must start with {owner_repo!r}/")
-            if not (workspace_root / path).exists():
+            if not resolve_workspace_reference(
+                path,
+                repo_root=repo_root,
+                workspace_root=workspace_root,
+            ).exists():
                 errors.append(f"{record_path}: references missing control path {path!r}")
 
         if after_action_ref:
@@ -199,7 +217,11 @@ def main() -> int:
                 errors.append(
                     f"{record_path}: after_action_ref must stay under workspace-governance/reviews/after-action/, got {after_action_ref!r}"
                 )
-            elif not (workspace_root / after_action_ref).exists():
+            elif not resolve_workspace_reference(
+                after_action_ref,
+                repo_root=repo_root,
+                workspace_root=workspace_root,
+            ).exists():
                 errors.append(f"{record_path}: references missing after_action_ref {after_action_ref!r}")
 
         status = record["status"]
