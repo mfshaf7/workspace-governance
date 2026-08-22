@@ -199,10 +199,10 @@ resolution:
     owner_repo: workspace-governance
     note: Work item 964 activates the exact merged OOS schema-v2 capability
       manifest in dev-integration and moves lifecycle plans to recovery-only.
-      At source head 553aa2274fbcee09fab627f6589e9efcdba20667, fresh-process
-      status, registered-worktree relocation, and disposable-worktree removal
-      plus continue all reconstructed the same session, source head, state, and
-      exact next action without manual path repair.
+      Fresh-process status, registered-worktree relocation, and
+      disposable-worktree removal plus continue all reconstructed the same
+      session, source head, state, and exact next action without manual path
+      repair on the activation branch.
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
