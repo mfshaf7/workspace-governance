@@ -72,6 +72,23 @@ Use these contracts to declare:
 - `delegation-policy.yaml`
   - defines the workspace-wide delegated-execution policy, eligibility gate,
     task classes, packet rules, and audit-journal expectations
+- `agent-action-authority.yaml`
+  - defines the provider-neutral action classes, identity and authority
+    bindings, cross-repo receipt ownership, activation gates, and denied
+    shortcuts for attributable AI-assisted actions
+- `schemas/agent-action-request.schema.json`
+  - defines the immutable request envelope for `read`, `advise`, `draft`, and
+    `mutate` actions without treating logical agent identity as authority
+- `schemas/agent-action-policy-decision.schema.json`
+  - defines the bounded WGCF allow, deny, or review-required decision and its
+    exact request, identity, workflow, target, source, policy, and approval
+    bindings
+- `schemas/agent-action-receipt.schema.json`
+  - defines the terminal shared-workflow receipt and its result, failure,
+    mutation, approval, and owner-receipt references
+- `schemas/agent-action-owner-receipt.schema.json`
+  - defines the domain-owner result for an invoked canonical mutation without
+    embedding raw backend output
 - `self-improvement-policy.yaml`
   - defines the in-session self-improvement signal catalog, fail-closed runtime
     gate, and primary escalation surface

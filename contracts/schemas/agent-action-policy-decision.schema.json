@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-action-policy-decision.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "decision_id",
+    "request_ref",
+    "action_class",
+    "outcome",
+    "reason_codes",
+    "obligations",
+    "decided_at",
+    "expires_at",
+    "bindings",
+    "policy_refs",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "agent_action_policy_decision" },
+    "decision_id": { "type": "string", "pattern": "^agent-action-decision:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "action_class": { "$ref": "#/$defs/actionClass" },
+    "outcome": { "enum": ["allow", "deny", "review-required"] },
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "obligations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "record-terminal-action-receipt",
+          "require-exact-operator-approval",
+          "require-current-source-version",
+          "require-owner-receipt-after-invocation",
+          "deny-raw-context-projection"
+        ]
+      }
+    },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+    "bindings": {
+      "type": "object",
+      "required": [
+        "operator_principal_id",
+        "operator_session_ref",
+        "caller_workload_id",
+        "agent_instance_id",
+        "workflow_execution_id",
+        "target_owner_repo",
+        "target_resource_id",
+        "source_version",
+        "approval_ref"
+      ],
+      "properties": {
+        "operator_principal_id": { "$ref": "#/$defs/nonEmptyString" },
+        "operator_session_ref": { "$ref": "#/$defs/artifactRef" },
+        "caller_workload_id": { "$ref": "#/$defs/nonEmptyString" },
+        "agent_instance_id": { "$ref": "#/$defs/nonEmptyString" },
+        "workflow_execution_id": { "$ref": "#/$defs/nonEmptyString" },
+        "target_owner_repo": { "$ref": "#/$defs/nonEmptyString" },
+        "target_resource_id": { "$ref": "#/$defs/nonEmptyString" },
+        "source_version": { "$ref": "#/$defs/nonEmptyString" },
+        "approval_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "policy_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/artifactRef" }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "action_class": { "const": "mutate" }, "outcome": { "const": "allow" } },
+        "required": ["action_class", "outcome"]
+      },
+      "then": {
+        "properties": {
+          "bindings": { "properties": { "approval_ref": { "$ref": "#/$defs/artifactRef" } } },
+          "obligations": {
+            "allOf": [
+              { "contains": { "const": "require-exact-operator-approval" } },
+              { "contains": { "const": "require-owner-receipt-after-invocation" } },
+              { "contains": { "const": "record-terminal-action-receipt" } }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "actionClass": { "enum": ["read", "advise", "draft", "mutate"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

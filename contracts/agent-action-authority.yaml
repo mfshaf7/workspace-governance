@@ -1,0 +1,95 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/agent-action-authority.md
+architecture:
+  active_ref: openproject://work_packages/906
+  supersedes_retired_ref: openproject://work_packages/77
+principles:
+  agent_identity_role: attribution-only
+  implicit_authority: denied
+  authority_inputs:
+    - operator_delegation
+    - authenticated_caller
+    - admitted_workflow
+    - action_class
+    - exact_target
+    - source_version
+    - current_policy_decision
+    - exact_approval_for_mutate
+identity_bindings:
+  operator: accountable-authority
+  caller: authenticated-workload
+  agent: attributed-executor
+  model_invocation: attributed-provider-invocation
+  backend_executor: owner-controlled-executor
+action_classes:
+  read:
+    canonical_mutation: false
+    model_invocation: optional
+    context_packet: optional
+    approval: not-required
+    output_authority: read-only
+    owner_receipt: not-required
+    terminal_receipt: required
+  advise:
+    canonical_mutation: false
+    model_invocation: required
+    context_packet: required
+    approval: not-required
+    output_authority: advisory
+    owner_receipt: not-required
+    terminal_receipt: required
+  draft:
+    canonical_mutation: false
+    model_invocation: required
+    context_packet: required
+    approval: operator-accepted-output
+    output_authority: noncanonical-draft
+    owner_receipt: not-required
+    terminal_receipt: required
+  mutate:
+    canonical_mutation: true
+    model_invocation: optional
+    context_packet: required
+    approval: exact-operator-approval
+    output_authority: canonical-owner-mutation
+    owner_receipt: required-when-owner-invoked
+    terminal_receipt: required
+schema_refs:
+  request: contracts/schemas/agent-action-request.schema.json
+  policy_decision: contracts/schemas/agent-action-policy-decision.schema.json
+  action_receipt: contracts/schemas/agent-action-receipt.schema.json
+  owner_receipt: contracts/schemas/agent-action-owner-receipt.schema.json
+receipt_ownership:
+  policy_decision: workspace-governance-control-fabric
+  action_receipt: operator-orchestration-service
+  owner_receipt: domain-owner-repo
+  security_acceptance: security-architecture
+evidence_rules:
+  raw_context_in_envelopes: denied
+  raw_model_output_in_receipts: denied
+  secret_material_in_refs: denied
+  references_require_digest_binding: true
+  terminal_action_receipt_required: true
+  owner_receipt_required_after_owner_invocation: true
+runtime_activation:
+  enabled: false
+  required_work_item_refs:
+    - openproject://work_packages/952
+    - openproject://work_packages/953
+    - openproject://work_packages/954
+    - openproject://work_packages/955
+  required_outcomes:
+    - policy-evaluator-merged
+    - workflow-enforcement-merged
+    - conformance-proven
+    - security-accepted
+denied_shortcuts:
+  - logical agent identity used as authorization
+  - model output used as operator approval
+  - direct provider or owner-backend mutation
+  - mutation without a current policy decision
+  - mutation without exact operator approval
+  - target or source-version mismatch
+  - expired, replayed, or unreceipted execution
+  - raw context or model output embedded in authority receipts

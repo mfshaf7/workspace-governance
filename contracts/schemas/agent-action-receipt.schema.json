@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-action-receipt.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "request_ref",
+    "decision_ref",
+    "action_class",
+    "outcome",
+    "execution",
+    "target",
+    "approval_ref",
+    "result_ref",
+    "owner_receipt_ref",
+    "mutation_state",
+    "failure",
+    "correlation",
+    "idempotency_key",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "agent_action_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^agent-action-receipt:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "action_class": { "$ref": "#/$defs/actionClass" },
+    "outcome": { "enum": ["succeeded", "failed", "cancelled", "denied"] },
+    "execution": {
+      "type": "object",
+      "required": ["workflow_execution_id", "backend_executor_id", "acknowledged_at", "started_at", "completed_at"],
+      "properties": {
+        "workflow_execution_id": { "$ref": "#/$defs/nonEmptyString" },
+        "backend_executor_id": { "$ref": "#/$defs/nonEmptyString" },
+        "acknowledged_at": { "type": "string", "format": "date-time" },
+        "started_at": { "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+        "completed_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["owner_repo", "resource_id", "before_version", "after_version"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/nonEmptyString" },
+        "resource_id": { "$ref": "#/$defs/nonEmptyString" },
+        "before_version": { "$ref": "#/$defs/nonEmptyString" },
+        "after_version": { "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "approval_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "result_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "owner_receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "mutation_state": { "enum": ["not-applicable", "not-attempted", "applied", "not-applied", "unknown"] },
+    "failure": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["code", "retryable"],
+          "properties": {
+            "code": { "$ref": "#/$defs/nonEmptyString" },
+            "retryable": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ]
+    },
+    "correlation": {
+      "type": "object",
+      "required": ["correlation_id", "causation_id"],
+      "properties": {
+        "correlation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "causation_id": { "oneOf": [{ "$ref": "#/$defs/nonEmptyString" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": { "$ref": "#/$defs/nonEmptyString" },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "succeeded" } }, "required": ["outcome"] },
+      "then": { "properties": { "result_ref": { "$ref": "#/$defs/artifactRef" }, "failure": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "enum": ["failed", "cancelled", "denied"] } }, "required": ["outcome"] },
+      "then": { "properties": { "failure": { "type": "object" } } }
+    },
+    {
+      "if": { "properties": { "action_class": { "enum": ["read", "advise", "draft"] } }, "required": ["action_class"] },
+      "then": {
+        "properties": {
+          "approval_ref": { "type": "null" },
+          "owner_receipt_ref": { "type": "null" },
+          "mutation_state": { "const": "not-applicable" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "action_class": { "const": "mutate" }, "mutation_state": { "enum": ["applied", "not-applied", "unknown"] } },
+        "required": ["action_class", "mutation_state"]
+      },
+      "then": {
+        "properties": {
+          "approval_ref": { "$ref": "#/$defs/artifactRef" },
+          "owner_receipt_ref": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "mutation_state": { "const": "applied" } }, "required": ["mutation_state"] },
+      "then": { "properties": { "target": { "properties": { "after_version": { "$ref": "#/$defs/nonEmptyString" } } } } }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "actionClass": { "enum": ["read", "advise", "draft", "mutate"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
