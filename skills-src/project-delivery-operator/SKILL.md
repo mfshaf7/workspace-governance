@@ -75,11 +75,10 @@ gates bound to authority work items, affected Landing Units, blocked
 transitions, and evidence. Never infer source landing order from ART readiness
 or compare one graph with the other.
 
-The active OOS and WGCF projections remain v1 until work items `968`, `971`,
-`969`, and `970` complete target activation. After contract correction `972`,
-`968` and `971` prepare exact implementation heads; Security `969` reviews and
-gates those heads before merge; activation `970` follows merged implementation,
-custody, and Security evidence. V1 then remains compatibility only.
+Architecture packet v2 is the normal OOS and WGCF shape after contract
+correction `972`, OOS implementation `968`, WGCF custody `971`, Security review
+`969`, and activation `970`. V1 remains compatibility-only for historical
+packets and bounded recovery.
 
 Keep the four readiness decisions distinct:
 
@@ -116,12 +115,9 @@ unless `OOS_ART_WORK_STATE_ROOT` overrides it. It is not canonical ART, Git,
 WGCF, or Review Packet truth and must not contain secrets or absolute worktree
 paths.
 
-Work-session resource retirement is contract-ready but remains pending owner
-implementation, Security review, custody projection, and activation through ART
-items `968`, `969`, `971`, and `970`. Before activation, do not claim that
-`work close` retired Git or managed temporary resources. After the active
-capability projection includes resource retirement, the same `work close`
-command must:
+Work-session resource retirement is active in `dev-integration` through OOS
+implementation `968`, Security review `969`, WGCF custody projection `971`, and
+Workspace Governance activation `970`. The same `work close` command must:
 
 - require explicit close intent and durable completion evidence
 - delete only resources marked `session-created` in the session manifest
@@ -132,6 +128,10 @@ command must:
   Review Packets, and earlier cleanup receipts
 - persist a terminal cleanup receipt before retiring active session state
 - leave partial failures retryable from `cleanup-blocked`
+
+Treat the retained terminal cleanup receipt as retirement evidence. A successful
+ART mutation or a missing active session alone does not prove that resources
+were removed.
 
 Docker resources and unrelated historical residue are not part of this close
 path. Do not broaden cleanup with `--force`, broad prune, or ad hoc deletion.

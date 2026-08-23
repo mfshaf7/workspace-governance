@@ -96,6 +96,13 @@ def capability_manifest() -> dict:
         ]
         + [
             {
+                "id": "work-session-resource-retirement",
+                "state": "human-gated",
+                "contract_version": 1,
+                "normal_path": True,
+                "activation_work_item_id": "work-item-970",
+            },
+            {
                 "id": "resumable-lifecycle-reconciliation",
                 "state": "compatibility",
                 "contract_version": 1,

@@ -139,14 +139,11 @@ This separation permits contract, implementation, independent Security review,
 and later activation to follow their real authorities without pretending they
 are one dependency or merge graph.
 
-Workspace Governance accepts both schema versions. The active OOS producer and
-WGCF custodian remain on v1 until activation work item `970`. Use v1 for the
-bounded bootstrap packet during that interval. After contract correction `972`,
-work items `968` and `971` prepare the OOS and WGCF implementation heads.
-Security work item `969` reviews those exact heads and gates their source merge;
-it is not an ART prerequisite for preparing them. Activation work item `970`
-follows the merged implementation, custody, and Security evidence. V2 then
-becomes the normal shape and v1 remains compatibility-only.
+Workspace Governance accepts both schema versions. Architecture packet v2 is
+the normal shape; v1 remains compatibility-only for historical packets and
+bounded recovery. Contract correction `972`, OOS implementation `968`, WGCF
+custody `971`, Security review `969`, and activation `970` establish that
+operating boundary.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
@@ -273,15 +270,15 @@ verification surfaces, not the normal operator path.
 
 ### Resource Retirement Contract
 
-Resource retirement is contract-ready but is not active runtime behavior yet.
-OOS work item `968` owns implementation, Security work item `969` owns the
-trust-boundary review, WGCF work item `971` owns architecture packet v2 custody,
-and Workspace Governance work item `970` owns final activation. Until those
-items land, `work close` must not be represented as proof that Git or managed
-temporary resources were retired.
+Resource retirement is active in the `dev-integration` operator path. OOS work
+item `968` owns implementation, Security work item `969` owns the trust-boundary
+review, WGCF work item `971` owns architecture packet v2 custody, and Workspace
+Governance work item `970` owns activation. The terminal cleanup receipt, not
+the close command alone, proves which Git and managed temporary resources were
+removed or retained.
 
-The target close path extends the existing command; it does not add a second
-cleanup command or service. After explicit close intent and durable ART/source
+The close path extends the existing command; it does not add a second cleanup
+command or service. After explicit close intent and durable ART/source
 evidence are verified, OOS will persist a
 [`delivery_art_work_session_resource_manifest`](../contracts/schemas/delivery-art-work-session-resource-manifest.schema.json)
 inside the active session directory and process only resources bound to that

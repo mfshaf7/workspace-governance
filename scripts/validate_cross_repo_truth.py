@@ -105,6 +105,7 @@ DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "operating-readiness",
     "review-packet-finalization",
     "art-closeout",
+    "work-session-resource-retirement",
 }
 
 
