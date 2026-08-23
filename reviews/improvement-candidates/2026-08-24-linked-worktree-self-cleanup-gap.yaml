@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-08-24-linked-worktree-self-cleanup-gap
+title: Make linked-worktree ART close self-retire safely
+recorded_on: '2026-08-24'
+owner_repo: operator-orchestration-service
+summary: ART close now resolves projection paths correctly, but a process launched
+  inside its managed worktree cannot retire that same worktree and requires a canonical-checkout
+  retry.
+regression_of: null
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: live-art-mutation-proof-gap
+  title: A live ART mutation or closeout bug was discovered, but normal delivery continued
+    before the exact blocker, smallest faithful regression, and one live repair proof
+    were locked.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'The #973 linked-worktree dogfood completed durable ART closeout and projection
+    quality, then entered cleanup-blocked because the cleanup controller rejects a
+    worktree active for the current process. This violates the intended single-command
+    close path and was discovered only after merge.'
+  source_refs:
+  - openproject://work_packages/973
+  - cleanup-receipt:work-session:delivery-882:delivery-882-work-item-973
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: Relocates resource-retirement execution to the canonical checkout before
+      evaluating the unchanged current-process safety guard.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-resource-retirement-controller.js
+    owner_repo: operator-orchestration-service
+    note: Makes cleanup-boundary preparation fail closed and retryable before any
+      managed resource is retired.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-resource-retirement.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves current-process detection, safe relocation, relocation failure,
+      and retry behavior.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves preparation ordering within the complete work-session close path.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Defines the canonical cleanup execution boundary and retained safety guards.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-08-24-linked-worktree-self-cleanup-execution-boundary.md
+    owner_repo: operator-orchestration-service
+    note: Records PR 150, merge commit ef46103, validation, and the live dogfood proof.
+  note: Closed after PR 150 merged and one original work-close invocation from the
+    managed worktree completed ART closeout, removed the worktree and both branches,
+    and persisted cleanup-receipt:work-session:delivery-882:delivery-882-work-item-976.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

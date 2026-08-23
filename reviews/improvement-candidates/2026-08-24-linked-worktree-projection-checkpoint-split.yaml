@@ -1,0 +1,45 @@
+schema_version: 1
+id: 2026-08-24-linked-worktree-projection-checkpoint-split
+title: Unify ART projection checkpoint truth across linked worktrees
+recorded_on: '2026-08-24'
+owner_repo: operator-orchestration-service
+summary: ART projection synchronization can succeed from a managed linked worktree
+  while a separate canonical-checkout projection checkpoint remains dirty because
+  the default checkpoint is resolved relative to the invoking checkout.
+regression_of: null
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'The live #976 close proved backend projection and cleanup, but the canonical
+    OOS checkout retained a dirty .art/projection-state.json marker from the earlier
+    create mutation. A separate canonical projection sync was required even though
+    the linked-worktree close had already passed projection quality. Checkout-local
+    coordination state therefore presents split operator truth across one work session.'
+  source_refs:
+  - openproject://work_packages/976
+  - github://mfshaf7/operator-orchestration-service/pull/150
+  - cleanup-receipt:work-session:delivery-882:delivery-882-work-item-976
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-08-27'
+  note: Resolve the default projection checkpoint through one canonical external operator-state
+    location shared by canonical and linked checkouts, preserve the explicit ART_PROJECTION_STATE_FILE
+    override, and prove canonical mutation plus linked-worktree close against one
+    checkpoint before landing.
