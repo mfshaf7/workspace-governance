@@ -34,7 +34,9 @@ cross-repo protocol, or control-plane change:
    repo.
 3. Produce one bounded architecture packet containing:
    - descendant and owner map
-   - dependency and merge sequence
+   - ART work-readiness dependencies
+   - source Landing Units and their landing sequence
+   - required human gates and the transitions they block
    - lifecycle and state model
    - authorization, session, scenario, and execution model
    - evidence and owner-receipt handoffs
@@ -65,14 +67,19 @@ cases must pass before merge readiness. Use a `real-git` case for Git-history
 causality, and declare the exact work items and dimensions whose claims require
 that fidelity; a synthetic resolver cannot prove a real commit sequence.
 
-Workspace Governance accepts architecture packet v1 and v2. The active OOS and
-WGCF projections remain v1 until work items `968`, `971`, `969`, and `970` land
-in that dependency order. Use v1 for a bounded bootstrap packet before that
-activation. After activation, use v2 `landing_unit_order` whenever one owner
-repo appears in more than one Landing Unit or review and activation are
-separate landings. That order covers work items, not unique repo names, and
-must honor every dependency precedence edge. V1 then remains compatibility
-only.
+Workspace Governance accepts architecture packet v1 and v2. V1 retains the
+mixed dependency and repo-merge graph only as bounded compatibility. V2 keeps
+four separate structures: an unambiguous prerequisite-to-dependent ART work
+graph, a Landing Unit registry, a source Landing Unit graph, and explicit human
+gates bound to authority work items, affected Landing Units, blocked
+transitions, and evidence. Never infer source landing order from ART readiness
+or compare one graph with the other.
+
+The active OOS and WGCF projections remain v1 until work items `968`, `971`,
+`969`, and `970` complete target activation. After contract correction `972`,
+`968` and `971` prepare exact implementation heads; Security `969` reviews and
+gates those heads before merge; activation `970` follows merged implementation,
+custody, and Security evidence. V1 then remains compatibility only.
 
 Keep the four readiness decisions distinct:
 
@@ -132,9 +139,16 @@ path. Do not broaden cleanup with `--force`, broad prune, or ad hoc deletion.
 Initial architecture persistence and every new transition candidate require a
 fresh scoped snapshot. Historical architecture remains immutable and valid
 across ordinary status, percent-complete, work-note, and evidence-reference
-updates. A covered-scope, parent, owner, rollback, dependency, Landing Unit
-order, protocol, validation, or Security-obligation change is material and
-must block for a new architecture decision.
+updates. A covered-scope, parent, owner, rollback, work-dependency, source
+Landing Unit topology, human-gate, protocol, validation, or Security-obligation
+change is material and must block for a new architecture decision.
+
+On the target v2 owner path, first persistence must compare topology even when
+the fresh ART digest already matches. Reconstruct human gates from the durable
+architecture packet; never default a required gate list to empty. Before an
+architecture-chain predecessor closes, rehearse the next known transition
+without mutation against fresh ART, source, and gate truth. A failed rehearsal
+blocks closeout instead of transferring a latent defect to the next child.
 
 Under the v2 path, every passing result binds the exact packet repo
 heads. Finalized source packets supersede and preserve a durable merge-ready

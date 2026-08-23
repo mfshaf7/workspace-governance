@@ -57,6 +57,29 @@ signals:
   - workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
   - operator-orchestration-service/contracts/delivery-art/delivery-art-architecture-packet.schema.json
   - workspace-governance-control-fabric/contracts/delivery-art/delivery-art-architecture-packet.schema.json
+- id: architecture-topology-semantic-preflight-regression
+  title: Packet approval did not prove the next real ART transition.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Starting work item 968 exposed that OOS treats ART dependency relations
+    and source Landing Unit ordering as one undifferentiated precedence graph, while
+    the live OpenProject projection exposes only ART follows relations. Initial packet
+    persistence did not compare those semantics when the captured snapshot digest
+    matched, and work item 967 closed without rehearsing the next real work-start
+    transition. The packet therefore passed local structure and custody checks but
+    failed only after the legitimate ART state change caused by closing 967. The
+    durable control must distinguish work readiness from source landing order and
+    execute the next governed transition against fresh authoritative topology before
+    the preceding child can close.
+  source_refs:
+  - 'conversation:2026-08-23 operator asked why flaws continue appearing after narrow checks'
+  - openproject://work_packages/967
+  - openproject://work_packages/968
+  - operator-orchestration-service:.art/review-packets/delivery-958-resource-retirement-architecture.json
+  - operator-orchestration-service/src/delivery-art/service.js
 resolution:
   after_action_ref: null
   control_refs: []
@@ -68,3 +91,7 @@ follow_up:
     ownership, safe terminal cleanup, idempotent recovery, cleanup receipts, and exact
     architecture-contract projection across its active custodians. Keep Docker cleanup
     outside the first implementation and require a separate adapter decision later.
+    Before work item 968 resumes, agree and land one semantic topology model that keeps
+    ART readiness relations separate from source Landing Unit order, plus an executable
+    next-transition preflight that would have rejected the packet before work item 967
+    closed.

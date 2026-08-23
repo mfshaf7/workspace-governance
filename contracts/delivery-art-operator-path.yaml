@@ -397,7 +397,9 @@ delivery_art_operator_path:
         requires:
           - finalized architecture packet with an explicit operator decision
           - complete descendant and owner map
-          - dependency and merge sequence
+          - ART work-readiness dependencies
+          - source Landing Units and landing sequence
+          - required human gates and blocked transitions
           - lifecycle, authority, evidence, runtime, and rollback boundaries
           - planned positive and negative conformance cases with fidelity classes
         does_not_require:
@@ -440,12 +442,16 @@ delivery_art_operator_path:
       failed_required_evidence_blocks_advancement: true
       not_applicable_requires_reason_and_authority_ref: true
       attached_artifact_is_a_reference_not_a_pass_result: true
-      architecture_dependency_graph_is_bound_and_acyclic: true
+      architecture_v1_compatibility_graph_is_bound_and_acyclic: true
       architecture_parent_map_is_a_rooted_acyclic_forest: true
       architecture_source_snapshot_exactly_covers_owner_repos: true
       architecture_lifecycle_transitions_use_declared_states: true
-      architecture_merge_order_respects_dependency_precedence: true
-      dependency_relation_precedence:
+      architecture_v1_compatibility_merge_order_respects_dependency_precedence: true
+      architecture_v2_work_dependency_graph_is_bound_and_acyclic: true
+      architecture_v2_landing_units_exactly_cover_work_items: true
+      architecture_v2_source_landing_graph_is_bound_and_acyclic: true
+      architecture_v2_human_gates_bind_authority_scope_and_transition: true
+      v1_dependency_relation_precedence:
         depends_on: the target work item and its owner repo precede the source
         blocks: the source work item and its owner repo precede the target
         must_merge_before: the source work item and its owner repo precede the target
@@ -513,13 +519,11 @@ delivery_art_operator_path:
           - json-schema
           - semantic-validator
         rationale: Structured evidence and chronology are enforced by the local schemas and semantic validator.
-      - id: architecture-structure
+      - id: architecture-common-structure
         claim_refs:
-          - readiness_model.rules.architecture_dependency_graph_is_bound_and_acyclic
           - readiness_model.rules.architecture_parent_map_is_a_rooted_acyclic_forest
           - readiness_model.rules.architecture_source_snapshot_exactly_covers_owner_repos
           - readiness_model.rules.architecture_lifecycle_transitions_use_declared_states
-          - readiness_model.rules.architecture_merge_order_respects_dependency_precedence
         enforcement_state: active-local
         owner_repo: workspace-governance
         owner_art_refs: []
@@ -530,7 +534,39 @@ delivery_art_operator_path:
         enforcement_layers:
           - json-schema
           - semantic-validator
-        rationale: Architecture topology, ownership, lifecycle, and merge precedence are executable local invariants.
+        rationale: Architecture ownership, parent, source-snapshot, and lifecycle invariants apply to every accepted schema version.
+      - id: architecture-v1-compatibility-structure
+        claim_refs:
+          - readiness_model.rules.architecture_v1_compatibility_graph_is_bound_and_acyclic
+          - readiness_model.rules.architecture_v1_compatibility_merge_order_respects_dependency_precedence
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        owner_art_refs: []
+        positive_case_ids:
+          - architecture-v1-compatibility-valid
+        negative_case_ids:
+          - architecture-v1-compatibility-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: V1 remains readable only through its bounded dependency and repo-merge compatibility semantics.
+      - id: architecture-v2-topology-structure
+        claim_refs:
+          - readiness_model.rules.architecture_v2_work_dependency_graph_is_bound_and_acyclic
+          - readiness_model.rules.architecture_v2_landing_units_exactly_cover_work_items
+          - readiness_model.rules.architecture_v2_source_landing_graph_is_bound_and_acyclic
+          - readiness_model.rules.architecture_v2_human_gates_bind_authority_scope_and_transition
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        owner_art_refs: []
+        positive_case_ids:
+          - architecture-v2-topology-valid
+        negative_case_ids:
+          - architecture-v2-topology-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: V2 validates ART work readiness, source landing, Landing Unit ownership, and human gates as independent topologies.
       - id: work-start-structure
         claim_refs:
           - work_start_gate.child_isolated_requires_split_reason
@@ -589,6 +625,25 @@ delivery_art_operator_path:
           approved architecture packet as immutable historical evidence. It
           must block only when current ART truth changes a material
           architecture semantic covered by the approved decision.
+      - id: architecture-transition-preflight-v2
+        claim_refs:
+          - work_start_gate.transition_preflight.initial_packet_persistence_revalidates_topology_even_when_snapshot_digest_matches
+          - work_start_gate.transition_preflight.human_gates_derive_from_architecture_packet
+          - work_start_gate.transition_preflight.missing_or_unknown_human_gate_blocks_transition
+          - work_start_gate.transition_preflight.architecture_chain_predecessor_close_requires_next_transition_rehearsal
+        enforcement_state: pending-owner
+        owner_repo: operator-orchestration-service
+        owner_art_refs:
+          - openproject://work_packages/968
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - owner-runtime
+        rationale: >-
+          OOS must validate separated topology on first persistence, reconstruct
+          human gates from durable architecture truth, and prove the next known
+          transition non-mutatively before an architecture-chain predecessor
+          closes.
       - id: work-session-resource-retirement
         claim_refs:
           - work_session_lifecycle.resource_retirement.rules.explicit_close_intent_required
@@ -806,6 +861,11 @@ delivery_art_operator_path:
     blocked_architecture_prevents_implementation_ready: true
     read_snapshot_cache_allowed: true
     fresh_target_and_dependency_snapshot_required_before_mutation: true
+    transition_preflight:
+      initial_packet_persistence_revalidates_topology_even_when_snapshot_digest_matches: true
+      human_gates_derive_from_architecture_packet: true
+      missing_or_unknown_human_gate_blocks_transition: true
+      architecture_chain_predecessor_close_requires_next_transition_rehearsal: true
     architecture_freshness:
       initial_persistence_requires_fresh_scoped_snapshot: true
       later_transition_requires_fresh_candidate_snapshot: true
@@ -815,7 +875,7 @@ delivery_art_operator_path:
       material_change_inputs:
         - covered-scope-or-parent-change
         - owner-or-rollback-boundary-change
-        - dependency-or-merge-order-change
+        - work-dependency-source-landing-or-human-gate-change
         - architecture-decision-or-protocol-change
         - validation-or-security-obligation-change
       ordinary_progress_inputs:

@@ -211,10 +211,12 @@ Use these contracts to declare:
     between contract-defined controls and owner-repo runtime enforcement
 - `schemas/delivery-art-architecture-packet.schema.json`
   - defines the operator-decided architecture packet, source snapshot,
-    dependency and merge DAG, lifecycle and authority model, explicit protocol
-    applicability, complete protocol conformance dimensions when applicable,
-    dimension-bound executable cases, contradictions, integrity, and opaque
-    WGCF artifact-registry custody with a digest-bound custody receipt
+    v1 compatibility topology, separated v2 ART work dependencies, Landing
+    Units, source landing order, required human gates, lifecycle and authority
+    model, explicit protocol applicability, complete protocol conformance
+    dimensions when applicable, dimension-bound executable cases,
+    contradictions, integrity, and opaque WGCF artifact-registry custody with a
+    digest-bound custody receipt
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and

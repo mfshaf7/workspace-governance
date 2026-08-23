@@ -84,7 +84,9 @@ The preflight must use authoritative ART and merged owner-repo truth to produce
 one bounded architecture packet containing:
 
 - the complete descendant and owner map
-- the dependency and merge sequence
+- the ART work-readiness dependencies
+- the source Landing Units and their landing sequence
+- required human gates and the transitions they block
 - the lifecycle and state model
 - the authorization, session, scenario, and execution model
 - evidence and owner-receipt handoffs
@@ -106,29 +108,45 @@ local draft so that persistence can evaluate the exact candidate. Work-start
 may reference the packet only after WGCF has persisted it with durable custody
 and a receipt.
 
-The descendant owner map and dependency DAG must cover the same declared work
-items. Parent links form a rooted acyclic forest, every edge endpoint resolves,
-and the source snapshot contains exactly one revision for every declared owner
-repo. Dependency relations have explicit precedence: the target precedes the
-source for `depends_on`; the source precedes the target for `blocks` and
-`must_merge_before`. Every lifecycle transition endpoint must be a declared
-lifecycle state. These invariants are semantic checks in addition to JSON
-Schema shape.
+The descendant owner map covers every declared work item exactly once. Parent
+links form a rooted acyclic forest, every graph endpoint resolves, and the
+source snapshot contains exactly one revision for every declared owner repo.
+Every lifecycle transition endpoint must be a declared lifecycle state. These
+invariants are semantic checks in addition to JSON Schema shape.
 
-Architecture packet v1 retains repo-level `merge_order` for compatibility. It
-can represent each owner repo only once. Architecture packet v2 uses
-work-item-level `landing_unit_order` and is required when one owner repo lands
-more than once or when review and activation are separate Landing Units. The
-order must exactly cover the dependency nodes and honor every dependency
-precedence edge. This permits a contract owner, runtime owner, then
-contract-owner activation sequence without inventing two owner identities.
+Architecture packet v1 retains `dependency_merge_dag` and repo-level
+`merge_order` as bounded compatibility. Its relation vocabulary still has
+explicit precedence: the target precedes the source for `depends_on`; the
+source precedes the target for `blocks` and `must_merge_before`.
+
+Architecture packet v2 replaces that mixed graph with four independent
+structures:
+
+- `work_dependency_graph` records ART readiness only. Every edge is written
+  unambiguously from `prerequisite_work_item_id` to
+  `dependent_work_item_id`.
+- `landing_units` assigns every covered work item exactly once to a stable
+  Landing Unit identity, owner repo, and explicit source-backed posture.
+- `source_landing_graph` orders only source-backed Landing Unit identities. It
+  is acyclic, but it is not inferred from or compared with ART work readiness.
+- `required_human_gates` binds each gate to its authority work item and owner,
+  affected Landing Units, blocked transition, and required evidence.
+
+The v2 human-gate field is always present. An empty array is the explicit
+decision that no human gate applies; omitting the field is invalid.
+
+This separation permits contract, implementation, independent Security review,
+and later activation to follow their real authorities without pretending they
+are one dependency or merge graph.
 
 Workspace Governance accepts both schema versions. The active OOS producer and
 WGCF custodian remain on v1 until activation work item `970`. Use v1 for the
-bounded bootstrap packet during that interval. Work items `968` and `971` add
-v2 producer and custody support; Security and activation work items `969` and
-`970` must then complete before v2 becomes the normal shape and v1 becomes
-compatibility-only.
+bounded bootstrap packet during that interval. After contract correction `972`,
+work items `968` and `971` prepare the OOS and WGCF implementation heads.
+Security work item `969` reviews those exact heads and gates their source merge;
+it is not an ART prerequisite for preparing them. Activation work item `970`
+follows the merged implementation, custody, and Security evidence. V2 then
+becomes the normal shape and v1 remains compatibility-only.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
@@ -335,10 +353,22 @@ persistence requires a fresh scoped snapshot, and every later transition
 requires a fresh candidate snapshot. A persisted architecture packet remains
 immutable historical evidence; ordinary lifecycle status, percent-complete,
 work-note, and evidence-reference updates do not expire it. Covered scope or
-parent, owner or rollback boundary, dependency or Landing Unit order,
-architecture or protocol, and validation or Security-obligation changes are
-material. Those changes block the transition and require a new architecture
-decision instead of rewriting the earlier packet.
+parent, owner or rollback boundary, work-dependency or source Landing Unit
+topology, human-gate binding, architecture or protocol, and validation or
+Security-obligation changes are material. Those changes block the transition
+and require a new architecture decision instead of rewriting the earlier
+packet.
+
+Initial persistence must run the topology comparison even when the fresh ART
+snapshot digest already matches the candidate packet. Digest equality is not a
+substitute for semantic validation. Under v2, OOS reconstructs required
+work-session human gates from the durable architecture packet rather than from
+an empty decision default; a missing authority item, affected Landing Unit, or
+blocked transition stops advancement. When an architecture packet names a
+known next Landing Unit, closing its predecessor also requires a non-mutating
+rehearsal of that next transition against fresh ART, source, and gate truth.
+The rehearsal proves that the next work can start; it does not create a branch,
+merge source, or mark the next item ready.
 
 When architecture is required but its decision is unresolved, the work-start
 record remains durable with architecture readiness `blocked` and overall
