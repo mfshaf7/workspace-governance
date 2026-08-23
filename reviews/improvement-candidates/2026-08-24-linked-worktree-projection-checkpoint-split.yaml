@@ -30,6 +30,7 @@ signals:
     coordination state therefore presents split operator truth across one work session.'
   source_refs:
   - openproject://work_packages/976
+  - openproject://work_packages/977
   - github://mfshaf7/operator-orchestration-service/pull/150
   - cleanup-receipt:work-session:delivery-882:delivery-882-work-item-976
 resolution:
@@ -39,7 +40,9 @@ resolution:
 follow_up:
   owner_repo: operator-orchestration-service
   due_on: '2026-08-27'
-  note: Resolve the default projection checkpoint through one canonical external operator-state
-    location shared by canonical and linked checkouts, preserve the explicit ART_PROJECTION_STATE_FILE
-    override, and prove canonical mutation plus linked-worktree close against one
-    checkpoint before landing.
+  note: >-
+    Deliver ART Defect #977 under Epic #884 by resolving the default projection
+    checkpoint through one canonical external operator-state location shared by
+    canonical and linked checkouts, preserving the explicit
+    ART_PROJECTION_STATE_FILE override, and proving canonical mutation plus
+    linked-worktree close against one checkpoint before landing.
