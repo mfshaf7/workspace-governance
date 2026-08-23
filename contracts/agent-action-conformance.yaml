@@ -1,0 +1,205 @@
+schema_version: 1
+owner_repo: workspace-governance
+work_item_ref: openproject://work_packages/954
+authority_contract_ref: contracts/agent-action-authority.yaml
+proof_posture: integrated-local-source
+decision_time: "2026-08-22T10:00:01Z"
+execution_time: "2026-08-22T10:00:02Z"
+implementation_sources:
+  evaluator:
+    repo: workspace-governance-control-fabric
+    revision: 8b83ba7a2fc0dbbe52ed2892e1b190d2ce0e5de9
+    manifest_ref: contracts/agent-action/manifest.json
+  enforcer:
+    repo: operator-orchestration-service
+    revision: 61c037fdd5368863681f6582970bc7f976d40b22
+    manifest_ref: contracts/agent-action/manifest.json
+report_outputs:
+  json: reports/agent-action-conformance.json
+  markdown: reports/agent-action-conformance.md
+capability_postures:
+  - capability_id: canonical-authority-contract
+    posture: implemented
+    reason: Workspace Governance owns schema-validated action classes, authority bindings, obligations, and receipt boundaries.
+  - capability_id: policy-evaluation
+    posture: implemented
+    reason: The proof invokes the exact merged WGCF evaluator source and retains digest-bound policy-decision references.
+  - capability_id: workflow-enforcement
+    posture: implemented
+    reason: The proof feeds WGCF decisions into the exact merged OOS enforcer and exercises dispatch, replay, and terminal-receipt behavior.
+  - capability_id: owner-mutation
+    posture: synthetic-bounded-proof
+    reason: The owner adapter is synthetic and records no canonical backend mutation.
+  - capability_id: shared-runtime-activation
+    posture: blocked-future-acceptance
+    reason: Runtime activation remains disabled until Security acceptance under work item 955.
+excluded_capabilities:
+  - console-agent-mutation
+  - shared-runtime-exposure
+  - stage-execution
+  - production-execution
+  - direct-model-provider-access
+  - canonical-backend-mutation
+cases:
+  - case_id: read-allow
+    action_class: read
+    case_class: positive
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: allow
+      execution_outcome: succeeded
+      execution_invocations: 1
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: true
+  - case_id: read-caller-mismatch
+    action_class: read
+    case_class: negative
+    current_overrides:
+      caller_workload_id: untrusted-caller
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: deny
+      execution_outcome: denied
+      execution_invocations: 0
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: advise-allow
+    action_class: advise
+    case_class: positive
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: allow
+      execution_outcome: succeeded
+      execution_invocations: 1
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: true
+  - case_id: advise-context-mismatch
+    action_class: advise
+    case_class: negative
+    current_overrides:
+      context_receipt_ref:
+        uri: cgg://receipts/stale
+        digest: sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: deny
+      execution_outcome: denied
+      execution_invocations: 0
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: draft-allow
+    action_class: draft
+    case_class: positive
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: allow
+      execution_outcome: succeeded
+      execution_invocations: 1
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: true
+  - case_id: draft-source-version-mismatch
+    action_class: draft
+    case_class: negative
+    current_overrides:
+      source_version: lock-version:stale
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: deny
+      execution_outcome: denied
+      execution_invocations: 0
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: mutate-allow
+    action_class: mutate
+    case_class: positive
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: allow
+      execution_outcome: succeeded
+      execution_invocations: 1
+      owner_mutation_invocations: 1
+      terminal_receipts: 1
+      owner_receipt_returned: true
+      success_returned: true
+  - case_id: mutate-approval-mismatch
+    action_class: mutate
+    case_class: negative
+    current_overrides:
+      approval_ref:
+        uri: wgcf://approvals/stale
+        digest: sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    consumed_request_idempotency: false
+    failure_injection: none
+    expected:
+      policy_outcome: deny
+      execution_outcome: denied
+      execution_invocations: 0
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: mutate-replay-consumed
+    action_class: mutate
+    case_class: negative
+    current_overrides: {}
+    consumed_request_idempotency: true
+    failure_injection: none
+    expected:
+      policy_outcome: deny
+      execution_outcome: denied
+      execution_invocations: 0
+      owner_mutation_invocations: 0
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: mutate-receipt-store-failure
+    action_class: mutate
+    case_class: negative
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: receipt-store
+    expected:
+      policy_outcome: allow
+      execution_outcome: error
+      execution_invocations: 1
+      owner_mutation_invocations: 1
+      terminal_receipts: 0
+      owner_receipt_returned: false
+      success_returned: false
+  - case_id: mutate-audit-failure
+    action_class: mutate
+    case_class: negative
+    current_overrides: {}
+    consumed_request_idempotency: false
+    failure_injection: audit
+    expected:
+      policy_outcome: allow
+      execution_outcome: error
+      execution_invocations: 1
+      owner_mutation_invocations: 1
+      terminal_receipts: 1
+      owner_receipt_returned: false
+      success_returned: false

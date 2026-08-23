@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-action-conformance.schema.json",
+  "title": "Agent Action Conformance Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "owner_repo",
+    "work_item_ref",
+    "authority_contract_ref",
+    "proof_posture",
+    "decision_time",
+    "execution_time",
+    "implementation_sources",
+    "report_outputs",
+    "capability_postures",
+    "excluded_capabilities",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "work_item_ref": { "type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$" },
+    "authority_contract_ref": { "const": "contracts/agent-action-authority.yaml" },
+    "proof_posture": { "const": "integrated-local-source" },
+    "decision_time": { "type": "string", "format": "date-time" },
+    "execution_time": { "type": "string", "format": "date-time" },
+    "implementation_sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluator", "enforcer"],
+      "properties": {
+        "evaluator": { "$ref": "#/$defs/source" },
+        "enforcer": { "$ref": "#/$defs/source" }
+      }
+    },
+    "report_outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["json", "markdown"],
+      "properties": {
+        "json": { "type": "string", "pattern": "^reports/.+\\.json$" },
+        "markdown": { "type": "string", "pattern": "^reports/.+\\.md$" }
+      }
+    },
+    "capability_postures": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capability_id", "posture", "reason"],
+        "properties": {
+          "capability_id": { "type": "string", "minLength": 1 },
+          "posture": {
+            "enum": ["implemented", "synthetic-bounded-proof", "blocked-future-acceptance"]
+          },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "excluded_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 11,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "revision", "manifest_ref"],
+      "properties": {
+        "repo": { "enum": ["workspace-governance-control-fabric", "operator-orchestration-service"] },
+        "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "manifest_ref": { "const": "contracts/agent-action/manifest.json" }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "action_class",
+        "case_class",
+        "current_overrides",
+        "consumed_request_idempotency",
+        "failure_injection",
+        "expected"
+      ],
+      "properties": {
+        "case_id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "action_class": { "enum": ["read", "advise", "draft", "mutate"] },
+        "case_class": { "enum": ["positive", "negative"] },
+        "current_overrides": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array" },
+              { "$ref": "#/$defs/reference" }
+            ]
+          }
+        },
+        "consumed_request_idempotency": { "type": "boolean" },
+        "failure_injection": { "enum": ["none", "receipt-store", "audit"] },
+        "expected": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy_outcome",
+            "execution_outcome",
+            "execution_invocations",
+            "owner_mutation_invocations",
+            "terminal_receipts",
+            "owner_receipt_returned",
+            "success_returned"
+          ],
+          "properties": {
+            "policy_outcome": { "enum": ["allow", "deny", "review-required"] },
+            "execution_outcome": { "enum": ["succeeded", "denied", "error"] },
+            "execution_invocations": { "type": "integer", "minimum": 0, "maximum": 1 },
+            "owner_mutation_invocations": { "type": "integer", "minimum": 0, "maximum": 1 },
+            "terminal_receipts": { "type": "integer", "minimum": 0, "maximum": 1 },
+            "owner_receipt_returned": { "type": "boolean" },
+            "success_returned": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

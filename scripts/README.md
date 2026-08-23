@@ -44,6 +44,13 @@
     readiness reports
   - use `python3 scripts/project_lifecycle_proof.py --repo-root . --check` to
     detect stale reports or a failed scenario
+- `agent_action_conformance.py`
+  - invokes the exact merged WGCF evaluator and OOS enforcer sources through
+    bounded adapters without exposing or activating a generic runtime path
+  - emits compact digest-bound JSON and Markdown conformance reports for all
+    declared action, replay, receipt, and audit cases
+  - use `python3 scripts/agent_action_conformance.py --workspace-root .. --check`
+    to rerun the integrated proof and detect stale reports
 - `governance_engine_materializer.py`
   - shared materialization layer for workspace-root sync, managed live skill
     install, and generated governance artifacts

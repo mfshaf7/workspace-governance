@@ -76,6 +76,11 @@ Use these contracts to declare:
   - defines the provider-neutral action classes, identity and authority
     bindings, cross-repo receipt ownership, activation gates, and denied
     shortcuts for attributable AI-assisted actions
+- `agent-action-conformance.yaml`
+  - defines the integrated local source proof across the exact merged WGCF
+    evaluator and OOS enforcer revisions, including positive and negative
+    action-class cases, replay denial, receipt and audit failures, and explicit
+    excluded capabilities
 - `schemas/agent-action-request.schema.json`
   - defines the immutable request envelope for `read`, `advise`, `draft`, and
     `mutate` actions without treating logical agent identity as authority
@@ -89,6 +94,9 @@ Use these contracts to declare:
 - `schemas/agent-action-owner-receipt.schema.json`
   - defines the domain-owner result for an invoked canonical mutation without
     embedding raw backend output
+- `schemas/agent-action-conformance.schema.json`
+  - defines the source bindings, capability postures, exclusions, cases, and
+    expected outcomes for the integrated conformance proof
 - `self-improvement-policy.yaml`
   - defines the in-session self-improvement signal catalog, fail-closed runtime
     gate, and primary escalation surface
