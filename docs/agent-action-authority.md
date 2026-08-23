@@ -78,3 +78,21 @@ listed in the canonical contract are complete.
 The Governance Operations Console may display safe posture and submit requests
 to admitted server workflows. It does not authorize actions and must not trust
 its current local or synthetic identity as shared authority.
+
+## Integrated Conformance
+
+The bounded local proof is declared in
+[contracts/agent-action-conformance.yaml](../contracts/agent-action-conformance.yaml)
+and rendered in
+[reports/agent-action-conformance.md](../reports/agent-action-conformance.md).
+It invokes the exact merged WGCF evaluator and OOS enforcer source revisions,
+uses a synthetic owner adapter, and records only digest-bound decision and
+receipt references. It does not activate shared runtime behavior or mutate a
+canonical backend.
+
+Run or verify it from the workspace root with:
+
+```bash
+python3 workspace-governance/scripts/agent_action_conformance.py \
+  --workspace-root /home/mfshaf7/projects --check
+```

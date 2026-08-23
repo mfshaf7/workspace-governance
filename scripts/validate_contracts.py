@@ -15,6 +15,9 @@ from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import SchemaError
 import yaml
 
+from agent_action_conformance import (
+    contract_issues as agent_action_conformance_issues,
+)
 from contracts_lib import (
     REPO_RULES_SCHEMA,
     SCHEMA_FILES,
@@ -5987,6 +5990,7 @@ def main() -> int:
         "durable_orchestration": repo_root / "contracts/durable-orchestration.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
         "agent_action_authority": repo_root / "contracts/agent-action-authority.yaml",
+        "agent_action_conformance": repo_root / "contracts/agent-action-conformance.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
         "work_home_routing": repo_root / "contracts/work-home-routing.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
@@ -6095,6 +6099,13 @@ def main() -> int:
     durable_orchestration = contracts["durable_orchestration"]["durable_orchestration"]
     delegation_policy = contracts["delegation_policy"]
     agent_action_authority = contracts["agent_action_authority"]
+    agent_action_conformance_errors = agent_action_conformance_issues(
+        contracts["agent_action_conformance"]
+    )
+    errors.extend(
+        f"contracts/agent-action-conformance.yaml: {error}"
+        for error in agent_action_conformance_errors
+    )
     self_improvement_policy = contracts["self_improvement_policy"]
     work_home_routing = contracts["work_home_routing"]["work_home_routing"]
     intake_statuses = set(intake_policy["statuses"])

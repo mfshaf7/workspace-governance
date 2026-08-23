@@ -54,6 +54,8 @@ release posture, and portfolio publication independent:
 - [contracts/project-lifecycle.yaml](contracts/project-lifecycle.yaml)
 - [contracts/project-lifecycle-proof.yaml](contracts/project-lifecycle-proof.yaml)
 - [reports/project-lifecycle-baseline-readiness.md](reports/project-lifecycle-baseline-readiness.md)
+- [contracts/agent-action-conformance.yaml](contracts/agent-action-conformance.yaml)
+- [reports/agent-action-conformance.md](reports/agent-action-conformance.md)
 
 This repo also holds the workspace doctrine for operator workflows, delegated
 execution, troubleshooting, and self-improvement. Those controls exist so the

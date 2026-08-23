@@ -1,0 +1,482 @@
+{
+  "authority_contract_digest": "sha256:8ed8aee6b03e42d02d5621e650d4488ee3a043e55b38cbd9e4018e4b9bf8d0c3",
+  "authority_contract_ref": "contracts/agent-action-authority.yaml",
+  "capability_postures": [
+    {
+      "capability_id": "canonical-authority-contract",
+      "posture": "implemented",
+      "reason": "Workspace Governance owns schema-validated action classes, authority bindings, obligations, and receipt boundaries."
+    },
+    {
+      "capability_id": "policy-evaluation",
+      "posture": "implemented",
+      "reason": "The proof invokes the exact merged WGCF evaluator source and retains digest-bound policy-decision references."
+    },
+    {
+      "capability_id": "workflow-enforcement",
+      "posture": "implemented",
+      "reason": "The proof feeds WGCF decisions into the exact merged OOS enforcer and exercises dispatch, replay, and terminal-receipt behavior."
+    },
+    {
+      "capability_id": "owner-mutation",
+      "posture": "synthetic-bounded-proof",
+      "reason": "The owner adapter is synthetic and records no canonical backend mutation."
+    },
+    {
+      "capability_id": "shared-runtime-activation",
+      "posture": "blocked-future-acceptance",
+      "reason": "Runtime activation remains disabled until Security acceptance under work item 955."
+    }
+  ],
+  "cases": [
+    {
+      "action_class": "read",
+      "action_receipt_ref": {
+        "digest": "sha256:b156db05b82a8a73168ad88edb9c067a6ccda1ddf72367003771fc06f7afefa7",
+        "uri": "oos://agent-actions/receipts/6b491a3c38cf54b8b9ef13d7"
+      },
+      "case_class": "positive",
+      "case_id": "read-allow",
+      "decision_ref": {
+        "digest": "sha256:6fd471420fab02d7bfe71a17bb31331a98f959cc14eef0a46778a2560518460b",
+        "uri": "wgcf://agent-actions/decisions/ce76a2263f606bb0e0cf04dd"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    },
+    {
+      "action_class": "read",
+      "action_receipt_ref": {
+        "digest": "sha256:95037fc42514b0e02ed8394ced0e7b7ac548803aca7340edb1d2a6c5d4a2c82e",
+        "uri": "oos://agent-actions/receipts/ecec0d17087a0a2671352727"
+      },
+      "case_class": "negative",
+      "case_id": "read-caller-mismatch",
+      "decision_ref": {
+        "digest": "sha256:b4cc0f106d743c8cca131ce6b27112369ba98979d310734e6d203f17f456d68d",
+        "uri": "wgcf://agent-actions/decisions/4b81116c755973833681d87e"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "caller-identity-mismatch"
+      ]
+    },
+    {
+      "action_class": "advise",
+      "action_receipt_ref": {
+        "digest": "sha256:b4ffd413032b395c8e38f512819781761705ae661cc43fc1b8542d1297f7ffb3",
+        "uri": "oos://agent-actions/receipts/ec3037dc4265b10a9f9ec132"
+      },
+      "case_class": "positive",
+      "case_id": "advise-allow",
+      "decision_ref": {
+        "digest": "sha256:34ea66bd6325c019c982571141b5d4892068eeaf26d9de68f76b778bddae3b4a",
+        "uri": "wgcf://agent-actions/decisions/9abb96e65f5a287f9cff6deb"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    },
+    {
+      "action_class": "advise",
+      "action_receipt_ref": {
+        "digest": "sha256:6bdbac02ae31e287234bc78f05431908ae457ac82b5c01f2522a9ebe29eadfa1",
+        "uri": "oos://agent-actions/receipts/b0fadb7107a29f60de647ee2"
+      },
+      "case_class": "negative",
+      "case_id": "advise-context-mismatch",
+      "decision_ref": {
+        "digest": "sha256:66ea1c940777b1ac706cfd949047eb5b1feaa0a85110a9ee60a5be764c6831cb",
+        "uri": "wgcf://agent-actions/decisions/392c3c512cdc1ccb26e39b5e"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "context-receipt-mismatch"
+      ]
+    },
+    {
+      "action_class": "draft",
+      "action_receipt_ref": {
+        "digest": "sha256:854ad441a235499450b0554a902fcc2a09e950228b3f48cd191f07e1f24b9934",
+        "uri": "oos://agent-actions/receipts/e70fea0a7ca3675672ec770f"
+      },
+      "case_class": "positive",
+      "case_id": "draft-allow",
+      "decision_ref": {
+        "digest": "sha256:9cc2b4e5e58fd989dabc74004e805302d9586a81d87eb626002b8092cc33ff4f",
+        "uri": "wgcf://agent-actions/decisions/7a3eb432b9441827857d63ea"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    },
+    {
+      "action_class": "draft",
+      "action_receipt_ref": {
+        "digest": "sha256:de6bd7d8547bd722513b357e7d8917d85db1762b2de5b5df1f37ec2c4f907205",
+        "uri": "oos://agent-actions/receipts/75d9bef2d8c84f4d9b9a1533"
+      },
+      "case_class": "negative",
+      "case_id": "draft-source-version-mismatch",
+      "decision_ref": {
+        "digest": "sha256:7421fddef006fd4ebb41d4f01fa30f0c6251f7b30fffb1de842880be53eb1800",
+        "uri": "wgcf://agent-actions/decisions/42c41a322671a079041a7ecc"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "source-version-mismatch"
+      ]
+    },
+    {
+      "action_class": "mutate",
+      "action_receipt_ref": {
+        "digest": "sha256:702b27f752efd296a998a494ee0c31aae29dab573547cf42a60ec32ccbc71d3c",
+        "uri": "oos://agent-actions/receipts/7b3e386201766c0ec0b48022"
+      },
+      "case_class": "positive",
+      "case_id": "mutate-allow",
+      "decision_ref": {
+        "digest": "sha256:f6c65e48e6fc0efcc135ccad47b7f167a77dd614e0e58aa37ed8f3aa510f2e84",
+        "uri": "wgcf://agent-actions/decisions/d4e8baecab2e7bf0bc050588"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": true,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "succeeded",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": true,
+        "policy_outcome": "allow",
+        "success_returned": true,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": {
+        "digest": "sha256:841edcd42db20d709c42b1a9684982807e578388587924a44751fd727f26c8f9",
+        "uri": "proof://owner-receipts/mutate-allow"
+      },
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    },
+    {
+      "action_class": "mutate",
+      "action_receipt_ref": {
+        "digest": "sha256:b5723c79969dd373761345f01b55d1f41bef66409306f7beefb5443525ab360e",
+        "uri": "oos://agent-actions/receipts/b5e1d269b784455975a041ae"
+      },
+      "case_class": "negative",
+      "case_id": "mutate-approval-mismatch",
+      "decision_ref": {
+        "digest": "sha256:3f82c19ac74fb5ff6b89ade04f01921d916caaa2565dbcd0ecd472fd5738353a",
+        "uri": "wgcf://agent-actions/decisions/88b9692529e69b25445baea7"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "approval-mismatch"
+      ]
+    },
+    {
+      "action_class": "mutate",
+      "action_receipt_ref": {
+        "digest": "sha256:05d8dcfe16a1355cc0b6cdd7b78b5f7073660307712be067528a693625f9a260",
+        "uri": "oos://agent-actions/receipts/49e7e902c3003282203b7395"
+      },
+      "case_class": "negative",
+      "case_id": "mutate-replay-consumed",
+      "decision_ref": {
+        "digest": "sha256:5e7114499cb4ff8886f2c43deaa2659b41264712cc9fa819698b7c34a806b427",
+        "uri": "wgcf://agent-actions/decisions/2c30ce1b307608cba75d677c"
+      },
+      "error_code": null,
+      "expected": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 0,
+        "execution_outcome": "denied",
+        "owner_mutation_invocations": 0,
+        "owner_receipt_returned": false,
+        "policy_outcome": "deny",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "idempotency-key-consumed"
+      ]
+    },
+    {
+      "action_class": "mutate",
+      "action_receipt_ref": null,
+      "case_class": "negative",
+      "case_id": "mutate-receipt-store-failure",
+      "decision_ref": {
+        "digest": "sha256:46e92de373c98f3075c744e2dae993a47b61b15254de7328cf368c0488d3c2bd",
+        "uri": "wgcf://agent-actions/decisions/3637e232eeb017cdfc255a20"
+      },
+      "error_code": "conformance-receipt-store-failure",
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "error",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": false,
+        "terminal_receipts": 0
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "error",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": false,
+        "terminal_receipts": 0
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    },
+    {
+      "action_class": "mutate",
+      "action_receipt_ref": {
+        "digest": "sha256:7f75cdd3e6a83ea3910d8fa47b6487626452fba88f9e851d4f018ebf0310e43c",
+        "uri": "oos://agent-actions/receipts/34012241c3de98d713c38bb2"
+      },
+      "case_class": "negative",
+      "case_id": "mutate-audit-failure",
+      "decision_ref": {
+        "digest": "sha256:383efaa9c2d06a5696ee5695ffc17e8afe74a9c44d6a222fe686b61ca2fa7bb1",
+        "uri": "wgcf://agent-actions/decisions/81bb35146562ee9b2f8acbca"
+      },
+      "error_code": "conformance-audit-failure",
+      "expected": {
+        "execution_invocations": 1,
+        "execution_outcome": "error",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "observed": {
+        "execution_invocations": 1,
+        "execution_outcome": "error",
+        "owner_mutation_invocations": 1,
+        "owner_receipt_returned": false,
+        "policy_outcome": "allow",
+        "success_returned": false,
+        "terminal_receipts": 1
+      },
+      "owner_receipt_ref": null,
+      "passed": true,
+      "policy_reason_codes": [
+        "authority-bindings-current",
+        "owner-workflow-admitted"
+      ]
+    }
+  ],
+  "conformance_contract_digest": "sha256:a7f5734c1036865dec69c18153fa3f56562aea140a989ed962dc813bea0a557c",
+  "excluded_capabilities": [
+    "console-agent-mutation",
+    "shared-runtime-exposure",
+    "stage-execution",
+    "production-execution",
+    "direct-model-provider-access",
+    "canonical-backend-mutation"
+  ],
+  "implementation_sources": {
+    "enforcer": {
+      "authority_source_commit": "d6e5a5bf0cac6ddfbf127f5826159556971c3718",
+      "manifest_digest": "sha256:5ae4d4abc6bfa51211f176dd06eeae5031eb704824c508291b6389da32e0f890",
+      "manifest_ref": "contracts/agent-action/manifest.json",
+      "repo": "operator-orchestration-service",
+      "revision": "61c037fdd5368863681f6582970bc7f976d40b22"
+    },
+    "evaluator": {
+      "authority_source_commit": "d6e5a5bf0cac6ddfbf127f5826159556971c3718",
+      "manifest_digest": "sha256:a82e94f8a5650eb7fdeacfa2096298fb43d3cca729e6132596de12ed428436d1",
+      "manifest_ref": "contracts/agent-action/manifest.json",
+      "repo": "workspace-governance-control-fabric",
+      "revision": "8b83ba7a2fc0dbbe52ed2892e1b190d2ce0e5de9"
+    }
+  },
+  "proof_posture": "integrated-local-source",
+  "schema_version": 1,
+  "summary": {
+    "case_count": 11,
+    "negative_case_count": 7,
+    "outcome": "passed",
+    "passed_case_count": 11,
+    "positive_case_count": 4,
+    "runtime_activation": "disabled"
+  },
+  "work_item_ref": "openproject://work_packages/954"
+}
