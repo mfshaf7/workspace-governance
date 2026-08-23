@@ -16,8 +16,8 @@ delivery_art_operator_path:
     capability_source:
       repo: operator-orchestration-service
       manifest_path: contracts/delivery-art-lifecycle/capabilities.json
-      manifest_digest: sha256:ffe92e627ebe711725084f68600fd1d0f2e4c7ebd7aa977cc9d95424c4eb9552
-      activated_at_commit: a044f616d89e53927832edd17575edd366063f9e
+      manifest_digest: sha256:3f05b59255fe3f224888de1bcc294135970b7ad96c27ccf288519df8cea846c6
+      activated_at_commit: 659306cc0ea70defb666eadefc1ee620328e1192
     capability_projection:
       schema_version: 2
       contract_id: operator-orchestration-service.delivery-art-lifecycle.v2
@@ -109,6 +109,11 @@ delivery_art_operator_path:
           state: implemented
           contract_version: 2
           normal_path: true
+        - id: work-session-resource-retirement
+          state: human-gated
+          contract_version: 1
+          normal_path: true
+          activation_work_item_id: work-item-970
         - id: resumable-lifecycle-reconciliation
           state: compatibility
           contract_version: 1
@@ -143,6 +148,10 @@ delivery_art_operator_path:
         - openproject://work_packages/962
         - openproject://work_packages/963
         - openproject://work_packages/964
+        - openproject://work_packages/968
+        - openproject://work_packages/969
+        - openproject://work_packages/970
+        - openproject://work_packages/971
       rule: >-
         Architecture, Security acceptance, owner implementation, and Workspace
         Governance activation evidence bind the exact dev-integration runtime.
@@ -176,9 +185,9 @@ delivery_art_operator_path:
         Require explicit operator closeout intent, resolve finalized evidence,
         submit bounded ART completion and eligible parent closeout, reconcile
         projection state, and retire the local work session only after success.
-        Once resource retirement is activated, close must first persist a cleanup
-        plan, remove only proven session-owned resources, retain the terminal
-        cleanup receipt, and then retire active session state.
+        In the active dev-integration path, close first persists a cleanup plan,
+        removes only proven session-owned resources, retains the terminal cleanup
+        receipt, and then retires active session state.
       help: >-
         Show only the work-session command family, required arguments, current
         authority boundaries, state location, compatibility path, and examples.
@@ -272,7 +281,7 @@ delivery_art_operator_path:
       temporal_adapter: deferred-until-durable-wait-evidence
     resource_retirement:
       contract_version: 1
-      state: contract-ready-pending-owner-implementation
+      state: active-dev-integration
       owner_repo: operator-orchestration-service
       activation_sequence:
         implementation_work_item_ref: openproject://work_packages/968
@@ -458,11 +467,9 @@ delivery_art_operator_path:
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
-      schema_version: 1
-      target_schema_version: 2
+      schema_version: 2
       compatibility_schema_versions:
         - 1
-      target_activation_ref: openproject://work_packages/970
       producer_repo: operator-orchestration-service
       custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
@@ -631,19 +638,23 @@ delivery_art_operator_path:
           - work_start_gate.transition_preflight.human_gates_derive_from_architecture_packet
           - work_start_gate.transition_preflight.missing_or_unknown_human_gate_blocks_transition
           - work_start_gate.transition_preflight.architecture_chain_predecessor_close_requires_next_transition_rehearsal
-        enforcement_state: pending-owner
+        enforcement_state: active-owner-runtime
         owner_repo: operator-orchestration-service
         owner_art_refs:
           - openproject://work_packages/968
+          - openproject://work_packages/969
+          - openproject://work_packages/970
+          - openproject://work_packages/971
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
           - owner-runtime
         rationale: >-
-          OOS must validate separated topology on first persistence, reconstruct
-          human gates from durable architecture truth, and prove the next known
-          transition non-mutatively before an architecture-chain predecessor
-          closes.
+          OOS work item 968 validates separated topology on first persistence,
+          reconstructs human gates from durable architecture truth, and proves
+          the next known transition non-mutatively. Security work item 969,
+          WGCF custody work item 971, and activation work item 970 bind that
+          behavior to the active dev-integration path.
       - id: work-session-resource-retirement
         claim_refs:
           - work_session_lifecycle.resource_retirement.rules.explicit_close_intent_required
@@ -661,18 +672,22 @@ delivery_art_operator_path:
           - work_session_lifecycle.resource_retirement.rules.partial_failure_retryable
           - work_session_lifecycle.resource_retirement.rules.terminal_receipt_retained
           - work_session_lifecycle.resource_retirement.rules.unrelated_historical_residue_out_of_scope
-        enforcement_state: pending-owner
+        enforcement_state: active-owner-runtime
         owner_repo: operator-orchestration-service
         owner_art_refs:
           - openproject://work_packages/968
+          - openproject://work_packages/969
+          - openproject://work_packages/970
+          - openproject://work_packages/971
         positive_case_ids: []
         negative_case_ids: []
         enforcement_layers:
           - owner-runtime
         rationale: >-
-          Workspace Governance defines the deletion boundary and artifact shape,
-          but OOS work item 968 must implement and prove the runtime behavior before
-          these rules can become active-owner-runtime claims.
+          OOS work item 968 implements the fail-closed runtime, Security work item
+          969 accepts the exact trust boundary, WGCF work item 971 supports the
+          required v2 custody, and Workspace Governance work item 970 activates the
+          capability for the dev-integration operator path.
       - id: read-cache-policy
         claim_refs:
           - work_start_gate.read_snapshot_cache_allowed

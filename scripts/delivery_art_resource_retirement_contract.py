@@ -195,8 +195,8 @@ def manifest_receipt_pair_issues(
 
 def resource_retirement_definition_issues(retirement: Mapping[str, Any]) -> list[str]:
     issues: list[str] = []
-    if retirement.get("state") != "contract-ready-pending-owner-implementation":
-        issues.append("resource retirement must remain pending owner implementation before activation")
+    if retirement.get("state") != "active-dev-integration":
+        issues.append("resource retirement must remain active in dev-integration after governed activation")
     sequence = retirement.get("activation_sequence")
     if not isinstance(sequence, Mapping) or sequence != {
         "implementation_work_item_ref": "openproject://work_packages/968",

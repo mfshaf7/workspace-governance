@@ -129,13 +129,13 @@ class DeliveryArtResourceRetirementContractTests(unittest.TestCase):
 
         self.assertTrue(any("resource set exactly" in issue for issue in issues), issues)
 
-    def test_runtime_claim_stays_pending_until_owner_work_lands(self) -> None:
+    def test_runtime_claim_cannot_downgrade_after_activation(self) -> None:
         invalid = copy.deepcopy(self.retirement)
-        invalid["state"] = "active-dev-integration"
+        invalid["state"] = "contract-ready-pending-owner-implementation"
 
         issues = resource_retirement_definition_issues(invalid)
 
-        self.assertTrue(any("must remain pending" in issue for issue in issues), issues)
+        self.assertTrue(any("must remain active" in issue for issue in issues), issues)
 
 
 if __name__ == "__main__":

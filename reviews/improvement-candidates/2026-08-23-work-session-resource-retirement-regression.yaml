@@ -9,7 +9,7 @@ summary: Delivery ART work closeout retires reconstructable session state but do
   closed on detection rather than lifecycle ownership, so completed Landing Units
   still require manual cleanup.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-23-branch-lifecycle-cleanup-gap.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -82,16 +82,33 @@ signals:
   - operator-orchestration-service/src/delivery-art/service.js
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-resource-retirement-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS work item 968 implements provenance-bound, fail-closed, restartable resource retirement through the existing work close command.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-08-23-delivery-art-work-session-resource-retirement.md
+    owner_repo: security-architecture
+    note: Security work item 969 accepts the exact OOS and WGCF review heads and records the destructive-action boundary.
+  - type: validator
+    path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_contracts.py
+    owner_repo: workspace-governance-control-fabric
+    note: WGCF work item 971 accepts and custodies architecture packet v2 while preserving v1 compatibility.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Workspace Governance work item 970 activates the exact merged owner capability, proof mapping, and architecture-v2 contract in dev-integration.
+  - type: validator
+    path: workspace-governance/scripts/delivery_art_resource_retirement_contract.py
+    owner_repo: workspace-governance
+    note: Contract validation rejects a downgrade from the activated resource-retirement state and preserves the approved scope exclusions.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: The primary ART operator skill now requires the terminal cleanup receipt as resource-retirement evidence.
+  note: Closed by the merged OOS runtime and real-Git retirement tests, exact-head Security review, WGCF v2 custody support, and Workspace Governance activation. The active work close path retains the terminal cleanup receipt as operating evidence.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-08-30'
-  note: Extend the existing Delivery ART work-session lifecycle with scoped resource
-    ownership, safe terminal cleanup, idempotent recovery, cleanup receipts, and exact
-    architecture-contract projection across its active custodians. Keep Docker cleanup
-    outside the first implementation and require a separate adapter decision later.
-    Before work item 968 resumes, agree and land one semantic topology model that keeps
-    ART readiness relations separate from source Landing Unit order, plus an executable
-    next-transition preflight that would have rejected the packet before work item 967
-    closed.
+  owner_repo: null
+  due_on: null
+  note: null

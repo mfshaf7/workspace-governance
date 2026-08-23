@@ -398,7 +398,7 @@
       ],
       "properties": {
         "contract_version": { "const": 1 },
-        "state": { "const": "contract-ready-pending-owner-implementation" },
+        "state": { "const": "active-dev-integration" },
         "owner_repo": { "const": "operator-orchestration-service" },
         "activation_sequence": {
           "type": "object",
@@ -662,8 +662,28 @@
           "enum": ["implemented", "human-gated", "compatibility", "planned"]
         },
         "contract_version": { "type": "integer", "minimum": 1 },
-        "normal_path": { "type": "boolean" }
-      }
+        "normal_path": { "type": "boolean" },
+        "activation_work_item_id": { "const": "work-item-970" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "id": { "const": "work-session-resource-retirement" } },
+            "required": ["id"]
+          },
+          "then": {
+            "required": ["activation_work_item_id"],
+            "properties": {
+              "state": { "const": "human-gated" },
+              "contract_version": { "const": 1 },
+              "normal_path": { "const": true }
+            }
+          },
+          "else": {
+            "properties": { "activation_work_item_id": false }
+          }
+        }
+      ]
     },
     "lifecycleCapabilityManifest": {
       "type": "object",
@@ -865,13 +885,13 @@
           "allOf": [
             { "$ref": "#/$defs/artifactContract" },
             {
-              "required": ["target_schema_version", "compatibility_schema_versions", "target_activation_ref"],
+              "required": ["compatibility_schema_versions"],
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
-                "schema_version": { "const": 1 },
-                "target_schema_version": { "const": 2 },
+                "schema_version": { "const": 2 },
+                "target_schema_version": false,
                 "compatibility_schema_versions": { "const": [1] },
-                "target_activation_ref": { "const": "openproject://work_packages/970" },
+                "target_activation_ref": false,
                 "producer_repo": { "const": "operator-orchestration-service" },
                 "custody_repo": { "const": "workspace-governance-control-fabric" }
               }
