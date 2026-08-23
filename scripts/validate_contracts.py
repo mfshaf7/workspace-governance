@@ -481,6 +481,27 @@ def _delivery_art_edge_precedence(edge: dict) -> tuple[str, str] | None:
     return None
 
 
+def _delivery_art_graph_is_acyclic(
+    nodes: set[str], edges: list[tuple[str, str]]
+) -> bool:
+    adjacency = {node: [] for node in nodes}
+    indegree = {node: 0 for node in nodes}
+    for source, target in edges:
+        adjacency[source].append(target)
+        indegree[target] += 1
+
+    ready = [node for node, degree in indegree.items() if degree == 0]
+    visited_count = 0
+    while ready:
+        node = ready.pop()
+        visited_count += 1
+        for target in adjacency[node]:
+            indegree[target] -= 1
+            if indegree[target] == 0:
+                ready.append(target)
+    return visited_count == len(nodes)
+
+
 def _artifact_timestamp(value: object) -> datetime | None:
     if not is_rfc3339_timestamp(value):
         return None
@@ -835,7 +856,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         )
         architecture = _artifact_object(payload.get("architecture"))
         owner_map = _artifact_object_list(architecture.get("descendant_owner_map"))
-        dag = _artifact_object(architecture.get("dependency_merge_dag"))
+        schema_version = payload.get("schema_version")
         owner_map_ids = [
             entry.get("work_item_id")
             for entry in owner_map
@@ -847,7 +868,6 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             if isinstance(entry.get("work_item_id"), str)
             and isinstance(entry.get("owner_repo"), str)
         }
-        dag_nodes = set(_artifact_string_list(dag.get("nodes")))
 
         if len(owner_map_ids) != len(set(owner_map_ids)):
             errors.append(
@@ -856,10 +876,6 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         if set(owner_map_ids) != covered_work_items:
             errors.append(
                 "architecture.descendant_owner_map must exactly cover covered_work_item_ids"
-            )
-        if dag_nodes != covered_work_items:
-            errors.append(
-                "architecture.dependency_merge_dag.nodes must exactly cover covered_work_item_ids"
             )
 
         parent_by_work_item = {}
@@ -871,7 +887,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 parent_by_work_item[work_item_id] = parent
                 if parent is None:
                     root_work_items.append(work_item_id)
-            if isinstance(parent, str) and parent not in dag_nodes:
+            if isinstance(parent, str) and parent not in covered_work_items:
                 errors.append(
                     f"architecture descendant {work_item_id} references unknown parent {parent}"
                 )
@@ -902,66 +918,38 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 + ", ".join(sorted(parent_cycle_nodes))
             )
 
-        adjacency = {node: [] for node in dag_nodes}
-        indegree = {node: 0 for node in dag_nodes}
-        precedence_edges = []
-        for edge in _artifact_object_list(dag.get("edges")):
-            source = edge.get("from")
-            target = edge.get("to")
-            if not isinstance(source, str) or not isinstance(target, str):
-                continue
-            unknown_endpoints = {source, target} - dag_nodes
-            if unknown_endpoints:
-                errors.append(
-                    "architecture dependency edge references unknown nodes: "
-                    + ", ".join(sorted(str(node) for node in unknown_endpoints))
-                )
-                continue
-            precedence = _delivery_art_edge_precedence(edge)
-            if precedence is None:
-                continue
-            before, after = precedence
-            precedence_edges.append(precedence)
-            adjacency[before].append(after)
-            indegree[after] += 1
-
-        ready = [node for node, degree in indegree.items() if degree == 0]
-        visited_count = 0
-        while ready:
-            node = ready.pop()
-            visited_count += 1
-            for target in adjacency[node]:
-                indegree[target] -= 1
-                if indegree[target] == 0:
-                    ready.append(target)
-        if visited_count != len(dag_nodes):
-            errors.append("architecture.dependency_merge_dag must be acyclic")
-
         owner_repos = {
             entry.get("owner_repo")
             for entry in owner_map
             if isinstance(entry.get("owner_repo"), str)
         }
-        if payload.get("schema_version") == 2:
-            landing_unit_order = _artifact_string_list(
-                dag.get("landing_unit_order")
-            )
-            if set(landing_unit_order) != dag_nodes:
+        if schema_version == 1:
+            dag = _artifact_object(architecture.get("dependency_merge_dag"))
+            dag_nodes = set(_artifact_string_list(dag.get("nodes")))
+            if dag_nodes != covered_work_items:
                 errors.append(
-                    "architecture.dependency_merge_dag.landing_unit_order must exactly cover dependency nodes"
+                    "architecture.dependency_merge_dag.nodes must exactly cover covered_work_item_ids"
                 )
-            else:
-                merge_positions = {
-                    work_item_id: position
-                    for position, work_item_id in enumerate(landing_unit_order)
-                }
-                for before, after in precedence_edges:
-                    if merge_positions[before] >= merge_positions[after]:
-                        errors.append(
-                            "architecture.dependency_merge_dag.landing_unit_order violates "
-                            f"{before} before {after}"
-                        )
-        else:
+
+            precedence_edges = []
+            for edge in _artifact_object_list(dag.get("edges")):
+                source = edge.get("from")
+                target = edge.get("to")
+                if not isinstance(source, str) or not isinstance(target, str):
+                    continue
+                unknown_endpoints = {source, target} - dag_nodes
+                if unknown_endpoints:
+                    errors.append(
+                        "architecture dependency edge references unknown nodes: "
+                        + ", ".join(sorted(str(node) for node in unknown_endpoints))
+                    )
+                    continue
+                precedence = _delivery_art_edge_precedence(edge)
+                if precedence is not None:
+                    precedence_edges.append(precedence)
+            if not _delivery_art_graph_is_acyclic(dag_nodes, precedence_edges):
+                errors.append("architecture.dependency_merge_dag must be acyclic")
+
             merge_order = _artifact_string_list(dag.get("merge_order"))
             if set(merge_order) != owner_repos:
                 errors.append(
@@ -983,6 +971,153 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         errors.append(
                             "architecture.dependency_merge_dag.merge_order violates "
                             f"{before} before {after}: {before_repo} must precede {after_repo}"
+                        )
+        elif schema_version == 2:
+            work_graph = _artifact_object(
+                architecture.get("work_dependency_graph")
+            )
+            work_nodes = set(_artifact_string_list(work_graph.get("nodes")))
+            if work_nodes != covered_work_items:
+                errors.append(
+                    "architecture.work_dependency_graph.nodes must exactly cover covered_work_item_ids"
+                )
+            work_edges = []
+            for edge in _artifact_object_list(work_graph.get("edges")):
+                prerequisite = edge.get("prerequisite_work_item_id")
+                dependent = edge.get("dependent_work_item_id")
+                if not isinstance(prerequisite, str) or not isinstance(
+                    dependent, str
+                ):
+                    continue
+                unknown_endpoints = {prerequisite, dependent} - work_nodes
+                if unknown_endpoints:
+                    errors.append(
+                        "architecture work dependency edge references unknown nodes: "
+                        + ", ".join(sorted(unknown_endpoints))
+                    )
+                    continue
+                work_edges.append((prerequisite, dependent))
+            if not _delivery_art_graph_is_acyclic(work_nodes, work_edges):
+                errors.append("architecture.work_dependency_graph must be acyclic")
+
+            landing_units = _artifact_object_list(
+                architecture.get("landing_units")
+            )
+            landing_unit_ids = [
+                unit.get("id")
+                for unit in landing_units
+                if isinstance(unit.get("id"), str)
+            ]
+            landing_unit_id_set = set(landing_unit_ids)
+            if len(landing_unit_ids) != len(landing_unit_id_set):
+                errors.append("architecture.landing_units ids must be unique")
+
+            assigned_work_items = []
+            source_backed_landing_unit_ids = set()
+            for unit in landing_units:
+                landing_unit_id = unit.get("id")
+                landing_unit_owner = unit.get("owner_repo")
+                if unit.get("source_backed") is True and isinstance(
+                    landing_unit_id, str
+                ):
+                    source_backed_landing_unit_ids.add(landing_unit_id)
+                for work_item_id in _artifact_string_list(
+                    unit.get("covered_work_item_ids")
+                ):
+                    assigned_work_items.append(work_item_id)
+                    if work_item_id not in covered_work_items:
+                        errors.append(
+                            f"architecture Landing Unit {landing_unit_id} references unknown work item {work_item_id}"
+                        )
+                    expected_owner = owner_by_work_item.get(work_item_id)
+                    if (
+                        expected_owner is not None
+                        and landing_unit_owner != expected_owner
+                    ):
+                        errors.append(
+                            f"architecture Landing Unit {landing_unit_id} owner {landing_unit_owner} does not match {work_item_id} owner {expected_owner}"
+                        )
+            if set(assigned_work_items) != covered_work_items:
+                errors.append(
+                    "architecture.landing_units must exactly cover covered_work_item_ids"
+                )
+            if len(assigned_work_items) != len(set(assigned_work_items)):
+                errors.append(
+                    "architecture.landing_units must assign every work item exactly once"
+                )
+
+            source_graph = _artifact_object(
+                architecture.get("source_landing_graph")
+            )
+            source_nodes = set(_artifact_string_list(source_graph.get("nodes")))
+            if source_nodes != source_backed_landing_unit_ids:
+                errors.append(
+                    "architecture.source_landing_graph.nodes must exactly cover source-backed Landing Units"
+                )
+            source_edges = []
+            for edge in _artifact_object_list(source_graph.get("edges")):
+                prerequisite = edge.get("prerequisite_landing_unit_id")
+                dependent = edge.get("dependent_landing_unit_id")
+                if not isinstance(prerequisite, str) or not isinstance(
+                    dependent, str
+                ):
+                    continue
+                unknown_endpoints = {prerequisite, dependent} - source_nodes
+                if unknown_endpoints:
+                    errors.append(
+                        "architecture source landing edge references unknown nodes: "
+                        + ", ".join(sorted(unknown_endpoints))
+                    )
+                    continue
+                source_edges.append((prerequisite, dependent))
+            if not _delivery_art_graph_is_acyclic(source_nodes, source_edges):
+                errors.append("architecture.source_landing_graph must be acyclic")
+
+            human_gates = _artifact_object_list(
+                architecture.get("required_human_gates")
+            )
+            gate_ids = [
+                gate.get("gate_id")
+                for gate in human_gates
+                if isinstance(gate.get("gate_id"), str)
+            ]
+            if len(gate_ids) != len(set(gate_ids)):
+                errors.append("architecture.required_human_gates ids must be unique")
+            for gate in human_gates:
+                gate_id = gate.get("gate_id")
+                authority_work_item_id = gate.get("authority_work_item_id")
+                authority_owner_repo = gate.get("authority_owner_repo")
+                if authority_work_item_id not in covered_work_items:
+                    errors.append(
+                        f"architecture human gate {gate_id} references unknown authority work item {authority_work_item_id}"
+                    )
+                expected_owner = owner_by_work_item.get(authority_work_item_id)
+                if (
+                    expected_owner is not None
+                    and authority_owner_repo != expected_owner
+                ):
+                    errors.append(
+                        f"architecture human gate {gate_id} authority owner {authority_owner_repo} does not match {authority_work_item_id} owner {expected_owner}"
+                    )
+                affected_landing_units = set(
+                    _artifact_string_list(gate.get("affected_landing_unit_ids"))
+                )
+                unknown_landing_units = (
+                    affected_landing_units - landing_unit_id_set
+                )
+                if unknown_landing_units:
+                    errors.append(
+                        f"architecture human gate {gate_id} references unknown Landing Units: "
+                        + ", ".join(sorted(unknown_landing_units))
+                    )
+                if gate.get("blocked_transition") == "before_source_merge":
+                    non_source_landing_units = (
+                        affected_landing_units - source_backed_landing_unit_ids
+                    )
+                    if non_source_landing_units:
+                        errors.append(
+                            f"architecture human gate {gate_id} blocks source merge for non-source Landing Units: "
+                            + ", ".join(sorted(non_source_landing_units))
                         )
 
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
@@ -2498,7 +2633,11 @@ def validate_delivery_art_artifact_contracts(
 
     if "architecture-packet.valid.json" in fixtures:
         executed_proof_cases.update(
-            {"architecture-structure-valid", "architecture-conformance-valid"}
+            {
+                "architecture-structure-valid",
+                "architecture-v1-compatibility-valid",
+                "architecture-conformance-valid",
+            }
         )
     if "work-start-record.valid.json" in fixtures:
         executed_proof_cases.add("work-start-valid")
@@ -3008,7 +3147,7 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             cyclic_dag,
             "cyclic architecture dependency graph",
-            "architecture-structure-invalid",
+            "architecture-v1-compatibility-invalid",
         )
 
         cyclic_parent_map = copy.deepcopy(architecture)
@@ -3019,6 +3158,7 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             cyclic_parent_map,
             "cyclic architecture descendant parent map without a root",
+            "architecture-structure-invalid",
         )
 
         reversed_merge_order = copy.deepcopy(architecture)
@@ -3031,15 +3171,96 @@ def validate_delivery_art_artifact_contracts(
             "architecture merge order that violates cross-repo dependency precedence",
         )
 
-        repeated_owner_landing_order = copy.deepcopy(architecture)
-        repeated_owner_landing_order["schema_version"] = 2
-        repeated_owner_landing_order["artifact_id"] = (
+        separated_v2_topology = copy.deepcopy(architecture)
+        separated_v2_topology["schema_version"] = 2
+        separated_v2_topology["artifact_id"] = (
             "architecture-packet:delivery-698-v2"
         )
-        repeated_owner_landing_order["covered_work_item_ids"].append(
+        separated_v2_architecture = separated_v2_topology["architecture"]
+        separated_v2_architecture.pop("dependency_merge_dag")
+        separated_v2_architecture["work_dependency_graph"] = {
+            "nodes": ["work-item-801", "work-item-802"],
+            "edges": [
+                {
+                    "prerequisite_work_item_id": "work-item-801",
+                    "dependent_work_item_id": "work-item-802",
+                }
+            ],
+        }
+        separated_v2_architecture["landing_units"] = [
+            {
+                "id": "delivery-698-contract",
+                "owner_repo": "workspace-governance",
+                "source_backed": True,
+                "covered_work_item_ids": ["work-item-801"],
+            },
+            {
+                "id": "delivery-698-implementation",
+                "owner_repo": "operator-orchestration-service",
+                "source_backed": True,
+                "covered_work_item_ids": ["work-item-802"],
+            },
+        ]
+        separated_v2_architecture["source_landing_graph"] = {
+            "nodes": [
+                "delivery-698-contract",
+                "delivery-698-implementation",
+            ],
+            "edges": [
+                {
+                    "prerequisite_landing_unit_id": "delivery-698-contract",
+                    "dependent_landing_unit_id": "delivery-698-implementation",
+                }
+            ],
+        }
+        separated_v2_architecture["required_human_gates"] = [
+            {
+                "gate_id": "gate:contract-acceptance",
+                "authority_work_item_id": "work-item-801",
+                "authority_owner_repo": "workspace-governance",
+                "affected_landing_unit_ids": [
+                    "delivery-698-implementation"
+                ],
+                "blocked_transition": "before_source_merge",
+                "evidence_requirement": "The contract owner accepts the exact implementation head before merge.",
+            }
+        ]
+        separated_v2_topology["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(separated_v2_topology)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            separated_v2_topology,
+            "architecture packet v2 with separated work, source, and human-gate topology",
+            "architecture-v2-topology-valid",
+        )
+
+        non_source_gate_authority = copy.deepcopy(separated_v2_topology)
+        non_source_gate_authority["architecture"]["landing_units"][0][
+            "source_backed"
+        ] = False
+        non_source_gate_authority["architecture"]["source_landing_graph"] = {
+            "nodes": ["delivery-698-implementation"],
+            "edges": [],
+        }
+        non_source_gate_authority["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(non_source_gate_authority)
+            )
+        )
+        require_accepted(
+            "architecture_packet",
+            non_source_gate_authority,
+            "non-source human-gate authority separated from source landing topology",
+        )
+
+        repeated_owner_landing_topology = copy.deepcopy(separated_v2_topology)
+        repeated_owner_landing_topology["covered_work_item_ids"].append(
             "work-item-803"
         )
-        repeated_owner_landing_order["architecture"][
+        repeated_owner_landing_topology["architecture"][
             "descendant_owner_map"
         ].append(
             {
@@ -3049,101 +3270,233 @@ def validate_delivery_art_artifact_contracts(
                 "parent_work_item_id": "work-item-801",
             }
         )
-        repeated_owner_dag = repeated_owner_landing_order["architecture"][
-            "dependency_merge_dag"
-        ]
-        repeated_owner_dag["nodes"].append("work-item-803")
-        repeated_owner_dag["edges"].append(
+        repeated_owner_work_graph = repeated_owner_landing_topology[
+            "architecture"
+        ]["work_dependency_graph"]
+        repeated_owner_work_graph["nodes"].append("work-item-803")
+        repeated_owner_work_graph["edges"].append(
             {
-                "from": "work-item-802",
-                "to": "work-item-803",
-                "relation": "must_merge_before",
+                "prerequisite_work_item_id": "work-item-801",
+                "dependent_work_item_id": "work-item-803",
             }
         )
-        repeated_owner_dag.pop("merge_order")
-        repeated_owner_dag["landing_unit_order"] = [
-            "work-item-801",
-            "work-item-802",
-            "work-item-803",
-        ]
+        repeated_owner_landing_topology["architecture"]["landing_units"].append(
+            {
+                "id": "delivery-698-activation",
+                "owner_repo": "workspace-governance",
+                "source_backed": True,
+                "covered_work_item_ids": ["work-item-803"],
+            }
+        )
+        repeated_owner_source_graph = repeated_owner_landing_topology[
+            "architecture"
+        ]["source_landing_graph"]
+        repeated_owner_source_graph["nodes"].append("delivery-698-activation")
+        repeated_owner_source_graph["edges"].append(
+            {
+                "prerequisite_landing_unit_id": "delivery-698-implementation",
+                "dependent_landing_unit_id": "delivery-698-activation",
+            }
+        )
         contract_applicability = copy.deepcopy(
-            repeated_owner_landing_order["conformance_plan"][
+            repeated_owner_landing_topology["conformance_plan"][
                 "work_item_dimension_applicability"
             ][0]
         )
         contract_applicability["work_item_id"] = "work-item-803"
-        repeated_owner_landing_order["conformance_plan"][
+        repeated_owner_landing_topology["conformance_plan"][
             "work_item_dimension_applicability"
         ].append(contract_applicability)
         for source_case, case_id in (
             (
-                repeated_owner_landing_order["conformance_plan"]["cases"][0],
+                repeated_owner_landing_topology["conformance_plan"]["cases"][0],
                 "case:activation-positive",
             ),
             (
-                repeated_owner_landing_order["conformance_plan"]["cases"][1],
+                repeated_owner_landing_topology["conformance_plan"]["cases"][1],
                 "case:activation-negative",
             ),
         ):
             activation_case = copy.deepcopy(source_case)
             activation_case["id"] = case_id
             activation_case["applies_to_work_item_ids"] = ["work-item-803"]
-            repeated_owner_landing_order["conformance_plan"]["cases"].append(
+            repeated_owner_landing_topology["conformance_plan"]["cases"].append(
                 activation_case
             )
-        repeated_owner_landing_order["scope_fingerprint"] = (
+        repeated_owner_landing_topology["scope_fingerprint"] = (
             _delivery_art_projection_digest(
-                _architecture_scope_projection(repeated_owner_landing_order)
+                _architecture_scope_projection(repeated_owner_landing_topology)
             )
         )
         require_accepted(
             "architecture_packet",
-            repeated_owner_landing_order,
-            "architecture Landing Unit order with a repeated owner repo",
+            repeated_owner_landing_topology,
+            "independent source landing graph with a repeated owner repo",
         )
 
-        v1_with_landing_unit_order = copy.deepcopy(architecture)
-        v1_with_landing_unit_order["architecture"]["dependency_merge_dag"][
-            "landing_unit_order"
-        ] = ["work-item-801", "work-item-802"]
-        require_rejected(
-            "architecture_packet",
-            v1_with_landing_unit_order,
-            "architecture packet v1 with a v2 Landing Unit order",
-        )
-
-        v2_with_repo_merge_order = copy.deepcopy(repeated_owner_landing_order)
-        v2_with_repo_merge_order["architecture"]["dependency_merge_dag"][
-            "merge_order"
-        ] = ["workspace-governance", "operator-orchestration-service"]
-        require_rejected(
-            "architecture_packet",
-            v2_with_repo_merge_order,
-            "architecture packet v2 with a v1 repo merge order",
-        )
-
-        invalid_repeated_owner_landing_order = copy.deepcopy(
-            repeated_owner_landing_order
-        )
-        invalid_repeated_owner_landing_order["architecture"][
-            "dependency_merge_dag"
-        ]["landing_unit_order"] = [
-            "work-item-801",
-            "work-item-803",
-            "work-item-802",
-        ]
-        invalid_repeated_owner_landing_order["scope_fingerprint"] = (
-            _delivery_art_projection_digest(
-                _architecture_scope_projection(
-                    invalid_repeated_owner_landing_order
-                )
-            )
+        v1_with_v2_topology = copy.deepcopy(architecture)
+        v1_with_v2_topology["architecture"]["work_dependency_graph"] = copy.deepcopy(
+            separated_v2_architecture["work_dependency_graph"]
         )
         require_rejected(
             "architecture_packet",
-            invalid_repeated_owner_landing_order,
-            "architecture Landing Unit order that violates repeated-owner dependency precedence",
-            expected_fragment="landing_unit_order violates work-item-802 before work-item-803",
+            v1_with_v2_topology,
+            "architecture packet v1 mixed with v2 topology",
+        )
+
+        v2_with_legacy_mixed_graph = copy.deepcopy(separated_v2_topology)
+        v2_with_legacy_mixed_graph["architecture"]["dependency_merge_dag"] = (
+            copy.deepcopy(architecture["architecture"]["dependency_merge_dag"])
+        )
+        require_rejected(
+            "architecture_packet",
+            v2_with_legacy_mixed_graph,
+            "architecture packet v2 mixed with the v1 dependency and merge graph",
+        )
+
+        v2_unknown_work_endpoint = copy.deepcopy(separated_v2_topology)
+        v2_unknown_work_endpoint["architecture"]["work_dependency_graph"][
+            "edges"
+        ][0]["dependent_work_item_id"] = "work-item-999"
+        require_rejected(
+            "architecture_packet",
+            v2_unknown_work_endpoint,
+            "architecture v2 work dependency with an unknown endpoint",
+            expected_fragment="work dependency edge references unknown nodes",
+        )
+
+        v2_cyclic_work_graph = copy.deepcopy(separated_v2_topology)
+        v2_cyclic_work_graph["architecture"]["work_dependency_graph"][
+            "edges"
+        ].append(
+            {
+                "prerequisite_work_item_id": "work-item-802",
+                "dependent_work_item_id": "work-item-801",
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            v2_cyclic_work_graph,
+            "cyclic architecture v2 work dependency graph",
+            "architecture-v2-topology-invalid",
+            expected_fragment="work_dependency_graph must be acyclic",
+        )
+
+        v2_duplicate_work_assignment = copy.deepcopy(separated_v2_topology)
+        v2_duplicate_work_assignment["architecture"]["landing_units"][1][
+            "covered_work_item_ids"
+        ].append("work-item-801")
+        require_rejected(
+            "architecture_packet",
+            v2_duplicate_work_assignment,
+            "architecture v2 work item assigned to two Landing Units",
+            expected_fragment="assign every work item exactly once",
+        )
+
+        v2_mismatched_landing_unit_owner = copy.deepcopy(separated_v2_topology)
+        v2_mismatched_landing_unit_owner["architecture"]["landing_units"][1][
+            "owner_repo"
+        ] = "workspace-governance"
+        require_rejected(
+            "architecture_packet",
+            v2_mismatched_landing_unit_owner,
+            "architecture v2 Landing Unit with a mismatched owner",
+            expected_fragment="does not match work-item-802 owner",
+        )
+
+        v2_missing_source_node = copy.deepcopy(separated_v2_topology)
+        v2_missing_source_node["architecture"]["source_landing_graph"][
+            "nodes"
+        ] = ["delivery-698-contract"]
+        require_rejected(
+            "architecture_packet",
+            v2_missing_source_node,
+            "architecture v2 source graph omitting a source-backed Landing Unit",
+            expected_fragment="must exactly cover source-backed Landing Units",
+        )
+
+        v2_unknown_source_endpoint = copy.deepcopy(separated_v2_topology)
+        v2_unknown_source_endpoint["architecture"]["source_landing_graph"][
+            "edges"
+        ][0]["dependent_landing_unit_id"] = "delivery-698-unknown"
+        require_rejected(
+            "architecture_packet",
+            v2_unknown_source_endpoint,
+            "architecture v2 source landing graph with an unknown endpoint",
+            expected_fragment="source landing edge references unknown nodes",
+        )
+
+        v2_cyclic_source_graph = copy.deepcopy(separated_v2_topology)
+        v2_cyclic_source_graph["architecture"]["source_landing_graph"][
+            "edges"
+        ].append(
+            {
+                "prerequisite_landing_unit_id": "delivery-698-implementation",
+                "dependent_landing_unit_id": "delivery-698-contract",
+            }
+        )
+        require_rejected(
+            "architecture_packet",
+            v2_cyclic_source_graph,
+            "cyclic architecture v2 source landing graph",
+            expected_fragment="source_landing_graph must be acyclic",
+        )
+
+        v2_without_gate_structure = copy.deepcopy(separated_v2_topology)
+        del v2_without_gate_structure["architecture"]["required_human_gates"]
+        require_rejected(
+            "architecture_packet",
+            v2_without_gate_structure,
+            "architecture v2 without an explicit human-gate structure",
+        )
+
+        v2_unknown_gate_authority = copy.deepcopy(separated_v2_topology)
+        v2_unknown_gate_authority["architecture"]["required_human_gates"][0][
+            "authority_work_item_id"
+        ] = "work-item-999"
+        require_rejected(
+            "architecture_packet",
+            v2_unknown_gate_authority,
+            "architecture v2 human gate with an unknown authority work item",
+            expected_fragment="references unknown authority work item",
+        )
+
+        v2_mismatched_gate_owner = copy.deepcopy(separated_v2_topology)
+        v2_mismatched_gate_owner["architecture"]["required_human_gates"][0][
+            "authority_owner_repo"
+        ] = "operator-orchestration-service"
+        require_rejected(
+            "architecture_packet",
+            v2_mismatched_gate_owner,
+            "architecture v2 human gate with a mismatched authority owner",
+            expected_fragment="authority owner operator-orchestration-service does not match",
+        )
+
+        v2_unknown_affected_landing_unit = copy.deepcopy(separated_v2_topology)
+        v2_unknown_affected_landing_unit["architecture"][
+            "required_human_gates"
+        ][0]["affected_landing_unit_ids"] = ["delivery-698-unknown"]
+        require_rejected(
+            "architecture_packet",
+            v2_unknown_affected_landing_unit,
+            "architecture v2 human gate with an unknown affected Landing Unit",
+            expected_fragment="references unknown Landing Units",
+        )
+
+        v2_source_merge_gate_on_non_source_unit = copy.deepcopy(
+            separated_v2_topology
+        )
+        v2_source_merge_gate_on_non_source_unit["architecture"]["landing_units"][
+            1
+        ]["source_backed"] = False
+        v2_source_merge_gate_on_non_source_unit["architecture"][
+            "source_landing_graph"
+        ] = {"nodes": ["delivery-698-contract"], "edges": []}
+        require_rejected(
+            "architecture_packet",
+            v2_source_merge_gate_on_non_source_unit,
+            "architecture v2 source-merge gate targeting a non-source Landing Unit",
+            expected_fragment="blocks source merge for non-source Landing Units",
         )
 
         valid_depends_on_order = copy.deepcopy(architecture)

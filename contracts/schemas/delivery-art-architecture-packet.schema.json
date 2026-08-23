@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
-  "$comment": "Exact descendant/DAG coverage, parent-forest validity, endpoint binding, relation-aware owner merge order, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
+  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, Landing Unit ownership, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -36,7 +36,6 @@
       "additionalProperties": false,
       "required": [
         "descendant_owner_map",
-        "dependency_merge_dag",
         "lifecycle_state_model",
         "authorization_session_execution_model",
         "evidence_receipt_handoffs",
@@ -94,9 +93,94 @@
               "minItems": 1,
               "uniqueItems": true,
               "items": { "$ref": "#/$defs/repoName" }
-            },
-            "landing_unit_order": {
-              "$ref": "#/$defs/workItemIds"
+            }
+          }
+        },
+        "work_dependency_graph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodes", "edges"],
+          "properties": {
+            "nodes": { "$ref": "#/$defs/workItemIds" },
+            "edges": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["prerequisite_work_item_id", "dependent_work_item_id"],
+                "properties": {
+                  "prerequisite_work_item_id": { "$ref": "#/$defs/workItemId" },
+                  "dependent_work_item_id": { "$ref": "#/$defs/workItemId" }
+                }
+              }
+            }
+          }
+        },
+        "landing_units": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "owner_repo", "source_backed", "covered_work_item_ids"],
+            "properties": {
+              "id": { "$ref": "#/$defs/landingUnitId" },
+              "owner_repo": { "$ref": "#/$defs/repoName" },
+              "source_backed": { "type": "boolean" },
+              "covered_work_item_ids": { "$ref": "#/$defs/workItemIds" }
+            }
+          }
+        },
+        "source_landing_graph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodes", "edges"],
+          "properties": {
+            "nodes": { "$ref": "#/$defs/landingUnitIds" },
+            "edges": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["prerequisite_landing_unit_id", "dependent_landing_unit_id"],
+                "properties": {
+                  "prerequisite_landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+                  "dependent_landing_unit_id": { "$ref": "#/$defs/landingUnitId" }
+                }
+              }
+            }
+          }
+        },
+        "required_human_gates": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "gate_id",
+              "authority_work_item_id",
+              "authority_owner_repo",
+              "affected_landing_unit_ids",
+              "blocked_transition",
+              "evidence_requirement"
+            ],
+            "properties": {
+              "gate_id": { "$ref": "#/$defs/identifier" },
+              "authority_work_item_id": { "$ref": "#/$defs/workItemId" },
+              "authority_owner_repo": { "$ref": "#/$defs/repoName" },
+              "affected_landing_unit_ids": { "$ref": "#/$defs/landingUnitIds" },
+              "blocked_transition": {
+                "enum": [
+                  "before_implementation",
+                  "before_source_merge",
+                  "before_runtime_activation",
+                  "before_operating_ready"
+                ]
+              },
+              "evidence_requirement": { "$ref": "#/$defs/nonEmptyString" }
             }
           }
         },
@@ -377,10 +461,18 @@
       "then": {
         "properties": {
           "architecture": {
+            "required": ["dependency_merge_dag"],
+            "not": {
+              "anyOf": [
+                { "required": ["work_dependency_graph"] },
+                { "required": ["landing_units"] },
+                { "required": ["source_landing_graph"] },
+                { "required": ["required_human_gates"] }
+              ]
+            },
             "properties": {
               "dependency_merge_dag": {
-                "required": ["nodes", "edges", "merge_order"],
-                "not": { "required": ["landing_unit_order"] }
+                "required": ["nodes", "edges", "merge_order"]
               }
             }
           }
@@ -395,12 +487,13 @@
       "then": {
         "properties": {
           "architecture": {
-            "properties": {
-              "dependency_merge_dag": {
-                "required": ["nodes", "edges", "landing_unit_order"],
-                "not": { "required": ["merge_order"] }
-              }
-            }
+            "required": [
+              "work_dependency_graph",
+              "landing_units",
+              "source_landing_graph",
+              "required_human_gates"
+            ],
+            "not": { "required": ["dependency_merge_dag"] }
           }
         }
       }
@@ -491,6 +584,7 @@
   "$defs": {
     "nonEmptyString": { "type": "string", "minLength": 1 },
     "identifier": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "landingUnitId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
     "artifactId": { "type": "string", "pattern": "^architecture-packet:[a-z0-9][a-z0-9._:-]*$" },
     "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
     "workItemId": { "type": "string", "pattern": "^work-item-[1-9][0-9]*$" },
@@ -499,6 +593,12 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/workItemId" }
+    },
+    "landingUnitIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/landingUnitId" }
     },
     "repoName": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
     "timestamp": { "type": "string", "format": "date-time" },
