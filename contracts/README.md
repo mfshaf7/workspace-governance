@@ -208,6 +208,14 @@ Use these contracts to declare:
     including safety class, profile eligibility, mutation posture, WGCF
     invocation posture, no-removal-before-parity retirement posture, and the
     repo/component admission contract for validation behavior
+- `developer-integration-profiles.yaml`
+  - registered profile lifecycle and ownership truth plus neutral
+    cross-profile runtime compositions, dependency edges, service endpoint
+    projections, and value-free credential bindings
+- `schemas/developer-integration-profiles.schema.json`
+  - validates profile records and runtime composition structure; semantic
+    validation additionally rejects cycles, disconnected participants,
+    ambiguous owners, duplicate projections, and tracked credential values
 - `delivery-art-operator-path.yaml`
   - machine-readable definition of the canonical ART operator entrypoint,
     four readiness levels, architecture preflight, work-start gate, evidence

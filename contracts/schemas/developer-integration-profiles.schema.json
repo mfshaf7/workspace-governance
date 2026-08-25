@@ -1,9 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "profiles"],
+  "required": ["schema_version", "runtime_compositions", "profiles"],
   "properties": {
     "schema_version": { "type": "integer", "minimum": 1 },
+    "runtime_compositions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": { "$ref": "#/$defs/runtimeComposition" }
+    },
     "profiles": {
       "type": "object",
       "minProperties": 1,
@@ -146,6 +152,116 @@
     }
   },
   "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "environmentVariable": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "runtimeComposition": {
+      "type": "object",
+      "required": [
+        "owner_repo",
+        "summary",
+        "root_profile_id",
+        "profiles",
+        "dependencies",
+        "credential_bindings"
+      ],
+      "properties": {
+        "owner_repo": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "root_profile_id": { "$ref": "#/$defs/identifier" },
+        "profiles": {
+          "type": "object",
+          "minProperties": 2,
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["required_lifecycle"],
+            "properties": {
+              "required_lifecycle": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["consumer_profile_id", "provider_profile_id"],
+            "properties": {
+              "consumer_profile_id": { "$ref": "#/$defs/identifier" },
+              "provider_profile_id": { "$ref": "#/$defs/identifier" },
+              "endpoint_projections": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "environment_variable",
+                    "scheme",
+                    "service_name",
+                    "service_port"
+                  ],
+                  "properties": {
+                    "environment_variable": { "$ref": "#/$defs/environmentVariable" },
+                    "scheme": { "enum": ["http", "https"] },
+                    "service_name": { "$ref": "#/$defs/identifier" },
+                    "service_port": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 65535
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "credential_bindings": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "owner_repo",
+              "purpose",
+              "value_source",
+              "retention",
+              "projections"
+            ],
+            "properties": {
+              "owner_repo": { "type": "string", "minLength": 1 },
+              "purpose": { "type": "string", "minLength": 1 },
+              "value_source": { "const": "runtime-generated" },
+              "retention": { "const": "composition-lifetime" },
+              "projections": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": ["profile_id", "environment_variable"],
+                  "properties": {
+                    "profile_id": { "$ref": "#/$defs/identifier" },
+                    "environment_variable": { "$ref": "#/$defs/environmentVariable" }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "securityReviewRef": {
       "type": "object",
       "required": ["repo", "path"],

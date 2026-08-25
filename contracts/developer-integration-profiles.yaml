@@ -1,4 +1,42 @@
 schema_version: 1
+runtime_compositions:
+  work-design-advice:
+    owner_repo: platform-engineering
+    summary: Compose the accepted-idea delivery runtime with Context Governance Gateway and the governed AI gateway for bounded Work Design advice.
+    root_profile_id: accepted-idea-delivery
+    profiles:
+      accepted-idea-delivery:
+        required_lifecycle: active
+      context-governance-gateway:
+        required_lifecycle: active
+      governed-ai-gateway:
+        required_lifecycle: active
+    dependencies:
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        endpoint_projections:
+          - environment_variable: CGG_WORK_DESIGN_BASE_URL
+            scheme: http
+            service_name: context-governance-gateway-api
+            service_port: 8080
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: governed-ai-gateway
+        endpoint_projections:
+          - environment_variable: GOVERNED_AI_GATEWAY_BASE_URL
+            scheme: http
+            service_name: governed-ai-gateway
+            service_port: 8080
+    credential_bindings:
+      work-design-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate the accepted-idea delivery runtime to the Work Design projection boundary without storing the shared credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: CGG_WORK_DESIGN_CALLER_SECRET
+          - profile_id: context-governance-gateway
+            environment_variable: CGG_WORK_DESIGN_CALLER_SHARED_SECRET
 profiles:
   accepted-idea-delivery:
     lifecycle: active
@@ -158,6 +196,7 @@ profiles:
       - workspace-governance-control-fabric
       - workspace-governance
       - platform-engineering
+      - workspace-prototype-studio
     stage_handoff:
       owner_repo: platform-engineering
       governed_surface: workspace-governance-control-fabric-stage

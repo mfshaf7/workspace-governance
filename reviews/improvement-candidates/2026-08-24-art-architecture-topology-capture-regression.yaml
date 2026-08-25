@@ -1,0 +1,105 @@
+schema_version: 1
+id: 2026-08-24-art-architecture-topology-capture-regression
+title: Prove complete ART topology before architecture approval
+recorded_on: '2026-08-24'
+owner_repo: operator-orchestration-service
+summary: Delivery ART architecture packet v3 omitted an existing Feature dependency,
+  so the corrected schema-v2 freshness validator blocked the first Review Packet transition.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-23-work-session-resource-retirement-regression.yaml
+status: triaged
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: late-root-cause-discovery
+  title: A simpler prerequisite, permission, environment, or contract check was proven
+    only after deeper analysis had already expanded.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  finding: The architecture packet was authored from a partial dependency summary
+    instead of the complete authoritative ART relation projection. The omission was
+    discovered only after exact-head dev-integration rehearsal, repeating the previously
+    closed architecture-topology semantic preflight lesson.
+  source_refs:
+  - openproject://work_packages/984
+  - 'conversation:2026-08-24 exact-head #984 Review Packet transition exposed omitted
+    #977 to #907 dependency'
+- id: stale-review-evidence-after-architecture-successor
+  title: Review evidence retained conformance cases removed by the approved architecture successor
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: Architecture packet v5 correctly narrowed work-item-977 to source-provenance
+    conformance, but its active evidence document still declared the superseded ingress-protocol
+    cases. The Review Packet contract rejected the otherwise valid closeout until those stale
+    mappings were removed.
+  source_refs:
+  - openproject://work_packages/977
+  - wgcf://artifacts/delivery-art/sha256/b4ac4f95122f96dbd7ac36c6fd6002ee79b1ca8e3ad519a1562d6a7efd24fd12
+  - 'conversation:2026-08-24 work continue for #977 rejected stale ingress-protocol
+    evidence after architecture v5'
+- id: review-evidence-authoring-not-derived-from-authority
+  title: Review evidence was authored without exact architecture and PR projections
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - learning-closure-regression
+  finding: >-
+    ART #979 required two avoidable correction loops because the editable
+    evidence template accepted directory-level changed-surface paths and manually
+    assigned conformance cases without projecting the architecture-required fidelity
+    and source-provenance cases. The canonical gates correctly rejected both drafts,
+    but the normal authoring path should have prevented invalid evidence before the
+    broker transition and should have returned the exact validation findings instead
+    of a generic contract error.
+  source_refs:
+  - openproject://work_packages/979
+  - openproject://work_packages/988
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/156
+  - 'conversation:2026-08-25 operator reported repeated wrong information despite
+    the stronger contract'
+- id: feature-outcome-composition-omitted
+  title: Component-complete evidence did not prove the composed Feature outcome
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    Work Design Feature #908 reached terminal child state and projected as a
+    stale-open closeout candidate after CGG, gateway, OOS, security, activation,
+    persistence, and Console children each passed independently. The approved
+    architecture packet named composed Feature-level conformance cases but did
+    not bind them to an executable child or source Landing Unit. Live #996 proof
+    could therefore return bounded 503 advice while apply and receipt behavior
+    passed, every child could close, and the parent could still project as stale
+    open. Feature completion lacked an owner-bounded path that had to prove its
+    stated end-to-end outcome.
+  source_refs:
+  - openproject://work_packages/908
+  - openproject://work_packages/996
+  - openproject://work_packages/998
+  - wgcf://artifacts/delivery-art/sha256/99d559038d50d6bf7eaa2549c77e7296de52fe8920e0e56bb9a1553134d6db25
+  - 'conversation:2026-08-25 pre-closeout inspection found the active accepted-idea-delivery
+    profile did not compose CGG and governed-AI runtime dependencies'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-08-27'
+  note: >-
+    ART Defect #988 tracks architecture-derived evidence scaffolding, exact
+    changed-file selection, authored-input preservation, and actionable validator
+    error projection. ART Defect #998 and owner-bounded Tasks #999 through #1003
+    track the missing composed Feature outcome. Keep this candidate open until
+    both controls are landed and proven.

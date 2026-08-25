@@ -30,6 +30,11 @@ lane is appropriate, what it must never touch, and which artifacts are
 required before fast local work can move into governed stage rehearsal. The
 concrete runtime shape still belongs to the profile owner.
 
+Cross-profile runtime dependencies and credential projection targets are
+defined by the [dev-integration runtime composition contract](docs/developer-integration-runtime-composition.md).
+The contract carries no credential values; Platform remains the runtime and
+credential authority.
+
 The same split applies to profile admission. A profile request is not the same
 thing as an active profile. Requests may be `proposed`, `build-admitted`,
 `active`, `suspended`, or `retired`, and the admission policy stays generic
