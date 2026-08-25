@@ -211,7 +211,8 @@ Use these contracts to declare:
 - `developer-integration-profiles.yaml`
   - registered profile lifecycle and ownership truth plus neutral
     cross-profile runtime compositions, dependency edges, service endpoint
-    projections, and value-free credential bindings
+    projections, caller identities, profile-owned environment references,
+    value-free credential bindings, and deterministic execution/cleanup policy
 - `schemas/developer-integration-profiles.schema.json`
   - validates profile records and runtime composition structure; semantic
     validation additionally rejects cycles, disconnected participants,

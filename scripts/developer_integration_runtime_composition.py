@@ -82,6 +82,11 @@ def runtime_composition_issues(
         owner_repo = composition.get("owner_repo")
         if owner_repo not in active_repos:
             issues.append(f"{label}.owner_repo {owner_repo!r} is not an active repo")
+        composition_lifecycle = composition.get("lifecycle")
+        if composition_lifecycle not in allowed_lifecycles:
+            issues.append(
+                f"{label}.lifecycle {composition_lifecycle!r} is not declared"
+            )
 
         participants = composition.get("profiles") or {}
         root_profile_id = composition.get("root_profile_id")
@@ -101,7 +106,10 @@ def runtime_composition_issues(
                     f"{label}.profiles.{profile_id}.required_lifecycle "
                     f"{required_lifecycle!r} is not declared"
                 )
-            elif profile.get("lifecycle") != required_lifecycle:
+            elif (
+                composition_lifecycle == "active"
+                and profile.get("lifecycle") != required_lifecycle
+            ):
                 issues.append(
                     f"{label}.profiles.{profile_id} requires lifecycle "
                     f"{required_lifecycle!r}, got {profile.get('lifecycle')!r}"
@@ -149,6 +157,66 @@ def runtime_composition_issues(
                 if not isinstance(environment_variable, str) or not ENVIRONMENT_VARIABLE_PATTERN.fullmatch(environment_variable):
                     issues.append(
                         f"{label} endpoint projection environment_variable "
+                        f"{environment_variable!r} is invalid"
+                    )
+
+        execution = composition.get("execution") or {}
+        cleanup_owner_repo = execution.get("cleanup_owner_repo")
+        if cleanup_owner_repo != owner_repo:
+            issues.append(
+                f"{label}.execution.cleanup_owner_repo {cleanup_owner_repo!r} "
+                f"does not match composition owner {owner_repo!r}"
+            )
+        for action_key in ("startup_action", "readiness_action", "teardown_action"):
+            action = execution.get(action_key)
+            for profile_id in sorted(participants):
+                profile = profiles.get(profile_id) or {}
+                if action not in (profile.get("actions") or []):
+                    issues.append(
+                        f"{label}.execution.{action_key} {action!r} is not available "
+                        f"on profile {profile_id!r}"
+                    )
+
+        for binding_id, binding in sorted(
+            (composition.get("caller_bindings") or {}).items()
+        ):
+            binding_label = f"{label}.caller_bindings.{binding_id}"
+            binding_owner = binding.get("owner_repo")
+            consumer = binding.get("consumer_profile_id")
+            provider = binding.get("provider_profile_id")
+            if binding_owner != owner_repo:
+                issues.append(
+                    f"{binding_label}.owner_repo {binding_owner!r} does not match "
+                    f"composition owner {owner_repo!r}"
+                )
+            if consumer not in participants or provider not in participants:
+                issues.append(
+                    f"{binding_label} must reference declared consumer and provider profiles"
+                )
+            elif (consumer, provider) not in edges:
+                issues.append(
+                    f"{binding_label} does not match a declared dependency "
+                    f"{consumer!r} -> {provider!r}"
+                )
+            for side in ("consumer", "provider"):
+                profile_id = binding.get(f"{side}_profile_id")
+                environment_variable = binding.get(
+                    f"{side}_environment_variable"
+                )
+                target = (profile_id, environment_variable)
+                if target in projection_targets:
+                    issues.append(
+                        f"{label} repeats projection {profile_id!r}:{environment_variable!r}"
+                    )
+                projection_targets.add(target)
+                if (
+                    not isinstance(environment_variable, str)
+                    or not ENVIRONMENT_VARIABLE_PATTERN.fullmatch(
+                        environment_variable
+                    )
+                ):
+                    issues.append(
+                        f"{binding_label}.{side}_environment_variable "
                         f"{environment_variable!r} is invalid"
                     )
 
@@ -208,5 +276,36 @@ def runtime_composition_issues(
                         f"{binding_label} projection environment_variable "
                         f"{environment_variable!r} is invalid"
                     )
+
+        for binding_id, binding in sorted(
+            (composition.get("profile_bindings") or {}).items()
+        ):
+            binding_label = f"{label}.profile_bindings.{binding_id}"
+            binding_owner = binding.get("owner_repo")
+            profile_id = binding.get("profile_id")
+            environment_variable = binding.get("environment_variable")
+            if binding_owner != owner_repo:
+                issues.append(
+                    f"{binding_label}.owner_repo {binding_owner!r} does not match "
+                    f"composition owner {owner_repo!r}"
+                )
+            if profile_id not in participants:
+                issues.append(
+                    f"{binding_label}.profile_id {profile_id!r} is not a declared composition profile"
+                )
+            target = (profile_id, environment_variable)
+            if target in projection_targets:
+                issues.append(
+                    f"{label} repeats projection {profile_id!r}:{environment_variable!r}"
+                )
+            projection_targets.add(target)
+            if (
+                not isinstance(environment_variable, str)
+                or not ENVIRONMENT_VARIABLE_PATTERN.fullmatch(environment_variable)
+            ):
+                issues.append(
+                    f"{binding_label}.environment_variable "
+                    f"{environment_variable!r} is invalid"
+                )
 
     return issues

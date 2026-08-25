@@ -135,6 +135,9 @@ governed_intake_assist:
       - upstream_model_digest
       - provider_runtime_version
       - prompt_version
+      - task_kind
+      - task_contract_ref
+      - task_contract_version
       - provider_schema_valid
       - provider_latency_ms
       - provider_usage
