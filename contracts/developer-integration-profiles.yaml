@@ -1,6 +1,7 @@
 schema_version: 1
 runtime_compositions:
   work-design-advice:
+    lifecycle: active
     owner_repo: platform-engineering
     summary: Compose the accepted-idea delivery runtime with Context Governance Gateway and the governed AI gateway for bounded Work Design advice.
     root_profile_id: accepted-idea-delivery
@@ -16,6 +17,7 @@ runtime_compositions:
         provider_profile_id: context-governance-gateway
         endpoint_projections:
           - environment_variable: CGG_WORK_DESIGN_BASE_URL
+            address_format: url
             scheme: http
             service_name: context-governance-gateway-api
             service_port: 8080
@@ -23,9 +25,19 @@ runtime_compositions:
         provider_profile_id: governed-ai-gateway
         endpoint_projections:
           - environment_variable: GOVERNED_AI_GATEWAY_BASE_URL
+            address_format: url
             scheme: http
             service_name: governed-ai-gateway
             service_port: 8080
+    caller_bindings:
+      work-design-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Bind the OOS Work Design caller identity to both sides of the CGG projection boundary.
+        caller_id: operator-orchestration-service
+        consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        consumer_environment_variable: CGG_WORK_DESIGN_CALLER_ID
+        provider_environment_variable: CGG_WORK_DESIGN_ALLOWED_CALLERS
     credential_bindings:
       work-design-cgg-caller:
         owner_repo: platform-engineering
@@ -37,6 +49,165 @@ runtime_compositions:
             environment_variable: CGG_WORK_DESIGN_CALLER_SECRET
           - profile_id: context-governance-gateway
             environment_variable: CGG_WORK_DESIGN_CALLER_SHARED_SECRET
+    profile_bindings: {}
+    execution:
+      startup_action: up
+      readiness_action: status
+      teardown_action: down
+      startup_order: dependency-first
+      teardown_order: reverse-startup
+      cleanup_owner_repo: platform-engineering
+      rollback_started_profiles_on_failure: true
+      preserve_profile_state_on_teardown: true
+  refinement-catalog:
+    lifecycle: proposed
+    owner_repo: platform-engineering
+    summary: Compose the accepted-idea delivery runtime with model-safe Refinement context, governed AI advice, repository readiness, durable execution, and profile-owned Catalog control bindings.
+    root_profile_id: accepted-idea-delivery
+    profiles:
+      accepted-idea-delivery:
+        required_lifecycle: active
+      context-governance-gateway:
+        required_lifecycle: active
+      governed-ai-gateway:
+        required_lifecycle: active
+      governance-control-fabric:
+        required_lifecycle: active
+      temporal:
+        required_lifecycle: active
+    dependencies:
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        endpoint_projections:
+          - environment_variable: CGG_REFINEMENT_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: context-governance-gateway-api
+            service_port: 8080
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: governed-ai-gateway
+        endpoint_projections:
+          - environment_variable: GOVERNED_AI_GATEWAY_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: governed-ai-gateway
+            service_port: 8080
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: governance-control-fabric
+        endpoint_projections:
+          - environment_variable: WGCF_REPOSITORY_READINESS_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: workspace-governance-control-fabric-api
+            service_port: 8080
+      - consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: temporal
+        endpoint_projections:
+          - environment_variable: OOS_TEMPORAL_ADDRESS
+            address_format: host-port
+            service_name: temporal-frontend
+            service_port: 7233
+    caller_bindings:
+      refinement-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Bind the OOS Refinement caller identity to both sides of the CGG projection boundary.
+        caller_id: operator-orchestration-service
+        consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        consumer_environment_variable: CGG_REFINEMENT_CALLER_ID
+        provider_environment_variable: CGG_REFINEMENT_ALLOWED_CALLERS
+      catalog-wgcf-caller:
+        owner_repo: platform-engineering
+        purpose: Bind the OOS Catalog caller identity to the WGCF repository-readiness boundary.
+        caller_id: operator-orchestration-service
+        consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: governance-control-fabric
+        consumer_environment_variable: WGCF_REPOSITORY_READINESS_CALLER_ID
+        provider_environment_variable: WGCF_ARTIFACT_REGISTRY_OOS_CALLER_ID
+    credential_bindings:
+      refinement-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate OOS to the Refinement projection boundary without storing the shared credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: CGG_REFINEMENT_CALLER_SECRET
+          - profile_id: context-governance-gateway
+            environment_variable: CGG_REFINEMENT_CALLER_SHARED_SECRET
+      catalog-wgcf-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate OOS to repository readiness without storing the shared credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: WGCF_REPOSITORY_READINESS_CALLER_SECRET
+          - profile_id: governance-control-fabric
+            environment_variable: WGCF_ARTIFACT_REGISTRY_OOS_CALLER_SECRET
+      catalog-control-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate OOS to the bounded Catalog control route without reusing the general OpenProject API token or storing the credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: OPENPROJECT_CATALOG_CONTROL_TOKEN
+          - profile_id: accepted-idea-delivery
+            environment_variable: OPENPROJECT_CATALOG_CONTROL_SHARED_SECRET
+    profile_bindings:
+      catalog-control-endpoint:
+        owner_repo: platform-engineering
+        purpose: Route the OOS Catalog adapter to the accepted-idea profile's bounded OpenProject control endpoint.
+        profile_id: accepted-idea-delivery
+        environment_variable: OPENPROJECT_CATALOG_CONTROL_BASE_URL
+        source:
+          kind: profile-service
+          address_format: url
+          scheme: http
+          service_name: openproject
+          service_port: 8080
+      refinement-runtime-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the reviewed Refinement API only when this composition is active.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_REFINEMENT_RUNTIME_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      refinement-worker-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the reviewed Refinement worker only when this composition is active.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_REFINEMENT_WORKER_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      refinement-execution-authorized:
+        owner_repo: platform-engineering
+        purpose: Authorize durable Refinement apply only after the composition and exact source heads pass Security review.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_REFINEMENT_EXECUTION_AUTHORIZED
+        source:
+          kind: literal
+          value: "true"
+      refinement-temporal-namespace:
+        owner_repo: platform-engineering
+        purpose: Bind OOS Refinement execution to the admitted Temporal namespace.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_TEMPORAL_NAMESPACE
+        source:
+          kind: literal
+          value: default
+    execution:
+      startup_action: up
+      readiness_action: status
+      teardown_action: down
+      startup_order: dependency-first
+      teardown_order: reverse-startup
+      cleanup_owner_repo: platform-engineering
+      rollback_started_profiles_on_failure: true
+      preserve_profile_state_on_teardown: true
 profiles:
   accepted-idea-delivery:
     lifecycle: active
@@ -80,6 +251,7 @@ profiles:
       governed_surface: openproject-stage-delivery-art-workbench
       required_checks:
         - broker readiness
+        - composed Work Design dependency and caller binding readiness
         - durable orchestration definition catalog and zero-replica worker
         - proposal backlog list read
         - delivery artifact mutation draft workflow

@@ -23,18 +23,25 @@ LIFECYCLES = {"proposed", "build-admitted", "active", "suspended", "retired"}
 def registry_fixture() -> dict:
     return {
         "profiles": {
-            "root": {"lifecycle": "active", "runtime_owner": "platform-engineering"},
+            "root": {
+                "lifecycle": "active",
+                "runtime_owner": "platform-engineering",
+                "actions": ["up", "status", "down"],
+            },
             "provider": {
                 "lifecycle": "active",
                 "runtime_owner": "platform-engineering",
+                "actions": ["up", "status", "down"],
             },
             "outside": {
                 "lifecycle": "active",
                 "runtime_owner": "platform-engineering",
+                "actions": ["up", "status", "down"],
             },
         },
         "runtime_compositions": {
             "example": {
+                "lifecycle": "active",
                 "owner_repo": "platform-engineering",
                 "summary": "Example composition",
                 "root_profile_id": "root",
@@ -49,6 +56,7 @@ def registry_fixture() -> dict:
                         "endpoint_projections": [
                             {
                                 "environment_variable": "PROVIDER_BASE_URL",
+                                "address_format": "url",
                                 "scheme": "http",
                                 "service_name": "provider-api",
                                 "service_port": 8080,
@@ -56,6 +64,17 @@ def registry_fixture() -> dict:
                         ],
                     }
                 ],
+                "caller_bindings": {
+                    "caller": {
+                        "owner_repo": "platform-engineering",
+                        "purpose": "Bind the caller identity",
+                        "caller_id": "root-service",
+                        "consumer_profile_id": "root",
+                        "provider_profile_id": "provider",
+                        "consumer_environment_variable": "CALLER_ID",
+                        "provider_environment_variable": "ALLOWED_CALLERS",
+                    }
+                },
                 "credential_bindings": {
                     "caller": {
                         "owner_repo": "platform-engineering",
@@ -73,6 +92,17 @@ def registry_fixture() -> dict:
                             },
                         ],
                     }
+                },
+                "profile_bindings": {},
+                "execution": {
+                    "startup_action": "up",
+                    "readiness_action": "status",
+                    "teardown_action": "down",
+                    "startup_order": "dependency-first",
+                    "teardown_order": "reverse-startup",
+                    "cleanup_owner_repo": "platform-engineering",
+                    "rollback_started_profiles_on_failure": True,
+                    "preserve_profile_state_on_teardown": True,
                 },
             }
         },
@@ -104,6 +134,46 @@ class RuntimeCompositionContractTests(unittest.TestCase):
                 allowed_lifecycles=LIFECYCLES,
             ),
             [],
+        )
+
+    def test_refinement_catalog_composition_is_proposed_and_console_safe(self) -> None:
+        registry = yaml.safe_load(
+            (REPO_ROOT / "contracts" / "developer-integration-profiles.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        composition = registry["runtime_compositions"]["refinement-catalog"]
+        self.assertEqual(composition["lifecycle"], "proposed")
+        self.assertEqual(
+            set(composition["profiles"]),
+            {
+                "accepted-idea-delivery",
+                "context-governance-gateway",
+                "governed-ai-gateway",
+                "governance-control-fabric",
+                "temporal",
+            },
+        )
+        self.assertNotIn("governance-operations-console", composition["profiles"])
+        temporal_projection = next(
+            projection
+            for dependency in composition["dependencies"]
+            if dependency["provider_profile_id"] == "temporal"
+            for projection in dependency["endpoint_projections"]
+        )
+        self.assertEqual(temporal_projection["address_format"], "host-port")
+        self.assertEqual(
+            composition["execution"],
+            {
+                "startup_action": "up",
+                "readiness_action": "status",
+                "teardown_action": "down",
+                "startup_order": "dependency-first",
+                "teardown_order": "reverse-startup",
+                "cleanup_owner_repo": "platform-engineering",
+                "rollback_started_profiles_on_failure": True,
+                "preserve_profile_state_on_teardown": True,
+            },
         )
 
     def test_unknown_profile_is_rejected(self) -> None:
@@ -147,6 +217,46 @@ class RuntimeCompositionContractTests(unittest.TestCase):
         registry = registry_fixture()
         registry["profiles"]["provider"]["runtime_owner"] = "provider-owner"
         self.assertTrue(any("ambiguous runtime ownership" in issue for issue in issues(registry)))
+
+    def test_active_composition_rejects_profile_lifecycle_mismatch(self) -> None:
+        registry = registry_fixture()
+        registry["profiles"]["provider"]["lifecycle"] = "build-admitted"
+        self.assertTrue(any("requires lifecycle" in issue for issue in issues(registry)))
+
+    def test_proposed_composition_allows_future_active_profile_requirement(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["lifecycle"] = "proposed"
+        registry["profiles"]["provider"]["lifecycle"] = "build-admitted"
+        self.assertEqual(issues(registry), [])
+
+    def test_caller_binding_must_follow_a_declared_dependency(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["profiles"]["outside"] = {
+            "required_lifecycle": "active"
+        }
+        binding = registry["runtime_compositions"]["example"]["caller_bindings"][
+            "caller"
+        ]
+        binding["provider_profile_id"] = "outside"
+        self.assertTrue(any("does not match a declared dependency" in issue for issue in issues(registry)))
+
+    def test_execution_actions_must_exist_on_every_profile(self) -> None:
+        registry = registry_fixture()
+        registry["profiles"]["provider"]["actions"].remove("down")
+        self.assertTrue(any("teardown_action" in issue for issue in issues(registry)))
+
+    def test_profile_binding_must_be_owned_and_projection_unique(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["profile_bindings"] = {
+            "duplicate": {
+                "owner_repo": "platform-engineering",
+                "purpose": "Deliberately duplicate a projected variable",
+                "profile_id": "root",
+                "environment_variable": "PROVIDER_BASE_URL",
+                "source": {"kind": "literal", "value": "true"},
+            }
+        }
+        self.assertTrue(any("repeats projection" in issue for issue in issues(registry)))
 
     def test_tracked_credential_value_is_rejected(self) -> None:
         registry = registry_fixture()

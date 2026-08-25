@@ -163,14 +163,19 @@
     "runtimeComposition": {
       "type": "object",
       "required": [
+        "lifecycle",
         "owner_repo",
         "summary",
         "root_profile_id",
         "profiles",
         "dependencies",
-        "credential_bindings"
+        "caller_bindings",
+        "credential_bindings",
+        "profile_bindings",
+        "execution"
       ],
       "properties": {
+        "lifecycle": { "type": "string", "minLength": 1 },
         "owner_repo": { "type": "string", "minLength": 1 },
         "summary": { "type": "string", "minLength": 1 },
         "root_profile_id": { "$ref": "#/$defs/identifier" },
@@ -203,12 +208,13 @@
                   "type": "object",
                   "required": [
                     "environment_variable",
-                    "scheme",
+                    "address_format",
                     "service_name",
                     "service_port"
                   ],
                   "properties": {
                     "environment_variable": { "$ref": "#/$defs/environmentVariable" },
+                    "address_format": { "enum": ["url", "host-port"] },
                     "scheme": { "enum": ["http", "https"] },
                     "service_name": { "$ref": "#/$defs/identifier" },
                     "service_port": {
@@ -217,9 +223,45 @@
                       "maximum": 65535
                     }
                   },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": { "address_format": { "const": "url" } },
+                        "required": ["address_format"]
+                      },
+                      "then": { "required": ["scheme"] },
+                      "else": { "not": { "required": ["scheme"] } }
+                    }
+                  ],
                   "additionalProperties": false
                 }
               }
+            },
+            "additionalProperties": false
+          }
+        },
+        "caller_bindings": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "owner_repo",
+              "purpose",
+              "caller_id",
+              "consumer_profile_id",
+              "provider_profile_id",
+              "consumer_environment_variable",
+              "provider_environment_variable"
+            ],
+            "properties": {
+              "owner_repo": { "type": "string", "minLength": 1 },
+              "purpose": { "type": "string", "minLength": 1 },
+              "caller_id": { "type": "string", "minLength": 1 },
+              "consumer_profile_id": { "$ref": "#/$defs/identifier" },
+              "provider_profile_id": { "$ref": "#/$defs/identifier" },
+              "consumer_environment_variable": { "$ref": "#/$defs/environmentVariable" },
+              "provider_environment_variable": { "$ref": "#/$defs/environmentVariable" }
             },
             "additionalProperties": false
           }
@@ -258,6 +300,86 @@
             },
             "additionalProperties": false
           }
+        },
+        "profile_bindings": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/identifier" },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "owner_repo",
+              "purpose",
+              "profile_id",
+              "environment_variable",
+              "source"
+            ],
+            "properties": {
+              "owner_repo": { "type": "string", "minLength": 1 },
+              "purpose": { "type": "string", "minLength": 1 },
+              "profile_id": { "$ref": "#/$defs/identifier" },
+              "environment_variable": { "$ref": "#/$defs/environmentVariable" },
+              "source": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": ["kind", "value"],
+                    "properties": {
+                      "kind": { "const": "literal" },
+                      "value": { "type": "string", "minLength": 1 }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "address_format",
+                      "scheme",
+                      "service_name",
+                      "service_port"
+                    ],
+                    "properties": {
+                      "kind": { "const": "profile-service" },
+                      "address_format": { "const": "url" },
+                      "scheme": { "enum": ["http", "https"] },
+                      "service_name": { "$ref": "#/$defs/identifier" },
+                      "service_port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 65535
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "execution": {
+          "type": "object",
+          "required": [
+            "startup_action",
+            "readiness_action",
+            "teardown_action",
+            "startup_order",
+            "teardown_order",
+            "cleanup_owner_repo",
+            "rollback_started_profiles_on_failure",
+            "preserve_profile_state_on_teardown"
+          ],
+          "properties": {
+            "startup_action": { "$ref": "#/$defs/identifier" },
+            "readiness_action": { "$ref": "#/$defs/identifier" },
+            "teardown_action": { "$ref": "#/$defs/identifier" },
+            "startup_order": { "const": "dependency-first" },
+            "teardown_order": { "const": "reverse-startup" },
+            "cleanup_owner_repo": { "type": "string", "minLength": 1 },
+            "rollback_started_profiles_on_failure": { "const": true },
+            "preserve_profile_state_on_teardown": { "const": true }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
