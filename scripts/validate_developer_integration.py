@@ -11,6 +11,7 @@ import sys
 import yaml
 
 from contracts_lib import active_repo_names, load_contracts
+from developer_integration_runtime_composition import runtime_composition_issues
 
 
 REQUIRED_ACTIONS = {
@@ -713,6 +714,13 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
     persistent_smoke_mutation_mode = testing_policy["persistent_profile_rule"][
         "mutation_mode_must_be"
     ]
+    errors.extend(
+        runtime_composition_issues(
+            registry,
+            active_repos=active_repos,
+            allowed_lifecycles=set(profile_lifecycle["statuses"]),
+        )
+    )
 
     checked_profiles = 0
     profile_testing: dict[str, dict[str, str | None]] = {}

@@ -28,6 +28,7 @@ from contracts_lib import (
 from delivery_art_resource_retirement_contract import (
     contract_fixture_issues as delivery_art_resource_retirement_fixture_issues,
 )
+from developer_integration_runtime_composition import runtime_composition_issues
 from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
 
@@ -9559,6 +9560,13 @@ def main() -> int:
                     "contracts/self-improvement-policy.yaml: signal_catalog "
                     f"{signal_name!r} references unknown failure class {failure_class!r}"
                 )
+    errors.extend(
+        runtime_composition_issues(
+            developer_integration_profiles,
+            active_repos=active_repos,
+            allowed_lifecycles=set(profile_lifecycle["statuses"]),
+        )
+    )
     for profile_name, payload in developer_integration_profiles["profiles"].items():
         if payload["lifecycle"] not in profile_lifecycle["statuses"]:
             errors.append(
