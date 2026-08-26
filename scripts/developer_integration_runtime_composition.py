@@ -5,6 +5,11 @@ from typing import Any
 
 
 ENVIRONMENT_VARIABLE_PATTERN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+SERVICE_NAME_PATTERN = re.compile(
+    r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$"
+)
+OPERATOR_TEMPLATE_TOKEN = "{operator}"
+OPERATOR_TEMPLATE_LITERAL_PATTERN = re.compile(r"^[a-z0-9-]*$")
 FORBIDDEN_CREDENTIAL_VALUE_KEYS = {
     "credential",
     "literal",
@@ -57,6 +62,86 @@ def _cycle_path(graph: dict[str, set[str]]) -> list[str] | None:
         if cycle:
             return cycle
     return None
+
+
+def _service_projection_issues(
+    source: dict[str, Any],
+    *,
+    label: str,
+) -> list[str]:
+    issues: list[str] = []
+    address_format = source.get("address_format", "url")
+    service_name = source.get("service_name")
+    service_port = source.get("service_port")
+    if address_format not in {"url", "host-port"}:
+        issues.append(
+            f"{label}.source.address_format {address_format!r} is unsupported"
+        )
+    if not isinstance(service_name, str) or not SERVICE_NAME_PATTERN.fullmatch(
+        service_name
+    ):
+        issues.append(f"{label}.source.service_name {service_name!r} is invalid")
+    if (
+        not isinstance(service_port, int)
+        or isinstance(service_port, bool)
+        or not 1 <= service_port <= 65535
+    ):
+        issues.append(f"{label}.source.service_port {service_port!r} is invalid")
+    scheme = source.get("scheme")
+    if address_format == "url" and scheme not in {"http", "https"}:
+        issues.append(
+            f"{label}.source.scheme {scheme!r} must be 'http' or 'https' for a URL"
+        )
+    if address_format == "host-port" and scheme is not None:
+        issues.append(
+            f"{label}.source.scheme must be omitted for a host-port projection"
+        )
+    return issues
+
+
+def _profile_binding_source_issues(
+    source: Any,
+    *,
+    participants: dict[str, Any],
+    label: str,
+) -> list[str]:
+    if not isinstance(source, dict):
+        return [f"{label}.source must be a mapping"]
+
+    source_kind = source.get("kind")
+    if source_kind == "literal":
+        value = source.get("value")
+        if not isinstance(value, str) or not value:
+            return [f"{label}.source.value must be a non-empty string"]
+        return []
+    if source_kind == "profile-service":
+        return _service_projection_issues(source, label=label)
+    if source_kind == "operator-template":
+        template = source.get("template")
+        if set(source) != {"kind", "template"} or not isinstance(template, str):
+            return [f"{label}.source is not a bounded operator template"]
+        if template.count(OPERATOR_TEMPLATE_TOKEN) != 1:
+            return [
+                f"{label}.source.template must contain exactly one "
+                f"{OPERATOR_TEMPLATE_TOKEN} token"
+            ]
+        literal = template.replace(OPERATOR_TEMPLATE_TOKEN, "")
+        if not OPERATOR_TEMPLATE_LITERAL_PATTERN.fullmatch(literal):
+            return [f"{label}.source.template contains unsupported syntax"]
+        return []
+    if source_kind == "profile-namespace":
+        source_profile_id = source.get("source_profile_id")
+        if (
+            set(source) != {"kind", "source_profile_id"}
+            or not isinstance(source_profile_id, str)
+            or source_profile_id not in participants
+        ):
+            return [
+                f"{label}.source.source_profile_id {source_profile_id!r} "
+                "is not a declared composition profile"
+            ]
+        return []
+    return [f"{label}.source.kind {source_kind!r} is unsupported"]
 
 
 def runtime_composition_issues(
@@ -307,5 +392,12 @@ def runtime_composition_issues(
                     f"{binding_label}.environment_variable "
                     f"{environment_variable!r} is invalid"
                 )
+            issues.extend(
+                _profile_binding_source_issues(
+                    binding.get("source"),
+                    participants=participants,
+                    label=binding_label,
+                )
+            )
 
     return issues

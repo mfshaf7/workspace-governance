@@ -193,12 +193,36 @@ runtime_compositions:
           value: "true"
       refinement-temporal-namespace:
         owner_repo: platform-engineering
-        purpose: Bind OOS Refinement execution to the admitted Temporal namespace.
+        purpose: Bind OOS Refinement execution to the operator-scoped Temporal workflow namespace.
         profile_id: accepted-idea-delivery
         environment_variable: OOS_TEMPORAL_NAMESPACE
         source:
-          kind: literal
-          value: default
+          kind: operator-template
+          template: governance-{operator}
+      temporal-oos-kubernetes-namespace:
+        owner_repo: platform-engineering
+        purpose: Project the exact runner-computed OOS Kubernetes namespace into Temporal's Refinement boundary.
+        profile_id: temporal
+        environment_variable: DEVINT_TEMPORAL_OOS_KUBERNETES_NAMESPACE
+        source:
+          kind: profile-namespace
+          source_profile_id: accepted-idea-delivery
+      temporal-wgcf-kubernetes-namespace:
+        owner_repo: platform-engineering
+        purpose: Project the exact runner-computed WGCF Kubernetes namespace into Temporal's Refinement boundary.
+        profile_id: temporal
+        environment_variable: DEVINT_TEMPORAL_WGCF_KUBERNETES_NAMESPACE
+        source:
+          kind: profile-namespace
+          source_profile_id: governance-control-fabric
+      governed-ai-trusted-consumer-namespace:
+        owner_repo: platform-engineering
+        purpose: Admit only the exact runner-computed OOS Kubernetes namespace to the governed AI gateway.
+        profile_id: governed-ai-gateway
+        environment_variable: DEVINT_GAI_TRUSTED_CONSUMER_NAMESPACE
+        source:
+          kind: profile-namespace
+          source_profile_id: accepted-idea-delivery
     execution:
       startup_action: up
       readiness_action: status
