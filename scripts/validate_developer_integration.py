@@ -605,17 +605,26 @@ def validate(repo_root: Path, workspace_root: Path) -> list[str]:
             errors.append(
                 "contracts/durable-orchestration.yaml: controlled proof target profile is not registered"
             )
-        elif target_profile["lifecycle"] != proof_target["profile_lifecycle"]:
+        elif (
+            proof_target["profile_lifecycle"] == "build-admitted"
+            and not target_profile.get("build_admission")
+        ):
             errors.append(
-                "contracts/durable-orchestration.yaml: controlled proof target lifecycle must match the profile registry"
+                "contracts/durable-orchestration.yaml: controlled proof target requires historical build admission"
             )
         runtime_posture = durable_orchestration["admission"]["current_runtime"]
         if (
             runtime_posture["dev_integration_profile"] != proof_target["profile_id"]
-            or runtime_posture["lifecycle"] != proof_target["profile_lifecycle"]
         ):
             errors.append(
-                "contracts/durable-orchestration.yaml: current runtime posture must match the controlled proof target"
+                "contracts/durable-orchestration.yaml: current runtime profile must match the controlled proof target"
+            )
+        if (
+            target_profile is not None
+            and runtime_posture["lifecycle"] != target_profile["lifecycle"]
+        ):
+            errors.append(
+                "contracts/durable-orchestration.yaml: current runtime lifecycle must match the profile registry"
             )
     runtime_state_models = set(policy.get("runtime_state_models") or [])
     lane_classes = {entry.get("id") for entry in policy.get("lane_classes") or []}

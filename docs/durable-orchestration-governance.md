@@ -144,33 +144,30 @@ must complete before expiry. A session that started before expiry may finish
 bounded cleanup afterward only as a stopped result and cannot become passing
 evidence. Any mismatch rejects the result before post-run Security review.
 
-The primary Platform procedure is the
+The historical commissioning procedure is the
 [controlled commissioning proof runbook](https://github.com/mfshaf7/platform-engineering/blob/main/docs/components/temporal/operations.md#controlled-commissioning-proof).
-The runbook and profile must fail closed until the reviewed issuer and executor
-source tracked by ART #792 has landed. No execution path is activated by this
-contract change.
+It remains the evidence boundary that qualified the runtime before activation;
+it is not the normal launch path for an active profile.
 
 ## Current Runtime Status
 
 - adapter: `temporal`
 - dev-integration profile: `temporal`
-- contract status: `runtime-admission-review`
-- profile lifecycle: `build-admitted`
-- implementation allowed: bounded owner-repo source work only
-- self-serve launch allowed: no
+- contract status: `runtime-admitted`
+- profile lifecycle: `active`
+- implementation allowed: bounded owner-repo source work
+- self-serve launch allowed: yes, through the shared profile runner only
 - normal workflow execution allowed: no
-- controlled proof contract defined: yes
-- controlled proof execution allowed: no, until ART #792 lands reviewed issuer
-  and executor source and an exact permit is issued and accepted
+- controlled commissioning proof retained: yes, as the historical
+  `build-admitted` activation boundary
 - governed stage allowed: no
 - production allowed: no
 
-Build admission records completed Platform and Security review for source
-implementation. It does not create or activate a runtime, admit a workflow
-definition, or satisfy the later operating-evidence gates.
-
-This source change defines the proof authority and permit schema. It does not
-issue a permit or activate Temporal.
+The commissioning target remains `build-admitted` because that is the lifecycle
+at which the bounded proof was authorized. Current runtime posture is separate
+truth and now follows the active profile registry. Activation permits only the
+registered local composition; it does not admit an unregistered workflow
+definition or create governed stage or production evidence.
 
 ## Runtime Boundary
 

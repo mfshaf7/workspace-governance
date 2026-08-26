@@ -136,14 +136,14 @@ class RuntimeCompositionContractTests(unittest.TestCase):
             [],
         )
 
-    def test_refinement_catalog_composition_is_proposed_and_console_safe(self) -> None:
+    def test_refinement_catalog_composition_is_active_and_console_safe(self) -> None:
         registry = yaml.safe_load(
             (REPO_ROOT / "contracts" / "developer-integration-profiles.yaml").read_text(
                 encoding="utf-8"
             )
         )
         composition = registry["runtime_compositions"]["refinement-catalog"]
-        self.assertEqual(composition["lifecycle"], "proposed")
+        self.assertEqual(composition["lifecycle"], "active")
         self.assertEqual(
             set(composition["profiles"]),
             {
@@ -155,6 +155,16 @@ class RuntimeCompositionContractTests(unittest.TestCase):
             },
         )
         self.assertNotIn("governance-operations-console", composition["profiles"])
+        temporal = registry["profiles"]["temporal"]
+        self.assertEqual(temporal["lifecycle"], "active")
+        self.assertEqual(
+            temporal["admission"]["platform_acceptance_ref"],
+            "github://mfshaf7/platform-engineering/pull/224",
+        )
+        self.assertEqual(
+            temporal["admission"]["security_review_refs"][0]["path"],
+            "docs/reviews/components/2026-08-26-refinement-catalog-dev-integration-boundary.md",
+        )
         temporal_projection = next(
             projection
             for dependency in composition["dependencies"]
@@ -175,6 +185,49 @@ class RuntimeCompositionContractTests(unittest.TestCase):
                 "preserve_profile_state_on_teardown": True,
             },
         )
+
+    def test_refinement_catalog_activation_fails_if_temporal_regresses(self) -> None:
+        registry = yaml.safe_load(
+            (REPO_ROOT / "contracts" / "developer-integration-profiles.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        registry["profiles"]["temporal"]["lifecycle"] = "build-admitted"
+        self.assertTrue(
+            any(
+                "refinement-catalog.profiles.temporal requires lifecycle 'active'"
+                in issue
+                for issue in runtime_composition_issues(
+                    registry,
+                    active_repos={
+                        payload["runtime_owner"]
+                        for payload in registry["profiles"].values()
+                    },
+                    allowed_lifecycles=LIFECYCLES,
+                )
+            )
+        )
+
+    def test_temporal_commissioning_history_is_separate_from_current_runtime(self) -> None:
+        registry = yaml.safe_load(
+            (REPO_ROOT / "contracts" / "developer-integration-profiles.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        orchestration = yaml.safe_load(
+            (REPO_ROOT / "contracts" / "durable-orchestration.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        admission = orchestration["durable_orchestration"]["admission"]
+
+        self.assertEqual(
+            admission["controlled_proof"]["target"]["profile_lifecycle"],
+            "build-admitted",
+        )
+        self.assertEqual(admission["current_runtime"]["lifecycle"], "active")
+        self.assertEqual(registry["profiles"]["temporal"]["lifecycle"], "active")
+        self.assertIn("build_admission", registry["profiles"]["temporal"])
 
     def test_unknown_profile_is_rejected(self) -> None:
         registry = registry_fixture()

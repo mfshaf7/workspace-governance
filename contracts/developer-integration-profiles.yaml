@@ -60,7 +60,7 @@ runtime_compositions:
       rollback_started_profiles_on_failure: true
       preserve_profile_state_on_teardown: true
   refinement-catalog:
-    lifecycle: proposed
+    lifecycle: active
     owner_repo: platform-engineering
     summary: Compose the accepted-idea delivery runtime with model-safe Refinement context, governed AI advice, repository readiness, durable execution, and profile-owned Catalog control bindings.
     root_profile_id: accepted-idea-delivery
@@ -594,20 +594,20 @@ profiles:
       - reset
       - promote_check
   temporal:
-    lifecycle: build-admitted
+    lifecycle: active
     lane_class: governed-devint
     owner_repo: platform-engineering
-    summary: Build-admitted persistent local-k3s profile for the platform-owned Temporal runtime behind OOS.
-    purpose: Authorize bounded owner-repo source implementation of Temporal as the replaceable durable workflow adapter behind OOS while denying runtime launch, access, smoke, shared workflow execution, stage, and production.
+    summary: Active persistent local-k3s profile for the platform-owned Temporal runtime behind OOS.
+    purpose: Authorize self-serve local Temporal runtime launch for the exact admitted OOS durable-workflow boundary while keeping stage, production, direct Console access, and unregistered workflow execution denied.
     validation_behavior:
-      posture: build-admitted-profile-gated
+      posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
         - developer-integration
         - devint-runner-read
         - security-bindings
         - review-coverage
-      notes: WGCF may provide bounded validation and readiness activities for OOS-owned workflows. Platform owns Temporal runtime lifecycle, OOS owns aggregate orchestration, and build-admitted status allows source implementation while denying self-serve launch and workflow execution.
+      notes: WGCF may provide bounded validation and readiness activities for OOS-owned workflows. Platform owns Temporal runtime lifecycle, OOS owns aggregate orchestration, and active status permits only local dev-integration launch through the shared runner.
     profile_path: dev-integration/profiles/temporal/profile.yaml
     runtime_owner: platform-engineering
     security_owner: security-architecture
@@ -627,6 +627,16 @@ profiles:
       implementation_allowed: true
       self_serve_launch_allowed: false
       work_item_ref: openproject://work_packages/742
+    admission:
+      approved_by: mfshaf7
+      approved_on: "2026-08-26"
+      platform_acceptance_ref: github://mfshaf7/platform-engineering/pull/224
+      security_review_required: true
+      security_review_refs:
+        - repo: security-architecture
+          path: docs/reviews/components/2026-08-26-refinement-catalog-dev-integration-boundary.md
+          source_commit: 5f0cd9da4718d66d0bc891aeba0d99e642ad0b69
+          content_sha256: bf99459a829cd965e80fd990ef1a99c1c2b0a5d30cf6640ee0c148379ebea66f
     shared_dependencies:
       - operator-orchestration-service
       - workspace-governance-control-fabric

@@ -83,9 +83,12 @@ only the composed Work Design path, not the standalone profiles.
 
 ## Refinement And Catalog Composition
 
-`refinement-catalog` is registered as `proposed`. It cannot launch until the
-separate Security review and Platform activation work make the exact
-composition active.
+`refinement-catalog` is active for local `dev-integration` after the exact
+Platform composition support, OOS profile integration, and Security boundary
+review landed. Its Temporal participant is active under the same bounded local
+admission. This lifecycle decision makes the composition self-serve launchable;
+it does not count as composed-runtime proof, stage readiness, or production
+authority. Platform work item `#1013` owns that runtime proof.
 
 Its root remains `accepted-idea-delivery`. The root depends on:
 
@@ -105,3 +108,9 @@ Its browser continues to call same-origin Console routes only; the Console
 server's authenticated OOS integration belongs to the later Console Landing
 Unit. The composition therefore exposes no browser path to CGG, WGCF, the AI
 gateway, Temporal, or OpenProject and requires no visual change.
+
+Suspending or retiring the composition must fail the composed Refinement and
+Catalog path closed without changing the independent lifecycle of its shared
+profiles. Suspending the Temporal profile separately makes the active
+composition invalid and therefore unlaunchable until the participant returns
+to the exact required lifecycle.

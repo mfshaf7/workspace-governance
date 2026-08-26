@@ -6977,10 +6977,6 @@ def main() -> int:
         errors.append(
             f"{durable_label}: controlled proof target profile must match current_runtime.dev_integration_profile"
         )
-    if proof_target["profile_lifecycle"] != runtime_posture["lifecycle"]:
-        errors.append(
-            f"{durable_label}: controlled proof target lifecycle must match current_runtime.lifecycle"
-        )
     if proof_target["profile_lifecycle"] not in set(
         controlled_proof_policy["eligible_profile_statuses"]
     ):
@@ -6997,6 +6993,12 @@ def main() -> int:
         if profile_payload["lifecycle"] != runtime_posture["lifecycle"]:
             errors.append(
                 f"{durable_label}: current runtime lifecycle must match profile {profile_id!r} registry lifecycle"
+            )
+        if proof_target["profile_lifecycle"] == "build-admitted" and not profile_payload.get(
+            "build_admission"
+        ):
+            errors.append(
+                f"{durable_label}: controlled proof target requires historical build admission for profile {profile_id!r}"
             )
         if profile_payload.get("build_admission", {}).get("self_serve_launch_allowed") is not False:
             errors.append(
