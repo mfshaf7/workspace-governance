@@ -252,6 +252,9 @@ profiles:
       required_checks:
         - broker readiness
         - composed Work Design dependency and caller binding readiness
+        - composed Refinement and Catalog dependency, caller, credential, and profile binding readiness
+        - dedicated Refinement worker readiness and composition-owned teardown
+        - bounded Catalog control authorization and readback
         - durable orchestration definition catalog and zero-replica worker
         - proposal backlog list read
         - delivery artifact mutation draft workflow
