@@ -350,6 +350,47 @@
                       }
                     },
                     "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "address_format",
+                      "service_name",
+                      "service_port"
+                    ],
+                    "properties": {
+                      "kind": { "const": "profile-service" },
+                      "address_format": { "const": "host-port" },
+                      "service_name": { "$ref": "#/$defs/identifier" },
+                      "service_port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 65535
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": ["kind", "template"],
+                    "properties": {
+                      "kind": { "const": "operator-template" },
+                      "template": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9-]*\\{operator\\}[a-z0-9-]*$"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "required": ["kind", "source_profile_id"],
+                    "properties": {
+                      "kind": { "const": "profile-namespace" },
+                      "source_profile_id": { "$ref": "#/$defs/identifier" }
+                    },
+                    "additionalProperties": false
                   }
                 ]
               }

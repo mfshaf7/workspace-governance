@@ -173,6 +173,51 @@ class RuntimeCompositionContractTests(unittest.TestCase):
         )
         self.assertEqual(temporal_projection["address_format"], "host-port")
         self.assertEqual(
+            composition["profile_bindings"]["refinement-temporal-namespace"],
+            {
+                "owner_repo": "platform-engineering",
+                "purpose": "Bind OOS Refinement execution to the operator-scoped Temporal workflow namespace.",
+                "profile_id": "accepted-idea-delivery",
+                "environment_variable": "OOS_TEMPORAL_NAMESPACE",
+                "source": {
+                    "kind": "operator-template",
+                    "template": "governance-{operator}",
+                },
+            },
+        )
+        namespace_bindings = {
+            binding_id: binding
+            for binding_id, binding in composition["profile_bindings"].items()
+            if binding["source"]["kind"] == "profile-namespace"
+        }
+        self.assertEqual(
+            {
+                binding_id: (
+                    binding["profile_id"],
+                    binding["environment_variable"],
+                    binding["source"]["source_profile_id"],
+                )
+                for binding_id, binding in namespace_bindings.items()
+            },
+            {
+                "temporal-oos-kubernetes-namespace": (
+                    "temporal",
+                    "DEVINT_TEMPORAL_OOS_KUBERNETES_NAMESPACE",
+                    "accepted-idea-delivery",
+                ),
+                "temporal-wgcf-kubernetes-namespace": (
+                    "temporal",
+                    "DEVINT_TEMPORAL_WGCF_KUBERNETES_NAMESPACE",
+                    "governance-control-fabric",
+                ),
+                "governed-ai-trusted-consumer-namespace": (
+                    "governed-ai-gateway",
+                    "DEVINT_GAI_TRUSTED_CONSUMER_NAMESPACE",
+                    "accepted-idea-delivery",
+                ),
+            },
+        )
+        self.assertEqual(
             composition["execution"],
             {
                 "startup_action": "up",
@@ -310,6 +355,66 @@ class RuntimeCompositionContractTests(unittest.TestCase):
             }
         }
         self.assertTrue(any("repeats projection" in issue for issue in issues(registry)))
+
+    def test_profile_binding_rejects_unknown_namespace_source(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["profile_bindings"] = {
+            "namespace": {
+                "owner_repo": "platform-engineering",
+                "purpose": "Project a participant namespace",
+                "profile_id": "root",
+                "environment_variable": "PROVIDER_NAMESPACE",
+                "source": {
+                    "kind": "profile-namespace",
+                    "source_profile_id": "missing",
+                },
+            }
+        }
+        self.assertTrue(
+            any(
+                "is not a declared composition profile" in issue
+                for issue in issues(registry)
+            )
+        )
+
+    def test_profile_binding_rejects_unbounded_operator_template(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["profile_bindings"] = {
+            "namespace": {
+                "owner_repo": "platform-engineering",
+                "purpose": "Project an operator namespace",
+                "profile_id": "root",
+                "environment_variable": "WORKFLOW_NAMESPACE",
+                "source": {
+                    "kind": "operator-template",
+                    "template": "governance-{operator}-{operator}",
+                },
+            }
+        }
+        self.assertTrue(
+            any(
+                "must contain exactly one {operator} token" in issue
+                for issue in issues(registry)
+            )
+        )
+
+    def test_profile_binding_rejects_unsupported_source_kind(self) -> None:
+        registry = registry_fixture()
+        registry["runtime_compositions"]["example"]["profile_bindings"] = {
+            "namespace": {
+                "owner_repo": "platform-engineering",
+                "purpose": "Project an unsupported source",
+                "profile_id": "root",
+                "environment_variable": "WORKFLOW_NAMESPACE",
+                "source": {"kind": "environment"},
+            }
+        }
+        self.assertTrue(
+            any(
+                "source.kind 'environment' is unsupported" in issue
+                for issue in issues(registry)
+            )
+        )
 
     def test_tracked_credential_value_is_rejected(self) -> None:
         registry = registry_fixture()

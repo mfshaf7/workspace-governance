@@ -22,7 +22,8 @@ Each composition declares:
 - optional non-secret caller identity bindings across an exact dependency edge
 - runtime-generated credential bindings and the environment variable projected
   into each participant
-- profile-owned non-secret literal or service bindings
+- profile-owned non-secret literal, service, operator-template, or participant
+  namespace bindings
 - one dependency-first startup, profile-owned readiness, reverse-order
   teardown, rollback, and state-preservation contract
 
@@ -57,6 +58,8 @@ Both workspace contract validation and dev-integration validation reject:
 - startup, readiness, or teardown actions absent from any participant
 - cleanup ownership that differs from composition runtime ownership
 - credential values or undeclared credential fields in tracked source
+- unsupported profile-binding source kinds, malformed operator templates, or
+  namespace sources outside the composition
 
 The runner must fail closed when a required profile, endpoint, or credential
 projection is unavailable. It must not substitute fixture data or bypass the
@@ -88,7 +91,7 @@ Platform composition support, OOS profile integration, and Security boundary
 review landed. Its Temporal participant is active under the same bounded local
 admission. This lifecycle decision makes the composition self-serve launchable;
 it does not count as composed-runtime proof, stage readiness, or production
-authority. Platform work item `#1013` owns that runtime proof.
+authority. Delivery work item `#1020` owns the merged-source runtime proof.
 
 Its root remains `accepted-idea-delivery`. The root depends on:
 
@@ -99,9 +102,13 @@ Its root remains `accepted-idea-delivery`. The root depends on:
 
 The contract binds the exact OOS caller identities and generated CGG, WGCF, and
 Catalog-control credentials, projects URL endpoints and the Temporal
-host-and-port address, and names the profile-owned Catalog endpoint, Refinement
-activation flags, and Temporal namespace. It does not reuse the general
-OpenProject API token and stores no secret value.
+host-and-port address, and names the profile-owned Catalog endpoint and
+Refinement activation flags. The Temporal workflow namespace is derived from
+the bounded operator identity. Temporal receives the exact runner-computed OOS
+and WGCF Kubernetes namespaces, while the governed AI gateway receives the
+exact OOS namespace as its trusted consumer boundary. Workspace source stores
+none of those resolved runtime namespaces. The composition does not reuse the
+general OpenProject API token and stores no secret value.
 
 The Governance Operations Console is deliberately not a composition profile.
 Its browser continues to call same-origin Console routes only; the Console
