@@ -24,6 +24,11 @@ These axes must not be collapsed into one status. A local preview is not a
 release. A repository does not imply runtime admission. A released product is
 not automatically published in the portfolio.
 
+The source-custody axis records the kind of source owner. Physical repository
+identity and workspace repository custody use the narrower
+[`repository-custody.yaml`](../contracts/repository-custody.yaml) contract.
+Neither contract implies Workspace Intake or active-inventory admission.
+
 ## Primary Flow
 
 ```mermaid

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-custody-request.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "requested_at", "action", "operator_ref", "workflow", "target", "requested_custody", "authority", "correlation", "idempotency_key", "request_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_custody_request" },
+    "request_id": { "type": "string", "pattern": "^repository-custody-request:[A-Za-z0-9._:-]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "action": { "$ref": "#/$defs/action" },
+    "operator_ref": { "$ref": "#/$defs/artifactRef" },
+    "workflow": {
+      "type": "object",
+      "required": ["workflow_id", "workflow_version", "execution_id"],
+      "properties": {
+        "workflow_id": { "$ref": "#/$defs/text" },
+        "workflow_version": { "$ref": "#/$defs/text" },
+        "execution_id": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["provider", "provider_host", "owner", "name", "provider_repository_id"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/text" },
+        "provider_host": { "type": "string", "format": "hostname" },
+        "owner": { "$ref": "#/$defs/text" },
+        "name": { "$ref": "#/$defs/text" },
+        "provider_repository_id": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "requested_custody": {
+      "type": "object",
+      "required": ["workspace_owner_ref", "custody_kind"],
+      "properties": {
+        "workspace_owner_ref": { "$ref": "#/$defs/text" },
+        "custody_kind": { "enum": ["dedicated-owner-repo", "shared-owner-repo", "incubation-repo", "external-repo"] }
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["policy_profile_ref", "approval_ref", "credential_binding_ref"],
+      "properties": {
+        "policy_profile_ref": { "$ref": "#/$defs/artifactRef" },
+        "approval_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "credential_binding_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "correlation": {
+      "type": "object",
+      "required": ["correlation_id", "causation_id"],
+      "properties": {
+        "correlation_id": { "$ref": "#/$defs/text" },
+        "causation_id": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
+      "then": { "properties": { "target": { "properties": { "provider_repository_id": { "$ref": "#/$defs/text" } } } } }
+    },
+    {
+      "if": { "properties": { "action": { "enum": ["link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
+      "then": { "properties": { "authority": { "properties": { "approval_ref": { "$ref": "#/$defs/artifactRef" } } } } }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

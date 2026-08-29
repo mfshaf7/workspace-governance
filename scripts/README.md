@@ -32,6 +32,10 @@
   - validates owner uniqueness, state vectors, transition support, authority,
     typed envelopes, evidence, preconditions, recovery, and maturity claims
     through `validate_contracts.py`
+- `repository_custody_contract.py`
+  - validates repository custody owner references, action state transitions,
+    evidence order, downstream owner boundaries, and disabled runtime maturity
+    through `validate_contracts.py`
 - `delivery_art_resource_retirement_contract.py`
   - focused semantic support for Delivery ART work-session resource manifests
     and terminal cleanup receipts

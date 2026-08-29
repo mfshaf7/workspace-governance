@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "scope_boundaries", "authority_roles", "repository_identity", "custody_states", "actions", "workflow_statuses", "schema_refs", "idempotency_and_recovery", "evidence_chain", "downstream_handoffs", "runtime_activation", "denied_shortcuts"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "operator_surface_path": { "const": "docs/repository-custody.md" },
+    "architecture": {
+      "type": "object",
+      "required": ["initiative_ref", "contract_work_ref"],
+      "properties": {
+        "initiative_ref": { "const": "openproject://work_packages/888" },
+        "contract_work_ref": { "const": "openproject://work_packages/1040" }
+      },
+      "additionalProperties": false
+    },
+    "purpose": { "$ref": "#/$defs/text" },
+    "scope_boundaries": {
+      "type": "object",
+      "required": ["provider_repository_state", "repository_custody_state", "workspace_intake_state", "active_inventory_state", "product_and_release_state"],
+      "additionalProperties": { "$ref": "#/$defs/boundary" }
+    },
+    "authority_roles": {
+      "type": "object",
+      "required": ["contract_authority", "readiness_authority", "workflow_authority", "provider_authority", "identity_and_secret_authority", "security_acceptance_authority", "operator_projection"],
+      "additionalProperties": { "$ref": "#/$defs/authority" }
+    },
+    "repository_identity": {
+      "type": "object",
+      "required": ["immutable_key", "required_readback_fields", "credential_rule"],
+      "properties": {
+        "immutable_key": {
+          "type": "object",
+          "required": ["fields", "rule"],
+          "properties": {
+            "fields": { "const": ["provider", "provider_repository_id"] },
+            "rule": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "required_readback_fields": {
+          "type": "array",
+          "minItems": 9,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/text" }
+        },
+        "credential_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "custody_states": {
+      "type": "object",
+      "required": ["unrecorded", "observed", "linked", "provisioned", "transfer-pending", "archived", "retired"],
+      "additionalProperties": { "$ref": "#/$defs/description" }
+    },
+    "actions": {
+      "type": "object",
+      "required": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"],
+      "additionalProperties": { "$ref": "#/$defs/action" }
+    },
+    "workflow_statuses": {
+      "type": "object",
+      "required": ["nonterminal", "terminal"],
+      "properties": {
+        "nonterminal": { "const": ["requested", "evaluating", "approved", "applying"] },
+        "terminal": { "const": ["succeeded", "denied", "failed", "cancelled"] }
+      },
+      "additionalProperties": false
+    },
+    "schema_refs": {
+      "type": "object",
+      "required": ["request", "decision", "provider_readback", "custody_receipt"],
+      "properties": {
+        "request": { "const": "contracts/schemas/repository-custody-request.schema.json" },
+        "decision": { "const": "contracts/schemas/repository-custody-decision.schema.json" },
+        "provider_readback": { "const": "contracts/schemas/repository-provider-readback.schema.json" },
+        "custody_receipt": { "const": "contracts/schemas/repository-custody-receipt.schema.json" }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_and_recovery": {
+      "type": "object",
+      "required": ["identity", "request_binding", "replay_rule", "partial_provider_success", "stale_readback", "unavailable_provider"],
+      "properties": {
+        "identity": { "const": "request_id" },
+        "request_binding": { "const": "request_digest" },
+        "replay_rule": { "$ref": "#/$defs/text" },
+        "partial_provider_success": { "$ref": "#/$defs/text" },
+        "stale_readback": { "$ref": "#/$defs/text" },
+        "unavailable_provider": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "evidence_chain": {
+      "type": "object",
+      "required": ["ordered_artifacts", "reference_rule", "mutation_rule"],
+      "properties": {
+        "ordered_artifacts": { "const": ["repository-custody-request", "repository-custody-decision", "repository-provider-readback", "repository-custody-receipt"] },
+        "reference_rule": { "$ref": "#/$defs/text" },
+        "mutation_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "downstream_handoffs": {
+      "type": "object",
+      "required": ["workspace_intake", "active_inventory", "delivery_catalog", "product_admission"],
+      "additionalProperties": { "$ref": "#/$defs/handoff" }
+    },
+    "runtime_activation": {
+      "type": "object",
+      "required": ["enabled", "current_maturity", "required_work_item_refs", "first_active_capability"],
+      "properties": {
+        "enabled": { "const": false },
+        "current_maturity": { "const": "contract-only" },
+        "required_work_item_refs": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^openproject://work_packages/[0-9]+$" }
+        },
+        "first_active_capability": { "const": "link-existing" }
+      },
+      "additionalProperties": false
+    },
+    "denied_shortcuts": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/text" }
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "description": {
+      "type": "object",
+      "required": ["description"],
+      "properties": { "description": { "$ref": "#/$defs/text" } },
+      "additionalProperties": false
+    },
+    "boundary": {
+      "type": "object",
+      "required": ["authority", "description"],
+      "properties": {
+        "authority": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["responsibilities"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/text" },
+        "owner_kind": { "const": "external-provider" },
+        "owner_ref": { "$ref": "#/$defs/text" },
+        "responsibilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/text" }
+        }
+      },
+      "oneOf": [
+        { "required": ["owner_repo"], "not": { "anyOf": [{ "required": ["owner_kind"] }, { "required": ["owner_ref"] }] } },
+        { "required": ["owner_kind", "owner_ref"], "not": { "required": ["owner_repo"] } }
+      ],
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "object",
+      "required": ["provider_mutation", "allowed_from", "allowed_to", "required_provider_readback"],
+      "properties": {
+        "provider_mutation": { "enum": [true, false, "conditional"] },
+        "allowed_from": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "allowed_to": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "required_provider_readback": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "handoff": {
+      "type": "object",
+      "required": ["input", "effect"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/text" },
+        "owner_kind": { "$ref": "#/$defs/text" },
+        "input": { "$ref": "#/$defs/text" },
+        "effect": { "$ref": "#/$defs/text" }
+      },
+      "oneOf": [
+        { "required": ["owner_repo"], "not": { "required": ["owner_kind"] } },
+        { "required": ["owner_kind"], "not": { "required": ["owner_repo"] } }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

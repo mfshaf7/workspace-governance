@@ -97,6 +97,23 @@ Use these contracts to declare:
 - `schemas/agent-action-conformance.schema.json`
   - defines the source bindings, capability postures, exclusions, cases, and
     expected outcomes for the integrated conformance proof
+- `repository-custody.yaml`
+  - defines provider-neutral repository identity, custody state, actions,
+    authority, idempotency, evidence, and explicit downstream boundaries
+  - keeps custody independent from Workspace Intake, active inventory,
+    Delivery Catalog, product admission, release, and security acceptance
+- `schemas/repository-custody-request.schema.json`
+  - defines the operator request, provider locator, desired workspace custody,
+    authority references, correlation, and idempotency binding
+- `schemas/repository-custody-decision.schema.json`
+  - defines the WGCF policy decision against the exact request and immutable
+    provider repository identity
+- `schemas/repository-provider-readback.schema.json`
+  - defines canonical provider coordinates and state read through a referenced
+    service credential without carrying secret values
+- `schemas/repository-custody-receipt.schema.json`
+  - defines terminal custody evidence and proves that every downstream
+    transition remains a separate explicit action
 - `self-improvement-policy.yaml`
   - defines the in-session self-improvement signal catalog, fail-closed runtime
     gate, and primary escalation surface

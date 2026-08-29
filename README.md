@@ -62,6 +62,13 @@ release posture, and portfolio publication independent:
 - [contracts/agent-action-conformance.yaml](contracts/agent-action-conformance.yaml)
 - [reports/agent-action-conformance.md](reports/agent-action-conformance.md)
 
+Repository provider identity and workspace custody are governed by a narrower
+contract that deliberately does not imply intake, active inventory, Catalog
+linkage, product admission, release, or security acceptance:
+
+- [docs/repository-custody.md](docs/repository-custody.md)
+- [contracts/repository-custody.yaml](contracts/repository-custody.yaml)
+
 This repo also holds the workspace doctrine for operator workflows, delegated
 execution, troubleshooting, and self-improvement. Those controls exist so the
 workspace behaves like a deliberate system of record rather than a set of

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-provider-readback.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readback_id", "request_ref", "observed_at", "repository_identity", "canonical_owner", "canonical_name", "canonical_url", "default_branch", "visibility", "provider_lifecycle_state", "provider_version", "credential_binding_ref", "integrity"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_provider_readback" },
+    "readback_id": { "type": "string", "pattern": "^repository-provider-readback:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "repository_identity": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id"],
+      "properties": { "provider": { "$ref": "#/$defs/text" }, "provider_repository_id": { "$ref": "#/$defs/text" } },
+      "additionalProperties": false
+    },
+    "canonical_owner": { "$ref": "#/$defs/text" },
+    "canonical_name": { "$ref": "#/$defs/text" },
+    "canonical_url": { "type": "string", "format": "uri" },
+    "default_branch": { "$ref": "#/$defs/text" },
+    "visibility": { "enum": ["private", "internal", "public"] },
+    "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
+    "provider_version": { "$ref": "#/$defs/text" },
+    "credential_binding_ref": { "$ref": "#/$defs/artifactRef" },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": { "uri": { "type": "string", "format": "uri" }, "digest": { "$ref": "#/$defs/digest" } },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
