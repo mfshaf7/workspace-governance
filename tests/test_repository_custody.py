@@ -80,6 +80,27 @@ class RepositoryCustodyTests(unittest.TestCase):
         readback["repository_identity"].pop("provider_repository_id")
         self.assertInvalid("provider_readback", readback)
 
+    def test_github_identity_uses_decimal_rest_repository_id(self) -> None:
+        self.assertEqual(
+            self.contract["repository_identity"]["provider_id_formats"]["github"][
+                "format"
+            ],
+            "decimal-rest-repository-id",
+        )
+        for artifact_name, identity_path in (
+            ("request", ("target",)),
+            ("decision", ("resolved_identity",)),
+            ("provider_readback", ("repository_identity",)),
+            ("custody_receipt", ("repository_identity",)),
+        ):
+            with self.subTest(artifact=artifact_name):
+                payload = copy.deepcopy(self.fixtures[artifact_name])
+                identity = payload
+                for key in identity_path:
+                    identity = identity[key]
+                identity["provider_repository_id"] = "R_kgDOExample"
+                self.assertInvalid(artifact_name, payload)
+
     def test_existing_repository_actions_require_provider_identity(self) -> None:
         request = copy.deepcopy(self.fixtures["request"])
         request["target"]["provider_repository_id"] = None

@@ -443,7 +443,7 @@
       ]
     }
   ],
-  "conformance_contract_digest": "sha256:f0aa5df462e7d842001fcb80d2ceccc1dea551cf28fab5922f81422f3f27a017",
+  "conformance_contract_digest": "sha256:beb75bbfc7c182a5f5b76a50b51871c1adacf09b2d955b7d17bc1015b4fd5936",
   "excluded_capabilities": [
     "console-agent-mutation",
     "shared-runtime-exposure",
@@ -465,7 +465,7 @@
       "manifest_digest": "sha256:a82e94f8a5650eb7fdeacfa2096298fb43d3cca729e6132596de12ed428436d1",
       "manifest_ref": "contracts/agent-action/manifest.json",
       "repo": "workspace-governance-control-fabric",
-      "revision": "d96d7293b079de523fac68658d11b9350defa299"
+      "revision": "ae96d83a409711e6333b545a82f8bb695573c7f0"
     }
   },
   "proof_posture": "integrated-local-source",

@@ -18,7 +18,7 @@
     "provider_host": "github.com",
     "owner": "example-owner",
     "name": "example-repository",
-    "provider_repository_id": "R_kgDOExample"
+    "provider_repository_id": "123456789"
   },
   "requested_custody": {
     "workspace_owner_ref": "repo:example-repository",

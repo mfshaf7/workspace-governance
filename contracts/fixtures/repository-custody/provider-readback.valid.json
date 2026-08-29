@@ -9,7 +9,7 @@
   "observed_at": "2026-08-29T06:00:02Z",
   "repository_identity": {
     "provider": "github",
-    "provider_repository_id": "R_kgDOExample"
+    "provider_repository_id": "123456789"
   },
   "canonical_owner": "example-owner",
   "canonical_name": "example-repository",
