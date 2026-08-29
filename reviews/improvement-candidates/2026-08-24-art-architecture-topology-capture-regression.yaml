@@ -96,10 +96,13 @@ resolution:
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
-  due_on: '2026-08-27'
+  due_on: '2026-09-05'
   note: >-
     ART Defect #988 tracks architecture-derived evidence scaffolding, exact
     changed-file selection, authored-input preservation, and actionable validator
     error projection. ART Defect #998 and owner-bounded Tasks #999 through #1003
     track the missing composed Feature outcome. Keep this candidate open until
     both controls are landed and proven.
+    The due date was refreshed on 2026-08-29 after candidate validation exposed
+    the overdue review; no control closure is claimed by this administrative
+    refresh.
