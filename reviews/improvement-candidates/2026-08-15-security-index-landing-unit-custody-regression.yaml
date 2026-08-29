@@ -55,6 +55,28 @@ signals:
       - openproject://work_packages/851
       - openproject://work_packages/855
       - github://security-architecture/pulls/116
+  - id: initiative-closeout-preceded-final-security-index-refresh
+    title: Initiative closeout ran before the final generated Security dependency
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - rollout-evidence-gap
+      - workflow-doctrine-gap
+    finding: >-
+      Delivery Epic #886 reached guided closeout after all ART descendants were
+      terminal, but OOS security-evidenced records from the final change-control
+      and closeout Landing Units had landed after Security work item #1036
+      refreshed the generated index. The missing dependency was detected only
+      after the Epic was marked done. Security PR #135 then reconciled the three
+      missing OOS records. Guided closeout therefore still lacks a deterministic
+      current-index precondition over remote owner-repo truth.
+    source_refs:
+      - openproject://work_packages/886
+      - openproject://work_packages/1036
+      - openproject://work_packages/1037
+      - github://operator-orchestration-service/pulls/179
+      - github://operator-orchestration-service/pulls/180
+      - github://security-architecture/pulls/135
 resolution:
   after_action_ref: null
   control_refs: []
@@ -69,6 +91,10 @@ follow_up:
     Reassessed during Delivery ART work item 964 validation on 2026-08-23;
     the sequencing and distinct-child correction remains open and no closure
     is claimed.
+    Recurred during Epic 886 closeout on 2026-08-29: the final Security index
+    refresh landed in PR #135 only after guided Epic closeout. The closing
+    control must also make remote-aligned generated dependency readiness a
+    fail-closed initiative-close precondition, not only a work-start rule.
     Propose one pre-work check that derives generated dependency direction from
     source authority and requires a distinct ART child before a second
     owner-repo Landing Unit can create work-start custody. OOS should return an
