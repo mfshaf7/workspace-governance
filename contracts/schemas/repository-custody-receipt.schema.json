@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-custody-receipt.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "receipt_id", "request_ref", "decision_ref", "provider_readback_ref", "completed_at", "action", "outcome", "repository_identity", "custody", "workflow_status", "findings", "downstream_handoffs", "integrity"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_custody_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^repository-custody-receipt:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "provider_readback_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "outcome": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
+    "repository_identity": { "oneOf": [{ "$ref": "#/$defs/repositoryIdentity" }, { "type": "null" }] },
+    "custody": {
+      "type": "object",
+      "required": ["before", "after", "workspace_owner_ref"],
+      "properties": {
+        "before": { "$ref": "#/$defs/custodyState" },
+        "after": { "$ref": "#/$defs/custodyState" },
+        "workspace_owner_ref": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "workflow_status": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+    "downstream_handoffs": {
+      "type": "object",
+      "required": ["workspace_intake", "active_inventory", "delivery_catalog", "product_admission"],
+      "properties": {
+        "workspace_intake": { "$ref": "#/$defs/handoffState" },
+        "active_inventory": { "$ref": "#/$defs/handoffState" },
+        "delivery_catalog": { "$ref": "#/$defs/handoffState" },
+        "product_admission": { "$ref": "#/$defs/handoffState" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "succeeded" } } },
+      "then": {
+        "properties": {
+          "repository_identity": { "$ref": "#/$defs/repositoryIdentity" },
+          "workflow_status": { "const": "succeeded" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider"] } } },
+      "then": { "properties": { "provider_readback_ref": { "$ref": "#/$defs/artifactRef" } } }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "custodyState": { "enum": ["unrecorded", "observed", "linked", "provisioned", "transfer-pending", "archived", "retired"] },
+    "handoffState": { "enum": ["not-requested", "request-available", "separate-action-required"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": { "uri": { "type": "string", "format": "uri" }, "digest": { "$ref": "#/$defs/digest" } },
+      "additionalProperties": false
+    },
+    "repositoryIdentity": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id"],
+      "properties": { "provider": { "$ref": "#/$defs/text" }, "provider_repository_id": { "$ref": "#/$defs/text" } },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

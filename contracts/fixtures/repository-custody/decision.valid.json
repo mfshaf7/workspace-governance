@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_custody_decision",
+  "decision_id": "repository-custody-decision:example-link-001",
+  "request_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-request/example-link-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "evaluated_at": "2026-08-29T06:00:01Z",
+  "policy_version": "repository-custody/v1",
+  "outcome": "allowed",
+  "resolved_identity": {
+    "provider": "github",
+    "provider_repository_id": "R_kgDOExample"
+  },
+  "findings": [
+    {
+      "code": "repository-identity-resolved",
+      "severity": "info",
+      "summary": "Provider identity and requested custody owner are consistent."
+    }
+  ],
+  "obligations": [
+    "require-fresh-provider-readback",
+    "emit-terminal-custody-receipt"
+  ],
+  "next_action": "read-provider",
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  }
+}

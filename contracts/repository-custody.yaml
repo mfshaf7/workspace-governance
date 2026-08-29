@@ -1,0 +1,219 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/repository-custody.md
+architecture:
+  initiative_ref: openproject://work_packages/888
+  contract_work_ref: openproject://work_packages/1040
+purpose: Define provider-neutral repository identity, custody, evidence, and handoff semantics without treating repository custody as workspace admission or product ownership.
+scope_boundaries:
+  provider_repository_state:
+    authority: repository-provider
+    description: Physical repository existence, immutable provider identity, coordinates, visibility, and archive state.
+  repository_custody_state:
+    authority: operator-orchestration-service
+    description: Governed record of which workspace owner is accountable for the repository and its current custody posture.
+  workspace_intake_state:
+    authority: workspace-governance
+    description: Explicit out-of-scope, proposed, or admitted classification; never implied by custody.
+  active_inventory_state:
+    authority: workspace-governance
+    description: Inclusion in contracts/repos.yaml after a separate intake and inventory mutation.
+  product_and_release_state:
+    authority: domain-owner
+    description: Catalog linkage, product admission, runtime, release, and publication decisions remain separate.
+authority_roles:
+  contract_authority:
+    owner_repo: workspace-governance
+    responsibilities:
+      - repository-custody-policy
+      - repository-identity-vocabulary
+      - downstream-boundary-contract
+  readiness_authority:
+    owner_repo: workspace-governance-control-fabric
+    responsibilities:
+      - request-policy-evaluation
+      - custody-readiness-decision
+  workflow_authority:
+    owner_repo: operator-orchestration-service
+    responsibilities:
+      - command-lifecycle
+      - correlation-and-idempotency
+      - provider-adapter-invocation
+      - custody-receipt
+  provider_authority:
+    owner_kind: external-provider
+    owner_ref: repository-provider
+    responsibilities:
+      - physical-repository-state
+      - immutable-provider-repository-id
+      - provider-readback
+  identity_and_secret_authority:
+    owner_repo: platform-engineering
+    responsibilities:
+      - provider-application-identity
+      - credential-delivery
+      - permission-activation-and-revocation
+  security_acceptance_authority:
+    owner_repo: security-architecture
+    responsibilities:
+      - provider-trust-boundary-review
+      - least-privilege-acceptance
+  operator_projection:
+    owner_repo: governance-operations-console
+    responsibilities:
+      - request-and-status-projection
+      - receipt-projection
+repository_identity:
+  immutable_key:
+    fields:
+      - provider
+      - provider_repository_id
+    rule: Provider repository ID is immutable identity; owner, name, URL, and default branch are mutable coordinates read from provider truth.
+  required_readback_fields:
+    - provider
+    - provider_repository_id
+    - canonical_owner
+    - canonical_name
+    - canonical_url
+    - visibility
+    - provider_lifecycle_state
+    - provider_version
+    - observed_at
+  credential_rule: Artifacts carry credential binding references only; secret values and personal access tokens are forbidden.
+custody_states:
+  unrecorded:
+    description: No governed custody record exists.
+  observed:
+    description: Provider identity was resolved read-only, but custody has not been assigned.
+  linked:
+    description: An existing provider repository has an authoritative workspace custody record.
+  provisioned:
+    description: A repository was created through an approved governed workflow and custody was recorded.
+  transfer-pending:
+    description: A custody or provider-coordinate transfer is approved but not complete.
+  archived:
+    description: Provider archive state is proven and retained as historical custody evidence.
+  retired:
+    description: The workspace custody record is logically retired without asserting provider deletion.
+actions:
+  observe-existing:
+    provider_mutation: false
+    allowed_from:
+      - unrecorded
+      - observed
+      - linked
+      - archived
+    allowed_to:
+      - observed
+    required_provider_readback: true
+  link-existing:
+    provider_mutation: false
+    allowed_from:
+      - unrecorded
+      - observed
+    allowed_to:
+      - linked
+    required_provider_readback: true
+  provision-new:
+    provider_mutation: true
+    allowed_from:
+      - unrecorded
+    allowed_to:
+      - provisioned
+    required_provider_readback: true
+  transfer-custody:
+    provider_mutation: conditional
+    allowed_from:
+      - linked
+      - provisioned
+      - transfer-pending
+    allowed_to:
+      - transfer-pending
+      - linked
+    required_provider_readback: true
+  archive-provider:
+    provider_mutation: true
+    allowed_from:
+      - linked
+      - provisioned
+    allowed_to:
+      - archived
+    required_provider_readback: true
+  retire-workspace-record:
+    provider_mutation: false
+    allowed_from:
+      - observed
+      - linked
+      - provisioned
+      - archived
+    allowed_to:
+      - retired
+    required_provider_readback: false
+workflow_statuses:
+  nonterminal:
+    - requested
+    - evaluating
+    - approved
+    - applying
+  terminal:
+    - succeeded
+    - denied
+    - failed
+    - cancelled
+schema_refs:
+  request: contracts/schemas/repository-custody-request.schema.json
+  decision: contracts/schemas/repository-custody-decision.schema.json
+  provider_readback: contracts/schemas/repository-provider-readback.schema.json
+  custody_receipt: contracts/schemas/repository-custody-receipt.schema.json
+idempotency_and_recovery:
+  identity: request_id
+  request_binding: request_digest
+  replay_rule: The same request ID and digest returns the existing workflow result; the same ID with a different digest fails as an idempotency conflict.
+  partial_provider_success: Resume from fresh provider readback and preserve the original correlation chain; never compensate by deleting a repository.
+  stale_readback: Fail closed when provider identity or version no longer matches the approved decision.
+  unavailable_provider: Preserve current custody state and emit a failed terminal receipt with retryable findings.
+evidence_chain:
+  ordered_artifacts:
+    - repository-custody-request
+    - repository-custody-decision
+    - repository-provider-readback
+    - repository-custody-receipt
+  reference_rule: Every artifact reference is digest-bound and every terminal workflow emits a custody receipt.
+  mutation_rule: A provider mutation requires an allowed decision, exact operator approval, provider readback, and a terminal receipt.
+downstream_handoffs:
+  workspace_intake:
+    owner_repo: workspace-governance
+    input: successful custody receipt
+    effect: request-only
+  active_inventory:
+    owner_repo: workspace-governance
+    input: admitted intake record and successful custody receipt
+    effect: separate-explicit-mutation
+  delivery_catalog:
+    owner_kind: domain-owner
+    input: active inventory identity and domain readiness
+    effect: separate-user-request
+  product_admission:
+    owner_kind: domain-owner
+    input: domain-specific admission request
+    effect: separate-domain-workflow
+runtime_activation:
+  enabled: false
+  current_maturity: contract-only
+  required_work_item_refs:
+    - openproject://work_packages/1041
+    - openproject://work_packages/1042
+    - openproject://work_packages/1043
+    - openproject://work_packages/1044
+    - openproject://work_packages/1045
+  first_active_capability: link-existing
+denied_shortcuts:
+  - repository URL or owner/name used as immutable identity
+  - custody success treated as Workspace Intake admission
+  - custody success inserted into active inventory automatically
+  - custody success treated as Catalog linkage or product admission
+  - provider mutation through personal credentials or ambient operator login
+  - mutation without current readiness decision and exact operator approval
+  - secret values embedded in requests, decisions, readbacks, or receipts
+  - hard provider deletion in contract version 1
+  - compensating delete after partial provisioning success

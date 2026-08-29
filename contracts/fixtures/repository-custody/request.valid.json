@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_custody_request",
+  "request_id": "repository-custody-request:example-link-001",
+  "requested_at": "2026-08-29T06:00:00Z",
+  "action": "link-existing",
+  "operator_ref": {
+    "uri": "https://workspace-governance.local/operators/example",
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "workflow": {
+    "workflow_id": "repository-custody",
+    "workflow_version": "1",
+    "execution_id": "repository-custody-example-link-001"
+  },
+  "target": {
+    "provider": "github",
+    "provider_host": "github.com",
+    "owner": "example-owner",
+    "name": "example-repository",
+    "provider_repository_id": "R_kgDOExample"
+  },
+  "requested_custody": {
+    "workspace_owner_ref": "repo:example-repository",
+    "custody_kind": "dedicated-owner-repo"
+  },
+  "authority": {
+    "policy_profile_ref": {
+      "uri": "https://workspace-governance.local/policy/repository-custody/v1",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "approval_ref": {
+      "uri": "https://workspace-governance.local/approvals/repository-custody/example-link-001",
+      "digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+    },
+    "credential_binding_ref": {
+      "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-read",
+      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  },
+  "correlation": {
+    "correlation_id": "repository-custody-example-link-001",
+    "causation_id": null
+  },
+  "idempotency_key": "repository-custody-example-link-001",
+  "request_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+}

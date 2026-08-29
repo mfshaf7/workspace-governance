@@ -31,6 +31,7 @@ from delivery_art_resource_retirement_contract import (
 from developer_integration_runtime_composition import runtime_composition_issues
 from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
+from repository_custody_contract import contract_issues as repository_custody_contract_issues
 
 
 CONTRACT_FORMAT_CHECKER = FormatChecker()
@@ -5992,6 +5993,7 @@ def main() -> int:
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
         "agent_action_authority": repo_root / "contracts/agent-action-authority.yaml",
         "agent_action_conformance": repo_root / "contracts/agent-action-conformance.yaml",
+        "repository_custody": repo_root / "contracts/repository-custody.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
         "work_home_routing": repo_root / "contracts/work-home-routing.yaml",
         "dependency_types": repo_root / "contracts/dependency-types.yaml",
@@ -6100,6 +6102,14 @@ def main() -> int:
     durable_orchestration = contracts["durable_orchestration"]["durable_orchestration"]
     delegation_policy = contracts["delegation_policy"]
     agent_action_authority = contracts["agent_action_authority"]
+    repository_custody_errors = repository_custody_contract_issues(
+        contracts["repository_custody"],
+        active_repo_names(contracts),
+    )
+    errors.extend(
+        f"contracts/repository-custody.yaml: {error}"
+        for error in repository_custody_errors
+    )
     agent_action_conformance_errors = agent_action_conformance_issues(
         contracts["agent_action_conformance"]
     )

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_provider_readback",
+  "readback_id": "repository-provider-readback:example-link-001",
+  "request_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-request/example-link-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "observed_at": "2026-08-29T06:00:02Z",
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "R_kgDOExample"
+  },
+  "canonical_owner": "example-owner",
+  "canonical_name": "example-repository",
+  "canonical_url": "https://github.com/example-owner/example-repository",
+  "default_branch": "main",
+  "visibility": "private",
+  "provider_lifecycle_state": "active",
+  "provider_version": "etag:example-link-001",
+  "credential_binding_ref": {
+    "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-read",
+    "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  }
+}

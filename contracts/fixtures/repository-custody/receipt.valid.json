@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_custody_receipt",
+  "receipt_id": "repository-custody-receipt:example-link-001",
+  "request_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-request/example-link-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "decision_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-decision/example-link-001",
+    "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "provider_readback_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-provider-readback/example-link-001",
+    "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  },
+  "completed_at": "2026-08-29T06:00:03Z",
+  "action": "link-existing",
+  "outcome": "succeeded",
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "R_kgDOExample"
+  },
+  "custody": {
+    "before": "unrecorded",
+    "after": "linked",
+    "workspace_owner_ref": "repo:example-repository"
+  },
+  "workflow_status": "succeeded",
+  "findings": [],
+  "downstream_handoffs": {
+    "workspace_intake": "request-available",
+    "active_inventory": "separate-action-required",
+    "delivery_catalog": "separate-action-required",
+    "product_admission": "separate-action-required"
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  }
+}
