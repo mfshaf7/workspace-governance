@@ -178,7 +178,8 @@ evidence_chain:
     - repository-custody-decision
     - repository-provider-readback
     - repository-custody-receipt
-  reference_rule: Every artifact reference is digest-bound and every terminal workflow emits a custody receipt.
+  reference_rule: Every artifact reference is digest-bound and every terminal workflow emits a custody receipt; denied and failed outcomes may carry a null provider readback when provider access did not occur or did not complete.
+  successful_readback_rule: Every successful action marked required_provider_readback must carry a current digest-bound provider readback.
   mutation_rule: A provider mutation requires an allowed decision, exact operator approval, provider readback, and a terminal receipt.
 downstream_handoffs:
   workspace_intake:

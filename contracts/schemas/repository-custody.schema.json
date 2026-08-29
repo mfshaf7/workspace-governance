@@ -94,10 +94,11 @@
     },
     "evidence_chain": {
       "type": "object",
-      "required": ["ordered_artifacts", "reference_rule", "mutation_rule"],
+      "required": ["ordered_artifacts", "reference_rule", "successful_readback_rule", "mutation_rule"],
       "properties": {
         "ordered_artifacts": { "const": ["repository-custody-request", "repository-custody-decision", "repository-provider-readback", "repository-custody-receipt"] },
         "reference_rule": { "$ref": "#/$defs/text" },
+        "successful_readback_rule": { "$ref": "#/$defs/text" },
         "mutation_rule": { "$ref": "#/$defs/text" }
       },
       "additionalProperties": false

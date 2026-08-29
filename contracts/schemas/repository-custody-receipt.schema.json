@@ -50,7 +50,13 @@
       }
     },
     {
-      "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider"] } } },
+      "if": {
+        "required": ["action", "outcome"],
+        "properties": {
+          "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider"] },
+          "outcome": { "const": "succeeded" }
+        }
+      },
       "then": { "properties": { "provider_readback_ref": { "$ref": "#/$defs/artifactRef" } } }
     }
   ],
