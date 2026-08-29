@@ -59,9 +59,11 @@ sequenceDiagram
     OOS-->>Console: terminal custody receipt
 ```
 
-Every terminal path produces a receipt. Provider mutations require an allowed
-decision, exact operator approval, current provider readback, and a terminal
-receipt.
+Every terminal path produces a receipt. A denied or failed path may carry a
+null provider readback when provider access did not occur or could not
+complete. Every successful action that requires provider truth carries a
+current digest-bound readback. Provider mutations additionally require an
+allowed decision, exact operator approval, and a terminal receipt.
 
 ## Actions
 

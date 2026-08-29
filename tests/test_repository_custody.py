@@ -105,6 +105,17 @@ class RepositoryCustodyTests(unittest.TestCase):
         receipt["repository_identity"] = None
         self.assertInvalid("custody_receipt", receipt)
 
+    def test_denied_and_failed_link_receipts_do_not_fabricate_readback(self) -> None:
+        for outcome in ("denied", "failed"):
+            with self.subTest(outcome=outcome):
+                receipt = copy.deepcopy(self.fixtures["custody_receipt"])
+                receipt["outcome"] = outcome
+                receipt["workflow_status"] = outcome
+                receipt["provider_readback_ref"] = None
+                receipt["repository_identity"] = None
+                receipt["custody"]["after"] = receipt["custody"]["before"]
+                self.assertValid("custody_receipt", receipt)
+
     def test_custody_receipt_does_not_claim_downstream_mutation(self) -> None:
         downstream = self.fixtures["custody_receipt"]["downstream_handoffs"]
         self.assertEqual(downstream["workspace_intake"], "request-available")
