@@ -39,10 +39,13 @@ resolution:
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
-  due_on: '2026-08-27'
+  due_on: '2026-09-05'
   note: >-
     Deliver ART Defect #977 under Epic #884 by resolving the default projection
     checkpoint through one canonical external operator-state location shared by
     canonical and linked checkouts, preserving the explicit
     ART_PROJECTION_STATE_FILE override, and proving canonical mutation plus
     linked-worktree close against one checkpoint before landing.
+    The due date was refreshed on 2026-08-29 after candidate validation exposed
+    the overdue review; no control closure is claimed by this administrative
+    refresh.

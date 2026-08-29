@@ -12,7 +12,7 @@ implementation_sources:
     manifest_ref: contracts/agent-action/manifest.json
   enforcer:
     repo: operator-orchestration-service
-    revision: ba5cc488c6f468aa11cf60b31dedbd1ba684e7b5
+    revision: 8772034ad03c6899f8e02ba45f4c3038dbf071e6
     manifest_ref: contracts/agent-action/manifest.json
 report_outputs:
   json: reports/agent-action-conformance.json

@@ -443,7 +443,7 @@
       ]
     }
   ],
-  "conformance_contract_digest": "sha256:53db0724dae6ca9fc9cd69e8e93e09b938da5c8ba4c3a839ff5eff071de43ace",
+  "conformance_contract_digest": "sha256:9cfab82652823f6d92ca1810e34130c5f7937448ae5f11f5f34e9a73e98322af",
   "excluded_capabilities": [
     "console-agent-mutation",
     "shared-runtime-exposure",
@@ -458,7 +458,7 @@
       "manifest_digest": "sha256:5ae4d4abc6bfa51211f176dd06eeae5031eb704824c508291b6389da32e0f890",
       "manifest_ref": "contracts/agent-action/manifest.json",
       "repo": "operator-orchestration-service",
-      "revision": "ba5cc488c6f468aa11cf60b31dedbd1ba684e7b5"
+      "revision": "8772034ad03c6899f8e02ba45f4c3038dbf071e6"
     },
     "evaluator": {
       "authority_source_commit": "d6e5a5bf0cac6ddfbf127f5826159556971c3718",
