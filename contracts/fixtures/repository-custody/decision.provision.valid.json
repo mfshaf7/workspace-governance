@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_custody_decision",
+  "decision_id": "repository-custody-decision:example-provision-001",
+  "request_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-request/example-provision-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "evaluated_at": "2026-08-29T14:00:01Z",
+  "policy_version": "repository-custody/v1",
+  "action": "provision-new",
+  "outcome": "allowed",
+  "resolved_identity": null,
+  "approved_provisioning": {
+    "provider": "github",
+    "provider_host": "github.com",
+    "owner": "example-organization",
+    "owner_scope": "organization",
+    "name": "example-repository",
+    "settings": {
+      "description": "Example governed repository.",
+      "visibility": "private",
+      "initialize_with_readme": true,
+      "features": {
+        "issues": true,
+        "projects": false,
+        "wiki": false,
+        "discussions": false
+      },
+      "merge_policy": {
+        "allow_squash_merge": true,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": false,
+        "delete_branch_on_merge": true
+      }
+    }
+  },
+  "findings": [
+    {
+      "code": "repository-provisioning-ready",
+      "severity": "info",
+      "summary": "The organization target and explicit baseline settings are approved."
+    }
+  ],
+  "obligations": [
+    "create-once",
+    "require-fresh-provider-readback",
+    "verify-applied-provisioning-settings",
+    "emit-terminal-custody-receipt"
+  ],
+  "next_action": "create-provider",
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_provider_readback",
+  "readback_id": "repository-provider-readback:example-provision-001",
+  "request_ref": {
+    "uri": "https://workspace-governance.local/artifacts/repository-custody-request/example-provision-001",
+    "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "observed_at": "2026-08-29T14:00:02Z",
+  "action": "provision-new",
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "987654321"
+  },
+  "canonical_owner": "example-organization",
+  "canonical_name": "example-repository",
+  "canonical_url": "https://github.com/example-organization/example-repository",
+  "default_branch": "main",
+  "visibility": "private",
+  "provider_lifecycle_state": "active",
+  "provider_version": "etag:example-provision-001",
+  "credential_binding_ref": {
+    "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-create",
+    "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "applied_provisioning": {
+    "owner_scope": "organization",
+    "initialization_state": "initialized",
+    "settings": {
+      "description": "Example governed repository.",
+      "visibility": "private",
+      "initialize_with_readme": true,
+      "features": {
+        "issues": true,
+        "projects": false,
+        "wiki": false,
+        "discussions": false
+      },
+      "merge_policy": {
+        "allow_squash_merge": true,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": false,
+        "delete_branch_on_merge": true
+      }
+    }
+  },
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  }
+}

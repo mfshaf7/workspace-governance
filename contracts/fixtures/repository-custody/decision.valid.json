@@ -8,11 +8,13 @@
   },
   "evaluated_at": "2026-08-29T06:00:01Z",
   "policy_version": "repository-custody/v1",
+  "action": "link-existing",
   "outcome": "allowed",
   "resolved_identity": {
     "provider": "github",
     "provider_repository_id": "123456789"
   },
+  "approved_provisioning": null,
   "findings": [
     {
       "code": "repository-identity-resolved",

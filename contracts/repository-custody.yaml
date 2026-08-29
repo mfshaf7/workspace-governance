@@ -4,6 +4,7 @@ operator_surface_path: docs/repository-custody.md
 architecture:
   initiative_ref: openproject://work_packages/888
   contract_work_ref: openproject://work_packages/1040
+  provisioning_contract_work_ref: openproject://work_packages/1054
 purpose: Define provider-neutral repository identity, custody, evidence, and handoff semantics without treating repository custody as workspace admission or product ownership.
 scope_boundaries:
   provider_repository_state:
@@ -84,6 +85,50 @@ repository_identity:
     - provider_version
     - observed_at
   credential_rule: Artifacts carry credential binding references only; secret values and personal access tokens are forbidden.
+provisioning_controls:
+  first_provider_scope:
+    provider: github
+    provider_host: github.com
+    owner_scope: organization
+    rule: The first provisioning capability creates only inside the organization bound to the approved GitHub App installation; personal-account creation is not an admitted fallback.
+  required_request_controls:
+    - organization-owner
+    - repository-name
+    - description
+    - visibility
+    - initialize-with-readme
+    - feature-toggles
+    - merge-policy
+    - exact-operator-approval
+    - credential-binding
+    - idempotency-binding
+  settings:
+    visibility:
+      allowed:
+        - private
+        - internal
+        - public
+      rule: The requested visibility is explicit and must be returned unchanged by provider readback; environment policy may allow only a subset.
+    initialization:
+      initialize_with_readme: true
+      rule: The first capability always initializes a default branch with a README so readback can prove a usable non-empty repository.
+    features:
+      fields:
+        - issues
+        - projects
+        - wiki
+        - discussions
+      rule: Every feature toggle is explicit; provider defaults are not treated as operator intent.
+    merge_policy:
+      fields:
+        - allow_squash_merge
+        - allow_merge_commit
+        - allow_rebase_merge
+        - delete_branch_on_merge
+      rule: Every merge setting is explicit and verified through provider readback.
+  decision_rule: An allowed provisioning decision carries the exact approved target and settings with next_action create-provider; it has no provider repository ID before creation.
+  readback_rule: Provisioning succeeds only when immutable provider identity, organization owner, canonical name, visibility, initialized state, features, and merge policy match the allowed decision.
+  no_compensation_rule: A timeout or partial success is reconciled through canonical coordinates and provider readback; the system never compensates by deleting a repository.
 custody_states:
   unrecorded:
     description: No governed custody record exists.
@@ -211,6 +256,12 @@ runtime_activation:
     - openproject://work_packages/1043
     - openproject://work_packages/1044
     - openproject://work_packages/1045
+    - openproject://work_packages/1054
+    - openproject://work_packages/1055
+    - openproject://work_packages/1046
+    - openproject://work_packages/1047
+    - openproject://work_packages/1048
+    - openproject://work_packages/1049
   first_active_capability: link-existing
 denied_shortcuts:
   - repository URL or owner/name used as immutable identity
@@ -222,3 +273,6 @@ denied_shortcuts:
   - secret values embedded in requests, decisions, readbacks, or receipts
   - hard provider deletion in contract version 1
   - compensating delete after partial provisioning success
+  - provision-new request with personal owner scope
+  - provision-new request that relies on provider defaults instead of explicit baseline settings
+  - provisioning success without exact applied-settings and initialized-state readback

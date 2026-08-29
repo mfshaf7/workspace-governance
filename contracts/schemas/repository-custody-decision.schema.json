@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/schemas/repository-custody-decision.schema.json",
   "type": "object",
-  "required": ["schema_version", "artifact_type", "decision_id", "request_ref", "evaluated_at", "policy_version", "outcome", "resolved_identity", "findings", "obligations", "next_action", "integrity"],
+  "required": ["schema_version", "artifact_type", "decision_id", "request_ref", "evaluated_at", "policy_version", "action", "outcome", "resolved_identity", "findings", "obligations", "next_action", "integrity"],
   "properties": {
     "schema_version": { "const": 1 },
     "artifact_type": { "const": "repository_custody_decision" },
@@ -10,8 +10,15 @@
     "request_ref": { "$ref": "#/$defs/artifactRef" },
     "evaluated_at": { "type": "string", "format": "date-time" },
     "policy_version": { "$ref": "#/$defs/text" },
+    "action": { "$ref": "#/$defs/action" },
     "outcome": { "enum": ["allowed", "denied", "requires-action"] },
     "resolved_identity": { "oneOf": [{ "$ref": "#/$defs/repositoryIdentity" }, { "type": "null" }] },
+    "approved_provisioning": {
+      "oneOf": [
+        { "$ref": "#/$defs/approvedProvisioning" },
+        { "type": "null" }
+      ]
+    },
     "findings": {
       "type": "array",
       "items": {
@@ -26,21 +33,57 @@
       }
     },
     "obligations": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
-    "next_action": { "enum": ["read-provider", "apply-custody", "request-correction", "stop"] },
+    "next_action": { "enum": ["read-provider", "create-provider", "apply-custody", "request-correction", "stop"] },
     "integrity": { "$ref": "#/$defs/integrity" }
   },
   "allOf": [
     {
-      "if": { "properties": { "outcome": { "const": "allowed" } } },
-      "then": { "properties": { "resolved_identity": { "$ref": "#/$defs/repositoryIdentity" } } }
+      "if": {
+        "required": ["action", "outcome"],
+        "properties": {
+          "action": { "const": "provision-new" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "required": ["approved_provisioning"],
+        "properties": {
+          "resolved_identity": { "type": "null" },
+          "approved_provisioning": { "$ref": "#/$defs/approvedProvisioning" },
+          "next_action": { "const": "create-provider" }
+        }
+      },
+      "else": {
+        "if": { "properties": { "outcome": { "const": "allowed" } } },
+        "then": {
+          "properties": {
+            "resolved_identity": { "$ref": "#/$defs/repositoryIdentity" },
+            "approved_provisioning": { "type": "null" },
+            "next_action": { "enum": ["read-provider", "apply-custody"] }
+          }
+        }
+      }
     },
     {
       "if": { "properties": { "outcome": { "const": "denied" } } },
       "then": { "properties": { "next_action": { "const": "stop" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": { "enum": ["denied", "requires-action"] }
+        }
+      },
+      "then": {
+        "properties": {
+          "approved_provisioning": { "type": "null" }
+        }
+      }
     }
   ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "artifactRef": {
       "type": "object",
@@ -58,6 +101,51 @@
           "then": { "properties": { "provider_repository_id": { "$ref": "#/$defs/githubRepositoryId" } } }
         }
       ],
+      "additionalProperties": false
+    },
+    "approvedProvisioning": {
+      "type": "object",
+      "required": ["provider", "provider_host", "owner", "owner_scope", "name", "settings"],
+      "properties": {
+        "provider": { "const": "github" },
+        "provider_host": { "const": "github.com" },
+        "owner": { "$ref": "#/$defs/text" },
+        "owner_scope": { "const": "organization" },
+        "name": { "$ref": "#/$defs/text" },
+        "settings": { "$ref": "#/$defs/provisioningSettings" }
+      },
+      "additionalProperties": false
+    },
+    "provisioningSettings": {
+      "type": "object",
+      "required": ["description", "visibility", "initialize_with_readme", "features", "merge_policy"],
+      "properties": {
+        "description": { "oneOf": [{ "type": "string", "minLength": 1, "maxLength": 350 }, { "type": "null" }] },
+        "visibility": { "enum": ["private", "internal", "public"] },
+        "initialize_with_readme": { "const": true },
+        "features": {
+          "type": "object",
+          "required": ["issues", "projects", "wiki", "discussions"],
+          "properties": {
+            "issues": { "type": "boolean" },
+            "projects": { "type": "boolean" },
+            "wiki": { "type": "boolean" },
+            "discussions": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "merge_policy": {
+          "type": "object",
+          "required": ["allow_squash_merge", "allow_merge_commit", "allow_rebase_merge", "delete_branch_on_merge"],
+          "properties": {
+            "allow_squash_merge": { "type": "boolean" },
+            "allow_merge_commit": { "type": "boolean" },
+            "allow_rebase_merge": { "type": "boolean" },
+            "delete_branch_on_merge": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": false
     },
     "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },

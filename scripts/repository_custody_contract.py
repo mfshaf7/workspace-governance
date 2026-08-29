@@ -44,4 +44,64 @@ def contract_issues(contract: dict, active_repo_names: Iterable[str]) -> list[st
     if contract.get("runtime_activation", {}).get("enabled") is not False:
         issues.append("runtime activation must remain disabled while maturity is contract-only")
 
+    provisioning = contract.get("provisioning_controls", {})
+    first_scope = provisioning.get("first_provider_scope", {})
+    if (
+        first_scope.get("provider") != "github"
+        or first_scope.get("provider_host") != "github.com"
+        or first_scope.get("owner_scope") != "organization"
+    ):
+        issues.append(
+            "provisioning_controls.first_provider_scope must remain GitHub organization-only"
+        )
+
+    expected_request_controls = {
+        "organization-owner",
+        "repository-name",
+        "description",
+        "visibility",
+        "initialize-with-readme",
+        "feature-toggles",
+        "merge-policy",
+        "exact-operator-approval",
+        "credential-binding",
+        "idempotency-binding",
+    }
+    actual_request_controls = set(provisioning.get("required_request_controls", []))
+    missing_request_controls = expected_request_controls - actual_request_controls
+    if missing_request_controls:
+        issues.append(
+            "provisioning_controls.required_request_controls is missing: "
+            + ", ".join(sorted(missing_request_controls))
+        )
+
+    settings = provisioning.get("settings", {})
+    expected_features = {"issues", "projects", "wiki", "discussions"}
+    expected_merge_policy = {
+        "allow_squash_merge",
+        "allow_merge_commit",
+        "allow_rebase_merge",
+        "delete_branch_on_merge",
+    }
+    if set(settings.get("features", {}).get("fields", [])) != expected_features:
+        issues.append("provisioning_controls.settings.features fields are incomplete")
+    if set(settings.get("merge_policy", {}).get("fields", [])) != expected_merge_policy:
+        issues.append("provisioning_controls.settings.merge_policy fields are incomplete")
+    if settings.get("initialization", {}).get("initialize_with_readme") is not True:
+        issues.append("provisioning must initialize the repository with a README")
+
+    required_provisioning_work = {
+        "openproject://work_packages/1054",
+        "openproject://work_packages/1055",
+        "openproject://work_packages/1046",
+        "openproject://work_packages/1047",
+        "openproject://work_packages/1048",
+        "openproject://work_packages/1049",
+    }
+    activation_refs = set(
+        contract.get("runtime_activation", {}).get("required_work_item_refs", [])
+    )
+    if not required_provisioning_work.issubset(activation_refs):
+        issues.append("runtime activation omits required provisioning work items")
+
     return issues

@@ -1,17 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "scope_boundaries", "authority_roles", "repository_identity", "custody_states", "actions", "workflow_statuses", "schema_refs", "idempotency_and_recovery", "evidence_chain", "downstream_handoffs", "runtime_activation", "denied_shortcuts"],
+  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "scope_boundaries", "authority_roles", "repository_identity", "provisioning_controls", "custody_states", "actions", "workflow_statuses", "schema_refs", "idempotency_and_recovery", "evidence_chain", "downstream_handoffs", "runtime_activation", "denied_shortcuts"],
   "properties": {
     "schema_version": { "const": 1 },
     "owner_repo": { "const": "workspace-governance" },
     "operator_surface_path": { "const": "docs/repository-custody.md" },
     "architecture": {
       "type": "object",
-      "required": ["initiative_ref", "contract_work_ref"],
+      "required": ["initiative_ref", "contract_work_ref", "provisioning_contract_work_ref"],
       "properties": {
         "initiative_ref": { "const": "openproject://work_packages/888" },
-        "contract_work_ref": { "const": "openproject://work_packages/1040" }
+        "contract_work_ref": { "const": "openproject://work_packages/1040" },
+        "provisioning_contract_work_ref": { "const": "openproject://work_packages/1054" }
       },
       "additionalProperties": false
     },
@@ -70,6 +71,60 @@
           "items": { "$ref": "#/$defs/text" }
         },
         "credential_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "provisioning_controls": {
+      "type": "object",
+      "required": ["first_provider_scope", "required_request_controls", "settings", "decision_rule", "readback_rule", "no_compensation_rule"],
+      "properties": {
+        "first_provider_scope": {
+          "type": "object",
+          "required": ["provider", "provider_host", "owner_scope", "rule"],
+          "properties": {
+            "provider": { "const": "github" },
+            "provider_host": { "const": "github.com" },
+            "owner_scope": { "const": "organization" },
+            "rule": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "required_request_controls": {
+          "type": "array",
+          "minItems": 10,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/text" }
+        },
+        "settings": {
+          "type": "object",
+          "required": ["visibility", "initialization", "features", "merge_policy"],
+          "properties": {
+            "visibility": {
+              "type": "object",
+              "required": ["allowed", "rule"],
+              "properties": {
+                "allowed": { "const": ["private", "internal", "public"] },
+                "rule": { "$ref": "#/$defs/text" }
+              },
+              "additionalProperties": false
+            },
+            "initialization": {
+              "type": "object",
+              "required": ["initialize_with_readme", "rule"],
+              "properties": {
+                "initialize_with_readme": { "const": true },
+                "rule": { "$ref": "#/$defs/text" }
+              },
+              "additionalProperties": false
+            },
+            "features": { "$ref": "#/$defs/fieldSet" },
+            "merge_policy": { "$ref": "#/$defs/fieldSet" }
+          },
+          "additionalProperties": false
+        },
+        "decision_rule": { "$ref": "#/$defs/text" },
+        "readback_rule": { "$ref": "#/$defs/text" },
+        "no_compensation_rule": { "$ref": "#/$defs/text" }
       },
       "additionalProperties": false
     },
@@ -161,6 +216,20 @@
       "type": "object",
       "required": ["description"],
       "properties": { "description": { "$ref": "#/$defs/text" } },
+      "additionalProperties": false
+    },
+    "fieldSet": {
+      "type": "object",
+      "required": ["fields", "rule"],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/text" }
+        },
+        "rule": { "$ref": "#/$defs/text" }
+      },
       "additionalProperties": false
     },
     "boundary": {
