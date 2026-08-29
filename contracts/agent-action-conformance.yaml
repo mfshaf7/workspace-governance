@@ -8,7 +8,7 @@ execution_time: "2026-08-22T10:00:02Z"
 implementation_sources:
   evaluator:
     repo: workspace-governance-control-fabric
-    revision: 9106fb718a47484aa4b38118be2e9ed8d553349e
+    revision: d96d7293b079de523fac68658d11b9350defa299
     manifest_ref: contracts/agent-action/manifest.json
   enforcer:
     repo: operator-orchestration-service
