@@ -58,6 +58,25 @@
         }
       },
       "then": { "properties": { "provider_readback_ref": { "$ref": "#/$defs/artifactRef" } } }
+    },
+    {
+      "if": {
+        "required": ["action", "outcome"],
+        "properties": {
+          "action": { "const": "provision-new" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "custody": {
+            "properties": {
+              "before": { "const": "unrecorded" },
+              "after": { "const": "provisioned" }
+            }
+          }
+        }
+      }
     }
   ],
   "$defs": {

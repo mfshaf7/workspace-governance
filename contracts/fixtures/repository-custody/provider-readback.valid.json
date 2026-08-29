@@ -7,6 +7,7 @@
     "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
   },
   "observed_at": "2026-08-29T06:00:02Z",
+  "action": "link-existing",
   "repository_identity": {
     "provider": "github",
     "provider_repository_id": "123456789"
@@ -22,6 +23,7 @@
     "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-read",
     "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
   },
+  "applied_provisioning": null,
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",

@@ -28,6 +28,13 @@ ARTIFACT_CASES = {
     ),
 }
 
+PROVISION_ARTIFACT_CASES = {
+    "request": "request.provision.valid.json",
+    "decision": "decision.provision.valid.json",
+    "provider_readback": "provider-readback.provision.valid.json",
+    "custody_receipt": "receipt.provision.valid.json",
+}
+
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -51,6 +58,10 @@ class RepositoryCustodyTests(unittest.TestCase):
             name: load_json(FIXTURE_ROOT / fixture_name)
             for name, (_, fixture_name) in ARTIFACT_CASES.items()
         }
+        cls.provision_fixtures = {
+            name: load_json(FIXTURE_ROOT / fixture_name)
+            for name, fixture_name in PROVISION_ARTIFACT_CASES.items()
+        }
 
     def assertValid(self, artifact_name: str, payload: dict) -> None:
         errors = sorted(
@@ -69,6 +80,9 @@ class RepositoryCustodyTests(unittest.TestCase):
         self.assertEqual(list(contract_validator.iter_errors(self.contract)), [])
         for name, payload in self.fixtures.items():
             with self.subTest(artifact=name):
+                self.assertValid(name, payload)
+        for name, payload in self.provision_fixtures.items():
+            with self.subTest(artifact=f"provision_{name}"):
                 self.assertValid(name, payload)
 
     def test_repository_identity_uses_provider_id_not_coordinates(self) -> None:
@@ -148,6 +162,51 @@ class RepositoryCustodyTests(unittest.TestCase):
         request = copy.deepcopy(self.fixtures["request"])
         request["authority"]["token"] = "not-allowed"
         self.assertInvalid("request", request)
+
+    def test_provisioning_requires_organization_scope_and_explicit_settings(self) -> None:
+        request = copy.deepcopy(self.provision_fixtures["request"])
+        request["target"]["owner_scope"] = "personal"
+        self.assertInvalid("request", request)
+
+        request = copy.deepcopy(self.provision_fixtures["request"])
+        request.pop("provisioning")
+        self.assertInvalid("request", request)
+
+        request = copy.deepcopy(self.provision_fixtures["request"])
+        request["provisioning"]["initialize_with_readme"] = False
+        self.assertInvalid("request", request)
+
+        request = copy.deepcopy(self.provision_fixtures["request"])
+        request["provisioning"]["features"].pop("issues")
+        self.assertInvalid("request", request)
+
+    def test_provisioning_decision_binds_exact_target_and_create_action(self) -> None:
+        decision = copy.deepcopy(self.provision_fixtures["decision"])
+        decision["next_action"] = "read-provider"
+        self.assertInvalid("decision", decision)
+
+        decision = copy.deepcopy(self.provision_fixtures["decision"])
+        decision["approved_provisioning"] = None
+        self.assertInvalid("decision", decision)
+
+        decision = copy.deepcopy(self.provision_fixtures["decision"])
+        decision["outcome"] = "requires-action"
+        decision["next_action"] = "request-correction"
+        self.assertInvalid("decision", decision)
+
+    def test_provisioning_readback_proves_settings_and_initialized_state(self) -> None:
+        readback = copy.deepcopy(self.provision_fixtures["provider_readback"])
+        readback["applied_provisioning"] = None
+        self.assertInvalid("provider_readback", readback)
+
+        readback = copy.deepcopy(self.provision_fixtures["provider_readback"])
+        readback["applied_provisioning"]["initialization_state"] = "empty"
+        self.assertInvalid("provider_readback", readback)
+
+    def test_successful_provision_receipt_records_provisioned_custody(self) -> None:
+        receipt = copy.deepcopy(self.provision_fixtures["custody_receipt"])
+        receipt["custody"]["after"] = "linked"
+        self.assertInvalid("custody_receipt", receipt)
 
 
 if __name__ == "__main__":

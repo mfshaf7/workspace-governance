@@ -10,7 +10,7 @@ This generated report proves the merged WGCF evaluator and OOS enforcer against 
 - Negative cases: `7`
 - Runtime activation: `disabled`
 - Authority contract: `sha256:8ed8aee6b03e42d02d5621e650d4488ee3a043e55b38cbd9e4018e4b9bf8d0c3`
-- Conformance contract: `sha256:beb75bbfc7c182a5f5b76a50b51871c1adacf09b2d955b7d17bc1015b4fd5936`
+- Conformance contract: `sha256:4514cbd7d92934ef6d0f17e9b0e7b83744cf7f3c465a9818aedd65a08cf542d1`
 
 The owner mutation adapter is synthetic. This proof does not mutate a canonical backend or activate shared runtime behavior.
 
@@ -18,8 +18,8 @@ The owner mutation adapter is synthetic. This proof does not mutate a canonical 
 
 | Role | Repository | Revision | Manifest |
 | --- | --- | --- | --- |
-| `enforcer` | `operator-orchestration-service` | `8772034ad03c6899f8e02ba45f4c3038dbf071e6` | `sha256:5ae4d4abc6bfa51211f176dd06eeae5031eb704824c508291b6389da32e0f890` |
-| `evaluator` | `workspace-governance-control-fabric` | `ae96d83a409711e6333b545a82f8bb695573c7f0` | `sha256:a82e94f8a5650eb7fdeacfa2096298fb43d3cca729e6132596de12ed428436d1` |
+| `enforcer` | `operator-orchestration-service` | `28bc985b37eede72342495ed358f9c67d5211bfc` | `sha256:5ae4d4abc6bfa51211f176dd06eeae5031eb704824c508291b6389da32e0f890` |
+| `evaluator` | `workspace-governance-control-fabric` | `5cd7efb6c793358ba6d1f2e9dd25ef40acd65f17` | `sha256:a82e94f8a5650eb7fdeacfa2096298fb43d3cca729e6132596de12ed428436d1` |
 
 ## Cases
 

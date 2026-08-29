@@ -27,10 +27,17 @@
         "provider": { "$ref": "#/$defs/text" },
         "provider_host": { "type": "string", "format": "hostname" },
         "owner": { "$ref": "#/$defs/text" },
+        "owner_scope": { "enum": ["personal", "organization"] },
         "name": { "$ref": "#/$defs/text" },
         "provider_repository_id": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
       },
       "additionalProperties": false
+    },
+    "provisioning": {
+      "oneOf": [
+        { "$ref": "#/$defs/provisioningSettings" },
+        { "type": "null" }
+      ]
     },
     "requested_custody": {
       "type": "object",
@@ -94,6 +101,27 @@
     {
       "if": { "properties": { "action": { "enum": ["link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
       "then": { "properties": { "authority": { "properties": { "approval_ref": { "$ref": "#/$defs/artifactRef" } } } } }
+    },
+    {
+      "if": { "properties": { "action": { "const": "provision-new" } } },
+      "then": {
+        "required": ["provisioning"],
+        "properties": {
+          "target": {
+            "required": ["owner_scope"],
+            "properties": {
+              "owner_scope": { "const": "organization" },
+              "provider_repository_id": { "type": "null" }
+            }
+          },
+          "provisioning": { "$ref": "#/$defs/provisioningSettings" }
+        }
+      },
+      "else": {
+        "properties": {
+          "provisioning": { "type": "null" }
+        }
+      }
     }
   ],
   "$defs": {
@@ -101,6 +129,43 @@
     "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "provisioningSettings": {
+      "type": "object",
+      "required": ["description", "visibility", "initialize_with_readme", "features", "merge_policy"],
+      "properties": {
+        "description": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 350 },
+            { "type": "null" }
+          ]
+        },
+        "visibility": { "enum": ["private", "internal", "public"] },
+        "initialize_with_readme": { "const": true },
+        "features": {
+          "type": "object",
+          "required": ["issues", "projects", "wiki", "discussions"],
+          "properties": {
+            "issues": { "type": "boolean" },
+            "projects": { "type": "boolean" },
+            "wiki": { "type": "boolean" },
+            "discussions": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "merge_policy": {
+          "type": "object",
+          "required": ["allow_squash_merge", "allow_merge_commit", "allow_rebase_merge", "delete_branch_on_merge"],
+          "properties": {
+            "allow_squash_merge": { "type": "boolean" },
+            "allow_merge_commit": { "type": "boolean" },
+            "allow_rebase_merge": { "type": "boolean" },
+            "delete_branch_on_merge": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "artifactRef": {
       "type": "object",
       "required": ["uri", "digest"],

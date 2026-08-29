@@ -2,13 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/schemas/repository-provider-readback.schema.json",
   "type": "object",
-  "required": ["schema_version", "artifact_type", "readback_id", "request_ref", "observed_at", "repository_identity", "canonical_owner", "canonical_name", "canonical_url", "default_branch", "visibility", "provider_lifecycle_state", "provider_version", "credential_binding_ref", "integrity"],
+  "required": ["schema_version", "artifact_type", "readback_id", "request_ref", "observed_at", "action", "repository_identity", "canonical_owner", "canonical_name", "canonical_url", "default_branch", "visibility", "provider_lifecycle_state", "provider_version", "credential_binding_ref", "integrity"],
   "properties": {
     "schema_version": { "const": 1 },
     "artifact_type": { "const": "repository_provider_readback" },
     "readback_id": { "type": "string", "pattern": "^repository-provider-readback:[A-Za-z0-9._:-]+$" },
     "request_ref": { "$ref": "#/$defs/artifactRef" },
     "observed_at": { "type": "string", "format": "date-time" },
+    "action": { "$ref": "#/$defs/action" },
     "repository_identity": {
       "type": "object",
       "required": ["provider", "provider_repository_id"],
@@ -29,16 +30,81 @@
     "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
     "provider_version": { "$ref": "#/$defs/text" },
     "credential_binding_ref": { "$ref": "#/$defs/artifactRef" },
+    "applied_provisioning": {
+      "oneOf": [
+        { "$ref": "#/$defs/appliedProvisioning" },
+        { "type": "null" }
+      ]
+    },
     "integrity": { "$ref": "#/$defs/integrity" }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "provision-new" } } },
+      "then": {
+        "required": ["applied_provisioning"],
+        "properties": {
+          "applied_provisioning": { "$ref": "#/$defs/appliedProvisioning" }
+        }
+      },
+      "else": {
+        "properties": {
+          "applied_provisioning": { "type": "null" }
+        }
+      }
+    }
+  ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
     "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "artifactRef": {
       "type": "object",
       "required": ["uri", "digest"],
       "properties": { "uri": { "type": "string", "format": "uri" }, "digest": { "$ref": "#/$defs/digest" } },
+      "additionalProperties": false
+    },
+    "appliedProvisioning": {
+      "type": "object",
+      "required": ["owner_scope", "initialization_state", "settings"],
+      "properties": {
+        "owner_scope": { "const": "organization" },
+        "initialization_state": { "const": "initialized" },
+        "settings": { "$ref": "#/$defs/provisioningSettings" }
+      },
+      "additionalProperties": false
+    },
+    "provisioningSettings": {
+      "type": "object",
+      "required": ["description", "visibility", "initialize_with_readme", "features", "merge_policy"],
+      "properties": {
+        "description": { "oneOf": [{ "type": "string", "minLength": 1, "maxLength": 350 }, { "type": "null" }] },
+        "visibility": { "enum": ["private", "internal", "public"] },
+        "initialize_with_readme": { "const": true },
+        "features": {
+          "type": "object",
+          "required": ["issues", "projects", "wiki", "discussions"],
+          "properties": {
+            "issues": { "type": "boolean" },
+            "projects": { "type": "boolean" },
+            "wiki": { "type": "boolean" },
+            "discussions": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "merge_policy": {
+          "type": "object",
+          "required": ["allow_squash_merge", "allow_merge_commit", "allow_rebase_merge", "delete_branch_on_merge"],
+          "properties": {
+            "allow_squash_merge": { "type": "boolean" },
+            "allow_merge_commit": { "type": "boolean" },
+            "allow_rebase_merge": { "type": "boolean" },
+            "delete_branch_on_merge": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": false
     },
     "integrity": {

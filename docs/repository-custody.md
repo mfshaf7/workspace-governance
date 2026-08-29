@@ -87,6 +87,35 @@ Hard provider deletion is outside contract version 1. A partial successful
 provision is recovered through readback and continuation, never by an automatic
 compensating delete.
 
+## Provisioning Controls
+
+The first `provision-new` capability is deliberately narrower than the general
+provider-neutral custody model. It creates GitHub repositories only inside the
+organization bound to the approved GitHub App installation. Personal-account
+creation, personal access tokens, and ambient `gh` authentication are not
+fallbacks.
+
+The request must explicitly bind:
+
+- organization owner and repository name
+- description and visibility
+- README initialization
+- issues, projects, wiki, and discussions toggles
+- squash, merge-commit, and rebase policy
+- delete-branch-on-merge policy
+- exact operator approval, credential binding, and idempotency identity
+
+Provider defaults do not count as operator intent. An allowed WGCF decision
+carries the exact target and settings with `create-provider` as its next action.
+Completion requires provider readback of the immutable repository ID, canonical
+coordinates, initialized state, visibility, features, and merge policy. Any
+mismatch fails closed.
+
+If the create response is lost or readback is interrupted, OOS reconciles the
+original request through canonical organization/name coordinates before it may
+retry. It never deletes a repository as automatic compensation and never sends
+a blind second create request.
+
 ## Replay And Failure
 
 The request ID and request digest form the idempotency binding. Replaying the
