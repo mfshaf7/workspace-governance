@@ -69,6 +69,10 @@ repository_identity:
       - provider
       - provider_repository_id
     rule: Provider repository ID is immutable identity; owner, name, URL, and default branch are mutable coordinates read from provider truth.
+  provider_id_formats:
+    github:
+      format: decimal-rest-repository-id
+      rule: Use the positive decimal GitHub repository `id` returned by the REST API. A GraphQL `node_id`, owner/name pair, or URL is not this field.
   required_readback_fields:
     - provider
     - provider_repository_id

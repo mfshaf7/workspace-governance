@@ -21,6 +21,12 @@ owner, name, URL, default branch, visibility, and archive state are coordinates
 obtained from provider readback. Rename and transfer must not create a second
 repository identity.
 
+For GitHub, `provider_repository_id` is the positive decimal repository `id`
+used by the REST `GET /repositories/{repository_id}` endpoint. It is not the
+GraphQL `node_id`, an owner/name pair, or a repository URL. Schemas enforce
+that provider-specific format across requests, decisions, readbacks, and
+receipts.
+
 Requests and receipts carry a provider credential-binding reference. They must
 never carry a personal access token, installation secret, or other credential
 value.

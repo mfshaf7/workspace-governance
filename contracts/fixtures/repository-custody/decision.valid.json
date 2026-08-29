@@ -11,7 +11,7 @@
   "outcome": "allowed",
   "resolved_identity": {
     "provider": "github",
-    "provider_repository_id": "R_kgDOExample"
+    "provider_repository_id": "123456789"
   },
   "findings": [
     {

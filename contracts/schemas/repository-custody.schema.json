@@ -28,7 +28,7 @@
     },
     "repository_identity": {
       "type": "object",
-      "required": ["immutable_key", "required_readback_fields", "credential_rule"],
+      "required": ["immutable_key", "provider_id_formats", "required_readback_fields", "credential_rule"],
       "properties": {
         "immutable_key": {
           "type": "object",
@@ -38,6 +38,30 @@
             "rule": { "$ref": "#/$defs/text" }
           },
           "additionalProperties": false
+        },
+        "provider_id_formats": {
+          "type": "object",
+          "required": ["github"],
+          "properties": {
+            "github": {
+              "type": "object",
+              "required": ["format", "rule"],
+              "properties": {
+                "format": { "const": "decimal-rest-repository-id" },
+                "rule": { "$ref": "#/$defs/text" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["format", "rule"],
+            "properties": {
+              "format": { "$ref": "#/$defs/text" },
+              "rule": { "$ref": "#/$defs/text" }
+            },
+            "additionalProperties": false
+          }
         },
         "required_readback_fields": {
           "type": "array",

@@ -65,6 +65,29 @@
   },
   "allOf": [
     {
+      "if": {
+        "properties": {
+          "target": {
+            "properties": { "provider": { "const": "github" } }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "properties": {
+              "provider_repository_id": {
+                "oneOf": [
+                  { "$ref": "#/$defs/githubRepositoryId" },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
       "then": { "properties": { "target": { "properties": { "provider_repository_id": { "$ref": "#/$defs/text" } } } } }
     },
@@ -75,6 +98,7 @@
   ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
+    "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
     "artifactRef": {
