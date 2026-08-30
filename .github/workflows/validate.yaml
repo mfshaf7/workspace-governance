@@ -122,7 +122,13 @@ jobs:
           capability_source = (
               delivery_art_path.get("contract_activation", {}).get("capability_source", {})
           )
+          agent_action_sources = yaml.safe_load(
+              (repo_root / "contracts" / "agent-action-conformance.yaml").read_text()
+          )["implementation_sources"]
           history_bound_repos = set(pinned_review_repos)
+          history_bound_repos.update(
+              source["repo"] for source in agent_action_sources.values()
+          )
           if capability_source.get("activated_at_commit"):
               history_bound_repos.add(capability_source["repo"])
           owner_repos = sorted(set(repos.keys()) | admitted_repos)

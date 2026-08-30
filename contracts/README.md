@@ -85,7 +85,8 @@ Use these contracts to declare:
   - defines the integrated local source proof across the exact merged WGCF
     evaluator and OOS enforcer revisions, including positive and negative
     action-class cases, replay denial, receipt and audit failures, and explicit
-    excluded capabilities
+    excluded capabilities; validation materializes those pinned revisions from
+    Git history and proves they remain merged into each owner repo's `main`
 - `schemas/agent-action-request.schema.json`
   - defines the immutable request envelope for `read`, `advise`, `draft`, and
     `mutate` actions without treating logical agent identity as authority

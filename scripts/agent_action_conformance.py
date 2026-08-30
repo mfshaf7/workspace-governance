@@ -4,10 +4,12 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import io
 import json
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
 from tempfile import TemporaryDirectory
 from typing import Any, Mapping
 
@@ -52,15 +54,78 @@ def _file_digest(path: Path) -> str:
     return _sha256_bytes(path.read_bytes())
 
 
-def _git_head(repo_root: Path) -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo_root,
-        check=True,
+def _canonical_main_ref(repo_root: Path) -> tuple[str, str]:
+    for ref in ("refs/remotes/origin/main", "refs/heads/main"):
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", ref],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode == 0:
+            return ref, result.stdout.strip()
+    raise ValueError(f"canonical main ref is unavailable in {repo_root}")
+
+
+def _materialize_pinned_source(
+    source_repo: Path,
+    revision: str,
+    destination: Path,
+) -> tuple[Path, str]:
+    if not source_repo.is_dir():
+        raise ValueError(f"implementation source checkout is missing: {source_repo}")
+
+    commit_check = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        cwd=source_repo,
+        check=False,
         capture_output=True,
         text=True,
     )
-    return result.stdout.strip()
+    if commit_check.returncode != 0:
+        raise ValueError(
+            f"pinned implementation revision {revision} is unavailable in "
+            f"{source_repo.name}; fetch source history before running conformance"
+        )
+
+    main_ref, main_revision = _canonical_main_ref(source_repo)
+    merged_check = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", revision, main_ref],
+        cwd=source_repo,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if merged_check.returncode != 0:
+        raise ValueError(
+            f"pinned implementation revision {revision} is not merged into "
+            f"{source_repo.name} {main_ref} ({main_revision})"
+        )
+
+    archive = subprocess.run(
+        ["git", "archive", "--format=tar", revision],
+        cwd=source_repo,
+        check=False,
+        capture_output=True,
+    )
+    if archive.returncode != 0:
+        raise RuntimeError(
+            f"could not materialize {source_repo.name} revision {revision}: "
+            + archive.stderr.decode("utf-8", errors="replace").strip()
+        )
+
+    destination.mkdir(parents=True, exist_ok=False)
+    with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:") as bundle:
+        bundle.extractall(destination, filter="data")
+
+    dependency_root = source_repo / "node_modules"
+    if dependency_root.is_dir():
+        (destination / "node_modules").symlink_to(
+            dependency_root,
+            target_is_directory=True,
+        )
+    return destination, main_revision
 
 
 def contract_issues(contract: Mapping[str, Any]) -> list[str]:
@@ -118,19 +183,21 @@ def _verify_source_contracts(
     repo_root: Path,
     workspace_root: Path,
     contract: Mapping[str, Any],
-) -> dict[str, Any]:
+    snapshot_root: Path,
+) -> tuple[dict[str, Any], dict[str, Path]]:
     authority_path = repo_root / contract["authority_contract_ref"]
     source_results: dict[str, Any] = {}
+    source_roots: dict[str, Path] = {}
     authority_commits: set[str] = set()
     schema_digests: dict[str, set[str]] = {}
 
     for role, source in contract["implementation_sources"].items():
-        source_repo = workspace_root / source["repo"]
-        actual_revision = _git_head(source_repo)
-        if actual_revision != source["revision"]:
-            raise ValueError(
-                f"{role} revision mismatch: expected {source['revision']}, got {actual_revision}"
-            )
+        owner_repo = workspace_root / source["repo"]
+        source_repo, _ = _materialize_pinned_source(
+            owner_repo,
+            source["revision"],
+            snapshot_root / role,
+        )
         manifest_path = source_repo / source["manifest_ref"]
         manifest = _load_json(manifest_path)
         authority_commits.add(manifest["source"]["commit"])
@@ -153,11 +220,12 @@ def _verify_source_contracts(
                 raise ValueError(f"{role} authority snapshot differs from workspace authority")
         source_results[role] = {
             "repo": source["repo"],
-            "revision": actual_revision,
+            "revision": source["revision"],
             "manifest_ref": source["manifest_ref"],
             "manifest_digest": _file_digest(manifest_path),
             "authority_source_commit": manifest["source"]["commit"],
         }
+        source_roots[role] = source_repo
 
     if len(authority_commits) != 1:
         raise ValueError("evaluator and enforcer do not pin the same authority source")
@@ -170,7 +238,7 @@ def _verify_source_contracts(
         raise ValueError(
             "implementation schema digests disagree: " + ", ".join(mismatched_schemas)
         )
-    return source_results
+    return source_results, source_roots
 
 
 def run_conformance(
@@ -181,68 +249,80 @@ def run_conformance(
     issues = contract_issues(contract)
     if issues:
         raise ValueError("; ".join(issues))
-    sources = _verify_source_contracts(repo_root, workspace_root, contract)
+    with TemporaryDirectory(prefix="agent-action-sources-") as source_temp:
+        sources, source_roots = _verify_source_contracts(
+            repo_root,
+            workspace_root,
+            contract,
+            Path(source_temp),
+        )
 
-    wgcf_repo = workspace_root / EXPECTED_SOURCE_REPOS["evaluator"]
-    with TemporaryDirectory() as temp_dir:
-        ledger_path = Path(temp_dir) / "wgcf-agent-action-ledger.jsonl"
-        evaluator_input = Path(temp_dir) / "evaluator-input.json"
-        evaluator_input.write_text(
-            json.dumps(
-                {
-                    "decision_time": contract["decision_time"],
-                    "ledger_path": str(ledger_path),
-                    "cases": contract["cases"],
-                },
-                indent=2,
-                sort_keys=True,
+        wgcf_repo = source_roots["evaluator"]
+        with TemporaryDirectory() as temp_dir:
+            ledger_path = Path(temp_dir) / "wgcf-agent-action-ledger.jsonl"
+            evaluator_input = Path(temp_dir) / "evaluator-input.json"
+            evaluator_input.write_text(
+                json.dumps(
+                    {
+                        "decision_time": contract["decision_time"],
+                        "ledger_path": str(ledger_path),
+                        "cases": contract["cases"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
             )
-            + "\n",
-            encoding="utf-8",
-        )
-        evaluator = repo_root / "scripts" / "agent_action_conformance_evaluator.py"
-        local_wgcf_python = wgcf_repo / ".venv" / "bin" / "python"
-        wgcf_python = local_wgcf_python if local_wgcf_python.exists() else Path(sys.executable)
-        evaluation = subprocess.run(
-            [str(wgcf_python), str(evaluator), str(evaluator_input), str(wgcf_repo)],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        if evaluation.returncode != 0:
-            raise RuntimeError(
-                "WGCF conformance evaluator failed: " + evaluation.stderr.strip()
+            evaluator = repo_root / "scripts" / "agent_action_conformance_evaluator.py"
+            owner_wgcf_repo = workspace_root / EXPECTED_SOURCE_REPOS["evaluator"]
+            local_wgcf_python = owner_wgcf_repo / ".venv" / "bin" / "python"
+            wgcf_python = (
+                local_wgcf_python
+                if local_wgcf_python.exists()
+                else Path(sys.executable)
             )
-        adapter_cases = json.loads(evaluation.stdout)["cases"]
+            evaluation = subprocess.run(
+                [str(wgcf_python), str(evaluator), str(evaluator_input), str(wgcf_repo)],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if evaluation.returncode != 0:
+                raise RuntimeError(
+                    "WGCF conformance evaluator failed: " + evaluation.stderr.strip()
+                )
+            adapter_cases = json.loads(evaluation.stdout)["cases"]
 
-        adapter_input = Path(temp_dir) / "adapter-input.json"
-        adapter_input.write_text(
-            json.dumps(
-                {
-                    "execution_time": contract["execution_time"],
-                    "cases": adapter_cases,
-                },
-                indent=2,
-                sort_keys=True,
+            adapter_input = Path(temp_dir) / "adapter-input.json"
+            adapter_input.write_text(
+                json.dumps(
+                    {
+                        "execution_time": contract["execution_time"],
+                        "cases": adapter_cases,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
             )
-            + "\n",
-            encoding="utf-8",
-        )
-        adapter = repo_root / "scripts" / "agent_action_conformance_adapter.mjs"
-        oos_repo = workspace_root / EXPECTED_SOURCE_REPOS["enforcer"]
-        result = subprocess.run(
-            ["node", str(adapter), str(adapter_input), str(oos_repo)],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            raise RuntimeError(
-                "OOS conformance adapter failed: " + result.stderr.strip()
+            adapter = repo_root / "scripts" / "agent_action_conformance_adapter.mjs"
+            oos_repo = source_roots["enforcer"]
+            result = subprocess.run(
+                ["node", str(adapter), str(adapter_input), str(oos_repo)],
+                check=False,
+                capture_output=True,
+                text=True,
             )
-        enforcement_results = {
-            entry["case_id"]: entry for entry in json.loads(result.stdout)["results"]
-        }
+            if result.returncode != 0:
+                raise RuntimeError(
+                    "OOS conformance adapter failed: " + result.stderr.strip()
+                )
+            enforcement_results = {
+                entry["case_id"]: entry
+                for entry in json.loads(result.stdout)["results"]
+            }
 
     case_results: list[dict[str, Any]] = []
     for case in contract["cases"]:

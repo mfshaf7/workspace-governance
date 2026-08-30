@@ -90,6 +90,10 @@ uses a synthetic owner adapter, and records only digest-bound decision and
 receipt references. It does not activate shared runtime behavior or mutate a
 canonical backend.
 
+The proof materializes each pinned revision from Git history and verifies that
+it remains an ancestor of that owner repo's canonical `main`. Unrelated later
+merges therefore do not rewrite or invalidate the approved proof source.
+
 Run or verify it from the workspace root with:
 
 ```bash
