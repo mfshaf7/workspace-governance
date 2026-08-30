@@ -443,7 +443,7 @@
       ]
     }
   ],
-  "conformance_contract_digest": "sha256:4514cbd7d92934ef6d0f17e9b0e7b83744cf7f3c465a9818aedd65a08cf542d1",
+  "conformance_contract_digest": "sha256:37e04f062459e99138aa955d4eb0e3e2f0bb5bd7e446e2157434e0f774371ca1",
   "excluded_capabilities": [
     "console-agent-mutation",
     "shared-runtime-exposure",
@@ -458,14 +458,14 @@
       "manifest_digest": "sha256:5ae4d4abc6bfa51211f176dd06eeae5031eb704824c508291b6389da32e0f890",
       "manifest_ref": "contracts/agent-action/manifest.json",
       "repo": "operator-orchestration-service",
-      "revision": "28bc985b37eede72342495ed358f9c67d5211bfc"
+      "revision": "697ed98b4bd1a4932dc95f81f1d98cd6ae39be9d"
     },
     "evaluator": {
       "authority_source_commit": "d6e5a5bf0cac6ddfbf127f5826159556971c3718",
       "manifest_digest": "sha256:a82e94f8a5650eb7fdeacfa2096298fb43d3cca729e6132596de12ed428436d1",
       "manifest_ref": "contracts/agent-action/manifest.json",
       "repo": "workspace-governance-control-fabric",
-      "revision": "5cd7efb6c793358ba6d1f2e9dd25ef40acd65f17"
+      "revision": "7b6414019771ea9364c363aa8a19364f656a7446"
     }
   },
   "proof_posture": "integrated-local-source",

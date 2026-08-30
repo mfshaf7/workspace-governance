@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-lifecycle-audit.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "audit_id", "projected_at", "source_authority", "mutation", "repository_identity", "current_state", "impact_summary", "latest_terminal_receipt_ref", "history", "integrity"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_lifecycle_audit" },
+    "audit_id": { "type": "string", "pattern": "^repository-lifecycle-audit:[A-Za-z0-9._:-]+$" },
+    "projected_at": { "type": "string", "format": "date-time" },
+    "source_authority": { "const": "operator-orchestration-service" },
+    "mutation": { "const": false },
+    "repository_identity": { "$ref": "#/$defs/repositoryIdentity" },
+    "current_state": { "$ref": "#/$defs/lifecycleState" },
+    "impact_summary": {
+      "type": "object",
+      "required": ["latest_assessment_ref", "finding_count", "blocking_finding_count", "blocker_disposition"],
+      "properties": {
+        "latest_assessment_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "blocking_finding_count": { "type": "integer", "minimum": 0 },
+        "blocker_disposition": { "enum": ["remove", "workaround", "accept-risk", "defer", null] }
+      },
+      "additionalProperties": false
+    },
+    "latest_terminal_receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "outcome", "completed_at", "receipt_ref", "reversal_of_receipt_ref"],
+        "properties": {
+          "action": { "$ref": "#/$defs/action" },
+          "outcome": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "receipt_ref": { "$ref": "#/$defs/artifactRef" },
+          "reversal_of_receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "action": { "enum": ["transfer-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "repositoryIdentity": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/text" },
+        "provider_repository_id": { "$ref": "#/$defs/text" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "provider": { "const": "github" } } },
+          "then": { "properties": { "provider_repository_id": { "pattern": "^[1-9][0-9]*$" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "lifecycleState": {
+      "type": "object",
+      "required": ["custody_state", "workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state", "custody_version", "provider_version"],
+      "properties": {
+        "custody_state": { "enum": ["linked", "provisioned"] },
+        "workspace_owner_ref": { "$ref": "#/$defs/text" },
+        "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
+        "workspace_record_state": { "enum": ["active", "retired"] },
+        "custody_version": { "$ref": "#/$defs/text" },
+        "provider_version": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

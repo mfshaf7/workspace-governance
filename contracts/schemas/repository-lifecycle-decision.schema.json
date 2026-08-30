@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-lifecycle-decision.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "decision_id", "request_ref", "evaluated_at", "policy_version", "action", "outcome", "current_state", "approved_target", "impact", "required_human_gates", "findings", "obligations", "next_action", "integrity"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_lifecycle_decision" },
+    "decision_id": { "type": "string", "pattern": "^repository-lifecycle-decision:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "policy_version": { "$ref": "#/$defs/text" },
+    "action": { "$ref": "#/$defs/action" },
+    "outcome": { "enum": ["allowed", "denied", "requires-action"] },
+    "current_state": { "$ref": "#/$defs/lifecycleState" },
+    "approved_target": {
+      "oneOf": [
+        { "$ref": "#/$defs/target" },
+        { "type": "null" }
+      ]
+    },
+    "impact": { "$ref": "#/$defs/impactDecision" },
+    "required_human_gates": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["exact-operator-approval", "source-owner-acceptance", "target-owner-acceptance", "governed-provider-credential-binding"] }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "summary"],
+        "properties": {
+          "code": { "$ref": "#/$defs/text" },
+          "severity": { "enum": ["info", "warning", "blocking"] },
+          "summary": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "obligations": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+    "next_action": { "enum": ["apply-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record", "request-correction", "stop"] },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "allowed" } } },
+      "then": {
+        "properties": {
+          "approved_target": { "$ref": "#/$defs/target" }
+        }
+      },
+      "else": {
+        "properties": {
+          "approved_target": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "denied" } } },
+      "then": { "properties": { "next_action": { "const": "stop" } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "requires-action" } } },
+      "then": { "properties": { "next_action": { "const": "request-correction" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "impact": {
+            "required": ["blocker_disposition"],
+            "properties": {
+              "blocker_disposition": {
+                "type": "object",
+                "required": ["decision"],
+                "properties": { "decision": { "const": "defer" } }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "outcome": { "const": "requires-action" },
+          "next_action": { "const": "request-correction" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "transfer-workspace-custody" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "next_action": { "const": "apply-workspace-custody" },
+          "required_human_gates": { "const": ["exact-operator-approval", "source-owner-acceptance", "target-owner-acceptance"] },
+          "approved_target": {
+            "properties": {
+              "workspace_owner_ref": { "$ref": "#/$defs/text" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "archive-provider" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "provider_lifecycle_state": { "const": "active" } } },
+          "next_action": { "const": "archive-provider" },
+          "required_human_gates": { "const": ["exact-operator-approval", "governed-provider-credential-binding"] },
+          "approved_target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "const": "archived" },
+              "workspace_record_state": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "unarchive-provider" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "provider_lifecycle_state": { "const": "archived" } } },
+          "next_action": { "const": "unarchive-provider" },
+          "required_human_gates": { "const": ["exact-operator-approval", "governed-provider-credential-binding"] },
+          "approved_target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "const": "active" },
+              "workspace_record_state": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "retire-workspace-record" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "next_action": { "const": "retire-workspace-record" },
+          "required_human_gates": { "const": ["exact-operator-approval"] },
+          "approved_target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "const": "retired" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "restore-workspace-record" },
+          "outcome": { "const": "allowed" }
+        }
+      },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "retired" } } },
+          "next_action": { "const": "restore-workspace-record" },
+          "required_human_gates": { "const": ["exact-operator-approval"] },
+          "approved_target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "const": "active" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "action": { "enum": ["transfer-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycleState": {
+      "type": "object",
+      "required": ["custody_state", "workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state", "custody_version", "provider_version"],
+      "properties": {
+        "custody_state": { "enum": ["linked", "provisioned"] },
+        "workspace_owner_ref": { "$ref": "#/$defs/text" },
+        "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
+        "workspace_record_state": { "enum": ["active", "retired"] },
+        "custody_version": { "$ref": "#/$defs/text" },
+        "provider_version": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state"],
+      "properties": {
+        "workspace_owner_ref": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] },
+        "provider_lifecycle_state": { "enum": ["active", "archived", null] },
+        "workspace_record_state": { "enum": ["active", "retired", null] }
+      },
+      "additionalProperties": false
+    },
+    "impactDecision": {
+      "type": "object",
+      "required": ["impact_assessment_ref", "finding_count", "blocking_finding_count", "blocker_disposition", "downstream_mutation"],
+      "properties": {
+        "impact_assessment_ref": { "$ref": "#/$defs/artifactRef" },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "blocking_finding_count": { "type": "integer", "minimum": 0 },
+        "blocker_disposition": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["decision", "justification", "evidence_ref"],
+              "properties": {
+                "decision": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+                "justification": { "$ref": "#/$defs/text" },
+                "evidence_ref": { "$ref": "#/$defs/artifactRef" }
+              },
+              "additionalProperties": false
+            },
+            { "type": "null" }
+          ]
+        },
+        "downstream_mutation": { "const": "none" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -11,7 +11,7 @@
     "decision_ref": { "$ref": "#/$defs/artifactRef" },
     "provider_readback_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
     "completed_at": { "type": "string", "format": "date-time" },
-    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new"] },
     "outcome": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
     "repository_identity": { "oneOf": [{ "$ref": "#/$defs/repositoryIdentity" }, { "type": "null" }] },
     "custody": {
@@ -53,7 +53,7 @@
       "if": {
         "required": ["action", "outcome"],
         "properties": {
-          "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider"] },
+          "action": { "enum": ["observe-existing", "link-existing", "provision-new"] },
           "outcome": { "const": "succeeded" }
         }
       },
@@ -82,7 +82,7 @@
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "custodyState": { "enum": ["unrecorded", "observed", "linked", "provisioned", "transfer-pending", "archived", "retired"] },
+    "custodyState": { "enum": ["unrecorded", "observed", "linked", "provisioned"] },
     "handoffState": { "enum": ["not-requested", "request-available", "separate-action-required"] },
     "artifactRef": {
       "type": "object",

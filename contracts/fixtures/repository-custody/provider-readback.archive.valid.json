@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_provider_readback",
+  "readback_id": "repository-provider-readback:example-archive-001",
+  "request_ref": {
+    "uri": "https://oos.local/repository-lifecycle/requests/example-archive-001",
+    "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  },
+  "observed_at": "2026-08-30T02:02:00Z",
+  "action": "archive-provider",
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "123456789"
+  },
+  "canonical_owner": "example-owner",
+  "canonical_name": "example-repository",
+  "canonical_url": "https://github.com/example-owner/example-repository",
+  "default_branch": "main",
+  "visibility": "private",
+  "provider_lifecycle_state": "archived",
+  "provider_version": "provider-v9",
+  "credential_binding_ref": {
+    "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-lifecycle",
+    "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "applied_provisioning": null,
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  }
+}

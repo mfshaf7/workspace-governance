@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_lifecycle_decision",
+  "decision_id": "repository-lifecycle-decision:example-archive-001",
+  "request_ref": {
+    "uri": "https://oos.local/repository-lifecycle/requests/example-archive-001",
+    "digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+  },
+  "evaluated_at": "2026-08-30T02:01:00Z",
+  "policy_version": "repository-lifecycle-v1",
+  "action": "archive-provider",
+  "outcome": "allowed",
+  "current_state": {
+    "custody_state": "linked",
+    "workspace_owner_ref": "repo:example-repository",
+    "provider_lifecycle_state": "active",
+    "workspace_record_state": "active",
+    "custody_version": "custody-v4",
+    "provider_version": "provider-v8"
+  },
+  "approved_target": {
+    "workspace_owner_ref": null,
+    "provider_lifecycle_state": "archived",
+    "workspace_record_state": null
+  },
+  "impact": {
+    "impact_assessment_ref": {
+      "uri": "https://wgcf.local/repository-impact/example-archive-001",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "finding_count": 2,
+    "blocking_finding_count": 0,
+    "blocker_disposition": null,
+    "downstream_mutation": "none"
+  },
+  "required_human_gates": [
+    "exact-operator-approval",
+    "governed-provider-credential-binding"
+  ],
+  "findings": [
+    {
+      "code": "repository-impact-reviewed",
+      "severity": "info",
+      "summary": "Known consumers were evaluated and require no mutation."
+    }
+  ],
+  "obligations": [
+    "append-terminal-receipt",
+    "preserve-downstream-consumers"
+  ],
+  "next_action": "archive-provider",
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  }
+}

@@ -1,18 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "scope_boundaries", "authority_roles", "repository_identity", "provisioning_controls", "custody_states", "actions", "workflow_statuses", "schema_refs", "idempotency_and_recovery", "evidence_chain", "downstream_handoffs", "runtime_activation", "denied_shortcuts"],
+  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "scope_boundaries", "authority_roles", "repository_identity", "provisioning_controls", "custody_states", "actions", "repository_lifecycle", "workflow_statuses", "schema_refs", "idempotency_and_recovery", "evidence_chain", "downstream_handoffs", "runtime_activation", "denied_shortcuts"],
   "properties": {
     "schema_version": { "const": 1 },
     "owner_repo": { "const": "workspace-governance" },
     "operator_surface_path": { "const": "docs/repository-custody.md" },
     "architecture": {
       "type": "object",
-      "required": ["initiative_ref", "contract_work_ref", "provisioning_contract_work_ref"],
+      "required": ["initiative_ref", "contract_work_ref", "provisioning_contract_work_ref", "lifecycle_feature_ref", "lifecycle_contract_work_ref"],
       "properties": {
         "initiative_ref": { "const": "openproject://work_packages/888" },
         "contract_work_ref": { "const": "openproject://work_packages/1040" },
-        "provisioning_contract_work_ref": { "const": "openproject://work_packages/1054" }
+        "provisioning_contract_work_ref": { "const": "openproject://work_packages/1054" },
+        "lifecycle_feature_ref": { "const": "openproject://work_packages/915" },
+        "lifecycle_contract_work_ref": { "const": "openproject://work_packages/1050" }
       },
       "additionalProperties": false
     },
@@ -130,13 +132,80 @@
     },
     "custody_states": {
       "type": "object",
-      "required": ["unrecorded", "observed", "linked", "provisioned", "transfer-pending", "archived", "retired"],
+      "required": ["unrecorded", "observed", "linked", "provisioned"],
       "additionalProperties": { "$ref": "#/$defs/description" }
     },
     "actions": {
       "type": "object",
-      "required": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"],
+      "required": ["observe-existing", "link-existing", "provision-new"],
       "additionalProperties": { "$ref": "#/$defs/action" }
+    },
+    "repository_lifecycle": {
+      "type": "object",
+      "required": ["state_axes", "actions", "impact_preflight", "confirmation_rules", "audit_projection"],
+      "properties": {
+        "state_axes": {
+          "type": "object",
+          "required": ["custody", "provider", "workspace_record"],
+          "properties": {
+            "custody": { "$ref": "#/$defs/lifecycleStateAxis" },
+            "provider": { "$ref": "#/$defs/lifecycleStateAxis" },
+            "workspace_record": { "$ref": "#/$defs/lifecycleStateAxis" }
+          },
+          "additionalProperties": false
+        },
+        "actions": {
+          "type": "object",
+          "required": ["transfer-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record"],
+          "properties": {
+            "transfer-workspace-custody": { "$ref": "#/$defs/lifecycleAction" },
+            "archive-provider": { "$ref": "#/$defs/lifecycleAction" },
+            "unarchive-provider": { "$ref": "#/$defs/lifecycleAction" },
+            "retire-workspace-record": { "$ref": "#/$defs/lifecycleAction" },
+            "restore-workspace-record": { "$ref": "#/$defs/lifecycleAction" }
+          },
+          "additionalProperties": false
+        },
+        "impact_preflight": {
+          "type": "object",
+          "required": ["required_for_every_action", "assessment_authority", "required_fields", "blocker_dispositions", "rules"],
+          "properties": {
+            "required_for_every_action": { "const": true },
+            "assessment_authority": { "const": "workspace-governance-control-fabric" },
+            "required_fields": { "const": ["impact_assessment_ref", "finding_count", "blocking_finding_count", "blocker_disposition"] },
+            "blocker_dispositions": { "const": ["remove", "workaround", "accept-risk", "defer"] },
+            "rules": { "type": "array", "minItems": 4, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
+          },
+          "additionalProperties": false
+        },
+        "confirmation_rules": {
+          "type": "object",
+          "required": ["every_action", "transfer-workspace-custody", "provider_actions"],
+          "properties": {
+            "every_action": { "const": ["exact-operator-approval"] },
+            "transfer-workspace-custody": { "const": ["source-owner-acceptance", "target-owner-acceptance"] },
+            "provider_actions": { "const": ["governed-provider-credential-binding", "current-provider-version"] }
+          },
+          "additionalProperties": false
+        },
+        "audit_projection": {
+          "type": "object",
+          "required": ["mutation", "authority", "required_fields", "rule"],
+          "properties": {
+            "mutation": { "const": false },
+            "authority": { "const": "operator-orchestration-service" },
+            "required_fields": {
+              "type": "array",
+              "minItems": 9,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/text" }
+            },
+            "rule": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
     "workflow_statuses": {
       "type": "object",
@@ -149,12 +218,16 @@
     },
     "schema_refs": {
       "type": "object",
-      "required": ["request", "decision", "provider_readback", "custody_receipt"],
+      "required": ["request", "decision", "provider_readback", "custody_receipt", "lifecycle_request", "lifecycle_decision", "lifecycle_receipt", "lifecycle_audit"],
       "properties": {
         "request": { "const": "contracts/schemas/repository-custody-request.schema.json" },
         "decision": { "const": "contracts/schemas/repository-custody-decision.schema.json" },
         "provider_readback": { "const": "contracts/schemas/repository-provider-readback.schema.json" },
-        "custody_receipt": { "const": "contracts/schemas/repository-custody-receipt.schema.json" }
+        "custody_receipt": { "const": "contracts/schemas/repository-custody-receipt.schema.json" },
+        "lifecycle_request": { "const": "contracts/schemas/repository-lifecycle-request.schema.json" },
+        "lifecycle_decision": { "const": "contracts/schemas/repository-lifecycle-decision.schema.json" },
+        "lifecycle_receipt": { "const": "contracts/schemas/repository-lifecycle-receipt.schema.json" },
+        "lifecycle_audit": { "const": "contracts/schemas/repository-lifecycle-audit.schema.json" }
       },
       "additionalProperties": false
     },
@@ -173,12 +246,15 @@
     },
     "evidence_chain": {
       "type": "object",
-      "required": ["ordered_artifacts", "reference_rule", "successful_readback_rule", "mutation_rule"],
+      "required": ["ordered_artifacts", "reference_rule", "successful_readback_rule", "mutation_rule", "lifecycle_ordered_artifacts", "lifecycle_reference_rule", "lifecycle_history_rule"],
       "properties": {
         "ordered_artifacts": { "const": ["repository-custody-request", "repository-custody-decision", "repository-provider-readback", "repository-custody-receipt"] },
         "reference_rule": { "$ref": "#/$defs/text" },
         "successful_readback_rule": { "$ref": "#/$defs/text" },
-        "mutation_rule": { "$ref": "#/$defs/text" }
+        "mutation_rule": { "$ref": "#/$defs/text" },
+        "lifecycle_ordered_artifacts": { "const": ["repository-lifecycle-request", "repository-lifecycle-decision", "repository-provider-readback", "repository-lifecycle-receipt"] },
+        "lifecycle_reference_rule": { "$ref": "#/$defs/text" },
+        "lifecycle_history_rule": { "$ref": "#/$defs/text" }
       },
       "additionalProperties": false
     },
@@ -270,6 +346,34 @@
         "allowed_to": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
         "required_provider_readback": { "type": "boolean" }
       },
+      "additionalProperties": false
+    },
+    "lifecycleStateAxis": {
+      "type": "object",
+      "required": ["authority", "states", "rule"],
+      "properties": {
+        "authority": { "$ref": "#/$defs/text" },
+        "states": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycleAction": {
+      "type": "object",
+      "required": ["mutation_authority", "provider_mutation", "required_provider_readback", "target_effect", "reversal"],
+      "properties": {
+        "mutation_authority": { "$ref": "#/$defs/text" },
+        "provider_mutation": { "type": "boolean" },
+        "required_provider_readback": { "type": "boolean" },
+        "allowed_provider_states": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "allowed_workspace_record_states": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "target_effect": { "$ref": "#/$defs/text" },
+        "reversal": { "$ref": "#/$defs/text" }
+      },
+      "oneOf": [
+        { "required": ["allowed_provider_states"], "not": { "required": ["allowed_workspace_record_states"] } },
+        { "required": ["allowed_workspace_record_states"], "not": { "required": ["allowed_provider_states"] } }
+      ],
       "additionalProperties": false
     },
     "handoff": {

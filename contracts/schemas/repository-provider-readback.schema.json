@@ -52,11 +52,19 @@
           "applied_provisioning": { "type": "null" }
         }
       }
+    },
+    {
+      "if": { "properties": { "action": { "const": "archive-provider" } } },
+      "then": { "properties": { "provider_lifecycle_state": { "const": "archived" } } }
+    },
+    {
+      "if": { "properties": { "action": { "const": "unarchive-provider" } } },
+      "then": { "properties": { "provider_lifecycle_state": { "const": "active" } } }
     }
   ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
-    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "archive-provider", "unarchive-provider"] },
     "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "artifactRef": {

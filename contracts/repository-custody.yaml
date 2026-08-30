@@ -5,6 +5,8 @@ architecture:
   initiative_ref: openproject://work_packages/888
   contract_work_ref: openproject://work_packages/1040
   provisioning_contract_work_ref: openproject://work_packages/1054
+  lifecycle_feature_ref: openproject://work_packages/915
+  lifecycle_contract_work_ref: openproject://work_packages/1050
 purpose: Define provider-neutral repository identity, custody, evidence, and handoff semantics without treating repository custody as workspace admission or product ownership.
 scope_boundaries:
   provider_repository_state:
@@ -138,12 +140,6 @@ custody_states:
     description: An existing provider repository has an authoritative workspace custody record.
   provisioned:
     description: A repository was created through an approved governed workflow and custody was recorded.
-  transfer-pending:
-    description: A custody or provider-coordinate transfer is approved but not complete.
-  archived:
-    description: Provider archive state is proven and retained as historical custody evidence.
-  retired:
-    description: The workspace custody record is logically retired without asserting provider deletion.
 actions:
   observe-existing:
     provider_mutation: false
@@ -151,7 +147,6 @@ actions:
       - unrecorded
       - observed
       - linked
-      - archived
     allowed_to:
       - observed
     required_provider_readback: true
@@ -170,34 +165,109 @@ actions:
     allowed_to:
       - provisioned
     required_provider_readback: true
-  transfer-custody:
-    provider_mutation: conditional
-    allowed_from:
-      - linked
-      - provisioned
-      - transfer-pending
-    allowed_to:
-      - transfer-pending
-      - linked
-    required_provider_readback: true
-  archive-provider:
-    provider_mutation: true
-    allowed_from:
-      - linked
-      - provisioned
-    allowed_to:
-      - archived
-    required_provider_readback: true
-  retire-workspace-record:
-    provider_mutation: false
-    allowed_from:
-      - observed
-      - linked
-      - provisioned
-      - archived
-    allowed_to:
-      - retired
-    required_provider_readback: false
+repository_lifecycle:
+  state_axes:
+    custody:
+      authority: operator-orchestration-service
+      states:
+        - linked
+        - provisioned
+      rule: Lifecycle actions preserve repository identity and custody origin; a workspace transfer changes the accountable owner, not the custody origin.
+    provider:
+      authority: repository-provider
+      states:
+        - active
+        - archived
+        - unavailable
+      rule: Archive state is provider truth and is independent from workspace-record retirement.
+    workspace_record:
+      authority: operator-orchestration-service
+      states:
+        - active
+        - retired
+      rule: Retirement is a logical workspace transition and never asserts provider archive or deletion.
+  actions:
+    transfer-workspace-custody:
+      mutation_authority: operator-orchestration-service
+      provider_mutation: false
+      required_provider_readback: false
+      allowed_workspace_record_states:
+        - active
+      target_effect: Change workspace_owner_ref while preserving provider identity and all lifecycle axes.
+      reversal: Submit a new accepted transfer; never rewrite the earlier receipt.
+    archive-provider:
+      mutation_authority: repository-provider
+      provider_mutation: true
+      required_provider_readback: true
+      allowed_provider_states:
+        - active
+      target_effect: Change provider_lifecycle_state to archived without retiring the workspace record.
+      reversal: Submit unarchive-provider with the archive receipt reference.
+    unarchive-provider:
+      mutation_authority: repository-provider
+      provider_mutation: true
+      required_provider_readback: true
+      allowed_provider_states:
+        - archived
+      target_effect: Change provider_lifecycle_state to active without restoring or changing workspace custody.
+      reversal: The request must reference the archive receipt being reversed.
+    retire-workspace-record:
+      mutation_authority: operator-orchestration-service
+      provider_mutation: false
+      required_provider_readback: false
+      allowed_workspace_record_states:
+        - active
+      target_effect: Change workspace_record_state to retired without changing provider state.
+      reversal: Submit restore-workspace-record with the retirement receipt reference.
+    restore-workspace-record:
+      mutation_authority: operator-orchestration-service
+      provider_mutation: false
+      required_provider_readback: false
+      allowed_workspace_record_states:
+        - retired
+      target_effect: Change workspace_record_state to active without changing provider state or custody owner.
+      reversal: The request must reference the retirement receipt being reversed.
+  impact_preflight:
+    required_for_every_action: true
+    assessment_authority: workspace-governance-control-fabric
+    required_fields:
+      - impact_assessment_ref
+      - finding_count
+      - blocking_finding_count
+      - blocker_disposition
+    blocker_dispositions:
+      - remove
+      - workaround
+      - accept-risk
+      - defer
+    rules:
+      - Zero blocking findings require a null blocker disposition.
+      - Blocking findings require one explicit disposition with justification and evidence.
+      - Defer never permits mutation; WGCF must return requires-action.
+      - No disposition mutates downstream consumers automatically.
+  confirmation_rules:
+    every_action:
+      - exact-operator-approval
+    transfer-workspace-custody:
+      - source-owner-acceptance
+      - target-owner-acceptance
+    provider_actions:
+      - governed-provider-credential-binding
+      - current-provider-version
+  audit_projection:
+    mutation: false
+    authority: operator-orchestration-service
+    required_fields:
+      - immutable-repository-identity
+      - current-workspace-owner
+      - custody-state
+      - provider-lifecycle-state
+      - workspace-record-state
+      - current-versions
+      - impact-summary
+      - latest-terminal-receipt
+      - immutable-history
+    rule: Audit is a read-only projection, not a lifecycle action, and cannot complete or repair a mutation.
 workflow_statuses:
   nonterminal:
     - requested
@@ -214,6 +284,10 @@ schema_refs:
   decision: contracts/schemas/repository-custody-decision.schema.json
   provider_readback: contracts/schemas/repository-provider-readback.schema.json
   custody_receipt: contracts/schemas/repository-custody-receipt.schema.json
+  lifecycle_request: contracts/schemas/repository-lifecycle-request.schema.json
+  lifecycle_decision: contracts/schemas/repository-lifecycle-decision.schema.json
+  lifecycle_receipt: contracts/schemas/repository-lifecycle-receipt.schema.json
+  lifecycle_audit: contracts/schemas/repository-lifecycle-audit.schema.json
 idempotency_and_recovery:
   identity: request_id
   request_binding: request_digest
@@ -230,6 +304,13 @@ evidence_chain:
   reference_rule: Every artifact reference is digest-bound and every terminal workflow emits a custody receipt; denied and failed outcomes may carry a null provider readback when provider access did not occur or did not complete.
   successful_readback_rule: Every successful action marked required_provider_readback must carry a current digest-bound provider readback.
   mutation_rule: A provider mutation requires an allowed decision, exact operator approval, provider readback, and a terminal receipt.
+  lifecycle_ordered_artifacts:
+    - repository-lifecycle-request
+    - repository-lifecycle-decision
+    - repository-provider-readback
+    - repository-lifecycle-receipt
+  lifecycle_reference_rule: Workspace-only actions carry a null provider readback; provider archive and unarchive require a current digest-bound provider readback.
+  lifecycle_history_rule: Every successful mutation appends a terminal receipt. Reversal references history and never replaces it.
 downstream_handoffs:
   workspace_intake:
     owner_repo: workspace-governance
@@ -262,6 +343,12 @@ runtime_activation:
     - openproject://work_packages/1047
     - openproject://work_packages/1048
     - openproject://work_packages/1049
+    - openproject://work_packages/1050
+    - openproject://work_packages/1058
+    - openproject://work_packages/1052
+    - openproject://work_packages/1059
+    - openproject://work_packages/1051
+    - openproject://work_packages/1053
   first_active_capability: link-existing
 denied_shortcuts:
   - repository URL or owner/name used as immutable identity
@@ -276,3 +363,11 @@ denied_shortcuts:
   - provision-new request with personal owner scope
   - provision-new request that relies on provider defaults instead of explicit baseline settings
   - provisioning success without exact applied-settings and initialized-state readback
+  - ambiguous transfer that combines workspace custody with provider ownership
+  - physical provider ownership transfer through a workspace custody action
+  - provider archive or unarchive through personal, browser, or ambient gh credentials
+  - workspace retirement treated as provider archive or deletion
+  - lifecycle mutation without current impact assessment and exact expected versions
+  - unresolved blockers without remove, workaround, accept-risk, or defer disposition
+  - automatic downstream consumer mutation after a lifecycle action
+  - reversal that rewrites or removes an earlier lifecycle receipt

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-lifecycle-receipt.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "receipt_id", "request_ref", "decision_ref", "provider_readback_ref", "completed_at", "action", "outcome", "repository_identity", "before", "after", "impact_assessment_ref", "blocker_disposition", "confirmations", "reversal_of_receipt_ref", "history_event_ref", "downstream_mutation", "workflow_status", "findings", "integrity"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_lifecycle_receipt" },
+    "receipt_id": { "type": "string", "pattern": "^repository-lifecycle-receipt:[A-Za-z0-9._:-]+$" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "provider_readback_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "action": { "$ref": "#/$defs/action" },
+    "outcome": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
+    "repository_identity": { "$ref": "#/$defs/repositoryIdentity" },
+    "before": { "$ref": "#/$defs/lifecycleState" },
+    "after": { "$ref": "#/$defs/lifecycleState" },
+    "impact_assessment_ref": { "$ref": "#/$defs/artifactRef" },
+    "blocker_disposition": {
+      "oneOf": [
+        { "$ref": "#/$defs/blockerDisposition" },
+        { "type": "null" }
+      ]
+    },
+    "confirmations": {
+      "type": "object",
+      "required": ["operator_approval_ref", "source_owner_acceptance_ref", "target_owner_acceptance_ref", "provider_credential_binding_ref"],
+      "properties": {
+        "operator_approval_ref": { "$ref": "#/$defs/artifactRef" },
+        "source_owner_acceptance_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "target_owner_acceptance_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "provider_credential_binding_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "reversal_of_receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "history_event_ref": { "$ref": "#/$defs/artifactRef" },
+    "downstream_mutation": { "const": "none" },
+    "workflow_status": { "enum": ["succeeded", "denied", "failed", "cancelled"] },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "succeeded" } } },
+      "then": { "properties": { "workflow_status": { "const": "succeeded" } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "denied" } } },
+      "then": { "properties": { "workflow_status": { "const": "denied" } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "failed" } } },
+      "then": { "properties": { "workflow_status": { "const": "failed" } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "cancelled" } } },
+      "then": { "properties": { "workflow_status": { "const": "cancelled" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "enum": ["archive-provider", "unarchive-provider"] },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "provider_readback_ref": { "$ref": "#/$defs/artifactRef" },
+          "confirmations": {
+            "properties": {
+              "source_owner_acceptance_ref": { "type": "null" },
+              "target_owner_acceptance_ref": { "type": "null" },
+              "provider_credential_binding_ref": { "$ref": "#/$defs/artifactRef" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "enum": ["transfer-workspace-custody", "retire-workspace-record", "restore-workspace-record"] },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": { "properties": { "provider_readback_ref": { "type": "null" } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "enum": ["retire-workspace-record", "restore-workspace-record"] },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "confirmations": {
+            "properties": {
+              "source_owner_acceptance_ref": { "type": "null" },
+              "target_owner_acceptance_ref": { "type": "null" },
+              "provider_credential_binding_ref": { "type": "null" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "archive-provider" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "before": { "properties": { "provider_lifecycle_state": { "const": "active" } } },
+          "after": { "properties": { "provider_lifecycle_state": { "const": "archived" } } },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "unarchive-provider" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "before": { "properties": { "provider_lifecycle_state": { "const": "archived" } } },
+          "after": { "properties": { "provider_lifecycle_state": { "const": "active" } } },
+          "reversal_of_receipt_ref": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "retire-workspace-record" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "before": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "after": { "properties": { "workspace_record_state": { "const": "retired" } } },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "restore-workspace-record" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "before": { "properties": { "workspace_record_state": { "const": "retired" } } },
+          "after": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "reversal_of_receipt_ref": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": { "const": "transfer-workspace-custody" },
+          "outcome": { "const": "succeeded" }
+        }
+      },
+      "then": {
+        "properties": {
+          "confirmations": {
+            "properties": {
+              "source_owner_acceptance_ref": { "$ref": "#/$defs/artifactRef" },
+              "target_owner_acceptance_ref": { "$ref": "#/$defs/artifactRef" },
+              "provider_credential_binding_ref": { "type": "null" }
+            }
+          },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "action": { "enum": ["transfer-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "repositoryIdentity": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/text" },
+        "provider_repository_id": { "$ref": "#/$defs/text" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "provider": { "const": "github" } } },
+          "then": { "properties": { "provider_repository_id": { "pattern": "^[1-9][0-9]*$" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "lifecycleState": {
+      "type": "object",
+      "required": ["custody_state", "workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state", "custody_version", "provider_version"],
+      "properties": {
+        "custody_state": { "enum": ["linked", "provisioned"] },
+        "workspace_owner_ref": { "$ref": "#/$defs/text" },
+        "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
+        "workspace_record_state": { "enum": ["active", "retired"] },
+        "custody_version": { "$ref": "#/$defs/text" },
+        "provider_version": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "blockerDisposition": {
+      "type": "object",
+      "required": ["decision", "justification", "evidence_ref"],
+      "properties": {
+        "decision": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+        "justification": { "$ref": "#/$defs/text" },
+        "evidence_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["canonicalization", "algorithm", "content_digest"],
+      "properties": {
+        "canonicalization": { "const": "RFC8785" },
+        "algorithm": { "const": "sha256" },
+        "content_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_lifecycle_request",
+  "request_id": "repository-lifecycle-request:example-archive-001",
+  "requested_at": "2026-08-30T02:00:00Z",
+  "action": "archive-provider",
+  "operator_ref": {
+    "uri": "https://workspace-governance.local/operators/example",
+    "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "workflow": {
+    "workflow_id": "repository-lifecycle",
+    "workflow_version": "1",
+    "execution_id": "repository-lifecycle-example-archive-001"
+  },
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "123456789"
+  },
+  "current_state": {
+    "custody_state": "linked",
+    "workspace_owner_ref": "repo:example-repository",
+    "provider_lifecycle_state": "active",
+    "workspace_record_state": "active",
+    "custody_version": "custody-v4",
+    "provider_version": "provider-v8"
+  },
+  "target": {
+    "workspace_owner_ref": null,
+    "provider_lifecycle_state": "archived",
+    "workspace_record_state": null
+  },
+  "impact": {
+    "impact_assessment_ref": {
+      "uri": "https://wgcf.local/repository-impact/example-archive-001",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "finding_count": 2,
+    "blocking_finding_count": 0,
+    "blocker_disposition": null
+  },
+  "authority": {
+    "policy_profile_ref": {
+      "uri": "https://workspace-governance.local/policy/repository-lifecycle/v1",
+      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "approval_ref": {
+      "uri": "https://workspace-governance.local/approvals/repository-lifecycle/example-archive-001",
+      "digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "source_owner_acceptance_ref": null,
+    "target_owner_acceptance_ref": null,
+    "provider_credential_binding_ref": {
+      "uri": "https://platform-engineering.local/credential-bindings/github-app/repository-lifecycle",
+      "digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    }
+  },
+  "reversal_of_receipt_ref": null,
+  "correlation": {
+    "correlation_id": "repository-lifecycle-example-archive-001",
+    "causation_id": null
+  },
+  "idempotency_key": "repository-lifecycle-example-archive-001",
+  "request_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666"
+}
