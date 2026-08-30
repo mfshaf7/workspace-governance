@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "artifact_type": "repository_lifecycle_audit",
+  "audit_id": "repository-lifecycle-audit:example-001",
+  "projected_at": "2026-08-30T02:04:00Z",
+  "source_authority": "operator-orchestration-service",
+  "mutation": false,
+  "repository_identity": {
+    "provider": "github",
+    "provider_repository_id": "123456789"
+  },
+  "current_state": {
+    "custody_state": "linked",
+    "workspace_owner_ref": "repo:example-repository",
+    "provider_lifecycle_state": "archived",
+    "workspace_record_state": "active",
+    "custody_version": "custody-v5",
+    "provider_version": "provider-v9"
+  },
+  "impact_summary": {
+    "latest_assessment_ref": {
+      "uri": "https://wgcf.local/repository-impact/example-archive-001",
+      "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    "finding_count": 2,
+    "blocking_finding_count": 0,
+    "blocker_disposition": null
+  },
+  "latest_terminal_receipt_ref": {
+    "uri": "https://oos.local/repository-lifecycle/receipts/example-archive-001",
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "history": [
+    {
+      "action": "archive-provider",
+      "outcome": "succeeded",
+      "completed_at": "2026-08-30T02:03:00Z",
+      "receipt_ref": {
+        "uri": "https://oos.local/repository-lifecycle/receipts/example-archive-001",
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "reversal_of_receipt_ref": null
+    }
+  ],
+  "integrity": {
+    "canonicalization": "RFC8785",
+    "algorithm": "sha256",
+    "content_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  }
+}

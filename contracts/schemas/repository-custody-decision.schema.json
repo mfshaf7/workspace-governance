@@ -83,7 +83,7 @@
   ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
-    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new"] },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "artifactRef": {
       "type": "object",

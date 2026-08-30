@@ -27,9 +27,10 @@ GraphQL `node_id`, an owner/name pair, or a repository URL. Schemas enforce
 that provider-specific format across requests, decisions, readbacks, and
 receipts.
 
-Requests and receipts carry a provider credential-binding reference. They must
-never carry a personal access token, installation secret, or other credential
-value.
+Provider reads and mutations carry a provider credential-binding reference.
+Workspace-only lifecycle actions carry no provider credential reference. No
+artifact may carry a personal access token, installation secret, browser
+credential, ambient `gh` session, or other credential value.
 
 ## Authority
 
@@ -71,21 +72,79 @@ complete. Every successful action that requires provider truth carries a
 current digest-bound readback. Provider mutations additionally require an
 allowed decision, exact operator approval, and a terminal receipt.
 
-## Actions
+Lifecycle actions use a separate request, decision, and receipt family under
+this same contract. Workspace-only actions carry a null provider readback.
+Archive and unarchive require current provider readback. This separation keeps
+the proven link and provision protocol compatible while making lifecycle
+evidence unambiguous.
+
+## Custody Acquisition
 
 - `observe-existing` resolves provider identity without assigning custody.
 - `link-existing` records custody for an existing provider repository.
 - `provision-new` creates a repository and records custody through one
   idempotent workflow.
-- `transfer-custody` changes workspace custody and may coordinate a provider
-  transfer when explicitly approved.
-- `archive-provider` archives the physical provider repository.
-- `retire-workspace-record` retires the workspace custody record without
-  asserting provider deletion.
 
-Hard provider deletion is outside contract version 1. A partial successful
-provision is recovered through readback and continuation, never by an automatic
-compensating delete.
+These actions establish custody. They do not archive, retire, restore, or
+transfer an established custody record.
+
+## Lifecycle State
+
+Lifecycle state has three independent axes:
+
+| Axis | States | Authority |
+| --- | --- | --- |
+| Custody origin | `linked`, `provisioned` | Operator Orchestration Service |
+| Provider lifecycle | `active`, `archived`, `unavailable` | Repository provider |
+| Workspace record | `active`, `retired` | Operator Orchestration Service |
+
+Keeping these axes separate prevents false claims. Archiving a provider
+repository does not retire its workspace record. Retiring a workspace record
+does not archive or delete the provider repository. A custody transfer changes
+the accountable workspace owner but not provider ownership or repository
+identity.
+
+## Lifecycle Actions
+
+- `transfer-workspace-custody` changes only `workspace_owner_ref`. It requires
+  exact operator approval plus source-owner and target-owner acceptance.
+- `archive-provider` changes provider state from `active` to `archived`. It
+  requires the governed provider identity, current provider version, and
+  provider readback.
+- `unarchive-provider` changes provider state from `archived` to `active`. It
+  requires the archive receipt being reversed and the same provider controls.
+- `retire-workspace-record` changes workspace-record state from `active` to
+  `retired` without provider mutation.
+- `restore-workspace-record` changes workspace-record state from `retired` to
+  `active` and references the retirement receipt being reversed.
+
+The earlier ambiguous `transfer-custody` action is not valid. Physical provider
+ownership transfer and hard provider deletion are outside this contract. A
+partial successful provider mutation is recovered through readback and
+continuation, never through automatic deletion.
+
+## Impact And Reversal
+
+Every lifecycle request carries a current WGCF impact assessment. It records
+the finding count, blocking-finding count, and one explicit blocker disposition
+when blockers exist:
+
+- `remove` proves the blocking condition was removed.
+- `workaround` binds the accepted bounded workaround evidence.
+- `accept-risk` binds explicit risk-acceptance evidence.
+- `defer` stops the mutation and returns the request for later action.
+
+No disposition rewrites downstream consumers. Lifecycle completion appends a
+terminal receipt. Archive reverses through unarchive, retirement through
+restore, and a transfer through another accepted transfer. Reversal references
+history and never deletes or replaces it.
+
+## Lifecycle Audit
+
+Audit is a read-only projection, not a lifecycle action. It shows immutable
+repository identity, current workspace owner, all three state axes, current
+versions, impact summary, latest terminal receipt, and immutable history. Audit
+cannot complete, repair, or imply a mutation.
 
 ## Provisioning Controls
 
@@ -133,8 +192,8 @@ actions owned by their domains.
 
 ## Current Maturity
 
-This contract is `contract-only`. Runtime activation remains disabled until
-the linked WGCF, OOS, Security, Platform, and Console work under Epic #888 is
-merged and evidenced. The first active capability is existing-repository
-linkage; provisioning and lifecycle controls follow only after that path is
-proven.
+This contract is `contract-only`. Existing-repository linkage and provisioning
+retain their own activation evidence. Repository lifecycle activation remains
+disabled until Platform provider authority, Security acceptance, WGCF
+readiness, OOS workflow, and Console integration under Feature #915 are merged
+and evidenced. Defining lifecycle schemas does not activate provider mutation.

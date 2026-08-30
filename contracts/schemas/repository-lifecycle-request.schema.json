@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/repository-lifecycle-request.schema.json",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "requested_at", "action", "operator_ref", "workflow", "repository_identity", "current_state", "target", "impact", "authority", "reversal_of_receipt_ref", "correlation", "idempotency_key", "request_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "repository_lifecycle_request" },
+    "request_id": { "type": "string", "pattern": "^repository-lifecycle-request:[A-Za-z0-9._:-]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "action": { "$ref": "#/$defs/action" },
+    "operator_ref": { "$ref": "#/$defs/artifactRef" },
+    "workflow": {
+      "type": "object",
+      "required": ["workflow_id", "workflow_version", "execution_id"],
+      "properties": {
+        "workflow_id": { "$ref": "#/$defs/text" },
+        "workflow_version": { "$ref": "#/$defs/text" },
+        "execution_id": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "repository_identity": { "$ref": "#/$defs/repositoryIdentity" },
+    "current_state": { "$ref": "#/$defs/lifecycleState" },
+    "target": {
+      "type": "object",
+      "required": ["workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state"],
+      "properties": {
+        "workspace_owner_ref": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] },
+        "provider_lifecycle_state": { "enum": ["active", "archived", null] },
+        "workspace_record_state": { "enum": ["active", "retired", null] }
+      },
+      "additionalProperties": false
+    },
+    "impact": { "$ref": "#/$defs/impact" },
+    "authority": {
+      "type": "object",
+      "required": ["policy_profile_ref", "approval_ref", "source_owner_acceptance_ref", "target_owner_acceptance_ref", "provider_credential_binding_ref"],
+      "properties": {
+        "policy_profile_ref": { "$ref": "#/$defs/artifactRef" },
+        "approval_ref": { "$ref": "#/$defs/artifactRef" },
+        "source_owner_acceptance_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "target_owner_acceptance_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+        "provider_credential_binding_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "reversal_of_receipt_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "correlation": {
+      "type": "object",
+      "required": ["correlation_id", "causation_id"],
+      "properties": {
+        "correlation_id": { "$ref": "#/$defs/text" },
+        "causation_id": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "transfer-workspace-custody" } } },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "target": {
+            "properties": {
+              "workspace_owner_ref": { "$ref": "#/$defs/text" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "type": "null" }
+            }
+          },
+          "authority": {
+            "properties": {
+              "source_owner_acceptance_ref": { "$ref": "#/$defs/artifactRef" },
+              "target_owner_acceptance_ref": { "$ref": "#/$defs/artifactRef" },
+              "provider_credential_binding_ref": { "type": "null" }
+            }
+          },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action": { "const": "archive-provider" } } },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "provider_lifecycle_state": { "const": "active" } } },
+          "target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "const": "archived" },
+              "workspace_record_state": { "type": "null" }
+            }
+          },
+          "authority": { "$ref": "#/$defs/providerAuthority" },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action": { "const": "unarchive-provider" } } },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "provider_lifecycle_state": { "const": "archived" } } },
+          "target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "const": "active" },
+              "workspace_record_state": { "type": "null" }
+            }
+          },
+          "authority": { "$ref": "#/$defs/providerAuthority" },
+          "reversal_of_receipt_ref": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action": { "const": "retire-workspace-record" } } },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "active" } } },
+          "target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "const": "retired" }
+            }
+          },
+          "authority": { "$ref": "#/$defs/workspaceAuthority" },
+          "reversal_of_receipt_ref": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "action": { "const": "restore-workspace-record" } } },
+      "then": {
+        "properties": {
+          "current_state": { "properties": { "workspace_record_state": { "const": "retired" } } },
+          "target": {
+            "properties": {
+              "workspace_owner_ref": { "type": "null" },
+              "provider_lifecycle_state": { "type": "null" },
+              "workspace_record_state": { "const": "active" }
+            }
+          },
+          "authority": { "$ref": "#/$defs/workspaceAuthority" },
+          "reversal_of_receipt_ref": { "$ref": "#/$defs/artifactRef" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "action": { "enum": ["transfer-workspace-custody", "archive-provider", "unarchive-provider", "retire-workspace-record", "restore-workspace-record"] },
+    "artifactRef": {
+      "type": "object",
+      "required": ["uri", "digest"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "repositoryIdentity": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/text" },
+        "provider_repository_id": { "$ref": "#/$defs/text" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "provider": { "const": "github" } } },
+          "then": { "properties": { "provider_repository_id": { "pattern": "^[1-9][0-9]*$" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "lifecycleState": {
+      "type": "object",
+      "required": ["custody_state", "workspace_owner_ref", "provider_lifecycle_state", "workspace_record_state", "custody_version", "provider_version"],
+      "properties": {
+        "custody_state": { "enum": ["linked", "provisioned"] },
+        "workspace_owner_ref": { "$ref": "#/$defs/text" },
+        "provider_lifecycle_state": { "enum": ["active", "archived", "unavailable"] },
+        "workspace_record_state": { "enum": ["active", "retired"] },
+        "custody_version": { "$ref": "#/$defs/text" },
+        "provider_version": { "oneOf": [{ "$ref": "#/$defs/text" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "impact": {
+      "type": "object",
+      "required": ["impact_assessment_ref", "finding_count", "blocking_finding_count", "blocker_disposition"],
+      "properties": {
+        "impact_assessment_ref": { "$ref": "#/$defs/artifactRef" },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "blocking_finding_count": { "type": "integer", "minimum": 0 },
+        "blocker_disposition": {
+          "oneOf": [
+            { "$ref": "#/$defs/blockerDisposition" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "blocking_finding_count": { "const": 0 } } },
+          "then": { "properties": { "blocker_disposition": { "type": "null" } } },
+          "else": { "properties": { "blocker_disposition": { "$ref": "#/$defs/blockerDisposition" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "blockerDisposition": {
+      "type": "object",
+      "required": ["decision", "justification", "evidence_ref"],
+      "properties": {
+        "decision": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+        "justification": { "$ref": "#/$defs/text" },
+        "evidence_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "providerAuthority": {
+      "type": "object",
+      "required": ["policy_profile_ref", "approval_ref", "source_owner_acceptance_ref", "target_owner_acceptance_ref", "provider_credential_binding_ref"],
+      "properties": {
+        "policy_profile_ref": { "$ref": "#/$defs/artifactRef" },
+        "approval_ref": { "$ref": "#/$defs/artifactRef" },
+        "source_owner_acceptance_ref": { "type": "null" },
+        "target_owner_acceptance_ref": { "type": "null" },
+        "provider_credential_binding_ref": { "$ref": "#/$defs/artifactRef" }
+      },
+      "additionalProperties": false
+    },
+    "workspaceAuthority": {
+      "type": "object",
+      "required": ["policy_profile_ref", "approval_ref", "source_owner_acceptance_ref", "target_owner_acceptance_ref", "provider_credential_binding_ref"],
+      "properties": {
+        "policy_profile_ref": { "$ref": "#/$defs/artifactRef" },
+        "approval_ref": { "$ref": "#/$defs/artifactRef" },
+        "source_owner_acceptance_ref": { "type": "null" },
+        "target_owner_acceptance_ref": { "type": "null" },
+        "provider_credential_binding_ref": { "type": "null" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

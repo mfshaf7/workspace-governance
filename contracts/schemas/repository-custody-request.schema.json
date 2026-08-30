@@ -95,11 +95,11 @@
       }
     },
     {
-      "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
+      "if": { "properties": { "action": { "enum": ["observe-existing", "link-existing"] } } },
       "then": { "properties": { "target": { "properties": { "provider_repository_id": { "$ref": "#/$defs/text" } } } } }
     },
     {
-      "if": { "properties": { "action": { "enum": ["link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] } } },
+      "if": { "properties": { "action": { "enum": ["link-existing", "provision-new"] } } },
       "then": { "properties": { "authority": { "properties": { "approval_ref": { "$ref": "#/$defs/artifactRef" } } } } }
     },
     {
@@ -128,7 +128,7 @@
     "text": { "type": "string", "minLength": 1 },
     "githubRepositoryId": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "action": { "enum": ["observe-existing", "link-existing", "provision-new", "transfer-custody", "archive-provider", "retire-workspace-record"] },
+    "action": { "enum": ["observe-existing", "link-existing", "provision-new"] },
     "provisioningSettings": {
       "type": "object",
       "required": ["description", "visibility", "initialize_with_readme", "features", "merge_policy"],
