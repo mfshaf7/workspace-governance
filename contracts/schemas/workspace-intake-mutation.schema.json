@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "mutation_id",
+    "created_at",
+    "request_ref",
+    "decision_ref",
+    "target",
+    "action",
+    "result",
+    "idempotency_key",
+    "source_branch",
+    "before",
+    "after",
+    "mutation_digest"
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "stateRef": {
+      "type": "object",
+      "required": ["register_digest", "record_version", "record_digest"],
+      "properties": {
+        "register_digest": { "$ref": "#/$defs/digest" },
+        "record_version": { "type": ["integer", "null"], "minimum": 1 },
+        "record_digest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_type": { "const": "workspace-intake-mutation" },
+    "mutation_id": { "$ref": "#/$defs/text" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "action": { "enum": ["add", "update"] },
+    "result": { "enum": ["applied", "replayed"] },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "before": { "$ref": "#/$defs/stateRef" },
+    "after": {
+      "type": "object",
+      "required": ["register_digest", "record_version", "record_digest"],
+      "properties": {
+        "register_digest": { "$ref": "#/$defs/digest" },
+        "record_version": { "type": "integer", "minimum": 1 },
+        "record_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "mutation_digest": { "$ref": "#/$defs/digest" }
+  },
+  "additionalProperties": false
+}

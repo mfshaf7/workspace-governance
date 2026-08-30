@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "decision_id",
+    "decided_at",
+    "request_ref",
+    "target",
+    "decision_source",
+    "operator_acceptance",
+    "outcome",
+    "decision_digest"
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "required": [
+        "code",
+        "severity",
+        "message",
+        "disposition",
+        "justification",
+        "owner_ref",
+        "review_due_on",
+        "evidence_refs",
+        "security_evidence_refs"
+      ],
+      "properties": {
+        "code": { "$ref": "#/$defs/text" },
+        "severity": { "enum": ["info", "warning", "blocking"] },
+        "message": { "$ref": "#/$defs/text" },
+        "disposition": {
+          "type": ["string", "null"],
+          "enum": ["remove", "workaround", "accept-risk", "defer", null]
+        },
+        "justification": { "type": ["string", "null"], "minLength": 1 },
+        "owner_ref": { "type": ["string", "null"], "minLength": 1 },
+        "review_due_on": {
+          "oneOf": [
+            { "type": "string", "format": "date" },
+            { "type": "null" }
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "security_evidence_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "severity": { "const": "blocking" } }, "required": ["severity"] },
+          "then": {
+            "properties": {
+              "disposition": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+              "justification": { "$ref": "#/$defs/text" },
+              "evidence_refs": { "minItems": 1 }
+            }
+          },
+          "else": {
+            "properties": {
+              "disposition": { "type": "null" },
+              "justification": { "type": "null" },
+              "owner_ref": { "type": "null" },
+              "review_due_on": { "type": "null" },
+              "security_evidence_refs": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "disposition": { "enum": ["workaround", "defer"] } },
+            "required": ["disposition"]
+          },
+          "then": {
+            "properties": {
+              "owner_ref": { "$ref": "#/$defs/text" },
+              "review_due_on": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "disposition": { "const": "accept-risk" } },
+            "required": ["disposition"]
+          },
+          "then": {
+            "properties": {
+              "security_evidence_refs": { "minItems": 1 }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "$ref": "#/$defs/text" },
+        "wgcf_graph_role": { "$ref": "#/$defs/text" },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "notes": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "repoRecord": {
+      "type": "object",
+      "required": ["kind", "repo_class", "requires_security_bindings", "security_owner", "notes"],
+      "properties": {
+        "kind": { "const": "repo" },
+        "repo_class": { "type": ["string", "null"] },
+        "requires_security_bindings": { "type": ["boolean", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    },
+    "productRecord": {
+      "type": "object",
+      "required": ["kind", "platform_owner", "security_owner", "runtime_owner", "source_owners", "intended_endpoint", "notes"],
+      "properties": {
+        "kind": { "const": "product" },
+        "platform_owner": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "runtime_owner": { "type": ["string", "null"] },
+        "source_owners": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "intended_endpoint": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    },
+    "componentRecord": {
+      "type": "object",
+      "required": ["kind", "component_class", "owner_repo", "security_owner", "product", "notes"],
+      "properties": {
+        "kind": { "const": "component" },
+        "component_class": { "type": ["string", "null"] },
+        "owner_repo": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "product": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    },
+    "aiSuggestion": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "policy_status",
+        "decision_id",
+        "generated_at",
+        "confidence",
+        "caller_id",
+        "invocation_path",
+        "suggested_decision",
+        "operator_decision",
+        "acceptance_state",
+        "accepted_by",
+        "accepted_at",
+        "audit_ref"
+      ],
+      "properties": {
+        "profile_id": { "$ref": "#/$defs/text" },
+        "policy_status": { "$ref": "#/$defs/text" },
+        "decision_id": { "$ref": "#/$defs/text" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "confidence": { "enum": ["low", "medium", "high"] },
+        "caller_id": { "$ref": "#/$defs/text" },
+        "invocation_path": { "$ref": "#/$defs/text" },
+        "suggested_decision": { "enum": ["out-of-scope", "proposed", "admitted"] },
+        "operator_decision": { "enum": ["out-of-scope", "proposed", "admitted"] },
+        "acceptance_state": { "enum": ["accepted", "overridden"] },
+        "accepted_by": { "$ref": "#/$defs/text" },
+        "accepted_at": { "type": "string", "format": "date-time" },
+        "audit_ref": { "$ref": "#/$defs/text" },
+        "override_reason": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_type": { "const": "workspace-intake-decision" },
+    "decision_id": { "$ref": "#/$defs/text" },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "decision_source": { "enum": ["operator", "ai-suggested"] },
+    "operator_acceptance": {
+      "type": "object",
+      "required": ["state", "operator_ref", "recorded_at"],
+      "properties": {
+        "state": { "enum": ["accepted", "rejected"] },
+        "operator_ref": { "$ref": "#/$defs/text" },
+        "recorded_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" },
+    "outcome": {
+      "type": "object",
+      "required": ["status", "classification", "owner_route", "approved_record", "findings"],
+      "properties": {
+        "status": { "enum": ["allowed", "denied", "requires-action"] },
+        "classification": {
+          "type": ["string", "null"],
+          "enum": ["out-of-scope", "proposed", "admitted", null]
+        },
+        "owner_route": { "type": ["string", "null"], "minLength": 1 },
+        "approved_record": {
+          "oneOf": [
+            { "$ref": "#/$defs/repoRecord" },
+            { "$ref": "#/$defs/productRecord" },
+            { "$ref": "#/$defs/componentRecord" },
+            { "type": "null" }
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "allowed" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "classification": { "enum": ["out-of-scope", "proposed", "admitted"] },
+              "owner_route": { "$ref": "#/$defs/text" },
+              "approved_record": {
+                "oneOf": [
+                  { "$ref": "#/$defs/repoRecord" },
+                  { "$ref": "#/$defs/productRecord" },
+                  { "$ref": "#/$defs/componentRecord" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "requires-action" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "findings": {
+                "contains": {
+                  "type": "object",
+                  "properties": { "severity": { "const": "blocking" } },
+                  "required": ["severity"]
+                },
+                "minContains": 1
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "allowed" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "findings": {
+                "not": {
+                  "contains": {
+                    "type": "object",
+                    "properties": { "disposition": { "const": "defer" } },
+                    "required": ["disposition"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decision_source": { "const": "ai-suggested" } }, "required": ["decision_source"] },
+      "then": { "required": ["ai_suggestion"] }
+    },
+    {
+      "if": { "properties": { "decision_source": { "const": "operator" } }, "required": ["decision_source"] },
+      "then": { "not": { "required": ["ai_suggestion"] } }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "properties": { "status": { "const": "allowed" } },
+            "required": ["status"]
+          }
+        },
+        "required": ["outcome"]
+      },
+      "then": {
+        "properties": {
+          "operator_acceptance": {
+            "properties": { "state": { "const": "accepted" } }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

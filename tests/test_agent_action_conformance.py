@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 import sys
+from tempfile import TemporaryDirectory
 import unittest
 
 import yaml
@@ -15,6 +17,7 @@ if str(SCRIPTS_ROOT) not in sys.path:
 
 from agent_action_conformance import (  # noqa: E402
     REQUIRED_EXCLUSIONS,
+    _materialize_pinned_source,
     contract_issues,
     render_markdown,
     report_issues,
@@ -69,6 +72,73 @@ class AgentActionConformanceTests(unittest.TestCase):
             markdown_path.read_text(encoding="utf-8"),
             render_markdown(self.report),
         )
+
+    def test_pinned_source_uses_merged_revision_not_mutable_head(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source_repo = root / "source"
+            source_repo.mkdir()
+            subprocess.run(
+                ["git", "init", "--initial-branch=main"],
+                cwd=source_repo,
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Conformance Test"],
+                cwd=source_repo,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.email", "conformance@example.invalid"],
+                cwd=source_repo,
+                check=True,
+            )
+            source_file = source_repo / "source.txt"
+            source_file.write_text("pinned\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=source_repo, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", "pinned source"],
+                cwd=source_repo,
+                check=True,
+                capture_output=True,
+            )
+            pinned_revision = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=source_repo,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+
+            source_file.write_text("new main\n", encoding="utf-8")
+            subprocess.run(["git", "add", "."], cwd=source_repo, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", "advance main"],
+                cwd=source_repo,
+                check=True,
+                capture_output=True,
+            )
+            main_revision = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=source_repo,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.strip()
+            source_file.write_text("dirty checkout\n", encoding="utf-8")
+
+            snapshot, observed_main = _materialize_pinned_source(
+                source_repo,
+                pinned_revision,
+                root / "snapshot",
+            )
+
+            self.assertEqual(observed_main, main_revision)
+            self.assertEqual(
+                (snapshot / "source.txt").read_text(encoding="utf-8"),
+                "pinned\n",
+            )
 
 
 if __name__ == "__main__":

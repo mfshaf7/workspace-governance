@@ -100,6 +100,7 @@ def load_ref_yaml(workspace_root: Path, ref: dict, errors: list[str], *, context
 def validate_governed_intake_assist_contract(
     *,
     workspace_root: Path,
+    repo_root: Path,
     intake_policy: dict,
     contract: dict,
     profiles: dict[str, dict],
@@ -116,7 +117,7 @@ def validate_governed_intake_assist_contract(
     activation_state = contract.get("activation_state") or {}
     contract_refs = contract.get("platform_contract_refs") or {}
 
-    primary_surface = workspace_root / "workspace-governance" / contract.get("primary_operator_surface", "")
+    primary_surface = repo_root / contract.get("primary_operator_surface", "")
     if not primary_surface.exists():
         errors.append(f"{label}: primary operator surface is missing: {contract.get('primary_operator_surface')!r}")
 
@@ -408,18 +409,37 @@ def main() -> int:
         type=Path,
         help="workspace root containing workspace-governance and the governed repos",
     )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        help="workspace-governance checkout to validate; defaults to <workspace-root>/workspace-governance",
+    )
     args = parser.parse_args()
 
     workspace_root = args.workspace_root.resolve()
-    repo_root = workspace_root / "workspace-governance"
+    repo_root = (
+        args.repo_root.resolve()
+        if args.repo_root is not None
+        else workspace_root / "workspace-governance"
+    )
     contracts = load_contracts(repo_root)
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
+    workspace_intake = contracts["workspace_intake"]
     governance_validator_catalog = contracts["governance_validator_catalog"][
         "governance_validator_catalog"
     ]
 
     errors: list[str] = []
+
+    if intake_policy.get("contract_ref") != {
+        "repo": "workspace-governance",
+        "path": "contracts/workspace-intake.yaml",
+        "schema_version": workspace_intake.get("schema_version"),
+    }:
+        errors.append(
+            "contracts/intake-policy.yaml: contract_ref must bind contracts/workspace-intake.yaml at its exact schema version"
+        )
 
     active_repos = set(active_repo_names(contracts))
     retired_repos = set(retired_repo_names(contracts))
@@ -512,6 +532,7 @@ def main() -> int:
         )
         validate_governed_intake_assist_contract(
             workspace_root=workspace_root,
+            repo_root=repo_root,
             intake_policy=intake_policy,
             contract=governed_intake_assist,
             profiles=profiles,
@@ -519,9 +540,36 @@ def main() -> int:
         )
 
     ai_decision_owners: dict[str, str] = {}
+    idempotency_owners: dict[str, str] = {}
+    allowed_source_classes = set(workspace_intake["vocabulary"]["source_classes"])
     for collection_name in ("repos", "products", "components"):
         for entry_name, payload in intake_register[collection_name].items():
             label = f"contracts/intake-register.yaml: {collection_name[:-1]} {entry_name}"
+            expected_record_id = f"{collection_name[:-1]}:{entry_name}"
+            record = payload.get("record") or {}
+            if record.get("id") != expected_record_id:
+                errors.append(
+                    f"{label}: record.id must be {expected_record_id!r}"
+                )
+            source = record.get("source") or {}
+            if source.get("class") not in allowed_source_classes:
+                errors.append(
+                    f"{label}: record.source.class {source.get('class')!r} is not allowed"
+                )
+            decision = record.get("decision") or {}
+            if decision.get("source") != payload.get("decision_source"):
+                errors.append(
+                    f"{label}: record.decision.source must match decision_source"
+                )
+            mutation = record.get("last_mutation") or {}
+            idempotency_key = mutation.get("idempotency_key")
+            if idempotency_key:
+                if idempotency_key in idempotency_owners:
+                    errors.append(
+                        f"{label}: record.last_mutation.idempotency_key {idempotency_key!r} is already used by {idempotency_owners[idempotency_key]}"
+                    )
+                else:
+                    idempotency_owners[idempotency_key] = label
             if collection_name in {"repos", "products", "components"}:
                 scope_policy = validation_behavior_policy[collection_name]
                 validate_validation_behavior(

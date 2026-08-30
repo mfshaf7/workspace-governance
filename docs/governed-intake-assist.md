@@ -75,51 +75,34 @@ suggestions never enter workspace truth.
 
 ## Accept A Suggestion
 
-The recorded `--status` and `--operator-decision` must agree. Acceptance must
-also be explicit. Each gateway `decision_id` may be applied only once:
+Acceptance becomes a `workspace-intake-decision` that binds the exact v2
+request, AI candidate identity, governed profile, operator identity, acceptance
+timestamp, and candidate audit reference. The recorded classification and the
+operator decision must agree. Each gateway `decision_id` may be applied only
+once.
 
-```bash
-python3 scripts/scaffold_intake.py component \
-  --name example-component \
-  --status proposed \
-  --decision-source ai-suggested \
-  --component-class shared-platform \
-  --owner-repo platform-engineering \
-  --security-owner security-architecture \
-  --notes "Operator accepted the governed intake suggestion." \
-  --ai-suggestion-file .art/intake-assist/example-component.json \
-  --operator-decision proposed \
-  --acceptance-state accepted \
-  --accepted-by operator-login \
-  --accepted-at 2026-08-20T12:05:00Z
-```
+Apply that request and decision through the procedure in
+[`workspace-intake.md`](workspace-intake.md). `scaffold_intake.py` remains a
+temporary compatibility front end and requires the same source, owner-route,
+version, validation, idempotency, and operator bindings; it no longer writes
+the register directly.
 
 ## Override A Suggestion
 
-An override requires a different operator decision and a reason:
-
-```bash
-python3 scripts/scaffold_intake.py component \
-  --name example-component \
-  --status out-of-scope \
-  --decision-source ai-suggested \
-  --notes "Operator overrode the governed intake suggestion." \
-  --ai-suggestion-file .art/intake-assist/example-component.json \
-  --operator-decision out-of-scope \
-  --acceptance-state overridden \
-  --override-reason "The component is not intended to join this workspace." \
-  --accepted-by operator-login \
-  --accepted-at 2026-08-20T12:05:00Z
-```
+An override records an operator decision different from the model suggestion,
+plus a non-empty reason. It follows the same v2 request, decision, review, and
+merged-readback path. Rejected suggestions never enter the canonical register.
 
 ## Validate The Result
 
 After an accepted or overridden decision changes workspace truth, run:
 
 ```bash
-python3 scripts/validate_structured_record.py contracts/intake-register.yaml \
-  --workspace-root /home/mfshaf7/projects
-python3 scripts/validate_intake.py --workspace-root /home/mfshaf7/projects
+python3 scripts/validate_contracts.py --repo-root .
+python3 scripts/validate_intake.py \
+  --workspace-root /home/mfshaf7/projects \
+  --repo-root .
+python3 -m unittest tests.test_workspace_intake tests.test_governed_intake_assist
 ```
 
 ## Failure And Rollback

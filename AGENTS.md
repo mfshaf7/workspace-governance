@@ -77,6 +77,9 @@ Route those changes back to the owner repos.
 - New repos, products, and components must be classified through the intake
   layer first. Do not silently let them appear in the workspace and only wire
   them into governance later.
+- Use `docs/workspace-intake.md` and its digest-bound v2 command path for intake
+  changes; do not hand-edit `contracts/intake-register.yaml` as an operator
+  workflow.
 - `dev-integration` is a workspace-standardized fast-iteration lane, not a
   governed delivery lane. Use it when operator-facing workflow design,
   cross-repo API iteration, or canonical-backend write paths are still moving
@@ -282,5 +285,5 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/sync_workspace_root.py scripts/validate_pull_request_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/workspace_intake.py scripts/sync_workspace_root.py scripts/validate_pull_request_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```

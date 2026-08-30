@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "receipt_id",
+    "completed_at",
+    "request_ref",
+    "decision_ref",
+    "mutation_ref",
+    "readback_ref",
+    "target",
+    "phase",
+    "outcome",
+    "idempotency_key",
+    "canonical_authority",
+    "receipt_digest"
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_type": { "const": "workspace-intake-receipt" },
+    "receipt_id": { "$ref": "#/$defs/text" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "decision_ref": { "$ref": "#/$defs/artifactRef" },
+    "mutation_ref": { "$ref": "#/$defs/artifactRef" },
+    "readback_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "phase": { "enum": ["source-preparation", "source-replay", "merged-authority"] },
+    "outcome": { "enum": ["prepared", "replayed", "succeeded"] },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "canonical_authority": {
+      "type": "object",
+      "required": ["repo", "path", "branch"],
+      "properties": {
+        "repo": { "const": "workspace-governance" },
+        "path": { "const": "contracts/intake-register.yaml" },
+        "branch": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "receipt_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "phase": { "const": "source-preparation" } }, "required": ["phase"] },
+      "then": {
+        "properties": {
+          "outcome": { "const": "prepared" },
+          "canonical_authority": {
+            "properties": { "branch": { "not": { "enum": ["main", "master"] } } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "source-replay" } }, "required": ["phase"] },
+      "then": {
+        "properties": {
+          "outcome": { "const": "replayed" },
+          "canonical_authority": {
+            "properties": { "branch": { "not": { "enum": ["main", "master"] } } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "merged-authority" } }, "required": ["phase"] },
+      "then": {
+        "properties": {
+          "outcome": { "const": "succeeded" },
+          "canonical_authority": {
+            "properties": { "branch": { "const": "main" } }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

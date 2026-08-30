@@ -1,10 +1,33 @@
-schema_version: 1
+schema_version: 2
 repos: {}
 products: {}
 components:
   temporal:
     status: proposed
     decision_source: operator
+    owner_route: platform-engineering
+    record:
+      id: component:temporal
+      version: 1
+      source:
+        class: direct
+        ref: git://workspace-governance/f3cb00e67c7ab9fa1a591dcffe685b3c5a015c3c/contracts/intake-register.yaml#components.temporal
+        digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
+      decision:
+        id: legacy-intake-component-temporal-f3cb00e
+        ref: git://workspace-governance/f3cb00e67c7ab9fa1a591dcffe685b3c5a015c3c/contracts/intake-register.yaml#components.temporal
+        digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
+        source: operator
+        operator_ref: operator:workspace-governance-owner
+        decided_at: "2026-07-31T13:25:01+08:00"
+      last_mutation:
+        id: migration:component:temporal:v2
+        idempotency_key: migration:component:temporal:v2
+        request_ref: migration://workspace-intake/v1/component:temporal
+        request_digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
+        decision_ref: git://workspace-governance/f3cb00e67c7ab9fa1a591dcffe685b3c5a015c3c/contracts/intake-register.yaml#components.temporal
+        decision_digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
+        applied_at: "2026-08-30T17:06:34+08:00"
     component_class: shared-platform
     owner_repo: platform-engineering
     security_owner: security-architecture

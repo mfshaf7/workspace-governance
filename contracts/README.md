@@ -24,6 +24,10 @@ Use these contracts to declare:
   - may also declare `security_review_subject: true` when a repo needs
     security review inventory coverage even though it does not use the normal
     security-binding pattern
+- `workspace-intake.yaml`
+  - versioned request, decision, mutation, receipt, readback, ownership,
+    idempotency, review, migration, and denied-shortcut contract for workspace
+    intake
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system
@@ -34,7 +38,8 @@ Use these contracts to declare:
   - explicit intake decisions for new repos, products, and components that are
     out-of-scope, proposed, or admitted but not yet in the active contracts;
     the decision may come directly from the operator or from an AI suggestion
-    that the operator then records
+    that the operator then records; v2 entries preserve source, decision,
+    mutation, owner-route, version, and digest bindings
 - `governed-intake-assist.yaml`
   - workspace-owned consumer contract for bounded AI-assisted intake, including
     caller identity, provider output, candidate and accepted-record schemas,
@@ -80,7 +85,8 @@ Use these contracts to declare:
   - defines the integrated local source proof across the exact merged WGCF
     evaluator and OOS enforcer revisions, including positive and negative
     action-class cases, replay denial, receipt and audit failures, and explicit
-    excluded capabilities
+    excluded capabilities; validation materializes those pinned revisions from
+    Git history and proves they remain merged into each owner repo's `main`
 - `schemas/agent-action-request.schema.json`
   - defines the immutable request envelope for `read`, `advise`, `draft`, and
     `mutate` actions without treating logical agent identity as authority

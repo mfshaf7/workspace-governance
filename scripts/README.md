@@ -75,10 +75,16 @@
 - `validate_delegation_journal.py`
   - validates delegated-execution journal records, packet scope discipline,
     write-scope overlap, and required security-review references
+- `workspace_intake.py`
+  - reads version and digest bindings or deterministically applies one
+    schema-valid Workspace Intake v2 request and decision on a review branch
+  - emits mutation, canonical readback, and receipt artifacts while rejecting
+    stale state, identity conflict, active-inventory overlap, implicit AI
+    acceptance, idempotency conflict, and default-branch writes
 - `scaffold_intake.py`
-  - creates a new intake classification entry so a repo, product, or component
-    is explicitly marked out-of-scope, proposed, or admitted before it joins
-    the active contracts
+  - temporary compatibility front end for intake adds; it constructs v2
+    request and decision artifacts and delegates to `workspace_intake.py`
+    instead of writing the register through a separate path
   - when `--decision-source ai-suggested` is used, requires a validated
     `--ai-suggestion-file` produced by the governed client plus an explicit
     operator decision, acceptance state, identity, and timestamp before it can

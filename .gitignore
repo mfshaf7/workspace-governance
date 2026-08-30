@@ -2,7 +2,9 @@ __pycache__/
 *.pyc
 .wgcf/
 .art/intake-assist/
+.art/locks/
 .art/review-packets/
+.art/workspace-intake/
 
 # Local session continuity state. Keep zero or one current handoff only.
 docs/archive/session-handoff-*.md

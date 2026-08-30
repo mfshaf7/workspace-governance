@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "owner_repo",
+    "operator_surface_path",
+    "architecture",
+    "purpose",
+    "scope_boundaries",
+    "vocabulary",
+    "authority_roles",
+    "canonical_truth",
+    "schema_refs",
+    "artifact_chain",
+    "record_contract",
+    "decision_contract",
+    "canonicalization",
+    "mutation_contract",
+    "review_boundary",
+    "ai_boundary",
+    "migration",
+    "denied_shortcuts"
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "textList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/text" },
+      "uniqueItems": true
+    },
+    "authorityBoundary": {
+      "type": "object",
+      "required": ["authority", "description"],
+      "properties": {
+        "authority": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "ownerRole": {
+      "type": "object",
+      "required": ["owner_repo", "responsibilities"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/text" },
+        "responsibilities": { "$ref": "#/$defs/textList" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": { "const": 2 },
+    "owner_repo": { "const": "workspace-governance" },
+    "operator_surface_path": { "$ref": "#/$defs/text" },
+    "architecture": {
+      "type": "object",
+      "required": ["initiative_ref", "contract_work_ref"],
+      "properties": {
+        "initiative_ref": { "type": "string", "pattern": "^openproject://work_packages/[0-9]+$" },
+        "contract_work_ref": { "type": "string", "pattern": "^openproject://work_packages/[0-9]+$" }
+      },
+      "additionalProperties": false
+    },
+    "purpose": { "$ref": "#/$defs/text" },
+    "scope_boundaries": {
+      "type": "object",
+      "required": [
+        "intake_classification",
+        "readiness_evaluation",
+        "durable_workflow",
+        "source_landing",
+        "provider_identity",
+        "security_acceptance",
+        "operator_projection"
+      ],
+      "additionalProperties": { "$ref": "#/$defs/authorityBoundary" }
+    },
+    "vocabulary": {
+      "type": "object",
+      "required": [
+        "entrant_kinds",
+        "source_classes",
+        "intake_classifications",
+        "active_inventory_postures",
+        "product_maturity_postures",
+        "rule"
+      ],
+      "properties": {
+        "entrant_kinds": {
+          "type": "array",
+          "items": { "enum": ["repo", "product", "component"] },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "source_classes": {
+          "type": "array",
+          "items": { "enum": ["direct", "repository-custody", "prototype", "delivery"] },
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "intake_classifications": {
+          "type": "array",
+          "items": { "enum": ["out-of-scope", "proposed", "admitted"] },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "active_inventory_postures": { "$ref": "#/$defs/textList" },
+        "product_maturity_postures": { "$ref": "#/$defs/textList" },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "authority_roles": {
+      "type": "object",
+      "required": [
+        "contract_authority",
+        "readiness_authority",
+        "workflow_authority",
+        "source_landing_authority",
+        "identity_authority",
+        "security_review_authority",
+        "operator_projection"
+      ],
+      "additionalProperties": { "$ref": "#/$defs/ownerRole" }
+    },
+    "canonical_truth": {
+      "type": "object",
+      "required": ["authority_repo", "policy_path", "register_path", "active_inventory_paths", "rules"],
+      "properties": {
+        "authority_repo": { "const": "workspace-governance" },
+        "policy_path": { "$ref": "#/$defs/text" },
+        "register_path": { "$ref": "#/$defs/text" },
+        "active_inventory_paths": {
+          "type": "object",
+          "required": ["repo", "product", "component"],
+          "properties": {
+            "repo": { "$ref": "#/$defs/text" },
+            "product": { "$ref": "#/$defs/text" },
+            "component": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "rules": { "$ref": "#/$defs/textList" }
+      },
+      "additionalProperties": false
+    },
+    "schema_refs": {
+      "type": "object",
+      "required": ["request", "decision", "mutation", "receipt", "readback"],
+      "properties": {
+        "request": { "$ref": "#/$defs/text" },
+        "decision": { "$ref": "#/$defs/text" },
+        "mutation": { "$ref": "#/$defs/text" },
+        "receipt": { "$ref": "#/$defs/text" },
+        "readback": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "artifact_chain": {
+      "type": "object",
+      "required": ["ordered_artifacts", "binding_rule", "phase_identity_rule", "terminal_rule"],
+      "properties": {
+        "ordered_artifacts": { "$ref": "#/$defs/textList" },
+        "binding_rule": { "$ref": "#/$defs/text" },
+        "phase_identity_rule": { "$ref": "#/$defs/text" },
+        "terminal_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "record_contract": {
+      "type": "object",
+      "required": ["identity_format", "version_rule", "required_envelope", "source_rule", "decision_rule", "mutation_rule"],
+      "properties": {
+        "identity_format": { "$ref": "#/$defs/text" },
+        "version_rule": { "$ref": "#/$defs/text" },
+        "required_envelope": { "$ref": "#/$defs/textList" },
+        "source_rule": { "$ref": "#/$defs/text" },
+        "decision_rule": { "$ref": "#/$defs/text" },
+        "mutation_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "decision_contract": {
+      "type": "object",
+      "required": ["finding_severities", "blocker_dispositions", "rules"],
+      "properties": {
+        "finding_severities": {
+          "type": "array",
+          "items": { "enum": ["info", "warning", "blocking"] },
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "blocker_dispositions": {
+          "type": "array",
+          "items": { "enum": ["remove", "workaround", "accept-risk", "defer"] },
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "rules": { "$ref": "#/$defs/textList" }
+      },
+      "additionalProperties": false
+    },
+    "canonicalization": {
+      "type": "object",
+      "required": ["algorithm", "encoding", "projection", "data_limit", "digest"],
+      "properties": {
+        "algorithm": { "const": "workspace-canonical-json-v1" },
+        "encoding": { "const": "UTF-8" },
+        "projection": { "$ref": "#/$defs/text" },
+        "data_limit": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "mutation_contract": {
+      "type": "object",
+      "required": ["command", "allowed_actions", "target", "branch_rule", "serialization_rule", "optimistic_concurrency", "idempotency", "write_rules"],
+      "properties": {
+        "command": { "$ref": "#/$defs/text" },
+        "allowed_actions": {
+          "type": "array",
+          "items": { "enum": ["add", "update"] },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "target": { "const": "contracts/intake-register.yaml" },
+        "branch_rule": { "$ref": "#/$defs/text" },
+        "serialization_rule": { "$ref": "#/$defs/text" },
+        "optimistic_concurrency": {
+          "type": "object",
+          "required": ["add", "update", "stale_result"],
+          "properties": {
+            "add": { "$ref": "#/$defs/text" },
+            "update": { "$ref": "#/$defs/text" },
+            "stale_result": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "idempotency": {
+          "type": "object",
+          "required": ["key", "replay", "conflict"],
+          "properties": {
+            "key": { "const": "idempotency_key" },
+            "replay": { "$ref": "#/$defs/text" },
+            "conflict": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "write_rules": { "$ref": "#/$defs/textList" }
+      },
+      "additionalProperties": false
+    },
+    "review_boundary": {
+      "type": "object",
+      "required": ["required_source_flow", "direct_main_allowed", "automatic_merge_allowed", "review_packet_required", "rollback"],
+      "properties": {
+        "required_source_flow": { "$ref": "#/$defs/textList" },
+        "direct_main_allowed": { "const": false },
+        "automatic_merge_allowed": { "const": false },
+        "review_packet_required": { "const": true },
+        "rollback": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "ai_boundary": {
+      "type": "object",
+      "required": ["suggestion_authority", "autonomous_mutation_allowed", "explicit_operator_acceptance_required", "allowed_acceptance_states", "rejected_suggestion_may_enter_register"],
+      "properties": {
+        "suggestion_authority": { "const": "suggestion-only" },
+        "autonomous_mutation_allowed": { "const": false },
+        "explicit_operator_acceptance_required": { "const": true },
+        "allowed_acceptance_states": {
+          "type": "array",
+          "items": { "enum": ["accepted", "overridden"] },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "rejected_suggestion_may_enter_register": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "migration": {
+      "type": "object",
+      "required": ["from_schema_version", "to_schema_version", "record_version", "rule", "compatibility_entrypoint"],
+      "properties": {
+        "from_schema_version": { "const": 1 },
+        "to_schema_version": { "const": 2 },
+        "record_version": { "const": 1 },
+        "rule": { "$ref": "#/$defs/text" },
+        "compatibility_entrypoint": {
+          "type": "object",
+          "required": ["path", "posture", "rule"],
+          "properties": {
+            "path": { "const": "scripts/scaffold_intake.py" },
+            "posture": { "const": "temporary-wrapper" },
+            "rule": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "denied_shortcuts": { "$ref": "#/$defs/textList" }
+  },
+  "additionalProperties": false
+}
