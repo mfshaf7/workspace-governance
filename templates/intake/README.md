@@ -15,10 +15,14 @@ The intake decision is explicit:
   - accepted into the governed path and ready to be promoted into the active
     contracts once the owning surface is prepared
 
-Use:
+Read the current digest and version bindings before constructing the v2
+request and decision artifacts:
 
 ```bash
-python3 scripts/scaffold_intake.py repo --name <repo> --status proposed --notes "<why>"
-python3 scripts/scaffold_intake.py product --name <product> --status proposed --notes "<why>"
-python3 scripts/scaffold_intake.py component --name <component> --status proposed --notes "<why>"
+python3 scripts/workspace_intake.py state --kind <repo|product|component> --name <name>
 ```
+
+Follow [`docs/workspace-intake.md`](../../docs/workspace-intake.md) for the
+artifact chain, deterministic apply command, review boundary, and validation.
+`scaffold_intake.py` is a temporary compatibility front end, not a separate
+authority writer.

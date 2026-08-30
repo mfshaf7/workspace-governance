@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "request_id",
+    "requested_at",
+    "requester_ref",
+    "source",
+    "target",
+    "action",
+    "requested_classification",
+    "owner_route",
+    "requested_record",
+    "expected_state",
+    "idempotency_key",
+    "request_digest"
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "$ref": "#/$defs/text" },
+        "wgcf_graph_role": { "$ref": "#/$defs/text" },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "notes": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "repoRecord": {
+      "type": "object",
+      "required": ["kind", "repo_class", "requires_security_bindings", "security_owner", "notes"],
+      "properties": {
+        "kind": { "const": "repo" },
+        "repo_class": { "type": ["string", "null"] },
+        "requires_security_bindings": { "type": ["boolean", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    },
+    "productRecord": {
+      "type": "object",
+      "required": ["kind", "platform_owner", "security_owner", "runtime_owner", "source_owners", "intended_endpoint", "notes"],
+      "properties": {
+        "kind": { "const": "product" },
+        "platform_owner": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "runtime_owner": { "type": ["string", "null"] },
+        "source_owners": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "intended_endpoint": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    },
+    "componentRecord": {
+      "type": "object",
+      "required": ["kind", "component_class", "owner_repo", "security_owner", "product", "notes"],
+      "properties": {
+        "kind": { "const": "component" },
+        "component_class": { "type": ["string", "null"] },
+        "owner_repo": { "type": ["string", "null"] },
+        "security_owner": { "type": ["string", "null"] },
+        "product": { "type": ["string", "null"] },
+        "notes": { "$ref": "#/$defs/text" },
+        "validation_behavior": { "$ref": "#/$defs/validationBehavior" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": { "const": 2 },
+    "artifact_type": { "const": "workspace-intake-request" },
+    "request_id": { "$ref": "#/$defs/text" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "requester_ref": { "$ref": "#/$defs/text" },
+    "source": {
+      "type": "object",
+      "required": ["class", "ref", "digest"],
+      "properties": {
+        "class": { "enum": ["direct", "repository-custody", "prototype", "delivery"] },
+        "ref": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "action": { "enum": ["add", "update"] },
+    "requested_classification": { "enum": ["out-of-scope", "proposed", "admitted"] },
+    "owner_route": { "$ref": "#/$defs/text" },
+    "requested_record": {
+      "oneOf": [
+        { "$ref": "#/$defs/repoRecord" },
+        { "$ref": "#/$defs/productRecord" },
+        { "$ref": "#/$defs/componentRecord" }
+      ]
+    },
+    "expected_state": {
+      "type": "object",
+      "required": ["register_digest", "record_version", "record_digest"],
+      "properties": {
+        "register_digest": { "$ref": "#/$defs/digest" },
+        "record_version": { "type": ["integer", "null"], "minimum": 1 },
+        "record_digest": {
+          "oneOf": [
+            { "$ref": "#/$defs/digest" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "additionalProperties": false
+}

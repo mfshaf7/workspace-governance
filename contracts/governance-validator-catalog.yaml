@@ -192,6 +192,7 @@ governance_validator_catalog:
         - contract-model
         - delegation-journal
         - intake-model
+        - workspace-intake-state
         - developer-integration
         - cross-repo-truth
         - governance-engine-shadow-parity
@@ -237,6 +238,7 @@ governance_validator_catalog:
     - register_id: structured-record-writers
       owner_repo: workspace-governance
       entry_refs:
+        - workspace-intake-apply
         - scaffold-intake
         - record-improvement-candidate
         - record-after-action
@@ -892,13 +894,33 @@ governance_validator_catalog:
       included_in_validation_matrix: false
       wgcf_posture: check-mode-only-before-explicit-write-gate
       retirement_posture: keep-direct-compatibility-entrypoint
-    scaffold-intake:
+    workspace-intake-state:
       kind: scaffolder
       owner_repo: workspace-governance
       surface_id: workspace-governance-python-scripts
-      executable_path: scripts/scaffold_intake.py
-      command: python3 scripts/scaffold_intake.py <repo|product|component> ...
-      purpose: scaffold explicit intake classification records for new entrants before they join active governance
+      executable_path: scripts/workspace_intake.py
+      command: python3 scripts/workspace_intake.py state --kind <kind> --name <name>
+      purpose: emit current digest and version bindings for one workspace intake identity without mutating authority
+      scope: structured-record
+      safety_class: local-read-only
+      allowed_profiles:
+        - local-read-only
+        - dev-integration
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: false
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: candidate-for-wgcf-invocation
+      retirement_posture: keep-owner-contract-entrypoint
+    workspace-intake-apply:
+      kind: scaffolder
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/workspace_intake.py
+      command: python3 scripts/workspace_intake.py apply --request <request.json> --decision <decision.json> --output-dir <directory>
+      purpose: deterministically add or update exactly one reviewed workspace intake record and emit mutation, readback, and receipt artifacts
       scope: structured-record
       safety_class: structured-record-write
       allowed_profiles:
@@ -909,7 +931,25 @@ governance_validator_catalog:
       writes_materialized_outputs: false
       included_in_validation_matrix: false
       wgcf_posture: recommendation-only
-      retirement_posture: keep-direct-authority-entrypoint
+      retirement_posture: keep-owner-contract-entrypoint
+    scaffold-intake:
+      kind: scaffolder
+      owner_repo: workspace-governance
+      surface_id: workspace-governance-python-scripts
+      executable_path: scripts/scaffold_intake.py
+      command: python3 scripts/scaffold_intake.py <repo|product|component> ...
+      purpose: compatibility front end that delegates intake adds to the deterministic Workspace Intake v2 authority engine
+      scope: structured-record
+      safety_class: structured-record-write
+      allowed_profiles:
+        - break-glass
+      requires_workspace_root: false
+      requires_network: false
+      mutates_authority: true
+      writes_materialized_outputs: false
+      included_in_validation_matrix: false
+      wgcf_posture: recommendation-only
+      retirement_posture: retire-after-oos-and-console-adoption
     record-improvement-candidate:
       kind: scaffolder
       owner_repo: workspace-governance

@@ -1,0 +1,20 @@
+{
+  "component_class": "shared-platform",
+  "decision_source": "operator",
+  "notes": "Proposed replaceable durable workflow runtime behind operator-orchestration-service. Build admission authorizes bounded owner-repo source implementation only; launch, workflow execution, stage/prod deployment, and direct Console access remain denied.",
+  "owner_repo": "platform-engineering",
+  "product": null,
+  "security_owner": "security-architecture",
+  "status": "proposed",
+  "validation_behavior": {
+    "catalog_refs": [
+      "developer-integration",
+      "devint-runner-read",
+      "security-bindings",
+      "review-coverage"
+    ],
+    "notes": "Temporal component admission remains proposed while its dev-integration profile is build-admitted; WGCF may consume later readiness evidence but cannot own aggregate orchestration or runtime activation.",
+    "posture": "proposed-profile-gated",
+    "wgcf_graph_role": "proposed-shared-platform-component"
+  }
+}

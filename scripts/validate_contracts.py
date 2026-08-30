@@ -133,6 +133,13 @@ AGENT_ACTION_ARTIFACT_CASES = {
         "contracts/fixtures/agent-action-authority/owner-receipt.valid.json",
     ),
 }
+WORKSPACE_INTAKE_ARTIFACT_SCHEMAS = (
+    "contracts/schemas/workspace-intake-request.schema.json",
+    "contracts/schemas/workspace-intake-decision.schema.json",
+    "contracts/schemas/workspace-intake-mutation.schema.json",
+    "contracts/schemas/workspace-intake-receipt.schema.json",
+    "contracts/schemas/workspace-intake-readback.schema.json",
+)
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
     "readiness_model.rules",
@@ -5984,6 +5991,7 @@ def main() -> int:
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
+        "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
@@ -6024,6 +6032,16 @@ def main() -> int:
 
     for key, rel_path in SCHEMA_FILES.items():
         validate_schema(errors, instance_paths[key], repo_root / rel_path)
+
+    for rel_path in WORKSPACE_INTAKE_ARTIFACT_SCHEMAS:
+        schema_path = repo_root / rel_path
+        if not schema_path.exists():
+            errors.append(f"{rel_path}: workspace intake artifact schema is missing")
+            continue
+        try:
+            Draft202012Validator.check_schema(load_json(schema_path))
+        except SchemaError as exc:
+            errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
 
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
@@ -6096,6 +6114,47 @@ def main() -> int:
     lifecycle_states = set(contracts["lifecycle"]["states"].keys())
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
+    workspace_intake = contracts["workspace_intake"]
+    expected_workspace_intake_schema_refs = {
+        "request": "contracts/schemas/workspace-intake-request.schema.json",
+        "decision": "contracts/schemas/workspace-intake-decision.schema.json",
+        "mutation": "contracts/schemas/workspace-intake-mutation.schema.json",
+        "receipt": "contracts/schemas/workspace-intake-receipt.schema.json",
+        "readback": "contracts/schemas/workspace-intake-readback.schema.json",
+    }
+    if workspace_intake.get("schema_refs") != expected_workspace_intake_schema_refs:
+        errors.append(
+            "contracts/workspace-intake.yaml: schema_refs must bind the canonical v2 artifact schemas"
+        )
+    if workspace_intake.get("artifact_chain", {}).get("ordered_artifacts") != [
+        "workspace-intake-request",
+        "workspace-intake-decision",
+        "workspace-intake-mutation",
+        "workspace-intake-readback",
+        "workspace-intake-receipt",
+    ]:
+        errors.append(
+            "contracts/workspace-intake.yaml: artifact_chain must preserve request, decision, mutation, readback, receipt order"
+        )
+    if intake_register.get("schema_version") != workspace_intake.get("schema_version"):
+        errors.append(
+            "contracts/intake-register.yaml: schema_version must match workspace-intake schema_version"
+        )
+    if set(workspace_intake["vocabulary"]["intake_classifications"]) != set(
+        intake_policy["statuses"]
+    ):
+        errors.append(
+            "contracts/workspace-intake.yaml: intake classifications must match intake-policy statuses"
+        )
+    expected_intake_ref = {
+        "repo": "workspace-governance",
+        "path": "contracts/workspace-intake.yaml",
+        "schema_version": workspace_intake["schema_version"],
+    }
+    if intake_policy.get("contract_ref") != expected_intake_ref:
+        errors.append(
+            "contracts/intake-policy.yaml: contract_ref must bind the current workspace-intake contract version"
+        )
     governed_intake_assist = contracts["governed_intake_assist"]["governed_intake_assist"]
     developer_integration_policy = contracts["developer_integration_policy"]
     developer_integration_profiles = contracts["developer_integration_profiles"]

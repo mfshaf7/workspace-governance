@@ -1,10 +1,47 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "repos", "products", "components"],
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "readback_id",
+    "observed_at",
+    "target",
+    "mutation_ref",
+    "authority_state",
+    "source_branch",
+    "register_digest",
+    "record_digest",
+    "record",
+    "readback_digest"
+  ],
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "validationBehavior": {
+      "type": "object",
+      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
+      "properties": {
+        "posture": { "$ref": "#/$defs/text" },
+        "wgcf_graph_role": { "$ref": "#/$defs/text" },
+        "catalog_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/text" },
+          "uniqueItems": true
+        },
+        "notes": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
     "aiSuggestion": {
       "type": "object",
       "required": ["profile_id", "policy_status", "decision_id", "generated_at", "confidence", "caller_id", "invocation_path", "suggested_decision", "operator_decision", "acceptance_state", "accepted_by", "accepted_at", "audit_ref"],
@@ -23,21 +60,6 @@
         "accepted_at": { "type": "string", "format": "date-time" },
         "audit_ref": { "$ref": "#/$defs/text" },
         "override_reason": { "$ref": "#/$defs/text" }
-      },
-      "additionalProperties": false
-    },
-    "validationBehavior": {
-      "type": "object",
-      "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],
-      "properties": {
-        "posture": { "$ref": "#/$defs/text" },
-        "wgcf_graph_role": { "$ref": "#/$defs/text" },
-        "catalog_refs": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/text" },
-          "uniqueItems": true
-        },
-        "notes": { "$ref": "#/$defs/text" }
       },
       "additionalProperties": false
     },
@@ -96,17 +118,7 @@
         },
         "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
         "ai_suggestion": { "$ref": "#/$defs/aiSuggestion" }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "decision_source": { "const": "ai-suggested" } }, "required": ["decision_source"] },
-          "then": { "required": ["ai_suggestion"] }
-        },
-        {
-          "if": { "properties": { "decision_source": { "const": "operator" } }, "required": ["decision_source"] },
-          "then": { "not": { "required": ["ai_suggestion"] } }
-        }
-      ]
+      }
     },
     "repoEntry": {
       "properties": {
@@ -205,18 +217,42 @@
   },
   "properties": {
     "schema_version": { "const": 2 },
-    "repos": {
+    "artifact_type": { "const": "workspace-intake-readback" },
+    "readback_id": { "$ref": "#/$defs/text" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "target": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/repoEntry" }
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
     },
-    "products": {
-      "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/productEntry" }
+    "mutation_ref": { "$ref": "#/$defs/artifactRef" },
+    "authority_state": { "enum": ["review-branch", "merged-authority"] },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "register_digest": { "$ref": "#/$defs/digest" },
+    "record_digest": { "$ref": "#/$defs/digest" },
+    "record": {
+      "oneOf": [
+        { "$ref": "#/$defs/repoEntry" },
+        { "$ref": "#/$defs/productEntry" },
+        { "$ref": "#/$defs/componentEntry" }
+      ]
     },
-    "components": {
-      "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/componentEntry" }
-    }
+    "readback_digest": { "$ref": "#/$defs/digest" }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "authority_state": { "const": "review-branch" } }, "required": ["authority_state"] },
+      "then": { "properties": { "source_branch": { "not": { "enum": ["main", "master"] } } } }
+    },
+    {
+      "if": { "properties": { "authority_state": { "const": "merged-authority" } }, "required": ["authority_state"] },
+      "then": { "properties": { "source_branch": { "const": "main" } } }
+    }
+  ],
   "additionalProperties": false
 }

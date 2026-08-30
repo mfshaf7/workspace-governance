@@ -1,0 +1,227 @@
+schema_version: 2
+owner_repo: workspace-governance
+operator_surface_path: docs/workspace-intake.md
+architecture:
+  initiative_ref: openproject://work_packages/890
+  contract_work_ref: openproject://work_packages/1062
+purpose: Define one versioned, review-backed contract for classifying a new repository, product, or component before it enters active workspace inventory.
+scope_boundaries:
+  intake_classification:
+    authority: workspace-governance
+    description: Records whether an entrant is out-of-scope, proposed, or admitted.
+  readiness_evaluation:
+    authority: workspace-governance-control-fabric
+    description: Evaluates request and decision artifacts without mutating canonical truth.
+  durable_workflow:
+    authority: operator-orchestration-service
+    description: Coordinates request, review, merge wait, receipt, and readback without owning classification semantics.
+  source_landing:
+    authority: workspace-governance
+    description: Canonical intake truth changes only through a reviewed source change merged into the authority repository.
+  provider_identity:
+    authority: platform-engineering
+    description: Supplies the exact repository-scoped application identity used for source landing.
+  security_acceptance:
+    authority: security-architecture
+    description: Reviews the exact proposed head when the mutation changes a trust boundary.
+  operator_projection:
+    authority: governance-operations-console
+    description: Projects requests, decisions, blockers, and receipts through OOS; it does not write authority files directly.
+vocabulary:
+  entrant_kinds:
+    - repo
+    - product
+    - component
+  source_classes:
+    - direct
+    - repository-custody
+    - prototype
+    - delivery
+  intake_classifications:
+    - out-of-scope
+    - proposed
+    - admitted
+  active_inventory_postures:
+    - active
+    - suspended
+    - retired
+  product_maturity_postures:
+    - owner-managed
+    - platform-integrated
+    - fully-governed
+  rule: Intake classification, active inventory posture, and product maturity are independent axes and must never be projected as one status.
+authority_roles:
+  contract_authority:
+    owner_repo: workspace-governance
+    responsibilities:
+      - vocabulary
+      - schemas
+      - canonical-register
+      - deterministic-mutation
+      - migration
+  readiness_authority:
+    owner_repo: workspace-governance-control-fabric
+    responsibilities:
+      - request-policy-evaluation
+      - stale-version-detection
+      - overlap-detection
+      - readiness-receipt
+  workflow_authority:
+    owner_repo: operator-orchestration-service
+    responsibilities:
+      - workflow-lifecycle
+      - review-wait
+      - merge-observation
+      - result-projection
+  source_landing_authority:
+    owner_repo: workspace-governance
+    responsibilities:
+      - branch-source-change
+      - canonical-validation
+      - merged-readback
+  identity_authority:
+    owner_repo: platform-engineering
+    responsibilities:
+      - exact-repository-application-identity
+      - credential-delivery
+      - permission-revocation
+  security_review_authority:
+    owner_repo: security-architecture
+    responsibilities:
+      - exact-head-security-review
+      - trust-boundary-acceptance
+  operator_projection:
+    owner_repo: governance-operations-console
+    responsibilities:
+      - request-projection
+      - decision-projection
+      - receipt-and-readback-projection
+canonical_truth:
+  authority_repo: workspace-governance
+  policy_path: contracts/intake-policy.yaml
+  register_path: contracts/intake-register.yaml
+  active_inventory_paths:
+    repo: contracts/repos.yaml
+    product: contracts/products.yaml
+    component: contracts/components.yaml
+  rules:
+    - One entrant identity may exist in intake or active inventory, never both.
+    - A merged canonical register readback is the only successful mutation result.
+    - WGCF receipts and OOS workflow state are evidence, not substitute authority.
+    - Intake mutation never activates runtime, grants security acceptance, or promotes product maturity.
+schema_refs:
+  request: contracts/schemas/workspace-intake-request.schema.json
+  decision: contracts/schemas/workspace-intake-decision.schema.json
+  mutation: contracts/schemas/workspace-intake-mutation.schema.json
+  receipt: contracts/schemas/workspace-intake-receipt.schema.json
+  readback: contracts/schemas/workspace-intake-readback.schema.json
+artifact_chain:
+  ordered_artifacts:
+    - workspace-intake-request
+    - workspace-intake-decision
+    - workspace-intake-mutation
+    - workspace-intake-readback
+    - workspace-intake-receipt
+  binding_rule: Every downstream artifact binds the immutable identifier and canonical digest of every authority artifact it consumes.
+  phase_identity_rule: Apply, replay, and merged evidence use distinct deterministic identifiers; replay identity also binds the observed register digest so an identifier is never reused for different content.
+  terminal_rule: The owner command emits source-preparation evidence only; terminal succeeded requires OOS to observe a digest-matching merged-authority readback. Rejected requests preserve failure evidence outside canonical intake truth.
+record_contract:
+  identity_format: <kind>:<name>
+  version_rule: A new record starts at version 1; each approved content update increments the version exactly once; an idempotent replay does not increment it.
+  required_envelope:
+    - id
+    - version
+    - source
+    - decision
+    - last_mutation
+    - owner_route
+  source_rule: Source class, immutable source reference, and source digest record where the entrant originated; updates preserve that source exactly and copied source content is not authority.
+  decision_rule: Classification and owner route come from one explicit digest-bound decision with operator acceptance.
+  mutation_rule: The record retains the latest idempotency key and exact request and decision bindings needed to prove replay or conflict.
+decision_contract:
+  finding_severities:
+    - info
+    - warning
+    - blocking
+  blocker_dispositions:
+    - remove
+    - workaround
+    - accept-risk
+    - defer
+  rules:
+    - Non-blocking findings carry no blocker disposition.
+    - Every blocking finding carries one disposition, justification, and at least one evidence reference.
+    - Workaround and defer also bind an accountable owner and review date.
+    - Defer requires a requires-action decision and never permits mutation.
+    - Accept-risk binds Security evidence and explicit operator acceptance.
+    - Allowed decisions may retain workaround or accept-risk only when their disposition-specific evidence is bound into the decision artifact.
+canonicalization:
+  algorithm: workspace-canonical-json-v1
+  encoding: UTF-8
+  projection: JSON object with keys sorted lexicographically, no insignificant whitespace, and the artifact's own digest field omitted
+  data_limit: Contract artifacts use JSON scalar, array, and object values without floating-point numbers.
+  digest: SHA-256 encoded as sha256:<lowercase-hex>
+mutation_contract:
+  command: python3 scripts/workspace_intake.py apply --request <request.json> --decision <decision.json> --output-dir <directory>
+  allowed_actions:
+    - add
+    - update
+  target: contracts/intake-register.yaml
+  branch_rule: Apply is denied on main, master, or a detached head; the command prepares a reviewable source change and never merges it.
+  serialization_rule: A repo-local authority lock covers read, validation, compare, atomic replace, and evidence emission; register digests and provider merge checks protect cross-worktree and remote concurrency.
+  optimistic_concurrency:
+    add: Request must bind the current register digest and declare null expected record version and digest.
+    update: Request must bind the current register digest plus the exact current record version and digest.
+    stale_result: Any stale binding fails closed before mutation.
+  idempotency:
+    key: idempotency_key
+    replay: The same key with the same request and decision digests returns the existing record result without incrementing record version and emits digest-bound replay evidence rather than another mutation claim.
+    conflict: Reusing a key with a different request or decision digest fails closed.
+  write_rules:
+    - Exactly one entrant record may be added or updated per invocation.
+    - The decision target, classification, owner route, and approved record must bind the request target.
+    - An allowed decision and explicit operator acceptance are required before mutation.
+    - AI-suggested decisions require an active governed profile and accepted or overridden operator disposition.
+    - Hard deletion is unsupported.
+    - Promotion into active inventory and removal from intake are separate reviewed lifecycle work.
+    - Register replacement is atomic and source-preparation artifacts are emitted only after review-branch readback matches the decision.
+review_boundary:
+  required_source_flow:
+    - create-non-default-branch
+    - apply-deterministic-mutation
+    - run-owner-validation
+    - open-pull-request
+    - review-exact-head
+    - merge-through-provider
+    - read-back-merged-canonical-truth
+  direct_main_allowed: false
+  automatic_merge_allowed: false
+  review_packet_required: true
+  rollback: Revert the merged source commit through the normal reviewed source path; never rewrite receipt history.
+ai_boundary:
+  suggestion_authority: suggestion-only
+  autonomous_mutation_allowed: false
+  explicit_operator_acceptance_required: true
+  allowed_acceptance_states:
+    - accepted
+    - overridden
+  rejected_suggestion_may_enter_register: false
+migration:
+  from_schema_version: 1
+  to_schema_version: 2
+  record_version: 1
+  rule: Existing entries retain domain values and gain a truthful envelope whose source and decision bind the Git revision that introduced the v1 entry and whose migration digest binds the canonical v1 entry.
+  compatibility_entrypoint:
+    path: scripts/scaffold_intake.py
+    posture: temporary-wrapper
+    rule: The wrapper may remain during OOS and Console adoption only when it delegates to the deterministic v2 engine and cannot create a second mutation path.
+denied_shortcuts:
+  - direct-main-mutation
+  - automatic-merge
+  - wgcf-authority-mutation
+  - console-direct-contract-write
+  - implicit-ai-acceptance
+  - stale-version-overwrite
+  - intake-and-active-inventory-overlap
+  - hard-delete
+  - runtime-activation-by-intake

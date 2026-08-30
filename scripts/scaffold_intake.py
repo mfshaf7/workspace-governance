@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-from contracts_lib import dump_yaml, load_yaml
+from contracts_lib import load_yaml
+import workspace_intake
 
 
 DEFAULT_SECURITY_OWNER = "security-architecture"
@@ -24,10 +27,6 @@ def load_intake(repo_root: Path) -> dict:
 def load_governed_intake_assist(repo_root: Path) -> dict:
     payload = load_yaml(repo_root / "contracts" / "governed-intake-assist.yaml")
     return payload["governed_intake_assist"]
-
-
-def write_intake(repo_root: Path, payload: dict) -> None:
-    dump_yaml(repo_root / "contracts" / "intake-register.yaml", payload)
 
 
 def load_ai_candidate(repo_root: Path, path: Path) -> dict:
@@ -99,13 +98,13 @@ def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     if missing:
         raise SystemExit(" ".join(missing) + " required when --decision-source ai-suggested")
     if acceptance_state == "accepted" and suggested_decision != operator_decision:
-        raise SystemExit("accepted AI suggestions require --ai-suggested-decision to match --operator-decision/status")
+        raise SystemExit("accepted AI suggestions require the suggested and operator decisions to match")
     if acceptance_state == "overridden" and suggested_decision == operator_decision:
-        raise SystemExit("overridden AI suggestions require --ai-suggested-decision to differ from --operator-decision/status")
+        raise SystemExit("overridden AI suggestions require the suggested and operator decisions to differ")
     if acceptance_state == "overridden" and not args.override_reason:
         raise SystemExit("--override-reason required when --acceptance-state overridden")
     if operator_decision != args.status:
-        raise SystemExit("--operator-decision must match the recorded --status for intake-register truth")
+        raise SystemExit("--operator-decision must match the recorded --status")
     if suggestion_candidate["profile_id"] != consumer["profile_id"]:
         raise SystemExit("AI suggestion candidate profile_id does not match the governed consumer")
     if suggestion_candidate["caller_id"] != consumer["caller_id"]:
@@ -131,98 +130,98 @@ def build_ai_suggestion(args: argparse.Namespace) -> dict | None:
     }
     if args.override_reason:
         suggestion["override_reason"] = args.override_reason
+    return suggestion
+
+
+def _validation_behavior(args: argparse.Namespace) -> dict | None:
+    if args.status == "out-of-scope":
+        return None
+    missing = [
+        flag
+        for flag, value in (
+            ("--validation-posture", args.validation_posture),
+            ("--validation-graph-role", args.validation_graph_role),
+            ("--validation-catalog-ref", args.validation_catalog_ref),
+            ("--validation-notes", args.validation_notes),
+        )
+        if not value
+    ]
+    if missing:
+        raise SystemExit(" ".join(missing) + " required for proposed or admitted intake")
     return {
-        key: value
-        for key, value in suggestion.items()
-        if value is not None
+        "posture": args.validation_posture,
+        "wgcf_graph_role": args.validation_graph_role,
+        "catalog_refs": args.validation_catalog_ref,
+        "notes": args.validation_notes,
     }
 
 
-def with_optional_ai_suggestion(entry: dict, args: argparse.Namespace) -> dict:
-    ai_suggestion = build_ai_suggestion(args)
-    if ai_suggestion is not None:
-        entry["ai_suggestion"] = ai_suggestion
-    return entry
-
-
-def add_repo_entry(register: dict, args: argparse.Namespace) -> str:
-    repos = register["repos"]
-    if args.name in repos:
-        raise SystemExit(f"repo intake entry already exists: {args.name}")
+def _requested_record(args: argparse.Namespace) -> dict:
     in_scope = args.status != "out-of-scope"
-    if in_scope and not args.repo_class:
-        raise SystemExit("--repo-class is required when status is proposed or admitted")
-    repos[args.name] = with_optional_ai_suggestion({
-        "status": args.status,
-        "decision_source": args.decision_source,
-        "repo_class": args.repo_class if in_scope else None,
-        "requires_security_bindings": args.requires_security_bindings if in_scope else None,
-        "security_owner": args.security_owner if in_scope and args.requires_security_bindings else None,
-        "notes": args.notes,
-    }, args)
-    return f"repo:{args.name}"
-
-
-def add_product_entry(register: dict, args: argparse.Namespace) -> str:
-    products = register["products"]
-    if args.name in products:
-        raise SystemExit(f"product intake entry already exists: {args.name}")
-    in_scope = args.status != "out-of-scope"
-    if in_scope:
-        missing = [
-            flag
-            for flag, value in (
-                ("--runtime-owner", args.runtime_owner),
-                ("--source-owner", args.source_owner),
-                ("--intended-endpoint", args.intended_endpoint),
-            )
-            if not value
-        ]
-        if missing:
-            raise SystemExit(
-                " ".join(missing) + " required when status is proposed or admitted"
-            )
-    products[args.name] = with_optional_ai_suggestion({
-        "status": args.status,
-        "decision_source": args.decision_source,
-        "platform_owner": args.platform_owner if in_scope else None,
-        "security_owner": args.security_owner if in_scope else None,
-        "runtime_owner": args.runtime_owner if in_scope else None,
-        "source_owners": args.source_owner if in_scope else [],
-        "intended_endpoint": args.intended_endpoint if in_scope else None,
-        "notes": args.notes,
-    }, args)
-    return f"product:{args.name}"
-
-
-def add_component_entry(register: dict, args: argparse.Namespace) -> str:
-    components = register["components"]
-    if args.name in components:
-        raise SystemExit(f"component intake entry already exists: {args.name}")
-    in_scope = args.status != "out-of-scope"
-    if in_scope:
-        missing = [
-            flag
-            for flag, value in (
-                ("--component-class", args.component_class),
-                ("--owner-repo", args.owner_repo),
-            )
-            if not value
-        ]
-        if missing:
-            raise SystemExit(
-                " ".join(missing) + " required when status is proposed or admitted"
-            )
-    components[args.name] = with_optional_ai_suggestion({
-        "status": args.status,
-        "decision_source": args.decision_source,
-        "component_class": args.component_class if in_scope else None,
-        "owner_repo": args.owner_repo if in_scope else None,
-        "security_owner": args.security_owner if in_scope else None,
-        "product": args.product if in_scope else None,
-        "notes": args.notes,
-    }, args)
-    return f"component:{args.name}"
+    record: dict = {"kind": args.kind}
+    if args.kind == "repo":
+        if in_scope and not args.repo_class:
+            raise SystemExit("--repo-class is required for proposed or admitted repo intake")
+        record.update(
+            {
+                "repo_class": args.repo_class if in_scope else None,
+                "requires_security_bindings": args.requires_security_bindings if in_scope else None,
+                "security_owner": (
+                    args.security_owner
+                    if in_scope and args.requires_security_bindings
+                    else None
+                ),
+                "notes": args.notes,
+            }
+        )
+    elif args.kind == "product":
+        if in_scope:
+            missing = [
+                flag
+                for flag, value in (
+                    ("--runtime-owner", args.runtime_owner),
+                    ("--source-owner", args.source_owner),
+                    ("--intended-endpoint", args.intended_endpoint),
+                )
+                if not value
+            ]
+            if missing:
+                raise SystemExit(" ".join(missing) + " required for proposed or admitted product intake")
+        record.update(
+            {
+                "platform_owner": args.platform_owner if in_scope else None,
+                "security_owner": args.security_owner if in_scope else None,
+                "runtime_owner": args.runtime_owner if in_scope else None,
+                "source_owners": args.source_owner if in_scope else [],
+                "intended_endpoint": args.intended_endpoint if in_scope else None,
+                "notes": args.notes,
+            }
+        )
+    else:
+        if in_scope:
+            missing = [
+                flag
+                for flag, value in (
+                    ("--component-class", args.component_class),
+                    ("--owner-repo", args.owner_repo),
+                )
+                if not value
+            ]
+            if missing:
+                raise SystemExit(" ".join(missing) + " required for proposed or admitted component intake")
+        record.update(
+            {
+                "component_class": args.component_class if in_scope else None,
+                "owner_repo": args.owner_repo if in_scope else None,
+                "security_owner": args.security_owner if in_scope else None,
+                "product": args.product if in_scope else None,
+                "notes": args.notes,
+            }
+        )
+    validation_behavior = _validation_behavior(args)
+    if validation_behavior is not None:
+        record["validation_behavior"] = validation_behavior
+    return record
 
 
 def add_ai_arguments(parser: argparse.ArgumentParser) -> None:
@@ -234,9 +233,43 @@ def add_ai_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--accepted-at")
 
 
+def _add_common_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--name", required=True)
+    parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
+    parser.add_argument(
+        "--decision-source",
+        choices=("operator", "ai-suggested"),
+        default=DEFAULT_DECISION_SOURCE,
+    )
+    parser.add_argument("--owner-route", required=True)
+    parser.add_argument(
+        "--source-class",
+        choices=("direct", "repository-custody", "prototype", "delivery"),
+        required=True,
+    )
+    parser.add_argument("--source-ref", required=True)
+    parser.add_argument("--source-digest", required=True)
+    parser.add_argument("--request-id", required=True)
+    parser.add_argument("--decision-id", required=True)
+    parser.add_argument("--idempotency-key", required=True)
+    parser.add_argument("--operator-ref", required=True)
+    parser.add_argument("--requested-at")
+    parser.add_argument("--decided-at")
+    parser.add_argument("--output-dir", type=Path, default=Path(".art/workspace-intake"))
+    parser.add_argument("--validation-posture")
+    parser.add_argument("--validation-graph-role")
+    parser.add_argument("--validation-catalog-ref", action="append", default=[])
+    parser.add_argument("--validation-notes")
+    parser.add_argument("--notes", required=True)
+    add_ai_arguments(parser)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Create an intake classification entry so a new repo, product, or component is explicitly marked out-of-scope, proposed, or admitted."
+        description=(
+            "Compatibility front end for adding one Workspace Intake v2 record through the "
+            "deterministic, review-branch-only authority engine."
+        )
     )
     parser.add_argument(
         "--repo-root",
@@ -246,49 +279,35 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="kind", required=True)
 
-    repo_parser = subparsers.add_parser("repo", help="scaffold a repo intake entry")
-    repo_parser.add_argument("--name", required=True)
-    repo_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
-    repo_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
+    repo_parser = subparsers.add_parser("repo", help="prepare and apply a repo intake add")
+    _add_common_arguments(repo_parser)
     repo_parser.add_argument("--repo-class")
     repo_parser.add_argument("--requires-security-bindings", action="store_true")
     repo_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
-    repo_parser.add_argument("--notes", required=True)
-    add_ai_arguments(repo_parser)
-    repo_parser.set_defaults(handler=add_repo_entry)
 
-    product_parser = subparsers.add_parser("product", help="scaffold a product intake entry")
-    product_parser.add_argument("--name", required=True)
-    product_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
-    product_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
+    product_parser = subparsers.add_parser("product", help="prepare and apply a product intake add")
+    _add_common_arguments(product_parser)
     product_parser.add_argument("--platform-owner", default="platform-engineering")
     product_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
     product_parser.add_argument("--runtime-owner")
     product_parser.add_argument("--source-owner", action="append", default=[])
     product_parser.add_argument("--intended-endpoint")
-    product_parser.add_argument("--notes", required=True)
-    add_ai_arguments(product_parser)
-    product_parser.set_defaults(handler=add_product_entry)
 
-    component_parser = subparsers.add_parser("component", help="scaffold a component intake entry")
-    component_parser.add_argument("--name", required=True)
-    component_parser.add_argument("--status", choices=INTAKE_STATUS_CHOICES, default="proposed")
-    component_parser.add_argument("--decision-source", choices=("operator", "ai-suggested"), default=DEFAULT_DECISION_SOURCE)
+    component_parser = subparsers.add_parser("component", help="prepare and apply a component intake add")
+    _add_common_arguments(component_parser)
     component_parser.add_argument("--component-class")
     component_parser.add_argument("--owner-repo")
     component_parser.add_argument("--security-owner", default=DEFAULT_SECURITY_OWNER)
     component_parser.add_argument("--product")
-    component_parser.add_argument("--notes", required=True)
-    add_ai_arguments(component_parser)
-    component_parser.set_defaults(handler=add_component_entry)
-
     return parser
 
 
-def main() -> int:
-    parser = build_parser()
-    args = parser.parse_args()
+def _timestamp(value: str | None) -> str:
+    return value or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
+
+def main() -> int:
+    args = build_parser().parse_args()
     repo_root = args.repo_root.resolve()
     args.repo_root = repo_root
     args.governed_intake_assist = load_governed_intake_assist(repo_root)
@@ -300,13 +319,83 @@ def main() -> int:
         if isinstance((suggestion := entry.get("ai_suggestion")), dict)
         and suggestion.get("decision_id")
     }
-    entry_id = args.handler(register, args)
-    write_intake(repo_root, register)
-
-    print(f"scaffolded intake entry: {entry_id} status={args.status} source={args.decision_source}")
-    print(
-        "next steps: validate the intake model, then either keep the entrant explicitly out-of-scope or promote it into the governed contracts when the owner surface is ready"
+    requested_record = _requested_record(args)
+    state = workspace_intake.current_state(repo_root, args.kind, args.name)
+    requested_at = _timestamp(args.requested_at)
+    decided_at = _timestamp(args.decided_at)
+    request = workspace_intake.bind_artifact_digest(
+        {
+            "schema_version": 2,
+            "artifact_type": "workspace-intake-request",
+            "request_id": args.request_id,
+            "requested_at": requested_at,
+            "requester_ref": args.operator_ref,
+            "source": {
+                "class": args.source_class,
+                "ref": args.source_ref,
+                "digest": args.source_digest,
+            },
+            "target": state["target"],
+            "action": "add",
+            "requested_classification": args.status,
+            "owner_route": args.owner_route,
+            "requested_record": requested_record,
+            "expected_state": state["expected_state"],
+            "idempotency_key": args.idempotency_key,
+        }
     )
+    ai_suggestion = build_ai_suggestion(args)
+    decision_payload = {
+        "schema_version": 2,
+        "artifact_type": "workspace-intake-decision",
+        "decision_id": args.decision_id,
+        "decided_at": decided_at,
+        "request_ref": {
+            "id": request["request_id"],
+            "digest": request["request_digest"],
+        },
+        "target": request["target"],
+        "decision_source": args.decision_source,
+        "operator_acceptance": {
+            "state": "accepted",
+            "operator_ref": args.operator_ref,
+            "recorded_at": decided_at,
+        },
+        "outcome": {
+            "status": "allowed",
+            "classification": args.status,
+            "owner_route": args.owner_route,
+            "approved_record": requested_record,
+            "findings": [],
+        },
+    }
+    if ai_suggestion is not None:
+        decision_payload["ai_suggestion"] = ai_suggestion
+    decision = workspace_intake.bind_artifact_digest(decision_payload)
+    output_dir = args.output_dir
+    if not output_dir.is_absolute():
+        output_dir = repo_root / output_dir
+    try:
+        artifacts = workspace_intake.apply_intake(
+            repo_root=repo_root,
+            request=request,
+            decision=decision,
+            output_dir=output_dir,
+            source_branch=workspace_intake.current_branch(repo_root),
+        )
+    except (
+        OSError,
+        subprocess.CalledProcessError,
+        workspace_intake.WorkspaceIntakeError,
+    ) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    receipt = artifacts["receipt"]
+    print(
+        f"workspace intake {receipt['outcome']}: {receipt['target']['record_id']} "
+        f"receipt={receipt['receipt_id']}"
+    )
+    print("next step: validate the source change and submit it through the normal pull-request path")
     return 0
 
 

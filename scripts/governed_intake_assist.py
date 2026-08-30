@@ -249,7 +249,7 @@ def main() -> int:
         f"suggested_decision={response['suggested_decision']} confidence={response['confidence']} "
         f"audit_ref={response['audit_ref']}"
     )
-    print("next step: review the candidate, then use scaffold_intake.py with explicit operator acceptance")
+    print("next step: review the candidate, then bind explicit operator acceptance into the Workspace Intake v2 request and decision path")
     return 0
 
 
