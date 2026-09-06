@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "receipt_id", "receipt_digest", "request_ref", "readiness_ref", "mutation_ref", "readback_ref", "target", "action", "operator_ref", "correlation_ref", "idempotency_key", "completed_at", "phase", "outcome"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-lifecycle-receipt" },
+    "receipt_id": { "$ref": "#/$defs/text" },
+    "receipt_digest": { "$ref": "#/$defs/digest" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "readiness_ref": { "$ref": "#/$defs/artifactRef" },
+    "mutation_ref": { "$ref": "#/$defs/artifactRef" },
+    "readback_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": { "$ref": "#/$defs/target" },
+    "action": { "enum": ["update", "suspend", "restore", "retire"] },
+    "operator_ref": { "$ref": "#/$defs/text" },
+    "correlation_ref": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "phase": { "const": "review-branch" },
+    "outcome": { "enum": ["prepared", "replayed"] }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "target": { "type": "object", "required": ["kind", "name", "record_id"], "properties": { "kind": { "enum": ["repo", "product", "component"] }, "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }, "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,101 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/workspace-active-inventory.md
+architecture:
+  initiative_ref: openproject://work_packages/890
+  contract_work_ref: openproject://work_packages/1077
+purpose: Change active inventory metadata and posture through deterministic reviewed source mutation while preserving identity, lineage, and append-only history.
+canonical_truth:
+  inventories:
+    repo: contracts/repos.yaml
+    product: contracts/products.yaml
+    component: contracts/components.yaml
+  history: contracts/workspace-inventory-history.yaml
+  rules:
+    - Merged Workspace Governance source is the only canonical lifecycle truth.
+    - Every accepted mutation increments the record version and appends exactly one immutable history event.
+    - A lifecycle request changes one canonical record and never creates or deletes its identity.
+actions:
+  update:
+    allowed_from:
+      - active
+      - suspended
+    result: Preserve posture and replace only the complete validated domain value supplied by the operator request.
+  suspend:
+    allowed_from:
+      - active
+    result: Preserve the full record and deny new references while posture is suspended.
+  restore:
+    allowed_from:
+      - suspended
+      - retired
+    result: Return posture to active through a new reviewed action bound to the latest suspension or retirement event.
+  retire:
+    allowed_from:
+      - active
+      - suspended
+    result: Preserve the full record and history while denying new references.
+state_axes:
+  posture:
+    - active
+    - suspended
+    - retired
+  product_maturity:
+    - owner-managed
+    - platform-integrated
+    - fully-governed
+  separation_rule: Product maturity is independent from posture and changes only through an explicit update request.
+command_contract:
+  command: python3 scripts/workspace_inventory.py lifecycle --request <request.json> --readiness <readiness.json> --output-dir <directory>
+  required_bindings:
+    - exact canonical inventory digest
+    - exact append-only history digest
+    - exact record version and digest
+    - current posture
+    - operator and approval references
+    - impact acknowledgements
+    - WGCF readiness for the same request and observed state
+    - idempotency and correlation keys
+  source_rules:
+    - The command is denied on main, master, and detached heads.
+    - The owner lock covers source reads, validation, mutation, replacement, and artifact emission.
+    - The changed inventory and history both validate before either canonical file is replaced.
+    - A process-level write failure restores both original files and emits no success artifact.
+    - Exact replay returns the existing event and record version without appending history.
+    - Reused identity or idempotency with different evidence fails closed.
+  output_artifacts:
+    - workspace-inventory-lifecycle-mutation
+    - workspace-inventory-lifecycle-readback
+    - workspace-inventory-lifecycle-receipt
+history_contract:
+  identity: workspace-inventory-event:<kind>:<name>:<version>
+  ordering: Sequence is monotonic per record and every event references the previous event when one exists.
+  custody: History is canonical Git source, append-only, and retained after suspension, retirement, or restoration.
+  prohibited_behavior:
+    - rewrite-prior-event
+    - delete-event
+    - reuse-event-identity
+    - omit-before-or-after-digest
+review_boundary:
+  required_flow:
+    - prepare non-default branch
+    - evaluate WGCF readiness
+    - apply deterministic source mutation
+    - validate inventory, history, and cross-repo truth
+    - open pull request
+    - review exact head
+    - merge through repository provider
+    - reconcile merged canonical readback
+  direct_main_allowed: false
+  automatic_merge_allowed: false
+  hard_delete_allowed: false
+denied_shortcuts:
+  - direct-main-mutation
+  - automatic-merge
+  - hard-delete
+  - stale-version-overwrite
+  - illegal-posture-transition
+  - hidden-retirement-reversal
+  - destructive-history-rewrite
+  - product-maturity-inference-from-posture
+  - runtime-or-release-activation

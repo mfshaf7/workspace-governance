@@ -6000,6 +6000,8 @@ def main() -> int:
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
         "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
         "workspace_active_inventory": repo_root / "contracts/workspace-active-inventory.yaml",
+        "workspace_inventory_lifecycle": repo_root / "contracts/workspace-inventory-lifecycle.yaml",
+        "workspace_inventory_history": repo_root / "contracts/workspace-inventory-history.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
@@ -9807,7 +9809,7 @@ def main() -> int:
             errors.append(f"contracts/repos.yaml: retired repo {repo_name} must keep retired posture and compatibility alias")
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/repos.yaml: retired repo {repo_name} uses unknown lifecycle {payload['lifecycle']!r}")
-        for replacement in payload["replaced_by"].values():
+        for replacement in (payload.get("replaced_by") or {}).values():
             if replacement not in active_repos:
                 errors.append(f"contracts/repos.yaml: retired repo {repo_name} replacement {replacement!r} is not an active repo")
 
