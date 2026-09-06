@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 products:
   openclaw:
     lifecycle: fully-governed
@@ -6,9 +6,9 @@ products:
     security_owner: security-architecture
     runtime_owner: openclaw-runtime-distribution
     source_owners:
-      - openclaw-telegram-enhanced
-      - openclaw-host-bridge
-      - openclaw-runtime-distribution
+    - openclaw-telegram-enhanced
+    - openclaw-host-bridge
+    - openclaw-runtime-distribution
     stage_supported: true
     governed_prod_promotion: true
     highest_real_endpoint: governed-prod
@@ -16,17 +16,38 @@ products:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-readiness-aggregate
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: OpenClaw product readiness is aggregated from owner-repo component contracts, platform release evidence, and security review posture; WGCF must not own promotion authority.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: OpenClaw product readiness is aggregated from owner-repo component contracts,
+        platform release evidence, and security review posture; WGCF must not own
+        promotion authority.
+    maturity: fully-governed
+    posture: active
+    record:
+      id: product:openclaw
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:3a86d452b1c727ab91341548e9a55a1afe6746c54b25ed16a2f9950229fbfeea
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:product:openclaw:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:product:openclaw:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openproject:
     lifecycle: platform-integrated
     platform_owner: platform-engineering
     security_owner: security-architecture
     runtime_owner: platform-engineering
     source_owners:
-      - platform-engineering
+    - platform-engineering
     stage_supported: false
     governed_prod_promotion: false
     highest_real_endpoint: platform-integrated-runtime
@@ -34,17 +55,38 @@ products:
       posture: profile-gated-external-owner
       wgcf_graph_role: product-readiness-aggregate
       catalog_refs:
-        - delivery-art-broker-read
-        - openproject-quality-check
-        - openproject-projection-sync
-      notes: OpenProject readiness is platform-integrated and ART-backed; WGCF may consume broker and platform receipts but OOS and platform-engineering retain mutation and runtime authority.
+      - delivery-art-broker-read
+      - openproject-quality-check
+      - openproject-projection-sync
+      notes: OpenProject readiness is platform-integrated and ART-backed; WGCF may
+        consume broker and platform receipts but OOS and platform-engineering retain
+        mutation and runtime authority.
+    maturity: platform-integrated
+    posture: active
+    record:
+      id: product:openproject
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:95b5e6465b1088474781dcb8074af06afbaad0b2792ecc005d5d56cb4ae036ad
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:product:openproject:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:product:openproject:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   governance-operations-console:
-    lifecycle: active
+    lifecycle: owner-managed
     platform_owner: platform-engineering
     security_owner: security-architecture
     runtime_owner: governance-operations-console
     source_owners:
-      - governance-operations-console
+    - governance-operations-console
     stage_supported: false
     governed_prod_promotion: false
     highest_real_endpoint: owner-repository-local-preview
@@ -52,7 +94,30 @@ products:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-readiness-aggregate
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Product readiness aggregates owner-repository validation, Security review posture, Platform authority, and reviewed delivery evidence. The active product currently proves durable source ownership and loopback-only local preview, not live backend, authenticated identity, governed AI, stage, production, release, public, or client-visible runtime readiness.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Product readiness aggregates owner-repository validation, Security review
+        posture, Platform authority, and reviewed delivery evidence. The active product
+        currently proves durable source ownership and loopback-only local preview,
+        not live backend, authenticated identity, governed AI, stage, production,
+        release, public, or client-visible runtime readiness.
+    maturity: owner-managed
+    posture: active
+    record:
+      id: product:governance-operations-console
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:d7a27f46f21f2d25b70ecd1e6c3010182f57fcd8bcb16377b6a1c8eb097d8713
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:product:governance-operations-console:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:product:governance-operations-console:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'

@@ -100,6 +100,7 @@ DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "architecture-packet-persistence",
     "work-start-authoring",
     "work-start-persistence",
+    "authoritative-review-evidence-projection",
     "review-packet-v2-authoring",
     "review-packet-merge-readiness",
     "operating-readiness",

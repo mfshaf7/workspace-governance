@@ -80,6 +80,9 @@ Route those changes back to the owner repos.
 - Use `docs/workspace-intake.md` and its digest-bound v2 command path for intake
   changes; do not hand-edit `contracts/intake-register.yaml` as an operator
   workflow.
+- Use `docs/workspace-active-inventory.md` after an admitted intake entrant is
+  ready for active inventory; promotion must remove intake and add exactly one
+  versioned active record in the same reviewed source change.
 - `dev-integration` is a workspace-standardized fast-iteration lane, not a
   governed delivery lane. Use it when operator-facing workflow design,
   cross-repo API iteration, or canonical-backend write paths are still moving

@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 repos:
   workspace-governance:
     lifecycle: active
@@ -6,323 +6,541 @@ repos:
     requires_security_bindings: false
     security_review_subject: true
     owns:
-      - workspace-root guidance
-      - cross-repo contracts
-      - workspace audit tooling
-      - workspace-level skill source
+    - workspace-root guidance
+    - cross-repo contracts
+    - workspace audit tooling
+    - workspace-level skill source
     must_not_own:
-      - platform rollout
-      - product source
-      - runtime packaging
-      - security standards
+    - platform rollout
+    - product source
+    - runtime packaging
+    - security standards
     allowed_authoritative_refs:
-      - platform-engineering
-      - security-architecture
-      - workspace-governance-control-fabric
+    - platform-engineering
+    - security-architecture
+    - workspace-governance-control-fabric
     validation_behavior:
       posture: catalog-owner
       wgcf_graph_role: catalog-authority-source
       catalog_refs:
-        - contract-model
-        - intake-model
-        - component-contracts
-        - workspace-layout
-        - pull-request-controls
-      notes: Owns validator identity, admission policy, and catalog truth consumed by WGCF.
+      - contract-model
+      - intake-model
+      - component-contracts
+      - workspace-layout
+      - pull-request-controls
+      notes: Owns validator identity, admission policy, and catalog truth consumed
+        by WGCF.
+    posture: active
+    record:
+      id: repo:workspace-governance
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:26cff2cf468d41ebfb96b5e818ea0717e4aae0dd81b33166745e7838b3b277d2
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:workspace-governance:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:workspace-governance:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   workspace-governance-control-fabric:
     lifecycle: active
     repo_class: governance-runtime
     requires_security_bindings: false
     security_review_subject: true
     owns:
-      - governance control-fabric runtime implementation
-      - governance graph and validation planning runtime
-      - admission, readiness, receipt, and ledger runtime surfaces
-      - policy and projection adapters for existing governance rules
-      - control-fabric API, worker, and CLI implementation
+    - governance control-fabric runtime implementation
+    - governance graph and validation planning runtime
+    - admission, readiness, receipt, and ledger runtime surfaces
+    - policy and projection adapters for existing governance rules
+    - control-fabric API, worker, and CLI implementation
     must_not_own:
-      - canonical workspace contracts
-      - workspace-root guidance
-      - platform deployment authority
-      - security standards
-      - Workspace Delivery ART work-state truth
+    - canonical workspace contracts
+    - workspace-root guidance
+    - platform deployment authority
+    - security standards
+    - Workspace Delivery ART work-state truth
     allowed_authoritative_refs:
-      - workspace-governance
-      - platform-engineering
-      - security-architecture
-      - operator-orchestration-service
+    - workspace-governance
+    - platform-engineering
+    - security-architecture
+    - operator-orchestration-service
     validation_behavior:
       posture: runtime-consumer
       wgcf_graph_role: wgcf-runtime-source
       catalog_refs:
-        - contract-model
-        - developer-integration
-      notes: Implements WGCF runtime planning and receipts from workspace-governance catalog truth without redefining validator authority.
+      - contract-model
+      - developer-integration
+      notes: Implements WGCF runtime planning and receipts from workspace-governance
+        catalog truth without redefining validator authority.
+    posture: active
+    record:
+      id: repo:workspace-governance-control-fabric
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:d30736f3c68fcfdea721f4eec1fff3d92712fd293ce3bafdad35abffdddf1006
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:workspace-governance-control-fabric:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:workspace-governance-control-fabric:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   context-governance-gateway:
     lifecycle: active
     repo_class: governance-runtime
     requires_security_bindings: true
     security_review_subject: true
     owns:
-      - operational context admission implementation
-      - context capture, normalization, classification, redaction, slicing, budgeting, and projection
-      - model-safe and operator-safe packet generation
-      - context manifests, redaction reports, operator receipts, artifact digests, and local ledger behavior
-      - future API, worker, storage-adapter, and downstream adapter implementation after runtime admission
+    - operational context admission implementation
+    - context capture, normalization, classification, redaction, slicing, budgeting,
+      and projection
+    - model-safe and operator-safe packet generation
+    - context manifests, redaction reports, operator receipts, artifact digests, and
+      local ledger behavior
+    - future API, worker, storage-adapter, and downstream adapter implementation after
+      runtime admission
     must_not_own:
-      - workspace contracts
-      - Workspace Governance Control Fabric validation planning or readiness authority
-      - Workspace Delivery ART mutation authority
-      - platform deployment authority
-      - security standards or security acceptance
-      - custom LLM gateway, custom scanner, custom observability backend, or custom object store
+    - workspace contracts
+    - Workspace Governance Control Fabric validation planning or readiness authority
+    - Workspace Delivery ART mutation authority
+    - platform deployment authority
+    - security standards or security acceptance
+    - custom LLM gateway, custom scanner, custom observability backend, or custom
+      object store
     allowed_authoritative_refs:
-      - workspace-governance
-      - workspace-governance-control-fabric
-      - platform-engineering
-      - security-architecture
-      - operator-orchestration-service
+    - workspace-governance
+    - workspace-governance-control-fabric
+    - platform-engineering
+    - security-architecture
+    - operator-orchestration-service
     validation_behavior:
       posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
-        - developer-integration
-        - devint-runner-read
-        - security-bindings
-        - review-coverage
-      notes: Active implementation repo for context packet production; local dev-integration runtime launch is active through the platform-owned runner, while governed stage/prod deployment, raw projection, downstream adapters, and approval authority remain blocked.
+      - developer-integration
+      - devint-runner-read
+      - security-bindings
+      - review-coverage
+      notes: Active implementation repo for context packet production; local dev-integration
+        runtime launch is active through the platform-owned runner, while governed
+        stage/prod deployment, raw projection, downstream adapters, and approval authority
+        remain blocked.
+    posture: active
+    record:
+      id: repo:context-governance-gateway
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:57f05af15454880b0a9606009e6cb3c21d892d0af733da7f40c135cd51197bd5
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:context-governance-gateway:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:context-governance-gateway:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   workspace-prototype-studio:
     lifecycle: active
     repo_class: product-incubation
     requires_security_bindings: false
     security_review_subject: true
     owns:
-      - prototype and product-incubation source
-      - prototype registry and lifecycle records
-      - design baseline records before graduation
-      - mock and synthetic data fixtures for prototype review
-      - internal and client app prototype scaffolds before graduation
+    - prototype and product-incubation source
+    - prototype registry and lifecycle records
+    - design baseline records before graduation
+    - mock and synthetic data fixtures for prototype review
+    - internal and client app prototype scaffolds before graduation
     must_not_own:
-      - Workspace Delivery ART work-state truth
-      - platform deployment authority
-      - security acceptance
-      - production releases
-      - long-lived product source after graduation
-      - real client data by default
+    - Workspace Delivery ART work-state truth
+    - platform deployment authority
+    - security acceptance
+    - production releases
+    - long-lived product source after graduation
+    - real client data by default
     allowed_authoritative_refs:
-      - workspace-governance
-      - platform-engineering
-      - security-architecture
-      - operator-orchestration-service
+    - workspace-governance
+    - platform-engineering
+    - security-architecture
+    - operator-orchestration-service
     validation_behavior:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-runtime-source
       catalog_refs:
-        - component-contracts
-        - review-coverage
-      notes: Prototype Studio owns incubation source and local validation; mature runtime, client-visible, or real-data work must graduate into the appropriate governed owner path before release evidence is accepted.
+      - component-contracts
+      - review-coverage
+      notes: Prototype Studio owns incubation source and local validation; mature
+        runtime, client-visible, or real-data work must graduate into the appropriate
+        governed owner path before release evidence is accepted.
+    posture: active
+    record:
+      id: repo:workspace-prototype-studio
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:a8c9da80696f3e490e3f104fa3cde23d493785d620087804d0866728f02ecc95
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:workspace-prototype-studio:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:workspace-prototype-studio:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   governance-operations-console:
     lifecycle: active
     repo_class: product-owner
     requires_security_bindings: true
     security_review_subject: true
     owns:
-      - Governance Operations Console durable product source
-      - repository review controls and public-source safety validation
-      - product-local architecture, interface contracts, tests, and operator documentation
-      - loopback-only owner-repository local preview
+    - Governance Operations Console durable product source
+    - repository review controls and public-source safety validation
+    - product-local architecture, interface contracts, tests, and operator documentation
+    - loopback-only owner-repository local preview
     must_not_own:
-      - workspace contracts or intake decisions
-      - Workspace Delivery ART work-state truth
-      - shared operator workflow orchestration
-      - Prototype Studio incubation history or graduation records
-      - platform deployment or release authority
-      - identity or security acceptance
-      - live backend authority from source graduation alone
+    - workspace contracts or intake decisions
+    - Workspace Delivery ART work-state truth
+    - shared operator workflow orchestration
+    - Prototype Studio incubation history or graduation records
+    - platform deployment or release authority
+    - identity or security acceptance
+    - live backend authority from source graduation alone
     allowed_authoritative_refs:
-      - workspace-governance
-      - workspace-prototype-studio
-      - operator-orchestration-service
-      - platform-engineering
-      - security-architecture
+    - workspace-governance
+    - workspace-prototype-studio
+    - operator-orchestration-service
+    - platform-engineering
+    - security-architecture
     validation_behavior:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-runtime-source
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: The active repository owns the graduated product source, product-local validation, and loopback-only local preview. Workspace Prototype Studio retains incubation history and the graduation record; Platform and Security retain deployment, release, and acceptance authority.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: The active repository owns the graduated product source, product-local
+        validation, and loopback-only local preview. Workspace Prototype Studio retains
+        incubation history and the graduation record; Platform and Security retain
+        deployment, release, and acceptance authority.
+    posture: active
+    record:
+      id: repo:governance-operations-console
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:86d5b09f576f45a362b1e9fc620b04a94a762d04a94713747115cf8c6522f1ce
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:governance-operations-console:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:governance-operations-console:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   platform-engineering:
     lifecycle: active
     repo_class: platform
     requires_security_bindings: true
     owns:
-      - environment contracts
-      - pinned source SHAs and digests
-      - Argo-managed deployment state
-      - shared platform component docs
-      - product integration docs and runbooks
+    - environment contracts
+    - pinned source SHAs and digests
+    - Argo-managed deployment state
+    - shared platform component docs
+    - product integration docs and runbooks
     must_not_own:
-      - canonical Telegram source
-      - canonical host bridge source
-      - security governance standards
+    - canonical Telegram source
+    - canonical host bridge source
+    - security governance standards
     allowed_authoritative_refs:
-      - security-architecture
-      - openclaw-runtime-distribution
-      - openclaw-telegram-enhanced
-      - openclaw-host-bridge
-      - workspace-governance
+    - security-architecture
+    - openclaw-runtime-distribution
+    - openclaw-telegram-enhanced
+    - openclaw-host-bridge
+    - workspace-governance
     validation_behavior:
       posture: profile-gated-external-owner
       wgcf_graph_role: platform-authority-source
       catalog_refs:
-        - openproject-quality-check
-        - openproject-projection-sync
-        - devint-runner-read
-        - devint-runner-lifecycle
-        - kubernetes-runtime-read
-        - kubernetes-runtime-mutation
-      notes: Owns platform runtime and reconciliation commands; WGCF may only invoke or recommend them through explicit profile gates.
+      - openproject-quality-check
+      - openproject-projection-sync
+      - devint-runner-read
+      - devint-runner-lifecycle
+      - kubernetes-runtime-read
+      - kubernetes-runtime-mutation
+      notes: Owns platform runtime and reconciliation commands; WGCF may only invoke
+        or recommend them through explicit profile gates.
+    posture: active
+    record:
+      id: repo:platform-engineering
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:19fc4ff8193459c281b5ef9595744826f1415e7cbefac1f477c46b3b1516ef15
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:platform-engineering:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:platform-engineering:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   security-architecture:
     lifecycle: active
     repo_class: security-governance
     requires_security_bindings: false
     owns:
-      - trust-boundary architecture
-      - security standards
-      - review methodology
-      - security findings and assessments
-      - product security overlays
+    - trust-boundary architecture
+    - security standards
+    - review methodology
+    - security findings and assessments
+    - product security overlays
     must_not_own:
-      - rollout implementation
-      - product packaging
-      - operator runbooks
+    - rollout implementation
+    - product packaging
+    - operator runbooks
     allowed_authoritative_refs:
-      - platform-engineering
-      - openclaw-host-bridge
-      - openclaw-runtime-distribution
-      - openclaw-telegram-enhanced
+    - platform-engineering
+    - openclaw-host-bridge
+    - openclaw-runtime-distribution
+    - openclaw-telegram-enhanced
     validation_behavior:
       posture: covered-by-owner-repo
       wgcf_graph_role: security-authority-source
       catalog_refs:
-        - security-bindings
-        - review-coverage
-        - security-delta-reviews
-        - security-evidence
-        - security-change-record-lanes
-      notes: Security posture remains authority-owned here; WGCF surfaces missing review evidence but does not approve or replace security decisions.
+      - security-bindings
+      - review-coverage
+      - security-delta-reviews
+      - security-evidence
+      - security-change-record-lanes
+      notes: Security posture remains authority-owned here; WGCF surfaces missing
+        review evidence but does not approve or replace security decisions.
+    posture: active
+    record:
+      id: repo:security-architecture
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:eb2ac84fec27be4813296f84e40b6b20682fc0272ea9019359889c89743d88d5
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:security-architecture:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:security-architecture:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-runtime-distribution:
     lifecycle: active
     repo_class: product-runtime
     requires_security_bindings: true
     owns:
-      - active OpenClaw runtime composition
-      - packaged runtime seam verification
-      - active host-control plugin package
-      - runtime-required workspace templates
+    - active OpenClaw runtime composition
+    - packaged runtime seam verification
+    - active host-control plugin package
+    - runtime-required workspace templates
     must_not_own:
-      - canonical Telegram source
-      - canonical host bridge source
-      - environment approval
-      - Argo deployment state
+    - canonical Telegram source
+    - canonical host bridge source
+    - environment approval
+    - Argo deployment state
     allowed_authoritative_refs:
-      - openclaw-telegram-enhanced
-      - openclaw-host-bridge
-      - platform-engineering
-      - security-architecture
+    - openclaw-telegram-enhanced
+    - openclaw-host-bridge
+    - platform-engineering
+    - security-architecture
     validation_behavior:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-runtime-source
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Runtime distribution validation stays source-owned and is represented to WGCF through component and security catalog coverage.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Runtime distribution validation stays source-owned and is represented
+        to WGCF through component and security catalog coverage.
+    posture: active
+    record:
+      id: repo:openclaw-runtime-distribution
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:df0dd28f667a6d3d52a81a92699acaa0b166f726cac8d3c5e7da6f7b53f11cad
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:openclaw-runtime-distribution:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:openclaw-runtime-distribution:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-host-bridge:
     lifecycle: active
     repo_class: runtime-enforcement
     requires_security_bindings: true
     owns:
-      - host-side policy enforcement
-      - allowed roots
-      - audit logging
-      - host export staging
-      - host runtime attestation
-      - WSL and Windows bridge behavior
+    - host-side policy enforcement
+    - allowed roots
+    - audit logging
+    - host export staging
+    - host runtime attestation
+    - WSL and Windows bridge behavior
     must_not_own:
-      - Telegram UX
-      - environment promotion
-      - image composition
+    - Telegram UX
+    - environment promotion
+    - image composition
     allowed_authoritative_refs:
-      - platform-engineering
-      - security-architecture
-      - openclaw-runtime-distribution
-      - openclaw-telegram-enhanced
+    - platform-engineering
+    - security-architecture
+    - openclaw-runtime-distribution
+    - openclaw-telegram-enhanced
     validation_behavior:
       posture: interface-contract-backed
       wgcf_graph_role: runtime-enforcement-source
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Host enforcement validation must remain interface-contract and security-review backed before WGCF can treat results as readiness evidence.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Host enforcement validation must remain interface-contract and security-review
+        backed before WGCF can treat results as readiness evidence.
+    posture: active
+    record:
+      id: repo:openclaw-host-bridge
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:957c29171c8ef4bf4ff00b039ebd39f9c0b177d1a240f3511225e42e6c5d1805
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:openclaw-host-bridge:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:openclaw-host-bridge:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-telegram-enhanced:
     lifecycle: active
     repo_class: product-channel
     requires_security_bindings: true
     owns:
-      - canonical Telegram behavior
-      - Telegram routing and approvals
-      - staged media delivery behavior
-      - Telegram packaging and tests
+    - canonical Telegram behavior
+    - Telegram routing and approvals
+    - staged media delivery behavior
+    - Telegram packaging and tests
     must_not_own:
-      - host enforcement
-      - platform rollout
-      - security standards
+    - host enforcement
+    - platform rollout
+    - security standards
     allowed_authoritative_refs:
-      - openclaw-runtime-distribution
-      - openclaw-host-bridge
-      - platform-engineering
-      - security-architecture
+    - openclaw-runtime-distribution
+    - openclaw-host-bridge
+    - platform-engineering
+    - security-architecture
     validation_behavior:
       posture: interface-contract-backed
       wgcf_graph_role: product-channel-source
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Telegram channel validation stays source-owned and is admitted to WGCF through interface-contract and security evidence coverage.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Telegram channel validation stays source-owned and is admitted to WGCF
+        through interface-contract and security evidence coverage.
+    posture: active
+    record:
+      id: repo:openclaw-telegram-enhanced
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:c681624cede8e90591876e7df4cff34040e881c1f7e5b54051d49212f42d9950
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:openclaw-telegram-enhanced:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:openclaw-telegram-enhanced:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   operator-orchestration-service:
     lifecycle: active
     repo_class: shared-operator-service
     requires_security_bindings: true
     owns:
-      - shared operator workflow APIs
-      - workflow audit and correlation
-      - provider-agnostic AI-assist orchestration for bounded operator workflows
-      - OpenProject workflow adapters
+    - shared operator workflow APIs
+    - workflow audit and correlation
+    - provider-agnostic AI-assist orchestration for bounded operator workflows
+    - OpenProject workflow adapters
     must_not_own:
-      - Telegram delivery or chat UX
-      - platform rollout authority
-      - security standards
-      - direct workspace contract mutation
+    - Telegram delivery or chat UX
+    - platform rollout authority
+    - security standards
+    - direct workspace contract mutation
     allowed_authoritative_refs:
-      - workspace-governance
-      - platform-engineering
-      - security-architecture
-      - openclaw-telegram-enhanced
+    - workspace-governance
+    - platform-engineering
+    - security-architecture
+    - openclaw-telegram-enhanced
     validation_behavior:
       posture: profile-gated-external-owner
       wgcf_graph_role: operator-workflow-source
       catalog_refs:
-        - delivery-art-broker-read
-        - delivery-art-broker-mutation
-        - delivery-art-api-probe-read
-        - delivery-art-api-probe-mutation
-        - component-contracts
-      notes: OOS remains ART workflow authority; WGCF may read or recommend through broker-owned gates but must not directly mutate ART.
+      - delivery-art-broker-read
+      - delivery-art-broker-mutation
+      - delivery-art-api-probe-read
+      - delivery-art-api-probe-mutation
+      - component-contracts
+      notes: OOS remains ART workflow authority; WGCF may read or recommend through
+        broker-owned gates but must not directly mutate ART.
+    posture: active
+    record:
+      id: repo:operator-orchestration-service
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:0345311e57e4fba97522b5300e97752273e52425e3928c853c721c7a9f6f65b1
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:operator-orchestration-service:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:operator-orchestration-service:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
 retired_repos:
   openclaw-isolated-deployment:
     lifecycle: retired
@@ -332,3 +550,21 @@ retired_repos:
       runtime_distribution: openclaw-runtime-distribution
       host_enforcement: openclaw-host-bridge
       telegram_source: openclaw-telegram-enhanced
+    posture: retired
+    record:
+      id: repo:openclaw-isolated-deployment
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:a9465361991012d87e582d32c54fbe15cdb51d0415b310be7b4f37857ba4fb23
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:repo:openclaw-isolated-deployment:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:repo:openclaw-isolated-deployment:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'

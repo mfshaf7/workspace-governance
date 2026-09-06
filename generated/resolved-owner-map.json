@@ -4,7 +4,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:argo-cd",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:argo-cd:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:argo-cd:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:71ebbac5ff321d5587560d9e04e2dbf9fbc80e7719b5a0a17fa88e7f277b0f63",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -21,7 +42,28 @@
       "component_class": "shared-governance-runtime",
       "lifecycle": "active",
       "owner_repo": "context-governance-gateway",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:context-governance-gateway",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:context-governance-gateway:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:context-governance-gateway:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:1be69562b4f71f402ae8d0d32f86907bdfe24020bad9ff787d9a35c6c7e561e7",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -39,7 +81,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:external-secrets",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:external-secrets:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:external-secrets:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:217a083f68daf00103dfab3c248310ca530f223f9d6147b7f81411e8c2f8b792",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -56,7 +119,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:governed-ai-gateway",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:governed-ai-gateway:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:governed-ai-gateway:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:e01ab766ad25a503c17f712e5868b265691d7305370035194c3b491f91b59461",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -78,7 +162,28 @@
       },
       "lifecycle": "active",
       "owner_repo": "openclaw-runtime-distribution",
+      "posture": "active",
       "product": "openclaw",
+      "record": {
+        "id": "component:host-control-plugin",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:host-control-plugin:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:host-control-plugin:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:d3ee077995655faf22e2aa21a71977eb69b2969d7b48fb4c47b3308288e00e88",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -95,7 +200,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:observability",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:observability:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:observability:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:83865574beaf4bcb061fa8e26e3e4b89afd1a0b5ee510a17ac63790ff644a108",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -116,7 +242,28 @@
       },
       "lifecycle": "active",
       "owner_repo": "openclaw-host-bridge",
+      "posture": "active",
       "product": "openclaw",
+      "record": {
+        "id": "component:openclaw-host-bridge",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:openclaw-host-bridge:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:openclaw-host-bridge:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:297af72bc4214af23e6f96df65c87eb6a3fa13dff3490cf1a916d9bf10f44da4",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -133,7 +280,28 @@
       "component_class": "product-runtime",
       "lifecycle": "active",
       "owner_repo": "openclaw-runtime-distribution",
+      "posture": "active",
       "product": "openclaw",
+      "record": {
+        "id": "component:openclaw-runtime-distribution",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:openclaw-runtime-distribution:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:openclaw-runtime-distribution:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:6857cce4cc0dbb3a28f330aa4c1a3cf6cda062f95079b2478f94c1500f240219",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -153,7 +321,28 @@
       },
       "lifecycle": "active",
       "owner_repo": "openclaw-telegram-enhanced",
+      "posture": "active",
       "product": "openclaw",
+      "record": {
+        "id": "component:openclaw-telegram-channel",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:openclaw-telegram-channel:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:openclaw-telegram-channel:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:5f52a04b011e499010f2387814dab7c5fdd07a2ca4d9a1070867c38a33c5dc2c",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -174,7 +363,28 @@
       },
       "lifecycle": "active",
       "owner_repo": "operator-orchestration-service",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:operator-orchestration-service",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:operator-orchestration-service:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:operator-orchestration-service:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:4020d948935c7f4fb3eb52d6d7e5d4b544da1b11a99867eb4c2366714f211b66",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -191,7 +401,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:platform-postgresql",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:platform-postgresql:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:platform-postgresql:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:79487e931b68168c593664b5053b9a85ccb2ebd8489f0ec325a0549efb58c514",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -208,7 +439,28 @@
       "component_class": "shared-platform",
       "lifecycle": "active",
       "owner_repo": "platform-engineering",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:vault",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:vault:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:vault:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:4a5607f09646fd7d44120576b0e96464b0930707a2c2e15654b9cb5a109ab21b",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -225,7 +477,28 @@
       "component_class": "shared-governance-runtime",
       "lifecycle": "active",
       "owner_repo": "workspace-governance-control-fabric",
+      "posture": "active",
       "product": null,
+      "record": {
+        "id": "component:workspace-governance-control-fabric",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:component:workspace-governance-control-fabric:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:component:workspace-governance-control-fabric:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:4b3b15d2acd90ea98f0eb7fe97afdb981b3737401e13d53a3a3bc7935055337a",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "security_owner": "security-architecture",
       "validation_behavior": {
         "catalog_refs": [
@@ -242,8 +515,30 @@
     "governance-operations-console": {
       "governed_prod_promotion": false,
       "highest_real_endpoint": "owner-repository-local-preview",
-      "lifecycle": "active",
+      "lifecycle": "owner-managed",
+      "maturity": "owner-managed",
       "platform_owner": "platform-engineering",
+      "posture": "active",
+      "record": {
+        "id": "product:governance-operations-console",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:product:governance-operations-console:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:product:governance-operations-console:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:d7a27f46f21f2d25b70ecd1e6c3010182f57fcd8bcb16377b6a1c8eb097d8713",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "runtime_owner": "governance-operations-console",
       "security_owner": "security-architecture",
       "source_owners": [
@@ -265,7 +560,29 @@
       "governed_prod_promotion": true,
       "highest_real_endpoint": "governed-prod",
       "lifecycle": "fully-governed",
+      "maturity": "fully-governed",
       "platform_owner": "platform-engineering",
+      "posture": "active",
+      "record": {
+        "id": "product:openclaw",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:product:openclaw:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:product:openclaw:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:3a86d452b1c727ab91341548e9a55a1afe6746c54b25ed16a2f9950229fbfeea",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "runtime_owner": "openclaw-runtime-distribution",
       "security_owner": "security-architecture",
       "source_owners": [
@@ -289,7 +606,29 @@
       "governed_prod_promotion": false,
       "highest_real_endpoint": "platform-integrated-runtime",
       "lifecycle": "platform-integrated",
+      "maturity": "platform-integrated",
       "platform_owner": "platform-engineering",
+      "posture": "active",
+      "record": {
+        "id": "product:openproject",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:product:openproject:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:product:openproject:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:95b5e6465b1088474781dcb8074af06afbaad0b2792ecc005d5d56cb4ae036ad",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "runtime_owner": "platform-engineering",
       "security_owner": "security-architecture",
       "source_owners": [
@@ -333,6 +672,27 @@
         "context manifests, redaction reports, operator receipts, artifact digests, and local ledger behavior",
         "future API, worker, storage-adapter, and downstream adapter implementation after runtime admission"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:context-governance-gateway",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:context-governance-gateway:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:context-governance-gateway:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:57f05af15454880b0a9606009e6cb3c21d892d0af733da7f40c135cd51197bd5",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "governance-runtime",
       "requires_security_bindings": true,
       "security_review_subject": true,
@@ -372,6 +732,27 @@
         "product-local architecture, interface contracts, tests, and operator documentation",
         "loopback-only owner-repository local preview"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:governance-operations-console",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:governance-operations-console:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:governance-operations-console:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:86d5b09f576f45a362b1e9fc620b04a94a762d04a94713747115cf8c6522f1ce",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "product-owner",
       "requires_security_bindings": true,
       "security_review_subject": true,
@@ -407,6 +788,27 @@
         "host runtime attestation",
         "WSL and Windows bridge behavior"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:openclaw-host-bridge",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:openclaw-host-bridge:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:openclaw-host-bridge:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:957c29171c8ef4bf4ff00b039ebd39f9c0b177d1a240f3511225e42e6c5d1805",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "runtime-enforcement",
       "requires_security_bindings": true,
       "validation_behavior": {
@@ -440,6 +842,27 @@
         "active host-control plugin package",
         "runtime-required workspace templates"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:openclaw-runtime-distribution",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:openclaw-runtime-distribution:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:openclaw-runtime-distribution:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:df0dd28f667a6d3d52a81a92699acaa0b166f726cac8d3c5e7da6f7b53f11cad",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "product-runtime",
       "requires_security_bindings": true,
       "validation_behavior": {
@@ -472,6 +895,27 @@
         "staged media delivery behavior",
         "Telegram packaging and tests"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:openclaw-telegram-enhanced",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:openclaw-telegram-enhanced:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:openclaw-telegram-enhanced:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:c681624cede8e90591876e7df4cff34040e881c1f7e5b54051d49212f42d9950",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "product-channel",
       "requires_security_bindings": true,
       "validation_behavior": {
@@ -505,6 +949,27 @@
         "provider-agnostic AI-assist orchestration for bounded operator workflows",
         "OpenProject workflow adapters"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:operator-orchestration-service",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:operator-orchestration-service:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:operator-orchestration-service:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:0345311e57e4fba97522b5300e97752273e52425e3928c853c721c7a9f6f65b1",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "shared-operator-service",
       "requires_security_bindings": true,
       "validation_behavior": {
@@ -541,6 +1006,27 @@
         "shared platform component docs",
         "product integration docs and runbooks"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:platform-engineering",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:platform-engineering:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:platform-engineering:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:19fc4ff8193459c281b5ef9595744826f1415e7cbefac1f477c46b3b1516ef15",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "platform",
       "requires_security_bindings": true,
       "validation_behavior": {
@@ -577,6 +1063,27 @@
         "security findings and assessments",
         "product security overlays"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:security-architecture",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:security-architecture:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:security-architecture:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:eb2ac84fec27be4813296f84e40b6b20682fc0272ea9019359889c89743d88d5",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "security-governance",
       "requires_security_bindings": false,
       "validation_behavior": {
@@ -611,6 +1118,27 @@
         "workspace audit tooling",
         "workspace-level skill source"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:workspace-governance",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:workspace-governance:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:workspace-governance:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:26cff2cf468d41ebfb96b5e818ea0717e4aae0dd81b33166745e7838b3b277d2",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "governance",
       "requires_security_bindings": false,
       "security_review_subject": true,
@@ -649,6 +1177,27 @@
         "policy and projection adapters for existing governance rules",
         "control-fabric API, worker, and CLI implementation"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:workspace-governance-control-fabric",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:workspace-governance-control-fabric:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:workspace-governance-control-fabric:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:d30736f3c68fcfdea721f4eec1fff3d92712fd293ce3bafdad35abffdddf1006",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "governance-runtime",
       "requires_security_bindings": false,
       "security_review_subject": true,
@@ -685,6 +1234,27 @@
         "mock and synthetic data fixtures for prototype review",
         "internal and client app prototype scaffolds before graduation"
       ],
+      "posture": "active",
+      "record": {
+        "id": "repo:workspace-prototype-studio",
+        "last_mutation": {
+          "action": "migrate",
+          "applied_at": "2026-08-30T18:27:30+08:00",
+          "id": "workspace-inventory-migration:repo:workspace-prototype-studio:v1-v2",
+          "idempotency_key": "workspace-inventory-migration:repo:workspace-prototype-studio:v1-v2",
+          "readiness_digest": null,
+          "readiness_ref": null,
+          "request_digest": null,
+          "request_ref": null
+        },
+        "lineage": {
+          "intake_entry_version": null,
+          "source": "legacy-migration",
+          "source_digest": "sha256:a8c9da80696f3e490e3f104fa3cde23d493785d620087804d0866728f02ecc95",
+          "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
+        },
+        "version": 1
+      },
       "repo_class": "product-incubation",
       "requires_security_bindings": false,
       "security_review_subject": true,

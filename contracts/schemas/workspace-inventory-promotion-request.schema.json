@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "requested_at", "operator_ref", "correlation_ref", "idempotency_key", "target", "intake_entry_ref", "expected_state", "active_record", "approval_refs", "request_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-promotion-request" },
+    "request_id": { "$ref": "#/$defs/text" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "operator_ref": { "$ref": "#/$defs/text" },
+    "correlation_ref": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "target": { "$ref": "#/$defs/target" },
+    "intake_entry_ref": {
+      "type": "object",
+      "required": ["id", "version", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "version": { "type": "integer", "minimum": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "expected_state": { "$ref": "#/$defs/state" },
+    "active_record": {
+      "type": "object",
+      "required": ["kind", "id", "value"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" },
+        "value": { "type": "object", "minProperties": 1 }
+      },
+      "additionalProperties": false
+    },
+    "approval_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "required": ["intake_register_digest", "active_inventory_digest", "intake_entry_version", "intake_entry_digest", "active_record_version", "active_record_digest"],
+      "properties": {
+        "intake_register_digest": { "$ref": "#/$defs/digest" },
+        "active_inventory_digest": { "$ref": "#/$defs/digest" },
+        "intake_entry_version": { "type": "integer", "minimum": 1 },
+        "intake_entry_digest": { "$ref": "#/$defs/digest" },
+        "active_record_version": { "type": "null" },
+        "active_record_digest": { "type": "null" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

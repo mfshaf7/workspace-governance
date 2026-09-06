@@ -140,6 +140,13 @@ WORKSPACE_INTAKE_ARTIFACT_SCHEMAS = (
     "contracts/schemas/workspace-intake-receipt.schema.json",
     "contracts/schemas/workspace-intake-readback.schema.json",
 )
+WORKSPACE_INVENTORY_ARTIFACT_SCHEMAS = (
+    "contracts/schemas/workspace-inventory-promotion-request.schema.json",
+    "contracts/schemas/workspace-inventory-promotion-readiness.schema.json",
+    "contracts/schemas/workspace-inventory-promotion-mutation.schema.json",
+    "contracts/schemas/workspace-inventory-promotion-readback.schema.json",
+    "contracts/schemas/workspace-inventory-promotion-receipt.schema.json",
+)
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
     "readiness_model.rules",
@@ -5992,6 +5999,7 @@ def main() -> int:
         "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
         "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
+        "workspace_active_inventory": repo_root / "contracts/workspace-active-inventory.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
         "governed_intake_assist": repo_root / "contracts/governed-intake-assist.yaml",
@@ -6037,6 +6045,16 @@ def main() -> int:
         schema_path = repo_root / rel_path
         if not schema_path.exists():
             errors.append(f"{rel_path}: workspace intake artifact schema is missing")
+            continue
+        try:
+            Draft202012Validator.check_schema(load_json(schema_path))
+        except SchemaError as exc:
+            errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
+
+    for rel_path in WORKSPACE_INVENTORY_ARTIFACT_SCHEMAS:
+        schema_path = repo_root / rel_path
+        if not schema_path.exists():
+            errors.append(f"{rel_path}: workspace inventory artifact schema is missing")
             continue
         try:
             Draft202012Validator.check_schema(load_json(schema_path))
@@ -9741,7 +9759,33 @@ def main() -> int:
                         f"contracts/developer-integration-profiles.yaml: {profile_name} security review repo {ref['repo']!r} is not an active repo"
                     )
 
+    def validate_inventory_envelope(
+        contract_path: str,
+        kind: str,
+        name: str,
+        payload: dict,
+    ) -> None:
+        record = payload.get("record") or {}
+        expected_id = f"{kind}:{name}"
+        if record.get("id") != expected_id:
+            errors.append(f"{contract_path}: record.id must equal {expected_id!r}")
+        if record.get("version", 0) < 1:
+            errors.append(f"{contract_path}: record.version must be a positive integer")
+        lineage = record.get("lineage") or {}
+        mutation = record.get("last_mutation") or {}
+        if lineage.get("source") == "workspace-intake" and lineage.get("intake_entry_version") is None:
+            errors.append(f"{contract_path}: promoted record lineage requires intake_entry_version")
+        if mutation.get("action") == "promote":
+            for field in ("request_ref", "request_digest", "readiness_ref", "readiness_digest"):
+                if not mutation.get(field):
+                    errors.append(f"{contract_path}: promoted record requires last_mutation.{field}")
+        if mutation.get("action") == "migrate" and lineage.get("source") != "legacy-migration":
+            errors.append(f"{contract_path}: migrated record requires legacy-migration lineage")
+
     for repo_name, payload in contracts["repos"]["repos"].items():
+        validate_inventory_envelope(f"contracts/repos.yaml: {repo_name}", "repo", repo_name, payload)
+        if payload["posture"] != payload["lifecycle"]:
+            errors.append(f"contracts/repos.yaml: {repo_name} lifecycle compatibility alias must equal posture")
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/repos.yaml: {repo_name} uses unknown lifecycle {payload['lifecycle']!r}")
         validate_validation_behavior(
@@ -9758,6 +9802,9 @@ def main() -> int:
             )
 
     for repo_name, payload in contracts["repos"].get("retired_repos", {}).items():
+        validate_inventory_envelope(f"contracts/repos.yaml: retired repo {repo_name}", "repo", repo_name, payload)
+        if payload["posture"] != "retired" or payload["lifecycle"] != "retired":
+            errors.append(f"contracts/repos.yaml: retired repo {repo_name} must keep retired posture and compatibility alias")
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/repos.yaml: retired repo {repo_name} uses unknown lifecycle {payload['lifecycle']!r}")
         for replacement in payload["replaced_by"].values():
@@ -9863,6 +9910,9 @@ def main() -> int:
             )
 
     for product_name, payload in contracts["products"]["products"].items():
+        validate_inventory_envelope(f"contracts/products.yaml: {product_name}", "product", product_name, payload)
+        if payload["lifecycle"] != payload["maturity"]:
+            errors.append(f"contracts/products.yaml: {product_name} lifecycle compatibility alias must equal maturity")
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/products.yaml: {product_name} uses unknown lifecycle {payload['lifecycle']!r}")
         validate_validation_behavior(
@@ -9878,6 +9928,9 @@ def main() -> int:
                 errors.append(f"contracts/products.yaml: {product_name} source owner {repo_name!r} is not an active repo")
 
     for component_name, payload in contracts["components"]["components"].items():
+        validate_inventory_envelope(f"contracts/components.yaml: {component_name}", "component", component_name, payload)
+        if payload["lifecycle"] != payload["posture"]:
+            errors.append(f"contracts/components.yaml: {component_name} lifecycle compatibility alias must equal posture")
         if payload["lifecycle"] not in lifecycle_states:
             errors.append(f"contracts/components.yaml: {component_name} uses unknown lifecycle {payload['lifecycle']!r}")
         validate_validation_behavior(

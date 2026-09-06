@@ -2,6 +2,8 @@ schema_version: 1
 states:
   active:
     description: normal current owner surface
+  owner-managed:
+    description: product is governed by its owner but is not yet integrated with shared platform delivery
   platform-integrated:
     description: integrated into platform operations but not fully governed end to end
   fully-governed:
