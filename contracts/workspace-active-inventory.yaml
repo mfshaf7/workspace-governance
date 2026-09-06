@@ -1,0 +1,93 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/workspace-active-inventory.md
+architecture:
+  initiative_ref: openproject://work_packages/890
+  contract_work_ref: openproject://work_packages/1071
+purpose: Promote one admitted Workspace Intake entrant into exactly one canonical active repository, product, or component record through a reviewed source change.
+canonical_truth:
+  intake_register: contracts/intake-register.yaml
+  inventories:
+    repo: contracts/repos.yaml
+    product: contracts/products.yaml
+    component: contracts/components.yaml
+  rules:
+    - An entrant identity exists in Workspace Intake or active inventory, never both.
+    - Promotion removes one admitted intake entry and adds one active record in the same reviewed source change.
+    - Merged Workspace Governance source is authority; WGCF decisions, OOS state, and Console projections are evidence only.
+record_contract:
+  schema_version: 2
+  identity_format: <kind>:<name>
+  envelope_fields:
+    - id
+    - version
+    - lineage
+    - last_mutation
+  postures:
+    - active
+    - suspended
+    - retired
+  product_maturity:
+    - owner-managed
+    - platform-integrated
+    - fully-governed
+  separation_rule: Inventory posture and product maturity are independent. Neither may be inferred from the other.
+  compatibility:
+    field: lifecycle
+    posture: temporary-read-alias for repository and component posture
+    product: temporary-read-alias for product maturity
+    validation: The compatibility alias must equal its authoritative field until downstream consumers complete v2 adoption.
+promotion_contract:
+  command: python3 scripts/workspace_inventory.py apply --request <request.json> --readiness <readiness.json> --output-dir <directory>
+  required_input:
+    - exact admitted intake entry id, version, and digest
+    - exact intake-register and target-inventory digests
+    - null expected active-record version
+    - typed active record
+    - operator identity and approval references
+    - WGCF readiness bound to the same request and source versions
+    - idempotency and correlation keys
+  source_rules:
+    - The command is denied on main, master, and detached heads.
+    - The owner lock covers source reads, validation, comparison, replacement, and artifact emission.
+    - Both resulting contracts validate before either canonical file is replaced.
+    - A process-level write failure restores both original files and emits no success artifact.
+    - Exact replay returns the existing version without a duplicate record.
+    - Reused identity or idempotency with different evidence fails closed.
+  output_artifacts:
+    - workspace-inventory-promotion-mutation
+    - workspace-inventory-promotion-readback
+    - workspace-inventory-promotion-receipt
+review_boundary:
+  required_flow:
+    - prepare non-default branch
+    - evaluate WGCF readiness
+    - apply deterministic source mutation
+    - validate both canonical contracts and cross-repo truth
+    - open pull request
+    - review exact head
+    - merge through repository provider
+    - reconcile merged canonical readback
+  direct_main_allowed: false
+  automatic_merge_allowed: false
+  hard_delete_allowed: false
+migration:
+  from_schema_version: 1
+  to_schema_version: 2
+  command: python3 scripts/workspace_inventory.py migrate --source-ref <git-ref> --recorded-at <date-time> --output <report.json>
+  rules:
+    - Existing identity and domain values are preserved.
+    - Every migrated record receives version 1 and digest-bound legacy lineage.
+    - Legacy repository and component lifecycle becomes authoritative posture.
+    - Legacy product lifecycle becomes authoritative maturity; generic active maps to owner-managed.
+    - The lifecycle compatibility alias remains until dependent consumers adopt v2.
+denied_shortcuts:
+  - direct-main-mutation
+  - automatic-merge
+  - intake-and-active-inventory-overlap
+  - non-admitted-promotion
+  - stale-version-overwrite
+  - duplicate-active-identity
+  - hard-delete
+  - runtime-or-release-activation
+  - product-maturity-inference-from-posture

@@ -45,6 +45,7 @@ def capability_manifest() -> dict:
         ("architecture-packet-persistence", "implemented", 1),
         ("work-start-authoring", "implemented", 1),
         ("work-start-persistence", "implemented", 1),
+        ("authoritative-review-evidence-projection", "implemented", 1),
         ("review-packet-v2-authoring", "implemented", 2),
         ("review-packet-merge-readiness", "implemented", 2),
         ("operating-readiness", "implemented", 2),
@@ -62,6 +63,13 @@ def capability_manifest() -> dict:
             "continue_command": "npm run art -- work continue <work-item-id>",
             "close_command": "npm run art -- work close <work-item-id>",
             "help_command": "npm run art -- work --help",
+        },
+        "target_operator_surface": {
+            "primary_adapter": "governance-operations-console",
+            "workflow_semantics_owner": "operator-orchestration-service",
+            "cli_posture": "transitional-engineering-recovery-diagnostics",
+            "shared_api_required": True,
+            "adapter_local_state_machine_allowed": False,
         },
         "compatibility_operator_surface": {
             "plan_artifact_type": "delivery_art_lifecycle_plan",

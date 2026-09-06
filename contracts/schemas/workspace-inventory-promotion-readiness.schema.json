@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readiness_id", "evaluated_at", "request_ref", "target", "observed_state", "policy_ref", "outcome", "findings", "readiness_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-promotion-readiness" },
+    "readiness_id": { "$ref": "#/$defs/text" },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "target": { "$ref": "#/$defs/target" },
+    "observed_state": { "$ref": "#/$defs/state" },
+    "policy_ref": { "$ref": "#/$defs/ref" },
+    "outcome": { "enum": ["ready", "blocked", "stale"] },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "message"],
+        "properties": {
+          "code": { "$ref": "#/$defs/text" },
+          "severity": { "enum": ["info", "warning", "blocking"] },
+          "message": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "readiness_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "required": ["intake_register_digest", "active_inventory_digest", "intake_entry_version", "intake_entry_digest", "active_record_version", "active_record_digest"],
+      "properties": {
+        "intake_register_digest": { "$ref": "#/$defs/digest" },
+        "active_inventory_digest": { "$ref": "#/$defs/digest" },
+        "intake_entry_version": { "type": "integer", "minimum": 1 },
+        "intake_entry_digest": { "$ref": "#/$defs/digest" },
+        "active_record_version": { "type": "null" },
+        "active_record_digest": { "type": "null" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

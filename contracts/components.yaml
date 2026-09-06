@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 components:
   argo-cd:
     lifecycle: active
@@ -10,10 +10,29 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - devint-runner-read
-        - kubernetes-runtime-read
-        - security-bindings
-      notes: Platform runtime state is visible to WGCF only through platform-owned profile gates and security bindings.
+      - devint-runner-read
+      - kubernetes-runtime-read
+      - security-bindings
+      notes: Platform runtime state is visible to WGCF only through platform-owned
+        profile gates and security bindings.
+    posture: active
+    record:
+      id: component:argo-cd
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:71ebbac5ff321d5587560d9e04e2dbf9fbc80e7719b5a0a17fa88e7f277b0f63
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:argo-cd:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:argo-cd:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   vault:
     lifecycle: active
     component_class: shared-platform
@@ -24,10 +43,29 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - devint-runner-read
-        - kubernetes-runtime-read
-        - security-bindings
-      notes: Secret infrastructure must stay platform-owned; WGCF reads status only through explicit live-runtime profiles.
+      - devint-runner-read
+      - kubernetes-runtime-read
+      - security-bindings
+      notes: Secret infrastructure must stay platform-owned; WGCF reads status only
+        through explicit live-runtime profiles.
+    posture: active
+    record:
+      id: component:vault
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:4a5607f09646fd7d44120576b0e96464b0930707a2c2e15654b9cb5a109ab21b
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:vault:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:vault:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   external-secrets:
     lifecycle: active
     component_class: shared-platform
@@ -38,10 +76,29 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - devint-runner-read
-        - kubernetes-runtime-read
-        - security-bindings
-      notes: Secret delivery validation remains platform-owned and security-reviewed before WGCF may consume runtime evidence.
+      - devint-runner-read
+      - kubernetes-runtime-read
+      - security-bindings
+      notes: Secret delivery validation remains platform-owned and security-reviewed
+        before WGCF may consume runtime evidence.
+    posture: active
+    record:
+      id: component:external-secrets
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:217a083f68daf00103dfab3c248310ca530f223f9d6147b7f81411e8c2f8b792
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:external-secrets:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:external-secrets:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   observability:
     lifecycle: active
     component_class: shared-platform
@@ -52,10 +109,29 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - devint-runner-read
-        - kubernetes-runtime-read
-        - security-bindings
-      notes: Observability runtime checks are platform-owned inputs, not WGCF-owned validators.
+      - devint-runner-read
+      - kubernetes-runtime-read
+      - security-bindings
+      notes: Observability runtime checks are platform-owned inputs, not WGCF-owned
+        validators.
+    posture: active
+    record:
+      id: component:observability
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:83865574beaf4bcb061fa8e26e3e4b89afd1a0b5ee510a17ac63790ff644a108
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:observability:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:observability:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   platform-postgresql:
     lifecycle: active
     component_class: shared-platform
@@ -66,10 +142,29 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - devint-runner-read
-        - kubernetes-runtime-read
-        - security-bindings
-      notes: Persistent platform storage evidence must pass platform and security gates before WGCF may use it for readiness.
+      - devint-runner-read
+      - kubernetes-runtime-read
+      - security-bindings
+      notes: Persistent platform storage evidence must pass platform and security
+        gates before WGCF may use it for readiness.
+    posture: active
+    record:
+      id: component:platform-postgresql
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:79487e931b68168c593664b5053b9a85ccb2ebd8489f0ec325a0549efb58c514
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:platform-postgresql:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:platform-postgresql:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   workspace-governance-control-fabric:
     lifecycle: active
     component_class: shared-governance-runtime
@@ -80,9 +175,28 @@ components:
       posture: runtime-consumer
       wgcf_graph_role: shared-governance-runtime-component
       catalog_refs:
-        - contract-model
-        - developer-integration
-      notes: WGCF is the runtime consumer of governance catalog truth and must expose receipts rather than owning source contracts.
+      - contract-model
+      - developer-integration
+      notes: WGCF is the runtime consumer of governance catalog truth and must expose
+        receipts rather than owning source contracts.
+    posture: active
+    record:
+      id: component:workspace-governance-control-fabric
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:4b3b15d2acd90ea98f0eb7fe97afdb981b3737401e13d53a3a3bc7935055337a
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:workspace-governance-control-fabric:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:workspace-governance-control-fabric:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   context-governance-gateway:
     lifecycle: active
     component_class: shared-governance-runtime
@@ -93,11 +207,32 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: context-packet-provider
       catalog_refs:
-        - developer-integration
-        - devint-runner-read
-        - security-bindings
-        - review-coverage
-      notes: Provides model-safe/operator-safe context packets and receipts to operators, agents, OOS, or WGCF through an active local dev-integration profile; it still does not own WGCF validation, ART mutation, platform release, security acceptance, governed stage/prod deployment, or model invocation.
+      - developer-integration
+      - devint-runner-read
+      - security-bindings
+      - review-coverage
+      notes: Provides model-safe/operator-safe context packets and receipts to operators,
+        agents, OOS, or WGCF through an active local dev-integration profile; it still
+        does not own WGCF validation, ART mutation, platform release, security acceptance,
+        governed stage/prod deployment, or model invocation.
+    posture: active
+    record:
+      id: component:context-governance-gateway
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:1be69562b4f71f402ae8d0d32f86907bdfe24020bad9ff787d9a35c6c7e561e7
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:context-governance-gateway:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:context-governance-gateway:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   governed-ai-gateway:
     lifecycle: active
     component_class: shared-platform
@@ -108,11 +243,33 @@ components:
       posture: profile-gated-external-owner
       wgcf_graph_role: shared-platform-component
       catalog_refs:
-        - developer-integration
-        - devint-runner-read
-        - security-bindings
-        - review-coverage
-      notes: Platform-owned governed AI access-plane gateway, admitted from the prior ai-access-plane intake proposal into the active component inventory. Local dev-integration profile proof may be consumed as readiness input, but live model-profile activation remains blocked until platform, security, and workspace consumer gates pass.
+      - developer-integration
+      - devint-runner-read
+      - security-bindings
+      - review-coverage
+      notes: Platform-owned governed AI access-plane gateway, admitted from the prior
+        ai-access-plane intake proposal into the active component inventory. Local
+        dev-integration profile proof may be consumed as readiness input, but live
+        model-profile activation remains blocked until platform, security, and workspace
+        consumer gates pass.
+    posture: active
+    record:
+      id: component:governed-ai-gateway
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:e01ab766ad25a503c17f712e5868b265691d7305370035194c3b491f91b59461
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:governed-ai-gateway:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:governed-ai-gateway:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-host-bridge:
     lifecycle: active
     component_class: product-runtime
@@ -123,13 +280,32 @@ components:
       posture: interface-contract-backed
       wgcf_graph_role: product-runtime-component
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Host bridge readiness must remain interface-contract and security evidence backed.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Host bridge readiness must remain interface-contract and security evidence
+        backed.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm run test:interface-contract
+    posture: active
+    record:
+      id: component:openclaw-host-bridge
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:297af72bc4214af23e6f96df65c87eb6a3fa13dff3490cf1a916d9bf10f44da4
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:openclaw-host-bridge:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:openclaw-host-bridge:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-telegram-channel:
     lifecycle: active
     component_class: product-channel
@@ -140,13 +316,32 @@ components:
       posture: interface-contract-backed
       wgcf_graph_role: product-channel-component
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: Telegram channel readiness must remain interface-contract and security evidence backed.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Telegram channel readiness must remain interface-contract and security
+        evidence backed.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm run test:host-control-contract
+    posture: active
+    record:
+      id: component:openclaw-telegram-channel
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:5f52a04b011e499010f2387814dab7c5fdd07a2ca4d9a1070867c38a33c5dc2c
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:openclaw-telegram-channel:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:openclaw-telegram-channel:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   openclaw-runtime-distribution:
     lifecycle: active
     component_class: product-runtime
@@ -157,9 +352,28 @@ components:
       posture: covered-by-owner-repo
       wgcf_graph_role: product-runtime-component
       catalog_refs:
-        - security-bindings
-        - review-coverage
-      notes: Runtime distribution validation is owner-repo and security-review backed; WGCF consumes summarized readiness, not raw rollout authority.
+      - security-bindings
+      - review-coverage
+      notes: Runtime distribution validation is owner-repo and security-review backed;
+        WGCF consumes summarized readiness, not raw rollout authority.
+    posture: active
+    record:
+      id: component:openclaw-runtime-distribution
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:6857cce4cc0dbb3a28f330aa4c1a3cf6cda062f95079b2478f94c1500f240219
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:openclaw-runtime-distribution:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:openclaw-runtime-distribution:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   host-control-plugin:
     lifecycle: active
     component_class: product-plugin
@@ -170,13 +384,32 @@ components:
       posture: interface-contract-backed
       wgcf_graph_role: product-plugin-component
       catalog_refs:
-        - component-contracts
-        - security-bindings
-        - review-coverage
-      notes: The packaged host-control plugin must keep interface-contract evidence before WGCF may use its readiness posture.
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: The packaged host-control plugin must keep interface-contract evidence
+        before WGCF may use its readiness posture.
     interface_contract:
       path: host-control-openclaw-plugin/contracts/interface-manifest.json
       validation_command: npm --prefix host-control-openclaw-plugin run test:interface-contract
+    posture: active
+    record:
+      id: component:host-control-plugin
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:d3ee077995655faf22e2aa21a71977eb69b2969d7b48fb4c47b3308288e00e88
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:host-control-plugin:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:host-control-plugin:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'
   operator-orchestration-service:
     lifecycle: active
     component_class: shared-platform
@@ -187,10 +420,29 @@ components:
       posture: interface-contract-backed
       wgcf_graph_role: operator-workflow-component
       catalog_refs:
-        - component-contracts
-        - delivery-art-broker-read
-        - delivery-art-api-probe-read
-      notes: OOS interface validation and broker read probes are WGCF inputs, while ART mutations remain OOS-owned.
+      - component-contracts
+      - delivery-art-broker-read
+      - delivery-art-api-probe-read
+      notes: OOS interface validation and broker read probes are WGCF inputs, while
+        ART mutations remain OOS-owned.
     interface_contract:
       path: contracts/interface-manifest.json
       validation_command: npm test
+    posture: active
+    record:
+      id: component:operator-orchestration-service
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:4020d948935c7f4fb3eb52d6d7e5d4b544da1b11a99867eb4c2366714f211b66
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:component:operator-orchestration-service:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:component:operator-orchestration-service:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'

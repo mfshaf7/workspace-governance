@@ -86,9 +86,9 @@ resolution:
     implemented by this candidate-record Landing Unit.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-09-01'
+  due_on: '2026-09-30'
   note: >-
-    Reassessed during Delivery ART work item 964 validation on 2026-08-23;
+    Reassessed on 2026-09-06 after Delivery ART work item 964 validation;
     the sequencing and distinct-child correction remains open and no closure
     is claimed.
     Recurred during Epic 886 closeout on 2026-08-29: the final Security index

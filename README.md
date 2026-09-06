@@ -25,6 +25,11 @@ components. Nothing needs to be governed by default, but new entrants should
 be classified explicitly before they drift into the operator-facing control
 plane by accident.
 
+An admitted entrant still requires a separate, reviewed active-inventory
+promotion before it appears in the canonical repository, product, or component
+inventory. The primary operator surface is
+[docs/workspace-active-inventory.md](docs/workspace-active-inventory.md).
+
 `dev-integration` policy lives here as well. The workspace defines when that
 lane is appropriate, what it must never touch, and which artifacts are
 required before fast local work can move into governed stage rehearsal. The
@@ -426,7 +431,7 @@ python3 scripts/install_skills.py --workspace-root /home/mfshaf7/projects --targ
 python3 scripts/sync_workspace_root.py --workspace-root /home/mfshaf7/projects --check
 python3 scripts/audit_workspace_layout.py --workspace-root /home/mfshaf7/projects
 python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects
-python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/workspace_intake.py scripts/sync_workspace_root.py scripts/validate_pull_request_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
+python3 -m py_compile scripts/audit_branch_lifecycle.py scripts/audit_workspace_layout.py scripts/audit_stale_content.py scripts/audit_improvement_signals.py scripts/check_remote_alignment.py scripts/contracts_lib.py scripts/install_skills.py scripts/record_after_action.py scripts/record_improvement_candidate.py scripts/scaffold_intake.py scripts/workspace_intake.py scripts/workspace_inventory.py scripts/sync_workspace_root.py scripts/validate_pull_request_controls.py scripts/validate_component_contracts.py scripts/validate_contracts.py scripts/validate_cross_repo_truth.py scripts/validate_delegation_journal.py scripts/validate_developer_integration.py scripts/validate_improvement_candidates.py scripts/validate_intake.py scripts/validate_learning_closure.py scripts/validate_repo_structure.py scripts/validate_review_coverage.py scripts/validate_security_bindings.py scripts/validate_security_change_record_lanes.py scripts/validate_structured_record.py scripts/workspace_control_plane_summary.py
 ```
 
 ## Read First

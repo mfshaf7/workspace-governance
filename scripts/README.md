@@ -81,6 +81,13 @@
   - emits mutation, canonical readback, and receipt artifacts while rejecting
     stale state, identity conflict, active-inventory overlap, implicit AI
     acceptance, idempotency conflict, and default-branch writes
+- `workspace_inventory.py`
+  - reads exact promotion concurrency bindings or deterministically moves one
+    admitted intake entry into one versioned repository, product, or component
+    inventory record on a review branch
+  - emits promotion mutation, readback, and receipt artifacts while rejecting
+    stale state, duplicate identity, non-ready evaluation, partial source
+    validation, and default-branch writes
 - `scaffold_intake.py`
   - temporary compatibility front end for intake adds; it constructs v2
     request and decision artifacts and delegates to `workspace_intake.py`

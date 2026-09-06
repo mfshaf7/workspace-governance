@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readback_id", "mutation_ref", "target", "authority_state", "source_branch", "observed_at", "intake_register_digest", "active_inventory_digest", "intake_entry_present", "active_record", "readback_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-promotion-readback" },
+    "readback_id": { "$ref": "#/$defs/text" },
+    "mutation_ref": { "$ref": "#/$defs/ref" },
+    "target": { "$ref": "#/$defs/target" },
+    "authority_state": { "enum": ["review-branch", "merged-authority"] },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "intake_register_digest": { "$ref": "#/$defs/digest" },
+    "active_inventory_digest": { "$ref": "#/$defs/digest" },
+    "intake_entry_present": { "const": false },
+    "active_record": { "type": "object", "minProperties": 1 },
+    "readback_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "target": { "type": "object", "required": ["kind", "name", "record_id"], "properties": { "kind": { "enum": ["repo", "product", "component"] }, "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }, "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

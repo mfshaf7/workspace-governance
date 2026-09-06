@@ -693,6 +693,7 @@
         "contract_id",
         "owner_repo",
         "normal_operator_surface",
+        "target_operator_surface",
         "compatibility_operator_surface",
         "state_store",
         "human_gates",
@@ -720,6 +721,24 @@
             "continue_command": { "const": "npm run art -- work continue <work-item-id>" },
             "close_command": { "const": "npm run art -- work close <work-item-id>" },
             "help_command": { "const": "npm run art -- work --help" }
+          }
+        },
+        "target_operator_surface": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "primary_adapter",
+            "workflow_semantics_owner",
+            "cli_posture",
+            "shared_api_required",
+            "adapter_local_state_machine_allowed"
+          ],
+          "properties": {
+            "primary_adapter": { "const": "governance-operations-console" },
+            "workflow_semantics_owner": { "const": "operator-orchestration-service" },
+            "cli_posture": { "const": "transitional-engineering-recovery-diagnostics" },
+            "shared_api_required": { "const": true },
+            "adapter_local_state_machine_allowed": { "const": false }
           }
         },
         "compatibility_operator_surface": {

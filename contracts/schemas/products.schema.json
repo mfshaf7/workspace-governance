@@ -3,13 +3,16 @@
   "type": "object",
   "required": ["schema_version", "products"],
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1 },
+    "schema_version": { "const": 2 },
     "products": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
         "required": [
+          "record",
+          "posture",
+          "maturity",
           "lifecycle",
           "platform_owner",
           "security_owner",
@@ -21,6 +24,9 @@
           "validation_behavior"
         ],
         "properties": {
+          "record": { "$ref": "#/$defs/recordEnvelope" },
+          "posture": { "enum": ["active", "suspended", "retired"] },
+          "maturity": { "enum": ["owner-managed", "platform-integrated", "fully-governed"] },
           "lifecycle": { "type": "string", "minLength": 1 },
           "platform_owner": { "type": "string", "minLength": 1 },
           "security_owner": { "type": "string", "minLength": 1 },
@@ -36,6 +42,43 @@
     }
   },
   "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "nullableText": { "type": ["string", "null"], "minLength": 1 },
+    "recordEnvelope": {
+      "type": "object",
+      "required": ["id", "version", "lineage", "last_mutation"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
+        "version": { "type": "integer", "minimum": 1 },
+        "lineage": {
+          "type": "object",
+          "required": ["source", "source_ref", "source_digest", "intake_entry_version"],
+          "properties": {
+            "source": { "enum": ["legacy-migration", "workspace-intake"] },
+            "source_ref": { "type": "string", "minLength": 1 },
+            "source_digest": { "$ref": "#/$defs/digest" },
+            "intake_entry_version": { "type": ["integer", "null"], "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "last_mutation": {
+          "type": "object",
+          "required": ["id", "action", "idempotency_key", "request_ref", "request_digest", "readiness_ref", "readiness_digest", "applied_at"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "action": { "enum": ["migrate", "promote"] },
+            "idempotency_key": { "type": "string", "minLength": 1 },
+            "request_ref": { "$ref": "#/$defs/nullableText" },
+            "request_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+            "readiness_ref": { "$ref": "#/$defs/nullableText" },
+            "readiness_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+            "applied_at": { "type": "string", "format": "date-time" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "validationBehavior": {
       "type": "object",
       "required": ["posture", "wgcf_graph_role", "catalog_refs", "notes"],

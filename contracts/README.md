@@ -28,6 +28,11 @@ Use these contracts to declare:
   - versioned request, decision, mutation, receipt, readback, ownership,
     idempotency, review, migration, and denied-shortcut contract for workspace
     intake
+- `workspace-active-inventory.yaml`
+  - promotion contract from an admitted intake record into exactly one active
+    repository, product, or component inventory, with source-version bindings,
+    readiness evidence, atomic source mutation, idempotent replay, readback,
+    review, migration, and terminal merged-authority receipt requirements
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system
