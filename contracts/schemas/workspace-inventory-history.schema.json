@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "events"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "required": ["record_version", "record_digest", "posture"],
+      "properties": {
+        "record_version": { "type": "integer", "minimum": 1 },
+        "record_digest": { "$ref": "#/$defs/digest" },
+        "posture": { "enum": ["active", "suspended", "retired"] }
+      },
+      "additionalProperties": false
+    },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["event_id", "event_digest", "sequence", "target", "action", "idempotency_key", "before", "after", "request_ref", "readiness_ref", "previous_event_ref", "operator_ref", "applied_at"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/text" },
+        "event_digest": { "$ref": "#/$defs/digest" },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "target": { "$ref": "#/$defs/target" },
+        "action": { "enum": ["update", "suspend", "restore", "retire"] },
+        "idempotency_key": { "$ref": "#/$defs/text" },
+        "before": { "$ref": "#/$defs/state" },
+        "after": { "$ref": "#/$defs/state" },
+        "request_ref": { "$ref": "#/$defs/artifactRef" },
+        "readiness_ref": { "$ref": "#/$defs/artifactRef" },
+        "previous_event_ref": {
+          "oneOf": [
+            { "$ref": "#/$defs/artifactRef" },
+            { "type": "null" }
+          ]
+        },
+        "operator_ref": { "$ref": "#/$defs/text" },
+        "applied_at": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

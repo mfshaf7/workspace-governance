@@ -33,6 +33,14 @@ Use these contracts to declare:
     repository, product, or component inventory, with source-version bindings,
     readiness evidence, atomic source mutation, idempotent replay, readback,
     review, migration, and terminal merged-authority receipt requirements
+- `workspace-inventory-lifecycle.yaml`
+  - deterministic update, suspension, restoration, and retirement contract for
+    existing inventory records, including state transitions, exact source and
+    history bindings, review, idempotency, and no-hard-delete rules
+- `workspace-inventory-history.yaml`
+  - append-only canonical event history for inventory lifecycle changes; every
+    event preserves before and after record state plus request and readiness
+    evidence references
 - `intake-policy.yaml`
   - how new repos, products, and components are classified before they become
     part of the governed system

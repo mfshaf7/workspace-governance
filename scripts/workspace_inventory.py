@@ -26,6 +26,11 @@ ARTIFACT_SCHEMAS = {
     "workspace-inventory-promotion-mutation": "workspace-inventory-promotion-mutation.schema.json",
     "workspace-inventory-promotion-readback": "workspace-inventory-promotion-readback.schema.json",
     "workspace-inventory-promotion-receipt": "workspace-inventory-promotion-receipt.schema.json",
+    "workspace-inventory-lifecycle-request": "workspace-inventory-lifecycle-request.schema.json",
+    "workspace-inventory-lifecycle-readiness": "workspace-inventory-lifecycle-readiness.schema.json",
+    "workspace-inventory-lifecycle-mutation": "workspace-inventory-lifecycle-mutation.schema.json",
+    "workspace-inventory-lifecycle-readback": "workspace-inventory-lifecycle-readback.schema.json",
+    "workspace-inventory-lifecycle-receipt": "workspace-inventory-lifecycle-receipt.schema.json",
 }
 DIGEST_FIELDS = {
     "workspace-inventory-promotion-request": "request_digest",
@@ -33,10 +38,22 @@ DIGEST_FIELDS = {
     "workspace-inventory-promotion-mutation": "mutation_digest",
     "workspace-inventory-promotion-readback": "readback_digest",
     "workspace-inventory-promotion-receipt": "receipt_digest",
+    "workspace-inventory-lifecycle-request": "request_digest",
+    "workspace-inventory-lifecycle-readiness": "readiness_digest",
+    "workspace-inventory-lifecycle-mutation": "mutation_digest",
+    "workspace-inventory-lifecycle-readback": "readback_digest",
+    "workspace-inventory-lifecycle-receipt": "receipt_digest",
 }
 COLLECTIONS = {"repo": "repos", "product": "products", "component": "components"}
 INVENTORY_FILES = {kind: f"contracts/{collection}.yaml" for kind, collection in COLLECTIONS.items()}
 DEFAULT_BRANCHES = {"main", "master"}
+HISTORY_FILE = "contracts/workspace-inventory-history.yaml"
+LIFECYCLE_TRANSITIONS = {
+    "update": {"active": "active", "suspended": "suspended"},
+    "suspend": {"active": "suspended"},
+    "restore": {"suspended": "active", "retired": "active"},
+    "retire": {"active": "retired", "suspended": "retired"},
+}
 
 
 class WorkspaceInventoryError(RuntimeError):
@@ -128,6 +145,22 @@ def current_state(repo_root: Path, kind: str, name: str) -> dict[str, Any]:
         "intake_entry_digest": canonical_digest(intake_entry) if intake_entry else None,
         "active_record_version": active_record.get("record", {}).get("version") if active_record else None,
         "active_record_digest": canonical_digest(active_record) if active_record else None,
+    }
+
+
+def current_lifecycle_state(repo_root: Path, kind: str, name: str) -> dict[str, Any]:
+    inventory = _load_inventory(repo_root, kind)
+    record = _inventory_record(inventory, kind, name)
+    if record is None:
+        raise WorkspaceInventoryError("lifecycle target is missing from active inventory")
+    history = load_yaml(repo_root / HISTORY_FILE)
+    return {
+        "target": {"kind": kind, "name": name, "record_id": f"{kind}:{name}"},
+        "active_inventory_digest": canonical_digest(inventory),
+        "history_digest": canonical_digest(history),
+        "record_version": record["record"]["version"],
+        "record_digest": canonical_digest(record),
+        "posture": record["posture"],
     }
 
 
@@ -391,6 +424,361 @@ def apply_promotion(
         return artifacts
 
 
+def history_event_digest(event: dict[str, Any]) -> str:
+    projection = copy.deepcopy(event)
+    projection.pop("event_digest", None)
+    return canonical_digest(projection)
+
+
+def bind_history_event_digest(event: dict[str, Any]) -> dict[str, Any]:
+    result = copy.deepcopy(event)
+    result["event_digest"] = history_event_digest(result)
+    return result
+
+
+def _target_history(history: dict[str, Any], record_id: str) -> list[dict[str, Any]]:
+    return [event for event in history.get("events", []) if event["target"]["record_id"] == record_id]
+
+
+def _validate_history(repo_root: Path, history: dict[str, Any]) -> None:
+    _validate_contract(repo_root, "workspace-inventory-history.yaml", history)
+    seen_ids: set[str] = set()
+    by_target: dict[str, list[dict[str, Any]]] = {}
+    for event in history["events"]:
+        if event["event_id"] in seen_ids:
+            raise WorkspaceInventoryError(f"duplicate history event identity: {event['event_id']}")
+        seen_ids.add(event["event_id"])
+        if event["event_digest"] != history_event_digest(event):
+            raise WorkspaceInventoryError(
+                f"history event digest does not match canonical content: {event['event_id']}"
+            )
+        by_target.setdefault(event["target"]["record_id"], []).append(event)
+    for record_id, events in by_target.items():
+        for index, event in enumerate(events, start=1):
+            if event["sequence"] != index:
+                raise WorkspaceInventoryError(
+                    f"history sequence for {record_id} must be contiguous from 1"
+                )
+            expected_previous = None
+            if index > 1:
+                previous = events[index - 2]
+                expected_previous = {
+                    "id": previous["event_id"],
+                    "digest": previous["event_digest"],
+                }
+                if event["before"] != previous["after"]:
+                    raise WorkspaceInventoryError(
+                        f"history before state for {event['event_id']} does not match the previous after state"
+                    )
+            if event["previous_event_ref"] != expected_previous:
+                raise WorkspaceInventoryError(
+                    f"history previous_event_ref is invalid for {event['event_id']}"
+                )
+
+
+def _validate_lifecycle_bindings(
+    request: dict[str, Any],
+    readiness: dict[str, Any],
+    state: dict[str, Any],
+    record: dict[str, Any],
+    history: dict[str, Any],
+) -> str:
+    target = request["target"]
+    if target["record_id"] != f"{target['kind']}:{target['name']}":
+        raise WorkspaceInventoryError("lifecycle target record_id does not match kind and name")
+    if readiness["request_ref"] != {
+        "id": request["request_id"],
+        "digest": request["request_digest"],
+    }:
+        raise WorkspaceInventoryError("readiness does not bind the supplied lifecycle request")
+    if readiness["target"] != target or readiness["action"] != request["action"]:
+        raise WorkspaceInventoryError("readiness target or action does not match the lifecycle request")
+    if readiness["outcome"] != "ready":
+        raise WorkspaceInventoryError(
+            f"lifecycle mutation requires ready outcome, got {readiness['outcome']!r}"
+        )
+    if readiness["observed_state"] != request["expected_state"]:
+        raise WorkspaceInventoryError("readiness observed_state does not bind the requested source versions")
+    for field in (
+        "active_inventory_digest",
+        "history_digest",
+        "record_version",
+        "record_digest",
+        "posture",
+    ):
+        if request["expected_state"][field] != state[field]:
+            raise WorkspaceInventoryError(f"stale lifecycle {field.replace('_', ' ')}")
+    action = request["action"]
+    current_posture = record["posture"]
+    next_posture = LIFECYCLE_TRANSITIONS.get(action, {}).get(current_posture)
+    if next_posture is None:
+        raise WorkspaceInventoryError(
+            f"illegal inventory transition: {action} from {current_posture}"
+        )
+    if action == "update":
+        requested_value = request["requested_value"]
+        if "record" in requested_value:
+            raise WorkspaceInventoryError("requested_value must not replace the record envelope")
+        if requested_value.get("posture") != current_posture:
+            raise WorkspaceInventoryError("update must preserve inventory posture")
+        _validate_compatibility_alias(target["kind"], requested_value)
+    if action == "restore":
+        prior_events = _target_history(history, target["record_id"])
+        if not prior_events:
+            raise WorkspaceInventoryError("restore requires a prior suspension or retirement history event")
+        latest = prior_events[-1]
+        expected_ref = {"id": latest["event_id"], "digest": latest["event_digest"]}
+        if request["prior_event_ref"] != expected_ref:
+            raise WorkspaceInventoryError("restore prior_event_ref does not bind the latest lifecycle event")
+        if latest["action"] not in {"suspend", "retire"}:
+            raise WorkspaceInventoryError("restore requires the latest event to be suspension or retirement")
+    return next_posture
+
+
+def _lifecycle_record_after(
+    request: dict[str, Any],
+    readiness: dict[str, Any],
+    record: dict[str, Any],
+    next_posture: str,
+    applied_at: str,
+) -> dict[str, Any]:
+    kind = request["target"]["kind"]
+    if request["action"] == "update":
+        result = copy.deepcopy(request["requested_value"])
+    else:
+        result = copy.deepcopy(record)
+        result.pop("record", None)
+        if kind == "repo" and next_posture == "active":
+            result.pop("replaced_by", None)
+        result["posture"] = next_posture
+        if kind != "product":
+            result["lifecycle"] = next_posture
+    result["record"] = copy.deepcopy(record["record"])
+    result["record"]["version"] += 1
+    result["record"]["last_mutation"] = {
+        "id": f"workspace-inventory-lifecycle:{request['idempotency_key']}",
+        "action": request["action"],
+        "idempotency_key": request["idempotency_key"],
+        "request_ref": request["request_id"],
+        "request_digest": request["request_digest"],
+        "readiness_ref": readiness["readiness_id"],
+        "readiness_digest": readiness["readiness_digest"],
+        "applied_at": applied_at,
+    }
+    return result
+
+
+def _replace_inventory_record(
+    inventory: dict[str, Any], kind: str, name: str, record: dict[str, Any]
+) -> None:
+    collection = COLLECTIONS[kind]
+    if kind != "repo":
+        inventory[collection][name] = record
+        return
+    inventory.setdefault("repos", {}).pop(name, None)
+    inventory.setdefault("retired_repos", {}).pop(name, None)
+    destination = "retired_repos" if record["posture"] == "retired" else "repos"
+    inventory[destination][name] = record
+
+
+def _build_history_event(
+    request: dict[str, Any],
+    readiness: dict[str, Any],
+    before: dict[str, Any],
+    after: dict[str, Any],
+    history: dict[str, Any],
+    applied_at: str,
+) -> dict[str, Any]:
+    target = request["target"]
+    prior_events = _target_history(history, target["record_id"])
+    previous = prior_events[-1] if prior_events else None
+    event = {
+        "event_id": f"workspace-inventory-event:{target['kind']}:{target['name']}:{after['record']['version']}",
+        "event_digest": "sha256:" + "0" * 64,
+        "sequence": len(prior_events) + 1,
+        "target": copy.deepcopy(target),
+        "action": request["action"],
+        "idempotency_key": request["idempotency_key"],
+        "before": {
+            "record_version": before["record"]["version"],
+            "record_digest": canonical_digest(before),
+            "posture": before["posture"],
+        },
+        "after": {
+            "record_version": after["record"]["version"],
+            "record_digest": canonical_digest(after),
+            "posture": after["posture"],
+        },
+        "request_ref": {"id": request["request_id"], "digest": request["request_digest"]},
+        "readiness_ref": {
+            "id": readiness["readiness_id"],
+            "digest": readiness["readiness_digest"],
+        },
+        "previous_event_ref": (
+            {"id": previous["event_id"], "digest": previous["event_digest"]}
+            if previous
+            else None
+        ),
+        "operator_ref": request["operator_ref"],
+        "applied_at": applied_at,
+    }
+    return bind_history_event_digest(event)
+
+
+def _build_lifecycle_artifacts(
+    request: dict[str, Any],
+    readiness: dict[str, Any],
+    before: dict[str, Any],
+    after: dict[str, Any],
+    event: dict[str, Any],
+    inventory: dict[str, Any],
+    history: dict[str, Any],
+    source_branch: str,
+    completed_at: str,
+    outcome: str,
+) -> dict[str, dict[str, Any]]:
+    target = request["target"]
+    suffix = "replay" if outcome == "replayed" else "review-branch"
+    mutation = bind_artifact_digest({
+        "schema_version": 1,
+        "artifact_type": "workspace-inventory-lifecycle-mutation",
+        "mutation_id": f"workspace-inventory-lifecycle-mutation:{request['idempotency_key']}:{suffix}",
+        "request_ref": {"id": request["request_id"], "digest": request["request_digest"]},
+        "readiness_ref": {"id": readiness["readiness_id"], "digest": readiness["readiness_digest"]},
+        "target": copy.deepcopy(target),
+        "action": request["action"],
+        "source_branch": source_branch,
+        "applied_at": completed_at,
+        "changes": {
+            "before_version": before["record"]["version"],
+            "after_version": after["record"]["version"],
+            "before_posture": before["posture"],
+            "after_posture": after["posture"],
+            "history_event_appended": outcome != "replayed",
+        },
+    })
+    readback = bind_artifact_digest({
+        "schema_version": 1,
+        "artifact_type": "workspace-inventory-lifecycle-readback",
+        "readback_id": f"workspace-inventory-lifecycle-readback:{request['idempotency_key']}:{suffix}",
+        "mutation_ref": {"id": mutation["mutation_id"], "digest": mutation["mutation_digest"]},
+        "target": copy.deepcopy(target),
+        "action": request["action"],
+        "authority_state": "review-branch",
+        "source_branch": source_branch,
+        "observed_at": completed_at,
+        "active_inventory_digest": canonical_digest(inventory),
+        "history_digest": canonical_digest(history),
+        "record": copy.deepcopy(after),
+        "history_event_ref": {"id": event["event_id"], "digest": event["event_digest"]},
+    })
+    receipt = bind_artifact_digest({
+        "schema_version": 1,
+        "artifact_type": "workspace-inventory-lifecycle-receipt",
+        "receipt_id": f"workspace-inventory-lifecycle-receipt:{request['idempotency_key']}:{suffix}",
+        "request_ref": {"id": request["request_id"], "digest": request["request_digest"]},
+        "readiness_ref": {"id": readiness["readiness_id"], "digest": readiness["readiness_digest"]},
+        "mutation_ref": {"id": mutation["mutation_id"], "digest": mutation["mutation_digest"]},
+        "readback_ref": {"id": readback["readback_id"], "digest": readback["readback_digest"]},
+        "target": copy.deepcopy(target),
+        "action": request["action"],
+        "operator_ref": request["operator_ref"],
+        "correlation_ref": request["correlation_ref"],
+        "idempotency_key": request["idempotency_key"],
+        "completed_at": completed_at,
+        "phase": "review-branch",
+        "outcome": outcome,
+    })
+    return {"mutation": mutation, "readback": readback, "receipt": receipt}
+
+
+def apply_lifecycle(
+    repo_root: Path,
+    request: dict[str, Any],
+    readiness: dict[str, Any],
+    output_dir: Path,
+    source_branch: str,
+    completed_at: str | None = None,
+) -> dict[str, dict[str, Any]]:
+    _validate_source_branch(source_branch)
+    validate_artifact(repo_root, request)
+    validate_artifact(repo_root, readiness)
+    completed_at = completed_at or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    target = request["target"]
+    kind = target["kind"]
+    name = target["name"]
+
+    with _authority_lock(repo_root):
+        inventory_path = repo_root / INVENTORY_FILES[kind]
+        history_path = repo_root / HISTORY_FILE
+        inventory = _load_inventory(repo_root, kind)
+        history = load_yaml(history_path)
+        _validate_history(repo_root, history)
+        record = _inventory_record(inventory, kind, name)
+        if record is None:
+            raise WorkspaceInventoryError("lifecycle target is missing from active inventory")
+        target_events = _target_history(history, target["record_id"])
+        matching_events = [
+            event
+            for event in target_events
+            if event["idempotency_key"] == request["idempotency_key"]
+            or event["request_ref"]["id"] == request["request_id"]
+        ]
+        if matching_events:
+            event = matching_events[-1]
+            if (
+                event["idempotency_key"] != request["idempotency_key"]
+                or event["request_ref"]
+                != {"id": request["request_id"], "digest": request["request_digest"]}
+                or event["readiness_ref"]
+                != {"id": readiness["readiness_id"], "digest": readiness["readiness_digest"]}
+            ):
+                raise WorkspaceInventoryError(
+                    "lifecycle request identity or idempotency key was reused with different evidence"
+                )
+            if event is not target_events[-1] or canonical_digest(record) != event["after"]["record_digest"]:
+                raise WorkspaceInventoryError(
+                    "lifecycle replay is superseded by a later canonical mutation"
+                )
+            artifacts = _build_lifecycle_artifacts(
+                request,
+                readiness,
+                {"record": {"version": event["before"]["record_version"]}, "posture": event["before"]["posture"]},
+                record,
+                event,
+                inventory,
+                history,
+                source_branch,
+                completed_at,
+                "replayed",
+            )
+            _write_artifacts(repo_root, output_dir, artifacts)
+            return artifacts
+        state = current_lifecycle_state(repo_root, kind, name)
+        next_posture = _validate_lifecycle_bindings(request, readiness, state, record, history)
+        updated = _lifecycle_record_after(request, readiness, record, next_posture, completed_at)
+        _replace_inventory_record(inventory, kind, name, updated)
+        event = _build_history_event(request, readiness, record, updated, history, completed_at)
+        history["events"].append(event)
+        _validate_contract(repo_root, f"{COLLECTIONS[kind]}.yaml", inventory)
+        _validate_history(repo_root, history)
+        _write_pair_atomically(inventory_path, inventory, history_path, history)
+        artifacts = _build_lifecycle_artifacts(
+            request,
+            readiness,
+            record,
+            updated,
+            event,
+            inventory,
+            history,
+            source_branch,
+            completed_at,
+            "prepared",
+        )
+        _write_artifacts(repo_root, output_dir, artifacts)
+        return artifacts
+
+
 def _write_artifacts(repo_root: Path, output_dir: Path, artifacts: dict[str, dict[str, Any]]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name, payload in artifacts.items():
@@ -483,10 +871,21 @@ def build_parser() -> argparse.ArgumentParser:
     state_parser = subparsers.add_parser("state", help="print promotion concurrency bindings")
     state_parser.add_argument("--kind", choices=tuple(COLLECTIONS), required=True)
     state_parser.add_argument("--name", required=True)
+    lifecycle_state_parser = subparsers.add_parser(
+        "lifecycle-state", help="print lifecycle concurrency and history bindings"
+    )
+    lifecycle_state_parser.add_argument("--kind", choices=tuple(COLLECTIONS), required=True)
+    lifecycle_state_parser.add_argument("--name", required=True)
     apply_parser = subparsers.add_parser("apply", help="prepare one reviewed intake-to-inventory promotion")
     apply_parser.add_argument("--request", type=Path, required=True)
     apply_parser.add_argument("--readiness", type=Path, required=True)
     apply_parser.add_argument("--output-dir", type=Path, required=True)
+    lifecycle_parser = subparsers.add_parser(
+        "lifecycle", help="prepare one reviewed active-inventory lifecycle change"
+    )
+    lifecycle_parser.add_argument("--request", type=Path, required=True)
+    lifecycle_parser.add_argument("--readiness", type=Path, required=True)
+    lifecycle_parser.add_argument("--output-dir", type=Path, required=True)
     migrate_parser = subparsers.add_parser("migrate", help="migrate v1 inventories to the v2 envelope")
     migrate_parser.add_argument("--source-ref", required=True)
     migrate_parser.add_argument("--recorded-at", required=True)
@@ -501,23 +900,44 @@ def main() -> int:
         if args.command == "state":
             print(json.dumps(current_state(repo_root, args.kind, args.name), indent=2, sort_keys=True))
             return 0
+        if args.command == "lifecycle-state":
+            print(
+                json.dumps(
+                    current_lifecycle_state(repo_root, args.kind, args.name),
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "migrate":
             report = migrate_inventory(repo_root, args.source_ref, args.recorded_at)
             dump_json(args.output.resolve(), report)
             print(f"workspace inventory migrated: {sum(item['count'] for item in report['inventories'].values())} records")
             return 0
-        artifacts = apply_promotion(
-            repo_root=repo_root,
-            request=load_json(args.request.resolve()),
-            readiness=load_json(args.readiness.resolve()),
-            output_dir=args.output_dir.resolve(),
-            source_branch=current_branch(repo_root),
-        )
+        if args.command == "lifecycle":
+            artifacts = apply_lifecycle(
+                repo_root=repo_root,
+                request=load_json(args.request.resolve()),
+                readiness=load_json(args.readiness.resolve()),
+                output_dir=args.output_dir.resolve(),
+                source_branch=current_branch(repo_root),
+            )
+        else:
+            artifacts = apply_promotion(
+                repo_root=repo_root,
+                request=load_json(args.request.resolve()),
+                readiness=load_json(args.readiness.resolve()),
+                output_dir=args.output_dir.resolve(),
+                source_branch=current_branch(repo_root),
+            )
     except (OSError, subprocess.CalledProcessError, WorkspaceInventoryError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     receipt = artifacts["receipt"]
-    print(f"workspace inventory {receipt['outcome']}: {receipt['target']['record_id']} receipt={receipt['receipt_id']}")
+    print(
+        f"workspace inventory {receipt['outcome']}: "
+        f"{receipt['target']['record_id']} receipt={receipt['receipt_id']}"
+    )
     return 0
 
 

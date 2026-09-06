@@ -29,17 +29,31 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["record", "posture", "lifecycle", "replaced_by"],
         "properties": {
           "record": { "$ref": "#/$defs/recordEnvelope" },
           "posture": { "const": "retired" },
           "lifecycle": { "const": "retired" },
+          "repo_class": { "type": "string", "minLength": 1 },
+          "requires_security_bindings": { "type": "boolean" },
+          "security_review_subject": { "type": "boolean" },
+          "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "must_not_own": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "allowed_authoritative_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "validation_behavior": { "$ref": "#/$defs/validationBehavior" },
           "replaced_by": {
             "type": "object",
-            "minProperties": 1,
             "additionalProperties": { "type": "string", "minLength": 1 }
           }
         },
+        "oneOf": [
+          {
+            "required": ["record", "posture", "lifecycle", "replaced_by"],
+            "not": { "required": ["repo_class"] }
+          },
+          {
+            "required": ["record", "posture", "lifecycle", "repo_class", "requires_security_bindings", "owns", "must_not_own", "allowed_authoritative_refs", "validation_behavior"]
+          }
+        ],
         "additionalProperties": false
       }
     }
@@ -69,7 +83,7 @@
           "required": ["id", "action", "idempotency_key", "request_ref", "request_digest", "readiness_ref", "readiness_digest", "applied_at"],
           "properties": {
             "id": { "type": "string", "minLength": 1 },
-            "action": { "enum": ["migrate", "promote"] },
+            "action": { "enum": ["migrate", "promote", "update", "suspend", "restore", "retire"] },
             "idempotency_key": { "type": "string", "minLength": 1 },
             "request_ref": { "$ref": "#/$defs/nullableText" },
             "request_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },

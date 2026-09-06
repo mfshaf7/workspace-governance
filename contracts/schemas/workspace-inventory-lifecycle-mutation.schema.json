@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "mutation_id", "mutation_digest", "request_ref", "readiness_ref", "target", "action", "source_branch", "applied_at", "changes"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-lifecycle-mutation" },
+    "mutation_id": { "$ref": "#/$defs/text" },
+    "mutation_digest": { "$ref": "#/$defs/digest" },
+    "request_ref": { "$ref": "#/$defs/artifactRef" },
+    "readiness_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": { "$ref": "#/$defs/target" },
+    "action": { "enum": ["update", "suspend", "restore", "retire"] },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "applied_at": { "type": "string", "format": "date-time" },
+    "changes": {
+      "type": "object",
+      "required": ["before_version", "after_version", "before_posture", "after_posture", "history_event_appended"],
+      "properties": {
+        "before_version": { "type": "integer", "minimum": 1 },
+        "after_version": { "type": "integer", "minimum": 2 },
+        "before_posture": { "enum": ["active", "suspended", "retired"] },
+        "after_posture": { "enum": ["active", "suspended", "retired"] },
+        "history_event_appended": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "target": { "type": "object", "required": ["kind", "name", "record_id"], "properties": { "kind": { "enum": ["repo", "product", "component"] }, "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }, "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

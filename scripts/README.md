@@ -88,6 +88,10 @@
   - emits promotion mutation, readback, and receipt artifacts while rejecting
     stale state, duplicate identity, non-ready evaluation, partial source
     validation, and default-branch writes
+  - also inspects and applies deterministic `update`, `suspend`, `restore`, and
+    `retire` actions against existing records while atomically appending their
+    canonical history and rejecting stale bindings, illegal transitions, hard
+    delete, and conflicting replay
 - `scaffold_intake.py`
   - temporary compatibility front end for intake adds; it constructs v2
     request and decision artifacts and delegates to `workspace_intake.py`

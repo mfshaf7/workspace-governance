@@ -52,6 +52,43 @@ run from `main`, `master`, or a detached head.
 The preparation receipt is not terminal success. WGCF and OOS artifacts support
 the workflow but never replace merged Workspace Governance source authority.
 
+## Change An Active Record
+
+Inspect the exact inventory and history bindings before preparing a change:
+
+```bash
+python3 scripts/workspace_inventory.py lifecycle-state \
+  --kind repo \
+  --name example-repo
+```
+
+Then run the requested lifecycle action from a non-default review branch:
+
+```bash
+python3 scripts/workspace_inventory.py lifecycle \
+  --request /path/to/lifecycle-request.json \
+  --readiness /path/to/lifecycle-readiness.json \
+  --output-dir /path/to/output
+```
+
+The request may `update`, `suspend`, `restore`, or `retire` one repository,
+product, or component. It binds the current inventory digest, append-only
+history digest, record version and digest, posture, operator and approval
+references, impact acknowledgements, and a stable idempotency key. A restore
+also binds the latest suspension or retirement event.
+
+Every accepted action preserves the record identity, increments its version,
+and appends one event to `contracts/workspace-inventory-history.yaml`. Exact
+replay returns the existing result without appending another event. Repository
+retirement moves the complete record to `retired_repos`; restoration moves it
+back to the active collection. Products and components remain in their current
+collection with explicit posture.
+
+Review, merge, and completion use the same boundary as promotion: validate the
+prepared source, review the exact pull-request head, merge through the provider,
+and let OOS reconcile merged canonical truth. The local preparation receipt is
+not terminal success.
+
 ## Record Shape
 
 Every v2 inventory record has an explicit identity, version, lineage, latest
@@ -86,4 +123,6 @@ v2 data is a no-op.
 - no promotion from `proposed` or `out-of-scope`
 - no overlap between intake and active inventory
 - no hard delete
+- no stale lifecycle or history overwrite
+- no hidden restoration or history rewrite
 - no runtime, release, security, or product-maturity activation by promotion

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readback_id", "readback_digest", "mutation_ref", "target", "action", "authority_state", "source_branch", "observed_at", "active_inventory_digest", "history_digest", "record", "history_event_ref"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-lifecycle-readback" },
+    "readback_id": { "$ref": "#/$defs/text" },
+    "readback_digest": { "$ref": "#/$defs/digest" },
+    "mutation_ref": { "$ref": "#/$defs/artifactRef" },
+    "target": { "$ref": "#/$defs/target" },
+    "action": { "enum": ["update", "suspend", "restore", "retire"] },
+    "authority_state": { "const": "review-branch" },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "active_inventory_digest": { "$ref": "#/$defs/digest" },
+    "history_digest": { "$ref": "#/$defs/digest" },
+    "record": { "type": "object", "minProperties": 1 },
+    "history_event_ref": { "$ref": "#/$defs/artifactRef" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "target": { "type": "object", "required": ["kind", "name", "record_id"], "properties": { "kind": { "enum": ["repo", "product", "component"] }, "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }, "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

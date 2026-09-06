@@ -127,6 +127,8 @@ class WorkspaceInventoryTests(unittest.TestCase):
             "repos.yaml",
             "products.yaml",
             "components.yaml",
+            "workspace-inventory-lifecycle.yaml",
+            "workspace-inventory-history.yaml",
         ):
             shutil.copy2(REPO_ROOT / "contracts" / name, contracts / name)
         for pattern in ("workspace-intake-*.schema.json", "workspace-inventory-*.schema.json"):
@@ -238,6 +240,69 @@ class WorkspaceInventoryTests(unittest.TestCase):
             completed_at="2026-09-06T04:07:00Z",
         )
 
+    def lifecycle_artifacts(
+        self,
+        kind: str,
+        name: str,
+        action: str,
+        *,
+        requested_value: dict | None = None,
+        idempotency_key: str | None = None,
+    ) -> tuple[dict, dict]:
+        state = inventory.current_lifecycle_state(self.repo_root, kind, name)
+        target = state.pop("target")
+        history = inventory.load_yaml(
+            self.repo_root / "contracts" / "workspace-inventory-history.yaml"
+        )
+        prior_events = inventory._target_history(history, target["record_id"])
+        prior_event_ref = None
+        if action == "restore" and prior_events:
+            prior_event_ref = {
+                "id": prior_events[-1]["event_id"],
+                "digest": prior_events[-1]["event_digest"],
+            }
+        request = inventory.bind_artifact_digest({
+            "schema_version": 1,
+            "artifact_type": "workspace-inventory-lifecycle-request",
+            "request_id": f"request:lifecycle:{kind}:{name}:{action}",
+            "requested_at": "2026-09-06T05:00:00Z",
+            "operator_ref": "operator:test",
+            "correlation_ref": f"test:{kind}:{name}:{action}",
+            "idempotency_key": idempotency_key or f"lifecycle:{kind}:{name}:{action}",
+            "action": action,
+            "target": target,
+            "expected_state": state,
+            "requested_value": requested_value,
+            "prior_event_ref": prior_event_ref,
+            "reason": f"Test {action} for {kind}:{name}.",
+            "impact_acknowledgements": ["Downstream references reviewed."],
+            "approval_refs": ["openproject://work_packages/1077"],
+        })
+        readiness = inventory.bind_artifact_digest({
+            "schema_version": 1,
+            "artifact_type": "workspace-inventory-lifecycle-readiness",
+            "readiness_id": f"readiness:lifecycle:{kind}:{name}:{action}",
+            "evaluated_at": "2026-09-06T05:01:00Z",
+            "request_ref": {"id": request["request_id"], "digest": request["request_digest"]},
+            "target": copy.deepcopy(target),
+            "action": action,
+            "observed_state": copy.deepcopy(state),
+            "policy_ref": {"id": "workspace-inventory-lifecycle:v1", "digest": "sha256:" + "d" * 64},
+            "outcome": "ready",
+            "findings": [],
+        })
+        return request, readiness
+
+    def apply_lifecycle(self, request: dict, readiness: dict, completed_at: str = "2026-09-06T05:02:00Z"):
+        return inventory.apply_lifecycle(
+            repo_root=self.repo_root,
+            request=request,
+            readiness=readiness,
+            output_dir=self.output_dir,
+            source_branch="feature/test-lifecycle",
+            completed_at=completed_at,
+        )
+
     def test_promotes_each_kind_without_intake_overlap(self) -> None:
         for kind in ("repo", "product", "component"):
             with self.subTest(kind=kind):
@@ -330,6 +395,162 @@ class WorkspaceInventoryTests(unittest.TestCase):
             {item["status"] for item in report["inventories"].values()},
             {"already-migrated"},
         )
+
+    def test_lifecycle_sequence_preserves_full_record_and_append_only_history(self) -> None:
+        self.admit("repo", "test-lifecycle")
+        promotion, promotion_readiness = self.promotion_artifacts("repo", "test-lifecycle")
+        self.apply(promotion, promotion_readiness)
+
+        current = inventory._inventory_record(
+            inventory._load_inventory(self.repo_root, "repo"), "repo", "test-lifecycle"
+        )
+        updated_value = copy.deepcopy(current)
+        updated_value.pop("record")
+        updated_value["owns"] = ["updated test source"]
+        request, readiness = self.lifecycle_artifacts(
+            "repo", "test-lifecycle", "update", requested_value=updated_value
+        )
+        self.apply_lifecycle(request, readiness, "2026-09-06T05:02:00Z")
+
+        request, readiness = self.lifecycle_artifacts("repo", "test-lifecycle", "suspend")
+        self.apply_lifecycle(request, readiness, "2026-09-06T05:03:00Z")
+        request, readiness = self.lifecycle_artifacts("repo", "test-lifecycle", "restore")
+        self.apply_lifecycle(request, readiness, "2026-09-06T05:04:00Z")
+        request, readiness = self.lifecycle_artifacts("repo", "test-lifecycle", "retire")
+        result = self.apply_lifecycle(request, readiness, "2026-09-06T05:05:00Z")
+
+        repos = inventory._load_inventory(self.repo_root, "repo")
+        self.assertNotIn("test-lifecycle", repos["repos"])
+        retired = repos["retired_repos"]["test-lifecycle"]
+        self.assertEqual(retired["owns"], ["updated test source"])
+        self.assertEqual(retired["posture"], "retired")
+        self.assertEqual(retired["record"]["version"], 5)
+        history = inventory.load_yaml(
+            self.repo_root / "contracts" / "workspace-inventory-history.yaml"
+        )
+        events = inventory._target_history(history, "repo:test-lifecycle")
+        self.assertEqual([event["action"] for event in events], ["update", "suspend", "restore", "retire"])
+        self.assertEqual([event["sequence"] for event in events], [1, 2, 3, 4])
+        self.assertEqual(result["receipt"]["outcome"], "prepared")
+
+    def test_lifecycle_exact_replay_does_not_append_history(self) -> None:
+        self.admit("component", "test-lifecycle-replay")
+        promotion, promotion_readiness = self.promotion_artifacts("component", "test-lifecycle-replay")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts(
+            "component", "test-lifecycle-replay", "suspend"
+        )
+        first = self.apply_lifecycle(request, readiness)
+        replay = self.apply_lifecycle(request, readiness)
+        history = inventory.load_yaml(
+            self.repo_root / "contracts" / "workspace-inventory-history.yaml"
+        )
+        self.assertEqual(len(inventory._target_history(history, "component:test-lifecycle-replay")), 1)
+        self.assertEqual(first["readback"]["record"]["record"]["version"], 2)
+        self.assertEqual(replay["receipt"]["outcome"], "replayed")
+        self.assertFalse(replay["mutation"]["changes"]["history_event_appended"])
+
+    def test_lifecycle_rejects_reused_request_identity_with_different_evidence(self) -> None:
+        self.admit("component", "test-lifecycle-identity")
+        promotion, promotion_readiness = self.promotion_artifacts("component", "test-lifecycle-identity")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts("component", "test-lifecycle-identity", "suspend")
+        self.apply_lifecycle(request, readiness)
+        conflicting, conflicting_readiness = self.lifecycle_artifacts(
+            "component",
+            "test-lifecycle-identity",
+            "restore",
+            idempotency_key="different-key",
+        )
+        conflicting["request_id"] = request["request_id"]
+        conflicting = inventory.bind_artifact_digest(conflicting)
+        conflicting_readiness["request_ref"] = {
+            "id": conflicting["request_id"],
+            "digest": conflicting["request_digest"],
+        }
+        conflicting_readiness = inventory.bind_artifact_digest(conflicting_readiness)
+        with self.assertRaisesRegex(
+            inventory.WorkspaceInventoryError,
+            "request identity or idempotency key was reused",
+        ):
+            self.apply_lifecycle(conflicting, conflicting_readiness)
+
+    def test_lifecycle_rejects_stale_history_binding(self) -> None:
+        self.admit("product", "test-lifecycle-stale")
+        promotion, promotion_readiness = self.promotion_artifacts("product", "test-lifecycle-stale")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts("product", "test-lifecycle-stale", "suspend")
+        request["expected_state"]["history_digest"] = "sha256:" + "e" * 64
+        request = inventory.bind_artifact_digest(request)
+        readiness["request_ref"] = {"id": request["request_id"], "digest": request["request_digest"]}
+        readiness["observed_state"] = copy.deepcopy(request["expected_state"])
+        readiness = inventory.bind_artifact_digest(readiness)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "stale lifecycle history digest"):
+            self.apply_lifecycle(request, readiness)
+
+    def test_lifecycle_rejects_illegal_transition_and_hard_delete(self) -> None:
+        self.admit("component", "test-lifecycle-illegal")
+        promotion, promotion_readiness = self.promotion_artifacts("component", "test-lifecycle-illegal")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts("component", "test-lifecycle-illegal", "suspend")
+        self.apply_lifecycle(request, readiness)
+        request, readiness = self.lifecycle_artifacts(
+            "component", "test-lifecycle-illegal", "suspend", idempotency_key="second-suspend"
+        )
+        request["request_id"] = "request:lifecycle:component:test-lifecycle-illegal:second-suspend"
+        request = inventory.bind_artifact_digest(request)
+        readiness["request_ref"] = {
+            "id": request["request_id"],
+            "digest": request["request_digest"],
+        }
+        readiness = inventory.bind_artifact_digest(readiness)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "illegal inventory transition"):
+            self.apply_lifecycle(request, readiness)
+        request["action"] = "delete"
+        request = inventory.bind_artifact_digest(request)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "artifact schema validation failed"):
+            self.apply_lifecycle(request, readiness)
+
+    def test_lifecycle_restore_requires_latest_event_and_impact_acknowledgement(self) -> None:
+        self.admit("repo", "test-lifecycle-restore")
+        promotion, promotion_readiness = self.promotion_artifacts("repo", "test-lifecycle-restore")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts("repo", "test-lifecycle-restore", "suspend")
+        self.apply_lifecycle(request, readiness)
+        request, readiness = self.lifecycle_artifacts("repo", "test-lifecycle-restore", "restore")
+        request["prior_event_ref"]["digest"] = "sha256:" + "f" * 64
+        request = inventory.bind_artifact_digest(request)
+        readiness["request_ref"] = {"id": request["request_id"], "digest": request["request_digest"]}
+        readiness = inventory.bind_artifact_digest(readiness)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "prior_event_ref"):
+            self.apply_lifecycle(request, readiness)
+        request["impact_acknowledgements"] = []
+        request = inventory.bind_artifact_digest(request)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "artifact schema validation failed"):
+            self.apply_lifecycle(request, readiness)
+
+    def test_lifecycle_write_failure_restores_inventory_and_history(self) -> None:
+        self.admit("component", "test-lifecycle-rollback")
+        promotion, promotion_readiness = self.promotion_artifacts("component", "test-lifecycle-rollback")
+        self.apply(promotion, promotion_readiness)
+        request, readiness = self.lifecycle_artifacts("component", "test-lifecycle-rollback", "suspend")
+        inventory_path = self.repo_root / "contracts" / "components.yaml"
+        history_path = self.repo_root / "contracts" / "workspace-inventory-history.yaml"
+        before = (inventory_path.read_bytes(), history_path.read_bytes())
+        real_replace = inventory.os.replace
+        calls = 0
+
+        def fail_second(source, target):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("simulated history replace failure")
+            return real_replace(source, target)
+
+        with mock.patch.object(inventory.os, "replace", side_effect=fail_second):
+            with self.assertRaisesRegex(OSError, "simulated history replace failure"):
+                self.apply_lifecycle(request, readiness)
+        self.assertEqual((inventory_path.read_bytes(), history_path.read_bytes()), before)
 
 
 if __name__ == "__main__":

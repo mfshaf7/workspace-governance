@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "request_digest", "requested_at", "operator_ref", "correlation_ref", "idempotency_key", "action", "target", "expected_state", "requested_value", "prior_event_ref", "reason", "impact_acknowledgements", "approval_refs"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "workspace-inventory-lifecycle-request" },
+    "request_id": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "operator_ref": { "$ref": "#/$defs/text" },
+    "correlation_ref": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "action": { "enum": ["update", "suspend", "restore", "retire"] },
+    "target": { "$ref": "#/$defs/target" },
+    "expected_state": { "$ref": "#/$defs/expectedState" },
+    "requested_value": { "type": ["object", "null"] },
+    "prior_event_ref": { "oneOf": [{ "$ref": "#/$defs/artifactRef" }, { "type": "null" }] },
+    "reason": { "$ref": "#/$defs/text" },
+    "impact_acknowledgements": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+    "approval_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "update" } } },
+      "then": { "properties": { "requested_value": { "type": "object", "minProperties": 1 }, "prior_event_ref": { "type": "null" } } },
+      "else": { "properties": { "requested_value": { "type": "null" } } }
+    },
+    {
+      "if": { "properties": { "action": { "const": "restore" } } },
+      "then": { "properties": { "prior_event_ref": { "$ref": "#/$defs/artifactRef" } } }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "target": {
+      "type": "object",
+      "required": ["kind", "name", "record_id"],
+      "properties": {
+        "kind": { "enum": ["repo", "product", "component"] },
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "record_id": { "type": "string", "pattern": "^(repo|product|component):[a-z0-9][a-z0-9._-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } },
+      "additionalProperties": false
+    },
+    "expectedState": {
+      "type": "object",
+      "required": ["active_inventory_digest", "history_digest", "record_version", "record_digest", "posture"],
+      "properties": {
+        "active_inventory_digest": { "$ref": "#/$defs/digest" },
+        "history_digest": { "$ref": "#/$defs/digest" },
+        "record_version": { "type": "integer", "minimum": 1 },
+        "record_digest": { "$ref": "#/$defs/digest" },
+        "posture": { "enum": ["active", "suspended", "retired"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
