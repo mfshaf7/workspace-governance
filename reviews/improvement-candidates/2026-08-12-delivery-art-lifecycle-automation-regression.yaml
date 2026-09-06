@@ -206,8 +206,8 @@ resolution:
   note: null
 follow_up:
   owner_repo: operator-orchestration-service
-  due_on: '2026-09-01'
-  note: The operator paused Epic 698 commissioning while the workspace returned to
+  due_on: '2026-09-30'
+  note: Reassessed on 2026-09-06; the operator paused Epic 698 commissioning while the workspace returned to
     the primary governed-project workflow. Reassess this candidate by the new review
     date; do not treat the schedule change as control closure. Keep the landed
     schema-v2 lifecycle and immutable authorization controls.
