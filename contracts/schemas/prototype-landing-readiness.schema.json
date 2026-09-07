@@ -14,7 +14,7 @@
       "required": ["registry_digest", "record_present", "source_revision"],
       "properties": {
         "registry_digest": { "$ref": "#/$defs/digest" },
-        "record_present": { "const": false },
+        "record_present": { "type": "boolean" },
         "source_revision": { "type": ["string", "null"], "minLength": 1 }
       },
       "additionalProperties": false

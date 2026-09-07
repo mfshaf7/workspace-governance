@@ -283,6 +283,22 @@ class PrototypeLandingContractTests(unittest.TestCase):
         readiness["checks"][0]["state"] = "blocked"
         self.assertIn("ready outcome requires every check to be ready", readiness_issues(readiness))
 
+    def test_blocked_readiness_can_report_an_identity_collision(self) -> None:
+        readiness = copy.deepcopy(self.artifacts["prototype-landing-readiness"])
+        readiness["observed_state"]["record_present"] = True
+        readiness["outcome"] = "blocked"
+        readiness["checks"][1]["state"] = "blocked"
+        readiness["findings"] = [{
+            "code": "prototype-identity-unavailable",
+            "severity": "blocking",
+            "message": "The Prototype identity already exists.",
+            "owner_ref": "workspace-prototype-studio",
+            "next_action": "Choose another stable identity.",
+        }]
+
+        self.assertEqual(self.validate_artifact(readiness), [])
+        self.assertEqual(readiness_issues(readiness), [])
+
     def test_apply_is_rejected_when_readiness_is_not_ready(self) -> None:
         artifacts = copy.deepcopy(self.artifacts)
         artifacts["prototype-landing-readiness"]["outcome"] = "blocked"
