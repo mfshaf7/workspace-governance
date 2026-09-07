@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readback_id", "apply_ref", "prototype_id", "authority_state", "source_branch", "source_revision", "registry_digest", "record_digest", "record", "observed_at", "readback_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-readback" },
+    "readback_id": { "type": "string", "pattern": "^prototype-landing-readback:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "apply_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "authority_state": { "enum": ["review-branch", "merged-authority"] },
+    "source_branch": { "$ref": "#/$defs/text" },
+    "source_revision": { "$ref": "#/$defs/text" },
+    "registry_digest": { "$ref": "#/$defs/digest" },
+    "record_digest": { "$ref": "#/$defs/digest" },
+    "record": {
+      "type": "object",
+      "required": ["id", "entry_ref", "name", "objective", "ingress_class", "lifecycle", "project_phase", "setup", "source", "next_action"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+        "entry_ref": { "$ref": "#/$defs/ref" },
+        "name": { "$ref": "#/$defs/text" },
+        "objective": { "$ref": "#/$defs/text" },
+        "ingress_class": { "enum": ["direct", "proposal-routed", "existing-source", "imported"] },
+        "lifecycle": { "const": "exploring" },
+        "project_phase": { "const": "incubating" },
+        "setup": {
+          "type": "object",
+          "required": ["support_profile", "support_rows", "scaffold_profile", "preview_mode", "data_mode", "mutation_boundary", "visibility"],
+          "properties": {
+            "support_profile": { "enum": ["simple", "interactive", "local-runtime", "external-dependency", "existing-source-review", "custom"] },
+            "support_rows": { "type": "array", "minItems": 10, "maxItems": 10, "items": { "$ref": "#/$defs/supportRow" } },
+            "scaffold_profile": { "$ref": "#/$defs/text" },
+            "preview_mode": { "enum": ["none", "static", "local-dev-server", "local-backend-stub", "prototype-devint"] },
+            "data_mode": { "enum": ["mock", "synthetic", "real-readonly", "real-mutable"] },
+            "mutation_boundary": { "enum": ["none", "local-only", "sandbox", "real-system-blocked"] },
+            "visibility": { "enum": ["private", "operator-review", "client-review", "public-demo"] }
+          },
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "required": ["posture", "custody", "ref", "revision"],
+          "properties": {
+            "posture": { "enum": ["create-studio-source", "use-existing-studio-source", "reference-dedicated-owner-source", "reference-shared-owner-source", "import-to-studio"] },
+            "custody": { "enum": ["incubation-repo", "dedicated-owner-repo", "shared-owner-repo"] },
+            "ref": { "$ref": "#/$defs/text" },
+            "revision": { "$ref": "#/$defs/text" }
+          },
+          "additionalProperties": false
+        },
+        "next_action": { "const": "candidate-promotion" }
+      },
+      "additionalProperties": false
+    },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "readback_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "supportRow": {
+      "type": "object",
+      "required": ["dimension", "state", "generated", "detail"],
+      "properties": {
+        "dimension": { "enum": ["source", "studio-home", "interface", "runtime", "data", "integration", "tooling", "evidence", "visibility", "recovery"] },
+        "state": { "enum": ["unknown", "not-needed", "needed", "ready", "blocked"] },
+        "generated": { "type": "boolean" },
+        "detail": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "authority_state": { "const": "merged-authority" } }, "required": ["authority_state"] },
+      "then": { "properties": { "source_branch": { "const": "main" } } },
+      "else": { "properties": { "source_branch": { "not": { "enum": ["main", "master"] } } } }
+    }
+  ],
+  "additionalProperties": false
+}

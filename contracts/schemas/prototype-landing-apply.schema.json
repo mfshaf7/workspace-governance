@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "apply_id", "requested_at", "request_ref", "plan_ref", "readiness_ref", "prototype_id", "expected_state", "operator_approval_ref", "source_branch", "correlation_id", "idempotency_key", "apply_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-apply" },
+    "apply_id": { "type": "string", "pattern": "^prototype-landing-apply:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "plan_ref": { "$ref": "#/$defs/ref" },
+    "readiness_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "expected_state": {
+      "type": "object",
+      "required": ["registry_digest", "record_present", "source_revision"],
+      "properties": {
+        "registry_digest": { "$ref": "#/$defs/digest" },
+        "record_present": { "const": false },
+        "source_revision": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "operator_approval_ref": { "$ref": "#/$defs/text" },
+    "source_branch": { "type": "string", "minLength": 1, "not": { "enum": ["main", "master"] } },
+    "correlation_id": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "apply_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

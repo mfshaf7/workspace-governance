@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readiness_id", "evaluated_at", "request_ref", "plan_ref", "observed_state", "outcome", "checks", "findings", "security_trigger_refs", "readiness_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-readiness" },
+    "readiness_id": { "type": "string", "pattern": "^prototype-landing-readiness:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "plan_ref": { "$ref": "#/$defs/ref" },
+    "observed_state": {
+      "type": "object",
+      "required": ["registry_digest", "record_present", "source_revision"],
+      "properties": {
+        "registry_digest": { "$ref": "#/$defs/digest" },
+        "record_present": { "const": false },
+        "source_revision": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "outcome": { "enum": ["ready", "blocked", "stale"] },
+    "checks": {
+      "type": "array", "minItems": 11, "maxItems": 11,
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "evidence_refs"],
+        "properties": {
+          "id": { "enum": ["entry-integrity", "identity-availability", "required-metadata", "support-profile-integrity", "support-row-readiness", "source-custody-coherence", "source-version-freshness", "data-and-mutation-boundary", "visibility-and-exposure", "security-trigger-disposition", "expected-mutation-set"] },
+          "state": { "enum": ["ready", "blocked", "stale"] },
+          "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "message", "owner_ref", "next_action"],
+        "properties": {
+          "code": { "$ref": "#/$defs/text" },
+          "severity": { "enum": ["info", "warning", "blocking"] },
+          "message": { "$ref": "#/$defs/text" },
+          "owner_ref": { "$ref": "#/$defs/text" },
+          "next_action": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "security_trigger_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+    "readiness_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

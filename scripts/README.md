@@ -32,6 +32,11 @@
   - validates owner uniqueness, state vectors, transition support, authority,
     typed envelopes, evidence, preconditions, recovery, and maturity claims
     through `validate_contracts.py`
+- `prototype_landing_contract.py`
+  - validates Prototype Landing authority, ingress, support, source-custody,
+    state, artifact-order, readiness, apply, and merged-readback semantics
+  - rejects duplicate support rows, false-ready evaluation, apply before
+    readiness, and success before merged authority
 - `repository_custody_contract.py`
   - validates repository custody owner references, action state transitions,
     evidence order, downstream owner boundaries, and disabled runtime maturity

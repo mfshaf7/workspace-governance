@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version", "owner_repo", "implementation_posture",
+    "primary_architecture_surface", "architecture", "purpose",
+    "upstream_contracts", "scope_boundaries", "ingress", "identity",
+    "support_model", "source_custody", "state_model", "schema_refs",
+    "artifact_chain", "readiness", "apply", "history", "recovery",
+    "boundary_handoffs", "denied_shortcuts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "implementation_posture": { "const": "contract-only" },
+    "primary_architecture_surface": { "const": "docs/prototype-landing.md" },
+    "architecture": { "$ref": "#/$defs/nonEmptyObject" },
+    "purpose": { "$ref": "#/$defs/text" },
+    "upstream_contracts": { "$ref": "#/$defs/nonEmptyObject" },
+    "scope_boundaries": { "type": "object", "minProperties": 8 },
+    "ingress": {
+      "type": "object",
+      "required": ["classes", "normalization_rule", "suggestion_rule"],
+      "properties": {
+        "classes": {
+          "type": "object",
+          "required": ["direct", "proposal-routed", "existing-source", "imported"],
+          "properties": {
+            "direct": { "$ref": "#/$defs/ingressClass" },
+            "proposal-routed": { "$ref": "#/$defs/ingressClass" },
+            "existing-source": { "$ref": "#/$defs/ingressClass" },
+            "imported": { "$ref": "#/$defs/ingressClass" }
+          },
+          "additionalProperties": false
+        },
+        "normalization_rule": { "$ref": "#/$defs/text" },
+        "suggestion_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "identity": { "$ref": "#/$defs/nonEmptyObject" },
+    "support_model": { "$ref": "#/$defs/nonEmptyObject" },
+    "source_custody": { "$ref": "#/$defs/nonEmptyObject" },
+    "state_model": { "$ref": "#/$defs/nonEmptyObject" },
+    "schema_refs": { "$ref": "#/$defs/nonEmptyObject" },
+    "artifact_chain": { "$ref": "#/$defs/nonEmptyObject" },
+    "readiness": { "$ref": "#/$defs/nonEmptyObject" },
+    "apply": { "$ref": "#/$defs/nonEmptyObject" },
+    "history": { "$ref": "#/$defs/nonEmptyObject" },
+    "recovery": { "$ref": "#/$defs/nonEmptyObject" },
+    "boundary_handoffs": { "$ref": "#/$defs/nonEmptyObject" },
+    "denied_shortcuts": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/text" }
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "nonEmptyObject": { "type": "object", "minProperties": 1 },
+    "ingressClass": {
+      "type": "object",
+      "required": ["source_authority", "rule"],
+      "properties": {
+        "source_authority": { "$ref": "#/$defs/text" },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

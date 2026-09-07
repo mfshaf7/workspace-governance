@@ -186,6 +186,14 @@ Use these contracts to declare:
   - declares the representative synthetic project, expected state changes,
     fail-closed cases, generated report paths, and truthful capability posture
   - does not contain deployable product source or claim live backend wiring
+- `prototype-landing.yaml`
+  - authoritative Prototype Landing ingress, support-profile, source-custody,
+    readiness, apply, readback, receipt, replay, and recovery contract
+  - keeps Workspace Intake, repository custody, Candidate Promotion, Delivery,
+    runtime, security acceptance, and portfolio publication as separate owner
+    boundaries
+  - binds seven typed artifacts from immutable entry packet through merged
+    Prototype Studio readback and terminal receipt
 - `dependency-types.yaml`
   - approved cross-repo dependency semantics
 - `change-classes.yaml`

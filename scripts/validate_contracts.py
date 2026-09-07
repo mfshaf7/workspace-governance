@@ -31,6 +31,7 @@ from delivery_art_resource_retirement_contract import (
 from developer_integration_runtime_composition import runtime_composition_issues
 from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
+from prototype_landing_contract import contract_issues as prototype_landing_contract_issues
 from repository_custody_contract import contract_issues as repository_custody_contract_issues
 
 
@@ -146,6 +147,15 @@ WORKSPACE_INVENTORY_ARTIFACT_SCHEMAS = (
     "contracts/schemas/workspace-inventory-promotion-mutation.schema.json",
     "contracts/schemas/workspace-inventory-promotion-readback.schema.json",
     "contracts/schemas/workspace-inventory-promotion-receipt.schema.json",
+)
+PROTOTYPE_LANDING_ARTIFACT_SCHEMAS = (
+    "contracts/schemas/prototype-landing-entry-packet.schema.json",
+    "contracts/schemas/prototype-landing-request.schema.json",
+    "contracts/schemas/prototype-landing-plan.schema.json",
+    "contracts/schemas/prototype-landing-readiness.schema.json",
+    "contracts/schemas/prototype-landing-apply.schema.json",
+    "contracts/schemas/prototype-landing-readback.schema.json",
+    "contracts/schemas/prototype-landing-receipt.schema.json",
 )
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
@@ -5998,6 +6008,7 @@ def main() -> int:
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
+        "prototype_landing": repo_root / "contracts/prototype-landing.yaml",
         "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
         "workspace_active_inventory": repo_root / "contracts/workspace-active-inventory.yaml",
         "workspace_inventory_lifecycle": repo_root / "contracts/workspace-inventory-lifecycle.yaml",
@@ -6047,6 +6058,16 @@ def main() -> int:
         schema_path = repo_root / rel_path
         if not schema_path.exists():
             errors.append(f"{rel_path}: workspace intake artifact schema is missing")
+            continue
+        try:
+            Draft202012Validator.check_schema(load_json(schema_path))
+        except SchemaError as exc:
+            errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
+
+    for rel_path in PROTOTYPE_LANDING_ARTIFACT_SCHEMAS:
+        schema_path = repo_root / rel_path
+        if not schema_path.exists():
+            errors.append(f"{rel_path}: Prototype Landing artifact schema is missing")
             continue
         try:
             Draft202012Validator.check_schema(load_json(schema_path))
@@ -6215,6 +6236,14 @@ def main() -> int:
     errors.extend(
         f"contracts/project-lifecycle-proof.yaml: {error}"
         for error in project_lifecycle_proof_errors
+    )
+    prototype_landing_errors = prototype_landing_contract_issues(
+        contracts["prototype_landing"],
+        known_repos=active_repos,
+    )
+    errors.extend(
+        f"contracts/prototype-landing.yaml: {error}"
+        for error in prototype_landing_errors
     )
     intake_repos = set(intake_register["repos"].keys())
     retired_repos = set(contracts["repos"].get("retired_repos", {}).keys())

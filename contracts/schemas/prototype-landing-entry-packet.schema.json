@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "entry_id", "captured_at", "ingress_class", "source", "suggestions", "constraints", "requested_by", "packet_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-entry-packet" },
+    "entry_id": { "type": "string", "pattern": "^prototype-entry:(direct|proposal-routed|existing-source|imported):[a-z0-9][a-z0-9._-]*$" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "ingress_class": { "enum": ["direct", "proposal-routed", "existing-source", "imported"] },
+    "source": {
+      "type": "object",
+      "required": ["authority", "ref", "digest", "revision"],
+      "properties": {
+        "authority": { "$ref": "#/$defs/text" },
+        "ref": { "$ref": "#/$defs/text" },
+        "digest": { "$ref": "#/$defs/digest" },
+        "revision": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "suggestions": {
+      "type": "object",
+      "required": ["name", "objective", "support_profile"],
+      "properties": {
+        "name": { "type": ["string", "null"], "minLength": 1 },
+        "objective": { "type": ["string", "null"], "minLength": 1 },
+        "support_profile": { "oneOf": [{ "$ref": "#/$defs/supportProfile" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "detail"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+          "detail": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "requested_by": { "$ref": "#/$defs/text" },
+    "packet_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "supportProfile": { "enum": ["simple", "interactive", "local-runtime", "external-dependency", "existing-source-review", "custom"] }
+  },
+  "additionalProperties": false
+}

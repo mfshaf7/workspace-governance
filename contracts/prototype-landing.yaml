@@ -1,0 +1,280 @@
+schema_version: 1
+owner_repo: workspace-governance
+implementation_posture: contract-only
+primary_architecture_surface: docs/prototype-landing.md
+architecture:
+  initiative_ref: openproject://work_packages/892
+  feature_ref: openproject://work_packages/919
+  contract_work_ref: openproject://work_packages/1085
+purpose: Define authoritative Prototype Landing ingress, support, custody, readiness, source mutation, readback, receipt, replay, and recovery semantics without creating a runtime or workflow authority.
+upstream_contracts:
+  project_lifecycle: contracts/project-lifecycle.yaml
+  workspace_intake: contracts/workspace-intake.yaml
+  repository_custody: contracts/repository-custody.yaml
+scope_boundaries:
+  contract_authority:
+    owner_repo: workspace-governance
+    responsibilities:
+      - landing-vocabulary
+      - artifact-shape
+      - custody-rules
+      - readiness-policy
+  source_authority:
+    owner_repo: workspace-prototype-studio
+    responsibilities:
+      - prototype-registry
+      - incubation-source
+      - landing-source-mutation
+      - merged-source-readback
+  referenced_source_authority:
+    owner_kind: dynamic
+    owner_ref: project-source-owner
+    responsibilities:
+      - referenced-source-content
+      - referenced-source-revision
+  readiness_authority:
+    owner_repo: workspace-governance-control-fabric
+    responsibilities:
+      - landing-readiness-evaluation
+      - finding-projection
+  workflow_authority:
+    owner_repo: operator-orchestration-service
+    responsibilities:
+      - command-lifecycle
+      - approval-binding
+      - idempotency-and-correlation
+      - durable-execution
+      - terminal-receipt
+  runtime_authority:
+    owner_repo: platform-engineering
+    responsibilities:
+      - preview-profile-admission
+      - runtime-identity
+      - credential-delivery
+  security_authority:
+    owner_repo: security-architecture
+    responsibilities:
+      - trigger-policy
+      - trust-boundary-acceptance
+      - risk-acceptance
+  operator_projection:
+    owner_repo: governance-operations-console
+    responsibilities:
+      - request-projection
+      - workflow-projection
+      - status-and-receipt-projection
+    mode: projection-only
+ingress:
+  classes:
+    direct:
+      source_authority: operator
+      rule: A direct request may supply complete setup suggestions but does not create an admitted Prototype record.
+    proposal-routed:
+      source_authority: workspace-proposals
+      rule: Proposal context supplies route evidence and suggestions only; it is not accepted Prototype metadata.
+    existing-source:
+      source_authority: source-owner
+      rule: Existing source must bind an immutable source revision and retains its current custody unless an explicit later transfer occurs.
+    imported:
+      source_authority: import-provider
+      rule: Imported content must bind origin and content digests; import does not imply trust, runtime admission, or security acceptance.
+  normalization_rule: Every ingress class produces one immutable Prototype Entry Packet before Landing configuration begins.
+  suggestion_rule: Upstream titles, objectives, owners, support choices, and source assumptions remain suggestions until an accepted Landing request records them.
+identity:
+  entry_identity: prototype-entry:<ingress-class>:<source-digest>
+  prototype_identity: prototype:<stable-id>
+  rules:
+    - Entry identity is deterministic from immutable ingress class and source evidence.
+    - Prototype identity is reserved before apply and remains stable across rename, replay, and recovery.
+    - Prototype name and objective may be edited until apply; neither is an identity key.
+    - A landed Prototype identity cannot be reused by another entry packet.
+support_model:
+  profiles:
+    simple: generated
+    interactive: generated
+    local-runtime: generated
+    external-dependency: generated
+    existing-source-review: generated
+    custom: operator-defined
+  row_states:
+    - unknown
+    - not-needed
+    - needed
+    - ready
+    - blocked
+  dimensions:
+    - source
+    - studio-home
+    - interface
+    - runtime
+    - data
+    - integration
+    - tooling
+    - evidence
+    - visibility
+    - recovery
+  rules:
+    - A support profile is a setup shortcut, not a project type or maturity classification.
+    - Named profiles generate immutable support rows for the request revision.
+    - Custom profiles allow explicit row selection except for policy-locked blockers.
+    - Unknown and blocked required rows prevent apply.
+    - Not-needed rows require an explicit profile or operator decision; omission is not not-needed.
+source_custody:
+  postures:
+    create-studio-source:
+      resulting_axis_state: incubation-repo
+      source_mutation: create
+    use-existing-studio-source:
+      resulting_axis_state: incubation-repo
+      source_mutation: update
+    reference-dedicated-owner-source:
+      resulting_axis_state: dedicated-owner-repo
+      source_mutation: reference-only
+    reference-shared-owner-source:
+      resulting_axis_state: shared-owner-repo
+      source_mutation: reference-only
+    import-to-studio:
+      resulting_axis_state: incubation-repo
+      source_mutation: import
+  rules:
+    - Landing records exactly one custody posture and its exact source reference.
+    - Workspace Prototype Studio owns the Prototype record and incubation source, not referenced external source content.
+    - Reference-only Landing never copies source or transfers repository custody.
+    - Import requires origin and imported-content digests and creates no trust claim.
+    - Repository provisioning and provider custody remain under the repository-custody contract.
+    - A denied, blocked, stale, conflicted, cancelled, or failed Landing leaves source and registry truth unchanged.
+state_model:
+  states:
+    - captured
+    - configuring
+    - ready
+    - applying
+    - landed
+    - blocked
+  terminal_states:
+    - landed
+  transitions:
+    captured:
+      - configuring
+    configuring:
+      - ready
+      - blocked
+    ready:
+      - applying
+      - blocked
+    applying:
+      - landed
+      - blocked
+    blocked:
+      - configuring
+  project_result:
+    project_phase: incubating
+    prototype_lifecycle: exploring
+    next_action: candidate-promotion
+  rules:
+    - Landing workflow state is not project lifecycle state.
+    - Candidate and baseline promotion are separate workflows and cannot be asserted by Landing.
+    - Landed is projected only after merged source readback and a terminal owner receipt agree.
+schema_refs:
+  entry_packet: contracts/schemas/prototype-landing-entry-packet.schema.json
+  request: contracts/schemas/prototype-landing-request.schema.json
+  plan: contracts/schemas/prototype-landing-plan.schema.json
+  readiness: contracts/schemas/prototype-landing-readiness.schema.json
+  apply: contracts/schemas/prototype-landing-apply.schema.json
+  readback: contracts/schemas/prototype-landing-readback.schema.json
+  receipt: contracts/schemas/prototype-landing-receipt.schema.json
+artifact_chain:
+  ordered_artifacts:
+    - prototype-entry-packet
+    - prototype-landing-request
+    - prototype-landing-plan
+    - prototype-landing-readiness
+    - prototype-landing-apply
+    - prototype-landing-readback
+    - prototype-landing-receipt
+  binding_rule: Every artifact binds the immutable identifier and digest of every authority artifact it consumes.
+  mutation_order: Readiness must be ready before apply; apply prepares one reviewable source change; merged readback precedes a succeeded receipt.
+  failure_rule: Rejected or failed attempts may retain workflow evidence but cannot emit a source-mutation, merged-readback, or succeeded-receipt claim.
+readiness:
+  outcomes:
+    - ready
+    - blocked
+    - stale
+  required_checks:
+    - entry-integrity
+    - identity-availability
+    - required-metadata
+    - support-profile-integrity
+    - support-row-readiness
+    - source-custody-coherence
+    - source-version-freshness
+    - data-and-mutation-boundary
+    - visibility-and-exposure
+    - security-trigger-disposition
+    - expected-mutation-set
+  rule: Only a digest-bound ready result for the exact request, plan, and observed source state permits apply.
+apply:
+  branch_rule: Apply is denied on main, master, and detached heads and prepares source for review without merging it.
+  authority_lock: One Prototype Studio authority lock covers source reads, expected-state comparison, mutation, validation, atomic replacement, and artifact emission.
+  required_bindings:
+    - request
+    - plan
+    - readiness
+    - operator-approval
+    - expected-registry-digest
+    - expected-source-revision
+    - correlation-id
+    - idempotency-key
+  mutation_scope:
+    - prototype-registry-record
+    - prototype-docs-and-incubation-source
+    - prototype-support-and-history-records
+  prohibited_mutation_scope:
+    - referenced-external-source
+    - repository-provider-state
+    - workspace-intake
+    - delivery-art
+  idempotency:
+    replay: The same key with identical authority digests returns the existing result without another mutation.
+    conflict: Reusing a key with different authority digests fails closed.
+  review_boundary:
+    - prepare-non-default-branch
+    - validate-owner-source
+    - open-pull-request
+    - review-exact-head
+    - merge-through-provider
+    - read-back-merged-authority
+history:
+  ordering: Events are monotonic per Prototype identity and bind correlation, causation, artifact digests, source revision, and observed time.
+  retention: Entry, blocked, failed, replay, landed, and superseding evidence is retained without rewriting prior events.
+  exact_next_action: Every non-terminal receipt or failure record names one owning authority and one actionable next step.
+recovery:
+  retry: Retry requires fresh readiness against current authority state.
+  replay: Exact replay returns prior evidence without source mutation.
+  cancel: Cancellation before mutation records cancellation only; cancellation after a source write enters reconciliation and cannot claim rollback without readback.
+  reconcile: Interrupted apply resolves current branch and merged authority truth before retrying any write.
+  stale: Stale requests return to configuration with current-state evidence.
+boundary_handoffs:
+  workspace_intake: Workspace classification may supply admitted identity but does not land a Prototype.
+  repository_custody: Repository identity or provisioning may satisfy a source plan but does not admit Prototype source.
+  delivery: Landing never creates Delivery work or baseline approval.
+  platform: Landing may prepare a preview profile draft but cannot activate runtime or release authority.
+  security: Landing exposes trigger evidence but cannot grant security acceptance.
+  portfolio: Landing cannot publish or list a product.
+denied_shortcuts:
+  - direct-registry-write
+  - direct-main-mutation
+  - console-owned-prototype-truth
+  - wgcf-owned-source-mutation
+  - upstream-suggestion-as-accepted-metadata
+  - rename-as-identity-change
+  - support-profile-as-project-type
+  - implicit-not-needed-support
+  - source-copy-on-reference-only
+  - repository-custody-by-landing
+  - runtime-activation-by-landing
+  - security-acceptance-by-landing
+  - candidate-or-baseline-promotion-by-landing
+  - portfolio-publication-by-landing
+  - success-before-merged-readback
+  - source-mutation-on-failure
