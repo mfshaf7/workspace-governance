@@ -137,7 +137,9 @@ Direct delivery:
 Incubation first:
 
 1. A proposal is routed to `incubating`.
-2. Workspace Prototype Studio admits the source and may provide a local preview.
+2. The dedicated [Prototype Landing contract](prototype-landing.md) normalizes
+   ingress, support, and source custody before Workspace Prototype Studio
+   admits the source.
 3. Baseline promotion moves project phase into governed delivery.
 4. Source graduation transfers exact source revision and custody evidence to a
    durable owner repo.

@@ -64,6 +64,8 @@ release posture, and portfolio publication independent:
 - [contracts/project-lifecycle.yaml](contracts/project-lifecycle.yaml)
 - [contracts/project-lifecycle-proof.yaml](contracts/project-lifecycle-proof.yaml)
 - [reports/project-lifecycle-baseline-readiness.md](reports/project-lifecycle-baseline-readiness.md)
+- [docs/prototype-landing.md](docs/prototype-landing.md)
+- [contracts/prototype-landing.yaml](contracts/prototype-landing.yaml)
 - [contracts/agent-action-conformance.yaml](contracts/agent-action-conformance.yaml)
 - [reports/agent-action-conformance.md](reports/agent-action-conformance.md)
 

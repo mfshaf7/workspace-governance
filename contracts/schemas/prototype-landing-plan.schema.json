@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "plan_id", "planned_at", "request_ref", "prototype_id", "source_plan", "mutation_set", "expected_outputs", "next_action", "plan_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-plan" },
+    "plan_id": { "type": "string", "pattern": "^prototype-landing-plan:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "planned_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "source_plan": { "$ref": "#/$defs/sourcePlan" },
+    "mutation_set": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["registry-record", "prototype-docs", "prototype-source", "fixtures", "preview-profile-draft", "validation-plan"] } },
+    "expected_outputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "target_ref", "required"],
+        "properties": {
+          "kind": { "enum": ["registry-record", "prototype-docs", "prototype-source", "fixtures", "preview-profile-draft", "validation-plan"] },
+          "target_ref": { "$ref": "#/$defs/text" },
+          "required": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "next_action": { "const": "candidate-promotion" },
+    "plan_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "sourcePlan": {
+      "type": "object",
+      "required": ["posture", "source_ref", "source_revision", "origin_digest", "imported_content_digest"],
+      "properties": {
+        "posture": { "enum": ["create-studio-source", "use-existing-studio-source", "reference-dedicated-owner-source", "reference-shared-owner-source", "import-to-studio"] },
+        "source_ref": { "$ref": "#/$defs/text" },
+        "source_revision": { "type": ["string", "null"], "minLength": 1 },
+        "origin_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "imported_content_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

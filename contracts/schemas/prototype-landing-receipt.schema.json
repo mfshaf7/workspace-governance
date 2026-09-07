@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "receipt_id", "completed_at", "entry_packet_ref", "request_ref", "plan_ref", "readiness_ref", "apply_ref", "readback_ref", "prototype_id", "phase", "outcome", "source_result", "next_action", "correlation_id", "idempotency_key", "receipt_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-receipt" },
+    "receipt_id": { "type": "string", "pattern": "^prototype-landing-receipt:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "entry_packet_ref": { "$ref": "#/$defs/ref" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "plan_ref": { "$ref": "#/$defs/ref" },
+    "readiness_ref": { "$ref": "#/$defs/ref" },
+    "apply_ref": { "$ref": "#/$defs/ref" },
+    "readback_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "phase": { "enum": ["source-preparation", "source-replay", "merged-authority"] },
+    "outcome": { "enum": ["prepared", "replayed", "succeeded"] },
+    "source_result": {
+      "type": "object",
+      "required": ["repo", "branch", "revision", "registry_digest", "record_digest"],
+      "properties": {
+        "repo": { "const": "workspace-prototype-studio" },
+        "branch": { "$ref": "#/$defs/text" },
+        "revision": { "$ref": "#/$defs/text" },
+        "registry_digest": { "$ref": "#/$defs/digest" },
+        "record_digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "next_action": {
+      "type": "object",
+      "required": ["code", "owner_ref"],
+      "properties": {
+        "code": { "enum": ["review-source", "candidate-promotion"] },
+        "owner_ref": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "correlation_id": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "receipt_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "phase": { "const": "merged-authority" } }, "required": ["phase"] },
+      "then": {
+        "properties": {
+          "outcome": { "const": "succeeded" },
+          "source_result": { "properties": { "branch": { "const": "main" } } },
+          "next_action": { "properties": { "code": { "const": "candidate-promotion" } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "enum": ["source-preparation", "source-replay"] } }, "required": ["phase"] },
+      "then": {
+        "properties": {
+          "source_result": { "properties": { "branch": { "not": { "enum": ["main", "master"] } } } },
+          "next_action": { "properties": { "code": { "const": "review-source" } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "source-preparation" } }, "required": ["phase"] },
+      "then": { "properties": { "outcome": { "const": "prepared" } } }
+    },
+    {
+      "if": { "properties": { "phase": { "const": "source-replay" } }, "required": ["phase"] },
+      "then": { "properties": { "outcome": { "const": "replayed" } } }
+    }
+  ],
+  "additionalProperties": false
+}

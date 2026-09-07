@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "requested_at", "operator_ref", "entry_packet_ref", "prototype", "setup", "source_plan", "starting_lifecycle", "expected_state", "operator_accepted", "correlation_id", "idempotency_key", "request_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-landing-request" },
+    "request_id": { "type": "string", "pattern": "^prototype-landing-request:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "operator_ref": { "$ref": "#/$defs/text" },
+    "entry_packet_ref": { "$ref": "#/$defs/ref" },
+    "prototype": {
+      "type": "object",
+      "required": ["id", "name", "objective"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+        "name": { "$ref": "#/$defs/text" },
+        "objective": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "setup": {
+      "type": "object",
+      "required": ["support_profile", "support_rows", "scaffold_profile", "preview_mode", "data_mode", "mutation_boundary", "visibility"],
+      "properties": {
+        "support_profile": { "$ref": "#/$defs/supportProfile" },
+        "support_rows": {
+          "type": "array", "minItems": 10, "maxItems": 10,
+          "items": { "$ref": "#/$defs/supportRow" }
+        },
+        "scaffold_profile": { "$ref": "#/$defs/text" },
+        "preview_mode": { "enum": ["none", "static", "local-dev-server", "local-backend-stub", "prototype-devint"] },
+        "data_mode": { "enum": ["mock", "synthetic", "real-readonly", "real-mutable"] },
+        "mutation_boundary": { "enum": ["none", "local-only", "sandbox", "real-system-blocked"] },
+        "visibility": { "enum": ["private", "operator-review", "client-review", "public-demo"] }
+      },
+      "additionalProperties": false
+    },
+    "source_plan": {
+      "type": "object",
+      "required": ["posture", "source_ref", "source_revision", "origin_digest", "imported_content_digest"],
+      "properties": {
+        "posture": { "enum": ["create-studio-source", "use-existing-studio-source", "reference-dedicated-owner-source", "reference-shared-owner-source", "import-to-studio"] },
+        "source_ref": { "$ref": "#/$defs/text" },
+        "source_revision": { "type": ["string", "null"], "minLength": 1 },
+        "origin_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "imported_content_digest": { "oneOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] }
+      },
+      "additionalProperties": false
+    },
+    "starting_lifecycle": { "const": "exploring" },
+    "expected_state": {
+      "type": "object",
+      "required": ["registry_digest", "record_present", "record_digest", "source_revision"],
+      "properties": {
+        "registry_digest": { "$ref": "#/$defs/digest" },
+        "record_present": { "const": false },
+        "record_digest": { "type": "null" },
+        "source_revision": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "operator_accepted": { "const": true },
+    "correlation_id": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "supportProfile": { "enum": ["simple", "interactive", "local-runtime", "external-dependency", "existing-source-review", "custom"] },
+    "supportRow": {
+      "type": "object",
+      "required": ["dimension", "state", "generated", "detail"],
+      "properties": {
+        "dimension": { "enum": ["source", "studio-home", "interface", "runtime", "data", "integration", "tooling", "evidence", "visibility", "recovery"] },
+        "state": { "enum": ["unknown", "not-needed", "needed", "ready", "blocked"] },
+        "generated": { "type": "boolean" },
+        "detail": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "setup": { "properties": { "support_profile": { "const": "custom" } }, "required": ["support_profile"] } }, "required": ["setup"] },
+      "then": { "properties": { "setup": { "properties": { "support_rows": { "items": { "properties": { "generated": { "const": false } } } } } } } },
+      "else": { "properties": { "setup": { "properties": { "support_rows": { "items": { "properties": { "generated": { "const": true } } } } } } } }
+    }
+  ],
+  "additionalProperties": false
+}
