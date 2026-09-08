@@ -1,0 +1,91 @@
+schema_version: 1
+id: 2026-08-25-work-session-merge-order-bypass
+title: Prevent source merge before work-session Review Packet readiness
+recorded_on: '2026-08-25'
+owner_repo: operator-orchestration-service
+summary: Platform PR 221 was merged after deterministic CI passed but before the
+  active OOS work session authored and persisted its merge-ready Review Packet,
+  forcing the documented post-merge recovery path for ART work item 1000.
+regression_of: null
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: merge-before-review-packet
+  title: Source merge bypassed the active work-session readiness order.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The operator path allowed a direct GitHub merge command while the OOS
+    session still required evidence authoring and merge-ready Review Packet custody.
+    The work-session guard detected the ordering defect only after merge.
+  source_refs:
+  - openproject://work_packages/1000
+  - https://github.com/mfshaf7/platform-engineering/pull/221
+- id: merge-before-review-packet-recurred
+  title: A later Landing Unit again merged before Review Packet readiness.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Console PR 24 merged before the active work-session path authored a
+    merge-ready schema-v2 Review Packet. The source correction was valid, but
+    closeout again required post-merge compatibility recovery for ART work item
+    1115, proving that documentation and status projection did not mechanically
+    enforce the required order.
+  source_refs:
+  - openproject://work_packages/1115
+  - https://github.com/mfshaf7/governance-operations-console/pull/24
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Offers source merge only after durable merge-ready Review Packet custody
+      and blocks deterministic continuation from approving the merge.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: Binds the merge to the exact pull-request URL, base, and head before
+      invoking the finite executor and requiring authoritative merged readback.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/review-packet-completion.js
+    owner_repo: operator-orchestration-service
+    note: Validates generated direct-completion payloads while Review Packet
+      evidence remains repairable and before finalization.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves ordered merge approval, replay, projection, and finalization behavior.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves exact PR matching, merge readback, and uncertain-result handling.
+  - type: contract
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Defines the explicit work merge API and keeps direct GitHub merge as recovery.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-09-08-art-work-session-lifecycle-order.md
+    owner_repo: operator-orchestration-service
+    note: Records the lifecycle correction, security impact, validation, and rollback.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-09-09-art-work-session-explicit-merge.md
+    owner_repo: security-architecture
+    note: Approves the exact OOS source head and its bounded identity, secrets,
+      delivery, and runtime impact.
+  note: Closed after OOS PR 199 merged through the new work merge command itself,
+    the command read back merge commit e271387708c0b2d391dbed04fab7adc3320f13e8,
+    ART work item 1117 closed with a finalized Review Packet, and Security PRs 147
+    and 148 landed the exact-head review and generated change-record index.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
