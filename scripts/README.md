@@ -37,6 +37,10 @@
     state, artifact-order, readiness, apply, and merged-readback semantics
   - rejects duplicate support rows, false-ready evaluation, apply before
     readiness, and success before merged authority
+- `prototype_maturity_contract.py`
+  - validates Candidate and Baseline Promotion authority, lifecycle pairs,
+    packet sections, readiness, decisions, artifact bindings, readback, and
+    terminal receipts
 - `repository_custody_contract.py`
   - validates repository custody owner references, action state transitions,
     evidence order, downstream owner boundaries, and disabled runtime maturity

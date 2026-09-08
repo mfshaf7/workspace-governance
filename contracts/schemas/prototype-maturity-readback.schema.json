@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readback_id", "observed_at", "decision_ref", "prototype_id", "transition", "decision", "authority_state", "source_revision", "record_digest", "observed_lifecycle", "record_ref", "readback_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-maturity-readback" },
+    "readback_id": { "type": "string", "pattern": "^prototype-maturity-readback:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "decision_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "$ref": "#/$defs/prototypeId" },
+    "transition": { "$ref": "#/$defs/transition" },
+    "decision": { "enum": ["promote-candidate", "block-promotion", "approve-baseline", "block-baseline", "route-closeout"] },
+    "authority_state": { "enum": ["merged-authority", "unchanged-authority"] },
+    "source_revision": { "$ref": "#/$defs/text" },
+    "record_digest": { "$ref": "#/$defs/digest" },
+    "observed_lifecycle": { "enum": ["exploring", "candidate", "baseline-approved"] },
+    "record_ref": { "$ref": "#/$defs/text" },
+    "readback_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "prototypeId": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "transition": { "enum": ["candidate-promotion", "baseline-promotion"] },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

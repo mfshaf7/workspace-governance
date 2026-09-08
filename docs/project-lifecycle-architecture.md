@@ -41,7 +41,7 @@ flowchart LR
 
     Proposal -->|route for exploration| Incubation
     Proposal -->|route directly| Delivery
-    Incubation -->|baseline promotion| Delivery
+    Incubation -->|separate delivery admission| Delivery
     Delivery -->|completion and owner receipt| Operational
     Proposal -->|retire| Retired
     Incubation -->|retire| Retired
@@ -140,10 +140,13 @@ Incubation first:
 2. The dedicated [Prototype Landing contract](prototype-landing.md) normalizes
    ingress, support, and source custody before Workspace Prototype Studio
    admits the source.
-3. Baseline promotion moves project phase into governed delivery.
-4. Source graduation transfers exact source revision and custody evidence to a
+3. Candidate and Baseline Promotion establish local Prototype maturity under
+   the dedicated [Prototype Maturity contract](prototype-maturity.md).
+4. After baseline approval, a separate delivery-admission transition may move
+   project phase into governed delivery.
+5. Source graduation transfers exact source revision and custody evidence to a
    durable owner repo.
-5. Delivery completion may then establish `operational` posture.
+6. Delivery completion may then establish `operational` posture.
 
 Non-deployed product:
 

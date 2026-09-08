@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version", "owner_repo", "implementation_posture",
+    "primary_architecture_surface", "architecture", "purpose",
+    "upstream_contracts", "scope_boundaries", "prototype_lifecycle",
+    "transition_profiles", "schema_refs", "artifact_chain", "readiness",
+    "decision", "source_mutation", "readback", "idempotency", "recovery",
+    "approval_boundary", "denied_shortcuts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "implementation_posture": { "const": "contract-only" },
+    "primary_architecture_surface": { "const": "docs/prototype-maturity.md" },
+    "architecture": { "$ref": "#/$defs/nonEmptyObject" },
+    "purpose": { "$ref": "#/$defs/text" },
+    "upstream_contracts": { "$ref": "#/$defs/nonEmptyObject" },
+    "scope_boundaries": { "type": "object", "minProperties": 7 },
+    "prototype_lifecycle": { "$ref": "#/$defs/nonEmptyObject" },
+    "transition_profiles": { "$ref": "#/$defs/nonEmptyObject" },
+    "schema_refs": { "$ref": "#/$defs/nonEmptyObject" },
+    "artifact_chain": { "$ref": "#/$defs/nonEmptyObject" },
+    "readiness": { "$ref": "#/$defs/nonEmptyObject" },
+    "decision": { "$ref": "#/$defs/nonEmptyObject" },
+    "source_mutation": { "$ref": "#/$defs/nonEmptyObject" },
+    "readback": { "$ref": "#/$defs/nonEmptyObject" },
+    "idempotency": { "$ref": "#/$defs/nonEmptyObject" },
+    "recovery": { "$ref": "#/$defs/nonEmptyObject" },
+    "approval_boundary": { "$ref": "#/$defs/nonEmptyObject" },
+    "denied_shortcuts": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "$ref": "#/$defs/text" }
+    }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "nonEmptyObject": { "type": "object", "minProperties": 1 }
+  },
+  "additionalProperties": false
+}
