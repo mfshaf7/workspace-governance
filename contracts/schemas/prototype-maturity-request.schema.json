@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "request_id", "requested_at", "operator_ref", "prototype_id", "transition", "source_lifecycle", "target_lifecycle", "expected_state", "inputs", "correlation_id", "idempotency_key", "request_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-maturity-request" },
+    "request_id": { "type": "string", "pattern": "^prototype-maturity-request:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "operator_ref": { "$ref": "#/$defs/text" },
+    "prototype_id": { "$ref": "#/$defs/prototypeId" },
+    "transition": { "$ref": "#/$defs/transition" },
+    "source_lifecycle": { "enum": ["exploring", "candidate"] },
+    "target_lifecycle": { "enum": ["candidate", "baseline-approved"] },
+    "expected_state": { "$ref": "#/$defs/sourceState" },
+    "inputs": {
+      "type": "object",
+      "required": ["source_refs", "editable_values"],
+      "properties": {
+        "source_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+        "editable_values": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "correlation_id": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "request_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "transition": { "const": "candidate-promotion" } } },
+      "then": { "properties": { "source_lifecycle": { "const": "exploring" }, "target_lifecycle": { "const": "candidate" } } },
+      "else": { "properties": { "source_lifecycle": { "const": "candidate" }, "target_lifecycle": { "const": "baseline-approved" } } }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "prototypeId": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "transition": { "enum": ["candidate-promotion", "baseline-promotion"] },
+    "sourceState": {
+      "type": "object",
+      "required": ["source_revision", "record_digest", "lifecycle"],
+      "properties": {
+        "source_revision": { "$ref": "#/$defs/text" },
+        "record_digest": { "$ref": "#/$defs/digest" },
+        "lifecycle": { "enum": ["exploring", "candidate"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

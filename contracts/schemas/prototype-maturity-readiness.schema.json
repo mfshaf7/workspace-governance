@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "readiness_id", "evaluated_at", "request_ref", "packet_ref", "prototype_id", "transition", "observed_state", "outcome", "checks", "findings", "readiness_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-maturity-readiness" },
+    "readiness_id": { "type": "string", "pattern": "^prototype-maturity-readiness:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "evaluated_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "packet_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "$ref": "#/$defs/prototypeId" },
+    "transition": { "$ref": "#/$defs/transition" },
+    "observed_state": { "$ref": "#/$defs/sourceState" },
+    "outcome": { "enum": ["ready", "blocked", "stale"] },
+    "checks": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "evidence_refs"],
+        "properties": {
+          "id": { "enum": ["request-integrity", "lifecycle-source-state", "source-version-freshness", "packet-integrity", "required-evidence", "boundary-coherence", "security-trigger-disposition", "open-issue-disposition"] },
+          "state": { "enum": ["ready", "blocked", "stale"] },
+          "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "detail"],
+        "properties": {
+          "code": { "$ref": "#/$defs/text" },
+          "severity": { "enum": ["advisory", "blocking"] },
+          "detail": { "$ref": "#/$defs/text" },
+          "owner_ref": { "$ref": "#/$defs/text" },
+          "required_fix": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "readiness_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "prototypeId": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "transition": { "enum": ["candidate-promotion", "baseline-promotion"] },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false },
+    "sourceState": { "type": "object", "required": ["source_revision", "record_digest", "lifecycle"], "properties": { "source_revision": { "$ref": "#/$defs/text" }, "record_digest": { "$ref": "#/$defs/digest" }, "lifecycle": { "enum": ["exploring", "candidate"] } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

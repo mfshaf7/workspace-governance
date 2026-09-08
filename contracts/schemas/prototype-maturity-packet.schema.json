@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "packet_id", "assembled_at", "request_ref", "prototype_id", "transition", "packet_kind", "sections", "packet_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-maturity-packet" },
+    "packet_id": { "type": "string", "pattern": "^prototype-maturity-packet:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "assembled_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "$ref": "#/$defs/prototypeId" },
+    "transition": { "$ref": "#/$defs/transition" },
+    "packet_kind": { "enum": ["candidate-evidence-packet", "baseline-packet"] },
+    "sections": {
+      "type": "array", "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "evidence_refs"],
+        "properties": {
+          "id": { "$ref": "#/$defs/text" },
+          "state": { "enum": ["ready", "missing", "blocked", "not-required", "deferred"] },
+          "evidence_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+          "note": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "packet_digest": { "$ref": "#/$defs/digest" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "transition": { "const": "candidate-promotion" } } },
+      "then": { "properties": { "packet_kind": { "const": "candidate-evidence-packet" } } },
+      "else": { "properties": { "packet_kind": { "const": "baseline-packet" } } }
+    }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "prototypeId": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "transition": { "enum": ["candidate-promotion", "baseline-promotion"] },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}

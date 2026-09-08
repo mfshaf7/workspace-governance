@@ -194,6 +194,11 @@ Use these contracts to declare:
     boundaries
   - binds seven typed artifacts from immutable entry packet through merged
     Prototype Studio readback and terminal receipt
+- `prototype-maturity.yaml`
+  - defines Candidate Promotion and Baseline Promotion as separate Prototype
+    Studio lifecycle decisions after Landing
+  - binds request, evidence or Baseline Packet, readiness, operator decision,
+    merged readback, and receipt without implying Delivery or runtime authority
 - `dependency-types.yaml`
   - approved cross-repo dependency semantics
 - `change-classes.yaml`

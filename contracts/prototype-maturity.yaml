@@ -1,0 +1,254 @@
+schema_version: 1
+owner_repo: workspace-governance
+implementation_posture: contract-only
+primary_architecture_surface: docs/prototype-maturity.md
+architecture:
+  initiative_ref: openproject://work_packages/892
+  feature_ref: openproject://work_packages/920
+  contract_work_ref: openproject://work_packages/1093
+purpose: Define authoritative Candidate Promotion and Baseline Promotion semantics for a landed Prototype without granting cross-domain delivery, runtime, security, source-graduation, or publication authority.
+upstream_contracts:
+  project_lifecycle: contracts/project-lifecycle.yaml
+  prototype_landing: contracts/prototype-landing.yaml
+scope_boundaries:
+  contract_authority:
+    owner_repo: workspace-governance
+    responsibilities:
+      - maturity-vocabulary
+      - transition-and-artifact-shape
+      - authority-boundaries
+  source_authority:
+    owner_repo: workspace-prototype-studio
+    responsibilities:
+      - prototype-registry
+      - maturity-source-mutation
+      - baseline-record
+      - merged-source-readback
+  readiness_authority:
+    owner_repo: workspace-governance-control-fabric
+    responsibilities:
+      - maturity-readiness-evaluation
+      - finding-projection
+  workflow_authority:
+    owner_repo: operator-orchestration-service
+    responsibilities:
+      - command-lifecycle
+      - approval-binding
+      - idempotency-and-correlation
+      - terminal-receipt
+  security_authority:
+    owner_repo: security-architecture
+    responsibilities:
+      - trigger-policy
+      - risk-acceptance
+  operator_projection:
+    owner_repo: governance-operations-console
+    responsibilities:
+      - workflow-projection
+      - status-and-receipt-projection
+    mode: projection-only
+  decision_authority:
+    owner_kind: dynamic
+    owner_ref: explicit-operator
+    responsibilities:
+      - candidate-promotion-decision
+      - baseline-promotion-decision
+prototype_lifecycle:
+  states:
+    - exploring
+    - candidate
+    - baseline-approved
+    - graduating
+    - graduated
+    - retired
+  transitions:
+    candidate-promotion:
+      source: exploring
+      target: candidate
+    baseline-promotion:
+      source: candidate
+      target: baseline-approved
+  rules:
+    - Prototype maturity is local to Workspace Prototype Studio and is independent from project phase.
+    - Candidate and baseline states may be entered only through their named transition and merged source readback.
+    - A maturity transition never changes source custody, runtime, release, publication, or project-phase state.
+transition_profiles:
+  candidate-promotion:
+    packet_kind: candidate-evidence-packet
+    required_sections:
+      - candidate-brief
+      - scope-and-non-goals
+      - boundaries-and-risks
+    required_evidence:
+      - landing-receipt
+      - source-context
+      - prototype-objective
+      - target-user
+      - expected-proof
+      - accepted-scope
+      - excluded-scope
+      - owner-and-source-boundary
+      - data-mutation-visibility-boundary
+      - security-governance-triggers
+      - open-issues
+    editable_fields:
+      - prototype-objective
+      - target-user
+      - expected-proof
+      - accepted-scope
+      - excluded-scope
+      - boundary-clarifications
+      - open-issue-disposition
+    decisions:
+      - promote-candidate
+      - block-promotion
+      - route-closeout
+  baseline-promotion:
+    packet_kind: baseline-packet
+    required_sections:
+      - definition
+      - design-and-workflow
+      - evidence
+      - boundaries
+      - issues-and-risk-disposition
+    required_evidence:
+      - candidate-promotion-receipt
+      - prototype-definition
+      - scope-and-non-goals
+      - design-profile
+      - workflow-and-state-map
+      - design-review-proof
+      - data-mutation-source-visibility-boundary
+      - security-governance-triggers
+      - open-issue-disposition
+      - next-intended-path
+    conditional_evidence:
+      preview-proof: required-when-baseline-claims-preview-behavior
+      validation-proof: required-when-baseline-claims-executable-behavior
+      interaction-proof: required-when-baseline-includes-operator-interface
+    editable_fields:
+      - baseline-title
+      - baseline-statement
+      - accepted-summary
+      - excluded-summary
+      - selected-evidence-refs
+      - missing-evidence-disposition
+      - issue-and-risk-disposition
+    decisions:
+      - approve-baseline
+      - block-baseline
+      - route-closeout
+  common_rules:
+    - Upstream records are read as evidence and are not silently rewritten by a maturity workflow.
+    - A block decision is available only for a visible blocker with an owner and required fix.
+    - Route closeout records intent only; the separate closeout workflow owns retirement.
+    - Leaving without a decision preserves current lifecycle and emits no no-op receipt.
+schema_refs:
+  request: contracts/schemas/prototype-maturity-request.schema.json
+  packet: contracts/schemas/prototype-maturity-packet.schema.json
+  readiness: contracts/schemas/prototype-maturity-readiness.schema.json
+  decision: contracts/schemas/prototype-maturity-decision.schema.json
+  readback: contracts/schemas/prototype-maturity-readback.schema.json
+  receipt: contracts/schemas/prototype-maturity-receipt.schema.json
+artifact_chain:
+  ordered_artifacts:
+    - prototype-maturity-request
+    - prototype-maturity-packet
+    - prototype-maturity-readiness
+    - prototype-maturity-decision
+    - prototype-maturity-readback
+    - prototype-maturity-receipt
+  binding_rule: Every artifact binds the immutable identifier and digest of every authority artifact it consumes.
+  decision_rule: Readiness for the exact request, packet, and observed source state must be ready before a promotion decision can be applied.
+  completion_rule: Lifecycle success is projected only after merged Prototype Studio readback and a terminal receipt agree.
+readiness:
+  outcomes:
+    - ready
+    - blocked
+    - stale
+  common_checks:
+    - request-integrity
+    - lifecycle-source-state
+    - source-version-freshness
+    - packet-integrity
+    - required-evidence
+    - boundary-coherence
+    - security-trigger-disposition
+    - open-issue-disposition
+  rule: Only a digest-bound ready result for the exact request, packet, and observed Prototype Studio source state permits a promote or approve decision.
+decision:
+  required_bindings:
+    - request
+    - packet
+    - readiness
+    - operator
+    - expected-source-revision
+    - expected-record-digest
+    - correlation-id
+    - idempotency-key
+  block_requirement:
+    - issue-ref
+    - owner-ref
+    - required-fix
+  apply_rule: Promote and approve decisions prepare one reviewable non-default-branch source change; they do not merge it.
+  no_op_rule: No decision artifact or receipt is emitted merely to preserve the current lifecycle.
+source_mutation:
+  branch_rule: Mutation is denied on main, master, and detached heads.
+  authority_lock: One Prototype Studio authority lock covers expected-state comparison, registry and record mutation, validation, and artifact emission.
+  candidate_scope:
+    - prototype-registry-lifecycle
+    - candidate-promotion-record
+    - prototype-history
+  baseline_scope:
+    - prototype-registry-lifecycle
+    - design-baseline-record
+    - prototype-history
+  prohibited_scope:
+    - project-phase
+    - source-custody
+    - referenced-external-source
+    - repository-provider-state
+    - delivery-art
+    - platform-runtime
+    - security-acceptance
+    - portfolio-publication
+readback:
+  success_authority_state: merged-authority
+  promotion_rule: A promote or approve receipt requires the exact target lifecycle in merged source readback.
+  non_promotion_rule: A block or route-closeout decision preserves the source lifecycle and cannot claim a source mutation.
+idempotency:
+  replay: The same key with identical authority digests returns the existing result without another mutation.
+  conflict: Reusing a key with different authority digests fails closed.
+recovery:
+  retry: Retry requires fresh readiness against current Prototype Studio authority state.
+  stale: Stale requests return to editable workflow state with current-source evidence.
+  reconcile: Interrupted mutation resolves branch and merged authority truth before another write.
+  block: A blocked result names one blocker owner and one actionable required fix.
+approval_boundary:
+  baseline_approved_means:
+    - local-design-accepted
+    - local-workflow-and-state-model-accepted
+    - local-boundaries-accepted
+    - evidence-sufficient-for-continued-incubation-or-transition-preparation
+  baseline_approved_does_not_mean:
+    - delivery-admitted
+    - delivery-art-created
+    - source-graduated
+    - runtime-admitted
+    - release-approved
+    - security-accepted
+    - client-exposed
+    - portfolio-published
+denied_shortcuts:
+  - direct-registry-lifecycle-edit
+  - console-owned-maturity-truth
+  - wgcf-owned-source-mutation
+  - candidate-without-landing
+  - baseline-without-candidate
+  - promote-without-ready-evidence
+  - generic-blocker-without-owner-and-fix
+  - no-op-keep-current-receipt
+  - baseline-as-delivery-admission
+  - baseline-as-runtime-or-security-acceptance
+  - baseline-as-source-graduation
+  - success-before-merged-readback

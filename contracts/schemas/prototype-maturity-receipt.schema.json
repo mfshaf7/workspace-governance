@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "artifact_type", "receipt_id", "completed_at", "request_ref", "packet_ref", "readiness_ref", "decision_ref", "readback_ref", "prototype_id", "transition", "decision", "outcome", "resulting_lifecycle", "next_action", "correlation_id", "idempotency_key", "receipt_digest"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-maturity-receipt" },
+    "receipt_id": { "type": "string", "pattern": "^prototype-maturity-receipt:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "request_ref": { "$ref": "#/$defs/ref" },
+    "packet_ref": { "$ref": "#/$defs/ref" },
+    "readiness_ref": { "$ref": "#/$defs/ref" },
+    "decision_ref": { "$ref": "#/$defs/ref" },
+    "readback_ref": { "$ref": "#/$defs/ref" },
+    "prototype_id": { "$ref": "#/$defs/prototypeId" },
+    "transition": { "$ref": "#/$defs/transition" },
+    "decision": { "enum": ["promote-candidate", "block-promotion", "approve-baseline", "block-baseline", "route-closeout"] },
+    "outcome": { "enum": ["succeeded", "blocked", "routed-closeout", "failed"] },
+    "resulting_lifecycle": { "enum": ["exploring", "candidate", "baseline-approved"] },
+    "next_action": {
+      "type": "object",
+      "required": ["code", "owner_ref"],
+      "properties": {
+        "code": { "$ref": "#/$defs/text" },
+        "owner_ref": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "correlation_id": { "$ref": "#/$defs/text" },
+    "idempotency_key": { "$ref": "#/$defs/text" },
+    "receipt_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "prototypeId": { "type": "string", "pattern": "^prototype:[a-z0-9][a-z0-9._-]*$" },
+    "transition": { "enum": ["candidate-promotion", "baseline-promotion"] },
+    "ref": { "type": "object", "required": ["id", "digest"], "properties": { "id": { "$ref": "#/$defs/text" }, "digest": { "$ref": "#/$defs/digest" } }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}
