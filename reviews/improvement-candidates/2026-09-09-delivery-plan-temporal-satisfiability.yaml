@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-09-09-delivery-plan-temporal-satisfiability
+title: Reject temporally impossible Delivery plans before implementation
+recorded_on: '2026-09-09'
+owner_repo: workspace-governance
+summary: Delivery architecture validation accepted a Security child that had to close
+  before implementation and also remain open for post-conformance acceptance.
+regression_of: null
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Feature 920 assigned pre-implementation and final normal-availability Security
+    decisions to work-item 1098 even though work-item 1094 depended on 1098 closing;
+    schema and DAG checks passed because no temporal close-condition simulation existed.
+  source_refs:
+  - 'conversation: operator identified repeated planning-method misses and approved
+    a mechanical correction'
+  - 'art: openproject://work_packages/920'
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Declares the v3 temporal-satisfiability rules without falsely activating the owner runtimes.
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+    owner_repo: workspace-governance
+    note: Defines the v3 execution plan and human-gate evidence prerequisites.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Rejects impossible start, close, and gate-evidence schedules.
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Explains the compatibility boundary and required split-gate planning model.
+  note: Canonical controls are implemented under ART Defect 1121; owner-runtime adoption remains pending.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-09-12'
+  note: Extend architecture and work-session validation with start/close evidence
+    phases, gate-cycle rejection, and an end-to-end executable schedule; then audit
+    and repair or retire affected Feature plans.

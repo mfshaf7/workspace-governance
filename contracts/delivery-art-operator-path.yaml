@@ -470,6 +470,10 @@ delivery_art_operator_path:
       architecture_v2_landing_units_exactly_cover_work_items: true
       architecture_v2_source_landing_graph_is_bound_and_acyclic: true
       architecture_v2_human_gates_bind_authority_scope_and_transition: true
+      architecture_v3_execution_plan_exactly_covers_work_items: true
+      architecture_v3_start_and_close_schedule_is_satisfiable: true
+      architecture_v3_gate_evidence_precedes_authority_close: true
+      architecture_v3_security_descendants_emit_explicit_gates: true
       v1_dependency_relation_precedence:
         depends_on: the target work item and its owner repo precede the source
         blocks: the source work item and its owner repo precede the target
@@ -584,6 +588,26 @@ delivery_art_operator_path:
           - json-schema
           - semantic-validator
         rationale: V2 validates ART work readiness, source landing, Landing Unit ownership, and human gates as independent topologies.
+      - id: architecture-v3-temporal-satisfiability
+        claim_refs:
+          - readiness_model.rules.architecture_v3_execution_plan_exactly_covers_work_items
+          - readiness_model.rules.architecture_v3_start_and_close_schedule_is_satisfiable
+          - readiness_model.rules.architecture_v3_gate_evidence_precedes_authority_close
+          - readiness_model.rules.architecture_v3_security_descendants_emit_explicit_gates
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        owner_art_refs: []
+        positive_case_ids:
+          - architecture-v3-execution-plan-valid
+        negative_case_ids:
+          - architecture-v3-execution-plan-invalid
+        enforcement_layers:
+          - json-schema
+          - semantic-validator
+        rationale: >-
+          V3 proves that start prerequisites, close prerequisites, and human-gate
+          evidence form one executable schedule before implementation begins.
+          OOS production and WGCF custody adoption remain separate owner work.
       - id: work-start-structure
         claim_refs:
           - work_start_gate.child_isolated_requires_split_reason

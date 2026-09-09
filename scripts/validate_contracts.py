@@ -1010,33 +1010,127 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             "architecture.dependency_merge_dag.merge_order violates "
                             f"{before} before {after}: {before_repo} must precede {after_repo}"
                         )
-        elif schema_version == 2:
-            work_graph = _artifact_object(
-                architecture.get("work_dependency_graph")
-            )
-            work_nodes = set(_artifact_string_list(work_graph.get("nodes")))
-            if work_nodes != covered_work_items:
-                errors.append(
-                    "architecture.work_dependency_graph.nodes must exactly cover covered_work_item_ids"
+        elif schema_version in {2, 3}:
+            execution_plan_by_work_item = {}
+            emitted_gate_authorities = {}
+            if schema_version == 2:
+                work_graph = _artifact_object(
+                    architecture.get("work_dependency_graph")
                 )
-            work_edges = []
-            for edge in _artifact_object_list(work_graph.get("edges")):
-                prerequisite = edge.get("prerequisite_work_item_id")
-                dependent = edge.get("dependent_work_item_id")
-                if not isinstance(prerequisite, str) or not isinstance(
-                    dependent, str
-                ):
-                    continue
-                unknown_endpoints = {prerequisite, dependent} - work_nodes
-                if unknown_endpoints:
+                work_nodes = set(_artifact_string_list(work_graph.get("nodes")))
+                if work_nodes != covered_work_items:
                     errors.append(
-                        "architecture work dependency edge references unknown nodes: "
-                        + ", ".join(sorted(unknown_endpoints))
+                        "architecture.work_dependency_graph.nodes must exactly cover covered_work_item_ids"
                     )
-                    continue
-                work_edges.append((prerequisite, dependent))
-            if not _delivery_art_graph_is_acyclic(work_nodes, work_edges):
-                errors.append("architecture.work_dependency_graph must be acyclic")
+                work_edges = []
+                for edge in _artifact_object_list(work_graph.get("edges")):
+                    prerequisite = edge.get("prerequisite_work_item_id")
+                    dependent = edge.get("dependent_work_item_id")
+                    if not isinstance(prerequisite, str) or not isinstance(
+                        dependent, str
+                    ):
+                        continue
+                    unknown_endpoints = {prerequisite, dependent} - work_nodes
+                    if unknown_endpoints:
+                        errors.append(
+                            "architecture work dependency edge references unknown nodes: "
+                            + ", ".join(sorted(unknown_endpoints))
+                        )
+                        continue
+                    work_edges.append((prerequisite, dependent))
+                if not _delivery_art_graph_is_acyclic(work_nodes, work_edges):
+                    errors.append("architecture.work_dependency_graph must be acyclic")
+            else:
+                execution_plan = _artifact_object_list(
+                    architecture.get("work_item_execution_plan")
+                )
+                execution_plan_ids = [
+                    entry.get("work_item_id")
+                    for entry in execution_plan
+                    if isinstance(entry.get("work_item_id"), str)
+                ]
+                if len(execution_plan_ids) != len(set(execution_plan_ids)):
+                    errors.append(
+                        "architecture.work_item_execution_plan must contain one entry per work item"
+                    )
+                if set(execution_plan_ids) != covered_work_items:
+                    errors.append(
+                        "architecture.work_item_execution_plan must exactly cover covered_work_item_ids"
+                    )
+
+                start_edges = []
+                combined_schedule_edges = []
+                for entry in execution_plan:
+                    work_item_id = entry.get("work_item_id")
+                    if not isinstance(work_item_id, str):
+                        continue
+                    execution_plan_by_work_item[work_item_id] = entry
+                    start_prerequisites = set(
+                        _artifact_string_list(
+                            entry.get("start_after_work_item_ids")
+                        )
+                    )
+                    close_prerequisites = set(
+                        _artifact_string_list(
+                            entry.get("close_after_work_item_ids")
+                        )
+                    )
+                    repeated_prerequisites = (
+                        start_prerequisites & close_prerequisites
+                    )
+                    if repeated_prerequisites:
+                        errors.append(
+                            f"architecture execution plan {work_item_id} repeats prerequisites across start_after and close_after: "
+                            + ", ".join(sorted(repeated_prerequisites))
+                        )
+                    unknown_prerequisites = (
+                        start_prerequisites | close_prerequisites
+                    ) - covered_work_items
+                    if unknown_prerequisites:
+                        errors.append(
+                            f"architecture execution plan {work_item_id} references unknown prerequisite work items: "
+                            + ", ".join(sorted(unknown_prerequisites))
+                        )
+                    if work_item_id in start_prerequisites | close_prerequisites:
+                        errors.append(
+                            f"architecture execution plan {work_item_id} cannot depend on itself"
+                        )
+                    valid_start_prerequisites = (
+                        start_prerequisites & covered_work_items
+                    ) - {work_item_id}
+                    valid_close_prerequisites = (
+                        close_prerequisites & covered_work_items
+                    ) - {work_item_id}
+                    start_edges.extend(
+                        (prerequisite, work_item_id)
+                        for prerequisite in valid_start_prerequisites
+                    )
+                    combined_schedule_edges.extend(
+                        (prerequisite, work_item_id)
+                        for prerequisite in (
+                            valid_start_prerequisites
+                            | valid_close_prerequisites
+                        )
+                    )
+                    for gate_id in _artifact_string_list(
+                        entry.get("emits_human_gate_ids")
+                    ):
+                        emitted_gate_authorities.setdefault(gate_id, []).append(
+                            work_item_id
+                        )
+
+                if not _delivery_art_graph_is_acyclic(
+                    covered_work_items, start_edges
+                ):
+                    errors.append(
+                        "architecture.work_item_execution_plan start prerequisites must be acyclic"
+                    )
+                if not _delivery_art_graph_is_acyclic(
+                    covered_work_items, combined_schedule_edges
+                ):
+                    errors.append(
+                        "architecture.work_item_execution_plan has no executable start-and-close schedule"
+                    )
 
             landing_units = _artifact_object_list(
                 architecture.get("landing_units")
@@ -1156,6 +1250,87 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         errors.append(
                             f"architecture human gate {gate_id} blocks source merge for non-source Landing Units: "
                             + ", ".join(sorted(non_source_landing_units))
+                        )
+                if schema_version == 3:
+                    evidence_prerequisites = set(
+                        _artifact_string_list(
+                            gate.get("evidence_prerequisite_work_item_ids")
+                        )
+                    )
+                    unknown_evidence_prerequisites = (
+                        evidence_prerequisites - covered_work_items
+                    )
+                    if unknown_evidence_prerequisites:
+                        errors.append(
+                            f"architecture human gate {gate_id} references unknown evidence prerequisite work items: "
+                            + ", ".join(sorted(unknown_evidence_prerequisites))
+                        )
+                    authority_plan = execution_plan_by_work_item.get(
+                        authority_work_item_id, {}
+                    )
+                    authority_prerequisites = set(
+                        _artifact_string_list(
+                            authority_plan.get("start_after_work_item_ids")
+                        )
+                    ) | set(
+                        _artifact_string_list(
+                            authority_plan.get("close_after_work_item_ids")
+                        )
+                    )
+                    missing_authority_prerequisites = (
+                        evidence_prerequisites - authority_prerequisites
+                    )
+                    if missing_authority_prerequisites:
+                        errors.append(
+                            f"architecture human gate {gate_id} evidence prerequisites are absent from authority work item {authority_work_item_id} execution prerequisites: "
+                            + ", ".join(sorted(missing_authority_prerequisites))
+                        )
+
+            if schema_version == 3:
+                declared_gate_ids = set(gate_ids)
+                emitted_gate_ids = set(emitted_gate_authorities)
+                unknown_emitted_gates = emitted_gate_ids - declared_gate_ids
+                if unknown_emitted_gates:
+                    errors.append(
+                        "architecture.work_item_execution_plan emits unknown human gates: "
+                        + ", ".join(sorted(unknown_emitted_gates))
+                    )
+                missing_emitted_gates = declared_gate_ids - emitted_gate_ids
+                if missing_emitted_gates:
+                    errors.append(
+                        "architecture.work_item_execution_plan must emit every declared human gate: "
+                        + ", ".join(sorted(missing_emitted_gates))
+                    )
+                gate_by_id = {
+                    gate.get("gate_id"): gate
+                    for gate in human_gates
+                    if isinstance(gate.get("gate_id"), str)
+                }
+                for gate_id, emitter_ids in emitted_gate_authorities.items():
+                    if len(emitter_ids) != 1:
+                        errors.append(
+                            f"architecture human gate {gate_id} must be emitted exactly once"
+                        )
+                        continue
+                    gate = gate_by_id.get(gate_id)
+                    if (
+                        gate is not None
+                        and gate.get("authority_work_item_id") != emitter_ids[0]
+                    ):
+                        errors.append(
+                            f"architecture human gate {gate_id} must be emitted by its authority work item {gate.get('authority_work_item_id')}"
+                        )
+                for work_item_id, owner_repo in owner_by_work_item.items():
+                    if owner_repo != "security-architecture":
+                        continue
+                    emitted_by_security_item = _artifact_string_list(
+                        execution_plan_by_work_item.get(work_item_id, {}).get(
+                            "emits_human_gate_ids"
+                        )
+                    )
+                    if not emitted_by_security_item:
+                        errors.append(
+                            f"architecture Security-owned work item {work_item_id} must emit at least one explicit human gate"
                         )
 
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
@@ -3273,6 +3448,208 @@ def validate_delivery_art_artifact_contracts(
             separated_v2_topology,
             "architecture packet v2 with separated work, source, and human-gate topology",
             "architecture-v2-topology-valid",
+        )
+
+        split_gate_v3 = copy.deepcopy(separated_v2_topology)
+        split_gate_v3["schema_version"] = 3
+        split_gate_v3["artifact_id"] = "architecture-packet:delivery-698-v3"
+        split_gate_architecture = split_gate_v3["architecture"]
+        split_gate_architecture.pop("work_dependency_graph")
+        split_gate_architecture["descendant_owner_map"][0]["owner_repo"] = (
+            "security-architecture"
+        )
+        split_gate_architecture["descendant_owner_map"].append(
+            {
+                "work_item_id": "work-item-803",
+                "work_item_type": "User story",
+                "owner_repo": "security-architecture",
+                "parent_work_item_id": "work-item-801",
+            }
+        )
+        split_gate_v3["covered_work_item_ids"].append("work-item-803")
+        split_gate_v3["source_snapshot"]["repo_revisions"][0]["repo"] = (
+            "security-architecture"
+        )
+        split_gate_architecture["landing_units"][0]["owner_repo"] = (
+            "security-architecture"
+        )
+        split_gate_architecture["landing_units"].append(
+            {
+                "id": "delivery-698-security-acceptance",
+                "owner_repo": "security-architecture",
+                "source_backed": True,
+                "covered_work_item_ids": ["work-item-803"],
+            }
+        )
+        split_gate_architecture["source_landing_graph"]["nodes"].append(
+            "delivery-698-security-acceptance"
+        )
+        split_gate_architecture["source_landing_graph"]["edges"].append(
+            {
+                "prerequisite_landing_unit_id": "delivery-698-implementation",
+                "dependent_landing_unit_id": "delivery-698-security-acceptance",
+            }
+        )
+        split_gate_architecture["work_item_execution_plan"] = [
+            {
+                "work_item_id": "work-item-801",
+                "start_after_work_item_ids": [],
+                "close_after_work_item_ids": [],
+                "emits_human_gate_ids": ["gate:implementation-admission"],
+            },
+            {
+                "work_item_id": "work-item-802",
+                "start_after_work_item_ids": ["work-item-801"],
+                "close_after_work_item_ids": [],
+                "emits_human_gate_ids": [],
+            },
+            {
+                "work_item_id": "work-item-803",
+                "start_after_work_item_ids": ["work-item-802"],
+                "close_after_work_item_ids": [],
+                "emits_human_gate_ids": ["gate:normal-availability"],
+            },
+        ]
+        split_gate_architecture["required_human_gates"] = [
+            {
+                "gate_id": "gate:implementation-admission",
+                "authority_work_item_id": "work-item-801",
+                "authority_owner_repo": "security-architecture",
+                "affected_landing_unit_ids": [
+                    "delivery-698-implementation"
+                ],
+                "blocked_transition": "before_implementation",
+                "evidence_requirement": "Security accepts the design before implementation starts.",
+                "evidence_prerequisite_work_item_ids": [],
+            },
+            {
+                "gate_id": "gate:normal-availability",
+                "authority_work_item_id": "work-item-803",
+                "authority_owner_repo": "security-architecture",
+                "affected_landing_unit_ids": [
+                    "delivery-698-implementation"
+                ],
+                "blocked_transition": "before_operating_ready",
+                "evidence_requirement": "Security accepts the implemented evidence before normal availability.",
+                "evidence_prerequisite_work_item_ids": ["work-item-802"],
+            },
+        ]
+        security_applicability = copy.deepcopy(
+            split_gate_v3["conformance_plan"][
+                "work_item_dimension_applicability"
+            ][0]
+        )
+        security_applicability["work_item_id"] = "work-item-803"
+        split_gate_v3["conformance_plan"][
+            "work_item_dimension_applicability"
+        ].append(security_applicability)
+        for source_case, case_id in (
+            (
+                split_gate_v3["conformance_plan"]["cases"][0],
+                "case:security-acceptance-positive",
+            ),
+            (
+                split_gate_v3["conformance_plan"]["cases"][1],
+                "case:security-acceptance-negative",
+            ),
+        ):
+            security_case = copy.deepcopy(source_case)
+            security_case["id"] = case_id
+            security_case["applies_to_work_item_ids"] = ["work-item-803"]
+            split_gate_v3["conformance_plan"]["cases"].append(security_case)
+        split_gate_v3["scope_fingerprint"] = _delivery_art_projection_digest(
+            _architecture_scope_projection(split_gate_v3)
+        )
+        require_accepted(
+            "architecture_packet",
+            split_gate_v3,
+            "architecture packet v3 with separately schedulable Security gates",
+            "architecture-v3-execution-plan-valid",
+        )
+
+        impossible_single_authority_v3 = copy.deepcopy(split_gate_v3)
+        impossible_single_authority_v3["architecture"][
+            "work_item_execution_plan"
+        ] = [
+            {
+                "work_item_id": "work-item-801",
+                "start_after_work_item_ids": [],
+                "close_after_work_item_ids": ["work-item-802"],
+                "emits_human_gate_ids": [
+                    "gate:implementation-admission",
+                    "gate:normal-availability",
+                ],
+            },
+            {
+                "work_item_id": "work-item-802",
+                "start_after_work_item_ids": ["work-item-801"],
+                "close_after_work_item_ids": [],
+                "emits_human_gate_ids": [],
+            },
+            {
+                "work_item_id": "work-item-803",
+                "start_after_work_item_ids": ["work-item-802"],
+                "close_after_work_item_ids": [],
+                "emits_human_gate_ids": [],
+            },
+        ]
+        impossible_single_authority_v3["architecture"][
+            "required_human_gates"
+        ][1]["authority_work_item_id"] = "work-item-801"
+        impossible_single_authority_v3["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(impossible_single_authority_v3)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            impossible_single_authority_v3,
+            "architecture v3 with one authority required before and after the work it unblocks",
+            "architecture-v3-execution-plan-invalid",
+            expected_fragment="has no executable start-and-close schedule",
+        )
+
+        v3_missing_security_gate = copy.deepcopy(split_gate_v3)
+        v3_missing_security_gate["architecture"]["work_item_execution_plan"][2][
+            "emits_human_gate_ids"
+        ] = []
+        v3_missing_security_gate["architecture"]["required_human_gates"].pop()
+        v3_missing_security_gate["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(v3_missing_security_gate)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            v3_missing_security_gate,
+            "architecture v3 with an unrepresented Security-owned descendant",
+            expected_fragment="must emit at least one explicit human gate",
+        )
+
+        v3_gate_without_evidence_order = copy.deepcopy(split_gate_v3)
+        v3_gate_without_evidence_order["architecture"][
+            "work_item_execution_plan"
+        ][2]["start_after_work_item_ids"] = []
+        v3_gate_without_evidence_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(v3_gate_without_evidence_order)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            v3_gate_without_evidence_order,
+            "architecture v3 gate whose evidence is absent from authority execution prerequisites",
+            expected_fragment="evidence prerequisites are absent from authority work item",
+        )
+
+        v3_with_compatibility_topology = copy.deepcopy(split_gate_v3)
+        v3_with_compatibility_topology["architecture"][
+            "work_dependency_graph"
+        ] = copy.deepcopy(separated_v2_architecture["work_dependency_graph"])
+        require_rejected(
+            "architecture_packet",
+            v3_with_compatibility_topology,
+            "architecture v3 mixed with the v2 compatibility work graph",
         )
 
         non_source_gate_authority = copy.deepcopy(separated_v2_topology)

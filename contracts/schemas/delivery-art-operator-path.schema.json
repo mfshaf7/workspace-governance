@@ -839,6 +839,10 @@
             "architecture_v2_landing_units_exactly_cover_work_items",
             "architecture_v2_source_landing_graph_is_bound_and_acyclic",
             "architecture_v2_human_gates_bind_authority_scope_and_transition",
+            "architecture_v3_execution_plan_exactly_covers_work_items",
+            "architecture_v3_start_and_close_schedule_is_satisfiable",
+            "architecture_v3_gate_evidence_precedes_authority_close",
+            "architecture_v3_security_descendants_emit_explicit_gates",
             "v1_dependency_relation_precedence"
           ],
           "properties": {
@@ -856,6 +860,10 @@
             "architecture_v2_landing_units_exactly_cover_work_items": { "const": true },
             "architecture_v2_source_landing_graph_is_bound_and_acyclic": { "const": true },
             "architecture_v2_human_gates_bind_authority_scope_and_transition": { "const": true },
+            "architecture_v3_execution_plan_exactly_covers_work_items": { "const": true },
+            "architecture_v3_start_and_close_schedule_is_satisfiable": { "const": true },
+            "architecture_v3_gate_evidence_precedes_authority_close": { "const": true },
+            "architecture_v3_security_descendants_emit_explicit_gates": { "const": true },
             "v1_dependency_relation_precedence": {
               "type": "object",
               "additionalProperties": false,

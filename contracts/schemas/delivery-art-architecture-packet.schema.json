@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
-  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, Landing Unit ownership, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
+  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3 execution-plan satisfiability, Landing Unit ownership, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -22,7 +22,7 @@
     "custody"
   ],
   "properties": {
-    "schema_version": { "enum": [1, 2] },
+    "schema_version": { "enum": [1, 2, 3] },
     "artifact_type": { "const": "delivery_art_architecture_packet" },
     "artifact_id": { "$ref": "#/$defs/artifactId" },
     "delivery_id": { "$ref": "#/$defs/deliveryId" },
@@ -117,6 +117,38 @@
             }
           }
         },
+        "work_item_execution_plan": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "work_item_id",
+              "start_after_work_item_ids",
+              "close_after_work_item_ids",
+              "emits_human_gate_ids"
+            ],
+            "properties": {
+              "work_item_id": { "$ref": "#/$defs/workItemId" },
+              "start_after_work_item_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/workItemId" }
+              },
+              "close_after_work_item_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/workItemId" }
+              },
+              "emits_human_gate_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/identifier" }
+              }
+            }
+          }
+        },
         "landing_units": {
           "type": "array",
           "minItems": 1,
@@ -180,7 +212,12 @@
                   "before_operating_ready"
                 ]
               },
-              "evidence_requirement": { "$ref": "#/$defs/nonEmptyString" }
+              "evidence_requirement": { "$ref": "#/$defs/nonEmptyString" },
+              "evidence_prerequisite_work_item_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/workItemId" }
+              }
             }
           }
         },
@@ -465,6 +502,7 @@
             "not": {
               "anyOf": [
                 { "required": ["work_dependency_graph"] },
+                { "required": ["work_item_execution_plan"] },
                 { "required": ["landing_units"] },
                 { "required": ["source_landing_graph"] },
                 { "required": ["required_human_gates"] }
@@ -493,7 +531,43 @@
               "source_landing_graph",
               "required_human_gates"
             ],
-            "not": { "required": ["dependency_merge_dag"] }
+            "not": {
+              "anyOf": [
+                { "required": ["dependency_merge_dag"] },
+                { "required": ["work_item_execution_plan"] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 3 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "required": [
+              "work_item_execution_plan",
+              "landing_units",
+              "source_landing_graph",
+              "required_human_gates"
+            ],
+            "not": {
+              "anyOf": [
+                { "required": ["dependency_merge_dag"] },
+                { "required": ["work_dependency_graph"] }
+              ]
+            },
+            "properties": {
+              "required_human_gates": {
+                "items": {
+                  "required": ["evidence_prerequisite_work_item_ids"]
+                }
+              }
+            }
           }
         }
       }
