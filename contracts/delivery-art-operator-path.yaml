@@ -16,8 +16,8 @@ delivery_art_operator_path:
     capability_source:
       repo: operator-orchestration-service
       manifest_path: contracts/delivery-art-lifecycle/capabilities.json
-      manifest_digest: sha256:754a3bac9dac6592a4ea9284f05a8b5f106b2babc8e3540568ebb2de9990cf40
-      activated_at_commit: 7350770f038d7978757f75b8c49aaaba09345213
+      manifest_digest: sha256:d32bf50cad0126055ae1eede5dff3f3d8e9e01c4ac028a4505fd2f328958092c
+      activated_at_commit: 89a79dcc98a7a4a7a1a813076bcc5d7fa87142d6
     capability_projection:
       schema_version: 2
       contract_id: operator-orchestration-service.delivery-art-lifecycle.v2
@@ -27,6 +27,7 @@ delivery_art_operator_path:
         start_command: npm run art -- work start <work-item-id>
         status_command: npm run art -- work status <work-item-id>
         continue_command: npm run art -- work continue <work-item-id>
+        merge_command: npm run art -- work merge <work-item-id>
         close_command: npm run art -- work close <work-item-id>
         help_command: npm run art -- work --help
       target_operator_surface:
@@ -87,6 +88,14 @@ delivery_art_operator_path:
           state: implemented
           contract_version: 1
           normal_path: true
+        - id: architecture-packet-v3-adoption
+          state: implemented
+          contract_version: 3
+          normal_path: false
+        - id: transition-specific-human-gate-derivation
+          state: implemented
+          contract_version: 3
+          normal_path: false
         - id: work-start-authoring
           state: implemented
           contract_version: 1
@@ -106,6 +115,10 @@ delivery_art_operator_path:
         - id: review-packet-merge-readiness
           state: implemented
           contract_version: 2
+          normal_path: true
+        - id: work-session-source-merge
+          state: implemented
+          contract_version: 1
           normal_path: true
         - id: operating-readiness
           state: implemented
@@ -162,6 +175,17 @@ delivery_art_operator_path:
         - openproject://work_packages/969
         - openproject://work_packages/970
         - openproject://work_packages/971
+        - openproject://work_packages/1122
+        - openproject://work_packages/1123
+        - openproject://work_packages/1124
+      architecture_packet:
+        schema_version: 3
+        artifact_id: architecture-packet:delivery-892-v1
+        delivery_ref: openproject://work_packages/892
+        artifact_ref: wgcf://artifacts/delivery-art/sha256/006963fc2f7985b7d09c8b8a13304be8b47334ae228c48db5e974d034b5176dc
+        content_digest: sha256:006963fc2f7985b7d09c8b8a13304be8b47334ae228c48db5e974d034b5176dc
+        custody_receipt_ref: wgcf://receipts/artifact-custody/4b52832604e14e2bc6567f37-be16c326bc219a9df7d312f4ea668b38af65e91dc3076cc1f634ce89f120525d.json
+        custody_receipt_digest: sha256:be16c326bc219a9df7d312f4ea668b38af65e91dc3076cc1f634ce89f120525d
       rule: >-
         Architecture, Security acceptance, owner implementation, and Workspace
         Governance activation evidence bind the exact dev-integration runtime.
@@ -176,6 +200,7 @@ delivery_art_operator_path:
       start: npm run art -- work start <work-item-id>
       status: npm run art -- work status <work-item-id>
       continue: npm run art -- work continue <work-item-id>
+      merge: npm run art -- work merge <work-item-id>
       close: npm run art -- work close <work-item-id>
       help: npm run art -- work --help
     command_semantics:
@@ -191,6 +216,10 @@ delivery_art_operator_path:
         Reconstruct current paths, refresh transition truth, perform only safe
         mechanical reconciliation, stop at the next human gate, and return one
         exact next action.
+      merge: >-
+        Verify merge-ready evidence and current pull-request truth, perform the
+        governed source merge, and preserve the immutable merge-ready packet as
+        predecessor evidence for finalization.
       close: >-
         Require explicit operator closeout intent, resolve finalized evidence,
         submit bounded ART completion and eligible parent closeout, reconcile
@@ -481,9 +510,10 @@ delivery_art_operator_path:
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
-      schema_version: 2
+      schema_version: 3
       compatibility_schema_versions:
         - 1
+        - 2
       producer_repo: operator-orchestration-service
       custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision

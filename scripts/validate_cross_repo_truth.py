@@ -103,6 +103,7 @@ DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "authoritative-review-evidence-projection",
     "review-packet-v2-authoring",
     "review-packet-merge-readiness",
+    "work-session-source-merge",
     "operating-readiness",
     "review-packet-finalization",
     "art-closeout",
@@ -445,6 +446,7 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
         "start": "npm run art -- work start <work-item-id>",
         "status": "npm run art -- work status <work-item-id>",
         "continue": "npm run art -- work continue <work-item-id>",
+        "merge": "npm run art -- work merge <work-item-id>",
         "close": "npm run art -- work close <work-item-id>",
         "help": "npm run art -- work --help",
     }

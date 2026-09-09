@@ -34,24 +34,45 @@ def load_validator():
 
 
 def capability_manifest() -> dict:
-    normal_capabilities = [
-        ("scoped-art-snapshot", "implemented", 2),
-        ("historical-material-freshness", "implemented", 2),
-        ("persistent-work-session", "implemented", 2),
-        ("process-restart-reconstruction", "implemented", 2),
-        ("worktree-relocation-reconstruction", "implemented", 2),
-        ("exact-next-action", "implemented", 2),
-        ("architecture-decision", "human-gated", 1),
-        ("architecture-packet-persistence", "implemented", 1),
-        ("work-start-authoring", "implemented", 1),
-        ("work-start-persistence", "implemented", 1),
-        ("authoritative-review-evidence-projection", "implemented", 1),
-        ("review-packet-v2-authoring", "implemented", 2),
-        ("review-packet-merge-readiness", "implemented", 2),
-        ("operating-readiness", "implemented", 2),
-        ("review-packet-finalization", "implemented", 2),
-        ("art-closeout", "implemented", 2),
+    capability_specs = [
+        ("scoped-art-snapshot", "implemented", 2, True),
+        ("historical-material-freshness", "implemented", 2, True),
+        ("persistent-work-session", "implemented", 2, True),
+        ("process-restart-reconstruction", "implemented", 2, True),
+        ("worktree-relocation-reconstruction", "implemented", 2, True),
+        ("exact-next-action", "implemented", 2, True),
+        ("architecture-decision", "human-gated", 1, True),
+        ("architecture-packet-persistence", "implemented", 1, True),
+        ("architecture-packet-v3-adoption", "implemented", 3, False),
+        ("transition-specific-human-gate-derivation", "implemented", 3, False),
+        ("work-start-authoring", "implemented", 1, True),
+        ("work-start-persistence", "implemented", 1, True),
+        ("authoritative-review-evidence-projection", "implemented", 1, True),
+        ("review-packet-v2-authoring", "implemented", 2, True),
+        ("review-packet-merge-readiness", "implemented", 2, True),
+        ("work-session-source-merge", "implemented", 1, True),
+        ("operating-readiness", "implemented", 2, True),
+        ("review-packet-finalization", "implemented", 2, True),
+        ("art-closeout", "implemented", 2, True),
+        ("work-session-resource-retirement", "human-gated", 1, True),
+        ("resumable-lifecycle-reconciliation", "compatibility", 1, False),
+        ("review-packet-v1-compatibility", "compatibility", 1, False),
+        ("temporal-lifecycle-adapter", "planned", 1, False),
     ]
+    capabilities = [
+        {
+            "id": capability_id,
+            "state": state,
+            "contract_version": version,
+            "normal_path": normal_path,
+        }
+        for capability_id, state, version, normal_path in capability_specs
+    ]
+    next(
+        capability
+        for capability in capabilities
+        if capability["id"] == "work-session-resource-retirement"
+    )["activation_work_item_id"] = "work-item-970"
     return {
         "schema_version": 2,
         "contract_id": "operator-orchestration-service.delivery-art-lifecycle.v2",
@@ -61,6 +82,7 @@ def capability_manifest() -> dict:
             "start_command": "npm run art -- work start <work-item-id>",
             "status_command": "npm run art -- work status <work-item-id>",
             "continue_command": "npm run art -- work continue <work-item-id>",
+            "merge_command": "npm run art -- work merge <work-item-id>",
             "close_command": "npm run art -- work close <work-item-id>",
             "help_command": "npm run art -- work --help",
         },
@@ -93,42 +115,7 @@ def capability_manifest() -> dict:
             "security-acceptance",
             "art-closeout",
         ],
-        "capabilities": [
-            {
-                "id": capability_id,
-                "state": state,
-                "contract_version": version,
-                "normal_path": True,
-            }
-            for capability_id, state, version in normal_capabilities
-        ]
-        + [
-            {
-                "id": "work-session-resource-retirement",
-                "state": "human-gated",
-                "contract_version": 1,
-                "normal_path": True,
-                "activation_work_item_id": "work-item-970",
-            },
-            {
-                "id": "resumable-lifecycle-reconciliation",
-                "state": "compatibility",
-                "contract_version": 1,
-                "normal_path": False,
-            },
-            {
-                "id": "review-packet-v1-compatibility",
-                "state": "compatibility",
-                "contract_version": 1,
-                "normal_path": False,
-            },
-            {
-                "id": "temporal-lifecycle-adapter",
-                "state": "planned",
-                "contract_version": 1,
-                "normal_path": False,
-            },
-        ],
+        "capabilities": capabilities,
     }
 
 
@@ -217,17 +204,27 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
-    def test_architecture_v3_is_locally_enforced_without_false_runtime_activation(
-        self,
-    ) -> None:
+    def test_architecture_v3_is_the_activated_normal_packet(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"
         ]
+        activation_packet = self.operator_path["contract_activation"][
+            "activation_evidence"
+        ]["architecture_packet"]
         readiness_rules = self.operator_path["readiness_model"]["rules"]
 
-        self.assertEqual(architecture_contract["schema_version"], 2)
+        self.assertEqual(architecture_contract["schema_version"], 3)
         self.assertEqual(
-            architecture_contract["compatibility_schema_versions"], [1]
+            architecture_contract["compatibility_schema_versions"], [1, 2]
+        )
+        self.assertEqual(activation_packet["schema_version"], 3)
+        self.assertEqual(
+            activation_packet["artifact_id"],
+            "architecture-packet:delivery-892-v1",
+        )
+        self.assertEqual(
+            activation_packet["artifact_ref"].rsplit("/", 1)[-1],
+            activation_packet["content_digest"].removeprefix("sha256:"),
         )
         self.assertTrue(
             readiness_rules[
@@ -279,6 +276,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
                 "start_command": work_session_commands["start"],
                 "status_command": work_session_commands["status"],
                 "continue_command": work_session_commands["continue"],
+                "merge_command": work_session_commands["merge"],
                 "close_command": work_session_commands["close"],
                 "help_command": work_session_commands["help"],
             },
