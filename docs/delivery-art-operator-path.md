@@ -156,12 +156,12 @@ implementation but must also remain open for evidence produced by that
 implementation. Split pre-implementation and post-conformance decisions use
 separate authority work items instead.
 
-Workspace Governance accepts schema versions 1, 2, and 3. V1 remains bounded
-historical compatibility. V2 remains the active OOS producer and WGCF custody
-shape while their v3 owner implementations are pending. New plans that need
-temporal gate-evidence ordering must not resume source implementation under a
-v2 packet; they wait for the v3 producer, custody, and activation sequence.
-Contract correction `1121` owns the canonical v3 shape and local validation.
+Workspace Governance accepts schema versions 1, 2, and 3. V3 is the normal OOS
+producer and WGCF custody shape. V1 and v2 remain bounded compatibility for
+historical packets and recovery. Contract correction `1121`, OOS adoption
+`1122`, WGCF custody and readiness `1123`, and Workspace Governance activation
+`1124` establish the active v3 path. Activation is bound to the exact durable
+v3 packet and custody receipt recorded in the machine contract.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
@@ -225,6 +225,7 @@ Use:
 npm run art -- work start <work-item-id>
 npm run art -- work status <work-item-id>
 npm run art -- work continue <work-item-id>
+npm run art -- work merge <work-item-id>
 npm run art -- work close <work-item-id>
 npm run art -- work --help
 ```
@@ -259,6 +260,7 @@ activation work item `964` establish the governed activation sequence:
 npm run art -- work start <work-item-id>
 npm run art -- work status <work-item-id>
 npm run art -- work continue <work-item-id>
+npm run art -- work merge <work-item-id>
 npm run art -- work close <work-item-id>
 npm run art -- work --help
 ```
@@ -376,7 +378,7 @@ packet.
 
 Initial persistence must run the topology comparison even when the fresh ART
 snapshot digest already matches the candidate packet. Digest equality is not a
-substitute for semantic validation. Under v2, OOS reconstructs required
+substitute for semantic validation. Under v3, OOS reconstructs required
 work-session human gates from the durable architecture packet rather than from
 an empty decision default; a missing authority item, affected Landing Unit, or
 blocked transition stops advancement. When an architecture packet names a

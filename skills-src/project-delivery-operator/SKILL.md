@@ -67,18 +67,19 @@ cases must pass before merge readiness. Use a `real-git` case for Git-history
 causality, and declare the exact work items and dimensions whose claims require
 that fidelity; a synthetic resolver cannot prove a real commit sequence.
 
-Workspace Governance accepts architecture packet v1 and v2. V1 retains the
-mixed dependency and repo-merge graph only as bounded compatibility. V2 keeps
-four separate structures: an unambiguous prerequisite-to-dependent ART work
-graph, a Landing Unit registry, a source Landing Unit graph, and explicit human
-gates bound to authority work items, affected Landing Units, blocked
-transitions, and evidence. Never infer source landing order from ART readiness
-or compare one graph with the other.
+Workspace Governance accepts architecture packet v1, v2, and v3. V1 and v2
+remain bounded compatibility for historical packets and recovery. V3 is the
+normal OOS and WGCF shape. It keeps the Landing Unit registry and source
+landing graph, and replaces the v2 ART graph with one execution plan that
+declares start prerequisites, close prerequisites, and emitted human gates per
+work item. Gate evidence prerequisites must precede the authority item that
+emits the gate. Never infer source landing order from ART readiness or store a
+second inverse dependency list.
 
-Architecture packet v2 is the normal OOS and WGCF shape after contract
-correction `972`, OOS implementation `968`, WGCF custody `971`, Security review
-`969`, and activation `970`. V1 remains compatibility-only for historical
-packets and bounded recovery.
+Contract correction `1121`, OOS adoption `1122`, WGCF custody and readiness
+`1123`, and Workspace Governance activation `1124` establish the active v3
+path. The activation contract binds the exact durable v3 packet and custody
+receipt. V1 and v2 must not be selected for new normal-path architecture work.
 
 Keep the four readiness decisions distinct:
 
@@ -95,6 +96,7 @@ Governance validates an exact capability projection. Use:
 - `npm run art -- work start <work-item-id>`
 - `npm run art -- work status <work-item-id>`
 - `npm run art -- work continue <work-item-id>`
+- `npm run art -- work merge <work-item-id>`
 - `npm run art -- work close <work-item-id>`
 - `npm run art -- work --help`
 
@@ -143,14 +145,14 @@ updates. A covered-scope, parent, owner, rollback, work-dependency, source
 Landing Unit topology, human-gate, protocol, validation, or Security-obligation
 change is material and must block for a new architecture decision.
 
-On the target v2 owner path, first persistence must compare topology even when
+On the v3 owner path, first persistence must compare topology even when
 the fresh ART digest already matches. Reconstruct human gates from the durable
 architecture packet; never default a required gate list to empty. Before an
 architecture-chain predecessor closes, rehearse the next known transition
 without mutation against fresh ART, source, and gate truth. A failed rehearsal
 blocks closeout instead of transferring a latent defect to the next child.
 
-Under the v2 path, every passing result binds the exact packet repo
+Under the v3 path, every passing result binds the exact packet repo
 heads. Finalized source packets supersede and preserve a durable merge-ready
 predecessor. WGCF receipts at architecture, implementation, and merge readiness
 bind the exact durable source-artifact content digest; the operating receipt

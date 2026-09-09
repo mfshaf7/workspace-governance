@@ -153,11 +153,12 @@
         "commands": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["start", "status", "continue", "close", "help"],
+          "required": ["start", "status", "continue", "merge", "close", "help"],
           "properties": {
             "start": { "const": "npm run art -- work start <work-item-id>" },
             "status": { "const": "npm run art -- work status <work-item-id>" },
             "continue": { "const": "npm run art -- work continue <work-item-id>" },
+            "merge": { "const": "npm run art -- work merge <work-item-id>" },
             "close": { "const": "npm run art -- work close <work-item-id>" },
             "help": { "const": "npm run art -- work --help" }
           }
@@ -165,11 +166,12 @@
         "command_semantics": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["start", "status", "continue", "close", "help"],
+          "required": ["start", "status", "continue", "merge", "close", "help"],
           "properties": {
             "start": { "$ref": "#/$defs/nonEmptyString" },
             "status": { "$ref": "#/$defs/nonEmptyString" },
             "continue": { "$ref": "#/$defs/nonEmptyString" },
+            "merge": { "$ref": "#/$defs/nonEmptyString" },
             "close": { "$ref": "#/$defs/nonEmptyString" },
             "help": { "$ref": "#/$defs/nonEmptyString" }
           }
@@ -634,7 +636,7 @@
         "activation_evidence": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["profile_id", "art_refs", "rule"],
+          "required": ["profile_id", "art_refs", "architecture_packet", "rule"],
           "properties": {
             "profile_id": { "$ref": "#/$defs/identifier" },
             "art_refs": {
@@ -642,6 +644,36 @@
               "minItems": 1,
               "uniqueItems": true,
               "items": { "$ref": "#/$defs/artWorkPackageRef" }
+            },
+            "architecture_packet": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schema_version",
+                "artifact_id",
+                "delivery_ref",
+                "artifact_ref",
+                "content_digest",
+                "custody_receipt_ref",
+                "custody_receipt_digest"
+              ],
+              "properties": {
+                "schema_version": { "const": 3 },
+                "artifact_id": { "const": "architecture-packet:delivery-892-v1" },
+                "delivery_ref": { "const": "openproject://work_packages/892" },
+                "artifact_ref": {
+                  "const": "wgcf://artifacts/delivery-art/sha256/006963fc2f7985b7d09c8b8a13304be8b47334ae228c48db5e974d034b5176dc"
+                },
+                "content_digest": {
+                  "const": "sha256:006963fc2f7985b7d09c8b8a13304be8b47334ae228c48db5e974d034b5176dc"
+                },
+                "custody_receipt_ref": {
+                  "const": "wgcf://receipts/artifact-custody/4b52832604e14e2bc6567f37-be16c326bc219a9df7d312f4ea668b38af65e91dc3076cc1f634ce89f120525d.json"
+                },
+                "custody_receipt_digest": {
+                  "const": "sha256:be16c326bc219a9df7d312f4ea668b38af65e91dc3076cc1f634ce89f120525d"
+                }
+              }
             },
             "rule": { "$ref": "#/$defs/nonEmptyString" }
           }
@@ -711,6 +743,7 @@
             "start_command",
             "status_command",
             "continue_command",
+            "merge_command",
             "close_command",
             "help_command"
           ],
@@ -719,6 +752,7 @@
             "start_command": { "const": "npm run art -- work start <work-item-id>" },
             "status_command": { "const": "npm run art -- work status <work-item-id>" },
             "continue_command": { "const": "npm run art -- work continue <work-item-id>" },
+            "merge_command": { "const": "npm run art -- work merge <work-item-id>" },
             "close_command": { "const": "npm run art -- work close <work-item-id>" },
             "help_command": { "const": "npm run art -- work --help" }
           }
@@ -915,9 +949,9 @@
               "required": ["compatibility_schema_versions"],
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
-                "schema_version": { "const": 2 },
+                "schema_version": { "const": 3 },
                 "target_schema_version": false,
-                "compatibility_schema_versions": { "const": [1] },
+                "compatibility_schema_versions": { "const": [1, 2] },
                 "target_activation_ref": false,
                 "producer_repo": { "const": "operator-orchestration-service" },
                 "custody_repo": { "const": "workspace-governance-control-fabric" }
