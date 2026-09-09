@@ -139,11 +139,29 @@ This separation permits contract, implementation, independent Security review,
 and later activation to follow their real authorities without pretending they
 are one dependency or merge graph.
 
-Workspace Governance accepts both schema versions. Architecture packet v2 is
-the normal shape; v1 remains compatibility-only for historical packets and
-bounded recovery. Contract correction `972`, OOS implementation `968`, WGCF
-custody `971`, Security review `969`, and activation `970` establish that
-operating boundary.
+Architecture packet v3 replaces `work_dependency_graph` with one
+`work_item_execution_plan`. Every covered item declares the work that must
+close before it starts, the work that must close before it can close, and the
+human gates it emits. Each human gate separately declares the work items whose
+evidence it requires. Dependents are derived rather than stored as a second
+inverse list.
+
+The v3 semantic validator combines start and close prerequisites into one
+schedule and rejects cycles. It also requires every gate to be emitted exactly
+once by its authority work item, requires gate evidence prerequisites to be
+represented in that authority item's execution prerequisites, and requires
+every Security-owned architecture descendant to emit an explicit human gate.
+This rejects a plan where one Security item must close to unblock
+implementation but must also remain open for evidence produced by that
+implementation. Split pre-implementation and post-conformance decisions use
+separate authority work items instead.
+
+Workspace Governance accepts schema versions 1, 2, and 3. V1 remains bounded
+historical compatibility. V2 remains the active OOS producer and WGCF custody
+shape while their v3 owner implementations are pending. New plans that need
+temporal gate-evidence ordering must not resume source implementation under a
+v2 packet; they wait for the v3 producer, custody, and activation sequence.
+Contract correction `1121` owns the canonical v3 shape and local validation.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated

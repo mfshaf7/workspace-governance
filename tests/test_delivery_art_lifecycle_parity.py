@@ -141,9 +141,8 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
-        cls.work_session_contract = contract["delivery_art_operator_path"][
-            "work_session_lifecycle"
-        ]
+        cls.operator_path = contract["delivery_art_operator_path"]
+        cls.work_session_contract = cls.operator_path["work_session_lifecycle"]
 
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -217,6 +216,29 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         )
 
         self.assertEqual(errors, [])
+
+    def test_architecture_v3_is_locally_enforced_without_false_runtime_activation(
+        self,
+    ) -> None:
+        architecture_contract = self.operator_path["artifact_contracts"][
+            "architecture_packet"
+        ]
+        readiness_rules = self.operator_path["readiness_model"]["rules"]
+
+        self.assertEqual(architecture_contract["schema_version"], 2)
+        self.assertEqual(
+            architecture_contract["compatibility_schema_versions"], [1]
+        )
+        self.assertTrue(
+            readiness_rules[
+                "architecture_v3_start_and_close_schedule_is_satisfiable"
+            ]
+        )
+        self.assertTrue(
+            readiness_rules[
+                "architecture_v3_gate_evidence_precedes_authority_close"
+            ]
+        )
 
     def test_work_session_cannot_downgrade_after_activation(self) -> None:
         work_session = copy.deepcopy(self.work_session_contract)
