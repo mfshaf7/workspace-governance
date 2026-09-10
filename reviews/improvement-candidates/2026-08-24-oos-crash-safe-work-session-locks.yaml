@@ -1,0 +1,44 @@
+schema_version: 1
+id: 2026-08-24-oos-crash-safe-work-session-locks
+title: Make ART work-session locks crash-safe
+recorded_on: '2026-08-24'
+owner_repo: operator-orchestration-service
+summary: A power interruption between exclusive lock creation and lock metadata persistence
+  left zero-byte transient locks that blocked a valid ART closeout even though the
+  durable session and evidence remained intact.
+regression_of: null
+status: triaged
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: live-art-mutation-proof-gap
+  title: A live ART mutation or closeout bug was discovered, but normal delivery continued
+    before the exact blocker, smallest faithful regression, and one live repair proof
+    were locked.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The ART work-session lock protocol uses exclusive file creation followed
+    by a separate non-durable metadata write; abrupt host loss can therefore leave
+    an unparseable lock that the next operator command treats as corrupt instead of
+    proving and recovering as stale.
+  source_refs:
+  - work-session:delivery-884:delivery-884-devint-host-service-runner
+  - openproject://work_packages/985
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-09-17'
+  note: Design and obtain operator approval for atomic crash-safe lock ownership,
+    bounded stale-lock recovery, and abrupt-termination regression coverage before
+    implementation.
