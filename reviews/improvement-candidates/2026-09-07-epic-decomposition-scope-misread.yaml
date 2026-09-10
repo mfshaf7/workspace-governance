@@ -1,0 +1,55 @@
+schema_version: 1
+id: 2026-09-07-epic-decomposition-scope-misread
+title: Full Epic decomposition was incorrectly narrowed to the first PI execution wave
+recorded_on: '2026-09-07'
+owner_repo: workspace-governance
+summary: >-
+  Delivery #892 was described as fully decomposed after only its first Feature
+  received executable children. Rolling-wave PI commitment was incorrectly
+  treated as permission to leave the rest of the explicitly requested Epic as
+  Feature shells. The ART correctly supports full backlog decomposition and a
+  narrower committed execution front; the operator workflow did not keep those
+  two decisions distinct.
+regression_of: null
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - operator-orchestration-service
+  related_products:
+    - openproject
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: epic-decomposition-scope-misread
+    title: Partial Feature elaboration was reported as complete Epic decomposition
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      The operator asked to break down the entire #892 Epic. Only Feature #919
+      was decomposed, while #920 and #921 remained shells, yet the result was
+      reported as complete. Full Epic backlog structure and current-PI execution
+      commitment are independent planning decisions and must be reported
+      separately.
+    source_refs:
+      - conversation:2026-09-07-delivery-892-full-decomposition-correction
+      - openproject://work_packages/892
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Immediate state was reconciled by decomposing #920 and #921, connecting all
+    three Feature dependency chains, and persisting a superseding architecture
+    packet covering all 29 work items. A durable workflow control is not yet
+    selected.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-09-14'
+  note: >-
+    Evaluate an explicit planning distinction between full backlog decomposition,
+    selected-wave elaboration, and PI commitment before changing validators or
+    operator commands.

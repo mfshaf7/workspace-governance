@@ -1,0 +1,39 @@
+schema_version: 1
+id: 2026-08-21-precommit-base-aware-validator-blind-spot
+title: Close the pre-commit base-aware validation blind spot
+recorded_on: '2026-08-21'
+owner_repo: workspace-governance
+summary: A base-aware owner-repo validator was run before the source commit, so HEAD
+  still matched origin/main and the validator incorrectly reported no policy-matched
+  changes; CI found the required security evidence only after PR publication.
+regression_of: null
+status: triaged
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: late-root-cause-discovery
+  title: A simpler prerequisite, permission, environment, or contract check was proven
+    only after deeper analysis had already expanded.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: The validation sequence proved tests and docs but did not prove the exact
+    future PR head. Review Packet work then failed after CI exposed missing change-record
+    security evidence.
+  source_refs:
+  - github://mfshaf7/operator-orchestration-service/actions/runs/32392483633
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-09-17'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.

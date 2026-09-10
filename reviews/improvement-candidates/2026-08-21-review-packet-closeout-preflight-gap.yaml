@@ -1,0 +1,39 @@
+schema_version: 1
+id: 2026-08-21-review-packet-closeout-preflight-gap
+title: Preflight generated ART closeout payloads before Review Packet finalization
+recorded_on: '2026-08-21'
+owner_repo: operator-orchestration-service
+summary: A finalized schema-v2 Review Packet passed evidence and operating-readiness
+  gates but landing-unit closeout later rejected a generated Changed Surfaces line
+  because an evidence summary contained an unformatted filename token.
+regression_of: null
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The lifecycle finalization path does not run the same generated completion-payload
+    preflight used by landing-unit status, allowing immutable evidence to finalize
+    before a deterministic closeout formatting failure is exposed.
+  source_refs:
+  - openproject://work_packages/939
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-09-17'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
