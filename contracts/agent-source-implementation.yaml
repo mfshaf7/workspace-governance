@@ -1,0 +1,116 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/agent-action-authority.md
+authority_contract_ref: contracts/agent-action-authority.yaml
+architecture:
+  work_item_ref: openproject://work_packages/1134
+  packet_ref: wgcf://artifacts/delivery-art/sha256/9e6263bea403250eceb814f80310af589ede2a6215ffa5a8010b62e5a68a1be5
+naming:
+  display_name_format: Agent <Name>
+  display_name_pattern: '^Agent [A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)*$'
+  logical_id_prefix: agent-
+  logical_id_pattern: '^agent-[a-z0-9]+(?:-[a-z0-9]+)*$'
+profiles:
+  agent-gary:
+    display_name: Agent Gary
+    logical_agent_id: agent-gary
+    role: source-implementor
+    state: contract-defined
+    provider_principal: mfshaf7-agent-gary[bot]
+    git_author:
+      name: Agent Gary
+      email: 327854141+mfshaf7-agent-gary[bot]@users.noreply.github.com
+authority_separation:
+  operator: accountable-reviewer-approver-and-merger
+  source_implementor: attributed-branch-author-and-pusher
+  orchestrator: admitted-workflow-coordinator-and-receipt-owner
+  provider_identity: authenticated-source-transport
+  platform: credential-custodian-and-token-issuer
+required_bindings:
+  session:
+    - logical_agent_id
+    - landing_unit_id
+    - owner_repo
+    - repository_id
+    - branch
+    - fetched_base
+    - provider_installation_id
+    - provider_principal
+    - git_author_name
+    - git_author_email
+    - token_expiry
+    - human_reviewer_id
+  completion:
+    - pushed_head
+    - reviewed_head
+    - merged_head
+provider_boundary:
+  provider_kind: github-app
+  repository_selection: selected-repositories-only
+  branch_scope: exact-non-default-branch
+  credential_delivery: short-lived-installation-token
+  permissions:
+    metadata: read
+    contents: write
+    pull_requests: write
+    checks: read
+  denied_powers:
+    - approve-pull-request
+    - merge-pull-request
+    - push-default-branch
+    - administer-repository
+    - modify-rulesets
+    - delete-repository
+    - broaden-installation-scope
+    - use-human-credential-fallback
+evidence:
+  required_fields:
+    - logical_agent_id
+    - provider_installation_id
+    - provider_principal
+    - git_author_name
+    - git_author_email
+    - owner_repo
+    - repository_id
+    - landing_unit_id
+    - branch
+    - fetched_base
+    - token_expiry
+    - pushed_head
+    - human_reviewer_id
+    - reviewed_head
+    - merged_head
+  secret_values: denied
+  human_identity_as_agent_source: denied
+  agent_authorship_as_human_review: denied
+bootstrap:
+  mode: bounded-first-identity-bootstrap
+  decision_id: decision:agent-gary-provider-bootstrap
+  operator_principal: operator:workspace-owner
+  allowed_work_item_refs:
+    - openproject://work_packages/1134
+    - openproject://work_packages/1135
+    - openproject://work_packages/1136
+    - openproject://work_packages/1137
+  allowed_actions:
+    - register-selected-repository-app
+    - custody-private-key
+    - mint-short-lived-installation-token
+    - push-exact-non-default-branch
+    - open-or-update-pull-request
+  prohibited_effects:
+    - shared-runtime-activation
+    - default-branch-mutation
+    - approval-or-merge
+    - repository-scope-expansion
+    - human-credential-fallback
+normal_activation:
+  enabled: false
+  required_work_item_refs:
+    - openproject://work_packages/1135
+    - openproject://work_packages/1136
+    - openproject://work_packages/1137
+  required_outcomes:
+    - security-accepted
+    - provider-commissioned
+    - oos-consumption-activated

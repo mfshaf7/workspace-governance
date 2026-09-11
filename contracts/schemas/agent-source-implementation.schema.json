@@ -1,0 +1,265 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/schemas/agent-source-implementation.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "owner_repo",
+    "operator_surface_path",
+    "authority_contract_ref",
+    "architecture",
+    "naming",
+    "profiles",
+    "authority_separation",
+    "required_bindings",
+    "provider_boundary",
+    "evidence",
+    "bootstrap",
+    "normal_activation"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "operator_surface_path": { "const": "docs/agent-action-authority.md" },
+    "authority_contract_ref": { "const": "contracts/agent-action-authority.yaml" },
+    "architecture": {
+      "type": "object",
+      "required": ["work_item_ref", "packet_ref"],
+      "properties": {
+        "work_item_ref": { "const": "openproject://work_packages/1134" },
+        "packet_ref": {
+          "type": "string",
+          "pattern": "^wgcf://artifacts/delivery-art/sha256/[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "naming": {
+      "type": "object",
+      "required": [
+        "display_name_format",
+        "display_name_pattern",
+        "logical_id_prefix",
+        "logical_id_pattern"
+      ],
+      "properties": {
+        "display_name_format": { "const": "Agent <Name>" },
+        "display_name_pattern": {
+          "const": "^Agent [A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)*$"
+        },
+        "logical_id_prefix": { "const": "agent-" },
+        "logical_id_pattern": {
+          "const": "^agent-[a-z0-9]+(?:-[a-z0-9]+)*$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "profiles": {
+      "type": "object",
+      "required": ["agent-gary"],
+      "properties": {
+        "agent-gary": {
+          "allOf": [
+            { "$ref": "#/$defs/sourceImplementorProfile" },
+            {
+              "properties": {
+                "display_name": { "const": "Agent Gary" },
+                "logical_agent_id": { "const": "agent-gary" },
+                "role": { "const": "source-implementor" },
+                "state": { "const": "contract-defined" },
+                "provider_principal": { "const": "mfshaf7-agent-gary[bot]" },
+                "git_author": {
+                  "properties": {
+                    "name": { "const": "Agent Gary" },
+                    "email": {
+                      "const": "327854141+mfshaf7-agent-gary[bot]@users.noreply.github.com"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "patternProperties": {
+        "^agent-[a-z0-9]+(?:-[a-z0-9]+)*$": {
+          "$ref": "#/$defs/sourceImplementorProfile"
+        }
+      },
+      "additionalProperties": false
+    },
+    "authority_separation": {
+      "type": "object",
+      "required": [
+        "operator",
+        "source_implementor",
+        "orchestrator",
+        "provider_identity",
+        "platform"
+      ],
+      "properties": {
+        "operator": { "const": "accountable-reviewer-approver-and-merger" },
+        "source_implementor": { "const": "attributed-branch-author-and-pusher" },
+        "orchestrator": { "const": "admitted-workflow-coordinator-and-receipt-owner" },
+        "provider_identity": { "const": "authenticated-source-transport" },
+        "platform": { "const": "credential-custodian-and-token-issuer" }
+      },
+      "additionalProperties": false
+    },
+    "required_bindings": {
+      "type": "object",
+      "required": ["session", "completion"],
+      "properties": {
+        "session": { "$ref": "#/$defs/uniqueStrings" },
+        "completion": { "$ref": "#/$defs/uniqueStrings" }
+      },
+      "additionalProperties": false
+    },
+    "provider_boundary": {
+      "type": "object",
+      "required": [
+        "provider_kind",
+        "repository_selection",
+        "branch_scope",
+        "credential_delivery",
+        "permissions",
+        "denied_powers"
+      ],
+      "properties": {
+        "provider_kind": { "const": "github-app" },
+        "repository_selection": { "const": "selected-repositories-only" },
+        "branch_scope": { "const": "exact-non-default-branch" },
+        "credential_delivery": { "const": "short-lived-installation-token" },
+        "permissions": {
+          "type": "object",
+          "required": ["metadata", "contents", "pull_requests", "checks"],
+          "properties": {
+            "metadata": { "const": "read" },
+            "contents": { "const": "write" },
+            "pull_requests": { "const": "write" },
+            "checks": { "const": "read" }
+          },
+          "additionalProperties": false
+        },
+        "denied_powers": { "$ref": "#/$defs/uniqueStrings" }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "required_fields",
+        "secret_values",
+        "human_identity_as_agent_source",
+        "agent_authorship_as_human_review"
+      ],
+      "properties": {
+        "required_fields": { "$ref": "#/$defs/uniqueStrings" },
+        "secret_values": { "const": "denied" },
+        "human_identity_as_agent_source": { "const": "denied" },
+        "agent_authorship_as_human_review": { "const": "denied" }
+      },
+      "additionalProperties": false
+    },
+    "bootstrap": {
+      "type": "object",
+      "required": [
+        "mode",
+        "decision_id",
+        "operator_principal",
+        "allowed_work_item_refs",
+        "allowed_actions",
+        "prohibited_effects"
+      ],
+      "properties": {
+        "mode": { "const": "bounded-first-identity-bootstrap" },
+        "decision_id": { "const": "decision:agent-gary-provider-bootstrap" },
+        "operator_principal": { "const": "operator:workspace-owner" },
+        "allowed_work_item_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^openproject://work_packages/[0-9]+$"
+          }
+        },
+        "allowed_actions": { "$ref": "#/$defs/uniqueStrings" },
+        "prohibited_effects": { "$ref": "#/$defs/uniqueStrings" }
+      },
+      "additionalProperties": false
+    },
+    "normal_activation": {
+      "type": "object",
+      "required": ["enabled", "required_work_item_refs", "required_outcomes"],
+      "properties": {
+        "enabled": { "const": false },
+        "required_work_item_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^openproject://work_packages/[0-9]+$"
+          }
+        },
+        "required_outcomes": { "$ref": "#/$defs/uniqueStrings" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "uniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "sourceImplementorProfile": {
+      "type": "object",
+      "required": [
+        "display_name",
+        "logical_agent_id",
+        "role",
+        "state",
+        "provider_principal",
+        "git_author"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "pattern": "^Agent [A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)*$"
+        },
+        "logical_agent_id": {
+          "type": "string",
+          "pattern": "^agent-[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "role": { "const": "source-implementor" },
+        "state": {
+          "enum": ["contract-defined", "active", "suspended", "retired"]
+        },
+        "provider_principal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "git_author": {
+          "type": "object",
+          "required": ["name", "email"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^Agent [A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)*$"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

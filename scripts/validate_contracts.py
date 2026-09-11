@@ -6408,6 +6408,9 @@ def main() -> int:
         "durable_orchestration": repo_root / "contracts/durable-orchestration.yaml",
         "delegation_policy": repo_root / "contracts/delegation-policy.yaml",
         "agent_action_authority": repo_root / "contracts/agent-action-authority.yaml",
+        "agent_source_implementation": (
+            repo_root / "contracts/agent-source-implementation.yaml"
+        ),
         "agent_action_conformance": repo_root / "contracts/agent-action-conformance.yaml",
         "repository_custody": repo_root / "contracts/repository-custody.yaml",
         "self_improvement_policy": repo_root / "contracts/self-improvement-policy.yaml",
@@ -8096,6 +8099,198 @@ def main() -> int:
     if set(agent_action_authority["principles"]["authority_inputs"]) != expected_authority_inputs:
         errors.append(
             "contracts/agent-action-authority.yaml: principles.authority_inputs must define the complete authority binding without treating agent identity as authority"
+        )
+    agent_source_implementation = contracts["agent_source_implementation"]
+    if (
+        agent_source_implementation["authority_contract_ref"]
+        != "contracts/agent-action-authority.yaml"
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: authority_contract_ref must point to the canonical agent-action authority contract"
+        )
+    if (
+        agent_source_implementation["architecture"]["work_item_ref"]
+        != "openproject://work_packages/1134"
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: architecture.work_item_ref must point to work item #1134"
+        )
+    expected_agent_naming = {
+        "display_name_format": "Agent <Name>",
+        "display_name_pattern": (
+            r"^Agent [A-Z][A-Za-z0-9]*(?: [A-Z][A-Za-z0-9]*)*$"
+        ),
+        "logical_id_prefix": "agent-",
+        "logical_id_pattern": r"^agent-[a-z0-9]+(?:-[a-z0-9]+)*$",
+    }
+    if agent_source_implementation["naming"] != expected_agent_naming:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: naming must preserve the product-neutral Agent <Name> display and agent-<name> logical-id grammar"
+        )
+    agent_gary = agent_source_implementation["profiles"].get("agent-gary")
+    if agent_gary != {
+        "display_name": "Agent Gary",
+        "logical_agent_id": "agent-gary",
+        "role": "source-implementor",
+        "state": "contract-defined",
+        "provider_principal": "mfshaf7-agent-gary[bot]",
+        "git_author": {
+            "name": "Agent Gary",
+            "email": (
+                "327854141+mfshaf7-agent-gary[bot]@users.noreply.github.com"
+            ),
+        },
+    }:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: Agent Gary must remain the contract-defined source implementor until normal activation"
+        )
+    for profile_id, profile in agent_source_implementation["profiles"].items():
+        if profile_id != profile["logical_agent_id"]:
+            errors.append(
+                "contracts/agent-source-implementation.yaml: profile key "
+                f"{profile_id!r} must equal logical_agent_id"
+            )
+        if not re.fullmatch(
+            expected_agent_naming["display_name_pattern"],
+            profile["display_name"],
+        ):
+            errors.append(
+                "contracts/agent-source-implementation.yaml: profile "
+                f"{profile_id!r} does not follow the Agent <Name> display grammar"
+            )
+        if not re.fullmatch(
+            expected_agent_naming["logical_id_pattern"],
+            profile["logical_agent_id"],
+        ):
+            errors.append(
+                "contracts/agent-source-implementation.yaml: profile "
+                f"{profile_id!r} does not follow the agent-<name> logical-id grammar"
+            )
+    expected_source_authority_separation = {
+        "operator": "accountable-reviewer-approver-and-merger",
+        "source_implementor": "attributed-branch-author-and-pusher",
+        "orchestrator": "admitted-workflow-coordinator-and-receipt-owner",
+        "provider_identity": "authenticated-source-transport",
+        "platform": "credential-custodian-and-token-issuer",
+    }
+    if (
+        agent_source_implementation["authority_separation"]
+        != expected_source_authority_separation
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: operator, implementor, orchestrator, provider, and Platform authority must remain separate"
+        )
+    expected_source_session_bindings = {
+        "logical_agent_id",
+        "landing_unit_id",
+        "owner_repo",
+        "repository_id",
+        "branch",
+        "fetched_base",
+        "provider_installation_id",
+        "provider_principal",
+        "git_author_name",
+        "git_author_email",
+        "token_expiry",
+        "human_reviewer_id",
+    }
+    expected_source_completion_bindings = {
+        "pushed_head",
+        "reviewed_head",
+        "merged_head",
+    }
+    required_source_bindings = agent_source_implementation["required_bindings"]
+    if set(required_source_bindings["session"]) != expected_source_session_bindings:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: sessions must bind the exact Landing Unit, source base, provider installation, expiry, and human reviewer"
+        )
+    if (
+        set(required_source_bindings["completion"])
+        != expected_source_completion_bindings
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: completion must bind the pushed, reviewed, and merged heads"
+        )
+    provider_boundary = agent_source_implementation["provider_boundary"]
+    expected_provider_permissions = {
+        "metadata": "read",
+        "contents": "write",
+        "pull_requests": "write",
+        "checks": "read",
+    }
+    if provider_boundary["permissions"] != expected_provider_permissions:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: provider permissions must remain at the selected-repository authoring minimum"
+        )
+    expected_denied_provider_powers = {
+        "approve-pull-request",
+        "merge-pull-request",
+        "push-default-branch",
+        "administer-repository",
+        "modify-rulesets",
+        "delete-repository",
+        "broaden-installation-scope",
+        "use-human-credential-fallback",
+    }
+    if set(provider_boundary["denied_powers"]) != expected_denied_provider_powers:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: provider must deny approval, merge, default-branch mutation, administration, scope expansion, and human fallback"
+        )
+    expected_source_evidence_fields = (
+        expected_source_session_bindings | expected_source_completion_bindings
+    )
+    if (
+        set(agent_source_implementation["evidence"]["required_fields"])
+        != expected_source_evidence_fields
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: evidence must preserve every required session and Git binding"
+        )
+    expected_bootstrap_refs = {
+        "openproject://work_packages/1134",
+        "openproject://work_packages/1135",
+        "openproject://work_packages/1136",
+        "openproject://work_packages/1137",
+    }
+    bootstrap = agent_source_implementation["bootstrap"]
+    if set(bootstrap["allowed_work_item_refs"]) != expected_bootstrap_refs:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: first-identity bootstrap must remain limited to work items #1134 through #1137"
+        )
+    expected_bootstrap_actions = {
+        "register-selected-repository-app",
+        "custody-private-key",
+        "mint-short-lived-installation-token",
+        "push-exact-non-default-branch",
+        "open-or-update-pull-request",
+    }
+    if set(bootstrap["allowed_actions"]) != expected_bootstrap_actions:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: bootstrap actions must remain limited to provider setup and exact review-branch authorship"
+        )
+    expected_bootstrap_prohibitions = {
+        "shared-runtime-activation",
+        "default-branch-mutation",
+        "approval-or-merge",
+        "repository-scope-expansion",
+        "human-credential-fallback",
+    }
+    if set(bootstrap["prohibited_effects"]) != expected_bootstrap_prohibitions:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: bootstrap must not activate runtime, mutate the default branch, approve, merge, expand scope, or use human credentials"
+        )
+    expected_source_activation_refs = {
+        "openproject://work_packages/1135",
+        "openproject://work_packages/1136",
+        "openproject://work_packages/1137",
+    }
+    normal_source_activation = agent_source_implementation["normal_activation"]
+    if (
+        set(normal_source_activation["required_work_item_refs"])
+        != expected_source_activation_refs
+    ):
+        errors.append(
+            "contracts/agent-source-implementation.yaml: normal Agent Gary activation must remain gated by Security, Platform, and OOS work items #1135 through #1137"
         )
     expected_action_classes = {
         "read": {
