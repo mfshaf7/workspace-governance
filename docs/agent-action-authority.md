@@ -3,8 +3,12 @@
 This is the primary workspace operator surface for classifying and authorizing
 AI-assisted actions that cross owner or workflow boundaries.
 
-The canonical machine-readable contract is
-[contracts/agent-action-authority.yaml](../contracts/agent-action-authority.yaml).
+The canonical machine-readable contracts are:
+
+- [agent-action-authority.yaml](../contracts/agent-action-authority.yaml) for
+  generic `read`, `advise`, `draft`, and `mutate` authority
+- [agent-source-implementation.yaml](../contracts/agent-source-implementation.yaml)
+  for governed source authorship under that authority model
 
 ## Core Rule
 
@@ -14,6 +18,85 @@ An action is eligible only when the accountable operator, authenticated caller,
 admitted workflow, action class, exact target, current source version, current
 policy decision, and any required approval all agree. Owner-repo business rules
 remain authoritative for the final operation.
+
+## Source Implementation Identity
+
+Source implementation uses a distinct identity so authorship can be reviewed
+independently from human approval. The first registered source implementor is:
+
+- display name: `Agent Gary`
+- logical agent id: `agent-gary`
+- role: source implementor
+- provider principal: `mfshaf7-agent-gary[bot]`
+- Git author: `Agent Gary` using the GitHub-recognized App bot noreply address
+- current state: contract defined, not normally active
+
+Future logical AI-agent display names use `Agent <Name>` and machine ids use
+`agent-<name>`. Human users, service workloads, model providers, and backend
+executors do not use this naming class.
+
+The authority split is strict:
+
+| Principal | Responsibility |
+| --- | --- |
+| Human operator | Accountable reviewer, approver, and merger |
+| Agent Gary | Attributed branch author and pusher |
+| Operator Orchestration Service | Admitted workflow coordinator and receipt owner |
+| GitHub App installation | Authenticated source transport only |
+| Platform Engineering | Credential custodian and short-lived token issuer |
+
+Agent Gary may author and push an exact non-default review branch and open or
+update its pull request. Agent Gary cannot approve or merge that pull request,
+push the default branch, administer a repository, modify repository rules,
+broaden installation scope, or use the operator's GitHub credential as a
+fallback.
+
+## Source Session Binding
+
+Before a credential is issued or a branch is pushed, every governed source
+session binds:
+
+- logical agent id and provider installation id
+- provider principal and exact Git author name and email
+- exact Landing Unit, owner repo, and repository id
+- branch and fetched base
+- token expiry
+- intended human reviewer id
+
+Completion evidence then binds the pushed head, the exact head reviewed by the
+human operator, and the merged head read back from the source provider.
+
+The provider installation is selected-repository only. Its minimum permissions
+are Metadata read, Contents write, Pull requests write, and Checks read.
+Evidence records the bindings and durable references, never private keys,
+installation tokens, or other secret values.
+
+The Git author identity must resolve to the bound provider principal. A local
+or otherwise unattributed email is not acceptable because repository policy
+cannot distinguish it from unowned source and may require an impossible extra
+human approval.
+
+Agent authorship is not independent review. A source Landing Unit is not
+complete until the human operator reviews the exact pushed head, explicitly
+authorizes the merge, and the merged head is read back and reconciled.
+
+## First Identity Bootstrap
+
+The first source identity has a bounded bootstrap because the normal OOS token
+consumer cannot activate until the identity contract, Security review, and
+Platform commissioning have landed in order. The operator-approved bootstrap
+is bound to the current Delivery architecture packet and work items #1134
+through #1137 only.
+
+That bootstrap may register the selected-repository GitHub App, place its
+private key under Platform custody, mint a short-lived installation token, and
+author the exact non-default review branches for those work items. It does not
+activate shared runtime behavior, mutate a default branch, approve or merge a
+pull request, expand repository scope, or permit human-credential fallback.
+
+Normal Agent Gary activation remains disabled until Security accepts the exact
+boundary in #1135, Platform commissions it in #1136, and OOS activates bounded
+credential consumption in #1137.
 
 ## Action Classes
 
@@ -74,6 +157,10 @@ The contract and schemas are the active foundation. Shared runtime mutation is
 not active yet. Runtime activation remains blocked until the policy evaluator,
 workflow enforcement, integrated conformance, and Security acceptance outcomes
 listed in the canonical contract are complete.
+
+The separate source-implementation path is also fail closed. Defining Agent
+Gary in this contract does not activate normal provider use; its activation
+requirements are recorded under `source_implementation.normal_activation`.
 
 The Governance Operations Console may display safe posture and submit requests
 to admitted server workflows. It does not authorize actions and must not trust

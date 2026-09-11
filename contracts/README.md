@@ -94,6 +94,12 @@ Use these contracts to declare:
   - defines the provider-neutral action classes, identity and authority
     bindings, cross-repo receipt ownership, activation gates, and denied
     shortcuts for attributable AI-assisted actions
+- `agent-source-implementation.yaml`
+  - defines the product-neutral `Agent <Name>` source-implementor grammar,
+    exact Git and provider-principal attribution bindings, human-only review
+    and merge boundary,
+    selected-repository permissions, no-fallback rule, and bounded first
+    identity bootstrap for Agent Gary
 - `agent-action-conformance.yaml`
   - defines the integrated local source proof across the exact merged WGCF
     evaluator and OOS enforcer revisions, including positive and negative
