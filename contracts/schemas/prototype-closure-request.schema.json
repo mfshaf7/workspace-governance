@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prototype Closure Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "request_id", "prototype_id", "action", "expected_lifecycle", "expected_source_revision", "operator_id", "correlation_id", "idempotency_key"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "prototype-closure-request"},
+    "request_id": {"$ref": "#/$defs/text"},
+    "prototype_id": {"$ref": "#/$defs/text"},
+    "action": {"enum": ["apply-delivery", "graduate-source", "retire-incubation", "reopen-incubation"]},
+    "expected_lifecycle": {"enum": ["exploring", "candidate", "baseline-approved", "graduating", "retired"]},
+    "expected_source_revision": {"$ref": "#/$defs/text"},
+    "operator_id": {"$ref": "#/$defs/text"},
+    "correlation_id": {"$ref": "#/$defs/text"},
+    "idempotency_key": {"$ref": "#/$defs/text"},
+    "accepted_baseline_receipt_ref": {"$ref": "#/$defs/text"},
+    "target_kind": {"enum": ["new-delivery-epic", "existing-delivery-item"]},
+    "target_delivery_ref": {"$ref": "#/$defs/text"},
+    "accepted_delivery_target_receipt_ref": {"$ref": "#/$defs/text"},
+    "durable_owner_ref": {"$ref": "#/$defs/text"},
+    "durable_repo_ref": {"$ref": "#/$defs/text"},
+    "durable_owner_acceptance_ref": {"$ref": "#/$defs/text"},
+    "transfer_strategy": {"enum": ["transfer", "already-owned"]},
+    "already_owned_source_proof_ref": {"$ref": "#/$defs/text"},
+    "retirement_reason": {"$ref": "#/$defs/text"},
+    "retention_plan_ref": {"$ref": "#/$defs/text"},
+    "runtime_disposition_plan_ref": {"$ref": "#/$defs/text"},
+    "prior_retirement_receipt_ref": {"$ref": "#/$defs/text"}
+  },
+  "allOf": [
+    {"if": {"properties": {"action": {"const": "apply-delivery"}}}, "then": {"properties": {"expected_lifecycle": {"const": "baseline-approved"}}, "required": ["accepted_baseline_receipt_ref", "target_kind"], "not": {"required": ["accepted_delivery_target_receipt_ref"]}}},
+    {"if": {"properties": {"action": {"const": "apply-delivery"}, "target_kind": {"const": "existing-delivery-item"}}}, "then": {"required": ["target_delivery_ref"]}},
+    {"if": {"properties": {"action": {"const": "graduate-source"}}}, "then": {"properties": {"expected_lifecycle": {"const": "graduating"}}, "required": ["accepted_delivery_target_receipt_ref", "durable_owner_ref", "durable_repo_ref", "durable_owner_acceptance_ref", "transfer_strategy"]}},
+    {"if": {"properties": {"action": {"const": "graduate-source"}, "transfer_strategy": {"const": "already-owned"}}}, "then": {"required": ["already_owned_source_proof_ref"]}},
+    {"if": {"properties": {"action": {"const": "graduate-source"}, "transfer_strategy": {"const": "transfer"}}}, "then": {"not": {"required": ["already_owned_source_proof_ref"]}}},
+    {"if": {"properties": {"action": {"const": "retire-incubation"}}}, "then": {"properties": {"expected_lifecycle": {"enum": ["exploring", "candidate", "baseline-approved", "graduating"]}}, "required": ["retirement_reason", "retention_plan_ref", "runtime_disposition_plan_ref"]}},
+    {"if": {"properties": {"action": {"const": "reopen-incubation"}}}, "then": {"properties": {"expected_lifecycle": {"const": "retired"}}, "required": ["prior_retirement_receipt_ref"]}}
+  ],
+  "$defs": {"text": {"type": "string", "minLength": 1}}
+}

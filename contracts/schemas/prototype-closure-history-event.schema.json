@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prototype Closure History Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "event_id", "prototype_id", "event_type", "terminal_receipt_ref", "terminal_receipt_digest", "prior_event_digest", "recorded_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "artifact_type": {"const": "prototype-closure-history-event"},
+    "event_id": {"$ref": "#/$defs/text"},
+    "prototype_id": {"$ref": "#/$defs/text"},
+    "event_type": {"enum": ["delivery-accepted", "source-graduated", "incubation-retired", "incubation-reopened", "closure-denied"]},
+    "terminal_receipt_ref": {"$ref": "#/$defs/text"},
+    "terminal_receipt_digest": {"$ref": "#/$defs/digest"},
+    "prior_event_digest": {"oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+    "recorded_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

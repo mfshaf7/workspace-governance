@@ -1,0 +1,118 @@
+schema_version: 1
+owner_repo: workspace-governance
+implementation_posture: contract-only
+primary_operator_surface: docs/prototype-closure.md
+architecture:
+  initiative_ref: openproject://work_packages/892
+  feature_ref: openproject://work_packages/921
+  contract_work_ref: openproject://work_packages/1101
+upstream_contracts:
+  project_lifecycle: contracts/project-lifecycle.yaml
+  prototype_landing: contracts/prototype-landing.yaml
+  prototype_maturity: contracts/prototype-maturity.yaml
+purpose: Close Prototype incubation without confusing Delivery acceptance, durable source custody, retirement, runtime cleanup, or Portfolio publication.
+authority:
+  contract: workspace-governance
+  incubation_source_and_history: workspace-prototype-studio
+  readiness: workspace-governance-control-fabric
+  workflow_and_target_reconciliation: operator-orchestration-service
+  runtime_and_identity: platform-engineering
+  security_review: security-architecture
+  operator_projection: governance-operations-console
+actions:
+  apply-delivery:
+    from_lifecycle: baseline-approved
+    project_phase_effect: delivery-governed
+    source_custody_effect: none
+    request_evidence:
+      - accepted-baseline-receipt
+      - exact-prototype-source-revision
+    completion_evidence:
+      - accepted-delivery-target-receipt
+    rule: Delivery acceptance alone must never set Prototype lifecycle to graduated or relinquish Studio source custody.
+  graduate-source:
+    from_lifecycle: graduating
+    to_lifecycle: graduated
+    project_phase_precondition: delivery-governed
+    source_custody_effect: durable-owner
+    request_evidence:
+      - accepted-delivery-target-receipt
+      - durable-owner-acceptance-receipt
+      - transfer-strategy-or-already-owned-proof
+    completion_evidence:
+      - exact-source-transfer-or-already-owned-proof
+      - merged-studio-readback
+    rule: Graduation requires exactly one active durable source custodian. An existing owner can accept source already present; a new repository cannot be assumed from a requested route.
+  retire-incubation:
+    from_lifecycle:
+      - exploring
+      - candidate
+      - baseline-approved
+      - graduating
+    to_lifecycle: retired
+    project_phase_effect: none
+    source_custody_effect: retained-history
+    request_evidence:
+      - explicit-operator-decision
+      - retention-and-cleanup-plan
+      - exact-active-runtime-disposition-plan
+    completion_evidence:
+      - exact-active-runtime-cleanup-or-absence-proof
+      - merged-studio-readback
+    rule: Retirement ends local incubation only. It cannot silently retire an accepted Delivery item, delete durable source, or claim runtime revocation before Platform proves it.
+  reopen-incubation:
+    from_lifecycle: retired
+    to_lifecycle: exploring
+    project_phase_effect: none
+    source_custody_effect: incubation-repo
+    request_evidence:
+      - explicit-operator-decision
+      - prior-retirement-receipt
+      - retained-source-readback
+    completion_evidence:
+      - merged-studio-readback
+    rule: Reopen creates a new history event and requires fresh maturity review; it does not revive a previous preview runtime or erase retirement evidence.
+target_routes:
+  workspace-delivery-art:
+    maturity: active
+    effect: project-phase-only
+  existing-owner-repo:
+    maturity: evidence-gated
+    effect: source-custody-transfer
+    requirement: accepted-durable-owner-and-exact-source-proof
+  new-repo:
+    maturity: blocked-until-repository-custody-activation
+    effect: no-mutation
+    requirement: active-repository-custody-capability-and-accepted-owner-receipt
+  portfolio:
+    maturity: prohibited
+    effect: no-mutation
+    reason: Portfolio publication is not an incubation exit or build lane.
+artifact_chain:
+  request: contracts/schemas/prototype-closure-request.schema.json
+  receipt: contracts/schemas/prototype-closure-receipt.schema.json
+  history_event: contracts/schemas/prototype-closure-history-event.schema.json
+  binding_rule: Every decision binds the observed Prototype state, source revision, operator, correlation id, idempotency key, and exact accepted upstream receipts.
+  completion_rule: Success requires the owning target receipt, merged Studio source readback where source changes, and an immutable terminal receipt.
+  replay_rule: The same idempotency key and authority digests returns the same terminal receipt; changed input under the same key is denied.
+history:
+  owner_repo: workspace-prototype-studio
+  mode: append-only
+  event_types:
+    - delivery-accepted
+    - source-graduated
+    - incubation-retired
+    - incubation-reopened
+    - closure-denied
+  ordering_rule: A new event binds the prior event digest and the exact terminal receipt; denied and failed attempts never masquerade as a completed transition.
+runtime_cleanup:
+  owner_repo: platform-engineering
+  rule: Revoke only exact active incubation resources after accepted closure; absent or draft preview resources require no invented revoke. Landing and Maturity identities remain separate.
+  normal_availability_gate: openproject://work_packages/1140
+recovery:
+  rule: A failed transition preserves prior durable lifecycle and source custody, with a denial receipt and explicit next action.
+  allowed_decisions:
+    - remove
+    - workaround
+    - accept-risk
+    - defer
