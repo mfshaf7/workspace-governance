@@ -24,19 +24,22 @@ actions:
     from_lifecycle: baseline-approved
     project_phase_effect: delivery-governed
     source_custody_effect: none
-    required_evidence:
+    request_evidence:
       - accepted-baseline-receipt
-      - accepted-delivery-target-receipt
       - exact-prototype-source-revision
+    completion_evidence:
+      - accepted-delivery-target-receipt
     rule: Delivery acceptance alone must never set Prototype lifecycle to graduated or relinquish Studio source custody.
   graduate-source:
     from_lifecycle: graduating
     to_lifecycle: graduated
     project_phase_precondition: delivery-governed
     source_custody_effect: durable-owner
-    required_evidence:
+    request_evidence:
       - accepted-delivery-target-receipt
       - durable-owner-acceptance-receipt
+      - transfer-strategy-or-already-owned-proof
+    completion_evidence:
       - exact-source-transfer-or-already-owned-proof
       - merged-studio-readback
     rule: Graduation requires exactly one active durable source custodian. An existing owner can accept source already present; a new repository cannot be assumed from a requested route.
@@ -49,10 +52,12 @@ actions:
     to_lifecycle: retired
     project_phase_effect: none
     source_custody_effect: retained-history
-    required_evidence:
+    request_evidence:
       - explicit-operator-decision
       - retention-and-cleanup-plan
-      - exact-active-runtime-disposition
+      - exact-active-runtime-disposition-plan
+    completion_evidence:
+      - exact-active-runtime-cleanup-or-absence-proof
       - merged-studio-readback
     rule: Retirement ends local incubation only. It cannot silently retire an accepted Delivery item, delete durable source, or claim runtime revocation before Platform proves it.
   reopen-incubation:
@@ -60,10 +65,11 @@ actions:
     to_lifecycle: exploring
     project_phase_effect: none
     source_custody_effect: incubation-repo
-    required_evidence:
+    request_evidence:
       - explicit-operator-decision
       - prior-retirement-receipt
       - retained-source-readback
+    completion_evidence:
       - merged-studio-readback
     rule: Reopen creates a new history event and requires fresh maturity review; it does not revive a previous preview runtime or erase retirement evidence.
 target_routes:

@@ -38,8 +38,18 @@ def contract_issues(contract: dict, *, known_repos: set[str]) -> list[str]:
         errors.append("closure actions must be apply-delivery, graduate-source, retire-incubation, and reopen-incubation")
     if actions.get("apply-delivery", {}).get("source_custody_effect") != "none":
         errors.append("Delivery application cannot transfer source custody")
+    delivery = actions.get("apply-delivery", {})
+    if "accepted-delivery-target-receipt" in delivery.get("request_evidence", []):
+        errors.append("Delivery request cannot require its future target receipt")
+    if "accepted-delivery-target-receipt" not in delivery.get("completion_evidence", []):
+        errors.append("Delivery completion must carry accepted target receipt")
     if actions.get("graduate-source", {}).get("project_phase_precondition") != "delivery-governed":
         errors.append("source graduation requires accepted Delivery phase")
+    graduation = actions.get("graduate-source", {})
+    if "exact-source-transfer-or-already-owned-proof" in graduation.get("request_evidence", []):
+        errors.append("source transfer request cannot require its future transfer receipt")
+    if "exact-source-transfer-or-already-owned-proof" not in graduation.get("completion_evidence", []):
+        errors.append("source graduation completion must prove transfer or already-owned custody")
     if contract.get("target_routes", {}).get("new-repo", {}).get("maturity") != "blocked-until-repository-custody-activation":
         errors.append("new-repo route must remain blocked until Repository custody activates")
     if contract.get("target_routes", {}).get("portfolio", {}).get("maturity") != "prohibited":
@@ -76,17 +86,22 @@ def receipt_issues(request: dict, receipt: dict) -> list[str]:
     if action == "apply-delivery":
         if receipt.get("observed_source_custody") != "incubation-repo":
             errors.append("Delivery application cannot graduate source")
-        if receipt.get("accepted_delivery_target_receipt_ref") != request.get("accepted_delivery_target_receipt_ref"):
-            errors.append("Delivery acceptance receipt mismatch")
+        if not receipt.get("accepted_delivery_target_receipt_ref"):
+            errors.append("Delivery application lacks target acceptance receipt")
     if action == "graduate-source":
         if receipt.get("observed_source_custody") not in {"dedicated-owner-repo", "shared-owner-repo"}:
             errors.append("source graduation requires durable custody")
         for field in ("accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref"):
             if receipt.get(field) != request.get(field):
                 errors.append(f"source graduation {field} mismatch")
-        proof = "source_transfer_receipt_ref" if request.get("source_transfer_receipt_ref") else "already_owned_source_proof_ref"
-        if receipt.get(proof) != request.get(proof):
-            errors.append("source transfer or already-owned proof mismatch")
+        if request.get("transfer_strategy") == "already-owned":
+            if receipt.get("already_owned_source_proof_ref") != request.get("already_owned_source_proof_ref"):
+                errors.append("already-owned source proof mismatch")
+        elif request.get("transfer_strategy") == "transfer":
+            if not receipt.get("source_transfer_receipt_ref"):
+                errors.append("source transfer receipt missing")
+        else:
+            errors.append("unknown source transfer strategy")
     if action == "reopen-incubation" and receipt.get("prior_retirement_receipt_ref") != request.get("prior_retirement_receipt_ref"):
         errors.append("reopen does not bind prior retirement")
     return errors

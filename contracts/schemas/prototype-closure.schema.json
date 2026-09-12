@@ -21,6 +21,6 @@
     "recovery": {"type": "object", "required": ["rule", "allowed_decisions"]}
   },
   "$defs": {
-    "action": {"type": "object", "required": ["from_lifecycle", "required_evidence", "rule"], "properties": {"from_lifecycle": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}, "minItems": 1}]}, "required_evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "rule": {"type": "string", "minLength": 1}}}
+    "action": {"type": "object", "required": ["from_lifecycle", "request_evidence", "completion_evidence", "rule"], "properties": {"from_lifecycle": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}, "minItems": 1}]}, "request_evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "completion_evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "rule": {"type": "string", "minLength": 1}}}
   }
 }

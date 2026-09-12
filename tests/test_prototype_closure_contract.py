@@ -39,11 +39,11 @@ def request(action: str) -> dict:
         "idempotency_key": "closure:prototype-1:1",
     }
     if action == "apply-delivery":
-        values.update(accepted_baseline_receipt_ref="baseline:1", accepted_delivery_target_receipt_ref="delivery:1")
+        values.update(accepted_baseline_receipt_ref="baseline:1", target_kind="new-delivery-epic")
     elif action == "graduate-source":
-        values.update(accepted_delivery_target_receipt_ref="delivery:1", durable_owner_ref="owner:1", durable_repo_ref="repo:1", durable_owner_acceptance_ref="owner-accepted:1", source_transfer_receipt_ref="transfer:1")
+        values.update(accepted_delivery_target_receipt_ref="delivery:1", durable_owner_ref="owner:1", durable_repo_ref="repo:1", durable_owner_acceptance_ref="owner-accepted:1", transfer_strategy="transfer")
     elif action == "retire-incubation":
-        values.update(retirement_reason="not-viable", retention_plan_ref="retention:1", runtime_disposition_ref="runtime:none")
+        values.update(retirement_reason="not-viable", retention_plan_ref="retention:1", runtime_disposition_plan_ref="runtime:none")
     else:
         values["prior_retirement_receipt_ref"] = "retirement:1"
     return values
@@ -80,6 +80,10 @@ def receipt(req: dict) -> dict:
             values[field] = req[field]
     if action != "apply-delivery":
         values["merged_studio_readback_ref"] = "studio-readback:1"
+    if action == "apply-delivery":
+        values["accepted_delivery_target_receipt_ref"] = "delivery:1"
+    if action == "graduate-source" and req["transfer_strategy"] == "transfer":
+        values["source_transfer_receipt_ref"] = "transfer:1"
     return values
 
 
@@ -107,6 +111,20 @@ class PrototypeClosureContractTests(unittest.TestCase):
         self.assertTrue(list(schema("receipt").iter_errors(result)))
         self.assertIn("Delivery application cannot graduate source", receipt_issues(req, result))
 
+    def test_delivery_request_cannot_claim_its_future_target_receipt(self) -> None:
+        req = request("apply-delivery")
+        self.assertEqual(list(schema("request").iter_errors(req)), [])
+        req["accepted_delivery_target_receipt_ref"] = "delivery:1"
+        self.assertTrue(list(schema("request").iter_errors(req)))
+
+    def test_transfer_receipt_is_output_not_request_input(self) -> None:
+        req = request("graduate-source")
+        self.assertEqual(list(schema("request").iter_errors(req)), [])
+        result = receipt(req)
+        del result["source_transfer_receipt_ref"]
+        self.assertTrue(list(schema("receipt").iter_errors(result)))
+        self.assertIn("source transfer receipt missing", receipt_issues(req, result))
+
     def test_receipt_rejects_stale_source_revision(self) -> None:
         req = request("apply-delivery")
         result = receipt(req)
@@ -115,7 +133,8 @@ class PrototypeClosureContractTests(unittest.TestCase):
 
     def test_graduation_needs_exact_transfer_or_already_owned_proof(self) -> None:
         req = request("graduate-source")
-        del req["source_transfer_receipt_ref"]
+        self.assertEqual(list(schema("request").iter_errors(req)), [])
+        req["transfer_strategy"] = "already-owned"
         self.assertTrue(list(schema("request").iter_errors(req)))
         req["already_owned_source_proof_ref"] = "already-owned:1"
         self.assertEqual(list(schema("request").iter_errors(req)), [])
