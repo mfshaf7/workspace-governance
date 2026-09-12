@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
 import unittest
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -156,6 +159,71 @@ def receipt_chain_issues(req: dict, result: dict, *, event: dict | None = None, 
 
 
 class PrototypeClosureContractTests(unittest.TestCase):
+    def test_real_git_event_merge_readback_receipt_order(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+
+            def git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+                return subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True, check=check)
+
+            git("init", "-b", "main")
+            git("config", "user.name", "Closure Contract Test")
+            git("config", "user.email", "closure-test@example.invalid")
+            (repo / "prototype.json").write_text('{"lifecycle":"baseline-approved"}\n')
+            git("add", "prototype.json")
+            git("commit", "-m", "Initial prototype state")
+            base = git("rev-parse", "HEAD").stdout.strip()
+
+            req = request("apply-delivery")
+            req["expected_source_revision"] = base
+            request_digest = "sha256:" + hashlib.sha256(json.dumps(req, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            event = source_event(req)
+            event["request_digest"] = request_digest
+            event_digest = "sha256:" + hashlib.sha256(json.dumps(event, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            git("checkout", "-b", "review")
+            (repo / "closure-event.json").write_text(json.dumps(event, sort_keys=True) + "\n")
+            git("add", "closure-event.json")
+            git("commit", "-m", "Record accepted Closure source event")
+            reviewed_head = git("rev-parse", "HEAD").stdout.strip()
+
+            self.assertNotEqual(git("show", "main:closure-event.json", check=False).returncode, 0)
+            self.assertIn(
+                "completed closure requires source event and merged readback evidence",
+                receipt_issues(req, receipt(req), request_digest=request_digest),
+            )
+            stale_event = {**event, "expected_source_revision": "f" * 40}
+            self.assertIn(
+                "history source revision does not match request",
+                history_issues(req, stale_event, request_digest=request_digest, prior_digest=None),
+            )
+
+            git("checkout", "main")
+            git("merge", "--no-ff", "review", "-m", "Merge accepted Closure event")
+            merged_head = git("rev-parse", "HEAD").stdout.strip()
+            self.assertEqual(git("merge-base", "--is-ancestor", reviewed_head, merged_head).returncode, 0)
+            self.assertEqual(json.loads(git("show", "HEAD:closure-event.json").stdout), event)
+
+            readback = studio_readback(event)
+            readback["source_event_digest"] = event_digest
+            readback["merged_source_revision"] = merged_head
+            readback_digest = "sha256:" + hashlib.sha256(json.dumps(readback, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            result = receipt(req)
+            result.update(
+                request_digest=request_digest,
+                source_event_digest=event_digest,
+                merged_studio_readback_digest=readback_digest,
+                merged_source_revision=merged_head,
+            )
+            self.assertEqual(list(schema("studio-readback").iter_errors(readback)), [])
+            self.assertEqual(
+                receipt_issues(
+                    req, result, request_digest=request_digest,
+                    event=event, event_digest=event_digest,
+                    readback=readback, readback_digest=readback_digest,
+                ),
+                [],
+            )
+
     def test_contract_owner_and_exit_boundaries(self) -> None:
         contract = yaml.safe_load((ROOT / "contracts/prototype-closure.yaml").read_text())
         known = set(contract["authority"].values()) | {"workspace-governance"}
