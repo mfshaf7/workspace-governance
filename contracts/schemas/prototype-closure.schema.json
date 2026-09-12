@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "owner_repo", "implementation_posture", "primary_operator_surface", "architecture", "upstream_contracts", "purpose", "authority", "actions", "target_routes", "artifact_chain", "history", "runtime_cleanup", "recovery"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "owner_repo": {"const": "workspace-governance"},
     "implementation_posture": {"const": "contract-only"},
     "primary_operator_surface": {"const": "docs/prototype-closure.md"},
@@ -15,7 +15,7 @@
     "authority": {"type": "object", "required": ["contract", "incubation_source_and_history", "readiness", "workflow_and_target_reconciliation", "runtime_and_identity", "security_review", "operator_projection"]},
     "actions": {"type": "object", "additionalProperties": false, "required": ["apply-delivery", "graduate-source", "retire-incubation", "reopen-incubation"], "properties": {"apply-delivery": {"$ref": "#/$defs/action"}, "graduate-source": {"$ref": "#/$defs/action"}, "retire-incubation": {"$ref": "#/$defs/action"}, "reopen-incubation": {"$ref": "#/$defs/action"}}},
     "target_routes": {"type": "object", "required": ["workspace-delivery-art", "existing-owner-repo", "new-repo", "portfolio"]},
-    "artifact_chain": {"type": "object", "required": ["request", "receipt", "history_event", "binding_rule", "completion_rule", "replay_rule"]},
+    "artifact_chain": {"type": "object", "required": ["request", "history_event", "merged_readback", "receipt", "binding_rule", "completion_rule", "replay_rule"]},
     "history": {"type": "object", "required": ["owner_repo", "mode", "event_types", "ordering_rule"]},
     "runtime_cleanup": {"type": "object", "required": ["owner_repo", "rule", "normal_availability_gate"]},
     "recovery": {"type": "object", "required": ["rule", "allowed_decisions"]}

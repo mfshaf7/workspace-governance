@@ -18,10 +18,17 @@ Platform owns runtime cleanup, and Security reviews the trust boundary.
    accepted transfer of the exact Studio revision or that the source is already
    present under that owner. The new-repository route remains unavailable until
    Repository custody is actually active.
-4. Review readiness and approve the exact action. OOS prepares a reviewable
-   source change; Studio records the transition only after merged readback and
-   the owner receipts agree. A denial preserves the prior state.
-5. Inspect the terminal receipt and append-only history. Platform revokes only
+4. Review readiness and approve the exact action. OOS first reconciles the
+   action-specific target, owner, or runtime evidence. The reviewable Studio
+   source event binds those accepted references, the request digest, expected
+   source revision, and prior history digest. It never cites a future terminal
+   receipt.
+5. Merge the Studio event and read back the exact merged revision, event digest,
+   lifecycle, and custody. OOS issues a completed terminal receipt only after
+   that readback agrees with the accepted request and event. This ordering also
+   applies to Delivery application, which changes Studio lifecycle to
+   `graduating` without transferring source custody.
+6. Inspect the terminal receipt and append-only history. Platform revokes only
    exact active incubation resources. Portfolio publication and governed
    release are separate later decisions.
 
@@ -31,7 +38,14 @@ receipt; it returns to exploration without resurrecting a preview server or
 erasing history. A graduated Prototype cannot be reopened into Studio custody
 through this path.
 
-The request, receipt, and history schemas live under
+Denied and failed pre-merge attempts have a terminal finding and next action
+but do not create a Studio transition event. If a merge may have happened but
+readback or receipt issuance is uncertain, leave the run pending reconciliation;
+do not report a terminal failure or attempt an unguarded second source change.
+Schema v2 supersedes the inactive v1 Closure artifact chain; it does not
+retroactively rewrite earlier Studio history.
+
+The request, source event, merged readback, and terminal receipt schemas live under
 [`contracts/schemas/`](../contracts/schemas/). Source and target owners must
 retain separate receipts so the project phase, source custody, runtime, release,
 and publication axes remain independently auditable.
