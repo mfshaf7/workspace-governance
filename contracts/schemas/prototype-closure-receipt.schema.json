@@ -3,12 +3,13 @@
   "title": "Prototype Closure Terminal Receipt",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "artifact_type", "receipt_id", "request_ref", "prototype_id", "action", "outcome", "previous_lifecycle", "observed_lifecycle", "previous_source_custody", "observed_source_custody", "source_revision", "operator_id", "correlation_id", "idempotency_key", "recorded_at", "evidence_refs"],
+  "required": ["schema_version", "artifact_type", "receipt_id", "request_ref", "request_digest", "prototype_id", "action", "outcome", "previous_lifecycle", "observed_lifecycle", "previous_source_custody", "observed_source_custody", "source_revision", "operator_id", "correlation_id", "idempotency_key", "recorded_at", "evidence_refs"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "artifact_type": {"const": "prototype-closure-receipt"},
     "receipt_id": {"$ref": "#/$defs/text"},
     "request_ref": {"$ref": "#/$defs/text"},
+    "request_digest": {"$ref": "#/$defs/digest"},
     "prototype_id": {"$ref": "#/$defs/text"},
     "action": {"enum": ["apply-delivery", "graduate-source", "retire-incubation", "reopen-incubation"]},
     "outcome": {"enum": ["completed", "denied", "failed"]},
@@ -17,6 +18,7 @@
     "previous_source_custody": {"enum": ["incubation-repo", "dedicated-owner-repo", "shared-owner-repo"]},
     "observed_source_custody": {"enum": ["incubation-repo", "dedicated-owner-repo", "shared-owner-repo"]},
     "source_revision": {"$ref": "#/$defs/text"},
+    "merged_source_revision": {"$ref": "#/$defs/text"},
     "operator_id": {"$ref": "#/$defs/text"},
     "correlation_id": {"$ref": "#/$defs/text"},
     "idempotency_key": {"$ref": "#/$defs/text"},
@@ -26,17 +28,23 @@
     "durable_owner_acceptance_ref": {"$ref": "#/$defs/text"},
     "source_transfer_receipt_ref": {"$ref": "#/$defs/text"},
     "already_owned_source_proof_ref": {"$ref": "#/$defs/text"},
+    "source_event_ref": {"$ref": "#/$defs/text"},
+    "source_event_digest": {"$ref": "#/$defs/digest"},
     "merged_studio_readback_ref": {"$ref": "#/$defs/text"},
+    "merged_studio_readback_digest": {"$ref": "#/$defs/digest"},
     "prior_retirement_receipt_ref": {"$ref": "#/$defs/text"},
     "finding_code": {"$ref": "#/$defs/text"},
+    "failure_stage": {"const": "pre-merge"},
     "next_action": {"$ref": "#/$defs/text"}
   },
   "allOf": [
-    {"if": {"properties": {"outcome": {"enum": ["denied", "failed"]}}}, "then": {"required": ["finding_code", "next_action"]}},
+    {"if": {"properties": {"outcome": {"enum": ["denied", "failed"]}}}, "then": {"required": ["finding_code", "next_action"], "not": {"anyOf": [{"required": ["source_event_ref"]}, {"required": ["merged_studio_readback_ref"]}]}}},
+    {"if": {"properties": {"outcome": {"const": "failed"}}}, "then": {"required": ["failure_stage"]}},
+    {"if": {"properties": {"outcome": {"const": "completed"}}}, "then": {"required": ["request_digest", "source_event_ref", "source_event_digest", "merged_studio_readback_ref", "merged_studio_readback_digest", "merged_source_revision"]}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "apply-delivery"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref"], "properties": {"observed_lifecycle": {"const": "graduating"}, "observed_source_custody": {"const": "incubation-repo"}}}},
-    {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "graduate-source"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref", "merged_studio_readback_ref"], "properties": {"observed_lifecycle": {"const": "graduated"}, "observed_source_custody": {"enum": ["dedicated-owner-repo", "shared-owner-repo"]}}, "oneOf": [{"required": ["source_transfer_receipt_ref"], "not": {"required": ["already_owned_source_proof_ref"]}}, {"required": ["already_owned_source_proof_ref"], "not": {"required": ["source_transfer_receipt_ref"]}}]}},
+    {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "graduate-source"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref"], "properties": {"observed_lifecycle": {"const": "graduated"}, "observed_source_custody": {"enum": ["dedicated-owner-repo", "shared-owner-repo"]}}, "oneOf": [{"required": ["source_transfer_receipt_ref"], "not": {"required": ["already_owned_source_proof_ref"]}}, {"required": ["already_owned_source_proof_ref"], "not": {"required": ["source_transfer_receipt_ref"]}}]}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "retire-incubation"}}}, "then": {"required": ["merged_studio_readback_ref"], "properties": {"observed_lifecycle": {"const": "retired"}}}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "reopen-incubation"}}}, "then": {"required": ["prior_retirement_receipt_ref", "merged_studio_readback_ref"], "properties": {"observed_lifecycle": {"const": "exploring"}}}}
   ],
-  "$defs": {"text": {"type": "string", "minLength": 1}}
+  "$defs": {"text": {"type": "string", "minLength": 1}, "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}
 }

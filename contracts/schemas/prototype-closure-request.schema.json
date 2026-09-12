@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "artifact_type", "request_id", "prototype_id", "action", "expected_lifecycle", "expected_source_revision", "operator_id", "correlation_id", "idempotency_key"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "artifact_type": {"const": "prototype-closure-request"},
     "request_id": {"$ref": "#/$defs/text"},
     "prototype_id": {"$ref": "#/$defs/text"},

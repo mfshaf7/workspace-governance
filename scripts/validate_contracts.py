@@ -169,8 +169,9 @@ PROTOTYPE_MATURITY_ARTIFACT_SCHEMAS = (
 )
 PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS = (
     "contracts/schemas/prototype-closure-request.schema.json",
-    "contracts/schemas/prototype-closure-receipt.schema.json",
     "contracts/schemas/prototype-closure-history-event.schema.json",
+    "contracts/schemas/prototype-closure-studio-readback.schema.json",
+    "contracts/schemas/prototype-closure-receipt.schema.json",
 )
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (

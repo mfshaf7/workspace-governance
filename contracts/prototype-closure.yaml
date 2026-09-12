@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 owner_repo: workspace-governance
 implementation_posture: contract-only
 primary_operator_surface: docs/prototype-closure.md
@@ -29,6 +29,7 @@ actions:
       - exact-prototype-source-revision
     completion_evidence:
       - accepted-delivery-target-receipt
+      - merged-studio-readback
     rule: Delivery acceptance alone must never set Prototype lifecycle to graduated or relinquish Studio source custody.
   graduate-source:
     from_lifecycle: graduating
@@ -90,10 +91,11 @@ target_routes:
     reason: Portfolio publication is not an incubation exit or build lane.
 artifact_chain:
   request: contracts/schemas/prototype-closure-request.schema.json
-  receipt: contracts/schemas/prototype-closure-receipt.schema.json
   history_event: contracts/schemas/prototype-closure-history-event.schema.json
-  binding_rule: Every decision binds the observed Prototype state, source revision, operator, correlation id, idempotency key, and exact accepted upstream receipts.
-  completion_rule: Success requires the owning target receipt, merged Studio source readback where source changes, and an immutable terminal receipt.
+  merged_readback: contracts/schemas/prototype-closure-studio-readback.schema.json
+  receipt: contracts/schemas/prototype-closure-receipt.schema.json
+  binding_rule: The accepted request and action-specific authority receipts bind an immutable Studio source event to the exact expected state, source revision, operator, correlation id, idempotency key, and prior event digest.
+  completion_rule: Accepted action evidence precedes the Studio event; the event is merged and read back before OOS records a completed terminal receipt that binds both exact digests. This applies to Delivery application as well as graduation, retirement, and reopen.
   replay_rule: The same idempotency key and authority digests returns the same terminal receipt; changed input under the same key is denied.
 history:
   owner_repo: workspace-prototype-studio
@@ -103,14 +105,13 @@ history:
     - source-graduated
     - incubation-retired
     - incubation-reopened
-    - closure-denied
-  ordering_rule: A new event binds the prior event digest and the exact terminal receipt; denied and failed attempts never masquerade as a completed transition.
+  ordering_rule: A new source event binds the exact accepted request and prior event digest, never a future terminal receipt. Denied or pre-merge failed attempts leave Studio source unchanged and have no Studio transition event.
 runtime_cleanup:
   owner_repo: platform-engineering
   rule: Revoke only exact active incubation resources after accepted closure; absent or draft preview resources require no invented revoke. Landing and Maturity identities remain separate.
   normal_availability_gate: openproject://work_packages/1140
 recovery:
-  rule: A failed transition preserves prior durable lifecycle and source custody, with a denial receipt and explicit next action.
+  rule: Denied or failed pre-merge attempts preserve prior durable lifecycle and source custody, with a terminal finding and explicit next action. A post-merge uncertain outcome remains pending reconciliation against merged Studio readback; it must not be issued as a terminal failed receipt.
   allowed_decisions:
     - remove
     - workaround
