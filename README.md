@@ -68,6 +68,8 @@ release posture, and portfolio publication independent:
 - [contracts/prototype-landing.yaml](contracts/prototype-landing.yaml)
 - [docs/prototype-maturity.md](docs/prototype-maturity.md)
 - [contracts/prototype-maturity.yaml](contracts/prototype-maturity.yaml)
+- [docs/prototype-closure.md](docs/prototype-closure.md)
+- [contracts/prototype-closure.yaml](contracts/prototype-closure.yaml)
 - [contracts/agent-action-conformance.yaml](contracts/agent-action-conformance.yaml)
 - [reports/agent-action-conformance.md](reports/agent-action-conformance.md)
 

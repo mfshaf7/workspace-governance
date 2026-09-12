@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Prototype Closure Governance Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "owner_repo", "implementation_posture", "primary_operator_surface", "architecture", "upstream_contracts", "purpose", "authority", "actions", "target_routes", "artifact_chain", "history", "runtime_cleanup", "recovery"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "owner_repo": {"const": "workspace-governance"},
+    "implementation_posture": {"const": "contract-only"},
+    "primary_operator_surface": {"const": "docs/prototype-closure.md"},
+    "architecture": {"type": "object", "required": ["initiative_ref", "feature_ref", "contract_work_ref"]},
+    "upstream_contracts": {"type": "object", "required": ["project_lifecycle", "prototype_landing", "prototype_maturity"]},
+    "purpose": {"type": "string", "minLength": 1},
+    "authority": {"type": "object", "required": ["contract", "incubation_source_and_history", "readiness", "workflow_and_target_reconciliation", "runtime_and_identity", "security_review", "operator_projection"]},
+    "actions": {"type": "object", "additionalProperties": false, "required": ["apply-delivery", "graduate-source", "retire-incubation", "reopen-incubation"], "properties": {"apply-delivery": {"$ref": "#/$defs/action"}, "graduate-source": {"$ref": "#/$defs/action"}, "retire-incubation": {"$ref": "#/$defs/action"}, "reopen-incubation": {"$ref": "#/$defs/action"}}},
+    "target_routes": {"type": "object", "required": ["workspace-delivery-art", "existing-owner-repo", "new-repo", "portfolio"]},
+    "artifact_chain": {"type": "object", "required": ["request", "receipt", "history_event", "binding_rule", "completion_rule", "replay_rule"]},
+    "history": {"type": "object", "required": ["owner_repo", "mode", "event_types", "ordering_rule"]},
+    "runtime_cleanup": {"type": "object", "required": ["owner_repo", "rule", "normal_availability_gate"]},
+    "recovery": {"type": "object", "required": ["rule", "allowed_decisions"]}
+  },
+  "$defs": {
+    "action": {"type": "object", "required": ["from_lifecycle", "required_evidence", "rule"], "properties": {"from_lifecycle": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}, "minItems": 1}]}, "required_evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1}, "rule": {"type": "string", "minLength": 1}}}
+  }
+}

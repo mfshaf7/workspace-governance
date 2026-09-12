@@ -33,6 +33,7 @@ from project_lifecycle_contract import contract_issues as project_lifecycle_cont
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
 from prototype_landing_contract import contract_issues as prototype_landing_contract_issues
 from prototype_maturity_contract import contract_issues as prototype_maturity_contract_issues
+from prototype_closure_contract import contract_issues as prototype_closure_contract_issues
 from repository_custody_contract import contract_issues as repository_custody_contract_issues
 
 
@@ -165,6 +166,11 @@ PROTOTYPE_MATURITY_ARTIFACT_SCHEMAS = (
     "contracts/schemas/prototype-maturity-decision.schema.json",
     "contracts/schemas/prototype-maturity-readback.schema.json",
     "contracts/schemas/prototype-maturity-receipt.schema.json",
+)
+PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS = (
+    "contracts/schemas/prototype-closure-request.schema.json",
+    "contracts/schemas/prototype-closure-receipt.schema.json",
+    "contracts/schemas/prototype-closure-history-event.schema.json",
 )
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
@@ -6396,6 +6402,7 @@ def main() -> int:
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
         "prototype_landing": repo_root / "contracts/prototype-landing.yaml",
         "prototype_maturity": repo_root / "contracts/prototype-maturity.yaml",
+        "prototype_closure": repo_root / "contracts/prototype-closure.yaml",
         "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
         "workspace_active_inventory": repo_root / "contracts/workspace-active-inventory.yaml",
         "workspace_inventory_lifecycle": repo_root / "contracts/workspace-inventory-lifecycle.yaml",
@@ -6468,6 +6475,16 @@ def main() -> int:
         schema_path = repo_root / rel_path
         if not schema_path.exists():
             errors.append(f"{rel_path}: Prototype maturity artifact schema is missing")
+            continue
+        try:
+            Draft202012Validator.check_schema(load_json(schema_path))
+        except SchemaError as exc:
+            errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
+
+    for rel_path in PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS:
+        schema_path = repo_root / rel_path
+        if not schema_path.exists():
+            errors.append(f"{rel_path}: Prototype closure artifact schema is missing")
             continue
         try:
             Draft202012Validator.check_schema(load_json(schema_path))
@@ -6652,6 +6669,14 @@ def main() -> int:
     errors.extend(
         f"contracts/prototype-maturity.yaml: {error}"
         for error in prototype_maturity_errors
+    )
+    prototype_closure_errors = prototype_closure_contract_issues(
+        contracts["prototype_closure"],
+        known_repos=active_repos,
+    )
+    errors.extend(
+        f"contracts/prototype-closure.yaml: {error}"
+        for error in prototype_closure_errors
     )
     intake_repos = set(intake_register["repos"].keys())
     retired_repos = set(contracts["repos"].get("retired_repos", {}).keys())

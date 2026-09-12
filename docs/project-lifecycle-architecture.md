@@ -142,10 +142,12 @@ Incubation first:
    admits the source.
 3. Candidate and Baseline Promotion establish local Prototype maturity under
    the dedicated [Prototype Maturity contract](prototype-maturity.md).
-4. After baseline approval, a separate delivery-admission transition may move
-   project phase into governed delivery.
-5. Source graduation transfers exact source revision and custody evidence to a
-   durable owner repo.
+4. After baseline approval, the [Prototype Closure contract](prototype-closure.md)
+   allows accepted Delivery admission to move project phase into governed
+   delivery. Studio source custody does not change at this step.
+5. A separate source graduation transfers the exact source revision only after
+   durable owner acceptance and transfer or already-owned proof. A requested
+   new repository is not proof that a durable owner exists.
 6. Delivery completion may then establish `operational` posture.
 
 Non-deployed product:
