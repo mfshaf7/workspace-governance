@@ -43,10 +43,10 @@ def contract_issues(contract: dict, *, known_repos: set[str]) -> list[str]:
     if actions.get("apply-delivery", {}).get("source_custody_effect") != "none":
         errors.append("Delivery application cannot transfer source custody")
     delivery = actions.get("apply-delivery", {})
-    if "accepted-delivery-target-receipt" in delivery.get("request_evidence", []):
-        errors.append("Delivery request cannot require its future target receipt")
-    if "accepted-delivery-target-receipt" not in delivery.get("completion_evidence", []):
-        errors.append("Delivery completion must carry accepted target receipt")
+    if "accepted-delivery-target-receipt" not in delivery.get("request_evidence", []):
+        errors.append("Delivery closure request requires completed ingress receipt")
+    if "exact-art-target-readback" not in delivery.get("request_evidence", []):
+        errors.append("Delivery closure request requires exact ART target readback")
     if "merged-studio-readback" not in delivery.get("completion_evidence", []):
         errors.append("Delivery completion must carry merged Studio readback")
     if actions.get("graduate-source", {}).get("project_phase_precondition") != "delivery-governed":
@@ -92,8 +92,8 @@ def history_issues(request: dict, event: dict, *, request_digest: str, prior_dig
     if action == "apply-delivery":
         if event.get("accepted_baseline_receipt_ref") != request.get("accepted_baseline_receipt_ref"):
             errors.append("Delivery history baseline receipt mismatch")
-        if not event.get("accepted_delivery_target_receipt_ref"):
-            errors.append("Delivery history lacks accepted target receipt")
+        if event.get("accepted_delivery_target_receipt_ref") != request.get("accepted_delivery_target_receipt_ref"):
+            errors.append("Delivery history target receipt mismatch")
         if event.get("observed_lifecycle") != "graduating" or event.get("observed_source_custody") != "incubation-repo":
             errors.append("Delivery history cannot graduate source")
     elif action == "graduate-source":

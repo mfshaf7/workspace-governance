@@ -9,11 +9,15 @@ Platform owns runtime cleanup, and Security reviews the trust boundary.
 ## Operator Path
 
 1. Confirm the Prototype's current lifecycle, source revision, accepted
-   baseline, and desired exit action. A Delivery application is available only
-   after baseline approval. Retirement is available for active incubation work.
-2. For Delivery, apply the existing target workflow and inspect its accepted
-   target receipt. This advances project phase to `delivery-governed`; it does
-   **not** graduate Studio source.
+   baseline, and desired exit action. Retirement is available for active
+   incubation work.
+2. For Delivery, first commit the Studio Delivery packet and apply it through
+   the existing OOS Prototype-to-Delivery ingress workflow. Read back its
+   accepted application receipt and exact ART Epic target. Only then start
+   `apply-delivery` Closure with both references. Closure records the Studio
+   phase transition to `delivery-governed`; it does **not** create the target
+   or graduate Studio source. Attaching an existing Delivery item is not yet
+   an admitted ingress route.
 3. To graduate source, identify a durable owner repo and prove either an
    accepted transfer of the exact Studio revision or that the source is already
    present under that owner. The new-repository route remains unavailable until
@@ -44,6 +48,11 @@ readback or receipt issuance is uncertain, leave the run pending reconciliation;
 do not report a terminal failure or attempt an unguarded second source change.
 Schema v2 supersedes the inactive v1 Closure artifact chain; it does not
 retroactively rewrite earlier Studio history.
+
+The ingress application receipt is issued by OOS; the ART target record is
+owned by OpenProject. The accepted baseline transition receipt is also issued
+by OOS and binds Studio's committed baseline record. A Studio record is not
+itself an OOS acceptance receipt.
 
 The request, source event, merged readback, and terminal receipt schemas live under
 [`contracts/schemas/`](../contracts/schemas/). Source and target owners must

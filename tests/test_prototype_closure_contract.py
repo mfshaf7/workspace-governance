@@ -47,7 +47,7 @@ def request(action: str) -> dict:
         "idempotency_key": "closure:prototype-1:1",
     }
     if action == "apply-delivery":
-        values.update(accepted_baseline_receipt_ref="baseline:1", target_kind="new-delivery-epic")
+        values.update(accepted_baseline_receipt_ref="baseline:1", target_kind="new-delivery-epic", target_delivery_ref="openproject://work_packages/1", accepted_delivery_target_receipt_ref="delivery:1")
     elif action == "graduate-source":
         values.update(accepted_delivery_target_receipt_ref="delivery:1", durable_owner_ref="owner:1", durable_repo_ref="repo:1", durable_owner_acceptance_ref="owner-accepted:1", transfer_strategy="transfer")
     elif action == "retire-incubation":
@@ -89,7 +89,7 @@ def source_event(req: dict) -> dict:
         "recorded_at": "2026-09-12T03:20:00Z",
     }
     if action == "apply-delivery":
-        values.update(accepted_baseline_receipt_ref=req["accepted_baseline_receipt_ref"], accepted_delivery_target_receipt_ref="delivery:1")
+        values.update(accepted_baseline_receipt_ref=req["accepted_baseline_receipt_ref"], accepted_delivery_target_receipt_ref=req["accepted_delivery_target_receipt_ref"])
     elif action == "graduate-source":
         values.update(accepted_delivery_target_receipt_ref=req["accepted_delivery_target_receipt_ref"], durable_owner_acceptance_ref=req["durable_owner_acceptance_ref"])
         if req["transfer_strategy"] == "transfer":
@@ -231,6 +231,16 @@ class PrototypeClosureContractTests(unittest.TestCase):
         contract["target_routes"]["portfolio"]["maturity"] = "active"
         self.assertIn("Portfolio cannot be a direct Prototype exit", contract_issues(contract, known_repos=known))
 
+    def test_contract_denies_closure_without_completed_ingress(self) -> None:
+        contract = yaml.safe_load((ROOT / "contracts/prototype-closure.yaml").read_text())
+        known = set(contract["authority"].values()) | {"workspace-governance"}
+        evidence = contract["actions"]["apply-delivery"]["request_evidence"]
+        evidence.remove("accepted-delivery-target-receipt")
+        evidence.remove("exact-art-target-readback")
+        issues = contract_issues(contract, known_repos=known)
+        self.assertIn("Delivery closure request requires completed ingress receipt", issues)
+        self.assertIn("Delivery closure request requires exact ART target readback", issues)
+
     def test_each_action_has_acyclic_typed_evidence(self) -> None:
         for action in ("apply-delivery", "graduate-source", "retire-incubation", "reopen-incubation"):
             with self.subTest(action=action):
@@ -250,10 +260,23 @@ class PrototypeClosureContractTests(unittest.TestCase):
         self.assertTrue(list(schema("history-event").iter_errors(event)))
         self.assertIn("Delivery history cannot graduate source", history_issues(req, event, request_digest=REQUEST_DIGEST, prior_digest=None))
 
-    def test_delivery_request_cannot_claim_its_future_target_receipt(self) -> None:
+    def test_delivery_request_requires_completed_ingress_and_exact_target(self) -> None:
         req = request("apply-delivery")
-        req["accepted_delivery_target_receipt_ref"] = "delivery:1"
+        self.assertEqual(list(schema("request").iter_errors(req)), [])
+        del req["accepted_delivery_target_receipt_ref"]
         self.assertTrue(list(schema("request").iter_errors(req)))
+        req = request("apply-delivery")
+        del req["target_delivery_ref"]
+        self.assertTrue(list(schema("request").iter_errors(req)))
+        req = request("apply-delivery")
+        req["target_kind"] = "existing-delivery-item"
+        self.assertTrue(list(schema("request").iter_errors(req)))
+
+    def test_delivery_history_binds_preexisting_ingress_receipt(self) -> None:
+        req = request("apply-delivery")
+        event = source_event(req)
+        event["accepted_delivery_target_receipt_ref"] = "delivery:other"
+        self.assertIn("Delivery history target receipt mismatch", history_issues(req, event, request_digest=REQUEST_DIGEST, prior_digest=None))
 
     def test_transfer_receipt_is_output_not_request_input(self) -> None:
         req = request("graduate-source")
