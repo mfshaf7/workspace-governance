@@ -34,6 +34,6 @@ resolution:
   note: null
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-09-17'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  due_on: '2026-09-27'
+  note: The 2026-09-17 review date was missed. Review and approve the strongest
+    durable control by the new date; this reschedule does not close the lesson.
