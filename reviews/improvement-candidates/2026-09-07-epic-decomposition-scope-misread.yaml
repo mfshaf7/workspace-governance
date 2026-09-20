@@ -48,8 +48,9 @@ resolution:
     selected.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-09-14'
+  due_on: '2026-09-27'
   note: >-
-    Evaluate an explicit planning distinction between full backlog decomposition,
+    The 2026-09-14 review date was missed. Evaluate an explicit planning
+    distinction between full backlog decomposition,
     selected-wave elaboration, and PI commitment before changing validators or
     operator commands.
