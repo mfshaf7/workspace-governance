@@ -24,11 +24,11 @@ Platform owns runtime cleanup, and Security reviews the trust boundary.
    Repository custody is actually active.
 4. Review readiness and approve the exact action. OOS first reconciles the
    action-specific target, owner, or runtime evidence. The reviewable Studio
-   source event binds those accepted references, the request digest, expected
+   source event binds the exact ART target, those accepted references, the request digest, expected
    source revision, and prior history digest. It never cites a future terminal
    receipt.
 5. Merge the Studio event and read back the exact merged revision, event digest,
-   lifecycle, and custody. OOS issues a completed terminal receipt only after
+   lifecycle, and custody. OOS issues a completed terminal receipt naming the same ART target only after
    that readback agrees with the accepted request and event. This ordering also
    applies to Delivery application, which changes Studio lifecycle to
    `graduating` without transferring source custody.

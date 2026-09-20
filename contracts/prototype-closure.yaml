@@ -30,6 +30,7 @@ actions:
       - exact-art-target-readback
       - exact-prototype-source-revision
     completion_evidence:
+      - exact-art-target-in-studio-event-and-receipt
       - merged-studio-readback
     rule: Apply the committed Studio Delivery packet through OOS ingress and verify its accepted receipt against the exact ART target before Closure starts. Closure only records the Studio phase transition; Delivery acceptance never graduates source or relinquishes Studio custody. The existing-item target route remains unsupported until an admitted ingress workflow can issue equivalent proof.
   graduate-source:

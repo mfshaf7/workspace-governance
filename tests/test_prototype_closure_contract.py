@@ -89,7 +89,7 @@ def source_event(req: dict) -> dict:
         "recorded_at": "2026-09-12T03:20:00Z",
     }
     if action == "apply-delivery":
-        values.update(accepted_baseline_receipt_ref=req["accepted_baseline_receipt_ref"], accepted_delivery_target_receipt_ref=req["accepted_delivery_target_receipt_ref"])
+        values.update(accepted_baseline_receipt_ref=req["accepted_baseline_receipt_ref"], target_delivery_ref=req["target_delivery_ref"], accepted_delivery_target_receipt_ref=req["accepted_delivery_target_receipt_ref"])
     elif action == "graduate-source":
         values.update(accepted_delivery_target_receipt_ref=req["accepted_delivery_target_receipt_ref"], durable_owner_acceptance_ref=req["durable_owner_acceptance_ref"])
         if req["transfer_strategy"] == "transfer":
@@ -146,7 +146,7 @@ def receipt(req: dict) -> dict:
         "merged_studio_readback_ref": readback["readback_id"],
         "merged_studio_readback_digest": READBACK_DIGEST,
     }
-    for field in ("accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref", "source_transfer_receipt_ref", "already_owned_source_proof_ref", "prior_retirement_receipt_ref"):
+    for field in ("target_delivery_ref", "accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref", "source_transfer_receipt_ref", "already_owned_source_proof_ref", "prior_retirement_receipt_ref"):
         if field in event:
             values[field] = event[field]
     return values
@@ -277,6 +277,12 @@ class PrototypeClosureContractTests(unittest.TestCase):
         event = source_event(req)
         event["accepted_delivery_target_receipt_ref"] = "delivery:other"
         self.assertIn("Delivery history target receipt mismatch", history_issues(req, event, request_digest=REQUEST_DIGEST, prior_digest=None))
+        event = source_event(req)
+        event["target_delivery_ref"] = "openproject://work_packages/999"
+        self.assertIn("Delivery history ART target mismatch", history_issues(req, event, request_digest=REQUEST_DIGEST, prior_digest=None))
+        result = receipt(req)
+        result["target_delivery_ref"] = "openproject://work_packages/999"
+        self.assertIn("Delivery receipt does not bind exact ART target", receipt_chain_issues(req, result))
 
     def test_transfer_receipt_is_output_not_request_input(self) -> None:
         req = request("graduate-source")

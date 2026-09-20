@@ -24,6 +24,7 @@
     "idempotency_key": {"$ref": "#/$defs/text"},
     "recorded_at": {"type": "string", "format": "date-time"},
     "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/text"}},
+    "target_delivery_ref": {"$ref": "#/$defs/text"},
     "accepted_delivery_target_receipt_ref": {"$ref": "#/$defs/text"},
     "durable_owner_acceptance_ref": {"$ref": "#/$defs/text"},
     "source_transfer_receipt_ref": {"$ref": "#/$defs/text"},
@@ -41,7 +42,7 @@
     {"if": {"properties": {"outcome": {"enum": ["denied", "failed"]}}}, "then": {"required": ["finding_code", "next_action"], "not": {"anyOf": [{"required": ["source_event_ref"]}, {"required": ["merged_studio_readback_ref"]}]}}},
     {"if": {"properties": {"outcome": {"const": "failed"}}}, "then": {"required": ["failure_stage"]}},
     {"if": {"properties": {"outcome": {"const": "completed"}}}, "then": {"required": ["request_digest", "source_event_ref", "source_event_digest", "merged_studio_readback_ref", "merged_studio_readback_digest", "merged_source_revision"]}},
-    {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "apply-delivery"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref"], "properties": {"observed_lifecycle": {"const": "graduating"}, "observed_source_custody": {"const": "incubation-repo"}}}},
+    {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "apply-delivery"}}}, "then": {"required": ["target_delivery_ref", "accepted_delivery_target_receipt_ref"], "properties": {"observed_lifecycle": {"const": "graduating"}, "observed_source_custody": {"const": "incubation-repo"}}}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "graduate-source"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref"], "properties": {"observed_lifecycle": {"const": "graduated"}, "observed_source_custody": {"enum": ["dedicated-owner-repo", "shared-owner-repo"]}}, "oneOf": [{"required": ["source_transfer_receipt_ref"], "not": {"required": ["already_owned_source_proof_ref"]}}, {"required": ["already_owned_source_proof_ref"], "not": {"required": ["source_transfer_receipt_ref"]}}]}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "retire-incubation"}}}, "then": {"required": ["merged_studio_readback_ref"], "properties": {"observed_lifecycle": {"const": "retired"}}}},
     {"if": {"properties": {"outcome": {"const": "completed"}, "action": {"const": "reopen-incubation"}}}, "then": {"required": ["prior_retirement_receipt_ref", "merged_studio_readback_ref"], "properties": {"observed_lifecycle": {"const": "exploring"}}}}
