@@ -30,8 +30,7 @@
     "prior_retirement_receipt_ref": {"$ref": "#/$defs/text"}
   },
   "allOf": [
-    {"if": {"properties": {"action": {"const": "apply-delivery"}}}, "then": {"properties": {"expected_lifecycle": {"const": "baseline-approved"}}, "required": ["accepted_baseline_receipt_ref", "target_kind"], "not": {"required": ["accepted_delivery_target_receipt_ref"]}}},
-    {"if": {"properties": {"action": {"const": "apply-delivery"}, "target_kind": {"const": "existing-delivery-item"}}}, "then": {"required": ["target_delivery_ref"]}},
+    {"if": {"properties": {"action": {"const": "apply-delivery"}}}, "then": {"properties": {"expected_lifecycle": {"const": "baseline-approved"}, "target_kind": {"const": "new-delivery-epic"}}, "required": ["accepted_baseline_receipt_ref", "target_kind", "target_delivery_ref", "accepted_delivery_target_receipt_ref"]}},
     {"if": {"properties": {"action": {"const": "graduate-source"}}}, "then": {"properties": {"expected_lifecycle": {"const": "graduating"}}, "required": ["accepted_delivery_target_receipt_ref", "durable_owner_ref", "durable_repo_ref", "durable_owner_acceptance_ref", "transfer_strategy"]}},
     {"if": {"properties": {"action": {"const": "graduate-source"}, "transfer_strategy": {"const": "already-owned"}}}, "then": {"required": ["already_owned_source_proof_ref"]}},
     {"if": {"properties": {"action": {"const": "graduate-source"}, "transfer_strategy": {"const": "transfer"}}}, "then": {"not": {"required": ["already_owned_source_proof_ref"]}}},
