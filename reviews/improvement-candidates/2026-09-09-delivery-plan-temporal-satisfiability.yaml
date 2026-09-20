@@ -53,7 +53,8 @@ resolution:
   note: Canonical controls are implemented under ART Defect 1121; owner-runtime adoption remains pending.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-09-12'
-  note: Extend architecture and work-session validation with start/close evidence
+  due_on: '2026-09-27'
+  note: The 2026-09-12 review date was missed. Extend architecture and work-session
+    validation with start/close evidence
     phases, gate-cycle rejection, and an end-to-end executable schedule; then audit
     and repair or retire affected Feature plans.
