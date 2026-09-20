@@ -21,6 +21,7 @@
     "correlation_id": {"$ref": "#/$defs/text"},
     "idempotency_key": {"$ref": "#/$defs/text"},
     "accepted_baseline_receipt_ref": {"$ref": "#/$defs/text"},
+    "target_delivery_ref": {"$ref": "#/$defs/text"},
     "accepted_delivery_target_receipt_ref": {"$ref": "#/$defs/text"},
     "durable_owner_acceptance_ref": {"$ref": "#/$defs/text"},
     "source_transfer_receipt_ref": {"$ref": "#/$defs/text"},
@@ -33,7 +34,7 @@
     "recorded_at": {"type": "string", "format": "date-time"}
   },
   "allOf": [
-    {"if": {"properties": {"event_type": {"const": "delivery-accepted"}}}, "then": {"required": ["accepted_baseline_receipt_ref", "accepted_delivery_target_receipt_ref"], "properties": {"observed_lifecycle": {"const": "graduating"}, "observed_source_custody": {"const": "incubation-repo"}}}},
+    {"if": {"properties": {"event_type": {"const": "delivery-accepted"}}}, "then": {"required": ["accepted_baseline_receipt_ref", "target_delivery_ref", "accepted_delivery_target_receipt_ref"], "properties": {"observed_lifecycle": {"const": "graduating"}, "observed_source_custody": {"const": "incubation-repo"}}}},
     {"if": {"properties": {"event_type": {"const": "source-graduated"}}}, "then": {"required": ["accepted_delivery_target_receipt_ref", "durable_owner_acceptance_ref"], "properties": {"observed_lifecycle": {"const": "graduated"}, "observed_source_custody": {"enum": ["dedicated-owner-repo", "shared-owner-repo"]}}, "oneOf": [{"required": ["source_transfer_receipt_ref"], "not": {"required": ["already_owned_source_proof_ref"]}}, {"required": ["already_owned_source_proof_ref"], "not": {"required": ["source_transfer_receipt_ref"]}}]}},
     {"if": {"properties": {"event_type": {"const": "incubation-retired"}}}, "then": {"required": ["retention_plan_ref", "runtime_disposition_proof_ref"], "properties": {"observed_lifecycle": {"const": "retired"}}}},
     {"if": {"properties": {"event_type": {"const": "incubation-reopened"}}}, "then": {"required": ["prior_retirement_receipt_ref", "retained_source_readback_ref"], "properties": {"observed_lifecycle": {"const": "exploring"}, "observed_source_custody": {"const": "incubation-repo"}}}}

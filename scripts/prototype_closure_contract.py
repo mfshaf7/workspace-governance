@@ -49,6 +49,8 @@ def contract_issues(contract: dict, *, known_repos: set[str]) -> list[str]:
         errors.append("Delivery closure request requires exact ART target readback")
     if "merged-studio-readback" not in delivery.get("completion_evidence", []):
         errors.append("Delivery completion must carry merged Studio readback")
+    if "exact-art-target-in-studio-event-and-receipt" not in delivery.get("completion_evidence", []):
+        errors.append("Delivery completion must bind the exact ART target through event and receipt")
     if actions.get("graduate-source", {}).get("project_phase_precondition") != "delivery-governed":
         errors.append("source graduation requires accepted Delivery phase")
     graduation = actions.get("graduate-source", {})
@@ -92,6 +94,8 @@ def history_issues(request: dict, event: dict, *, request_digest: str, prior_dig
     if action == "apply-delivery":
         if event.get("accepted_baseline_receipt_ref") != request.get("accepted_baseline_receipt_ref"):
             errors.append("Delivery history baseline receipt mismatch")
+        if event.get("target_delivery_ref") != request.get("target_delivery_ref"):
+            errors.append("Delivery history ART target mismatch")
         if event.get("accepted_delivery_target_receipt_ref") != request.get("accepted_delivery_target_receipt_ref"):
             errors.append("Delivery history target receipt mismatch")
         if event.get("observed_lifecycle") != "graduating" or event.get("observed_source_custody") != "incubation-repo":
@@ -184,8 +188,11 @@ def receipt_issues(
             errors.append("source event, merged readback, and terminal receipt are out of order")
     except (KeyError, TypeError, ValueError):
         errors.append("closure chain timestamps are invalid")
-    if request.get("action") == "apply-delivery" and receipt.get("accepted_delivery_target_receipt_ref") != event.get("accepted_delivery_target_receipt_ref"):
-        errors.append("Delivery receipt does not bind accepted target evidence")
+    if request.get("action") == "apply-delivery":
+        if receipt.get("target_delivery_ref") != request.get("target_delivery_ref") or receipt.get("target_delivery_ref") != event.get("target_delivery_ref"):
+            errors.append("Delivery receipt does not bind exact ART target")
+        if receipt.get("accepted_delivery_target_receipt_ref") != event.get("accepted_delivery_target_receipt_ref"):
+            errors.append("Delivery receipt does not bind accepted target evidence")
     if request.get("action") == "graduate-source":
         if receipt.get("observed_source_custody") not in {"dedicated-owner-repo", "shared-owner-repo"}:
             errors.append("source graduation requires durable custody")
