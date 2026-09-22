@@ -91,6 +91,21 @@ class DeliveryArtResourceRetirementContractTests(unittest.TestCase):
 
         self.assertTrue(any("ownership_marker" in issue for issue in issues), issues)
 
+    def test_recovery_generation_is_valid_for_manifest_and_receipt(self) -> None:
+        session_id = f"{self.manifest['session_id']}:r1"
+        manifest = copy.deepcopy(self.manifest)
+        manifest["session_id"] = session_id
+        for resource in manifest["resources"]:
+            resource["locator"]["ownership_marker"] = session_id
+        receipt = copy.deepcopy(self.receipt)
+        receipt["session_id"] = session_id
+        receipt["receipt_id"] = f"cleanup-receipt:{session_id}"
+
+        self.assertEqual(self.schema_errors(self.manifest_schema, manifest), [])
+        self.assertEqual(resource_manifest_semantic_issues(manifest), [])
+        self.assertEqual(self.schema_errors(self.receipt_schema, receipt), [])
+        self.assertEqual(cleanup_receipt_semantic_issues(receipt), [])
+
     def test_cleanup_receipt_rejects_nonterminal_resource_outcome(self) -> None:
         invalid = copy.deepcopy(self.receipt)
         invalid["resources"][0]["outcome"] = "blocked"
