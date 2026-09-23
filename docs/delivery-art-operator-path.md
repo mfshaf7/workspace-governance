@@ -1,5 +1,10 @@
 # Delivery ART Operator Path
 
+The target Console-complete evolution of this path is defined in
+[`delivery-art-console-complete-lifecycle.md`](delivery-art-console-complete-lifecycle.md).
+This document remains the current primary operator procedure while that
+initiative is implemented and qualified.
+
 ## Purpose
 
 Define the workspace-level governance shape for the normal `Workspace Delivery
