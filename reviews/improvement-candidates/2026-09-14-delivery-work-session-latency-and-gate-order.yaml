@@ -1,0 +1,56 @@
+schema_version: 1
+id: 2026-09-14-delivery-work-session-latency-and-gate-order
+title: Remove repeated ART work-session latency and gate-order misses
+recorded_on: '2026-09-14'
+owner_repo: operator-orchestration-service
+summary: Delivery work-session commands repeatedly rebuild project-wide OpenProject
+  evidence for narrow status reads and can outlive the CLI response; Prototype Closure
+  final approval was ordered before its required proof.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'On 2026-09-14 work continue 1108 timed out while server work later finalized,
+    and work close 1108 took about eight minutes; the current status adapter serially
+    builds full-project evidence packets for dependency statuses. Live ART #1140 requires
+    provider and conformance proof before #1107/#1109 can provide it.'
+  source_refs:
+  - 'conversation: operator called the lifecycle repeatedly slow and approved focused
+    repair on 2026-09-14'
+- id: art-cli-execution-context-preflight-miss
+  title: Distinguish the ART CLI pod execution context from host localhost access.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: 'On 2026-09-20 a slow work status read was misdiagnosed as an unavailable
+    host-side broker because no host listener was found. The CLI actually executes
+    inside the OOS pod; its broker health endpoint returned 200. Future preflight
+    must prove the CLI execution context and direct pod health before diagnosing
+    a broker outage or changing access configuration.'
+  source_refs:
+  - openproject://work_packages/1149
+  - 'conversation: ART status latency and corrected broker diagnosis on 2026-09-20'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-09-27'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
