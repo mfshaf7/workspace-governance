@@ -6,7 +6,7 @@ owner_repo: operator-orchestration-service
 summary: Delivery ART architecture packet v3 omitted an existing Feature dependency,
   so the corrected schema-v2 freshness validator blocked the first Review Packet transition.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-23-work-session-resource-retirement-regression.yaml
-status: triaged
+status: accepted
 source_type: review
 scope:
   related_repos:
@@ -67,6 +67,24 @@ signals:
   - https://github.com/mfshaf7/operator-orchestration-service/pull/156
   - 'conversation:2026-08-25 operator reported repeated wrong information despite
     the stronger contract'
+- id: work-start-omits-terminal-contract-preflight
+  title: Work start did not surface architecture fidelity and closeout narrative obligations
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - learning-closure-regression
+  finding: >-
+    ART #1165 reached Review Packet authoring before the normal work-session path
+    exposed that architecture-mandated real-git evidence had been authored as
+    filesystem evidence, then reached work close before the path exposed the
+    missing Why This Matters Now narrative section. Both requirements existed in
+    authoritative inputs before implementation started. The workflow correctly
+    rejected the invalid transitions but discovered known terminal obligations too
+    late and still depended on handcrafted evidence classification.
+  source_refs:
+  - openproject://work_packages/1165
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/232
+  - 'conversation:2026-09-24 operator called out repeated fidelity and narrative misses'
 - id: feature-outcome-composition-omitted
   title: Component-complete evidence did not prove the composed Feature outcome
   trigger: late-root-cause-discovery
@@ -102,7 +120,11 @@ follow_up:
     changed-file selection, authored-input preservation, and actionable validator
     error projection. ART Defect #998 and owner-bounded Tasks #999 through #1003
     track the missing composed Feature outcome. Keep this candidate open until
-    both controls are landed and proven.
+    both controls are landed and proven. The 2026-09-24 recurrence additionally
+    requires the normal work-session preflight, start, and status projections to
+    expose authoritative narrative and conformance-fidelity obligations before
+    implementation, and Review Packet evidence authoring to derive fidelity from
+    the architecture plan rather than accepting an incompatible manual value.
     The due date was refreshed on 2026-09-06 after candidate validation exposed
     the overdue review; no control closure is claimed by this administrative
     refresh.
