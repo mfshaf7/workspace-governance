@@ -1,0 +1,68 @@
+schema_version: 1
+id: 2026-09-27-cross-repo-acceptance-and-evidence-profile-completeness
+title: Require executable cross-repo acceptance before feature closure
+recorded_on: '2026-09-27'
+owner_repo: workspace-governance
+summary: >-
+  Feature 930 exposed two related completion gaps: producer work could appear complete
+  before its promised Console consumer existed, and an owner evidence profile could be
+  active without the test command required by the normal Review Packet path.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+signals:
+- id: cross-repo-acceptance-trace-missing
+  title: Producer completion omitted the promised Console consumer
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: Feature 930 was initially treated as complete after the runtime observation
+    producer landed, even though its acceptance narrative required the Governance
+    Operations Console to consume and present that projection. Child 1189 had to be
+    added after the operator identified the missing feature work.
+  source_refs:
+  - openproject://work_packages/930
+  - openproject://work_packages/1187
+  - openproject://work_packages/1189
+  - https://github.com/mfshaf7/governance-operations-console/pull/38
+  - 'conversation:2026-09-27-operator-identified-unclosed-feature-work'
+- id: owner-evidence-profile-not-executable
+  title: Owner evidence profile lacked the test class required for closure
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: The Security owner-evidence profile was syntactically valid and active but
+    contained validation commands only. Source-backed Review Packet progression also
+    required test evidence, so child 1188 could not complete through the normal path
+    until the profile was repaired and the workflow was recovered.
+  source_refs:
+  - openproject://work_packages/1188
+  - openproject://work_packages/1190
+  - https://github.com/mfshaf7/security-architecture/pull/161
+  - https://github.com/mfshaf7/security-architecture/pull/162
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/239
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: The delivery work was repaired and Feature 930 closed. The preventive controls
+    remain intentionally separate from the completed feature.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-09-30'
+  note: Define a cross-repo acceptance binding that names producer, consumer,
+    integration point, and end-to-end proof; extend evidence-profile validation so an
+    active source-backed profile must provide both test and validation command classes.
