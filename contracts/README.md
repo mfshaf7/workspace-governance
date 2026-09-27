@@ -288,6 +288,11 @@ Use these contracts to declare:
     integrity, artifact custody, proof-obligation registry, read hierarchy,
     guided closeout intents, fallback model, compatibility boundary, and
     activation state
+- `delivery-art-work-session/evidence-profile.json`
+  - bounded owner-repository command profile used by the Delivery ART work
+    session to acquire exact-base and exact-head Workspace Governance test,
+    contract, structure, lifecycle-proof, stale-content, and source-diff
+    evidence without accepting policy from an unreviewed candidate worktree
 - `schemas/delivery-art-operator-path.schema.json`
   - validates the operator-path contract, including the explicit boundary
     between contract-defined controls and owner-repo runtime enforcement
