@@ -1,12 +1,13 @@
 schema_version: 1
 id: 2026-09-27-cross-repo-acceptance-and-evidence-profile-completeness
-title: Require executable cross-repo acceptance before feature closure
+title: Require executable acceptance and parent traversal before delivery closure
 recorded_on: '2026-09-27'
 owner_repo: workspace-governance
 summary: >-
-  Feature 930 exposed two related completion gaps: producer work could appear complete
-  before its promised Console consumer existed, and an owner evidence profile could be
-  active without the test command required by the normal Review Packet path.
+  Delivery 898 exposed three related completion gaps: producer work could appear
+  complete before its promised Console consumer existed, an owner evidence profile
+  could be active without the test command required by the normal Review Packet path,
+  and completion stopped at a Feature without traversing its PI Objective and Epic.
 regression_of: null
 status: triaged
 source_type: conversation
@@ -55,14 +56,31 @@ signals:
   - https://github.com/mfshaf7/security-architecture/pull/161
   - https://github.com/mfshaf7/security-architecture/pull/162
   - https://github.com/mfshaf7/operator-orchestration-service/pull/239
+- id: parent-closeout-traversal-omitted
+  title: Feature completion did not continue through the remaining parent shells
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: Feature 930 was reported complete without checking initiative planning and
+    closeout readiness. PI Objective 1178 remained in progress despite having no open
+    child or descendant work, and Epic 898 therefore remained open until the operator
+    challenged the incomplete hierarchy closeout.
+  source_refs:
+  - openproject://work_packages/1178
+  - openproject://work_packages/898
+  - 'conversation:2026-09-27-operator-identified-unclosed-parent-items'
 resolution:
   after_action_ref: null
   control_refs: []
-  note: The delivery work was repaired and Feature 930 closed. The preventive controls
-    remain intentionally separate from the completed feature.
+  note: The delivery work was repaired; Feature 930, PI Objective 1178, and Epic 898
+    are closed. The preventive controls remain intentionally separate from the
+    completed initiative.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-09-30'
   note: Define a cross-repo acceptance binding that names producer, consumer,
     integration point, and end-to-end proof; extend evidence-profile validation so an
-    active source-backed profile must provide both test and validation command classes.
+    active source-backed profile must provide both test and validation command classes;
+    require completion to evaluate and either close or explicitly retain every ancestor
+    through the initiative root before reporting the delivery scope complete.
