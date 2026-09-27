@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "profile_id": "workspace-governance-delivery-art-evidence-v1",
+  "owner_repo": "workspace-governance",
+  "commands": [
+    {
+      "id": "owner-repository-tests",
+      "kind": "tests",
+      "name": "Workspace Governance test suite",
+      "executable": "python3",
+      "args": ["-m", "unittest", "discover", "-s", "tests"],
+      "fidelity": "real-git",
+      "conformance_binding": "matching-fidelity",
+      "timeout_seconds": 1200
+    },
+    {
+      "id": "contract-validation",
+      "kind": "validations",
+      "name": "Workspace contract validation",
+      "executable": "python3",
+      "args": ["scripts/validate_contracts.py", "--repo-root", "."],
+      "fidelity": "filesystem",
+      "conformance_binding": "none",
+      "timeout_seconds": 600
+    },
+    {
+      "id": "repository-structure-validation",
+      "kind": "validations",
+      "name": "Repository structure validation",
+      "executable": "python3",
+      "args": ["scripts/validate_repo_structure.py", "--repo-root", "."],
+      "fidelity": "filesystem",
+      "conformance_binding": "none",
+      "timeout_seconds": 300
+    },
+    {
+      "id": "project-lifecycle-proof-validation",
+      "kind": "validations",
+      "name": "Project lifecycle proof validation",
+      "executable": "python3",
+      "args": ["scripts/project_lifecycle_proof.py", "--repo-root", ".", "--check"],
+      "fidelity": "filesystem",
+      "conformance_binding": "none",
+      "timeout_seconds": 300
+    },
+    {
+      "id": "stale-content-audit",
+      "kind": "validations",
+      "name": "Workspace Governance stale-content audit",
+      "executable": "python3",
+      "args": ["scripts/audit_stale_content.py", "--workspace-root", ".", "--repo-name", "workspace-governance"],
+      "fidelity": "filesystem",
+      "conformance_binding": "none",
+      "timeout_seconds": 300
+    },
+    {
+      "id": "source-diff-validation",
+      "kind": "validations",
+      "name": "Source diff whitespace validation",
+      "executable": "git",
+      "args": ["diff", "--check", "{{base_commit}}...{{head_commit}}"],
+      "fidelity": "real-git",
+      "conformance_binding": "none",
+      "timeout_seconds": 60
+    }
+  ]
+}
