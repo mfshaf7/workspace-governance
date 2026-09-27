@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "artifact_type": "console-source-projection",
+  "binding": {
+    "authority": "operator-orchestration-service",
+    "record_ref": "lifecycle-transition://prototype/governance-console/delivery/1",
+    "source_owner": "operator-orchestration-service",
+    "source_ref": "prototype://governance-console"
+  },
+  "freshness": {
+    "observed_at": "2026-09-27T12:00:00Z",
+    "state": "current",
+    "valid_until": "2026-09-28T12:00:00Z"
+  },
+  "revision": {
+    "event_cursor": "lifecycle-transition:prototype-governance-console:0",
+    "event_sequence": 0,
+    "source_revision": "sha256:2bf616bc724fcd3efc81486f09065dfc9b84a9ea69a9293c6b50f17c27f85eac"
+  },
+  "projection": {
+    "transition_id": "lifecycle-transition:prototype-governance-console:delivery:1",
+    "route_id": "prototype-to-delivery",
+    "state": "prepared",
+    "correlation_id": "prototype-governance-console:delivery:1",
+    "idempotency_key": "prototype-governance-console:delivery:1",
+    "source": {
+      "domain": "prototype",
+      "owner_ref": "prototype",
+      "projection_version": "1",
+      "record_id": "prototype:governance-console",
+      "source_version": "baseline:governance-console:1"
+    },
+    "target": {
+      "admission_owner_ref": "delivery-ingress-policy",
+      "application_owner_ref": "delivery-ingress-adapter",
+      "domain": "delivery",
+      "home_ref": "workspace-delivery-art",
+      "ingress_ref": "delivery-intake",
+      "lane_ref": "delivery-intake"
+    },
+    "reason": {
+      "code": "baseline-approved",
+      "detail": "Continue governed delivery from the accepted Prototype baseline."
+    },
+    "validation": {
+      "gates": [],
+      "receipt_ref": null,
+      "run_ref": null,
+      "state": "not-started"
+    },
+    "authority_decisions": [],
+    "admission": {
+      "reason_code": null,
+      "receipt_ref": null,
+      "recorded_at": null,
+      "state": "not-started",
+      "target_record_ref": null
+    },
+    "application": {
+      "adapter_ref": "delivery-ingress-adapter",
+      "evidence_kind": null,
+      "failure_code": null,
+      "failure_detail": null,
+      "receipt_ref": null,
+      "recorded_at": null,
+      "resulting_refs": [],
+      "retryable": null,
+      "run_ref": null,
+      "state": "not-started",
+      "target_record_ref": null
+    },
+    "blocked_gate": null,
+    "correction": null,
+    "deferred": null,
+    "rejection": null,
+    "cancelled_reason_code": null,
+    "supersedes_transition_id": null,
+    "superseded_by_transition_id": null,
+    "next_action": {
+      "action": "start-validation",
+      "owner_ref": "workspace-governance-control-fabric",
+      "review_at": null
+    },
+    "history": {
+      "entries": [
+        {
+          "artifact_id": "lifecycle-artifact:prototype-governance-console:0",
+          "artifact_kind": "source-packet-prepared",
+          "authority": {
+            "owner_ref": "prototype",
+            "role": "source-domain"
+          },
+          "evidence_refs": [
+            "prototype-baseline://governance-console/1"
+          ],
+          "recorded_at": "2026-09-27T12:00:00Z",
+          "sequence": 0
+        }
+      ],
+      "next_cursor": null,
+      "truncated": false
+    },
+    "updated_at": "2026-09-27T12:00:00Z"
+  }
+}

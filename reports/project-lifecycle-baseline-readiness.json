@@ -31,7 +31,7 @@
       "reason": "The Console projection remains fixture-backed until canonical backend reads and writes are implemented."
     }
   ],
-  "lifecycle_contract_digest": "sha256:3b44aa161f69fe788173d7e74f4e90518f08ed2dffabf14a51b575d759808c25",
+  "lifecycle_contract_digest": "sha256:1ca79be001a7c383b26ff0cc3a8050ca08972f58f32409298edf02cc763cc6ef",
   "lifecycle_contract_ref": "contracts/project-lifecycle.yaml",
   "proof_contract_digest": "sha256:73e99c66893177e40da117663e94c895cc87477bbb5f619af6ded651849fa96d",
   "proof_posture": "local-deterministic",

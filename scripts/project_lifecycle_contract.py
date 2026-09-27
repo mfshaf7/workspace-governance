@@ -18,6 +18,140 @@ IMPLEMENTATION_MATURITY = {
     "dev-integration": 2,
     "governed": 3,
 }
+PROJECTION_ROUTES = {
+    "proposal-to-delivery": {
+        "canonical_transition_id": "proposal-route-delivery",
+        "source_domain": "proposal",
+        "intent_owner_ref": "proposal",
+        "target_domain": "delivery",
+        "target_home_ref": "workspace-delivery-art",
+        "target_ingress_ref": "delivery-intake",
+        "target_lane_ref": "delivery-intake",
+        "target_admission_owner_ref": "delivery-ingress-policy",
+        "target_application_owner_ref": "delivery-ingress-adapter",
+        "validation_owner_ref": "workspace-governance-control-fabric",
+        "execution_owner_ref": "operator-orchestration-service",
+        "completion_evidence": "target-admission-receipt",
+    },
+    "proposal-to-prototype": {
+        "canonical_transition_id": "proposal-route-incubation",
+        "source_domain": "proposal",
+        "intent_owner_ref": "proposal",
+        "target_domain": "prototype",
+        "target_home_ref": "workspace-prototype-studio",
+        "target_ingress_ref": "prototype-ingress",
+        "target_lane_ref": "prototype-landing",
+        "target_admission_owner_ref": "prototype-ingress-policy",
+        "target_application_owner_ref": "prototype-ingress-adapter",
+        "validation_owner_ref": "workspace-governance-control-fabric",
+        "execution_owner_ref": "operator-orchestration-service",
+        "completion_evidence": "target-application-receipt",
+    },
+    "prototype-to-delivery": {
+        "canonical_transition_id": "incubation-promote-delivery",
+        "source_domain": "prototype",
+        "intent_owner_ref": "prototype",
+        "target_domain": "delivery",
+        "target_home_ref": "workspace-delivery-art",
+        "target_ingress_ref": "delivery-intake",
+        "target_lane_ref": "delivery-intake",
+        "target_admission_owner_ref": "delivery-ingress-policy",
+        "target_application_owner_ref": "delivery-ingress-adapter",
+        "validation_owner_ref": "workspace-governance-control-fabric",
+        "execution_owner_ref": "operator-orchestration-service",
+        "completion_evidence": "target-application-receipt",
+    },
+}
+PROJECTION_STATES = {
+    "prepared",
+    "validating",
+    "awaiting-authority",
+    "awaiting-admission",
+    "authorized",
+    "applying",
+    "blocked",
+    "returned",
+    "deferred",
+    "rejected",
+    "failed",
+    "applied",
+    "cancelled",
+    "superseded",
+}
+PROJECTION_NEXT_ACTIONS = {
+    "prepared": "start-validation",
+    "validating": "complete-validation",
+    "awaiting-authority": "record-authority-decision",
+    "awaiting-admission": "record-admission",
+    "authorized": "start-application",
+    "applying": "complete-application",
+    "blocked": "resolve-gate",
+    "returned": "correct-source",
+    "deferred": "review-deferred-transition",
+    "rejected": "review-rejection",
+    "failed": "retry-application",
+}
+PROJECTION_TERMINAL_STATES = {"applied", "cancelled", "superseded"}
+
+
+def _projection_next_action_owner(
+    state: str,
+    projection: Mapping[str, Any],
+    route: Mapping[str, Any],
+) -> Any:
+    if state in {"prepared", "validating"}:
+        return route.get("validation_owner_ref")
+    if state == "awaiting-authority":
+        pending = next(
+            (
+                decision
+                for decision in projection.get("authority_decisions", [])
+                if isinstance(decision, Mapping)
+                and decision.get("decision") != "approved"
+            ),
+            None,
+        )
+        return (
+            pending.get("authority_owner_ref")
+            if isinstance(pending, Mapping)
+            else route.get("validation_owner_ref")
+        )
+    if state == "awaiting-admission":
+        return route.get("target_admission_owner_ref")
+    if state in {"authorized", "applying", "failed"}:
+        return route.get("execution_owner_ref")
+    if state == "blocked":
+        blocked_gate = projection.get("blocked_gate")
+        return (
+            blocked_gate.get("owner_ref")
+            if isinstance(blocked_gate, Mapping)
+            else route.get("validation_owner_ref")
+        )
+    if state == "returned":
+        correction = projection.get("correction")
+        return (
+            correction.get("owner_ref")
+            if isinstance(correction, Mapping)
+            else route.get("intent_owner_ref")
+        )
+    if state == "deferred":
+        deferred_decision = next(
+            (
+                decision
+                for decision in projection.get("authority_decisions", [])
+                if isinstance(decision, Mapping)
+                and decision.get("decision") == "deferred"
+            ),
+            None,
+        )
+        return (
+            deferred_decision.get("authority_owner_ref")
+            if isinstance(deferred_decision, Mapping)
+            else route.get("intent_owner_ref")
+        )
+    if state == "rejected":
+        return route.get("intent_owner_ref")
+    return None
 
 
 def lifecycle_model(contract: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -56,6 +190,7 @@ def contract_issues(
     evidence_types = model.get("evidence_types", {})
     envelopes = model.get("envelopes", {})
     recovery = model.get("recovery_contract", {})
+    projection_contract = model.get("projection_contract", {})
     transitions = model.get("transitions", {})
     issues: list[str] = []
     model_maturity = model.get("implementation_posture")
@@ -121,6 +256,31 @@ def contract_issues(
         issues.append("recovery decisions must be exactly remove, workaround, accept-risk, and defer")
     if set(recovery.get("requirements", {})) != allowed_recovery:
         issues.append("recovery requirements must cover every allowed recovery decision exactly")
+
+    if projection_contract.get("schema_ref") != (
+        "contracts/schemas/lifecycle-transition-projection.schema.json"
+    ):
+        issues.append("projection contract must reference the canonical projection schema")
+    if projection_contract.get("contract_maturity") != "contract-ready":
+        issues.append("projection contract maturity must be contract-ready")
+    if projection_contract.get("runtime_maturity") != "contract-only":
+        issues.append("projection runtime maturity must remain contract-only")
+    if projection_contract.get("locked_routes") != PROJECTION_ROUTES:
+        issues.append("projection contract must define the three locked routes exactly")
+    if set(projection_contract.get("states", [])) != PROJECTION_STATES:
+        issues.append("projection contract must define the lifecycle projection states exactly")
+    if set(projection_contract.get("next_actions", [])) != set(
+        PROJECTION_NEXT_ACTIONS.values()
+    ):
+        issues.append("projection contract must define the lifecycle next actions exactly")
+    if set(projection_contract.get("terminal_states", [])) != PROJECTION_TERMINAL_STATES:
+        issues.append("projection contract must define the terminal states exactly")
+    for route_id, route in PROJECTION_ROUTES.items():
+        if route["canonical_transition_id"] not in transitions:
+            issues.append(
+                f"projection route {route_id} references unknown canonical transition "
+                f"{route['canonical_transition_id']!r}"
+            )
 
     for transition_id, transition in transitions.items():
         axis_id = transition.get("axis")
@@ -201,6 +361,128 @@ def contract_issues(
                     states_key="states",
                 )
             )
+
+    return issues
+
+
+def projection_issues(
+    contract: Mapping[str, Any],
+    artifact: Mapping[str, Any],
+) -> list[str]:
+    model = lifecycle_model(contract)
+    routes = model.get("projection_contract", {}).get("locked_routes", {})
+    projection = artifact.get("projection", {})
+    issues: list[str] = []
+
+    if not isinstance(projection, Mapping):
+        return ["lifecycle transition projection payload must be structured"]
+
+    route_id = projection.get("route_id")
+    route = routes.get(route_id)
+    if not isinstance(route, Mapping):
+        return [f"lifecycle transition projection uses unknown route {route_id!r}"]
+
+    source = projection.get("source", {})
+    target = projection.get("target", {})
+    expected_source = {
+        "domain": route.get("source_domain"),
+        "owner_ref": route.get("intent_owner_ref"),
+    }
+    actual_source = {
+        "domain": source.get("domain") if isinstance(source, Mapping) else None,
+        "owner_ref": source.get("owner_ref") if isinstance(source, Mapping) else None,
+    }
+    if actual_source != expected_source:
+        issues.append(f"projection source does not match locked route {route_id}")
+
+    target_fields = {
+        "domain": "target_domain",
+        "home_ref": "target_home_ref",
+        "ingress_ref": "target_ingress_ref",
+        "lane_ref": "target_lane_ref",
+        "admission_owner_ref": "target_admission_owner_ref",
+        "application_owner_ref": "target_application_owner_ref",
+    }
+    if not isinstance(target, Mapping) or any(
+        target.get(field) != route.get(route_field)
+        for field, route_field in target_fields.items()
+    ):
+        issues.append(f"projection target does not match locked route {route_id}")
+
+    state = projection.get("state")
+    next_action = projection.get("next_action")
+    if state in PROJECTION_TERMINAL_STATES:
+        if next_action is not None:
+            issues.append("terminal lifecycle transition must not expose a next action")
+    elif state in PROJECTION_NEXT_ACTIONS:
+        if not isinstance(next_action, Mapping):
+            issues.append("non-terminal lifecycle transition requires one owned next action")
+        else:
+            expected_action = PROJECTION_NEXT_ACTIONS[state]
+            if next_action.get("action") != expected_action:
+                issues.append(
+                    f"lifecycle transition state {state} requires next action {expected_action}"
+                )
+            if not next_action.get("owner_ref"):
+                issues.append("lifecycle transition next action requires an owner")
+            expected_owner = _projection_next_action_owner(state, projection, route)
+            if expected_owner and next_action.get("owner_ref") != expected_owner:
+                issues.append(
+                    f"lifecycle transition state {state} requires next-action owner "
+                    f"{expected_owner}"
+                )
+
+    if state == "blocked":
+        blocked_gate = projection.get("blocked_gate")
+        if not isinstance(blocked_gate, Mapping) or (
+            blocked_gate.get("state") != "blocked"
+            or not blocked_gate.get("required_fix")
+        ):
+            issues.append("blocked lifecycle transition requires its gate and required fix")
+    if state == "returned" and not isinstance(projection.get("correction"), Mapping):
+        issues.append("returned lifecycle transition requires a source correction")
+    if state == "failed":
+        application = projection.get("application", {})
+        if not isinstance(application, Mapping) or (
+            application.get("state") != "failed"
+            or not application.get("failure_code")
+            or not application.get("failure_detail")
+            or not isinstance(application.get("retryable"), bool)
+        ):
+            issues.append("failed lifecycle transition requires bounded application failure detail")
+    if state == "applied":
+        application = projection.get("application", {})
+        if not isinstance(application, Mapping) or (
+            application.get("state") != "applied"
+            or application.get("evidence_kind") != route.get("completion_evidence")
+            or not application.get("receipt_ref")
+        ):
+            issues.append("applied lifecycle transition requires its route completion receipt")
+
+    history = projection.get("history", {})
+    entries = history.get("entries", []) if isinstance(history, Mapping) else []
+    sequences = [
+        entry.get("sequence")
+        for entry in entries
+        if isinstance(entry, Mapping)
+    ]
+    if len(sequences) != len(entries) or sequences != sorted(set(sequences)):
+        issues.append("lifecycle transition history must have unique ascending sequences")
+    if not entries or entries[0].get("artifact_kind") != "source-packet-prepared":
+        issues.append("lifecycle transition history must start with one source packet")
+    if sum(
+        1
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and entry.get("artifact_kind") == "source-packet-prepared"
+    ) != 1:
+        issues.append("lifecycle transition history must contain exactly one source packet")
+
+    revision = artifact.get("revision", {})
+    if entries and isinstance(revision, Mapping) and (
+        sequences[-1] != revision.get("event_sequence")
+    ):
+        issues.append("projection revision must match the latest history sequence")
 
     return issues
 

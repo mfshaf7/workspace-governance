@@ -186,6 +186,16 @@ Use these contracts to declare:
   - defines owner roles, typed transition envelopes, evidence, preconditions,
     recovery decisions, and stable-state invariants without claiming runtime
     implementation
+- `schemas/lifecycle-transition-projection.schema.json`
+  - defines the strict OOS-owned source projection consumed by lifecycle
+    operator surfaces for the three admitted Proposal and Prototype routes
+  - carries current state, one owned next action, bounded reference-only
+    history, owner results, freshness, and monotonic revision evidence without
+    granting mutation authority to the consumer
+- `fixtures/lifecycle-transition-projection/prototype-to-delivery.current.valid.json`
+  - canonical contract-only example of a current Prototype-to-Delivery
+    projection; it proves contract shape and semantic validation, not live
+    backend wiring
 - `project-lifecycle-proof.yaml`
   - deterministic positive and negative lifecycle scenarios built only from
     canonical transition identifiers
