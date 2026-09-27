@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mfshaf7.dev/schemas/lifecycle-transition-projection.schema.json",
+  "title": "Lifecycle Transition Source Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "binding", "freshness", "revision", "projection"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "console-source-projection" },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "record_ref", "source_owner", "source_ref"],
+      "properties": {
+        "authority": { "const": "operator-orchestration-service" },
+        "record_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "source_owner": { "const": "operator-orchestration-service" },
+        "source_ref": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_at", "state", "valid_until"],
+      "properties": {
+        "observed_at": { "type": "string", "format": "date-time" },
+        "state": { "enum": ["current", "stale", "unavailable", "unknown"] },
+        "valid_until": { "type": "string", "format": "date-time" }
+      }
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_cursor", "event_sequence", "source_revision"],
+      "properties": {
+        "event_cursor": { "$ref": "#/$defs/nonEmptyString" },
+        "event_sequence": { "type": "integer", "minimum": 0 },
+        "source_revision": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "projection": { "$ref": "#/$defs/projection" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "nullableString": {
+      "oneOf": [
+        { "$ref": "#/$defs/nonEmptyString" },
+        { "type": "null" }
+      ]
+    },
+    "referenceList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_ref", "role"],
+      "properties": {
+        "owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "role": {
+          "enum": ["decision-authority", "orchestration", "source-domain", "target-adapter", "target-domain", "validation-authority"]
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_ref", "gate_id", "owner_ref", "required_fix", "state"],
+      "properties": {
+        "evidence_ref": { "$ref": "#/$defs/nullableString" },
+        "gate_id": { "$ref": "#/$defs/nonEmptyString" },
+        "owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "required_fix": { "$ref": "#/$defs/nullableString" },
+        "state": { "enum": ["blocked", "not-required", "passed"] }
+      }
+    },
+    "correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_ref", "reason_code", "required_fix"],
+      "properties": {
+        "owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "reason_code": { "$ref": "#/$defs/nonEmptyString" },
+        "required_fix": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "owner_ref", "review_at"],
+      "properties": {
+        "action": {
+          "enum": ["start-validation", "complete-validation", "record-authority-decision", "record-admission", "start-application", "complete-application", "resolve-gate", "correct-source", "review-deferred-transition", "review-rejection", "retry-application"]
+        },
+        "owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "review_at": {
+          "oneOf": [
+            { "type": "string", "format": "date-time" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "historyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "artifact_kind", "authority", "evidence_refs", "recorded_at", "sequence"],
+      "properties": {
+        "artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "artifact_kind": {
+          "enum": ["source-packet-prepared", "validation-started", "validation-completed", "target-admission-recorded", "authority-decision-recorded", "application-started", "target-application-recorded", "application-failed", "gate-blocked", "source-correction-returned", "transition-deferred", "transition-cancelled", "transition-superseded"]
+        },
+        "authority": { "$ref": "#/$defs/authority" },
+        "evidence_refs": { "$ref": "#/$defs/referenceList" },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "sequence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transition_id", "route_id", "state", "correlation_id", "idempotency_key", "source", "target", "reason", "validation", "authority_decisions", "admission", "application", "blocked_gate", "correction", "deferred", "rejection", "cancelled_reason_code", "supersedes_transition_id", "superseded_by_transition_id", "next_action", "history", "updated_at"],
+      "properties": {
+        "transition_id": { "$ref": "#/$defs/nonEmptyString" },
+        "route_id": { "enum": ["proposal-to-delivery", "proposal-to-prototype", "prototype-to-delivery"] },
+        "state": { "enum": ["prepared", "validating", "awaiting-authority", "awaiting-admission", "authorized", "applying", "blocked", "returned", "deferred", "rejected", "failed", "applied", "cancelled", "superseded"] },
+        "correlation_id": { "$ref": "#/$defs/nonEmptyString" },
+        "idempotency_key": { "$ref": "#/$defs/nonEmptyString" },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["domain", "owner_ref", "projection_version", "record_id", "source_version"],
+          "properties": {
+            "domain": { "enum": ["proposal", "prototype"] },
+            "owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "projection_version": { "$ref": "#/$defs/nonEmptyString" },
+            "record_id": { "$ref": "#/$defs/nonEmptyString" },
+            "source_version": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["admission_owner_ref", "application_owner_ref", "domain", "home_ref", "ingress_ref", "lane_ref"],
+          "properties": {
+            "admission_owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "application_owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "domain": { "enum": ["delivery", "prototype"] },
+            "home_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "ingress_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "lane_ref": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "reason": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "detail"],
+          "properties": {
+            "code": { "$ref": "#/$defs/nonEmptyString" },
+            "detail": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gates", "receipt_ref", "run_ref", "state"],
+          "properties": {
+            "gates": { "type": "array", "items": { "$ref": "#/$defs/gate" } },
+            "receipt_ref": { "$ref": "#/$defs/nullableString" },
+            "run_ref": { "$ref": "#/$defs/nullableString" },
+            "state": { "enum": ["blocked", "not-started", "passed", "returned", "running"] }
+          }
+        },
+        "authority_decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["authority_owner_ref", "control_id", "decision", "evidence_type", "justification", "receipt_ref", "recorded_at", "review_at"],
+            "properties": {
+              "authority_owner_ref": { "$ref": "#/$defs/nonEmptyString" },
+              "control_id": { "$ref": "#/$defs/nonEmptyString" },
+              "decision": { "enum": ["approved", "deferred", "pending"] },
+              "evidence_type": { "$ref": "#/$defs/nonEmptyString" },
+              "justification": { "$ref": "#/$defs/nullableString" },
+              "receipt_ref": { "$ref": "#/$defs/nullableString" },
+              "recorded_at": {
+                "oneOf": [
+                  { "type": "string", "format": "date-time" },
+                  { "type": "null" }
+                ]
+              },
+              "review_at": {
+                "oneOf": [
+                  { "type": "string", "format": "date-time" },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        },
+        "admission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason_code", "receipt_ref", "recorded_at", "state", "target_record_ref"],
+          "properties": {
+            "reason_code": { "$ref": "#/$defs/nullableString" },
+            "receipt_ref": { "$ref": "#/$defs/nullableString" },
+            "recorded_at": {
+              "oneOf": [
+                { "type": "string", "format": "date-time" },
+                { "type": "null" }
+              ]
+            },
+            "state": { "enum": ["admitted", "not-started", "rejected"] },
+            "target_record_ref": { "$ref": "#/$defs/nullableString" }
+          }
+        },
+        "application": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["adapter_ref", "evidence_kind", "failure_code", "failure_detail", "receipt_ref", "recorded_at", "resulting_refs", "retryable", "run_ref", "state", "target_record_ref"],
+          "properties": {
+            "adapter_ref": { "$ref": "#/$defs/nonEmptyString" },
+            "evidence_kind": {
+              "oneOf": [
+                { "enum": ["target-admission-receipt", "target-application-receipt"] },
+                { "type": "null" }
+              ]
+            },
+            "failure_code": { "$ref": "#/$defs/nullableString" },
+            "failure_detail": { "$ref": "#/$defs/nullableString" },
+            "receipt_ref": { "$ref": "#/$defs/nullableString" },
+            "recorded_at": {
+              "oneOf": [
+                { "type": "string", "format": "date-time" },
+                { "type": "null" }
+              ]
+            },
+            "resulting_refs": { "$ref": "#/$defs/referenceList" },
+            "retryable": { "type": ["boolean", "null"] },
+            "run_ref": { "$ref": "#/$defs/nullableString" },
+            "state": { "enum": ["applied", "failed", "not-started", "running"] },
+            "target_record_ref": { "$ref": "#/$defs/nullableString" }
+          }
+        },
+        "blocked_gate": {
+          "oneOf": [
+            { "$ref": "#/$defs/gate" },
+            { "type": "null" }
+          ]
+        },
+        "correction": {
+          "oneOf": [
+            { "$ref": "#/$defs/correction" },
+            { "type": "null" }
+          ]
+        },
+        "deferred": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["justification", "reason_code", "review_at"],
+              "properties": {
+                "justification": { "$ref": "#/$defs/nonEmptyString" },
+                "reason_code": { "$ref": "#/$defs/nonEmptyString" },
+                "review_at": { "type": "string", "format": "date-time" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "rejection": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reason_code", "reason_detail"],
+              "properties": {
+                "reason_code": { "$ref": "#/$defs/nonEmptyString" },
+                "reason_detail": { "$ref": "#/$defs/nonEmptyString" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "cancelled_reason_code": { "$ref": "#/$defs/nullableString" },
+        "supersedes_transition_id": { "$ref": "#/$defs/nullableString" },
+        "superseded_by_transition_id": { "$ref": "#/$defs/nullableString" },
+        "next_action": {
+          "oneOf": [
+            { "$ref": "#/$defs/nextAction" },
+            { "type": "null" }
+          ]
+        },
+        "history": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entries", "next_cursor", "truncated"],
+          "properties": {
+            "entries": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 100,
+              "items": { "$ref": "#/$defs/historyEntry" }
+            },
+            "next_cursor": { "$ref": "#/$defs/nullableString" },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

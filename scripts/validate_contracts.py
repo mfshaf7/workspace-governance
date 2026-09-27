@@ -29,7 +29,10 @@ from delivery_art_resource_retirement_contract import (
     contract_fixture_issues as delivery_art_resource_retirement_fixture_issues,
 )
 from developer_integration_runtime_composition import runtime_composition_issues
-from project_lifecycle_contract import contract_issues as project_lifecycle_contract_issues
+from project_lifecycle_contract import (
+    contract_issues as project_lifecycle_contract_issues,
+    projection_issues as lifecycle_transition_projection_issues,
+)
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
 from prototype_landing_contract import contract_issues as prototype_landing_contract_issues
 from prototype_maturity_contract import contract_issues as prototype_maturity_contract_issues
@@ -172,6 +175,13 @@ PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS = (
     "contracts/schemas/prototype-closure-history-event.schema.json",
     "contracts/schemas/prototype-closure-studio-readback.schema.json",
     "contracts/schemas/prototype-closure-receipt.schema.json",
+)
+LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF = (
+    "contracts/schemas/lifecycle-transition-projection.schema.json"
+)
+LIFECYCLE_TRANSITION_PROJECTION_FIXTURE_REF = (
+    "contracts/fixtures/lifecycle-transition-projection/"
+    "prototype-to-delivery.current.valid.json"
 )
 
 DELIVERY_ART_PROOF_CLAIM_ROOTS = (
@@ -6502,6 +6512,39 @@ def main() -> int:
         except SchemaError as exc:
             errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
 
+    lifecycle_transition_projection_schema_path = (
+        repo_root / LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF
+    )
+    lifecycle_transition_projection_fixture_path = (
+        repo_root / LIFECYCLE_TRANSITION_PROJECTION_FIXTURE_REF
+    )
+    if not lifecycle_transition_projection_schema_path.exists():
+        errors.append(
+            f"{LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF}: lifecycle transition "
+            "projection schema is missing"
+        )
+    else:
+        try:
+            Draft202012Validator.check_schema(
+                load_json(lifecycle_transition_projection_schema_path)
+            )
+        except SchemaError as exc:
+            errors.append(
+                f"{LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF}: invalid JSON Schema: "
+                f"{exc.message}"
+            )
+        if not lifecycle_transition_projection_fixture_path.exists():
+            errors.append(
+                f"{LIFECYCLE_TRANSITION_PROJECTION_FIXTURE_REF}: canonical lifecycle "
+                "transition projection fixture is missing"
+            )
+        else:
+            validate_schema(
+                errors,
+                lifecycle_transition_projection_fixture_path,
+                lifecycle_transition_projection_schema_path,
+            )
+
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
     )
@@ -6647,6 +6690,17 @@ def main() -> int:
         f"contracts/project-lifecycle.yaml: {error}"
         for error in project_lifecycle_errors
     )
+    if lifecycle_transition_projection_fixture_path.exists():
+        lifecycle_transition_projection_errors = (
+            lifecycle_transition_projection_issues(
+                contracts["project_lifecycle"],
+                load_json(lifecycle_transition_projection_fixture_path),
+            )
+        )
+        errors.extend(
+            f"{LIFECYCLE_TRANSITION_PROJECTION_FIXTURE_REF}: {error}"
+            for error in lifecycle_transition_projection_errors
+        )
     project_lifecycle_proof_errors = project_lifecycle_proof_issues(
         contracts["project_lifecycle"],
         contracts["project_lifecycle_proof"],

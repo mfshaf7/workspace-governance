@@ -85,6 +85,42 @@ flowchart TD
 The Console displays and requests lifecycle work. It is not canonical project,
 source, runtime, release, or publication truth.
 
+## Canonical Transition Projection
+
+The lifecycle contract admits exactly three cross-domain routes for the current
+operator surface:
+
+| Projection route | Canonical transition | Source | Target |
+| --- | --- | --- | --- |
+| `proposal-to-delivery` | `proposal-route-delivery` | Proposal | Delivery intake |
+| `proposal-to-prototype` | `proposal-route-incubation` | Proposal | Prototype Landing |
+| `prototype-to-delivery` | `incubation-promote-delivery` | Prototype | Delivery intake |
+
+Operator Orchestration Service owns the transition journal and publishes the
+current state through the strict
+[`lifecycle-transition-projection.schema.json`](../contracts/schemas/lifecycle-transition-projection.schema.json)
+envelope. The projection carries:
+
+- one immutable route, source record, source version, correlation id, and
+  idempotency key
+- the current transition state and exactly one owner-routed next action while
+  the transition is non-terminal
+- validation, authority, admission, and application results as typed state
+- bounded, ordered history that references owner evidence instead of embedding
+  raw artifacts
+- source freshness and monotonic revision evidence required by a live consumer
+
+`applied`, `cancelled`, and `superseded` are terminal and cannot expose a next
+action. Blocked and returned states identify the required fix and its owner.
+Applied state requires the completion receipt declared by the selected route.
+
+The contract is `contract-ready`; the runtime remains `contract-only`. The
+canonical fixture proves the schema and semantic rules, but it is not evidence
+that OOS, WGCF, target adapters, or the Console are live-wired. Synthetic
+projection fixtures are permitted only in an explicitly disconnected preview.
+Configured live mode must fail closed when owner-backed projection truth is
+missing, stale, unavailable, or contradictory.
+
 ## Transition Contract
 
 Every allowed transition names:

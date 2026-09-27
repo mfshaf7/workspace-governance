@@ -298,6 +298,123 @@ project_lifecycle:
         - owner
         - review_at
     rule: A failed transition remains at its prior durable state until one allowed recovery decision and its required evidence are recorded.
+  projection_contract:
+    schema_ref: contracts/schemas/lifecycle-transition-projection.schema.json
+    schema_version: 1
+    contract_maturity: contract-ready
+    runtime_maturity: contract-only
+    purpose: Project the current state, exact next action, bounded history, and owner evidence for the three admitted cross-domain routes without granting mutation authority to a consumer.
+    source_authority_envelope:
+      artifact_type: console-source-projection
+      authority: operator-orchestration-service
+      source_owner: operator-orchestration-service
+      required_sections:
+        - binding
+        - freshness
+        - revision
+        - projection
+      accepted_freshness_states:
+        - current
+        - stale
+        - unavailable
+        - unknown
+      live_consumer_rule: Only a current, unexpired, monotonically advancing projection may replace accepted live state.
+      disconnected_preview_rule: Synthetic fixtures are allowed only when the Console is explicitly configured for disconnected preview and must never masquerade as owner-backed live state.
+    locked_routes:
+      proposal-to-delivery:
+        canonical_transition_id: proposal-route-delivery
+        source_domain: proposal
+        intent_owner_ref: proposal
+        target_domain: delivery
+        target_home_ref: workspace-delivery-art
+        target_ingress_ref: delivery-intake
+        target_lane_ref: delivery-intake
+        target_admission_owner_ref: delivery-ingress-policy
+        target_application_owner_ref: delivery-ingress-adapter
+        validation_owner_ref: workspace-governance-control-fabric
+        execution_owner_ref: operator-orchestration-service
+        completion_evidence: target-admission-receipt
+      proposal-to-prototype:
+        canonical_transition_id: proposal-route-incubation
+        source_domain: proposal
+        intent_owner_ref: proposal
+        target_domain: prototype
+        target_home_ref: workspace-prototype-studio
+        target_ingress_ref: prototype-ingress
+        target_lane_ref: prototype-landing
+        target_admission_owner_ref: prototype-ingress-policy
+        target_application_owner_ref: prototype-ingress-adapter
+        validation_owner_ref: workspace-governance-control-fabric
+        execution_owner_ref: operator-orchestration-service
+        completion_evidence: target-application-receipt
+      prototype-to-delivery:
+        canonical_transition_id: incubation-promote-delivery
+        source_domain: prototype
+        intent_owner_ref: prototype
+        target_domain: delivery
+        target_home_ref: workspace-delivery-art
+        target_ingress_ref: delivery-intake
+        target_lane_ref: delivery-intake
+        target_admission_owner_ref: delivery-ingress-policy
+        target_application_owner_ref: delivery-ingress-adapter
+        validation_owner_ref: workspace-governance-control-fabric
+        execution_owner_ref: operator-orchestration-service
+        completion_evidence: target-application-receipt
+    states:
+      - prepared
+      - validating
+      - awaiting-authority
+      - awaiting-admission
+      - authorized
+      - applying
+      - blocked
+      - returned
+      - deferred
+      - rejected
+      - failed
+      - applied
+      - cancelled
+      - superseded
+    next_actions:
+      - start-validation
+      - complete-validation
+      - record-authority-decision
+      - record-admission
+      - start-application
+      - complete-application
+      - resolve-gate
+      - correct-source
+      - review-deferred-transition
+      - review-rejection
+      - retry-application
+    terminal_states:
+      - applied
+      - cancelled
+      - superseded
+    history_event_kinds:
+      - source-packet-prepared
+      - validation-started
+      - validation-completed
+      - target-admission-recorded
+      - authority-decision-recorded
+      - application-started
+      - target-application-recorded
+      - application-failed
+      - gate-blocked
+      - source-correction-returned
+      - transition-deferred
+      - transition-cancelled
+      - transition-superseded
+    invariants:
+      - One transition id binds one route, source record, source version, correlation id, and idempotency key.
+      - Event sequence and source revision never move backward; replay at the same sequence must be byte-equivalent after canonical serialization.
+      - A terminal transition has no next action.
+      - Every non-terminal transition exposes exactly one next action and its owner.
+      - Blocked and returned states identify the owning gate or source correction and the required fix.
+      - Failed application state identifies a bounded failure code, retry posture, and execution owner.
+      - Evidence remains reference-only; raw owner artifacts and secret values are prohibited.
+      - Target admission or application receipts are required before applied state.
+      - Consumer surfaces do not infer success from an incomplete history or an unavailable source.
   transitions:
     proposal-route-incubation:
       axis: project-phase

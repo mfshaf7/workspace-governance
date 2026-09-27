@@ -17,6 +17,7 @@
         "evidence_types",
         "envelopes",
         "recovery_contract",
+        "projection_contract",
         "transitions",
         "state_invariants",
         "denied_claims"
@@ -111,6 +112,7 @@
           },
           "additionalProperties": false
         },
+        "projection_contract": { "$ref": "#/$defs/projectionContract" },
         "transitions": {
           "type": "object",
           "minProperties": 1,
@@ -194,6 +196,199 @@
     },
     "recoveryDecision": {
       "enum": ["remove", "workaround", "accept-risk", "defer"]
+    },
+    "projectionContract": {
+      "type": "object",
+      "required": [
+        "schema_ref",
+        "schema_version",
+        "contract_maturity",
+        "runtime_maturity",
+        "purpose",
+        "source_authority_envelope",
+        "locked_routes",
+        "states",
+        "next_actions",
+        "terminal_states",
+        "history_event_kinds",
+        "invariants"
+      ],
+      "properties": {
+        "schema_ref": {
+          "const": "contracts/schemas/lifecycle-transition-projection.schema.json"
+        },
+        "schema_version": { "const": 1 },
+        "contract_maturity": { "const": "contract-ready" },
+        "runtime_maturity": { "const": "contract-only" },
+        "purpose": { "type": "string", "minLength": 1 },
+        "source_authority_envelope": {
+          "type": "object",
+          "required": [
+            "artifact_type",
+            "authority",
+            "source_owner",
+            "required_sections",
+            "accepted_freshness_states",
+            "live_consumer_rule",
+            "disconnected_preview_rule"
+          ],
+          "properties": {
+            "artifact_type": { "const": "console-source-projection" },
+            "authority": { "const": "operator-orchestration-service" },
+            "source_owner": { "const": "operator-orchestration-service" },
+            "required_sections": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "uniqueItems": true,
+              "items": { "enum": ["binding", "freshness", "revision", "projection"] }
+            },
+            "accepted_freshness_states": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "uniqueItems": true,
+              "items": { "enum": ["current", "stale", "unavailable", "unknown"] }
+            },
+            "live_consumer_rule": { "type": "string", "minLength": 1 },
+            "disconnected_preview_rule": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "locked_routes": {
+          "type": "object",
+          "required": [
+            "proposal-to-delivery",
+            "proposal-to-prototype",
+            "prototype-to-delivery"
+          ],
+          "properties": {
+            "proposal-to-delivery": { "$ref": "#/$defs/projectionRoute" },
+            "proposal-to-prototype": { "$ref": "#/$defs/projectionRoute" },
+            "prototype-to-delivery": { "$ref": "#/$defs/projectionRoute" }
+          },
+          "additionalProperties": false
+        },
+        "states": {
+          "type": "array",
+          "minItems": 14,
+          "maxItems": 14,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/projectionState" }
+        },
+        "next_actions": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/projectionNextAction" }
+        },
+        "terminal_states": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "enum": ["applied", "cancelled", "superseded"] }
+        },
+        "history_event_kinds": {
+          "type": "array",
+          "minItems": 13,
+          "maxItems": 13,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/projectionHistoryEventKind" }
+        },
+        "invariants": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "projectionRoute": {
+      "type": "object",
+      "required": [
+        "canonical_transition_id",
+        "source_domain",
+        "intent_owner_ref",
+        "target_domain",
+        "target_home_ref",
+        "target_ingress_ref",
+        "target_lane_ref",
+        "target_admission_owner_ref",
+        "target_application_owner_ref",
+        "validation_owner_ref",
+        "execution_owner_ref",
+        "completion_evidence"
+      ],
+      "properties": {
+        "canonical_transition_id": { "type": "string", "minLength": 1 },
+        "source_domain": { "enum": ["proposal", "prototype"] },
+        "intent_owner_ref": { "type": "string", "minLength": 1 },
+        "target_domain": { "enum": ["delivery", "prototype"] },
+        "target_home_ref": { "type": "string", "minLength": 1 },
+        "target_ingress_ref": { "type": "string", "minLength": 1 },
+        "target_lane_ref": { "type": "string", "minLength": 1 },
+        "target_admission_owner_ref": { "type": "string", "minLength": 1 },
+        "target_application_owner_ref": { "type": "string", "minLength": 1 },
+        "validation_owner_ref": { "type": "string", "minLength": 1 },
+        "execution_owner_ref": { "type": "string", "minLength": 1 },
+        "completion_evidence": {
+          "enum": ["target-admission-receipt", "target-application-receipt"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "projectionState": {
+      "enum": [
+        "prepared",
+        "validating",
+        "awaiting-authority",
+        "awaiting-admission",
+        "authorized",
+        "applying",
+        "blocked",
+        "returned",
+        "deferred",
+        "rejected",
+        "failed",
+        "applied",
+        "cancelled",
+        "superseded"
+      ]
+    },
+    "projectionNextAction": {
+      "enum": [
+        "start-validation",
+        "complete-validation",
+        "record-authority-decision",
+        "record-admission",
+        "start-application",
+        "complete-application",
+        "resolve-gate",
+        "correct-source",
+        "review-deferred-transition",
+        "review-rejection",
+        "retry-application"
+      ]
+    },
+    "projectionHistoryEventKind": {
+      "enum": [
+        "source-packet-prepared",
+        "validation-started",
+        "validation-completed",
+        "target-admission-recorded",
+        "authority-decision-recorded",
+        "application-started",
+        "target-application-recorded",
+        "application-failed",
+        "gate-blocked",
+        "source-correction-returned",
+        "transition-deferred",
+        "transition-cancelled",
+        "transition-superseded"
+      ]
     },
     "stateCondition": {
       "type": "object",
