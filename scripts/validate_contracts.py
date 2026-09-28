@@ -913,79 +913,75 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
         runtime_boundaries = _artifact_object_list(
             architecture.get("runtime_boundaries")
         )
-        durable_custody_owner = "workspace-governance-control-fabric"
-        persistence_terms = ("persist", "store", "hold")
-        wgcf_boundaries = [
-            boundary
+        runtime_owner_ids = [
+            boundary.get("owner_repo")
             for boundary in runtime_boundaries
-            if boundary.get("owner_repo") == durable_custody_owner
+            if isinstance(boundary.get("owner_repo"), str)
         ]
-        if not wgcf_boundaries or not any(
-            "artifact" in capability.casefold()
-            and any(
-                term in capability.casefold()
-                for term in persistence_terms
+        if len(runtime_owner_ids) != len(set(runtime_owner_ids)):
+            errors.append(
+                "architecture.runtime_boundaries must contain one entry per owner repo"
             )
-            for boundary in wgcf_boundaries
-            for capability in _artifact_string_list(boundary.get("allowed"))
+        durable_custody_owner = "workspace-governance-control-fabric"
+        orchestration_owner = "operator-orchestration-service"
+        persist_capability = "delivery-art.persist-canonical-artifacts"
+        project_content_capability = (
+            "delivery-art.project-canonical-content-to-openproject"
+        )
+        required_orchestration_capabilities = {
+            "delivery-art.author-canonical-artifacts",
+            "delivery-art.submit-canonical-artifacts-to-wgcf",
+            "delivery-art.project-safe-references-to-openproject",
+        }
+        allowed_by_owner = {
+            boundary.get("owner_repo"): set(
+                _artifact_string_list(boundary.get("allowed_capability_ids"))
+            )
+            for boundary in runtime_boundaries
+            if isinstance(boundary.get("owner_repo"), str)
+        }
+        prohibited_by_owner = {
+            boundary.get("owner_repo"): set(
+                _artifact_string_list(boundary.get("prohibited_capability_ids"))
+            )
+            for boundary in runtime_boundaries
+            if isinstance(boundary.get("owner_repo"), str)
+        }
+        if persist_capability not in allowed_by_owner.get(
+            durable_custody_owner, set()
         ):
             errors.append(
                 "architecture.runtime_boundaries must assign durable artifact "
                 "persistence to workspace-governance-control-fabric"
             )
-        for boundary in runtime_boundaries:
-            owner_repo = boundary.get("owner_repo")
-            for capability in _artifact_string_list(boundary.get("allowed")):
-                normalized = capability.casefold()
-                if (
-                    owner_repo != durable_custody_owner
-                    and "artifact" in normalized
-                    and any(term in normalized for term in persistence_terms)
-                ):
-                    errors.append(
-                        "architecture.runtime_boundaries may assign durable artifact "
-                        "persistence only to workspace-governance-control-fabric"
-                    )
-                if (
-                    "openproject" in normalized
-                    and "artifact" in normalized
-                    and any(
-                        term in normalized
-                        for term in ("attach", "upload", "persist", "store")
-                    )
-                ):
-                    errors.append(
-                        "architecture.runtime_boundaries must not assign canonical "
-                        "artifact content custody to OpenProject"
-                    )
-
-        for decision in _artifact_object_list(
-            architecture.get("contradictions_open_decisions")
+        if not required_orchestration_capabilities.issubset(
+            allowed_by_owner.get(orchestration_owner, set())
         ):
+            errors.append(
+                "architecture.runtime_boundaries must assign artifact authorship, "
+                "WGCF submission, and safe OpenProject reference projection to "
+                "operator-orchestration-service"
+            )
+        if not {persist_capability, project_content_capability}.issubset(
+            prohibited_by_owner.get(orchestration_owner, set())
+        ):
+            errors.append(
+                "architecture.runtime_boundaries must prohibit OOS artifact "
+                "persistence and canonical OpenProject content projection"
+            )
+        for owner_repo, capability_ids in allowed_by_owner.items():
             if (
-                decision.get("id") != "decision:evidence-custody"
-                or decision.get("status") != "resolved"
+                owner_repo != durable_custody_owner
+                and persist_capability in capability_ids
             ):
-                continue
-            resolution = str(decision.get("resolution", "")).casefold()
-            names_wgcf = (
-                "wgcf" in resolution
-                or durable_custody_owner in resolution
-            )
-            names_safe_openproject_projection = (
-                "openproject" in resolution
-                and "reference" in resolution
-                and "only" in resolution
-            )
-            if not names_wgcf:
                 errors.append(
-                    "resolved evidence-custody decision must identify WGCF as the "
-                    "durable custody owner"
+                    "architecture.runtime_boundaries may assign durable artifact "
+                    "persistence only to workspace-governance-control-fabric"
                 )
-            if not names_safe_openproject_projection:
+            if project_content_capability in capability_ids:
                 errors.append(
-                    "resolved evidence-custody decision must limit OpenProject to "
-                    "reference projection only"
+                    "architecture.runtime_boundaries must not allow canonical "
+                    "artifact content projection to OpenProject"
                 )
         owner_map = _artifact_object_list(architecture.get("descendant_owner_map"))
         schema_version = payload.get("schema_version")
@@ -3115,8 +3111,8 @@ def validate_delivery_art_artifact_contracts(
     if architecture:
         non_owner_persistence = copy.deepcopy(architecture)
         non_owner_persistence["architecture"]["runtime_boundaries"][0][
-            "allowed"
-        ].append("persist canonical Delivery ART artifacts")
+            "allowed_capability_ids"
+        ].append("delivery-art.persist-canonical-artifacts")
         require_rejected(
             "architecture_packet",
             non_owner_persistence,
@@ -3143,27 +3139,27 @@ def validate_delivery_art_artifact_contracts(
         openproject_attachment_capability = copy.deepcopy(architecture)
         openproject_attachment_capability["architecture"]["runtime_boundaries"][
             0
-        ]["allowed"].append(
-            "attach canonical artifact content to OpenProject"
+        ]["allowed_capability_ids"].append(
+            "delivery-art.project-canonical-content-to-openproject"
         )
         require_rejected(
             "architecture_packet",
             openproject_attachment_capability,
             "OpenProject canonical artifact attachment capability",
-            expected_fragment="must not assign canonical artifact content custody",
+            expected_fragment="must not allow canonical artifact content projection",
         )
 
-        openproject_attachment_decision = copy.deepcopy(architecture)
-        openproject_attachment_decision["architecture"][
-            "contradictions_open_decisions"
-        ][0]["resolution"] = (
-            "OOS attaches content-addressed artifacts to the initiative Epic."
+        missing_safe_projection = copy.deepcopy(architecture)
+        missing_safe_projection["architecture"]["runtime_boundaries"][0][
+            "allowed_capability_ids"
+        ].remove(
+            "delivery-art.project-safe-references-to-openproject"
         )
         require_rejected(
             "architecture_packet",
-            openproject_attachment_decision,
-            "legacy OpenProject attachment ownership decision",
-            expected_fragment="must identify WGCF as the durable custody owner",
+            missing_safe_projection,
+            "missing safe OpenProject reference projection capability",
+            expected_fragment="must assign artifact authorship",
         )
 
         legacy_attachment_custody = copy.deepcopy(architecture)

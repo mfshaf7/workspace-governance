@@ -10,9 +10,9 @@
     "decision_source": "operator"
   },
   "work_start": {
-    "artifact_ref": "wgcf://artifacts/delivery-art/sha256/f39d8b6f7c8a6355048c4435264b08dcdd04ce4dedf44c1fea7a8d85eb6dc23f",
-    "artifact_digest": "sha256:f39d8b6f7c8a6355048c4435264b08dcdd04ce4dedf44c1fea7a8d85eb6dc23f",
-    "scope_fingerprint": "sha256:d70ad308de6b28ab5ae19ee9301f5844ef502de3b017fff6f470f5762b76966d"
+    "artifact_ref": "wgcf://artifacts/delivery-art/sha256/ea5c6a8a86a9b3ac6b132b6fc7912eaacc23e471915d5682fba3424cb4210b3a",
+    "artifact_digest": "sha256:ea5c6a8a86a9b3ac6b132b6fc7912eaacc23e471915d5682fba3424cb4210b3a",
+    "scope_fingerprint": "sha256:01e0a700d110b7e0c925b40b11a8118f2c3140d039e79c70288f8836df0167ac"
   },
   "landing_unit": {
     "decision": "child_isolated_landing_unit",
@@ -121,31 +121,31 @@
   "readiness": {
     "level": "operating-ready",
     "evaluated_at": "2026-08-08T11:30:00+08:00",
-    "subject_digest": "sha256:242b0bd4a86c348a451001a5237fd4c20e23e7a8177d0ae25a0de9c723b99731",
+    "subject_digest": "sha256:27660314999b36528063729ee433230e7b53f2718401bb9f2077df92bb3ef4c0",
     "receipt_refs": [
       {
-        "uri": "wgcf://receipts/art-readiness/art-readiness-receipt-0123456789abcdef01234567-74cb0d84103f1986f1c4c6aa6ab9b417c3a69528212d54eb5eeaf7527f35fdf4.json",
-        "digest": "sha256:74cb0d84103f1986f1c4c6aa6ab9b417c3a69528212d54eb5eeaf7527f35fdf4"
+        "uri": "wgcf://receipts/art-readiness/art-readiness-receipt-0123456789abcdef01234567-2060662f8ab4a0cd606a02a30f1890dea5116e78e1dc0350e703fe89faa14407.json",
+        "digest": "sha256:2060662f8ab4a0cd606a02a30f1890dea5116e78e1dc0350e703fe89faa14407"
       }
     ]
   },
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:b53a3a27ea58319bea25e1f09c8bf3acd77cd09cd24258498aa0f46e1c93f46c"
+    "content_digest": "sha256:990c029659f4c941d83367ea49353ae71585a626276228241bfaebc9017f27e5"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-artifact-registry",
-    "uri": "wgcf://artifacts/delivery-art/sha256/b53a3a27ea58319bea25e1f09c8bf3acd77cd09cd24258498aa0f46e1c93f46c",
+    "uri": "wgcf://artifacts/delivery-art/sha256/990c029659f4c941d83367ea49353ae71585a626276228241bfaebc9017f27e5",
     "receipt_ref": {
-      "uri": "wgcf://receipts/artifact-custody/dddddddddddddddddddddddd-9e003c7f5bed3c9a9ba850d82c84809a931be245f6f9a6ebb3178201f6b195d1.json",
-      "digest": "sha256:9e003c7f5bed3c9a9ba850d82c84809a931be245f6f9a6ebb3178201f6b195d1"
+      "uri": "wgcf://receipts/artifact-custody/dddddddddddddddddddddddd-0088202ce178ea1ba1fc0f66c73a59c809f7af60e51f131320d638d9314136ac.json",
+      "digest": "sha256:0088202ce178ea1ba1fc0f66c73a59c809f7af60e51f131320d638d9314136ac"
     },
     "persisted_at": "2026-08-08T11:33:00+08:00",
     "supersedes": {
-      "uri": "wgcf://artifacts/delivery-art/sha256/0042b3f02ca8b5b8c6bd38d051dfb2495e8ae8bdf3852aa42dc089a133255144",
-      "digest": "sha256:0042b3f02ca8b5b8c6bd38d051dfb2495e8ae8bdf3852aa42dc089a133255144"
+      "uri": "wgcf://artifacts/delivery-art/sha256/72680a6fb28464ae15b2dee540f70d9f7b1500eac0cc315341574179667c4cde",
+      "digest": "sha256:72680a6fb28464ae15b2dee540f70d9f7b1500eac0cc315341574179667c4cde"
     }
   },
   "finalized_at": "2026-08-08T11:32:00+08:00"

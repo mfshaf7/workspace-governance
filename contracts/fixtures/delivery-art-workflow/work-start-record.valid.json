@@ -25,8 +25,8 @@
   },
   "architecture": {
     "required": true,
-    "packet_ref": "wgcf://artifacts/delivery-art/sha256/38ddddbd90945e65777c4122aec27e13da218d2485fb3beea6447634a7d18d8a",
-    "packet_digest": "sha256:38ddddbd90945e65777c4122aec27e13da218d2485fb3beea6447634a7d18d8a",
+    "packet_ref": "wgcf://artifacts/delivery-art/sha256/183c424105839de5defa3a67fa234ef5aa64ed8b620a31b5d357f3ff2888993a",
+    "packet_digest": "sha256:183c424105839de5defa3a67fa234ef5aa64ed8b620a31b5d357f3ff2888993a",
     "readiness": "architecture-ready"
   },
   "source_snapshot": {
@@ -41,7 +41,7 @@
       }
     ]
   },
-  "scope_fingerprint": "sha256:d70ad308de6b28ab5ae19ee9301f5844ef502de3b017fff6f470f5762b76966d",
+  "scope_fingerprint": "sha256:01e0a700d110b7e0c925b40b11a8118f2c3140d039e79c70288f8836df0167ac",
   "invalidation_inputs": [
     "art-descendant-or-dependency-change",
     "owner-or-rollback-boundary-change",
@@ -57,15 +57,15 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:f39d8b6f7c8a6355048c4435264b08dcdd04ce4dedf44c1fea7a8d85eb6dc23f"
+    "content_digest": "sha256:ea5c6a8a86a9b3ac6b132b6fc7912eaacc23e471915d5682fba3424cb4210b3a"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-artifact-registry",
-    "uri": "wgcf://artifacts/delivery-art/sha256/f39d8b6f7c8a6355048c4435264b08dcdd04ce4dedf44c1fea7a8d85eb6dc23f",
+    "uri": "wgcf://artifacts/delivery-art/sha256/ea5c6a8a86a9b3ac6b132b6fc7912eaacc23e471915d5682fba3424cb4210b3a",
     "receipt_ref": {
-      "uri": "wgcf://receipts/artifact-custody/bbbbbbbbbbbbbbbbbbbbbbbb-082dc71c93eefb15026d88a2b5bcafcfc68e8489f0e85c2fa4e803dfa9e4f680.json",
-      "digest": "sha256:082dc71c93eefb15026d88a2b5bcafcfc68e8489f0e85c2fa4e803dfa9e4f680"
+      "uri": "wgcf://receipts/artifact-custody/bbbbbbbbbbbbbbbbbbbbbbbb-324d790023a3cdcc0d2882fa54e3b2131ccc1d2cdeea6da5dbb3bed44bcb0f99.json",
+      "digest": "sha256:324d790023a3cdcc0d2882fa54e3b2131ccc1d2cdeea6da5dbb3bed44bcb0f99"
     },
     "persisted_at": "2026-08-08T10:11:00+08:00",
     "supersedes": null

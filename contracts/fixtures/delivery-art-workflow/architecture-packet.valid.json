@@ -26,7 +26,7 @@
       }
     ]
   },
-  "scope_fingerprint": "sha256:8fcb6fffa6922c8475f4af29884034641edffa7c6ce0c31a099c849d083313f4",
+  "scope_fingerprint": "sha256:fe17b2b129d9751233795d68c45d32355fca01c1f1e9afddc7454f9f4d74df29",
   "architecture": {
     "descendant_owner_map": [
       {
@@ -86,27 +86,28 @@
     "runtime_boundaries": [
       {
         "owner_repo": "operator-orchestration-service",
-        "allowed": [
-          "read scoped ART state",
-          "author canonical Delivery ART artifacts",
-          "submit canonical Delivery ART artifacts to WGCF"
+        "allowed_capability_ids": [
+          "delivery-art.read-scoped-art-state",
+          "delivery-art.author-canonical-artifacts",
+          "delivery-art.submit-canonical-artifacts-to-wgcf",
+          "delivery-art.project-safe-references-to-openproject"
         ],
-        "prohibited": [
-          "persist canonical Delivery ART artifacts",
-          "attach canonical artifact content to OpenProject",
-          "claim security acceptance",
-          "mutate platform runtime"
+        "prohibited_capability_ids": [
+          "delivery-art.persist-canonical-artifacts",
+          "delivery-art.project-canonical-content-to-openproject",
+          "security.claim-acceptance",
+          "platform.mutate-runtime"
         ]
       },
       {
         "owner_repo": "workspace-governance-control-fabric",
-        "allowed": [
-          "persist canonical Delivery ART artifacts",
-          "issue opaque custody references and receipts"
+        "allowed_capability_ids": [
+          "delivery-art.persist-canonical-artifacts",
+          "delivery-art.issue-custody-references-and-receipts"
         ],
-        "prohibited": [
-          "author Delivery ART workflow decisions",
-          "mutate OpenProject work state"
+        "prohibited_capability_ids": [
+          "delivery-art.author-workflow-decisions",
+          "openproject.mutate-work-state"
         ]
       }
     ],
@@ -117,10 +118,10 @@
     },
     "contradictions_open_decisions": [
       {
-        "id": "decision:evidence-custody",
+        "id": "decision:rollback-terminal-state",
         "status": "resolved",
-        "summary": "Final artifacts require durable shared custody.",
-        "resolution": "OOS authors and submits canonical artifacts to WGCF; WGCF owns durable registry custody; OpenProject receives safe references only."
+        "summary": "Rollback must preserve an auditable terminal state.",
+        "resolution": "Cleanup receipts remain required after rollback or cancellation."
       }
     ]
   },
@@ -298,15 +299,15 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:38ddddbd90945e65777c4122aec27e13da218d2485fb3beea6447634a7d18d8a"
+    "content_digest": "sha256:183c424105839de5defa3a67fa234ef5aa64ed8b620a31b5d357f3ff2888993a"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-artifact-registry",
-    "uri": "wgcf://artifacts/delivery-art/sha256/38ddddbd90945e65777c4122aec27e13da218d2485fb3beea6447634a7d18d8a",
+    "uri": "wgcf://artifacts/delivery-art/sha256/183c424105839de5defa3a67fa234ef5aa64ed8b620a31b5d357f3ff2888993a",
     "receipt_ref": {
-      "uri": "wgcf://receipts/artifact-custody/aaaaaaaaaaaaaaaaaaaaaaaa-e7883064cd8ad661ac6b28d654d701c01a20899b43a6d1f50ca4ef1e8d3c9162.json",
-      "digest": "sha256:e7883064cd8ad661ac6b28d654d701c01a20899b43a6d1f50ca4ef1e8d3c9162"
+      "uri": "wgcf://receipts/artifact-custody/aaaaaaaaaaaaaaaaaaaaaaaa-40374a17f07ef2c655a23c89bf103a65bb4c38a5ed03d8650b281d1e843279fc.json",
+      "digest": "sha256:40374a17f07ef2c655a23c89bf103a65bb4c38a5ed03d8650b281d1e843279fc"
     },
     "persisted_at": "2026-08-08T10:06:00+08:00",
     "supersedes": null
