@@ -8469,6 +8469,32 @@ def main() -> int:
                 "contracts/work-home-routing.yaml: example scenario "
                 f"{example['scenario']!r} references inactive owner_repo {example['owner_repo']!r}"
             )
+    cleanup_policy = work_home_routing.get("landing_and_review_policy", {}).get(
+        "cleanup_policy"
+    ) or []
+    expected_cleanup_command = (
+        "python3 /home/mfshaf7/projects/workspace-governance/scripts/"
+        "audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects "
+        "--repo-root <owner-repo-root> --include-remote --check-clean"
+    )
+    cleanup_text = "\n".join(cleanup_policy)
+    if not isinstance(cleanup_policy, list):
+        errors.append(
+            "contracts/work-home-routing.yaml: landing_and_review_policy.cleanup_policy must be a list"
+        )
+    else:
+        if "Every completed source-backed Landing Unit" not in cleanup_text:
+            errors.append(
+                "contracts/work-home-routing.yaml: cleanup_policy must cover every completed source-backed Landing Unit"
+            )
+        if expected_cleanup_command not in cleanup_text:
+            errors.append(
+                "contracts/work-home-routing.yaml: cleanup_policy must use the exact owner-repo cleanup command"
+            )
+        if "Cleanup residue blocks final completion" not in cleanup_text:
+            errors.append(
+                "contracts/work-home-routing.yaml: cleanup_policy must fail closed on cleanup residue"
+            )
     if governance_engine_foundation["owner_repo"] != "workspace-governance":
         errors.append(
             "contracts/governance-engine-foundation.yaml: owner_repo must be 'workspace-governance'"

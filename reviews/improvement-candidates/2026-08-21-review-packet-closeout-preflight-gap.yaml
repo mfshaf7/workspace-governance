@@ -7,7 +7,7 @@ summary: A finalized schema-v2 Review Packet passed evidence and operating-readi
   gates but landing-unit closeout later rejected a generated Changed Surfaces line
   because an evidence summary contained an unformatted filename token.
 regression_of: null
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -30,10 +30,21 @@ signals:
   - openproject://work_packages/939
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/service.js
+    owner_repo: operator-orchestration-service
+    note: Preflights every generated Review Packet completion payload before finalization can make the packet immutable.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-service.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves malformed generated changed-surface evidence fails before custody and finalization.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-09-08-art-work-session-lifecycle-order.md
+    owner_repo: operator-orchestration-service
+    note: Records the lifecycle-order correction and the pre-finalization payload boundary.
+  note: Closed by the landed OOS finalization preflight and its regression coverage.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-09-27'
-  note: The 2026-09-17 review date was missed. Review and approve the strongest
-    durable control by the new date; this reschedule does not close the lesson.
+  owner_repo: null
+  due_on: null
+  note: null

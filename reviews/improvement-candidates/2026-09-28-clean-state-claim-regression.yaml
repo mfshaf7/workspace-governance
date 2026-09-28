@@ -1,0 +1,72 @@
+schema_version: 1
+id: 2026-09-28-clean-state-claim-regression
+title: Enforce branch and worktree cleanup after completed source work
+recorded_on: '2026-09-28'
+owner_repo: workspace-governance
+summary: Epic 900 was correctly proven complete, but post-work source cleanup was
+  skipped. A delayed branch-lifecycle check exposed stale branches and worktrees
+  across seven repositories, including residue from closed ART 1107.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-23-branch-lifecycle-cleanup-gap.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - workspace-prototype-studio
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: closed-cleanup-lesson-regressed
+  title: Completed source work bypassed the already-landed cleanup gate
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: The branch-lifecycle validator and WGCF clean-state scope were present and
+    working, but post-landing cleanup was conditional on global cleanliness language
+    instead of every completed source-backed Landing Unit. Source-lifecycle residue
+    therefore remained until the operator challenged the closeout.
+  source_refs:
+  - conversation:2026-09-28 operator challenged leftover ART 1107 state after Epic 900 closeout
+  - wgcf:control-receipt:b511a33737a2507d58240702
+  - wgcf:control-receipt:17ab394aa17f89bc175411bd
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Makes branch, worktree, remote-branch retirement and exact owner-repo proof mandatory after every completed source-backed Landing Unit.
+  - type: validator
+    path: workspace-governance/scripts/audit_branch_lifecycle.py
+    owner_repo: workspace-governance
+    note: Supports strict cleanup proof for one completed work's owner repo without requiring global workspace cleanliness.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Prevents the post-landing cleanup gate from being removed or redirected to a global workspace claim.
+  - type: test
+    path: workspace-governance/tests/test_validation_boundaries.py
+    owner_repo: workspace-governance
+    note: Proves the four-step cleanup sequence and canonical completion gate remain present.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires exact owner-repo cleanup proof before the agent reports final completion.
+  - type: doc
+    path: workspace-governance/docs/pull-request-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Adds post-landing cleanup and verification to the primary PR operator flow.
+  note: Closed by extending the existing Landing Unit closeout path; no new global-claim subsystem was introduced.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

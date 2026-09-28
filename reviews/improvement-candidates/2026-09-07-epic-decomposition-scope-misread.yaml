@@ -11,7 +11,7 @@ summary: >-
   narrower committed execution front; the operator workflow did not keep those
   two decisions distinct.
 regression_of: null
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -40,17 +40,26 @@ signals:
       - openproject://work_packages/892
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: skill
+      path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+      owner_repo: workspace-governance
+      note: Requires the complete initiative descendant tree before architecture work and keeps backlog structure distinct from PI execution elaboration.
+    - type: runbook
+      path: platform-engineering/products/openproject/runbooks/plan-delivery-art.md
+      owner_repo: platform-engineering
+      note: Separates backlog shaping, PI commitment, and rolling-wave elaboration in the primary planning procedure.
+    - type: contract
+      path: platform-engineering/products/openproject/delivery-art-planning-workflow.json
+      owner_repo: platform-engineering
+      note: Defines machine-readable planning stages and commitment rules so partial elaboration is not equivalent to full requested decomposition.
   note: >-
     Immediate state was reconciled by decomposing #920 and #921, connecting all
     three Feature dependency chains, and persisting a superseding architecture
-    packet covering all 29 work items. A durable workflow control is not yet
-    selected.
+    packet covering all 29 work items. The landed planning procedure and
+    Delivery operator skill now keep full initiative scope, PI commitment, and
+    rolling-wave elaboration as separate decisions.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-27'
-  note: >-
-    The 2026-09-14 review date was missed. Evaluate an explicit planning
-    distinction between full backlog decomposition,
-    selected-wave elaboration, and PI commitment before changing validators or
-    operator commands.
+  owner_repo: null
+  due_on: null
+  note: null

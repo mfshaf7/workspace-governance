@@ -6,7 +6,7 @@ owner_repo: workspace-governance
 summary: Delivery architecture validation accepted a Security child that had to close
   before implementation and also remain open for post-conformance acceptance.
 regression_of: null
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -50,11 +50,8 @@ resolution:
     path: workspace-governance/docs/delivery-art-operator-path.md
     owner_repo: workspace-governance
     note: Explains the compatibility boundary and required split-gate planning model.
-  note: Canonical controls are implemented under ART Defect 1121; owner-runtime adoption remains pending.
+  note: Closed by the v3 execution-plan contract, satisfiability validator, and completed activation sequence across ART 1121 through 1124.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-27'
-  note: The 2026-09-12 review date was missed. Extend architecture and work-session
-    validation with start/close evidence
-    phases, gate-cycle rejection, and an end-to-end executable schedule; then audit
-    and repair or retire affected Feature plans.
+  owner_repo: null
+  due_on: null
+  note: null

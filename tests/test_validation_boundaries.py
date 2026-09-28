@@ -14,6 +14,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_ROOT = REPO_ROOT / "scripts"
 CATALOG_PATH = REPO_ROOT / "contracts" / "governance-validator-catalog.yaml"
+WORK_HOME_PATH = REPO_ROOT / "contracts" / "work-home-routing.yaml"
 LAYOUT_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_workspace_layout.py"
 BRANCH_AUDIT_PATH = REPO_ROOT / "scripts" / "audit_branch_lifecycle.py"
 DEV_INTEGRATION_VALIDATOR_PATH = REPO_ROOT / "scripts" / "validate_developer_integration.py"
@@ -122,6 +123,20 @@ class ValidationModeContractTests(unittest.TestCase):
         self.assertIn("--check-clean", branch["command"])
         self.assertNotIn("--check-clean", layout["command"])
 
+    def test_completed_source_work_requires_post_landing_cleanup(self) -> None:
+        routing = yaml.safe_load(WORK_HOME_PATH.read_text())["work_home_routing"]
+        cleanup = routing["landing_and_review_policy"]["cleanup_policy"]
+        cleanup_text = "\n".join(cleanup)
+
+        self.assertIn("Every completed source-backed Landing Unit", cleanup_text)
+        self.assertIn(
+            "python3 /home/mfshaf7/projects/workspace-governance/scripts/"
+            "audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects "
+            "--repo-root <owner-repo-root> --include-remote --check-clean",
+            cleanup_text,
+        )
+        self.assertIn("Cleanup residue blocks final completion", cleanup_text)
+
 
 class AuditBoundaryTests(unittest.TestCase):
     def test_workspace_layout_audit_does_not_orchestrate_other_controls(self) -> None:
@@ -154,6 +169,25 @@ class AuditBoundaryTests(unittest.TestCase):
             self.assertFalse(branch_audit.worktree_is_dirty(repo_root))
             (repo_root / "untracked.txt").write_text("dirty\n")
             self.assertTrue(branch_audit.worktree_is_dirty(repo_root))
+
+    def test_branch_cleanup_can_target_one_exact_owner_repo(self) -> None:
+        branch_audit = load_script_module("audit_branch_lifecycle", BRANCH_AUDIT_PATH)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workspace_root = Path(temp_dir)
+            selected = workspace_root / "selected"
+            unrelated = workspace_root / "unrelated"
+            for repo_root in (selected, unrelated):
+                subprocess.run(
+                    ["git", "init", "--quiet", str(repo_root)],
+                    check=True,
+                    text=True,
+                    capture_output=True,
+                )
+
+            self.assertEqual(
+                branch_audit.select_repos(workspace_root, selected),
+                [selected.resolve()],
+            )
 
 
 class PullRequestControlTests(unittest.TestCase):

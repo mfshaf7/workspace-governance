@@ -280,6 +280,7 @@ profiles:
         - dedicated Refinement worker readiness and composition-owned teardown
         - bounded Catalog control authorization and readback
         - durable orchestration definition catalog and zero-replica worker
+        - lifecycle transition journal contract, persistent custody, and authenticated read access
         - proposal backlog list read
         - delivery artifact mutation draft workflow
         - WGCF ART readiness is required for broker completion-style mutations
