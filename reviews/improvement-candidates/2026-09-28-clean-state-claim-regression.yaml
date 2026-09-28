@@ -1,0 +1,52 @@
+schema_version: 1
+id: 2026-09-28-clean-state-claim-regression
+title: Bind global cleanliness claims to authoritative clean-state receipts
+recorded_on: '2026-09-28'
+owner_repo: workspace-governance
+summary: Epic 900 was correctly proven complete, but its final report overstated
+  scoped initiative completion as global workspace cleanliness without first running
+  the existing authority:workspace-clean-state gate. The delayed gate exposed stale
+  branches and worktrees across seven repositories, including closed ART 1107 residue.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-23-branch-lifecycle-cleanup-gap.yaml
+status: new
+source_type: conversation
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - workspace-prototype-studio
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: closed-cleanup-lesson-regressed
+  title: A global clean-state claim bypassed the already-landed clean-state gate
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: The branch-lifecycle validator and WGCF clean-state scope were present and
+    working, but they were not mechanically required before the final report used
+    global cleanliness language. Initiative-scoped evidence therefore hid unrelated
+    source-lifecycle residue until the operator challenged the report.
+  source_refs:
+  - conversation:2026-09-28 operator challenged leftover ART 1107 state after Epic 900 closeout
+  - wgcf:control-receipt:b511a33737a2507d58240702
+  - wgcf:control-receipt:17ab394aa17f89bc175411bd
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: Proposed control is to make global clean or restart-ready wording mechanically
+    require a successful current authority:workspace-clean-state receipt, while keeping
+    initiative-complete reporting explicitly scoped when that receipt is absent.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-02'
+  note: Triage the smallest enforcement point that binds final completion reporting
+    to receipt scope without turning workspace clean-state into an implementation loop.
