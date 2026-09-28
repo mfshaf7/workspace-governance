@@ -6,8 +6,8 @@
     "artifact_type": "art_review_packet",
     "artifact_id": "review-packet:delivery-698-work-item-801",
     "delivery_id": "delivery-698",
-    "content_digest": "sha256:5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c",
-    "registry_uri": "wgcf://artifacts/delivery-art/sha256/5f26f316be80a3fe49102eb0fbccabd23d7cb6f2eb316c3068ac43643748c56c"
+    "content_digest": "sha256:0042b3f02ca8b5b8c6bd38d051dfb2495e8ae8bdf3852aa42dc089a133255144",
+    "registry_uri": "wgcf://artifacts/delivery-art/sha256/0042b3f02ca8b5b8c6bd38d051dfb2495e8ae8bdf3852aa42dc089a133255144"
   },
   "issuer": {
     "owner_repo": "workspace-governance-control-fabric",
@@ -22,12 +22,12 @@
   "integrity": {
     "canonicalization": "RFC8785",
     "algorithm": "sha256",
-    "content_digest": "sha256:ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a"
+    "content_digest": "sha256:a8d6ed397b14d8145451168a7cc534d4525966ac71accaa2a4657811bf575e5a"
   },
   "custody": {
     "state": "durable",
     "backend": "wgcf-receipt-ledger",
-    "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-ab4e5fd35bd88791ba8f0bb580bd9526397eb7e506a85a57894557b42645056a.json",
+    "uri": "wgcf://receipts/artifact-custody/cccccccccccccccccccccccc-a8d6ed397b14d8145451168a7cc534d4525966ac71accaa2a4657811bf575e5a.json",
     "persisted_at": "2026-08-08T11:15:59+08:00",
     "supersedes": null
   }

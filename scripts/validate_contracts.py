@@ -910,6 +910,83 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             _artifact_string_list(payload.get("covered_work_item_ids"))
         )
         architecture = _artifact_object(payload.get("architecture"))
+        runtime_boundaries = _artifact_object_list(
+            architecture.get("runtime_boundaries")
+        )
+        durable_custody_owner = "workspace-governance-control-fabric"
+        persistence_terms = ("persist", "store", "hold")
+        wgcf_boundaries = [
+            boundary
+            for boundary in runtime_boundaries
+            if boundary.get("owner_repo") == durable_custody_owner
+        ]
+        if not wgcf_boundaries or not any(
+            "artifact" in capability.casefold()
+            and any(
+                term in capability.casefold()
+                for term in persistence_terms
+            )
+            for boundary in wgcf_boundaries
+            for capability in _artifact_string_list(boundary.get("allowed"))
+        ):
+            errors.append(
+                "architecture.runtime_boundaries must assign durable artifact "
+                "persistence to workspace-governance-control-fabric"
+            )
+        for boundary in runtime_boundaries:
+            owner_repo = boundary.get("owner_repo")
+            for capability in _artifact_string_list(boundary.get("allowed")):
+                normalized = capability.casefold()
+                if (
+                    owner_repo != durable_custody_owner
+                    and "artifact" in normalized
+                    and any(term in normalized for term in persistence_terms)
+                ):
+                    errors.append(
+                        "architecture.runtime_boundaries may assign durable artifact "
+                        "persistence only to workspace-governance-control-fabric"
+                    )
+                if (
+                    "openproject" in normalized
+                    and "artifact" in normalized
+                    and any(
+                        term in normalized
+                        for term in ("attach", "upload", "persist", "store")
+                    )
+                ):
+                    errors.append(
+                        "architecture.runtime_boundaries must not assign canonical "
+                        "artifact content custody to OpenProject"
+                    )
+
+        for decision in _artifact_object_list(
+            architecture.get("contradictions_open_decisions")
+        ):
+            if (
+                decision.get("id") != "decision:evidence-custody"
+                or decision.get("status") != "resolved"
+            ):
+                continue
+            resolution = str(decision.get("resolution", "")).casefold()
+            names_wgcf = (
+                "wgcf" in resolution
+                or durable_custody_owner in resolution
+            )
+            names_safe_openproject_projection = (
+                "openproject" in resolution
+                and "reference" in resolution
+                and "only" in resolution
+            )
+            if not names_wgcf:
+                errors.append(
+                    "resolved evidence-custody decision must identify WGCF as the "
+                    "durable custody owner"
+                )
+            if not names_safe_openproject_projection:
+                errors.append(
+                    "resolved evidence-custody decision must limit OpenProject to "
+                    "reference projection only"
+                )
         owner_map = _artifact_object_list(architecture.get("descendant_owner_map"))
         schema_version = payload.get("schema_version")
         owner_map_ids = [
@@ -3036,6 +3113,59 @@ def validate_delivery_art_artifact_contracts(
         "finalized-custody-receipt.valid.json"
     )
     if architecture:
+        non_owner_persistence = copy.deepcopy(architecture)
+        non_owner_persistence["architecture"]["runtime_boundaries"][0][
+            "allowed"
+        ].append("persist canonical Delivery ART artifacts")
+        require_rejected(
+            "architecture_packet",
+            non_owner_persistence,
+            "non-owner durable artifact persistence",
+            expected_fragment="may assign durable artifact persistence only",
+        )
+
+        missing_wgcf_custody = copy.deepcopy(architecture)
+        missing_wgcf_custody["architecture"]["runtime_boundaries"] = [
+            boundary
+            for boundary in missing_wgcf_custody["architecture"][
+                "runtime_boundaries"
+            ]
+            if boundary.get("owner_repo")
+            != "workspace-governance-control-fabric"
+        ]
+        require_rejected(
+            "architecture_packet",
+            missing_wgcf_custody,
+            "missing WGCF durable artifact persistence boundary",
+            expected_fragment="must assign durable artifact persistence",
+        )
+
+        openproject_attachment_capability = copy.deepcopy(architecture)
+        openproject_attachment_capability["architecture"]["runtime_boundaries"][
+            0
+        ]["allowed"].append(
+            "attach canonical artifact content to OpenProject"
+        )
+        require_rejected(
+            "architecture_packet",
+            openproject_attachment_capability,
+            "OpenProject canonical artifact attachment capability",
+            expected_fragment="must not assign canonical artifact content custody",
+        )
+
+        openproject_attachment_decision = copy.deepcopy(architecture)
+        openproject_attachment_decision["architecture"][
+            "contradictions_open_decisions"
+        ][0]["resolution"] = (
+            "OOS attaches content-addressed artifacts to the initiative Epic."
+        )
+        require_rejected(
+            "architecture_packet",
+            openproject_attachment_decision,
+            "legacy OpenProject attachment ownership decision",
+            expected_fragment="must identify WGCF as the durable custody owner",
+        )
+
         legacy_attachment_custody = copy.deepcopy(architecture)
         legacy_attachment_custody["custody"]["backend"] = (
             "openproject-attachment"
