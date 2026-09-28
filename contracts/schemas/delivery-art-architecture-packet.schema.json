@@ -281,11 +281,11 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["owner_repo", "allowed", "prohibited"],
+            "required": ["owner_repo", "allowed_capability_ids", "prohibited_capability_ids"],
             "properties": {
               "owner_repo": { "$ref": "#/$defs/repoName" },
-              "allowed": { "$ref": "#/$defs/nonEmptyStrings" },
-              "prohibited": { "$ref": "#/$defs/nonEmptyStrings" }
+              "allowed_capability_ids": { "$ref": "#/$defs/capabilityIds" },
+              "prohibited_capability_ids": { "$ref": "#/$defs/capabilityIds" }
             }
           }
         },
@@ -683,6 +683,12 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/nonEmptyString" }
+    },
+    "capabilityIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/identifier" }
     },
     "artifactRef": {
       "type": "object",
