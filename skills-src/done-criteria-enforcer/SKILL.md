@@ -21,8 +21,24 @@ or live governed state.
 1. Identify the real change class.
 2. Check the product or repo workflow maturity.
 3. List the minimum evidence that should exist.
-4. If you are about to recommend a restart or session close, run the restart-readiness gate first.
-5. Call out what is still missing instead of implying completion.
+4. After source-backed work lands, run the post-landing cleanup gate before reporting final completion.
+5. If you are about to recommend a restart or session close, run the restart-readiness gate first.
+6. Call out what is still missing instead of implying completion.
+
+## Post-Landing Cleanup Gate
+
+After every completed source-backed Landing Unit, including owner-repo
+maintenance:
+
+- retire its extra worktrees after merged source and rollback evidence are durable
+- return the primary checkout to canonical `main` and remove the local branch
+- remove the remote branch unless it still backs an open PR or documented exception
+- run the exact owner-repo cleanup check before reporting final completion:
+  `python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects --repo-root <owner-repo-root> --include-remote --check-clean`
+- fail closed when residue remains; preserve dirty or unique work and record a
+  blocker or exception instead of deleting unproven state
+
+This is a post-landing closeout gate, not an implementation feedback loop.
 
 ## Restart-Readiness Gate
 
@@ -41,6 +57,8 @@ Before telling the operator that a restart is safe or recommended:
 ## Minimum Checks
 
 - owner repo change exists
+- post-landing branch and worktree cleanup is complete for source-backed work,
+  and the exact owner-repo cleanup check passes before final completion is reported
 - validation ran at the owning layer
 - docs changed when behavior or ownership changed
 - one primary operator instruction surface exists when operator workflow shape changed

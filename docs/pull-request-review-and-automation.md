@@ -93,8 +93,14 @@ python3 scripts/validate_pull_request_controls.py --workspace-root /home/mfshaf7
     because the commit changed.
 14. After merge, finalize the Review Packet with PR, commit, validation, and
    rollback evidence before closing covered source-backed ART items.
-15. After closeout, retire the local branch, remote branch, and any temporary
-   worktrees unless an open PR or a documented exception still requires them.
+15. After closeout, retire the Landing Unit's temporary worktrees and local
+   branch, then remove its remote branch unless an open PR or documented
+   exception still requires it.
+16. Before reporting final completion, run the branch-lifecycle audit in strict
+   mode against the completed work's exact owner repo. Residue blocks
+   completion; preserve unique or dirty work and record a blocker or exception
+   instead of deleting unproven state. Use the workspace-wide WGCF clean-state
+   scope only when claiming that the entire workspace is clean or restart-ready.
 
 ## Landing Units And Review Packets
 

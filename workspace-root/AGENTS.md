@@ -348,6 +348,13 @@ Only start implementation after that discussion narrows the target design.
   accumulating dated files.
 - Before telling the operator that a restart is safe or recommended, run an
   explicit restart-readiness check.
+- After every completed source-backed Landing Unit, including owner-repo
+  maintenance, retire its extra worktrees and local branch, remove its remote
+  branch unless an open PR or documented exception still requires it, and run
+  the strict branch-lifecycle audit against that exact owner repo before
+  reporting final completion.
+- Cleanup residue blocks final completion. Preserve dirty or unique work and
+  record a blocker or exception instead of deleting unproven state.
 - If meaningful workspace-level local-only state remains, refresh the current
   handoff first and only then recommend the restart.
 - If the workspace is being described as clean or restart-ready, require the

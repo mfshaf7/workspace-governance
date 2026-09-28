@@ -329,6 +329,19 @@ work_home_routing:
         open PR or documented exception.
       - Review Packets should remain as evidence records only when they support
         active completion, audit, rollback, or future troubleshooting.
+      - Every completed source-backed Landing Unit, including owner-repo
+        maintenance, must retire its extra worktrees and local branch after
+        merged source and rollback evidence are durable.
+      - Remove the Landing Unit's remote branch unless it still backs an open
+        pull request or a documented exception.
+      - Before final completion is reported, run `python3
+        /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py
+        --workspace-root /home/mfshaf7/projects --repo-root <owner-repo-root>
+        --include-remote --check-clean` and require success for the completed
+        work's owner repository.
+      - Cleanup residue blocks final completion. Preserve dirty or unique work
+        and record a blocker or documented exception instead of deleting
+        unproven state.
   reconciliation_policy:
     principles:
       - Preserve important work; do not discard a useful change solely because

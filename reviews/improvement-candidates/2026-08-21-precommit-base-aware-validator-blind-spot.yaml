@@ -7,7 +7,7 @@ summary: A base-aware owner-repo validator was run before the source commit, so 
   still matched origin/main and the validator incorrectly reported no policy-matched
   changes; CI found the required security evidence only after PR publication.
 regression_of: null
-status: triaged
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -30,10 +30,21 @@ signals:
   - github://mfshaf7/operator-orchestration-service/actions/runs/32392483633
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Requires pre-merge CI-equivalent proof to use the same fetched base-ref shape as the required check.
+  - type: doc
+    path: workspace-governance/docs/pull-request-review-and-automation.md
+    owner_repo: workspace-governance
+    note: Makes base-aware local proof and its exact base ref part of the standard PR flow.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires the Delivery operator to record the exact repo head, base ref, command, and result before merge.
+  note: Closed by the landed CI-equivalent pre-merge validation contract and its primary operator guidance.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-27'
-  note: The 2026-09-17 review date was missed. Review and approve the strongest
-    durable control by the new date; this reschedule does not close the lesson.
+  owner_repo: null
+  due_on: null
+  note: null

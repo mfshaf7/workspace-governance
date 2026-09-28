@@ -260,12 +260,14 @@ level, but it is not a governed delivery lane:
 - stage still requires reviewed commits and the normal governed path
 
 Those local branch and worktree inputs are allowed only while the iteration is
-active. Once a repo or the workspace is being described as clean or
-restart-ready, the WGCF clean-state scope must pass so stale branches, pinned
-worktrees, and remote branches without an open PR or documented exception do
-not linger behind the real work. Direct branch-lifecycle or workspace-layout
-commands are rollback paths; if WGCF cannot run them, record the blocker or
-defect before using a direct command as final evidence.
+active. After every completed source-backed Landing Unit, retire its extra
+worktrees and local branch, remove its remote branch unless an open PR or
+documented exception still requires it, and run the strict branch-lifecycle
+audit against that exact owner repo before reporting final completion. The
+workspace-wide WGCF clean-state scope is required only before the workspace is
+described as clean or restart-ready. Direct workspace-wide branch-lifecycle or
+workspace-layout commands are rollback paths; if WGCF cannot run them, record
+the blocker or defect before using a direct command as final evidence.
 
 During implementation, use the changed repo's exact-worktree smoke checks.
 Use CI-equivalent landing-unit proof before merge. Do not substitute the

@@ -7,7 +7,7 @@ summary: A power interruption between exclusive lock creation and lock metadata 
   left zero-byte transient locks that blocked a valid ART closeout even though the
   durable session and evidence remained intact.
 regression_of: null
-status: triaged
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -34,12 +34,21 @@ signals:
   - openproject://work_packages/985
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/work-session-store.js
+    owner_repo: operator-orchestration-service
+    note: Flushes complete owner metadata before atomically publishing a lock and applies bounded legacy-lock recovery.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers stale zero-byte crash recovery, fresh incomplete-lock fail-closed behavior, and complete visible ownership metadata.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-09-28-crash-safe-work-session-locks.md
+    owner_repo: operator-orchestration-service
+    note: Records the root cause, bounded recovery behavior, validation, and residual risk.
+  note: Closed by the crash-safe OOS lock publication protocol and abrupt-termination regression coverage.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-09-27'
-  note: The 2026-09-17 review date was missed. Design and obtain operator approval
-    for atomic crash-safe lock ownership,
-    bounded stale-lock recovery, and abrupt-termination regression coverage before
-    implementation.
+  owner_repo: null
+  due_on: null
+  note: null

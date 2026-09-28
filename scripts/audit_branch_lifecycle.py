@@ -52,6 +52,15 @@ def discover_repos(workspace_root: Path) -> list[Path]:
     )
 
 
+def select_repos(workspace_root: Path, repo_root: Path | None) -> list[Path]:
+    if repo_root is None:
+        return discover_repos(workspace_root)
+    selected = repo_root.resolve()
+    if not selected.is_relative_to(workspace_root) or not (selected / ".git").exists():
+        raise ValueError("--repo-root must identify a Git repository under --workspace-root")
+    return [selected]
+
+
 def parse_worktrees(repo_root: Path) -> list[WorktreeRecord]:
     output = git_output(repo_root, ["worktree", "list", "--porcelain"])
     if not output:
@@ -178,6 +187,11 @@ def main() -> int:
         help="workspace root containing the local Git repositories",
     )
     parser.add_argument(
+        "--repo-root",
+        type=Path,
+        help="audit only this owner repository instead of every workspace repository",
+    )
+    parser.add_argument(
         "--include-remote",
         action="store_true",
         help="also audit remote branches against open PRs using gh",
@@ -191,6 +205,10 @@ def main() -> int:
 
     workspace_root = args.workspace_root.resolve()
     governance_root = workspace_root / "workspace-governance"
+    try:
+        repo_roots = select_repos(workspace_root, args.repo_root)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     waivers = load_waivers(governance_root)
     errors: list[str] = []
     notes: list[str] = []
@@ -204,7 +222,7 @@ def main() -> int:
         "dirty_repos": 0,
     }
 
-    for repo_root in discover_repos(workspace_root):
+    for repo_root in repo_roots:
         repo_name = repo_root.name
         summary["repos"] += 1
         worktrees = parse_worktrees(repo_root)
