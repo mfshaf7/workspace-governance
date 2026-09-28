@@ -7,7 +7,7 @@ summary: ART projection synchronization can succeed from a managed linked worktr
   while a separate canonical-checkout projection checkpoint remains dirty because
   the default checkpoint is resolved relative to the invoking checkout.
 regression_of: null
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -35,17 +35,32 @@ signals:
   - cleanup-receipt:work-session:delivery-882:delivery-882-work-item-976
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-09-30'
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/art-cli.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 153 resolves the default projection checkpoint through the
+      canonical workspace root shared by canonical and linked checkouts while
+      preserving the explicit ART_PROJECTION_STATE_FILE override.
+  - type: test
+    path: operator-orchestration-service/test/art-cli.test.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      Regression coverage proves canonical mutation and linked-worktree
+      closeout use one projection checkpoint.
+  - type: doc
+    path: operator-orchestration-service/docs/records/change-records/2026-08-24-canonical-projection-checkpoint-coordination.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      Records the canonical checkpoint boundary and the completed ART #977
+      operating proof.
   note: >-
-    Deliver ART Defect #977 under Epic #884 by resolving the default projection
-    checkpoint through one canonical external operator-state location shared by
-    canonical and linked checkouts, preserving the explicit
-    ART_PROJECTION_STATE_FILE override, and proving canonical mutation plus
-    linked-worktree close against one checkpoint before landing.
-    The due date was refreshed on 2026-09-06 after candidate validation exposed
-    the overdue review; no control closure is claimed by this administrative
-    refresh.
+    Closed by OOS PR 153 at merge commit
+    4ec0da9b60d4ea4358e386d035b504329b6aa3f0. Durable ART continuation output
+    records work item 977 as done, and the current resolver no longer derives
+    default checkpoint state from the invoking linked worktree.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

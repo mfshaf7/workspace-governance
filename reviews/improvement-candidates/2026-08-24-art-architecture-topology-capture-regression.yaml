@@ -6,7 +6,7 @@ owner_repo: operator-orchestration-service
 summary: Delivery ART architecture packet v3 omitted an existing Feature dependency,
   so the corrected schema-v2 freshness validator blocked the first Review Packet transition.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-23-work-session-resource-retirement-regression.yaml
-status: accepted
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -110,21 +110,45 @@ signals:
     profile did not compose CGG and governed-AI runtime dependencies'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-09-30'
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/review-evidence.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 171 projects Review Packet evidence from authoritative
+      architecture, work-start, and exact source truth before operator results
+      are evaluated.
+  - type: validator
+    path: operator-orchestration-service/src/delivery-art/contracts.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 209 rejects Architecture Packets whose dependency topology does
+      not match authoritative ART relations.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 233 projects completion-narrative and architecture-defined
+      conformance-fidelity obligations before implementation begins.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-review-evidence.test.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      Regression coverage proves architecture-derived evidence projection,
+      fidelity inheritance, contradiction rejection, and composed evidence
+      handling.
+  - type: doc
+    path: operator-orchestration-service/docs/records/change-records/2026-08-25-work-design-composed-oos-runtime.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      Records the owner-bounded composed Feature outcome delivered through ART
+      #998 and its dependent owner work.
   note: >-
-    ART Defect #988 tracks architecture-derived evidence scaffolding, exact
-    changed-file selection, authored-input preservation, and actionable validator
-    error projection. ART Defect #998 and owner-bounded Tasks #999 through #1003
-    track the missing composed Feature outcome. Keep this candidate open until
-    both controls are landed and proven. The 2026-09-24 recurrence additionally
-    requires the normal work-session preflight, start, and status projections to
-    expose authoritative narrative and conformance-fidelity obligations before
-    implementation, and Review Packet evidence authoring to derive fidelity from
-    the architecture plan rather than accepting an incompatible manual value.
-    The due date was refreshed on 2026-09-06 after candidate validation exposed
-    the overdue review; no control closure is claimed by this administrative
-    refresh.
+    Closed after the topology, evidence-authoring, composed-outcome, and early
+    terminal-obligation controls all landed. Durable ART outputs record #988,
+    #998, Feature #908, and Epic #884 as done; later OOS PR 233 closes the
+    2026-09-24 fidelity and narrative recurrence captured by this record.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
