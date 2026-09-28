@@ -51,11 +51,23 @@ def _relative_path_issue(value: object) -> str | None:
     return None
 
 
+def _session_binds_identity(payload: Mapping[str, Any]) -> bool:
+    session_id = payload.get("session_id")
+    base_session_id = (
+        f"work-session:{payload.get('delivery_id')}:{payload.get('landing_unit_id')}"
+    )
+    return session_id == base_session_id or (
+        isinstance(session_id, str)
+        and session_id.startswith(base_session_id)
+        and re.fullmatch(r":r[1-9][0-9]*", session_id[len(base_session_id) :])
+        is not None
+    )
+
+
 def resource_manifest_semantic_issues(payload: Mapping[str, Any]) -> list[str]:
     issues: list[str] = []
     session_id = payload.get("session_id")
-    expected_session_id = f"work-session:{payload.get('delivery_id')}:{payload.get('landing_unit_id')}"
-    if session_id != expected_session_id:
+    if not _session_binds_identity(payload):
         issues.append("session_id must bind delivery_id and landing_unit_id")
 
     cleanup = payload.get("cleanup")
@@ -114,8 +126,7 @@ def resource_manifest_semantic_issues(payload: Mapping[str, Any]) -> list[str]:
 def cleanup_receipt_semantic_issues(payload: Mapping[str, Any]) -> list[str]:
     issues: list[str] = []
     session_id = payload.get("session_id")
-    expected_session_id = f"work-session:{payload.get('delivery_id')}:{payload.get('landing_unit_id')}"
-    if session_id != expected_session_id:
+    if not _session_binds_identity(payload):
         issues.append("session_id must bind delivery_id and landing_unit_id")
     if payload.get("receipt_id") != f"cleanup-receipt:{session_id}":
         issues.append("receipt_id must be derived from session_id")

@@ -22,7 +22,7 @@
   "properties": {
     "schema_version": { "const": 1 },
     "artifact_type": { "const": "delivery_art_work_session_cleanup_receipt" },
-    "receipt_id": { "type": "string", "pattern": "^cleanup-receipt:work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "receipt_id": { "type": "string", "pattern": "^cleanup-receipt:work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*(?::r[1-9][0-9]*)?$" },
     "session_id": { "$ref": "#/$defs/sessionId" },
     "delivery_id": { "$ref": "#/$defs/deliveryId" },
     "landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
@@ -54,7 +54,7 @@
     "nonEmptyString": { "type": "string", "minLength": 1 },
     "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
     "landingUnitId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
-    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*(?::r[1-9][0-9]*)?$" },
     "timestamp": { "type": "string", "format": "date-time" },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "resourceResult": {

@@ -60,7 +60,7 @@
     "nonEmptyString": { "type": "string", "minLength": 1 },
     "deliveryId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" },
     "landingUnitId": { "type": "string", "pattern": "^delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
-    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*$" },
+    "sessionId": { "type": "string", "pattern": "^work-session:delivery-[1-9][0-9]*:delivery-[1-9][0-9]*-[a-z0-9][a-z0-9._-]*(?::r[1-9][0-9]*)?$" },
     "timestamp": { "type": "string", "format": "date-time" },
     "gitCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
     "repoName": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
