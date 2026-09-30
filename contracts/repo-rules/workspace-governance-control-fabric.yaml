@@ -49,3 +49,11 @@ review_control_requirements:
     - "## Validation"
     - "## Advisory Review"
     - "## Review Gates"
+operator_workflow_requirements:
+  workflows:
+    - id: governance-control-fabric-operator-surface
+      summary: Primary operator procedure for governance graph, validation, readiness, receipts, ledger, and admitted runtime controls.
+      primary_surface_path: docs/operations/operator-surface.md
+      required_in_docs:
+        - readme
+        - agents

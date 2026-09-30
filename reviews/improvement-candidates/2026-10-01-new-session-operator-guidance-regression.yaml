@@ -1,0 +1,91 @@
+schema_version: 1
+id: 2026-10-01-new-session-operator-guidance-regression
+title: Make fresh-session operator guidance executable and current
+recorded_on: '2026-10-01'
+owner_repo: workspace-governance
+summary: A system-wide fresh-session audit found a registered skill command that no
+  longer exists, active OOS guidance that contradicts current manifests and completed
+  activation gates, and owner operator surfaces that are not discoverable from root
+  routing.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-19-new-session-architecture-bootstrap-gap.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - context-governance-gateway
+  - governance-operations-console
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The existing architecture bootstrap and skill parity controls prove file
+    synchronization but do not prove that referenced commands exist or that every
+    active owner exposes one discoverable operator index; a fresh session can therefore
+    start from synchronized but stale or incomplete guidance.
+  source_refs:
+  - conversation:2026-10-01 system-wide fresh-session clarity audit
+  - workspace-governance/skills-src/contract-drift-check/SKILL.md
+  - operator-orchestration-service/README.md
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/docs/operations/README.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      PR #253 added the primary OOS operator index and aligned active workflow
+      guidance with schema-v4 and current runtime availability.
+  - type: workflow
+    path: context-governance-gateway/docs/operating-model/README.md
+    owner_repo: context-governance-gateway
+    note: >-
+      PR #21 added one fresh-session index for CGG local and dev-integration
+      operation.
+  - type: doc
+    path: governance-operations-console/README.md
+    owner_repo: governance-operations-console
+    note: >-
+      PR #45 replaced the stale graduation-candidate claim with the Console's
+      current durable-source ownership.
+  - type: doc
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: >-
+      PR #166 reconciled the generated security index after the owner record
+      merged.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Registered skill commands now fail validation when their referenced
+      owner-repo script does not exist.
+  - type: contract
+    path: workspace-governance/contracts/repo-rules/operator-orchestration-service.yaml
+    owner_repo: workspace-governance
+    note: Active owner repos now declare discoverable primary operator surfaces.
+  - type: doc
+    path: workspace-governance/workspace-root/ARCHITECTURE.md
+    owner_repo: workspace-governance
+    note: Fresh sessions can route directly from the root architecture snapshot
+      to the active operator surfaces.
+  note: Fresh-session routing and executable-command truth are corrected. Workspace
+    Intake remains source-complete but unavailable end to end because WGCF still
+    declares runtime_activation false and the accepted OOS profile does not compose
+    the workflow; the OOS operator guidance now exposes that dependency instead of
+    implying availability.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

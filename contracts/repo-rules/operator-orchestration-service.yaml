@@ -39,6 +39,14 @@ review_control_requirements:
     - "## Validation"
     - "## Advisory Review"
     - "## Review Gates"
+operator_workflow_requirements:
+  workflows:
+    - id: operator-orchestration-workflow-index
+      summary: Primary operator index for selecting the owning OOS workflow and its current procedure, availability, recovery, and evidence surface.
+      primary_surface_path: docs/operations/README.md
+      required_in_docs:
+        - readme
+        - agents
 security_requirements:
   security_owner: security-architecture
   review_checklist_path: docs/reviews/security-review-checklist.md
