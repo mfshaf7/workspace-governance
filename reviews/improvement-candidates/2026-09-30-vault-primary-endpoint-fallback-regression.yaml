@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-09-30-vault-primary-endpoint-fallback-regression
+title: Keep the persistent Vault endpoint primary for source maintenance
+recorded_on: '2026-09-30'
+owner_repo: workspace-governance
+summary: >-
+  The source-maintenance correction promoted Vault's temporary WSL
+  port-forward endpoint to the default even though the platform catalog
+  declares the persistent NodePort endpoint as the primary operator path.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-agent-source-operator-preflight-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - platform-engineering
+    - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+    - source-behavior
+signals:
+  - id: fallback-promoted-to-default
+    title: Temporary Vault port-forward was made the normal source-maintenance path
+    trigger: closed-lesson-regression
+    failure_classes:
+      - diagnostic-ordering-miss
+      - contract-drift
+    finding: >-
+      Platform already publishes http://127.0.0.1:32200 as Vault's persistent
+      operator URL and 8220 as a WSL fallback. The new source-maintenance
+      Makefile and skill inverted that authority, requiring an unnecessary
+      process whose lifetime ended with the terminal or WSL session.
+    source_refs:
+      - conversation:2026-09-30 operator identified temporary Vault fallback as the default
+      - platform-engineering/docs/runbooks/platform-operator-catalog.yaml
+      - platform-engineering/docs/runbooks/access-platform-uis.md
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: workflow
+      path: platform-engineering/Makefile
+      owner_repo: platform-engineering
+      note: >-
+        Platform PR 253 restored 32200 as the default at
+        ecc43e95a6934c1b4141141c4d9976e845fbd465.
+    - type: skill
+      path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+      owner_repo: workspace-governance
+      note: >-
+        The source operator skill now reserves 8220 for a proven WSL fallback
+        and no longer starts a port-forward on the normal path.
+  note: >-
+    Closed after the persistent endpoint issued the correction credentials,
+    Platform restored the catalog order, and Workspace guidance adopted the
+    same primary-versus-fallback boundary.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
