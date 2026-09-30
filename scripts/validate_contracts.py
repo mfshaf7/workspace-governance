@@ -52,6 +52,11 @@ def registered_skill_command_reference_issues(
     issues: list[str] = []
     for skill_name, payload in sorted(registered_skills.items()):
         owner_root = workspace_root / payload["owner_repo"]
+        # A repository-only CI checkout cannot inspect skill sources owned by
+        # sibling repositories. Workspace validation covers those owners when
+        # their roots are present.
+        if not owner_root.is_dir():
+            continue
         skill_path = owner_root / payload["source_path"] / "SKILL.md"
         if not skill_path.is_file():
             issues.append(

@@ -62,6 +62,23 @@ class SkillCommandReferenceTests(unittest.TestCase):
                 [],
             )
 
+    def test_absent_external_owner_is_deferred_to_workspace_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workspace_root = Path(temp_dir)
+            skills = {
+                "external-example": {
+                    "owner_repo": "external-owner",
+                    "source_path": "skills-src/external-example",
+                }
+            }
+
+            self.assertEqual(
+                self.validator.registered_skill_command_reference_issues(
+                    workspace_root, skills
+                ),
+                [],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
