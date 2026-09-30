@@ -1,0 +1,45 @@
+schema_version: 1
+id: 2026-10-01-owner-evidence-fidelity-regression
+title: Require owner evidence profiles to cover every architecture fidelity
+recorded_on: '2026-10-01'
+owner_repo: workspace-governance
+summary: 'Delivery #1206 stopped after clean source implementation because Workspace
+  Governance''s admitted base-owned evidence profile covered real-git conformance
+  but did not bind any command to filesystem conformance required by the approved
+  Architecture Packet.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-27-cross-repo-acceptance-and-evidence-profile-completeness.yaml
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: The normal OOS work continue path rejected the exact clean Agent Gary source
+    head with delivery_art_evidence_profile_incomplete. This regresses the closed
+    evidence-profile-completeness lesson because profile validation allowed an active
+    profile that could not satisfy an approved packet's fidelity set.
+  source_refs:
+  - openproject://work_packages/1206
+  - conversation:2026-10-01-machine-visible-workflow-drift
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-01'
+  note: 'Bind an existing filesystem validation command to matching-fidelity and prove
+    both filesystem and real-git architecture cases before resuming Delivery #1206.'

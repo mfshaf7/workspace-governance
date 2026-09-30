@@ -20,7 +20,7 @@
       "executable": "python3",
       "args": ["scripts/validate_contracts.py", "--repo-root", "."],
       "fidelity": "filesystem",
-      "conformance_binding": "none",
+      "conformance_binding": "matching-fidelity",
       "timeout_seconds": 600
     },
     {
