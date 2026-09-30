@@ -24,6 +24,10 @@ skills:
     owner_repo: workspace-governance
     source_path: skills-src/done-criteria-enforcer
     scope: workspace
+  source-implementation-operator:
+    owner_repo: workspace-governance
+    source_path: skills-src/source-implementation-operator
+    scope: workspace
   operator-workflow-design:
     owner_repo: workspace-governance
     source_path: skills-src/operator-workflow-design

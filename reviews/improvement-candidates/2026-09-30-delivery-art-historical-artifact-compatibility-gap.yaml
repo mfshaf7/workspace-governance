@@ -1,0 +1,51 @@
+schema_version: 1
+id: 2026-09-30-delivery-art-historical-artifact-compatibility-gap
+title: Version immutable Delivery ART architecture artifacts explicitly
+recorded_on: '2026-09-30'
+owner_repo: operator-orchestration-service
+summary: >-
+  Current architecture validation requires capability-id runtime boundaries
+  from immutable schema-v3 artifacts even though earlier schema-v3 writers
+  emitted prose `allowed` and `prohibited` fields. Historical packets therefore
+  fail current validation without an explicit version or supersession result.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-12-delivery-art-lifecycle-automation-regression.yaml
+status: triaged
+source_type: review
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+    - platform-contract
+signals:
+  - id: immutable-schema-v3-shape-drift
+    title: Two incompatible architecture shapes share schema version 3
+    trigger: closed-lesson-regression
+    failure_classes:
+      - contract-drift
+      - workflow-doctrine-gap
+    finding: >-
+      Immutable architecture packets created before capability-id enforcement
+      use `allowed` and `prohibited`, while current validation requires
+      `allowed_capability_ids` and `prohibited_capability_ids` without a schema
+      version change. Historical reads need explicit compatibility, and new
+      transitions need a clear architecture-supersession result rather than a
+      generic dependency error.
+    source_refs:
+      - conversation:2026-09-30 Delivery ART historical compatibility reassessment
+      - operator-orchestration-service/src/delivery-art/contracts.js
+      - operator-orchestration-service/src/delivery-art/work-session-controller.js
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-03'
+  note: >-
+    Design an explicit wire-version and historical-read policy before changing
+    validation. Do not silently grandfather historical architecture for new
+    mutations, and do not combine this separate contract correction with the
+    approved Landing Unit closeout implementation.

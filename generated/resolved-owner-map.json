@@ -1335,6 +1335,11 @@
       "scope": "workspace",
       "source_path": "skills-src/self-improvement-review"
     },
+    "source-implementation-operator": {
+      "owner_repo": "workspace-governance",
+      "scope": "workspace",
+      "source_path": "skills-src/source-implementation-operator"
+    },
     "troubleshooting-preflight": {
       "owner_repo": "workspace-governance",
       "scope": "workspace",
