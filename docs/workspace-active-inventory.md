@@ -52,6 +52,18 @@ run from `main`, `master`, or a detached head.
 The preparation receipt is not terminal success. WGCF and OOS artifacts support
 the workflow but never replace merged Workspace Governance source authority.
 
+## Routine Operation Boundary
+
+Promotion and lifecycle commands share one activation boundary with Workspace
+Intake. The canonical order, human gates, evidence requirements, rollback
+units, and operator status states are defined in
+[`workspace-intake-inventory-operation`](../contracts/workspace-intake-inventory-operation.yaml).
+
+Local source preparation and conformance remain baseline evidence. Routine
+operation requires exact merged source, WGCF receipts, OOS recovery evidence,
+the Console projection, Security acceptance, Platform composition, and the
+composed operating receipt. No individual owner may infer `operating-ready`.
+
 ## Change An Active Record
 
 Inspect the exact inventory and history bindings before preparing a change:

@@ -37,6 +37,11 @@ Use these contracts to declare:
   - deterministic update, suspension, restoration, and retirement contract for
     existing inventory records, including state transitions, exact source and
     history bindings, review, idempotency, and no-hard-delete rules
+- `workspace-intake-inventory-operation.yaml`
+  - shared activation boundary for routine Workspace Intake and Active
+    Inventory operation, including the ordered owner sequence, human gates,
+    exact ART work order, operating-ready evidence, status projection, and
+    rollback and cleanup rules
 - `workspace-inventory-history.yaml`
   - append-only canonical event history for inventory lifecycle changes; every
     event preserves before and after record state plus request and readiness

@@ -30,6 +30,11 @@ promotion before it appears in the canonical repository, product, or component
 inventory. The primary operator surface is
 [docs/workspace-active-inventory.md](docs/workspace-active-inventory.md).
 
+Routine Workspace Intake and Active Inventory activation is governed by one
+shared owner and evidence sequence rather than inferred from source completion:
+
+- [contracts/workspace-intake-inventory-operation.yaml](contracts/workspace-intake-inventory-operation.yaml)
+
 `dev-integration` policy lives here as well. The workspace defines when that
 lane is appropriate, what it must never touch, and which artifacts are
 required before fast local work can move into governed stage rehearsal. The

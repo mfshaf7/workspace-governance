@@ -215,6 +215,11 @@ migration:
     path: scripts/scaffold_intake.py
     posture: temporary-wrapper
     rule: The wrapper may remain during OOS and Console adoption only when it delegates to the deterministic v2 engine and cannot create a second mutation path.
+routine_operation:
+  contract_ref: contracts/workspace-intake-inventory-operation.yaml
+  capability: workspace-intake-classification
+  baseline_posture: source-complete-conformance-only
+  rule: Routine status comes from the shared activation contract and authoritative OOS evidence; this source contract alone never claims operating readiness.
 denied_shortcuts:
   - direct-main-mutation
   - automatic-merge

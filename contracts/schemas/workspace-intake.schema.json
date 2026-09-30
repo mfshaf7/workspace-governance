@@ -20,6 +20,7 @@
     "review_boundary",
     "ai_boundary",
     "migration",
+    "routine_operation",
     "denied_shortcuts"
   ],
   "$defs": {
@@ -45,6 +46,17 @@
       "properties": {
         "owner_repo": { "$ref": "#/$defs/text" },
         "responsibilities": { "$ref": "#/$defs/textList" }
+      },
+      "additionalProperties": false
+    },
+    "routineOperationRef": {
+      "type": "object",
+      "required": ["contract_ref", "capability", "baseline_posture", "rule"],
+      "properties": {
+        "contract_ref": { "const": "contracts/workspace-intake-inventory-operation.yaml" },
+        "capability": { "const": "workspace-intake-classification" },
+        "baseline_posture": { "const": "source-complete-conformance-only" },
+        "rule": { "$ref": "#/$defs/text" }
       },
       "additionalProperties": false
     }
@@ -308,6 +320,7 @@
       },
       "additionalProperties": false
     },
+    "routine_operation": { "$ref": "#/$defs/routineOperationRef" },
     "denied_shortcuts": { "$ref": "#/$defs/textList" }
   },
   "additionalProperties": false

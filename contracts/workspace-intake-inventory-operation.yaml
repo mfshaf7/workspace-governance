@@ -1,0 +1,100 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_refs:
+  - docs/workspace-intake.md
+  - docs/workspace-active-inventory.md
+architecture:
+  initiative_ref: openproject://work_packages/1203
+  architecture_packet_ref: architecture-packet:delivery-1203-v1
+  contract_work_ref: openproject://work_packages/1206
+purpose: Lock the authority, evidence, activation, rollback, and status-projection boundary for routine Workspace Intake and Active Inventory operation.
+applies_to:
+  - workspace-intake-classification
+  - workspace-active-inventory-promotion
+  - workspace-active-inventory-lifecycle
+evidence_posture:
+  baseline: source-complete-conformance-only
+  target: dev-integration-routine-operating
+  rule: The baseline proves local owner behavior only. Routine operating status requires the complete ordered owner chain and composed operating evidence; this contract alone never claims activation.
+authority_sequence:
+  - order: 1
+    owner_repo: workspace-governance
+    capability: define-contract-and-canonical-source-authority
+    evidence: merged activation contract and exact canonical source readback
+  - order: 2
+    owner_repo: workspace-governance-control-fabric
+    capability: evaluate-readiness-and-issue-custody-receipts
+    evidence: current exact-contract readiness, denial, stale-state, and replay receipts
+  - order: 3
+    owner_repo: operator-orchestration-service
+    capability: orchestrate-durable-owner-workflow
+    evidence: command journal, idempotent recovery, owner mutation, merge wait, and terminal receipt
+  - order: 4
+    owner_repo: governance-operations-console
+    capability: project-and-submit-operator-intent
+    evidence: typed request, state, next-action, result, history, and blocked-path projections
+  - order: 5
+    owner_repo: security-architecture
+    capability: decide-controlled-activation
+    evidence: exact-revision security delta decision covering identity, authorization, replay, custody, rollback, and cleanup
+  - order: 6
+    owner_repo: platform-engineering
+    capability: commission-dev-integration-composition
+    evidence: exact-head activation, health, restart, denial, rollback, revocation, and teardown proof
+ordered_work_item_refs:
+  - openproject://work_packages/1206
+  - openproject://work_packages/1207
+  - openproject://work_packages/1208
+  - openproject://work_packages/1209
+  - openproject://work_packages/1216
+  - openproject://work_packages/1217
+  - openproject://work_packages/1210
+human_gates:
+  contract_before_implementation:
+    authority_ref: openproject://work_packages/1206
+    blocked_transition: before-implementation
+    rule: Dependent implementation cannot start until this contract is merged and read back from Workspace Governance main.
+  security_before_activation:
+    authority_ref: openproject://work_packages/1216
+    blocked_transition: before-runtime-activation
+    rule: Platform cannot commission the dev-integration composition until Security accepts the exact merged owner revisions and conformance evidence.
+operating_ready_requires:
+  - all source-backed Landing Units merged with finalized Review Packets
+  - current WGCF readiness and custody receipts for exact contract and request versions
+  - OOS positive, denial, stale-state, replay, interruption, and recovery evidence
+  - Console projection derived from OOS state without local authority or false success
+  - Security acceptance bound to exact merged revisions
+  - Platform health, restart, rollback, revocation, and teardown evidence
+  - composed operating receipt from openproject://work_packages/1210
+status_projection:
+  source: operator-orchestration-service
+  allowed_states:
+    - contract-locked
+    - implementation-in-progress
+    - security-review-required
+    - activation-required
+    - operating-ready
+    - blocked
+  rule: Console and reports project the current authoritative workflow state and exact next action; no owner infers operating-ready from source completion, local conformance, or a prepared mutation.
+rollback_and_cleanup:
+  rollback_units:
+    - one owner-repository Landing Unit
+    - one Security activation decision
+    - one Platform dev-integration composition
+  preserve:
+    - canonical source history
+    - Review Packets
+    - readiness and custody receipts
+    - denied and failed evidence
+    - Security decisions
+    - runtime activation and teardown evidence
+  cleanup_rule: Retire only session-created branches, worktrees, credentials, and disposable runtime resources; unresolved residue remains an explicit owned blocker.
+denied_shortcuts:
+  - source-complete-treated-as-operating-ready
+  - local-conformance-treated-as-runtime-activation
+  - console-local-success
+  - console-or-wgcf-canonical-source-mutation
+  - runtime-activation-before-security-decision
+  - runtime-activation-without-exact-source-binding
+  - terminal-success-without-merged-authority-readback
+  - broad-or-destructive-cleanup

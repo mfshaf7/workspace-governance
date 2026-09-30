@@ -6790,6 +6790,7 @@ def main() -> int:
         "workspace_intake": repo_root / "contracts/workspace-intake.yaml",
         "workspace_active_inventory": repo_root / "contracts/workspace-active-inventory.yaml",
         "workspace_inventory_lifecycle": repo_root / "contracts/workspace-inventory-lifecycle.yaml",
+        "workspace_intake_inventory_operation": repo_root / "contracts/workspace-intake-inventory-operation.yaml",
         "workspace_inventory_history": repo_root / "contracts/workspace-inventory-history.yaml",
         "intake_policy": repo_root / "contracts/intake-policy.yaml",
         "intake_register": repo_root / "contracts/intake-register.yaml",
@@ -6990,6 +6991,11 @@ def main() -> int:
     intake_policy = contracts["intake_policy"]
     intake_register = contracts["intake_register"]
     workspace_intake = contracts["workspace_intake"]
+    workspace_active_inventory = contracts["workspace_active_inventory"]
+    workspace_inventory_lifecycle = contracts["workspace_inventory_lifecycle"]
+    workspace_intake_inventory_operation = contracts[
+        "workspace_intake_inventory_operation"
+    ]
     expected_workspace_intake_schema_refs = {
         "request": "contracts/schemas/workspace-intake-request.schema.json",
         "decision": "contracts/schemas/workspace-intake-decision.schema.json",
@@ -7029,6 +7035,59 @@ def main() -> int:
     if intake_policy.get("contract_ref") != expected_intake_ref:
         errors.append(
             "contracts/intake-policy.yaml: contract_ref must bind the current workspace-intake contract version"
+        )
+    expected_operation_ref = "contracts/workspace-intake-inventory-operation.yaml"
+    expected_routine_bindings = (
+        (
+            "contracts/workspace-intake.yaml",
+            workspace_intake,
+            "workspace-intake-classification",
+        ),
+        (
+            "contracts/workspace-active-inventory.yaml",
+            workspace_active_inventory,
+            "workspace-active-inventory-promotion",
+        ),
+        (
+            "contracts/workspace-inventory-lifecycle.yaml",
+            workspace_inventory_lifecycle,
+            "workspace-active-inventory-lifecycle",
+        ),
+    )
+    for path, contract, capability in expected_routine_bindings:
+        routine = contract.get("routine_operation", {})
+        if routine.get("contract_ref") != expected_operation_ref:
+            errors.append(f"{path}: routine operation must bind the shared activation contract")
+        if routine.get("capability") != capability:
+            errors.append(f"{path}: routine operation capability is not the canonical capability")
+        if routine.get("baseline_posture") != "source-complete-conformance-only":
+            errors.append(f"{path}: routine operation must preserve the truthful baseline posture")
+    expected_operation_owners = [
+        "workspace-governance",
+        "workspace-governance-control-fabric",
+        "operator-orchestration-service",
+        "governance-operations-console",
+        "security-architecture",
+        "platform-engineering",
+    ]
+    operation_sequence = workspace_intake_inventory_operation.get(
+        "authority_sequence", []
+    )
+    if [entry.get("owner_repo") for entry in operation_sequence] != expected_operation_owners:
+        errors.append(
+            "contracts/workspace-intake-inventory-operation.yaml: authority sequence must preserve contract, readiness, workflow, projection, security, and platform ownership"
+        )
+    if [entry.get("order") for entry in operation_sequence] != list(range(1, 7)):
+        errors.append(
+            "contracts/workspace-intake-inventory-operation.yaml: authority sequence order must be contiguous"
+        )
+    expected_operation_refs = [
+        f"openproject://work_packages/{work_item_id}"
+        for work_item_id in (1206, 1207, 1208, 1209, 1216, 1217, 1210)
+    ]
+    if workspace_intake_inventory_operation.get("ordered_work_item_refs") != expected_operation_refs:
+        errors.append(
+            "contracts/workspace-intake-inventory-operation.yaml: work-item order must match the approved activation architecture"
         )
     governed_intake_assist = contracts["governed_intake_assist"]["governed_intake_assist"]
     developer_integration_policy = contracts["developer_integration_policy"]
