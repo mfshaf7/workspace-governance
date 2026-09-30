@@ -1235,10 +1235,14 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 errors.append("architecture.landing_units ids must be unique")
 
             assigned_work_items = []
+            landing_unit_by_id = {}
+            landing_unit_by_work_item = {}
             source_backed_landing_unit_ids = set()
             for unit in landing_units:
                 landing_unit_id = unit.get("id")
                 landing_unit_owner = unit.get("owner_repo")
+                if isinstance(landing_unit_id, str):
+                    landing_unit_by_id[landing_unit_id] = unit
                 if unit.get("source_backed") is True and isinstance(
                     landing_unit_id, str
                 ):
@@ -1247,6 +1251,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     unit.get("covered_work_item_ids")
                 ):
                     assigned_work_items.append(work_item_id)
+                    landing_unit_by_work_item[work_item_id] = landing_unit_id
                     if work_item_id not in covered_work_items:
                         errors.append(
                             f"architecture Landing Unit {landing_unit_id} references unknown work item {work_item_id}"
@@ -1294,6 +1299,99 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                 source_edges.append((prerequisite, dependent))
             if not _delivery_art_graph_is_acyclic(source_nodes, source_edges):
                 errors.append("architecture.source_landing_graph must be acyclic")
+
+            if schema_version == 3:
+                source_dependents = {}
+                for prerequisite, dependent in source_edges:
+                    source_dependents.setdefault(prerequisite, set()).add(dependent)
+
+                def source_path_exists(prerequisite, dependent):
+                    pending = list(source_dependents.get(prerequisite, set()))
+                    visited = set()
+                    while pending:
+                        current = pending.pop()
+                        if current == dependent:
+                            return True
+                        if current in visited:
+                            continue
+                        visited.add(current)
+                        pending.extend(source_dependents.get(current, set()))
+                    return False
+
+                handoffs = _artifact_object_list(
+                    architecture.get("evidence_receipt_handoffs")
+                )
+                handoff_ids = [
+                    handoff.get("handoff_id")
+                    for handoff in handoffs
+                    if isinstance(handoff.get("handoff_id"), str)
+                ]
+                if len(handoff_ids) != len(set(handoff_ids)):
+                    errors.append(
+                        "architecture.evidence_receipt_handoffs ids must be unique"
+                    )
+                for handoff in handoffs:
+                    handoff_id = handoff.get("handoff_id")
+                    producer = handoff.get("producer")
+                    consumer = handoff.get("consumer")
+                    producer_unit_id = handoff.get("producer_landing_unit_id")
+                    consumer_unit_id = handoff.get("consumer_landing_unit_id")
+                    producer_work_item_id = handoff.get("producer_work_item_id")
+                    consumer_work_item_id = handoff.get("consumer_work_item_id")
+                    if producer == consumer:
+                        errors.append(
+                            f"architecture handoff {handoff_id} must cross owner repositories"
+                        )
+                    for role, unit_id in (
+                        ("producer", producer_unit_id),
+                        ("consumer", consumer_unit_id),
+                    ):
+                        if unit_id not in landing_unit_id_set:
+                            errors.append(
+                                f"architecture handoff {handoff_id} references unknown {role} Landing Unit {unit_id}"
+                            )
+                    for role, work_item_id in (
+                        ("producer", producer_work_item_id),
+                        ("consumer", consumer_work_item_id),
+                    ):
+                        if work_item_id not in covered_work_items:
+                            errors.append(
+                                f"architecture handoff {handoff_id} references unknown {role} work item {work_item_id}"
+                            )
+                    producer_unit = landing_unit_by_id.get(producer_unit_id, {})
+                    consumer_unit = landing_unit_by_id.get(consumer_unit_id, {})
+                    if producer_unit and producer_unit.get("owner_repo") != producer:
+                        errors.append(
+                            f"architecture handoff {handoff_id} producer {producer} does not own Landing Unit {producer_unit_id}"
+                        )
+                    if consumer_unit and consumer_unit.get("owner_repo") != consumer:
+                        errors.append(
+                            f"architecture handoff {handoff_id} consumer {consumer} does not own Landing Unit {consumer_unit_id}"
+                        )
+                    if (
+                        producer_work_item_id in covered_work_items
+                        and landing_unit_by_work_item.get(producer_work_item_id)
+                        != producer_unit_id
+                    ):
+                        errors.append(
+                            f"architecture handoff {handoff_id} producer work item {producer_work_item_id} is not assigned to Landing Unit {producer_unit_id}"
+                        )
+                    if (
+                        consumer_work_item_id in covered_work_items
+                        and landing_unit_by_work_item.get(consumer_work_item_id)
+                        != consumer_unit_id
+                    ):
+                        errors.append(
+                            f"architecture handoff {handoff_id} consumer work item {consumer_work_item_id} is not assigned to Landing Unit {consumer_unit_id}"
+                        )
+                    if (
+                        producer_unit_id in source_nodes
+                        and consumer_unit_id in source_nodes
+                        and not source_path_exists(producer_unit_id, consumer_unit_id)
+                    ):
+                        errors.append(
+                            f"architecture handoff {handoff_id} is not ordered from producer Landing Unit {producer_unit_id} to consumer Landing Unit {consumer_unit_id}"
+                        )
 
             human_gates = _artifact_object_list(
                 architecture.get("required_human_gates")
@@ -3598,6 +3696,20 @@ def validate_delivery_art_artifact_contracts(
         split_gate_v3["artifact_id"] = "architecture-packet:delivery-698-v3"
         split_gate_architecture = split_gate_v3["architecture"]
         split_gate_architecture.pop("work_dependency_graph")
+        split_gate_architecture["evidence_receipt_handoffs"] = [
+            {
+                "handoff_id": "handoff:contract-to-implementation",
+                "producer": "security-architecture",
+                "consumer": "operator-orchestration-service",
+                "producer_landing_unit_id": "delivery-698-contract",
+                "consumer_landing_unit_id": "delivery-698-implementation",
+                "producer_work_item_id": "work-item-801",
+                "consumer_work_item_id": "work-item-802",
+                "integration_point": "OOS pinned Delivery ART contract loader",
+                "artifact": "Delivery ART contract bundle",
+                "acceptance": "consumer contract tests pass against the exact authority digest",
+            }
+        ]
         split_gate_architecture["descendant_owner_map"][0]["owner_repo"] = (
             "security-architecture"
         )
@@ -3708,6 +3820,41 @@ def validate_delivery_art_artifact_contracts(
             split_gate_v3,
             "architecture packet v3 with separately schedulable Security gates",
             "architecture-v3-execution-plan-valid",
+        )
+
+        v3_handoff_with_wrong_owner = copy.deepcopy(split_gate_v3)
+        v3_handoff_with_wrong_owner["architecture"][
+            "evidence_receipt_handoffs"
+        ][0]["producer"] = "workspace-governance"
+        v3_handoff_with_wrong_owner["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(v3_handoff_with_wrong_owner)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            v3_handoff_with_wrong_owner,
+            "architecture v3 handoff whose producer does not own its Landing Unit",
+            expected_fragment="does not own Landing Unit",
+        )
+
+        v3_handoff_without_source_order = copy.deepcopy(split_gate_v3)
+        v3_handoff_without_source_order["architecture"][
+            "evidence_receipt_handoffs"
+        ][0]["producer_landing_unit_id"] = "delivery-698-security-acceptance"
+        v3_handoff_without_source_order["architecture"][
+            "evidence_receipt_handoffs"
+        ][0]["producer_work_item_id"] = "work-item-803"
+        v3_handoff_without_source_order["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(v3_handoff_without_source_order)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            v3_handoff_without_source_order,
+            "architecture v3 handoff whose producer follows its consumer",
+            expected_fragment="is not ordered from producer Landing Unit",
         )
 
         impossible_single_authority_v3 = copy.deepcopy(split_gate_v3)

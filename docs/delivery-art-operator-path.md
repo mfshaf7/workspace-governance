@@ -161,6 +161,13 @@ implementation but must also remain open for evidence produced by that
 implementation. Split pre-implementation and post-conformance decisions use
 separate authority work items instead.
 
+V3 also binds every evidence or receipt handoff to a unique handoff id, exact
+producer and consumer work items, their Landing Units, and the named consumer
+integration point. The declared repositories must own those Landing Units, the
+work items must belong to them, and the source landing graph must order the
+producer before the consumer. Descriptive producer and consumer names alone do
+not constitute an executable cross-repo acceptance contract.
+
 Workspace Governance accepts schema versions 1, 2, and 3. V3 is the normal OOS
 producer and WGCF custody shape. V1 and v2 remain bounded compatibility for
 historical packets and recovery. Contract correction `1121`, OOS adoption
