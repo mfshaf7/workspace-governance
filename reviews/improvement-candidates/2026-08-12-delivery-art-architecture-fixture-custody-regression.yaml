@@ -8,7 +8,7 @@ summary: >-
   custody to WGCF, but the valid architecture-packet fixture still describes OOS
   persistence and OpenProject attachment custody in two architecture prose fields.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-09-art-evidence-custody-ownership-regression.yaml
-status: accepted
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -41,19 +41,58 @@ signals:
       - art:Workspace Delivery ART work item 802
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+      owner_repo: workspace-governance
+      note: >-
+        Defines structured allowed and prohibited capability identifiers for
+        each Delivery ART runtime owner boundary.
+    - type: contract
+      path: workspace-governance/contracts/fixtures/delivery-art-workflow/architecture-packet.valid.json
+      owner_repo: workspace-governance
+      note: >-
+        Assigns canonical artifact authorship and WGCF submission to OOS,
+        durable persistence to WGCF, and only safe reference projection to
+        OpenProject.
+    - type: validator
+      path: workspace-governance/scripts/validate_contracts.py
+      owner_repo: workspace-governance
+      note: >-
+        Rejects non-WGCF durable persistence, canonical content projection to
+        OpenProject, and missing OOS safe-reference capabilities.
+    - type: validator
+      path: operator-orchestration-service/src/delivery-art/contracts.js
+      owner_repo: operator-orchestration-service
+      note: >-
+        Enforces the same exact capability ownership in the OOS artifact
+        authoring and submission boundary.
+    - type: test
+      path: operator-orchestration-service/test/delivery-art-contracts.test.js
+      owner_repo: operator-orchestration-service
+      note: >-
+        Proves retired OOS persistence and OpenProject attachment behavior are
+        rejected by the OOS consumer.
+    - type: validator
+      path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_contracts.py
+      owner_repo: workspace-governance-control-fabric
+      note: >-
+        Enforces WGCF-only durable artifact persistence before registry custody
+        and readiness processing.
+    - type: test
+      path: workspace-governance-control-fabric/tests/test_delivery_art_readiness.py
+      owner_repo: workspace-governance-control-fabric
+      note: >-
+        Proves the pinned WGCF consumer rejects contradictory persistence and
+        projection capabilities while retaining existing readiness behavior.
   note: >-
-    The operator approved extending the existing custody contract rather than
-    introducing another custody mechanism. The correction remains open until
-    the canonical fixture, its semantic validation, and independently owned
-    OOS and WGCF fixture copies all express the same owner boundary.
+    Closed through Workspace Governance merge 18c2d68b860b39a1dc1c3424c946888663ec2575,
+    OOS merge d3978f878fb86ab709b06e7c054793a6dc1dff82, and WGCF merge
+    17b5e6496027b7d3396b9c6f82b92194d27d4a96. The canonical fixture and
+    both independently owned consumers now enforce one non-contradictory
+    capability boundary: OOS authors and submits, WGCF persists and issues
+    custody receipts, and OpenProject receives safe references only.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-30'
-  note: >-
-    Reassessed on 2026-09-06 after Delivery ART work item 964 validation;
-    the owner-boundary correction remains open and no closure is claimed.
-    Correct the canonical fixture so OOS authors and submits canonical content,
-    WGCF owns durable registry custody, and OpenProject receives only safe
-    references. Add semantic owner-boundary assertions, then sequence the OOS
-    and WGCF fixture-copy corrections as separate owner-repo Landing Units.
+  owner_repo: null
+  due_on: null
+  note: null
