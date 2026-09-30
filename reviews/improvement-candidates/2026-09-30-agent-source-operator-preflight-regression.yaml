@@ -42,7 +42,11 @@ resolution:
   - type: workflow
     path: platform-engineering/Makefile
     owner_repo: platform-engineering
-    note: Platform PR 252 made the cataloged 127.0.0.1:8220 Vault endpoint the identity issuer default at 917cf8918e133e90ff33053e7e4881ba5e268ec9.
+    note: >-
+      Platform PR 252 initially made the 8220 fallback the issuer default;
+      Platform PR 253 corrected that regression and restored the cataloged
+      persistent 32200 endpoint at
+      ecc43e95a6934c1b4141141c4d9976e845fbd465.
   - type: skill
     path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
     owner_repo: workspace-governance

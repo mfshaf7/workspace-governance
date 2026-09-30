@@ -29,13 +29,13 @@ Use this skill before the first source mutation that is intended to land.
 1. Prove the owner repo, exact branch, fetched `origin/main` commit, Landing
    Unit id, and tracking reference.
 2. Use Platform's `agent-source-identity deliver` target. Its default Vault
-   address is the cataloged WSL endpoint `http://127.0.0.1:8220`; establish the
-   documented `vault-ui` port-forward when needed. Do not improvise another
-   address.
+   address is the cataloged persistent operator endpoint
+   `http://127.0.0.1:32200`. Use the documented `vault-ui` port-forward at
+   `http://127.0.0.1:8220` only after proving the primary endpoint is
+   unavailable from the current WSL network mode. Do not improvise another
+   address or start the fallback for normal operation.
 
    ```bash
-   k3s kubectl -n vault port-forward svc/vault-ui 8220:8200
-
    make -C /home/mfshaf7/projects/platform-engineering agent-source-identity \
      ACTION=deliver \
      ARGS="--landing-unit-id <landing-unit-id> \
@@ -45,6 +45,18 @@ Use this skill before the first source mutation that is intended to land.
        --human-reviewer-id mfshaf7 \
        --receipt <operator-private-receipt-path> \
        --workspace-repo-inventory /home/mfshaf7/projects/workspace-governance/contracts/repos.yaml"
+   ```
+
+   When the primary endpoint is unavailable, establish the fallback first and
+   explicitly override `AGENT_SOURCE_VAULT_ADDR` for that invocation:
+
+   ```bash
+   k3s kubectl -n vault port-forward svc/vault-ui 8220:8200
+
+   AGENT_SOURCE_VAULT_ADDR=http://127.0.0.1:8220 \
+     make -C /home/mfshaf7/projects/platform-engineering agent-source-identity \
+       ACTION=deliver \
+       ARGS="<same bounded arguments>"
    ```
 3. Before committing, run:
 
