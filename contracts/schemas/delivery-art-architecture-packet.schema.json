@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
-  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3 execution-plan satisfiability, Landing Unit ownership, cross-repo handoff binding, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
+  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3/v4 execution-plan satisfiability, Landing Unit ownership, cross-repo handoff binding, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology. Versions 1 through 3 remain immutable historical shapes; version 4 is the current authoring shape.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -22,7 +22,7 @@
     "custody"
   ],
   "properties": {
-    "schema_version": { "enum": [1, 2, 3] },
+    "schema_version": { "enum": [1, 2, 3, 4] },
     "artifact_type": { "const": "delivery_art_architecture_packet" },
     "artifact_id": { "$ref": "#/$defs/artifactId" },
     "delivery_id": { "$ref": "#/$defs/deliveryId" },
@@ -282,18 +282,10 @@
           }
         },
         "runtime_boundaries": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["owner_repo", "allowed_capability_ids", "prohibited_capability_ids"],
-            "properties": {
-              "owner_repo": { "$ref": "#/$defs/repoName" },
-              "allowed_capability_ids": { "$ref": "#/$defs/capabilityIds" },
-              "prohibited_capability_ids": { "$ref": "#/$defs/capabilityIds" }
-            }
-          }
+          "oneOf": [
+            { "$ref": "#/$defs/legacyRuntimeBoundaries" },
+            { "$ref": "#/$defs/capabilityRuntimeBoundaries" }
+          ]
         },
         "rollback_cleanup_terminal_conditions": {
           "type": "object",
@@ -591,6 +583,50 @@
       }
     },
     {
+      "if": {
+        "properties": { "schema_version": { "const": 4 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "required": [
+              "work_item_execution_plan",
+              "landing_units",
+              "source_landing_graph",
+              "required_human_gates"
+            ],
+            "not": {
+              "anyOf": [
+                { "required": ["dependency_merge_dag"] },
+                { "required": ["work_dependency_graph"] }
+              ]
+            },
+            "properties": {
+              "runtime_boundaries": { "$ref": "#/$defs/capabilityRuntimeBoundaries" },
+              "required_human_gates": {
+                "items": {
+                  "required": ["evidence_prerequisite_work_item_ids"]
+                }
+              },
+              "evidence_receipt_handoffs": {
+                "items": {
+                  "required": [
+                    "handoff_id",
+                    "producer_landing_unit_id",
+                    "consumer_landing_unit_id",
+                    "producer_work_item_id",
+                    "consumer_work_item_id",
+                    "integration_point"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "if": { "properties": { "decision": { "properties": { "status": { "const": "draft" } }, "required": ["status"] } } },
       "then": {
         "properties": {
@@ -707,6 +743,36 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "$ref": "#/$defs/identifier" }
+    },
+    "legacyRuntimeBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_repo", "allowed", "prohibited"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/repoName" },
+        "allowed": { "$ref": "#/$defs/nonEmptyStrings" },
+        "prohibited": { "$ref": "#/$defs/nonEmptyStrings" }
+      }
+    },
+    "capabilityRuntimeBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner_repo", "allowed_capability_ids", "prohibited_capability_ids"],
+      "properties": {
+        "owner_repo": { "$ref": "#/$defs/repoName" },
+        "allowed_capability_ids": { "$ref": "#/$defs/capabilityIds" },
+        "prohibited_capability_ids": { "$ref": "#/$defs/capabilityIds" }
+      }
+    },
+    "legacyRuntimeBoundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/legacyRuntimeBoundary" }
+    },
+    "capabilityRuntimeBoundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/capabilityRuntimeBoundary" }
     },
     "artifactRef": {
       "type": "object",
