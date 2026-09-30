@@ -193,6 +193,18 @@ Primary operator-facing surfaces that already exist:
   - [README.md](/home/mfshaf7/projects/README.md)
 - shared `dev-integration` request and usage
   - [platform-engineering/docs/runbooks/dev-integration-profiles.md](https://github.com/mfshaf7/platform-engineering/blob/main/docs/runbooks/dev-integration-profiles.md)
+- shared operator workflows and Delivery ART
+  - [operator-orchestration-service/docs/operations/README.md](/home/mfshaf7/projects/operator-orchestration-service/docs/operations/README.md)
+- governance control-fabric validation and readiness
+  - [workspace-governance-control-fabric/docs/operations/operator-surface.md](/home/mfshaf7/projects/workspace-governance-control-fabric/docs/operations/operator-surface.md)
+- operational context admission
+  - [context-governance-gateway/docs/operating-model/README.md](/home/mfshaf7/projects/context-governance-gateway/docs/operating-model/README.md)
+- prototype incubation
+  - [workspace-prototype-studio/docs/operating-model.md](/home/mfshaf7/projects/workspace-prototype-studio/docs/operating-model.md)
+- Governance Operations Console local product use
+  - [governance-operations-console/README.md](/home/mfshaf7/projects/governance-operations-console/README.md)
+- security delta review
+  - [security-architecture/docs/reviews/security-delta-review-process.md](/home/mfshaf7/projects/security-architecture/docs/reviews/security-delta-review-process.md)
 - Telegram operator commands
   - [openclaw-telegram-enhanced/docs/operator-commands.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/docs/operator-commands.md)
 - OpenClaw runtime build and packaging

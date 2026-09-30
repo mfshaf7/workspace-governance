@@ -41,6 +41,36 @@ from repository_custody_contract import contract_issues as repository_custody_co
 
 
 CONTRACT_FORMAT_CHECKER = FormatChecker()
+PYTHON_SCRIPT_COMMAND_RE = re.compile(
+    r"(?<![A-Za-z0-9_./-])python3\s+(?P<path>scripts/[A-Za-z0-9_./-]+\.py)\b"
+)
+
+
+def registered_skill_command_reference_issues(
+    workspace_root: Path, registered_skills: dict
+) -> list[str]:
+    issues: list[str] = []
+    for skill_name, payload in sorted(registered_skills.items()):
+        owner_root = workspace_root / payload["owner_repo"]
+        # A repository-only CI checkout cannot inspect skill sources owned by
+        # sibling repositories. Workspace validation covers those owners when
+        # their roots are present.
+        if not owner_root.is_dir():
+            continue
+        skill_path = owner_root / payload["source_path"] / "SKILL.md"
+        if not skill_path.is_file():
+            issues.append(
+                f"contracts/skills.yaml: {skill_name} source is missing {skill_path}"
+            )
+            continue
+        text = skill_path.read_text(encoding="utf-8")
+        for match in PYTHON_SCRIPT_COMMAND_RE.finditer(text):
+            command_path = match.group("path")
+            if not (owner_root / command_path).is_file():
+                issues.append(
+                    f"{skill_path.relative_to(workspace_root)}: references missing owner script {command_path}"
+                )
+    return issues
 
 
 @CONTRACT_FORMAT_CHECKER.checks("date-time")
@@ -11244,6 +11274,10 @@ def main() -> int:
             errors.append(
                 f"contracts/skills.yaml: {skill_name} source_path must end in the skill name"
             )
+
+    errors.extend(
+        registered_skill_command_reference_issues(repo_root.parent, registered_skills)
+    )
 
     if errors:
         for error in errors:
