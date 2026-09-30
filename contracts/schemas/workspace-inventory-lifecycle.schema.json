@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "canonical_truth", "actions", "state_axes", "command_contract", "history_contract", "review_boundary", "denied_shortcuts"],
+  "required": ["schema_version", "owner_repo", "operator_surface_path", "architecture", "purpose", "canonical_truth", "actions", "state_axes", "command_contract", "history_contract", "review_boundary", "routine_operation", "denied_shortcuts"],
   "properties": {
     "schema_version": { "const": 1 },
     "owner_repo": { "const": "workspace-governance" },
@@ -24,11 +24,23 @@
     "command_contract": { "$ref": "#/$defs/section" },
     "history_contract": { "$ref": "#/$defs/section" },
     "review_boundary": { "$ref": "#/$defs/section" },
+    "routine_operation": { "$ref": "#/$defs/routineOperationRef" },
     "denied_shortcuts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/text" } }
   },
   "$defs": {
     "text": { "type": "string", "minLength": 1 },
     "section": { "type": "object", "minProperties": 1 },
+    "routineOperationRef": {
+      "type": "object",
+      "required": ["contract_ref", "capability", "baseline_posture", "rule"],
+      "properties": {
+        "contract_ref": { "const": "contracts/workspace-intake-inventory-operation.yaml" },
+        "capability": { "const": "workspace-active-inventory-lifecycle" },
+        "baseline_posture": { "const": "source-complete-conformance-only" },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
     "action": {
       "type": "object",
       "required": ["allowed_from", "result"],

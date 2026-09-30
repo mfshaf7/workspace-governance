@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "owner_repo",
+    "operator_surface_refs",
+    "architecture",
+    "purpose",
+    "applies_to",
+    "evidence_posture",
+    "authority_sequence",
+    "ordered_work_item_refs",
+    "human_gates",
+    "operating_ready_requires",
+    "status_projection",
+    "rollback_and_cleanup",
+    "denied_shortcuts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "owner_repo": { "const": "workspace-governance" },
+    "operator_surface_refs": {
+      "type": "array",
+      "const": ["docs/workspace-intake.md", "docs/workspace-active-inventory.md"]
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["initiative_ref", "architecture_packet_ref", "contract_work_ref"],
+      "properties": {
+        "initiative_ref": { "const": "openproject://work_packages/1203" },
+        "architecture_packet_ref": { "const": "architecture-packet:delivery-1203-v1" },
+        "contract_work_ref": { "const": "openproject://work_packages/1206" }
+      },
+      "additionalProperties": false
+    },
+    "purpose": { "$ref": "#/$defs/text" },
+    "applies_to": {
+      "type": "array",
+      "const": [
+        "workspace-intake-classification",
+        "workspace-active-inventory-promotion",
+        "workspace-active-inventory-lifecycle"
+      ]
+    },
+    "evidence_posture": {
+      "type": "object",
+      "required": ["baseline", "target", "rule"],
+      "properties": {
+        "baseline": { "const": "source-complete-conformance-only" },
+        "target": { "const": "dev-integration-routine-operating" },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "authority_sequence": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["order", "owner_repo", "capability", "evidence"],
+        "properties": {
+          "order": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "owner_repo": { "$ref": "#/$defs/text" },
+          "capability": { "$ref": "#/$defs/text" },
+          "evidence": { "$ref": "#/$defs/text" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ordered_work_item_refs": {
+      "type": "array",
+      "const": [
+        "openproject://work_packages/1206",
+        "openproject://work_packages/1207",
+        "openproject://work_packages/1208",
+        "openproject://work_packages/1209",
+        "openproject://work_packages/1216",
+        "openproject://work_packages/1217",
+        "openproject://work_packages/1210"
+      ]
+    },
+    "human_gates": {
+      "type": "object",
+      "required": ["contract_before_implementation", "security_before_activation"],
+      "properties": {
+        "contract_before_implementation": { "$ref": "#/$defs/gate" },
+        "security_before_activation": { "$ref": "#/$defs/gate" }
+      },
+      "additionalProperties": false
+    },
+    "operating_ready_requires": { "$ref": "#/$defs/textList" },
+    "status_projection": {
+      "type": "object",
+      "required": ["source", "allowed_states", "rule"],
+      "properties": {
+        "source": { "const": "operator-orchestration-service" },
+        "allowed_states": {
+          "type": "array",
+          "const": ["contract-locked", "implementation-in-progress", "security-review-required", "activation-required", "operating-ready", "blocked"]
+        },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "rollback_and_cleanup": {
+      "type": "object",
+      "required": ["rollback_units", "preserve", "cleanup_rule"],
+      "properties": {
+        "rollback_units": { "$ref": "#/$defs/textList" },
+        "preserve": { "$ref": "#/$defs/textList" },
+        "cleanup_rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "denied_shortcuts": { "$ref": "#/$defs/textList" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "textList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "gate": {
+      "type": "object",
+      "required": ["authority_ref", "blocked_transition", "rule"],
+      "properties": {
+        "authority_ref": { "type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$" },
+        "blocked_transition": { "enum": ["before-implementation", "before-runtime-activation"] },
+        "rule": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

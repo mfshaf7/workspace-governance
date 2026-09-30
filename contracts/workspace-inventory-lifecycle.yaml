@@ -89,6 +89,11 @@ review_boundary:
   direct_main_allowed: false
   automatic_merge_allowed: false
   hard_delete_allowed: false
+routine_operation:
+  contract_ref: contracts/workspace-intake-inventory-operation.yaml
+  capability: workspace-active-inventory-lifecycle
+  baseline_posture: source-complete-conformance-only
+  rule: Routine status comes from the shared activation contract and authoritative OOS evidence; this source contract alone never claims operating readiness.
 denied_shortcuts:
   - direct-main-mutation
   - automatic-merge

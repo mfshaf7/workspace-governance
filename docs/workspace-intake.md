@@ -39,6 +39,19 @@ workflow and merge wait. Platform owns the exact-repository application
 identity. Security owns trust-boundary acceptance. Console projects the OOS
 workflow and never writes these files directly.
 
+## Routine Operation Boundary
+
+The source command and its tests are complete, but that local proof does not
+by itself make Workspace Intake a routine operating service. The shared
+[`workspace-intake-inventory-operation`](../contracts/workspace-intake-inventory-operation.yaml)
+contract fixes the activation order: Workspace Governance contract, WGCF
+readiness, OOS workflow, Console adapter, Security decision, Platform
+composition, and composed operating proof.
+
+Until that chain is complete, project the exact current OOS state and next
+action. Never label a prepared source mutation, local conformance run, or
+unmerged branch as operating success.
+
 ## Current Owner Commands
 
 Read the current optimistic-concurrency bindings before creating a request:

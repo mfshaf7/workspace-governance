@@ -81,6 +81,11 @@ migration:
     - Legacy repository and component lifecycle becomes authoritative posture.
     - Legacy product lifecycle becomes authoritative maturity; generic active maps to owner-managed.
     - The lifecycle compatibility alias remains until dependent consumers adopt v2.
+routine_operation:
+  contract_ref: contracts/workspace-intake-inventory-operation.yaml
+  capability: workspace-active-inventory-promotion
+  baseline_posture: source-complete-conformance-only
+  rule: Routine status comes from the shared activation contract and authoritative OOS evidence; this source contract alone never claims operating readiness.
 denied_shortcuts:
   - direct-main-mutation
   - automatic-merge
