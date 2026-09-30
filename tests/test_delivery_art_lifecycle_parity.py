@@ -51,6 +51,7 @@ def capability_manifest() -> dict:
         ("review-packet-v2-authoring", "implemented", 2, True),
         ("review-packet-merge-readiness", "implemented", 2, True),
         ("work-session-source-merge", "implemented", 1, True),
+        ("agent-source-identity-consumption", "implemented", 1, True),
         ("operating-readiness", "implemented", 2, True),
         ("review-packet-finalization", "implemented", 2, True),
         ("art-closeout", "implemented", 2, True),
@@ -68,6 +69,11 @@ def capability_manifest() -> dict:
         }
         for capability_id, state, version, normal_path in capability_specs
     ]
+    next(
+        capability
+        for capability in capabilities
+        if capability["id"] == "agent-source-identity-consumption"
+    )["activation_work_item_id"] = "work-item-1137"
     next(
         capability
         for capability in capabilities
@@ -187,6 +193,9 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
                 "activated_at_commit": self.commit,
             },
             "capability_projection": copy.deepcopy(self.manifest),
+            "activation_evidence": {
+                "art_refs": ["openproject://work_packages/1137"],
+            },
         }
 
     def test_exact_owner_manifest_projection_passes(self) -> None:
@@ -196,6 +205,43 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         )
 
         self.assertEqual(errors, [])
+
+    def test_agent_source_identity_activation_is_explicit(self) -> None:
+        activation = self.operator_path["contract_activation"]
+        capability = next(
+            entry
+            for entry in activation["capability_projection"]["capabilities"]
+            if entry["id"] == "agent-source-identity-consumption"
+        )
+
+        self.assertEqual(
+            capability,
+            {
+                "id": "agent-source-identity-consumption",
+                "state": "implemented",
+                "contract_version": 1,
+                "normal_path": True,
+                "activation_work_item_id": "work-item-1137",
+            },
+        )
+        self.assertIn(
+            "openproject://work_packages/1137",
+            activation["activation_evidence"]["art_refs"],
+        )
+
+    def test_agent_source_identity_activation_evidence_is_required(self) -> None:
+        activation = self.activation()
+        activation["activation_evidence"]["art_refs"] = []
+
+        errors = self.validator.delivery_art_lifecycle_capability_parity_errors(
+            self.workspace_root,
+            activation,
+        )
+
+        self.assertIn(
+            "Agent source identity activation evidence must reference work item 1137",
+            errors,
+        )
 
     def test_active_work_session_contract_passes(self) -> None:
         errors = self.validator.delivery_art_work_session_contract_errors(

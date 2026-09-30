@@ -695,7 +695,9 @@
         },
         "contract_version": { "type": "integer", "minimum": 1 },
         "normal_path": { "type": "boolean" },
-        "activation_work_item_id": { "const": "work-item-970" }
+        "activation_work_item_id": {
+          "enum": ["work-item-970", "work-item-1137"]
+        }
       },
       "allOf": [
         {
@@ -708,8 +710,37 @@
             "properties": {
               "state": { "const": "human-gated" },
               "contract_version": { "const": 1 },
-              "normal_path": { "const": true }
+              "normal_path": { "const": true },
+              "activation_work_item_id": { "const": "work-item-970" }
             }
+          }
+        },
+        {
+          "if": {
+            "properties": { "id": { "const": "agent-source-identity-consumption" } },
+            "required": ["id"]
+          },
+          "then": {
+            "required": ["activation_work_item_id"],
+            "properties": {
+              "state": { "const": "implemented" },
+              "contract_version": { "const": 1 },
+              "normal_path": { "const": true },
+              "activation_work_item_id": { "const": "work-item-1137" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "enum": [
+                  "work-session-resource-retirement",
+                  "agent-source-identity-consumption"
+                ]
+              }
+            },
+            "required": ["id"]
           },
           "else": {
             "properties": { "activation_work_item_id": false }

@@ -104,6 +104,7 @@ DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "review-packet-v2-authoring",
     "review-packet-merge-readiness",
     "work-session-source-merge",
+    "agent-source-identity-consumption",
     "operating-readiness",
     "review-packet-finalization",
     "art-closeout",
@@ -380,6 +381,33 @@ def delivery_art_lifecycle_capability_parity_errors(
     if normal_capabilities != DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES:
         errors.append(
             "owner lifecycle normal capabilities do not match the governed dev-integration path"
+        )
+
+    agent_source_identity = next(
+        (
+            entry
+            for entry in capabilities
+            if entry.get("id") == "agent-source-identity-consumption"
+        ),
+        None,
+    )
+    if agent_source_identity != {
+        "id": "agent-source-identity-consumption",
+        "state": "implemented",
+        "contract_version": 1,
+        "normal_path": True,
+        "activation_work_item_id": "work-item-1137",
+    }:
+        errors.append(
+            "Agent source identity consumption must remain bound to its governed activation"
+        )
+
+    activation_refs = set(
+        ((activation.get("activation_evidence") or {}).get("art_refs") or [])
+    )
+    if "openproject://work_packages/1137" not in activation_refs:
+        errors.append(
+            "Agent source identity activation evidence must reference work item 1137"
         )
 
     compatibility = next(
