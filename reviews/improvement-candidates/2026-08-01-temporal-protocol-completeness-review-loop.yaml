@@ -12,7 +12,7 @@ summary: >-
   completeness, immutable restore evidence, and executable schema cases before code
   review.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -218,33 +218,29 @@ resolution:
     owner_repo: workspace-governance
     note: Proves positive and negative authorization, session, execution,
       receipt, timeline, and restore bindings.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      The normal work-session path now requires durable architecture readiness,
+      exact source scope, human gates, merge-ready evidence, and transition
+      rehearsal before source progression.
+  - type: doc
+    path: workspace-governance/docs/durable-orchestration-governance.md
+    owner_repo: workspace-governance
+    note: >-
+      Records the completed controlled-commissioning boundary and the current
+      active Temporal dev-integration posture without treating that historical
+      proof as the normal launch path.
   note: >-
-    The earlier prose preflight is merged, but runtime enforcement is not. ART Feature
-    800 now sequences executable workspace contracts, Security custody review,
-    Platform object storage, WGCF artifact custody and readiness, OOS work-start
-    integration, Platform semantic cleanup, and initiative 698 dogfood. Closure
-    remains pending the first successful operator-locked execution
-    sequence and conformance packet used before implementation, plus a real-Git
-    approval-provenance test that cannot synthesize files into an already fixed
-    revision. The first commissioning attempt also requires a Platform correction
-    that proves mounted runtime semantics, side-effect-free read operations,
-    authorization input custody outside destructive recovery scope, and a supported
-    exact-scope terminal cleanup retry before another permit is issued. Review Packet
-    sequencing also requires an enforcement control that prevents source merge from
-    bypassing the lifecycle controller's durable merge-ready gate.
+    Closed after the original prose-only preflight was replaced by executable
+    schema-v3 architecture, work-start, evidence-profile, Review Packet,
+    transition-rehearsal, and cleanup controls. Real-Git fidelity is required
+    for Git-causality claims, the historical controlled Temporal commissioning
+    proof completed its activation role, and normal source progression now
+    fail-closes before implementation or merge when the durable chain is not
+    ready. The broad review-loop record no longer owns an unresolved control.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-30'
-  note: >-
-    Reassessed on 2026-09-06; the operator paused Epic 698 commissioning while the workspace returned to
-    the primary governed-project workflow. Reassess this candidate by the new
-    review date; do not treat the schedule change as control closure.
-    Complete Feature 800 through the corrected owner sequence: contract correction
-    #809, Security review #805, Platform storage #811, WGCF registry #810, OOS
-    integration #802, and dogfood #806 after the independent #803 and #804 controls.
-    Close this candidate only when dogfood proves that the initiative architecture
-    packet and executable conformance plan are used before source implementation,
-    and a fresh Temporal commissioning session passes after the runtime-semantic and
-    terminal-cleanup controls linked from ART #829 and #830 have landed. The follow-up
-    must also replace compatibility recovery with an enforced schema-v2 pre-merge
-    Review Packet gate for normal source-backed Landing Units.
+  owner_repo: null
+  due_on: null
+  note: null
