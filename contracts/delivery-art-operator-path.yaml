@@ -516,10 +516,15 @@ delivery_art_operator_path:
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
-      schema_version: 3
+      schema_version: 4
       compatibility_schema_versions:
         - 1
         - 2
+        - 3
+      new_work_requires_current_schema: true
+      historical_versions_are_read_only: true
+      bound_historical_session_may_continue_if_material_semantics_unchanged: true
+      current_pointer_cutover_requires_non_pristine_session_inventory: true
       producer_repo: operator-orchestration-service
       custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision

@@ -9,7 +9,7 @@ summary: >-
   emitted prose `allowed` and `prohibited` fields. Historical packets therefore
   fail current validation without an explicit version or supersession result.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-12-delivery-art-lifecycle-automation-regression.yaml
-status: triaged
+status: accepted
 source_type: review
 scope:
   related_repos:
@@ -45,7 +45,12 @@ follow_up:
   owner_repo: operator-orchestration-service
   due_on: '2026-10-03'
   note: >-
-    Design an explicit wire-version and historical-read policy before changing
-    validation. Do not silently grandfather historical architecture for new
-    mutations, and do not combine this separate contract correction with the
-    approved Landing Unit closeout implementation.
+    Land the approved architecture-packet v4 authority contract in Workspace
+    Governance, then adopt it in OOS and WGCF before closing this candidate.
+    Versions 1 through 3 remain immutable historical evidence; only v4 may be
+    selected for a new work start. An already-started session may continue
+    against its pinned historical packet while material ART semantics remain
+    unchanged. Inventory non-pristine sessions before moving any current
+    architecture pointer so a format-only supersession cannot strand active
+    work. The three owner repos remain separate Landing Units because they have
+    distinct review, validation, and rollback boundaries.

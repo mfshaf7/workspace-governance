@@ -250,7 +250,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
-    def test_architecture_v3_is_the_activated_normal_packet(self) -> None:
+    def test_architecture_v4_is_the_normal_authoring_packet(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"
         ]
@@ -259,10 +259,24 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         ]["architecture_packet"]
         readiness_rules = self.operator_path["readiness_model"]["rules"]
 
-        self.assertEqual(architecture_contract["schema_version"], 3)
+        self.assertEqual(architecture_contract["schema_version"], 4)
         self.assertEqual(
-            architecture_contract["compatibility_schema_versions"], [1, 2]
+            architecture_contract["compatibility_schema_versions"], [1, 2, 3]
         )
+        self.assertTrue(architecture_contract["new_work_requires_current_schema"])
+        self.assertTrue(architecture_contract["historical_versions_are_read_only"])
+        self.assertTrue(
+            architecture_contract[
+                "bound_historical_session_may_continue_if_material_semantics_unchanged"
+            ]
+        )
+        self.assertTrue(
+            architecture_contract[
+                "current_pointer_cutover_requires_non_pristine_session_inventory"
+            ]
+        )
+        # The v3 packet remains immutable activation evidence; it is not the
+        # current authoring version after the v4 correction.
         self.assertEqual(activation_packet["schema_version"], 3)
         self.assertEqual(
             activation_packet["artifact_id"],

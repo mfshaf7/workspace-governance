@@ -168,12 +168,19 @@ work items must belong to them, and the source landing graph must order the
 producer before the consumer. Descriptive producer and consumer names alone do
 not constitute an executable cross-repo acceptance contract.
 
-Workspace Governance accepts schema versions 1, 2, and 3. V3 is the normal OOS
-producer and WGCF custody shape. V1 and v2 remain bounded compatibility for
-historical packets and recovery. Contract correction `1121`, OOS adoption
-`1122`, WGCF custody and readiness `1123`, and Workspace Governance activation
-`1124` establish the active v3 path. Activation is bound to the exact durable
-v3 packet and custody receipt recorded in the machine contract.
+Workspace Governance accepts schema versions 1 through 4. V4 is the only
+authoring shape eligible for a new work start. It retains the v3 execution-plan
+topology and requires capability-id runtime boundaries. V1 through v3 remain
+immutable, read-only historical evidence; their original prose runtime
+boundaries remain valid and are never inferred into capability ids.
+
+An already-started session may continue against its pinned v1-v3 packet while
+fresh ART truth confirms that material architecture semantics are unchanged.
+Historical compatibility never permits a new start or a replacement write in
+an old version. Before a current architecture pointer moves to v4, the operator
+must inventory non-pristine sessions so a format-only supersession does not
+strand active work. The durable v3 packet recorded in contract activation
+remains historical proof of the earlier activation; it is not rewritten as v4.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated

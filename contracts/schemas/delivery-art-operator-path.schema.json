@@ -965,6 +965,10 @@
           "uniqueItems": true,
           "items": { "type": "integer", "minimum": 1 }
         },
+        "new_work_requires_current_schema": { "type": "boolean" },
+        "historical_versions_are_read_only": { "type": "boolean" },
+        "bound_historical_session_may_continue_if_material_semantics_unchanged": { "type": "boolean" },
+        "current_pointer_cutover_requires_non_pristine_session_inventory": { "type": "boolean" },
         "target_activation_ref": { "$ref": "#/$defs/artWorkPackageRef" }
       }
     },
@@ -977,12 +981,22 @@
           "allOf": [
             { "$ref": "#/$defs/artifactContract" },
             {
-              "required": ["compatibility_schema_versions"],
+              "required": [
+                "compatibility_schema_versions",
+                "new_work_requires_current_schema",
+                "historical_versions_are_read_only",
+                "bound_historical_session_may_continue_if_material_semantics_unchanged",
+                "current_pointer_cutover_requires_non_pristine_session_inventory"
+              ],
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
-                "schema_version": { "const": 3 },
+                "schema_version": { "const": 4 },
                 "target_schema_version": false,
-                "compatibility_schema_versions": { "const": [1, 2] },
+                "compatibility_schema_versions": { "const": [1, 2, 3] },
+                "new_work_requires_current_schema": { "const": true },
+                "historical_versions_are_read_only": { "const": true },
+                "bound_historical_session_may_continue_if_material_semantics_unchanged": { "const": true },
+                "current_pointer_cutover_requires_non_pristine_session_inventory": { "const": true },
                 "target_activation_ref": false,
                 "producer_repo": { "const": "operator-orchestration-service" },
                 "custody_repo": { "const": "workspace-governance-control-fabric" }
