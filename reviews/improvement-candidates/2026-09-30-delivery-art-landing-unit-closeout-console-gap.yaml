@@ -1,0 +1,84 @@
+schema_version: 1
+id: 2026-09-30-delivery-art-landing-unit-closeout-console-gap
+title: Complete entire Delivery Landing Units through the Console work-session close action
+recorded_on: '2026-09-30'
+owner_repo: operator-orchestration-service
+summary: >-
+  A Delivery work session can cover several ART work items, but its normal OOS
+  close adapter completes only the routed alias and may retire the shared
+  session before sibling items are complete. The Console exposes that same
+  single close command without showing the complete Landing Unit impact, so the
+  intended Console-only operating model cannot close a multi-item Landing Unit
+  truthfully.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-12-delivery-art-lifecycle-automation-regression.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - governance-operations-console
+    - workspace-governance
+  related_products:
+    - governance-operations-console
+  related_components: []
+  change_classes:
+    - source-behavior
+signals:
+  - id: landing-unit-closeout-alias-scope-gap
+    title: Normal work-session closeout completes only one alias from a multi-item Landing Unit
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+      - contract-drift
+    finding: >-
+      OOS stores one persistent work session under every covered work-item alias,
+      while the normal close adapter calls `completeDeliveryWorkItem` only for
+      the alias used to route the request. The controller can then retire the
+      shared session even though sibling work items covered by the finalized
+      Review Packet remain open. The engineering-only `landing-unit submit`
+      command already plans complete covered scope and eligible parent closeout,
+      proving that the two close paths have drifted.
+    source_refs:
+      - conversation:2026-09-30 Console-first multi-item closeout review and approved correction plan
+      - operator-orchestration-service/src/delivery-art/work-session-runtime.js
+      - operator-orchestration-service/src/delivery-art/work-session-controller.js
+      - operator-orchestration-service/src/art-cli.js
+      - operator-orchestration-service/test/delivery-art-work-session.test.js
+  - id: console-closeout-scope-visibility-gap
+    title: The Console does not show the complete Landing Unit affected by Close Work
+    trigger: closed-lesson-regression
+    failure_classes:
+      - workflow-doctrine-gap
+    finding: >-
+      The Console validates `covered_work_item_ids` in a Landing Unit decision
+      but does not retain and present the complete scope during the active
+      session or terminal close action. An operator therefore cannot review the
+      full ART impact of a close command that should eventually complete several
+      covered work items.
+    source_refs:
+      - governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-work-session-live-types.ts
+      - governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-work-session-modal.tsx
+      - governance-operations-console/docs/product/delivery-execution-work-sessions.md
+resolution:
+  after_action_ref: null
+  control_refs:
+    - type: workflow
+      path: operator-orchestration-service/src/delivery-art/landing-unit-completion.js
+      owner_repo: operator-orchestration-service
+      note: OOS PR 249 merged the shared whole-Landing-Unit completion engine at b464a36d6edb8b2481dd378fd9379997328deaa8.
+    - type: workflow
+      path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+      owner_repo: operator-orchestration-service
+      note: Normal work-session closeout now retains partial sessions and cleans up only after all covered items and eligible parents close.
+    - type: workflow
+      path: governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-work-session-modal.tsx
+      owner_repo: governance-operations-console
+      note: Console PR 43 merged complete Landing Unit scope and result visibility at 435458c49dd819b758f40e2e828d3807e407daee.
+  note: >-
+    Closed after the shared OOS application service, retryable partial-failure
+    behavior, API projection, Console scope review, and terminal result surface
+    landed through Agent Gary-authored, human-approved pull requests.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

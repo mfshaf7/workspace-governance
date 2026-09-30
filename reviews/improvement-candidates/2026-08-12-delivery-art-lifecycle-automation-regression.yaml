@@ -7,7 +7,7 @@ summary: Delivery ART closeout and controlled commissioning still discover cross
   protocol obligations serially at late runtime gates, causing repeated child defects,
   fresh authorization cycles, and manual recovery despite previously closed controls.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-08-art-proof-obligation-review-regression.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -203,23 +203,20 @@ resolution:
       disposable-worktree removal plus continue all reconstructed the same
       session, source head, state, and exact next action without manual path
       repair on the activation branch.
-  note: null
+  note: >-
+    Closed after reassessment on 2026-09-30. The broad historical candidate no
+    longer describes one coherent active failure class: the original
+    dependency-resolution parity defect is resolved, the proposed sibling
+    snapshot remedy was superseded by persistent Landing Unit work sessions,
+    runtime artifact retrievability is covered by focused Platform controls,
+    and controlled-commissioning obligations are owned by the dedicated
+    Temporal protocol candidate. The current Console-first multi-item closeout
+    defect is tracked by
+    `2026-09-30-delivery-art-landing-unit-closeout-console-gap`; the separately
+    discovered immutable-artifact compatibility signal is tracked by
+    `2026-09-30-delivery-art-historical-artifact-compatibility-gap`. No current
+    control obligation remains owned by this broad record.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-09-30'
-  note: Reassessed on 2026-09-06; the operator paused Epic 698 commissioning while the workspace returned to
-    the primary governed-project workflow. Reassess this candidate by the new review
-    date; do not treat the schedule change as control closure. Keep the landed
-    schema-v2 lifecycle and immutable authorization controls.
-    Before another workflow family is commissioned, design one bounded executable
-    pre-authorization conformance rehearsal that validates the complete source,
-    claims, authorization, permit, target-architecture artifact retrievability,
-    runtime, receipt, cleanup, and ART-closeout chain across owner repos. Close
-    Defects 826 and 827 through that same coherent model instead of adding another
-    isolated repair sequence. Keep the candidate open through OOS work item 963,
-    Security review 962, Workspace Governance activation 964, and restart plus
-    worktree reconstruction dogfood. Multi-Landing-Unit behavior is covered by
-    owner tests; run live dogfood only when a truthful multi-Landing-Unit ART
-    candidate exists rather than fabricating one for closure. Do not treat this
-    activation as closure of the separate Temporal conformance, Defect 826, or
-    Defect 827 obligations.
+  owner_repo: null
+  due_on: null
+  note: null

@@ -1,0 +1,58 @@
+schema_version: 1
+id: 2026-09-30-agent-source-operator-preflight-regression
+title: Make source identity and platform endpoint preflight mechanical
+recorded_on: '2026-09-30'
+owner_repo: workspace-governance
+summary: Normal source landing still depends on the agent remembering the correct
+  GitHub identity and cataloged platform endpoint, allowing ambient human PR creation
+  and improvised Vault addressing despite explicit contracts.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - diagnostic-ordering-miss
+  - workflow-doctrine-gap
+  finding: During the Landing Unit closeout correction, source commits were authored
+    by Agent Gary but both PRs were opened through the ambient human GitHub session;
+    recovery then improvised a Vault port-forward on 8200 instead of reading the cataloged
+    8220 operator address first.
+  source_refs:
+  - conversation:2026-09-30 repeated Agent Gary identity and Vault address misses
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/owner-source-cli.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 250 merged the fail-closed owner-maintenance publisher at 1e23a771165a21bc7de83d6a1a724f9dd6be28f0.
+  - type: workflow
+    path: platform-engineering/Makefile
+    owner_repo: platform-engineering
+    note: Platform PR 252 made the cataloged 127.0.0.1:8220 Vault endpoint the identity issuer default at 917cf8918e133e90ff33053e7e4881ba5e268ec9.
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: The workspace skill routes ART and owner-maintenance source work without ambient-human publication or manual credential lookup.
+  note: >-
+    Closed after the replacement workflow prepared and published its own exact
+    Agent Gary commits and pull requests. Human credentials remained limited to
+    delegated review and merge, and the bounded publisher resolved the hashed
+    credential projection internally.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
