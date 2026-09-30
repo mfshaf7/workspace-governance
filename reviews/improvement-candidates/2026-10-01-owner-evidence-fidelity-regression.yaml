@@ -8,7 +8,7 @@ summary: 'Delivery #1206 stopped after clean source implementation because Works
   but did not bind any command to filesystem conformance required by the approved
   Architecture Packet.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-09-27-cross-repo-acceptance-and-evidence-profile-completeness.yaml
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -35,11 +35,18 @@ signals:
   - openproject://work_packages/1206
   - conversation:2026-10-01-machine-visible-workflow-drift
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-01-owner-evidence-fidelity-closure.yaml
+  control_refs:
+  - type: workflow
+    path: workspace-governance/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-governance
+    note: Workspace Governance PR 216 binds the existing contract validation command to filesystem conformance while retaining the real-git test binding.
+  - type: test
+    path: workspace-governance/tests/test_delivery_art_evidence_profile.py
+    owner_repo: workspace-governance
+    note: The regression test requires the admitted profile to cover both filesystem and real-git architecture fidelities.
+  note: Closed after PR 216 landed the profile repair and a recovery receipt preserved the incomplete pre-merge session for Delivery 1206 before normal work restarted from the repaired base.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-01'
-  note: 'Bind an existing filesystem validation command to matching-fidelity and prove
-    both filesystem and real-git architecture cases before resuming Delivery #1206.'
+  owner_repo: null
+  due_on: null
+  note: null

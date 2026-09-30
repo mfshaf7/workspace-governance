@@ -1,0 +1,57 @@
+schema_version: 1
+id: 2026-10-01-owner-evidence-fidelity-closure
+title: Owner evidence now covers every supported architecture fidelity
+recorded_on: '2026-10-01'
+owner_repo: workspace-governance
+summary: >-
+  Delivery 1206 exposed that a syntactically valid owner evidence profile could
+  still be unable to prove the fidelity classes required by an approved
+  Architecture Packet. The admitted Workspace Governance profile now binds
+  deterministic commands to both filesystem and real-git conformance, with a
+  regression test that prevents either class from disappearing.
+scope:
+  related_repos:
+  - workspace-governance
+  - operator-orchestration-service
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/workspace-governance/pull/216
+- https://github.com/mfshaf7/workspace-governance/pull/215
+- openproject://work_packages/1206
+- oos://delivery-art/work-session-recovery/work-session:delivery-1203:delivery-1203-intake-inventory-authority
+lessons:
+- id: owner-profile-fidelity-coverage-must-be-executable
+  title: An admitted owner profile must cover the architecture fidelity set it may be asked to prove
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    Workspace Governance had real-git matching evidence and filesystem
+    validations, but the filesystem commands were marked as unbound. OOS
+    correctly rejected the profile when Delivery 1206 required both fidelity
+    classes, showing that profile presence and schema validity were insufficient
+    activation checks.
+  impact: >-
+    A clean implementation branch and pull request could not enter the normal
+    Review Packet path. The source merge required explicit recovery, and the
+    active work session had to restart from the repaired trusted base.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  control_refs:
+  - type: workflow
+    path: workspace-governance/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-governance
+    note: Binds contract validation to filesystem conformance and retains the test suite as the real-git conformance command.
+  - type: test
+    path: workspace-governance/tests/test_delivery_art_evidence_profile.py
+    owner_repo: workspace-governance
+    note: Fails when either supported Architecture Packet fidelity lacks a matching command.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
