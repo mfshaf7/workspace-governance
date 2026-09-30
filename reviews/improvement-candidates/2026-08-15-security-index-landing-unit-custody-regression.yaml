@@ -9,7 +9,7 @@ summary: >-
   second Landing Unit reused ART child #851 until WGCF rejected duplicate
   work-start custody with a 409 conflict.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-29-security-change-record-index-sequencing-regression.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -79,24 +79,35 @@ signals:
       - github://security-architecture/pulls/135
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+    - type: workflow
+      path: operator-orchestration-service/src/delivery-art/contracts.js
+      owner_repo: operator-orchestration-service
+      note: >-
+        Architecture v3 requires unique Landing Units, assigns every work item
+        exactly once, validates owner alignment, and enforces an acyclic source
+        landing graph with explicit Security-owned human gates.
+    - type: validator
+      path: workspace-governance/scripts/validate_structured_record.py
+      owner_repo: workspace-governance
+      note: >-
+        Any owner change record declaring security evidence now proves the
+        generated Security change-record index is current before normal
+        continuation.
+    - type: contract
+      path: workspace-governance/contracts/delivery-art-operator-path.yaml
+      owner_repo: workspace-governance
+      note: >-
+        Source-landing topology and validation or Security-obligation changes
+        are material architecture changes that require a fresh decision rather
+        than reusing prior custody.
   note: >-
-    The operator approved extending the existing sequencing and lifecycle
-    controls. The closing control remains open and must not be treated as
-    implemented by this candidate-record Landing Unit.
+    Closed after architecture v3 made the original accidental child reuse
+    invalid, made generated Security work an explicit ordered Landing Unit,
+    and structured-record preflight made stale generated Security indexes a
+    fail-closed condition. The broad custody regression no longer owns an
+    unresolved control.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-30'
-  note: >-
-    Reassessed on 2026-09-06 after Delivery ART work item 964 validation;
-    the sequencing and distinct-child correction remains open and no closure
-    is claimed.
-    Recurred during Epic 886 closeout on 2026-08-29: the final Security index
-    refresh landed in PR #135 only after guided Epic closeout. The closing
-    control must also make remote-aligned generated dependency readiness a
-    fail-closed initiative-close precondition, not only a work-start rule.
-    Propose one pre-work check that derives generated dependency direction from
-    source authority and requires a distinct ART child before a second
-    owner-repo Landing Unit can create work-start custody. OOS should return an
-    actionable distinct-art-child-required projection before any registry
-    request; workspace governance should own the sequencing doctrine.
+  owner_repo: null
+  due_on: null
+  note: null
