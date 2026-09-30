@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
-  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3 execution-plan satisfiability, Landing Unit ownership, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
+  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3 execution-plan satisfiability, Landing Unit ownership, cross-repo handoff binding, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -268,8 +268,14 @@
             "additionalProperties": false,
             "required": ["producer", "consumer", "artifact", "acceptance"],
             "properties": {
+              "handoff_id": { "$ref": "#/$defs/identifier" },
               "producer": { "$ref": "#/$defs/repoName" },
               "consumer": { "$ref": "#/$defs/repoName" },
+              "producer_landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+              "consumer_landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+              "producer_work_item_id": { "$ref": "#/$defs/workItemId" },
+              "consumer_work_item_id": { "$ref": "#/$defs/workItemId" },
+              "integration_point": { "$ref": "#/$defs/nonEmptyString" },
               "artifact": { "$ref": "#/$defs/nonEmptyString" },
               "acceptance": { "$ref": "#/$defs/nonEmptyString" }
             }
@@ -565,6 +571,18 @@
               "required_human_gates": {
                 "items": {
                   "required": ["evidence_prerequisite_work_item_ids"]
+                }
+              },
+              "evidence_receipt_handoffs": {
+                "items": {
+                  "required": [
+                    "handoff_id",
+                    "producer_landing_unit_id",
+                    "consumer_landing_unit_id",
+                    "producer_work_item_id",
+                    "consumer_work_item_id",
+                    "integration_point"
+                  ]
                 }
               }
             }
