@@ -9,12 +9,13 @@ summary: >-
   emitted prose `allowed` and `prohibited` fields. Historical packets therefore
   fail current validation without an explicit version or supersession result.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-12-delivery-art-lifecycle-automation-regression.yaml
-status: accepted
+status: closed
 source_type: review
 scope:
   related_repos:
     - operator-orchestration-service
     - workspace-governance
+    - workspace-governance-control-fabric
   related_products: []
   related_components: []
   change_classes:
@@ -39,18 +40,58 @@ signals:
       - operator-orchestration-service/src/delivery-art/work-session-controller.js
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-03'
+  control_refs:
+    - type: contract
+      path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+      owner_repo: workspace-governance
+      note: >-
+        Workspace Governance PR 212 introduces schema version 4 as the only
+        current authoring format while classifying versions 1 through 3 as
+        immutable historical evidence.
+    - type: validator
+      path: workspace-governance/scripts/validate_contracts.py
+      owner_repo: workspace-governance
+      note: >-
+        Workspace Governance PR 212 proves the current-versus-historical
+        contract posture and rejects new authoring against historical schemas.
+    - type: workflow
+      path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+      owner_repo: operator-orchestration-service
+      note: >-
+        OOS PR 252 blocks current-pointer replacement while a non-pristine
+        active session still depends on the historical packet and requires an
+        exact same-subject version-4 supersession before new work starts.
+    - type: validator
+      path: operator-orchestration-service/src/delivery-art/contracts.js
+      owner_repo: operator-orchestration-service
+      note: >-
+        OOS PR 252 keeps versions 1 through 3 readable without rewriting their
+        semantics while requiring version 4 for newly persisted architecture
+        packets and new work sessions.
+    - type: validator
+      path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/artifact_registry.py
+      owner_repo: workspace-governance-control-fabric
+      note: >-
+        WGCF PR 90 separates stored historical-artifact readback from new
+        registration so custody remains readable while all new architecture
+        registration requires version 4.
+    - type: validator
+      path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_readiness.py
+      owner_repo: workspace-governance-control-fabric
+      note: >-
+        WGCF PR 90 permits an already-bound historical dependency to continue
+        through later readiness stages while requiring version 4 for fresh
+        architecture readiness.
   note: >-
-    Land the approved architecture-packet v4 authority contract in Workspace
-    Governance, then adopt it in OOS and WGCF before closing this candidate.
-    Versions 1 through 3 remain immutable historical evidence; only v4 may be
-    selected for a new work start. An already-started session may continue
-    against its pinned historical packet while material ART semantics remain
-    unchanged. Inventory non-pristine sessions before moving any current
-    architecture pointer so a format-only supersession cannot strand active
-    work. The three owner repos remain separate Landing Units because they have
-    distinct review, validation, and rollback boundaries.
+    Closed through Workspace Governance PR 212 at merge
+    120f520baa3eba9e1b36c1caef6300dcef8b6a77, OOS PR 252 at merge
+    f46b61f64a33b08dfe83174095c61550eb5b9cad, and WGCF PR 90 at merge
+    dd776ec90f569eac47ddb219b1ba7b913770c95a. The three controls now agree:
+    version 4 is the only current authoring format, historical versions remain
+    immutable and readable, existing exact historical bindings may continue,
+    and current-pointer cutover requires an exact version-4 supersession that
+    cannot strand active work.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
