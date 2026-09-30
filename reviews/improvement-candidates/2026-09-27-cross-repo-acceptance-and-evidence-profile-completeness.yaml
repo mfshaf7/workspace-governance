@@ -9,7 +9,7 @@ summary: >-
   could be active without the test command required by the normal Review Packet path,
   and completion stopped at a Feature without traversing its PI Objective and Epic.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -17,6 +17,7 @@ scope:
   - operator-orchestration-service
   - security-architecture
   - workspace-governance
+  - workspace-governance-control-fabric
   related_products:
   - governance-operations-console
   related_components:
@@ -72,15 +73,31 @@ signals:
   - 'conversation:2026-09-27-operator-identified-unclosed-parent-items'
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: The delivery work was repaired; Feature 930, PI Objective 1178, and Epic 898
-    are closed. The preventive controls remain intentionally separate from the
-    completed initiative.
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+    owner_repo: workspace-governance
+    note: Workspace Governance PR 210 binds every schema-v3 handoff to exact producer and consumer Landing Units, work items, integration point, and ordered source path.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-runtime.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 251 enforces workflow-required evidence kinds and preserves ancestor plus initiative disposition after Landing Unit closeout.
+  - type: validator
+    path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_contracts.py
+    owner_repo: workspace-governance-control-fabric
+    note: WGCF PR 89 rejects invalid schema-v3 handoff ownership, work-item binding, and source order at durable custody.
+  - type: contract
+    path: governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-work-session-live-contract.ts
+    owner_repo: governance-operations-console
+    note: Console PR 44 validates and retains OOS ancestor and initiative closeout truth without changing the visual surface.
+  - type: change-record
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: Security PR 165 reconciles the owner-repo delivery/runtime change record into the generated review index.
+  note: >-
+    Closed after contract, broker runtime, custody validation, Console client,
+    and security evidence-index controls all landed with clean owner-repo audits.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-09-30'
-  note: Define a cross-repo acceptance binding that names producer, consumer,
-    integration point, and end-to-end proof; extend evidence-profile validation so an
-    active source-backed profile must provide both test and validation command classes;
-    require completion to evaluate and either close or explicitly retain every ancestor
-    through the initiative root before reporting the delivery scope complete.
+  owner_repo: null
+  due_on: null
+  note: null

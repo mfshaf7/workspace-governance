@@ -24,11 +24,16 @@ doctrine depends on another repo being merged first.
    - shared audits that read remote `main`
 3. Merge dependency repos first when a later repo's CI or validation reads
    those repos from remote `main`.
-4. When an owner-repo change record declares `security_evidence`, treat the
-   generated `security-architecture/registers/security-change-record-index.yaml`
-   update as a required dependency landing unit. Run the structured-record
-   preflight for the change record and merge the security-architecture update
-   before claiming workspace audit or closure is clean.
+4. When an owner-repo change record declares `security_evidence`, run its
+   structured-record preflight before publication. The generated
+   `security-architecture/registers/security-change-record-index.yaml` reads
+   owner-repo `main`, so use this executable order:
+   - merge the validated owner-repo record and source change
+   - regenerate the Security index from the updated owner `main`
+   - merge the Security index dependency Landing Unit
+   - rerun the structured-record preflight and only then claim final closure
+   Do not require the generated index to contain an owner record that has not
+   reached the source branch the generator reads.
 5. If a dependent PR already failed for sequencing reasons, retrigger it only
    after the dependency repos are actually merged.
 6. State the merge order explicitly in the user-facing progress updates and the
@@ -43,3 +48,5 @@ doctrine depends on another repo being merged first.
   the work is in flight.
 - Do not treat a security-evidenced owner-repo record as complete while the
   security-architecture generated change-record index is stale or unmerged.
+- Do not encode circular merge order between an owner record and a generated
+  index that is derived only from the owner repo's merged `main`.

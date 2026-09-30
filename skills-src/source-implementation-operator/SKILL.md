@@ -69,18 +69,73 @@ Use this skill before the first source mutation that is intended to land.
      --tracking-ref <owner-record-or-candidate-ref>
    ```
 
-4. After committing and local CI-equivalent validation, run the same command
-   with `publish`. It resolves the protected hashed credential slot, verifies
-   exact provider scope and commit identity, pushes without force, opens or
-   reuses the Agent Gary PR, and requests human review.
-5. Verify the PR author is `app/mfshaf7-agent-gary` before using the delegated
+4. Run working-tree validators before committing. Commit under the prepared
+   Agent Gary identity, then run every base-aware validator that compares
+   `<base-ref>...HEAD`. A `HEAD`-based validator run before the commit does not
+   prove the pending working-tree change.
+5. After the committed local CI-equivalent validation passes, run the same
+   command with `publish`. It resolves the protected hashed credential slot,
+   verifies exact provider scope and commit identity, pushes without force,
+   opens or reuses the Agent Gary PR, and requests human review.
+6. Verify the PR author is `app/mfshaf7-agent-gary` before using the delegated
    human identity for approval and merge.
-6. Revoke the Landing Unit credential and complete exact owner-repo branch and
-   worktree cleanup after merge.
+7. Use the exact review, merge, credential-revocation, and cleanup commands in
+   the next section after required checks pass.
 
 Do not manually locate credential files, run `git push`, or invoke `gh pr
 create` as a fallback. If the bounded command fails, diagnose that workflow
 instead of bypassing it.
+
+## Review, Merge, And Cleanup
+
+Use the delegated human identity only after proving the PR author, exact head,
+required checks, and review state:
+
+```bash
+gh pr review <pr-number> --repo mfshaf7/<owner-repo> \
+  --approve --body "<validation summary>"
+gh pr checks <pr-number> --repo mfshaf7/<owner-repo> --watch --interval 5
+```
+
+For the current single-human-reviewer repositories whose rulesets allow the
+accountable reviewer to bypass after approval, use the known merge command
+directly. Do not first try a normal merge and do not fall back to unsupported
+auto-merge:
+
+```bash
+gh pr merge <pr-number> --repo mfshaf7/<owner-repo> \
+  --squash --delete-branch --admin
+```
+
+After proving the PR is merged, revoke the exact Landing Unit credential:
+
+```bash
+make -C /home/mfshaf7/projects/platform-engineering agent-source-identity \
+  ACTION=revoke \
+  ARGS="--landing-unit-id <landing-unit-id> \
+    --repository mfshaf7/<owner-repo> \
+    --receipt <operator-private-revocation-receipt-path> \
+    --workspace-repo-inventory /home/mfshaf7/projects/workspace-governance/contracts/repos.yaml"
+```
+
+Then return the owner repo to current `main`, retire the local branch, prune
+deleted remote refs, and run the exact strict audit:
+
+```bash
+git -C <owner-repo-root> switch main
+git -C <owner-repo-root> pull --ff-only origin main
+git -C <owner-repo-root> branch -d <branch>
+git -C <owner-repo-root> fetch --prune origin
+python3 /home/mfshaf7/projects/workspace-governance/scripts/audit_branch_lifecycle.py \
+  --workspace-root /home/mfshaf7/projects \
+  --repo-root <owner-repo-root> \
+  --include-remote \
+  --check-clean
+```
+
+Do not use command-help discovery for these normal-path steps. If one of these
+exact commands stops matching the implementation, repair this skill in the same
+work rather than relying on session memory.
 
 ## Completion
 

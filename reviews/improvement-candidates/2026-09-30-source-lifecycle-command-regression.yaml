@@ -1,0 +1,79 @@
+schema_version: 1
+id: 2026-09-30-source-lifecycle-command-regression
+title: Make post-publication source lifecycle commands exact and ordered
+recorded_on: '2026-09-30'
+owner_repo: workspace-governance
+summary: >-
+  The source implementation skill still required command discovery for merge,
+  credential revocation, and strict cleanup, and it did not state that
+  base-aware HEAD validation must run after commit. The cross-repo sequencer
+  also required a generated Security index before the owner record used to
+  generate that index had merged.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-agent-source-operator-preflight-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: exact-post-publication-command-gap
+  title: Normal source closeout still depended on command discovery
+  trigger: closed-lesson-regression
+  failure_classes:
+  - workflow-doctrine-gap
+  - diagnostic-ordering-miss
+  finding: >-
+    During the delivery-completion maintenance Landing Units, the agent tried a
+    normal merge and unsupported auto-merge before the known admin merge, used
+    command help to recover the credential-revocation syntax, and initially
+    passed the wrong strict-audit repository argument.
+  source_refs:
+  - conversation:2026-09-30 operator identified repeated merge, revoke, and audit command misses
+- id: head-validation-order-gap
+  title: Base-aware validation ran before pending source reached HEAD
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The OOS base-aware change-record validator compares origin/main to HEAD. It
+    was run while the relevant files were still uncommitted, so local proof
+    reported no matched changes while CI correctly required the change record.
+  source_refs:
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/251
+- id: generated-index-order-contradiction
+  title: Security index guidance required an impossible dependency order
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The Security index generator reads owner-repo main, but the sequencer said
+    to merge that generated index before the owner change record. Security PR
+    165 could pass only after OOS PR 251 merged and the job was rerun.
+  source_refs:
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/251
+  - https://github.com/mfshaf7/security-architecture/pull/165
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Provides exact approval, admin merge, credential revocation, branch retirement, and strict audit commands and requires HEAD-based validation after commit.
+  - type: skill
+    path: workspace-governance/skills-src/cross-repo-sequencer/SKILL.md
+    owner_repo: workspace-governance
+    note: Replaces the circular Security index dependency with the executable owner-main then generated-index sequence.
+  note: Closed atomically with the corrected skill source and refreshed live installed skills.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
