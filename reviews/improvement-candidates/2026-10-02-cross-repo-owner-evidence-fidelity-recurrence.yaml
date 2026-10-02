@@ -11,7 +11,7 @@ summary: >-
   conformance cases required by the accepted Architecture Packet. The normal
   OOS path found each mismatch only after source implementation and commit.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -89,12 +89,37 @@ resolution:
     path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
     owner_repo: platform-engineering
     note: Platform Engineering PR 255 is the bounded owner-profile repair that unblocks the current initiative; it is containment, not the cross-repo closing control.
-  note: null
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-03'
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 260 passes the exact merge-ready Architecture Packet fidelities and required evidence kinds into configured-path preflight.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 260 reads and validates the evidence profile from the exact fetched base before identity preflight or source-resource creation.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves complete profiles pass and incomplete fidelity coverage stops before Agent source identity preflight.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves the typed incomplete-profile blocker creates no work-session source resources.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-02-evidence-profile-preflight.md
+    owner_repo: operator-orchestration-service
+    note: Records the corrective workflow boundary, validation, residual risk, and rollback.
+  - type: doc
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: Security PR 171 indexes the merged OOS security-evidenced change record.
   note: >-
-    Extend the existing evidence-profile controls so work preflight checks the exact
-    base-owned profile against every required architecture fidelity before creating a
-    session, branch, worktree, or credential, and audit every admitted source owner
-    for the same coverage. Do not close from the per-repository repair alone.
+    Closed after the affected owner profiles were repaired and OOS PR 260 moved
+    the existing completeness check into read-only configured-path preflight.
+    Every source-backed Landing Unit now validates its exact base-owned profile
+    against its own merge-ready Architecture Packet fidelities before identity
+    preflight or source-resource creation; no new registry or workflow was added.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
