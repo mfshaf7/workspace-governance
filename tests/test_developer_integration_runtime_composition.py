@@ -172,6 +172,105 @@ class RuntimeCompositionContractTests(unittest.TestCase):
             for projection in dependency["endpoint_projections"]
         )
         self.assertEqual(temporal_projection["address_format"], "host-port")
+        wgcf_dependency = next(
+            dependency
+            for dependency in composition["dependencies"]
+            if dependency["provider_profile_id"] == "governance-control-fabric"
+        )
+        self.assertEqual(
+            {
+                projection["environment_variable"]
+                for projection in wgcf_dependency["endpoint_projections"]
+            },
+            {
+                "WGCF_REPOSITORY_READINESS_BASE_URL",
+                "WGCF_WORKSPACE_INTAKE_BASE_URL",
+                "WGCF_WORKSPACE_INVENTORY_BASE_URL",
+            },
+        )
+        self.assertEqual(
+            {
+                (projection["profile_id"], projection["environment_variable"])
+                for projection in composition["credential_bindings"]
+                ["catalog-wgcf-caller"]["projections"]
+            },
+            {
+                (
+                    "accepted-idea-delivery",
+                    "WGCF_REPOSITORY_READINESS_CALLER_SECRET",
+                ),
+                (
+                    "accepted-idea-delivery",
+                    "WGCF_WORKSPACE_INTAKE_CALLER_SECRET",
+                ),
+                (
+                    "accepted-idea-delivery",
+                    "WGCF_WORKSPACE_INVENTORY_CALLER_SECRET",
+                ),
+                (
+                    "governance-control-fabric",
+                    "WGCF_ARTIFACT_REGISTRY_OOS_CALLER_SECRET",
+                ),
+            },
+        )
+        expected_workspace_operation_bindings = {
+            "workspace-intake-runtime-enabled": (
+                "accepted-idea-delivery",
+                "OOS_WORKSPACE_INTAKE_ENABLED",
+                "true",
+            ),
+            "workspace-inventory-runtime-enabled": (
+                "accepted-idea-delivery",
+                "OOS_WORKSPACE_INVENTORY_ENABLED",
+                "true",
+            ),
+            "workspace-intake-wgcf-caller": (
+                "accepted-idea-delivery",
+                "WGCF_WORKSPACE_INTAKE_CALLER_ID",
+                "operator-orchestration-service",
+            ),
+            "workspace-inventory-wgcf-caller": (
+                "accepted-idea-delivery",
+                "WGCF_WORKSPACE_INVENTORY_CALLER_ID",
+                "operator-orchestration-service",
+            ),
+            "workspace-intake-readiness-enabled": (
+                "governance-control-fabric",
+                "WGCF_WORKSPACE_INTAKE_READINESS_ENABLED",
+                "true",
+            ),
+            "workspace-inventory-readiness-enabled": (
+                "governance-control-fabric",
+                "WGCF_WORKSPACE_INVENTORY_READINESS_ENABLED",
+                "true",
+            ),
+            "workspace-inventory-lifecycle-readiness-enabled": (
+                "governance-control-fabric",
+                "WGCF_WORKSPACE_INVENTORY_LIFECYCLE_READINESS_ENABLED",
+                "true",
+            ),
+        }
+        self.assertEqual(
+            {
+                binding_id: (
+                    composition["profile_bindings"][binding_id]["profile_id"],
+                    composition["profile_bindings"][binding_id][
+                        "environment_variable"
+                    ],
+                    composition["profile_bindings"][binding_id]["source"]["value"],
+                )
+                for binding_id in expected_workspace_operation_bindings
+            },
+            expected_workspace_operation_bindings,
+        )
+        accepted_profile = registry["profiles"]["accepted-idea-delivery"]
+        self.assertIn(
+            "workspace-governance-control-fabric", accepted_profile["source_repos"]
+        )
+        self.assertIn(
+            "composed Workspace Intake and Inventory endpoint, caller, credential, exact-WGCF-revision, source-authority, and runtime-state readiness",
+            accepted_profile["stage_handoff"]["required_checks"],
+        )
         self.assertEqual(
             composition["profile_bindings"]["refinement-temporal-namespace"],
             {

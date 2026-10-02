@@ -132,7 +132,6 @@
         "states",
         "next_action",
         "human_gates",
-        "planned_review_transition",
         "artifact_discovery",
         "freshness",
         "compatibility",
@@ -271,7 +270,6 @@
             "art-closeout"
           ]
         },
-        "planned_review_transition": { "$ref": "#/$defs/plannedReviewTransition" },
         "artifact_discovery": {
           "type": "object",
           "additionalProperties": false,
@@ -375,96 +373,6 @@
           }
         },
         "resource_retirement": { "$ref": "#/$defs/resourceRetirement" }
-      }
-    },
-    "plannedReviewTransition": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "contract_version",
-        "state",
-        "owner_repo",
-        "activation_sequence",
-        "command",
-        "state_sequence",
-        "reviewer_authority",
-        "merger_authority",
-        "agent_source_review",
-        "agent_source_merge",
-        "exact_head_bindings",
-        "accepted_review_state",
-        "stale_head_result",
-        "merge_preconditions",
-        "review_receipt",
-        "direct_provider_command_posture"
-      ],
-      "properties": {
-        "contract_version": { "const": 1 },
-        "state": { "const": "contract-ready-pending-owner-implementation" },
-        "owner_repo": { "const": "operator-orchestration-service" },
-        "activation_sequence": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "contract_work_item_ref",
-            "implementation_work_item_ref",
-            "security_work_item_ref",
-            "activation_work_item_ref"
-          ],
-          "properties": {
-            "contract_work_item_ref": { "const": "openproject://work_packages/1224" },
-            "implementation_work_item_ref": { "const": "openproject://work_packages/1225" },
-            "security_work_item_ref": { "const": "openproject://work_packages/1226" },
-            "activation_work_item_ref": { "const": "openproject://work_packages/1227" }
-          }
-        },
-        "command": { "const": "npm run art -- work review <work-item-id>" },
-        "state_sequence": {
-          "const": [
-            "source-review-approval-required",
-            "source-merge-approval-required"
-          ]
-        },
-        "reviewer_authority": { "const": "active-human-identity-only" },
-        "merger_authority": { "const": "active-human-identity-only" },
-        "agent_source_review": { "const": "denied" },
-        "agent_source_merge": { "const": "denied" },
-        "exact_head_bindings": {
-          "const": [
-            "owner_repo",
-            "repository_id",
-            "pull_request_url",
-            "base_ref",
-            "head_commit",
-            "human_reviewer_id",
-            "review_state",
-            "reviewed_at"
-          ]
-        },
-        "accepted_review_state": { "const": "approved" },
-        "stale_head_result": {
-          "const": "invalidate-review-and-return-to-source-review-approval-required"
-        },
-        "merge_preconditions": {
-          "const": [
-            "current-head-equals-reviewed-head",
-            "reviewer-equals-recorded-human-reviewer",
-            "review-state-is-approved",
-            "required-checks-pass",
-            "repository-pull-request-and-base-match-session"
-          ]
-        },
-        "review_receipt": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["exact_head_bound", "secret_values", "canonical_source"],
-          "properties": {
-            "exact_head_bound": { "const": true },
-            "secret_values": { "const": "denied" },
-            "canonical_source": { "const": "github-pull-request-review" }
-          }
-        },
-        "direct_provider_command_posture": { "const": "recovery-only" }
       }
     },
     "resourceRetirement": {

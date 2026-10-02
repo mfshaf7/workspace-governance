@@ -100,6 +100,16 @@ runtime_compositions:
             scheme: http
             service_name: workspace-governance-control-fabric-api
             service_port: 8080
+          - environment_variable: WGCF_WORKSPACE_INTAKE_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: workspace-governance-control-fabric-api
+            service_port: 8080
+          - environment_variable: WGCF_WORKSPACE_INVENTORY_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: workspace-governance-control-fabric-api
+            service_port: 8080
       - consumer_profile_id: accepted-idea-delivery
         provider_profile_id: temporal
         endpoint_projections:
@@ -137,12 +147,16 @@ runtime_compositions:
             environment_variable: CGG_REFINEMENT_CALLER_SHARED_SECRET
       catalog-wgcf-caller:
         owner_repo: platform-engineering
-        purpose: Authenticate OOS to repository readiness without storing the shared credential in Git.
+        purpose: Authenticate OOS to repository, Workspace Intake, and Workspace Inventory readiness without storing the shared credential in Git.
         value_source: runtime-generated
         retention: composition-lifetime
         projections:
           - profile_id: accepted-idea-delivery
             environment_variable: WGCF_REPOSITORY_READINESS_CALLER_SECRET
+          - profile_id: accepted-idea-delivery
+            environment_variable: WGCF_WORKSPACE_INTAKE_CALLER_SECRET
+          - profile_id: accepted-idea-delivery
+            environment_variable: WGCF_WORKSPACE_INVENTORY_CALLER_SECRET
           - profile_id: governance-control-fabric
             environment_variable: WGCF_ARTIFACT_REGISTRY_OOS_CALLER_SECRET
       catalog-control-caller:
@@ -188,6 +202,62 @@ runtime_compositions:
         purpose: Authorize durable Refinement apply only after the composition and exact source heads pass Security review.
         profile_id: accepted-idea-delivery
         environment_variable: OOS_REFINEMENT_EXECUTION_AUTHORIZED
+        source:
+          kind: literal
+          value: "true"
+      workspace-intake-runtime-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the Workspace Intake runtime only inside the reviewed composition.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_WORKSPACE_INTAKE_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      workspace-inventory-runtime-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the Workspace Inventory runtime only inside the reviewed composition.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_WORKSPACE_INVENTORY_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      workspace-intake-wgcf-caller:
+        owner_repo: platform-engineering
+        purpose: Bind Workspace Intake readiness to the existing OOS caller identity.
+        profile_id: accepted-idea-delivery
+        environment_variable: WGCF_WORKSPACE_INTAKE_CALLER_ID
+        source:
+          kind: literal
+          value: operator-orchestration-service
+      workspace-inventory-wgcf-caller:
+        owner_repo: platform-engineering
+        purpose: Bind Workspace Inventory readiness to the existing OOS caller identity.
+        profile_id: accepted-idea-delivery
+        environment_variable: WGCF_WORKSPACE_INVENTORY_CALLER_ID
+        source:
+          kind: literal
+          value: operator-orchestration-service
+      workspace-intake-readiness-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable WGCF Workspace Intake readiness only inside the reviewed composition.
+        profile_id: governance-control-fabric
+        environment_variable: WGCF_WORKSPACE_INTAKE_READINESS_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      workspace-inventory-readiness-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable WGCF Workspace Inventory readiness only inside the reviewed composition.
+        profile_id: governance-control-fabric
+        environment_variable: WGCF_WORKSPACE_INVENTORY_READINESS_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      workspace-inventory-lifecycle-readiness-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable WGCF Workspace Inventory lifecycle readiness only inside the reviewed composition.
+        profile_id: governance-control-fabric
+        environment_variable: WGCF_WORKSPACE_INVENTORY_LIFECYCLE_READINESS_ENABLED
         source:
           kind: literal
           value: "true"
@@ -270,6 +340,7 @@ profiles:
     source_repos:
       - operator-orchestration-service
       - platform-engineering
+      - workspace-governance-control-fabric
     stage_handoff:
       owner_repo: platform-engineering
       governed_surface: openproject-stage-delivery-art-workbench
@@ -277,6 +348,8 @@ profiles:
         - broker readiness
         - composed Work Design dependency and caller binding readiness
         - composed Refinement and Catalog dependency, caller, credential, and profile binding readiness
+        - composed Workspace Intake and Inventory endpoint, caller, credential, exact-WGCF-revision, source-authority, and runtime-state readiness
+        - dedicated Workspace Governance identity projection and revocation readiness
         - dedicated Refinement worker readiness and composition-owned teardown
         - bounded Catalog control authorization and readback
         - durable orchestration definition catalog and zero-replica worker
