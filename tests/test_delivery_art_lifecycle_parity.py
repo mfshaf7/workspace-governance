@@ -250,6 +250,42 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
+    def test_planned_review_transition_is_exact_head_and_not_yet_active(self) -> None:
+        transition = self.work_session_contract["planned_review_transition"]
+
+        self.assertEqual(
+            transition["state"], "contract-ready-pending-owner-implementation"
+        )
+        self.assertEqual(
+            transition["command"], "npm run art -- work review <work-item-id>"
+        )
+        self.assertNotIn("review", self.work_session_contract["commands"])
+        self.assertEqual(
+            transition["state_sequence"],
+            [
+                "source-review-approval-required",
+                "source-merge-approval-required",
+            ],
+        )
+        self.assertTrue(transition["review_receipt"]["exact_head_bound"])
+        self.assertEqual(transition["agent_source_review"], "denied")
+        self.assertEqual(transition["agent_source_merge"], "denied")
+
+    def test_planned_review_transition_drift_fails(self) -> None:
+        work_session = copy.deepcopy(self.work_session_contract)
+        work_session["planned_review_transition"]["stale_head_result"] = (
+            "retain-review"
+        )
+
+        errors = self.validator.delivery_art_work_session_contract_errors(
+            work_session
+        )
+
+        self.assertIn(
+            "planned source-review transition differs from the approved exact-head contract",
+            errors,
+        )
+
     def test_architecture_v4_is_the_normal_authoring_packet(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"

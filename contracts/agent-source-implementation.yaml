@@ -40,10 +40,56 @@ required_bindings:
     - git_author_email
     - token_expiry
     - human_reviewer_id
+  review:
+    - owner_repo
+    - repository_id
+    - pull_request_url
+    - base_ref
+    - head_commit
+    - human_reviewer_id
+    - review_state
+    - reviewed_at
   completion:
     - pushed_head
     - reviewed_head
     - merged_head
+review_transition:
+  contract_version: 1
+  state: contract-ready-pending-oos-implementation
+  owner_repo: operator-orchestration-service
+  activation_sequence:
+    contract_work_item_ref: openproject://work_packages/1224
+    implementation_work_item_ref: openproject://work_packages/1225
+    security_work_item_ref: openproject://work_packages/1226
+    activation_work_item_ref: openproject://work_packages/1227
+  planned_commands:
+    review: npm run art -- work review <work-item-id>
+    merge: npm run art -- work merge <work-item-id>
+  state_sequence:
+    - source-review-approval-required
+    - source-merge-approval-required
+  reviewer_authority: active-human-identity-only
+  merger_authority: active-human-identity-only
+  agent_source_review: denied
+  agent_source_merge: denied
+  exact_head_bindings:
+    - owner_repo
+    - repository_id
+    - pull_request_url
+    - base_ref
+    - head_commit
+    - human_reviewer_id
+    - review_state
+    - reviewed_at
+  accepted_review_state: approved
+  stale_head_result: invalidate-review-and-return-to-source-review-approval-required
+  merge_preconditions:
+    - current-head-equals-reviewed-head
+    - reviewer-equals-recorded-human-reviewer
+    - review-state-is-approved
+    - required-checks-pass
+    - repository-pull-request-and-base-match-session
+  direct_provider_command_posture: recovery-only
 provider_boundary:
   provider_kind: github-app
   repository_selection: selected-repositories-only
@@ -78,6 +124,11 @@ evidence:
     - token_expiry
     - pushed_head
     - human_reviewer_id
+    - pull_request_url
+    - base_ref
+    - head_commit
+    - review_state
+    - reviewed_at
     - reviewed_head
     - merged_head
   secret_values: denied

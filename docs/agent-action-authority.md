@@ -80,6 +80,20 @@ Agent authorship is not independent review. A source Landing Unit is not
 complete until the human operator reviews the exact pushed head, explicitly
 authorizes the merge, and the merged head is read back and reconciled.
 
+The target work-session lifecycle makes that separation executable. An open
+pull request first stops at `source-review-approval-required`; only a human
+approval bound to the current repository, pull request, base, head, reviewer,
+approval state, and review time may advance it to
+`source-merge-approval-required`. Any head change invalidates the review and
+returns to the first state. The planned OOS command is `npm run art -- work
+review <work-item-id>`, while `work merge` remains a separate human-authorized
+action that rechecks the exact reviewed head and required checks.
+
+This transition is contract-ready but not yet active. Work items #1225, #1226,
+and #1227 own implementation, Security review, and activation respectively.
+Until they land, the current OOS operator surface remains authoritative and
+must not claim that `work review` is available.
+
 ## First Identity Bootstrap
 
 The first source identity has a bounded bootstrap because the normal OOS token
