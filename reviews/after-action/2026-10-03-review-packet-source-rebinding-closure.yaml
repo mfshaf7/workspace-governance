@@ -1,0 +1,68 @@
+schema_version: 1
+id: 2026-10-03-review-packet-source-rebinding-closure
+title: Recovered Landing Units can no longer rebind completion evidence
+recorded_on: '2026-10-03'
+owner_repo: operator-orchestration-service
+summary: >-
+  Delivery 1206 was implemented by Workspace Governance PR 215, but recovery
+  allowed the same Landing Unit identity to finalize against unrelated PR 217.
+  OOS now makes recovered identities terminal, requires an exact durable
+  recovery-supersession chain for later source intent, and rechecks that chain
+  before finalization and closeout. The canonical 1206 completion narrative
+  now attributes the real implementation and quarantines the immutable wrong
+  packet as audit history.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  - security-architecture
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/operator-orchestration-service/pull/262
+- https://github.com/mfshaf7/security-architecture/pull/174
+- https://github.com/mfshaf7/workspace-governance/pull/215
+- https://github.com/mfshaf7/workspace-governance/pull/217
+- openproject://work_packages/1206
+- wgcf://artifacts/delivery-art/sha256/a89d3bdab7930f71e5b376db51f27bce708d5db18569fbac18d626aa7766866a
+- art-readiness-receipt:ba44e04050a5424dff11a1cc
+lessons:
+- id: recovered-landing-unit-identity-must-be-terminal
+  title: Recovery must terminate source identity instead of reopening attribution
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    The earlier evidence-fidelity control validated evidence content but did
+    not prevent a recovered work session from reusing its Landing Unit identity
+    for a different pull request. A structurally valid finalized packet could
+    therefore carry truthful evidence for the wrong source change.
+  impact: >-
+    Work item 1206 and its already-closed parent attributed activation-authority
+    implementation to an unrelated improvement-record pull request. The real
+    implementation remained present and validated, but delivery provenance and
+    rollback evidence could not be trusted until corrected.
+  status: closed
+  expected_control_types:
+  - workflow
+  - contract
+  - test
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Makes recovered Landing Unit identities and branches terminal and requires exact unsuperseded recovery bindings for later source intent.
+  - type: contract
+    path: operator-orchestration-service/docs/contracts/delivery-workflow-api-v1.md
+    owner_repo: operator-orchestration-service
+    note: Defines the recovery terminality and durable supersession requirements enforced before finalization and closeout.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers missing, partial, stale, and valid recovery-supersession chains plus pre-existing rebound-session rejection.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
