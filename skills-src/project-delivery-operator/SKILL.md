@@ -238,6 +238,21 @@ activation items land.
    - if the blocker is caused by a live system or workflow control bug, open or
      update a real `Defect` in ART instead of leaving the issue only in chat or
      a self-improvement candidate
+   - before creating that Defect, state the expected behavior and exact
+     violated contract, prove the observed failure, and complete
+     troubleshooting preflight so a missing approval, permission, credential,
+     configuration value, feature flag, or operator-side gate is not mislabeled
+     as a product defect
+   - when an existing ART item already owns the outcome or was closed with
+     incorrect evidence, correct, reopen, or continue that item before creating
+     a new Defect; do not create a Defect merely to repair completion truth
+   - treat one independently reproduced failure as one defect identity;
+     repository, owner, review, Security, activation, Landing Unit, and
+     rollback boundaries may split implementation or evidence but do not create
+     additional Defects by themselves
+   - before creating more than one ART item from one discovery, show the
+     operator the proposed subjects, types, violated contracts, and independence
+     justification and obtain explicit approval for the batch
    - if the blocker creates exposure broader than one blocked work item, open
      or update a `Risk` with ROAM fields
    - when a new defect is discovered during active ART work, contain immediate
@@ -314,8 +329,9 @@ activation items land.
      `new_business_or_architecture_idea`,
      `late_discovered_unclassified_work`
    - tiny same-slice patch: absorb it into the active work item
-   - meaningful work in the same initiative: add a new item under the active
-     `Epic`
+   - meaningful work in the same initiative: first use or correct the existing
+     item that owns the outcome; add a new item under the active `Epic` only
+     when independently scoped work remains
    - if the operator asks for a broad stage/prod rehearsal, temporary prod
      activation, or restore-to-baseline exercise, classify the scope as a
      governed drill before assuming product scope:
@@ -533,6 +549,8 @@ activation items land.
 ## Guardrails
 
 - Do not let meaningful uncovered work live only in chat.
+- Do not multiply one failure into peer Defects because its repair crosses
+  repositories, reviewers, Security gates, activation steps, or Landing Units.
 - Do not reconstruct the work queue from handoff prose when the ART already
   exists.
 - Do not hide a cross-repo control-plane or workflow change inside one coarse
