@@ -9,7 +9,7 @@ summary: >-
   mutating review workflow before reading the existing exact-head approval
   contract.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-source-lifecycle-command-regression.yaml
-status: accepted
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -93,15 +93,26 @@ resolution:
     path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
     owner_repo: workspace-governance
     note: Requires contract proof, troubleshooting preflight, existing-item correction, and explicit approval before multi-item creation.
+  - type: workflow
+    path: operator-orchestration-service/src/owner-source-cli.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 259 derives maintenance repository identity from the exact GitHub origin instead of the linked-worktree basename.
+  - type: test
+    path: operator-orchestration-service/test/owner-source-cli.test.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 259 proves a descriptively named linked worktree resolves the admitted repository and rejects a different GitHub owner.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-02-maintenance-repository-identity.md
+    owner_repo: operator-orchestration-service
+    note: Records the root cause, security evidence, validation, residual risk, and rollback boundary for the correction.
   note: >-
-    The false review workflow and Defect classification are corrected. The
-    candidate remains accepted until maintenance repository identity no longer
-    depends on the linked-worktree basename.
+    Closed after the false review workflow and Defect classification were
+    removed, the narrow read-only approval projection landed in OOS PR 258,
+    the Defect creation gate landed in Workspace Governance PR 220, and OOS PR
+    259 removed the linked-worktree basename dependency. Post-merge live proof
+    succeeded from `/home/mfshaf7/projects/.worktrees/oos-remote-identity-live-proof`
+    while resolving `mfshaf7/operator-orchestration-service` from `origin`.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-05'
-  note: >-
-    Derive maintenance repository identity from the authenticated Git remote
-    plus admitted workspace inventory instead of the physical worktree
-    basename, and add a regression test using a descriptively named linked
-    worktree. No new ART item or review workflow is required.
+  owner_repo: null
+  due_on: null
+  note: null
