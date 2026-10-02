@@ -1,0 +1,60 @@
+schema_version: 1
+id: 2026-10-02-dev-integration-memory-pressure
+title: Use the existing dev-integration lifecycle to contain workstation memory pressure
+recorded_on: '2026-10-02'
+owner_repo: platform-engineering
+summary: >-
+  Persistent dev-integration workloads remained active after interrupted work
+  and contributed to high WSL memory usage. The existing Platform status and
+  state-preserving down controls correctly exposed and suspended the composition.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - runtime-composition
+signals:
+- id: inactive-composition-remained-running
+  title: Persistent dev-integration workloads outlived the interrupted work session
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The registered refinement-catalog composition and its persistent profiles
+    remained active after interrupted work and contributed to high WSL memory
+    usage. Platform's supported composition status and down commands identified
+    and suspended the workloads without resetting their persistent data.
+  source_refs:
+  - 'conversation: operator requested urgent WSL memory containment and a strategy that prevents inactive development workloads from remaining active'
+  - platform-engineering:Makefile
+  - workspace-governance:contracts/developer-integration-profiles.yaml
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: platform-engineering/Makefile
+    owner_repo: platform-engineering
+    note: >-
+      `devint-status` inventories a profile or composition and `devint-down`
+      suspends it while preserving product state.
+  - type: doc
+    path: platform-engineering/README.md
+    owner_repo: platform-engineering
+    note: Publishes the existing shared dev-integration status and down operator entrypoints.
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-profiles.yaml
+    owner_repo: workspace-governance
+    note: Records the refinement-catalog composition and the lifecycle of its member profiles.
+  note: >-
+    Closed by reuse of the existing Platform lifecycle: the composition was
+    inspected and suspended through the supported state-preserving down path.
+    No new memory service, workflow, policy, or ART item is required.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
