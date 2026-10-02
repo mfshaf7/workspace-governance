@@ -1,0 +1,100 @@
+schema_version: 1
+id: 2026-10-02-cross-repo-owner-evidence-fidelity-recurrence
+title: Validate every admitted owner evidence profile before source work starts
+recorded_on: '2026-10-02'
+owner_repo: workspace-governance
+summary: >-
+  Delivery #1209, #1216, and #1217 repeated the closed owner-evidence fidelity
+  failure in three additional owner repositories. The Governance Operations
+  Console, Security Architecture, and Platform Engineering profiles were valid
+  and admitted but did not bind a filesystem command to the filesystem
+  conformance cases required by the accepted Architecture Packet. The normal
+  OOS path found each mismatch only after source implementation and commit.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: second-owner-profile-fidelity-regression
+  title: A second admitted owner profile failed the same architecture fidelity gate
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: >-
+    The normal work continue path rejected the clean Agent Gary head for Delivery
+    #1209 with delivery_art_evidence_profile_incomplete because the accepted Console
+    base covered real-git but not filesystem conformance. The prior closure repaired
+    only Workspace Governance and left other admitted owners unchecked until their
+    next live delivery.
+  source_refs:
+  - openproject://work_packages/1209
+  - https://github.com/mfshaf7/governance-operations-console/pull/47
+  - conversation:2026-10-02-machine-visible-workflow-drift
+- id: third-owner-profile-fidelity-regression
+  title: Security Architecture repeated the same admitted-profile fidelity failure
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: >-
+    The normal work continue path rejected the clean Agent Gary head for Delivery
+    #1216 with delivery_art_evidence_profile_incomplete because the accepted
+    Security Architecture base covered real-git but not filesystem conformance.
+    The failure confirms that per-repository containment does not close the class.
+  source_refs:
+  - openproject://work_packages/1216
+  - https://github.com/mfshaf7/security-architecture/pull/168
+  - conversation:2026-10-02-machine-visible-workflow-drift
+- id: fourth-owner-profile-fidelity-regression
+  title: Platform Engineering repeated the same admitted-profile fidelity failure
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: >-
+    The normal work continue path rejected the clean Agent Gary head for Delivery
+    #1217 with delivery_art_evidence_profile_incomplete because the accepted
+    Platform Engineering base covered real-git but not filesystem conformance.
+    The third additional owner recurrence proves that admitted profile validation
+    must be workspace-wide and must run before source work begins.
+  source_refs:
+  - openproject://work_packages/1217
+  - https://github.com/mfshaf7/platform-engineering/pull/255
+  - conversation:2026-10-02-machine-visible-workflow-drift
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: governance-operations-console
+    note: Console PR 47 is the bounded owner-profile repair that unblocks the current initiative; it is containment, not the cross-repo closing control.
+  - type: workflow
+    path: security-architecture/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: security-architecture
+    note: Security Architecture PR 168 is the bounded owner-profile repair that unblocks the current initiative; it is containment, not the cross-repo closing control.
+  - type: workflow
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: Platform Engineering PR 255 is the bounded owner-profile repair that unblocks the current initiative; it is containment, not the cross-repo closing control.
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-03'
+  note: >-
+    Extend the existing evidence-profile controls so work preflight checks the exact
+    base-owned profile against every required architecture fidelity before creating a
+    session, branch, worktree, or credential, and audit every admitted source owner
+    for the same coverage. Do not close from the per-repository repair alone.
