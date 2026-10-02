@@ -110,6 +110,22 @@ exact OOS namespace as its trusted consumer boundary. Workspace source stores
 none of those resolved runtime namespaces. The composition does not reuse the
 general OpenProject API token and stores no secret value.
 
+The same composition also projects the existing WGCF service endpoint to the
+Workspace Intake and Workspace Inventory clients, reuses the one
+composition-lifetime OOS-to-WGCF caller credential under their dedicated
+environment-variable names, and enables the corresponding OOS and WGCF
+readiness surfaces together. The accepted-idea profile records WGCF as a
+source repo so OOS can bind readiness to the exact runner-selected WGCF Git
+revision. Workspace Governance source authority, runtime state, and the
+dedicated GitHub App credential remain separately mounted or delivered by the
+owning runtime; none of their values are stored in this contract.
+
+These bindings define the existing composition shape but do not by themselves
+prove live activation. Platform commissioning, refreshed Security acceptance
+for the exact merged revisions, identity delivery, denial checks, rollback,
+revocation, and teardown evidence remain required before the Workspace Intake
+and Inventory runtime can be reported operational.
+
 The Governance Operations Console is deliberately not a composition profile.
 Its browser continues to call same-origin Console routes only; the Console
 server's authenticated OOS integration belongs to the later Console Landing

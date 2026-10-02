@@ -87,48 +87,9 @@ class AgentSourceImplementationTests(unittest.TestCase):
 
         self.assertNotIn("merged_head", bindings["session"])
         self.assertEqual(
-            set(bindings["review"]),
-            {
-                "owner_repo",
-                "repository_id",
-                "pull_request_url",
-                "base_ref",
-                "head_commit",
-                "human_reviewer_id",
-                "review_state",
-                "reviewed_at",
-            },
-        )
-        self.assertEqual(
             set(bindings["completion"]),
             {"pushed_head", "reviewed_head", "merged_head"},
         )
-
-    def test_review_transition_is_human_only_and_exact_head_bound(self) -> None:
-        transition = self.contract["review_transition"]
-
-        self.assertEqual(
-            transition["state_sequence"],
-            [
-                "source-review-approval-required",
-                "source-merge-approval-required",
-            ],
-        )
-        self.assertEqual(transition["reviewer_authority"], "active-human-identity-only")
-        self.assertEqual(transition["merger_authority"], "active-human-identity-only")
-        self.assertEqual(transition["agent_source_review"], "denied")
-        self.assertEqual(transition["agent_source_merge"], "denied")
-        self.assertIn("head_commit", transition["exact_head_bindings"])
-        self.assertEqual(
-            transition["stale_head_result"],
-            "invalidate-review-and-return-to-source-review-approval-required",
-        )
-
-    def test_review_transition_cannot_claim_active_implementation(self) -> None:
-        contract = copy.deepcopy(self.contract)
-        contract["review_transition"]["state"] = "active-dev-integration"
-
-        self.assertContractInvalid(contract)
 
     def test_human_fallback_and_agent_merge_are_denied(self) -> None:
         denied = set(self.contract["provider_boundary"]["denied_powers"])

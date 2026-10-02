@@ -257,33 +257,6 @@ Lifecycle plans, direct artifact commands, and Review Packet v1 are recovery or
 compatibility surfaces only. This activation does not grant stage or production
 authority.
 
-### Exact-Head Review Transition Contract
-
-The workspace contract now reserves an explicit review transition between an
-open pull request and source merge:
-
-1. `source-review-approval-required`
-2. `source-merge-approval-required`
-
-The target OOS command is `npm run art -- work review <work-item-id>`. It must
-use the active human identity, bind repository, pull request, base branch,
-exact head, reviewer, approval state, and review time, then persist a
-non-secret receipt. Agent Gary remains the attributed source author and cannot
-review, approve, or merge its own source.
-
-A changed pull-request head invalidates the prior review and returns the
-session to `source-review-approval-required`. `work merge` may advance only
-when the current head equals the reviewed head, the reviewer matches the
-recorded human reviewer, the review state is approved, required checks pass,
-and repository, pull request, and base still match the session. Direct provider
-review or merge commands remain recovery-only.
-
-This transition is currently `contract-ready-pending-owner-implementation`.
-The contract item is #1224, OOS implementation is #1225, the exact-head
-Security delta is #1226, and workspace activation is #1227. Until those items
-land in sequence, the active command list and active state list above remain
-authoritative and do not claim that `work review` is available.
-
 The machine contract also carries a proof-obligation registry. Every Boolean
 claim under readiness rules, work-start, evidence integrity, and architecture
 preflight is mapped exactly once as:
