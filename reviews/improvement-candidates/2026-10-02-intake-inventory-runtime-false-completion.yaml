@@ -10,7 +10,7 @@ summary: >-
   later repair then multiplied that one completion failure into peer Defects by
   confusing repository-specific Landing Units with defect identities.
 regression_of: null
-status: accepted
+status: closed
 source_type: review
 scope:
   related_repos:
@@ -41,6 +41,9 @@ signals:
   - openproject://work_packages/1217
   - openproject://work_packages/1210
   - https://github.com/mfshaf7/platform-engineering/pull/256
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/261
+  - https://github.com/mfshaf7/security-architecture/pull/173
+  - https://github.com/mfshaf7/platform-engineering/pull/260
   - security-architecture:docs/reviews/components/2026-10-02-workspace-intake-inventory-controlled-activation.md
   - runtime://devint-accepted-idea-delivery-mfshaf7/operator-orchestration-service/environment-preflight
 - id: operator-half-baked-callout
@@ -83,17 +86,35 @@ resolution:
     path: operator-orchestration-service/docs/records/change-records/2026-10-02-runtime-activation-and-review-recovery.md
     owner_repo: operator-orchestration-service
     note: OOS PR 258 contains the bounded runtime-composition and exact-head review recovery; final operating proof remains in 1210.
+  - type: workflow
+    path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+    owner_repo: operator-orchestration-service
+    note: OOS PR 261 projects only the two required Workspace authority helper scripts into the composed runtime.
+  - type: test
+    path: operator-orchestration-service/test/devint-host-service-profile.test.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 261 prevents the helper-packaging omission from recurring in the accepted-idea-delivery profile.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-03-workspace-intake-inventory-runtime-helper-reacceptance.md
+    owner_repo: security-architecture
+    note: Security PR 173 reaccepts only the two-helper projection and does not expand runtime authority.
+  - type: contract
+    path: platform-engineering/security/workspace-intake-identity.yaml
+    owner_repo: platform-engineering
+    note: Platform PR 260 pins the repaired OOS and Security revisions used by the final live proof.
   note: >-
-    The operator approved the minimal governance correction on 2026-10-02. The
-    Defect-identity portion closes through this Landing Unit; the candidate
-    remains accepted until capability-specific live operating proof is recorded
-    against existing item 1210.
+    Closed after OOS PR 261, Security PR 173, and Platform PR 260 landed the
+    bounded runtime repair and exact accepted pins. Existing item 1210 then
+    recorded direct commission, credential delivery, authenticated Inventory
+    read, non-mutating Intake preparation, restart, fail-closed revocation,
+    rollback, reactivation, and final runtime-ready evidence. Its final status
+    receipt is bound by digest
+    sha256:6c541e6e85795406e7833864bd7014a35ca74c1d6ac9ae179f130f40a2f3314a.
+    Item 1217 now explicitly limits its historical completion claim to Platform
+    composition, and Feature 1205 closed only after 1210 supplied the direct
+    capability proof. The already-landed Defect-identity gate prevented any
+    replacement Defect chain; no new ART item was required.
 follow_up:
-  owner_repo: platform-engineering
-  due_on: '2026-10-05'
-  note: >-
-    Continue existing item 1210 and correct the historical completion account
-    for 1217. Prove authenticated Intake and Inventory status, restart,
-    revoke or negative behavior, rollback, and cleanup at the exact merged
-    runtime composition. Do not create replacement Defects for repository,
-    review, Security, activation, or Landing Unit steps.
+  owner_repo: null
+  due_on: null
+  note: null
