@@ -1,0 +1,98 @@
+schema_version: 1
+id: 2026-10-02-codex-session-crash-memory-amplification
+title: Bound crash recovery and verify desktop acceptance
+recorded_on: '2026-10-02'
+owner_repo: workspace-governance
+summary: >-
+  Repeated Codex session crashes exposed an oversized malformed transcript,
+  interrupted recovery state, and persistent dev-integration workloads whose
+  Linux cache made VmmemWSL appear critically high. Recovery also declared the
+  desktop fixed from process health before proving that organization settings
+  loaded successfully.
+regression_of: null
+status: new
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components:
+  - context-governance-gateway
+  change_classes:
+  - architecture-shaping
+signals:
+- id: repeated-codex-crash-and-memory-amplification
+  title: Repeated Codex crashes required manual transcript recovery and WSL memory containment
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    A 3.26 GB Codex transcript contained 29 malformed records after repeated
+    crashes, while persistent k3s and dev-integration workloads plus 9.3 GiB of
+    reclaimable Linux cache raised VmmemWSL to 15.94 GiB. Existing recovery
+    guidance did not give the operator one bounded sequence for session growth,
+    recovery retention, active runtime inventory, and memory verification.
+  source_refs:
+  - 'conversation: operator requested corrupted-file removal and a preventive memory strategy after multiple crashes'
+  - recovery:/mnt/c/Users/Sevensoul/OneDrive/Desktop/PROJECT/codex-recovery/session-handoff-1203.md
+- id: desktop-usability-acceptance-check-missed
+  title: Desktop recovery was declared complete before organization settings loaded
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - diagnostic-ordering-miss
+  finding: >-
+    Recovery verified that the Windows package and ChatGPT processes were
+    healthy and responding, but did not verify the visible application state or
+    successful organization-settings load. The operator then reported the real
+    workspace-routing failure, requiring another recovery pass.
+  source_refs:
+  - 'conversation: operator corrected the premature desktop recovery claim'
+  - 'local-diagnostic: Codex desktop log reported workspace routing discovery failed and Workspace routing is unavailable'
+- id: nul-filled-windows-config-discovered-late
+  title: Windows Codex configuration corruption was checked after package and cache work
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    The native Windows Codex doctor proved that the desktop configuration could
+    not be parsed. The 3,678-byte config.toml contained only NUL bytes. This
+    client-specific configuration precondition should have been checked before
+    package reset and profile quarantine work.
+  source_refs:
+  - 'local-diagnostic: native Windows codex doctor reported config.toml line 1 column 3679 key with no value'
+  - 'local-diagnostic: byte inspection proved the file contained 3,678 NUL bytes and no recoverable TOML content'
+- id: windows-desktop-update-runtime-regression
+  title: A desktop update reintroduced the organization-settings block through a crashing bundled runtime
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - host-drift-undetected
+  finding: >-
+    The update from package 26.928.3736.0 to 26.928.4866.0 reintroduced the
+    organization-settings block. Config, auth lifetime, DNS, HTTPS reachability,
+    AppX registration, a clean Chromium profile, and Reset-AppxPackage passed or
+    failed to change the symptom. The update-installed codex.exe crashed on a
+    basic version command, while native Codex CLI 0.160.0 selected through
+    CODEX_CLI_PATH restored app-server connectivity, account lookup, successful
+    desktop startup, and visible UI acceptance.
+  source_refs:
+  - 'conversation: operator reported that the Windows desktop broke again immediately after an update'
+  - 'local-diagnostic: Windows AppX events proved update registration from 26.928.3736.0 to 26.928.4866.0 and subsequent launches reproduced the organization-settings gate'
+  - 'local-diagnostic: update-installed codex.exe terminated on --version while native Codex CLI 0.160.0 exited successfully and restored app_start outcome success'
+  - github:openai/codex/issues/47145 documents the matching CODEX_CLI_PATH recovery pattern for Windows workspace-routing failures
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-05'
+  note: >-
+    Run recommendation preflight and prefer small extensions to existing
+    troubleshooting, restart-readiness, context-admission, and dev-integration
+    lifecycle controls. Require end-to-end visible desktop acceptance and an
+    update-aware bundled-runtime health check. Do not introduce a new policy or
+    workflow unless the existing surfaces cannot carry those checks.
