@@ -54,8 +54,10 @@ work_home_routing:
         executing an accepted initiative and it is required for honest
         completion.
       required_action: >
-        Add a Defect, User story, or Feature under the active Epic according to
-        the real delivery shape before continuing adjacent execution.
+        First correct or continue an existing item when it already owns the
+        outcome or its completion evidence was wrong. Only then add a Defect,
+        User story, or Feature under the active Epic when independently scoped
+        work remains.
       proportionality_rule: >
         Expansion must be explicit when it changes scope, owner, review path,
         or validation evidence; otherwise absorb it into the active item and
@@ -292,6 +294,23 @@ work_home_routing:
           - authoritative record reference
           - validation or readback evidence
     defect_handling:
+      - Before creating a Defect, prove the concrete observed behavior, the
+        exact contract or accepted outcome it violates, and the preflight or
+        minimal reproduction that rules out a missing prerequisite, approval,
+        permission, configuration value, or other operator-side gate.
+      - When an existing ART item already owns the outcome, or was closed with
+        incorrect or insufficient evidence, correct, reopen, or continue that
+        item before considering a new Defect. Do not create a Defect merely to
+        repair completion truth.
+      - Treat one independently provable failure as one defect identity.
+        Repository, owner, review, Security, activation, Landing Unit, or
+        rollback boundaries may split implementation and evidence, but do not
+        create additional Defects unless each boundary has its own reproduced
+        contract violation.
+      - Before creating more than one ART item from one discovery, present the
+        proposed item subjects, types, violated contracts, and independence
+        justification to the operator and obtain explicit approval for the
+        batch.
       - After containment of a newly discovered defect, classify it before
         implementation as one of immediate_blocker, deferred_defect,
         absorbed_same_slice_fix, or risk.
@@ -306,9 +325,10 @@ work_home_routing:
         truth, safety, runtime behavior, security posture, or evidence.
       - A same-cause, same-owner, same-validation defect may be fixed inside
         the current Landing Unit and Review Packet.
-      - A defect with a distinct cause, owner, review path, rollback boundary,
-        or validation burden gets its own ART Defect and, when source-backed,
-        its own or explicitly shared Landing Unit.
+      - A separately reproduced defect with a distinct cause gets its own ART
+        Defect. Distinct owner, review path, rollback boundary, or validation
+        burden by itself changes the Landing Unit or evidence plan, not the
+        number of Defects.
       - Defects outside the active Epic but caused by current work must be
         linked and assessed for blocker or risk impact before parent closeout.
     parent_coverage_gate:

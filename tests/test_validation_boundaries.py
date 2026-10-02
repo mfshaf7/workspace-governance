@@ -137,6 +137,17 @@ class ValidationModeContractTests(unittest.TestCase):
         )
         self.assertIn("Cleanup residue blocks final completion", cleanup_text)
 
+    def test_defect_creation_requires_proof_and_does_not_follow_repo_boundaries(self) -> None:
+        routing = yaml.safe_load(WORK_HOME_PATH.read_text())["work_home_routing"]
+        defect_handling = routing["landing_and_review_policy"]["defect_handling"]
+        defect_text = "\n".join(defect_handling)
+
+        self.assertIn("Before creating a Defect, prove", defect_text)
+        self.assertIn("correct, reopen, or continue", defect_text)
+        self.assertIn("one defect identity", defect_text)
+        self.assertIn("do not create additional Defects", defect_text)
+        self.assertIn("obtain explicit approval for the batch", defect_text)
+
 
 class AuditBoundaryTests(unittest.TestCase):
     def test_workspace_layout_audit_does_not_orchestrate_other_controls(self) -> None:

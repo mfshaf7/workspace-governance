@@ -8904,6 +8904,21 @@ def main() -> int:
     cleanup_policy = work_home_routing.get("landing_and_review_policy", {}).get(
         "cleanup_policy"
     ) or []
+    defect_handling = work_home_routing.get("landing_and_review_policy", {}).get(
+        "defect_handling"
+    ) or []
+    defect_handling_text = "\n".join(defect_handling)
+    for required_phrase, finding in (
+        ("Before creating a Defect, prove", "require preflight proof before Defect creation"),
+        ("correct, reopen, or continue", "prefer correction of the existing ART item"),
+        ("one defect identity", "keep one independently provable failure as one defect identity"),
+        ("do not create additional Defects", "separate Landing Units from Defect identity"),
+        ("obtain explicit approval for the batch", "require operator approval before multi-item creation"),
+    ):
+        if required_phrase not in defect_handling_text:
+            errors.append(
+                "contracts/work-home-routing.yaml: defect_handling must " + finding
+            )
     expected_cleanup_command = (
         "python3 /home/mfshaf7/projects/workspace-governance/scripts/"
         "audit_branch_lifecycle.py --workspace-root /home/mfshaf7/projects "

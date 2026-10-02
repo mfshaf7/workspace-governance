@@ -1,0 +1,99 @@
+schema_version: 1
+id: 2026-10-02-intake-inventory-runtime-false-completion
+title: Prevent false completion of Intake and Inventory runtime activation
+recorded_on: '2026-10-02'
+owner_repo: platform-engineering
+summary: >-
+  ART 1217 closed after generic Console cross-domain activity checks even
+  though the live OOS pod lacked the enable flags, authority and state roots,
+  and WGCF bindings required for Workspace Intake and Inventory operation. The
+  later repair then multiplied that one completion failure into peer Defects by
+  confusing repository-specific Landing Units with defect identities.
+regression_of: null
+status: accepted
+source_type: review
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - runtime-composition
+  - source-behavior
+signals:
+- id: live-art-mutation-proof-gap
+  title: Capability-specific operating proof was replaced by generic activity proof
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The finalized 1217 Review Packet and commissioning receipts proved generic
+    Console activity, restart, dependency denial, rollback, and cleanup, but
+    never probed the Workspace Intake or Inventory routes or asserted their
+    complete OOS runtime configuration. Live preflight for 1210 found the
+    required runtime variables absent after merged-source reconciliation.
+  source_refs:
+  - openproject://work_packages/1217
+  - openproject://work_packages/1210
+  - https://github.com/mfshaf7/platform-engineering/pull/256
+  - security-architecture:docs/reviews/components/2026-10-02-workspace-intake-inventory-controlled-activation.md
+  - runtime://devint-accepted-idea-delivery-mfshaf7/operator-orchestration-service/environment-preflight
+- id: operator-half-baked-callout
+  title: Repository repair boundaries were mistaken for separate Defects
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The repair expanded one failed outcome into peer Defect records 1218
+    through 1222 even though 1210 already represented the remaining activation
+    work and 1217 held the incorrect completion claim. Platform activation,
+    Security re-acceptance, and repository-specific source changes were repair
+    and evidence boundaries, not independently reproduced contract failures.
+    The records were later deleted at the operator's direction.
+  source_refs:
+  - 'conversation: operator challenged why one failure became a multi-defect story-like chain'
+  - openproject://work_packages/1210
+  - openproject://work_packages/1217
+  - openproject://work_packages/1218
+  - openproject://work_packages/1219
+  - openproject://work_packages/1220
+  - openproject://work_packages/1221
+  - openproject://work_packages/1222
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Requires proof of a violated contract, correction of existing completion truth, one defect identity per independently reproduced failure, and operator approval before multi-item creation.
+  - type: doc
+    path: workspace-governance/docs/work-home-routing-contract.md
+    owner_repo: workspace-governance
+    note: Publishes the matching Defect creation gate without introducing a new artifact type or workflow.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Applies the same gate in future ART delivery sessions.
+  - type: workflow
+    path: operator-orchestration-service/docs/records/change-records/2026-10-02-runtime-activation-and-review-recovery.md
+    owner_repo: operator-orchestration-service
+    note: OOS PR 258 contains the bounded runtime-composition and exact-head review recovery; final operating proof remains in 1210.
+  note: >-
+    The operator approved the minimal governance correction on 2026-10-02. The
+    Defect-identity portion closes through this Landing Unit; the candidate
+    remains accepted until capability-specific live operating proof is recorded
+    against existing item 1210.
+follow_up:
+  owner_repo: platform-engineering
+  due_on: '2026-10-05'
+  note: >-
+    Continue existing item 1210 and correct the historical completion account
+    for 1217. Prove authenticated Intake and Inventory status, restart,
+    revoke or negative behavior, rollback, and cleanup at the exact merged
+    runtime composition. Do not create replacement Defects for repository,
+    review, Security, activation, or Landing Unit steps.

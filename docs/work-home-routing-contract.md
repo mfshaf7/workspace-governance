@@ -53,12 +53,40 @@ boundaries.
 - Absorb a tiny same-slice correction into the active ART item and mention it
   in completion evidence.
 - Create a new ART child when the work has a distinct scope, owner repo,
-  review path, risk, blocker, or validation proof.
+  review path, risk, blocker, or validation proof. Choose the child's type from
+  the work it represents; a repository or Landing Unit boundary does not make
+  the child a Defect.
 - Use owner-repo-only tracking when the work is local maintenance outside an
   accepted initiative and does not affect shared workflow, platform, security,
   or workspace governance behavior.
 - Use Workspace Proposals before decomposing a new business or architecture
   idea.
+
+## Defect Creation Gate
+
+`Defect` means a concrete, independently provable failure against an accepted
+contract or outcome. It is not a container for every repository, reviewer, or
+repair step involved in restoring one failed outcome.
+
+Before creating a Defect:
+
+1. State the expected behavior and the exact contract or accepted outcome.
+2. Prove the observed failure with live truth or the smallest faithful
+   reproduction.
+3. Run troubleshooting preflight and rule out a missing approval, permission,
+   credential, configuration value, feature flag, or other prerequisite.
+4. Check whether an existing ART item already owns the outcome or was closed
+   with incorrect evidence. Correct, reopen, or continue that item first.
+5. Create a new Defect only when an independently scoped failure still remains.
+
+One independently provable failure has one defect identity. Multiple owner
+repos, Security review, Platform activation, separate pull requests, or
+separate Landing Units may be required to repair and prove that failure, but
+those boundaries do not create additional Defects by themselves.
+
+Before creating more than one ART item from one discovery, show the operator
+the proposed subjects, types, violated contracts, and reason each item is
+independent. Create the batch only after explicit operator approval.
 
 ## Landing Units And Review Packets
 

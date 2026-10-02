@@ -1,0 +1,107 @@
+schema_version: 1
+id: 2026-10-02-premerge-review-precondition-skip-regression
+title: Enforce precondition proof before governed source merge diagnosis
+recorded_on: '2026-10-02'
+owner_repo: operator-orchestration-service
+summary: >-
+  The operator agent invoked OOS work merge before the required GitHub approval,
+  blamed the merge adapter, created a false Defect, and then designed a new
+  mutating review workflow before reading the existing exact-head approval
+  contract.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-source-lifecycle-command-regression.yaml
+status: accepted
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: premerge-review-state-skipped
+  title: Missing approval was misdiagnosed as an OOS merge-adapter defect
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - diagnostic-ordering-miss
+  finding: >-
+    PR 94 had passing checks but no approving review when OOS work merge failed.
+    The agent inspected adapter code and created ART 1223 before reading the
+    live ruleset and review timeline. After approval at 06:20:56Z, the PR
+    merged at 06:21:01Z; no product defect was present.
+  source_refs:
+  - https://github.com/mfshaf7/workspace-governance-control-fabric/pull/94
+  - openproject://work_packages/1223
+  - workspace-governance/reviews/improvement-candidates/2026-09-30-source-lifecycle-command-regression.yaml
+- id: late-root-cause-discovery
+  title: Existing review doctrine was mistaken for a missing review workflow
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  finding: >-
+    The source contract and skill already required exact-head human approval
+    through gh pr review. The agent nevertheless designed a mutating work
+    review command and created ART 1224 through 1227. Workspace Governance PR
+    219 removed that over-scoped contract, and OOS PR 258 added the narrow
+    read-only pre-merge approval projection that was actually missing.
+  source_refs:
+  - https://github.com/mfshaf7/workspace-governance/pull/218
+  - https://github.com/mfshaf7/workspace-governance/pull/219
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/258
+  - openproject://work_packages/1224
+  - openproject://work_packages/1225
+  - openproject://work_packages/1226
+  - openproject://work_packages/1227
+  - workspace-governance/contracts/agent-source-implementation.yaml
+  - workspace-governance/skills-src/source-implementation-operator/SKILL.md
+- id: maintenance-repository-identity-derived-from-worktree-basename
+  title: Maintenance preparation rejects valid descriptively named linked worktrees
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    The supported owner-repo maintenance prepare command derives repository
+    identity from the worktree directory basename rather than authoritative Git
+    remote and workspace inventory data. It rejected valid admitted repositories
+    during two recovery Landing Units.
+  source_refs:
+  - operator-orchestration-service:scripts/owner_source_cli.mjs
+  - workspace-governance/reviews/improvement-candidates/2026-09-30-source-lifecycle-command-regression.yaml
+  - runtime://agent-source/maintenance-prepare/agent_source_repository_not_admitted
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 258 adds read-only exact-head review-state projection before merge.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 258 proves approval-required behavior without executing merge first.
+  - type: contract
+    path: workspace-governance/contracts/work-home-routing.yaml
+    owner_repo: workspace-governance
+    note: Prevents skipped prerequisites from being labeled Defects and prevents one discovery from expanding into an unapproved ART batch.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires contract proof, troubleshooting preflight, existing-item correction, and explicit approval before multi-item creation.
+  note: >-
+    The false review workflow and Defect classification are corrected. The
+    candidate remains accepted until maintenance repository identity no longer
+    depends on the linked-worktree basename.
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-05'
+  note: >-
+    Derive maintenance repository identity from the authenticated Git remote
+    plus admitted workspace inventory instead of the physical worktree
+    basename, and add a regression test using a descriptively named linked
+    worktree. No new ART item or review workflow is required.
