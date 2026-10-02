@@ -1,0 +1,58 @@
+schema_version: 1
+id: 2026-10-03-review-packet-source-rebinding-regression
+title: Prevent recovered Landing Unit identity from rebinding completion evidence
+recorded_on: '2026-10-03'
+owner_repo: operator-orchestration-service
+summary: >-
+  Delivery 1206 implemented its activation-authority contract in Workspace
+  Governance PR 215, but the interrupted source session was recovered without
+  completion evidence. A later, unrelated self-improvement PR reused the same
+  work-item and Landing Unit identity, and its Review Packet became the stored
+  completion evidence for 1206. The contract exists, but ART now attributes its
+  implementation to the wrong source change.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: recovered-landing-unit-source-rebound
+  title: A recovered source Landing Unit closed against an unrelated later pull request
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: >-
+    Workspace Governance PR 215 merged the exact Intake and Inventory activation
+    contract for work item 1206 at merge commit
+    079155178a1ecd7fe8676d62758429c5b45d0341. The stored finalized Review Packet
+    instead binds PR 217 at merge commit
+    e3864940dd6961426de93fa5cdb2215a86a5aca1, whose only changed surfaces are an
+    improvement candidate and after-action record. Both pull requests claimed
+    the same Landing Unit identity after the first session entered recovery.
+  source_refs:
+  - openproject://work_packages/1206
+  - https://github.com/mfshaf7/workspace-governance/pull/215
+  - https://github.com/mfshaf7/workspace-governance/pull/217
+  - workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
+  - workspace-governance/reviews/after-action/2026-10-01-owner-evidence-fidelity-closure.yaml
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-06'
+  note: >-
+    Design the narrow OOS guard that prevents a recovered or superseded Landing
+    Unit identity from closing against a different source change without an
+    explicit new Landing Unit decision and durable supersession binding. Correct
+    the historical 1206 evidence account through an existing governed route or
+    an operator-approved bounded repair; do not create a replacement Defect.
