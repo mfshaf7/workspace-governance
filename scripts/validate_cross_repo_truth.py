@@ -489,6 +489,58 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
     if work_session.get("commands") != expected_commands:
         errors.append("work-session lifecycle command family differs from the approved contract")
 
+    expected_review_transition = {
+        "contract_version": 1,
+        "state": "contract-ready-pending-owner-implementation",
+        "owner_repo": "operator-orchestration-service",
+        "activation_sequence": {
+            "contract_work_item_ref": "openproject://work_packages/1224",
+            "implementation_work_item_ref": "openproject://work_packages/1225",
+            "security_work_item_ref": "openproject://work_packages/1226",
+            "activation_work_item_ref": "openproject://work_packages/1227",
+        },
+        "command": "npm run art -- work review <work-item-id>",
+        "state_sequence": [
+            "source-review-approval-required",
+            "source-merge-approval-required",
+        ],
+        "reviewer_authority": "active-human-identity-only",
+        "merger_authority": "active-human-identity-only",
+        "agent_source_review": "denied",
+        "agent_source_merge": "denied",
+        "exact_head_bindings": [
+            "owner_repo",
+            "repository_id",
+            "pull_request_url",
+            "base_ref",
+            "head_commit",
+            "human_reviewer_id",
+            "review_state",
+            "reviewed_at",
+        ],
+        "accepted_review_state": "approved",
+        "stale_head_result": (
+            "invalidate-review-and-return-to-source-review-approval-required"
+        ),
+        "merge_preconditions": [
+            "current-head-equals-reviewed-head",
+            "reviewer-equals-recorded-human-reviewer",
+            "review-state-is-approved",
+            "required-checks-pass",
+            "repository-pull-request-and-base-match-session",
+        ],
+        "review_receipt": {
+            "exact_head_bound": True,
+            "secret_values": "denied",
+            "canonical_source": "github-pull-request-review",
+        },
+        "direct_provider_command_posture": "recovery-only",
+    }
+    if work_session.get("planned_review_transition") != expected_review_transition:
+        errors.append(
+            "planned source-review transition differs from the approved exact-head contract"
+        )
+
     state_store = work_session.get("state_store") or {}
     if state_store.get("classification") != "reconstructable-operator-coordination":
         errors.append("work-session state must remain reconstructable coordination")

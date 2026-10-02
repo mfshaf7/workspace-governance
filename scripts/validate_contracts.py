@@ -8711,6 +8711,16 @@ def main() -> int:
         "reviewed_head",
         "merged_head",
     }
+    expected_source_review_bindings = {
+        "owner_repo",
+        "repository_id",
+        "pull_request_url",
+        "base_ref",
+        "head_commit",
+        "human_reviewer_id",
+        "review_state",
+        "reviewed_at",
+    }
     required_source_bindings = agent_source_implementation["required_bindings"]
     if set(required_source_bindings["session"]) != expected_source_session_bindings:
         errors.append(
@@ -8722,6 +8732,59 @@ def main() -> int:
     ):
         errors.append(
             "contracts/agent-source-implementation.yaml: completion must bind the pushed, reviewed, and merged heads"
+        )
+    if set(required_source_bindings["review"]) != expected_source_review_bindings:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: review must bind the exact pull request head and human approval"
+        )
+    expected_source_review_transition = {
+        "contract_version": 1,
+        "state": "contract-ready-pending-oos-implementation",
+        "owner_repo": "operator-orchestration-service",
+        "activation_sequence": {
+            "contract_work_item_ref": "openproject://work_packages/1224",
+            "implementation_work_item_ref": "openproject://work_packages/1225",
+            "security_work_item_ref": "openproject://work_packages/1226",
+            "activation_work_item_ref": "openproject://work_packages/1227",
+        },
+        "planned_commands": {
+            "review": "npm run art -- work review <work-item-id>",
+            "merge": "npm run art -- work merge <work-item-id>",
+        },
+        "state_sequence": [
+            "source-review-approval-required",
+            "source-merge-approval-required",
+        ],
+        "reviewer_authority": "active-human-identity-only",
+        "merger_authority": "active-human-identity-only",
+        "agent_source_review": "denied",
+        "agent_source_merge": "denied",
+        "exact_head_bindings": [
+            "owner_repo",
+            "repository_id",
+            "pull_request_url",
+            "base_ref",
+            "head_commit",
+            "human_reviewer_id",
+            "review_state",
+            "reviewed_at",
+        ],
+        "accepted_review_state": "approved",
+        "stale_head_result": (
+            "invalidate-review-and-return-to-source-review-approval-required"
+        ),
+        "merge_preconditions": [
+            "current-head-equals-reviewed-head",
+            "reviewer-equals-recorded-human-reviewer",
+            "review-state-is-approved",
+            "required-checks-pass",
+            "repository-pull-request-and-base-match-session",
+        ],
+        "direct_provider_command_posture": "recovery-only",
+    }
+    if agent_source_implementation["review_transition"] != expected_source_review_transition:
+        errors.append(
+            "contracts/agent-source-implementation.yaml: review transition must preserve exact-head human approval before merge"
         )
     provider_boundary = agent_source_implementation["provider_boundary"]
     expected_provider_permissions = {
@@ -8749,7 +8812,9 @@ def main() -> int:
             "contracts/agent-source-implementation.yaml: provider must deny approval, merge, default-branch mutation, administration, scope expansion, and human fallback"
         )
     expected_source_evidence_fields = (
-        expected_source_session_bindings | expected_source_completion_bindings
+        expected_source_session_bindings
+        | expected_source_review_bindings
+        | expected_source_completion_bindings
     )
     if (
         set(agent_source_implementation["evidence"]["required_fields"])
