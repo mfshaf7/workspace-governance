@@ -168,11 +168,28 @@ work items must belong to them, and the source landing graph must order the
 producer before the consumer. Descriptive producer and consumer names alone do
 not constitute an executable cross-repo acceptance contract.
 
-Workspace Governance accepts schema versions 1 through 4. V4 is the only
-authoring shape eligible for a new work start. It retains the v3 execution-plan
-topology and requires capability-id runtime boundaries. V1 through v3 remain
-immutable, read-only historical evidence; their original prose runtime
-boundaries remain valid and are never inferred into capability ids.
+Workspace Governance validates schema versions 1 through 5. V4 remains the
+only authoring shape eligible for a new work start while v5 is staged. V5 must
+not become current until OOS producer and work-session parity, WGCF custody and
+readiness parity, Security delta review, and a non-pristine session inventory
+are complete. Schema acceptance is therefore not activation authority.
+
+V5 retains the v4 execution-plan and capability-boundary model and separates
+two meanings that earlier versions overloaded. `applies_to_work_item_ids`
+declares the outcomes whose acceptance depends on a case.
+`evidence_owner_landing_unit_id` declares the one Landing Unit accountable for
+producing that atomic case. If more than one Landing Unit must independently
+prove an outcome, author separate cases. The evidence-owner Landing Unit must
+exist, and its work must be causally ordered before each external applicable
+outcome through execution prerequisites followed by zero or more
+child-to-parent closure steps. A parent Feature may therefore depend on proof
+owned by a child Landing Unit without assigning that proof obligation to every
+supporting child.
+
+V1 through v3 remain immutable, read-only historical evidence. V4 remains the
+current authoring shape until the staged cutover, and v5 support must not
+rewrite any earlier packet. Historical prose runtime boundaries remain valid
+and are never inferred into capability ids.
 
 An already-started session may continue against its pinned v1-v3 packet while
 fresh ART truth confirms that material architecture semantics are unchanged.
@@ -192,22 +209,27 @@ restore evidence, lifecycle matrices, cross-artifact timelines, and shared
 validator compatibility.
 
 Architecture readiness proves that this plan is complete and operator-approved;
-it does not pretend implementation tests have already run. Applicable positive
-and negative cases must pass before `merge-ready`, using the fidelity needed for
-the claim. Each case names the dimensions it proves, required plans cover every
-declared dimension, and every mandated protocol dimension has positive and
-negative `merge-ready` cases. Every covered work item must also have positive
-and negative `merge-ready` cases, so one item cannot carry protocol proof for a
-different item that defers its own cases until operating readiness. A synthetic
-resolver may support unit tests, but it cannot prove a claim about real Git
-history. The packet therefore declares the exact applicable dimensions for each
-work item. Every declared `(work item, dimension)` pair needs positive and
-negative merge-ready cases. Git-causality claims separately name their work
-items and dimensions, and each such pair requires positive and negative
-`real-git` cases.
+it does not pretend implementation tests have already run. Each case names the
+dimensions and outcomes it proves, required plans preserve positive and
+negative coverage, and every mandated protocol dimension has positive and
+negative `merge-ready` cases. A synthetic resolver may support unit tests, but
+it cannot prove a claim about real Git history. The packet therefore declares
+the exact applicable dimensions for each work item, and Git-causality claims
+separately name the work items and dimensions that require `real-git` fidelity.
+
+For v5, readiness evidence is selected by
+`evidence_owner_landing_unit_id`, not by overlap with outcome applicability.
+The owner must pass its `merge-ready` cases before source merge and must acquire
+its `operating-ready` cases after merge before finalization. Outcome
+applicability still drives acceptance coverage; it does not make every
+applicable work item an evidence producer. V1 through v4 retain their immutable
+historical interpretation.
 
 The machine schema is
 [`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
+OOS and WGCF must prove identical owner-and-phase selection against
+[`architecture-packet-v5-parity-vectors.valid.json`](../contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json)
+before v5 activation.
 
 ## Readiness Levels
 
@@ -513,12 +535,13 @@ architecture packet; a Review Packet resolves its work-start record and that
 record's architecture packet. The resolved chain must preserve Delivery id,
 work-item coverage, Landing Unit decision, owner and branch plan, exact base
 revisions, scope fingerprint, and architecture decision. Architecture
-conformance cases declare the work items they apply to. Every case applicable
-to the packet's work-item and readiness scope must have a passing evidence
-result at the planned fidelity. A required conformance plan covers every
-architecture work item and every declared dimension with executable cases. A
-child cannot advance merely because its tests were omitted from the plan or
-deferred beyond that child's current readiness gate.
+conformance cases declare the work-item outcomes they apply to. Under v5 they
+also declare their exact evidence-owner Landing Unit. A Review Packet must
+satisfy the cases owned by its Landing Unit at the target readiness phase, with
+passing evidence at the planned fidelity. A required conformance plan still
+covers every architecture outcome and declared dimension with executable
+positive and negative cases; ownership changes who produces proof, not which
+outcomes require proof.
 
 A finalized source Review Packet also resolves the durable merge-ready packet
 named by `custody.supersedes`. The predecessor must be earlier, durable, of the

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "architecture_packet_schema_version": 5,
+  "vectors": [
+    {
+      "id": "feature-outcome-with-separate-source-and-runtime-owners",
+      "parent_by_work_item": {
+        "work-item-1203": null,
+        "work-item-1228": "work-item-1203",
+        "work-item-1229": "work-item-1203"
+      },
+      "execution_edges": [
+        {
+          "prerequisite_work_item_id": "work-item-1228",
+          "dependent_work_item_id": "work-item-1229"
+        }
+      ],
+      "landing_units": [
+        {
+          "id": "delivery-1203-feature",
+          "covered_work_item_ids": ["work-item-1203"]
+        },
+        {
+          "id": "delivery-1203-source",
+          "covered_work_item_ids": ["work-item-1228"]
+        },
+        {
+          "id": "delivery-1203-runtime",
+          "covered_work_item_ids": ["work-item-1229"]
+        }
+      ],
+      "cases": [
+        {
+          "id": "case:source-positive",
+          "applies_to_work_item_ids": ["work-item-1203", "work-item-1228"],
+          "evidence_owner_landing_unit_id": "delivery-1203-source",
+          "polarity": "positive",
+          "target_readiness": "merge-ready"
+        },
+        {
+          "id": "case:source-negative",
+          "applies_to_work_item_ids": ["work-item-1203", "work-item-1228"],
+          "evidence_owner_landing_unit_id": "delivery-1203-source",
+          "polarity": "negative",
+          "target_readiness": "merge-ready"
+        },
+        {
+          "id": "case:runtime-positive",
+          "applies_to_work_item_ids": ["work-item-1203", "work-item-1229"],
+          "evidence_owner_landing_unit_id": "delivery-1203-runtime",
+          "polarity": "positive",
+          "target_readiness": "operating-ready"
+        },
+        {
+          "id": "case:runtime-negative",
+          "applies_to_work_item_ids": ["work-item-1203", "work-item-1229"],
+          "evidence_owner_landing_unit_id": "delivery-1203-runtime",
+          "polarity": "negative",
+          "target_readiness": "operating-ready"
+        }
+      ],
+      "selection_expectations": [
+        {
+          "landing_unit_id": "delivery-1203-source",
+          "target_readiness": "merge-ready",
+          "selected_case_ids": ["case:source-positive", "case:source-negative"]
+        },
+        {
+          "landing_unit_id": "delivery-1203-source",
+          "target_readiness": "operating-ready",
+          "selected_case_ids": []
+        },
+        {
+          "landing_unit_id": "delivery-1203-runtime",
+          "target_readiness": "merge-ready",
+          "selected_case_ids": []
+        },
+        {
+          "landing_unit_id": "delivery-1203-runtime",
+          "target_readiness": "operating-ready",
+          "selected_case_ids": ["case:runtime-positive", "case:runtime-negative"]
+        },
+        {
+          "landing_unit_id": "delivery-1203-feature",
+          "target_readiness": "operating-ready",
+          "selected_case_ids": []
+        }
+      ]
+    }
+  ]
+}

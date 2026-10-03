@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-v5-parity-vectors.schema.json",
+  "title": "Delivery ART Architecture Packet v5 Consumer Parity Vectors",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "architecture_packet_schema_version", "vectors"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "architecture_packet_schema_version": { "const": 5 },
+    "vectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "parent_by_work_item",
+          "execution_edges",
+          "landing_units",
+          "cases",
+          "selection_expectations"
+        ],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "parent_by_work_item": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                { "$ref": "#/$defs/workItemId" },
+                { "type": "null" }
+              ]
+            }
+          },
+          "execution_edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["prerequisite_work_item_id", "dependent_work_item_id"],
+              "properties": {
+                "prerequisite_work_item_id": { "$ref": "#/$defs/workItemId" },
+                "dependent_work_item_id": { "$ref": "#/$defs/workItemId" }
+              }
+            }
+          },
+          "landing_units": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "covered_work_item_ids"],
+              "properties": {
+                "id": { "$ref": "#/$defs/identifier" },
+                "covered_work_item_ids": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/workItemId" }
+                }
+              }
+            }
+          },
+          "cases": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "applies_to_work_item_ids",
+                "evidence_owner_landing_unit_id",
+                "polarity",
+                "target_readiness"
+              ],
+              "properties": {
+                "id": { "$ref": "#/$defs/identifier" },
+                "applies_to_work_item_ids": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/workItemId" }
+                },
+                "evidence_owner_landing_unit_id": { "$ref": "#/$defs/identifier" },
+                "polarity": { "enum": ["positive", "negative"] },
+                "target_readiness": { "enum": ["merge-ready", "operating-ready"] }
+              }
+            }
+          },
+          "selection_expectations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["landing_unit_id", "target_readiness", "selected_case_ids"],
+              "properties": {
+                "landing_unit_id": { "$ref": "#/$defs/identifier" },
+                "target_readiness": { "enum": ["merge-ready", "operating-ready"] },
+                "selected_case_ids": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/identifier" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+    "workItemId": { "type": "string", "pattern": "^work-item-[1-9][0-9]*$" }
+  }
+}

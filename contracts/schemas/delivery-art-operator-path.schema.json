@@ -959,6 +959,20 @@
         "durable_when": { "$ref": "#/$defs/nonEmptyString" },
         "migration_from_runtime_version": { "type": "integer", "minimum": 1 },
         "target_schema_version": { "type": "integer", "minimum": 1 },
+        "supported_schema_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "staged_schema_version": { "type": "integer", "minimum": 1 },
+        "staged_parity_fixture_ref": { "$ref": "#/$defs/nonEmptyString" },
+        "staged_activation_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
         "compatibility_schema_versions": {
           "type": "array",
           "minItems": 1,
@@ -983,6 +997,10 @@
             {
               "required": [
                 "compatibility_schema_versions",
+                "supported_schema_versions",
+                "staged_schema_version",
+                "staged_parity_fixture_ref",
+                "staged_activation_requirements",
                 "new_work_requires_current_schema",
                 "historical_versions_are_read_only",
                 "bound_historical_session_may_continue_if_material_semantics_unchanged",
@@ -992,6 +1010,19 @@
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
                 "schema_version": { "const": 4 },
                 "target_schema_version": false,
+                "supported_schema_versions": { "const": [1, 2, 3, 4, 5] },
+                "staged_schema_version": { "const": 5 },
+                "staged_parity_fixture_ref": {
+                  "const": "contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json"
+                },
+                "staged_activation_requirements": {
+                  "const": [
+                    "operator-orchestration-service producer and work-session parity",
+                    "workspace-governance-control-fabric custody and readiness parity",
+                    "security-architecture delta review",
+                    "non-pristine work-session inventory and disposition"
+                  ]
+                },
                 "compatibility_schema_versions": { "const": [1, 2, 3] },
                 "new_work_requires_current_schema": { "const": true },
                 "historical_versions_are_read_only": { "const": true },
@@ -1425,6 +1456,12 @@
           "additionalProperties": false,
           "required": [
             "architecture_cases_declare_applicable_work_items",
+            "architecture_v5_cases_declare_one_evidence_owner_landing_unit",
+            "architecture_v5_evidence_owner_landing_unit_must_exist",
+            "architecture_v5_evidence_owner_must_precede_external_applicable_outcomes",
+            "architecture_v5_outcome_applicability_does_not_imply_evidence_ownership",
+            "architecture_v5_merge_readiness_selects_owner_merge_ready_cases",
+            "architecture_v5_operating_readiness_selects_owner_operating_ready_cases",
             "architecture_cases_declare_dimension_ids",
             "case_ids_unique_within_architecture_packet",
             "required_plan_exactly_covers_architecture_work_items",
@@ -1433,13 +1470,19 @@
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases",
             "required_protocol_work_item_has_merge_ready_positive_and_negative_cases",
             "required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases",
-            "later_readiness_requires_all_applicable_cases_to_pass",
+            "architecture_v1_v4_later_readiness_requires_all_applicable_cases_to_pass",
             "evidence_fidelity_must_match_planned_case_fidelity",
             "cases_outside_packet_work_item_or_readiness_scope_rejected",
             "work_item_dimension_applicability_is_explicit"
           ],
           "properties": {
             "architecture_cases_declare_applicable_work_items": { "const": true },
+            "architecture_v5_cases_declare_one_evidence_owner_landing_unit": { "const": true },
+            "architecture_v5_evidence_owner_landing_unit_must_exist": { "const": true },
+            "architecture_v5_evidence_owner_must_precede_external_applicable_outcomes": { "const": true },
+            "architecture_v5_outcome_applicability_does_not_imply_evidence_ownership": { "const": true },
+            "architecture_v5_merge_readiness_selects_owner_merge_ready_cases": { "const": true },
+            "architecture_v5_operating_readiness_selects_owner_operating_ready_cases": { "const": true },
             "architecture_cases_declare_dimension_ids": { "const": true },
             "case_ids_unique_within_architecture_packet": { "const": true },
             "required_plan_exactly_covers_architecture_work_items": { "const": true },
@@ -1448,7 +1491,7 @@
             "required_protocol_dimension_has_merge_ready_positive_and_negative_cases": { "const": true },
             "required_protocol_work_item_has_merge_ready_positive_and_negative_cases": { "const": true },
             "required_work_item_dimension_pair_has_merge_ready_positive_and_negative_cases": { "const": true },
-            "later_readiness_requires_all_applicable_cases_to_pass": { "const": true },
+            "architecture_v1_v4_later_readiness_requires_all_applicable_cases_to_pass": { "const": true },
             "evidence_fidelity_must_match_planned_case_fidelity": { "const": true },
             "cases_outside_packet_work_item_or_readiness_scope_rejected": { "const": true },
             "work_item_dimension_applicability_is_explicit": { "const": true }
@@ -1677,7 +1720,7 @@
             "required_dimensions",
             "executable_cases_required",
             "architecture_ready_requires_conformance_plan",
-            "merge_ready_requires_applicable_cases_pass",
+            "merge_ready_requires_applicable_merge_ready_cases_pass",
             "fidelity_class_required"
           ],
           "properties": {
@@ -1703,7 +1746,7 @@
             },
             "executable_cases_required": { "const": ["positive-contract-cases", "negative-contract-cases"] },
             "architecture_ready_requires_conformance_plan": { "const": true },
-            "merge_ready_requires_applicable_cases_pass": { "const": true },
+            "merge_ready_requires_applicable_merge_ready_cases_pass": { "const": true },
             "fidelity_class_required": { "const": true }
           }
         }
