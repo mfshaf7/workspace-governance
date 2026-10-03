@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-10-04-delivery-quality-caller-binding-closure
+title: Platform quality checks now preserve broker caller-secret identity
+recorded_on: '2026-10-04'
+owner_repo: platform-engineering
+summary: >-
+  Platform's Delivery ART quality adapter no longer assumes the first allowed
+  broker caller can authenticate with the compatibility shared secret. It now
+  uses an exact caller-specific secret whenever the caller is identity-bound,
+  reserves the shared secret for allowed unbound callers, and fails closed when
+  no valid pair exists. Merged-main Epic 1203 projection quality is clean.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/platform-engineering/pull/262
+- https://github.com/mfshaf7/security-architecture/pull/183
+- openproject://work_packages/1203
+- platform-engineering/docs/records/change-records/2026-10-04-delivery-quality-caller-binding.md
+lessons:
+- id: broker-probes-must-select-an-exact-authentication-pair
+  title: Caller selection and credential selection are one contract
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    The earlier OOS repair correctly introduced distinct caller-specific
+    secrets, but the downstream Platform quality adapter continued to select a
+    caller id and credential independently. Selecting the first allowed id and
+    the shared secret produced a structurally plausible but invalid pair that
+    only failed during the required projection quality check.
+  impact: >-
+    The ART projection synchronized successfully but remained dirty because its
+    quality checkpoint could not authenticate, delaying return to primary Epic
+    work and obscuring an otherwise healthy zero-finding quality result.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - change-record
+  control_refs:
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Selects one valid caller-secret pair inside the OOS pod and emits no secret material.
+  - type: test
+    path: platform-engineering/products/openproject/scripts/test_openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Guards bound-pair selection, unbound shared-secret fallback, and removal of the first-id assumption.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-04-delivery-quality-caller-binding.md
+    owner_repo: platform-engineering
+    note: Records the merged control and clean Epic 1203 live proof.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
