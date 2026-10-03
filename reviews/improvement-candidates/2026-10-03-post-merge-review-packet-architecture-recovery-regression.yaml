@@ -171,6 +171,29 @@ signals:
   source_refs:
   - platform-engineering/scripts/dev_integration.py
   - /home/mfshaf7/projects/.dev-integration/sessions/accepted-idea-delivery-mfshaf7-20261003T095658Z/accepted-idea-delivery-mfshaf7-20261003T095658Z-smoke-20261003T100420691011Z-f0cfb8c4.result.yaml
+- id: v5-predecision-preflight-required-an-evidence-owner
+  title: V5 pre-decision work preflight selected owner evidence before an owner existed
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    After the Delivery 1203 v5 packet became current, the normal read-only work
+    preflight for item 1229 returned an internal error before it could provide
+    the Landing Unit decision draft. Work-contract projection invoked strict
+    v5 evidence-owner selection while the pre-decision call correctly had no
+    accepted Landing Unit id. The existing no-decision test used a packet with
+    no required conformance cases and therefore missed the failure. OOS PR 272
+    now leaves evidence-owner cases empty until the operator accepts an exact
+    Landing Unit, still exposes the applicable outcome cases, and preserves
+    strict owner selection after a decision. Merged-main live proof returned
+    the decision draft without mutation and selected exactly the two protocol
+    and two real-Git cases owned by item 1229 after the decision was supplied.
+  source_refs:
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/272
+  - operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-v5-predecision-preflight.md
+  - openproject://work_packages/1229
+  - wgcf://artifacts/delivery-art/sha256/1615866d716014b21d3aec544b04f24e2d48c4d8cc49ff844efacd0b3f45e240
 resolution:
   after_action_ref: null
   control_refs:
@@ -198,23 +221,29 @@ resolution:
     path: operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-initiative-relation-read-scope.md
     owner_repo: operator-orchestration-service
     note: PR 271 records and proves bounded backend reads for one Delivery ART initiative.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      PR 272 repairs schema-v5 pre-decision projection while retaining exact
+      evidence-owner selection after the Landing Unit decision.
   note: >-
     The evidence-preserving recovery mode has landed through OOS PR 266 and was
     exercised successfully against work item 1228. Architecture Packet v5 and
     its cycle-termination repair are now active across Workspace Governance,
     OOS, and WGCF with the required Security delta review. The bounded OOS read
-    repair is also merged and proven in the live composition. The candidate
-    remains open until a fresh v5 packet supersedes Delivery 1203's historical
-    packet and the operator decides whether to approve the proposed Platform
-    composition-preflight and smoke-context controls. No additional ART Defect
-    was created for this maintenance.
+    repair and pre-decision repair are also merged and proven in the live
+    composition. Delivery 1203 now points to the durable v5 packet at
+    sha256:1615866d716014b21d3aec544b04f24e2d48c4d8cc49ff844efacd0b3f45e240.
+    The candidate remains open only until the operator decides whether to
+    approve the proposed Platform composition-preflight and smoke-context
+    controls. No additional ART Defect was created for this maintenance.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-06'
   note: >-
-    Inventory non-pristine OOS work sessions, persist a fresh Delivery 1203 v5
-    packet, and prove its current pointer and readiness. Then present the two
-    still-unimplemented Platform controls for operator decision: preflight all
-    composition source/restart prerequisites before mutation, and bind profile
-    smoke to its active composition context. Close this regression only through
-    a linked after-action after the approved controls land with exact evidence.
+    Present the two still-unimplemented Platform controls for operator
+    decision: preflight all composition source/restart prerequisites before
+    mutation, and bind profile smoke to its active composition context. Close
+    this regression only through a linked after-action after the approved
+    controls land with exact evidence.
