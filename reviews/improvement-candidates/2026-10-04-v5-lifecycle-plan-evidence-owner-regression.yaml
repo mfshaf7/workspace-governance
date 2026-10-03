@@ -1,0 +1,74 @@
+schema_version: 1
+id: 2026-10-04-v5-lifecycle-plan-evidence-owner-regression
+title: Preserve v5 evidence-owner identity in work-session compatibility plans
+recorded_on: '2026-10-04'
+owner_repo: workspace-governance
+summary: A valid Delivery 1203 work session carried the exact v5 evidence-owner Landing
+  Unit, but the lifecycle compatibility-plan serializer omitted its id and blocked
+  normal work continuation.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-03-post-merge-review-packet-architecture-recovery-regression.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: live-art-mutation-proof-gap
+  title: A live ART mutation or closeout bug was discovered, but normal delivery continued
+    before the exact blocker, smallest faithful regression, and one live repair proof
+    were locked.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Live work continue for item 1229 created the bounded worktree and then
+    failed because buildDeliveryArtLifecycleCompatibilityPlan serialized decision,
+    repo, base, branch, and rollback fields but omitted landing_unit.id. The v5 conformance
+    selector therefore received no exact evidence owner and correctly rejected the
+    plan. This regresses the closed evidence-owner selection lesson and requires one
+    OOS serializer fix, regression test, and live continuation proof.
+  source_refs:
+  - openproject://work_packages/1229
+  - live:2026-10-04 work continue 1229 returned delivery_art_conformance_owner_required
+  - operator-orchestration-service/src/delivery-art/work-session.js
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-04-v5-lifecycle-evidence-owner-continuity-closure.yaml
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 275 preserves the persisted Landing Unit id in the lifecycle compatibility plan.
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-lifecycle/lifecycle-plan.schema.json
+    owner_repo: operator-orchestration-service
+    note: OOS PR 275 admits the optional identity field for historical compatibility while v5 selection requires an exact current binding.
+  - type: validator
+    path: operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 275 rejects missing, stale, and scope-ambiguous v5 evidence-owner identities before selection.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: The regression harness proves identity continuity across session serialization and lifecycle continuation.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-04-v5-work-session-lifecycle-owner-binding.md
+    owner_repo: operator-orchestration-service
+    note: Records the causal defect, bounded repair, validation, and exact live continuation requirement.
+  note: >-
+    OOS PR 275 merged the exact identity-continuity repair. The merged revision
+    was activated through the existing refinement-catalog composition, and the
+    exact work-item 1229 status reached source-work with Landing Unit
+    delivery-1203-repository-catalog-console. Defect 1249 then closed through
+    its finalized Review Packet and cleanup receipt. Security PR 182 indexed
+    the merged owner evidence. The linked after-action records why the
+    serializer-schema-selector seam, not another planning rule, is the durable
+    control boundary.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

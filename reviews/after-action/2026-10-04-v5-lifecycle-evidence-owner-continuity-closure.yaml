@@ -1,0 +1,75 @@
+schema_version: 1
+id: 2026-10-04-v5-lifecycle-evidence-owner-continuity-closure
+title: V5 work-session continuation now preserves exact evidence ownership
+recorded_on: '2026-10-04'
+owner_repo: operator-orchestration-service
+summary: >-
+  Delivery 1203 work item 1229 carried the correct v5 Landing Unit decision,
+  but OOS dropped that identity when it serialized the lifecycle compatibility
+  plan. OOS PR 275 now preserves the identifier, validates it against one exact
+  architecture Landing Unit, and rejects missing, stale, or ambiguous bindings
+  before evidence selection. Merged-runtime proof reached source-work and the
+  causal Defect 1249 closed with its finalized Review Packet.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/operator-orchestration-service/pull/275
+- https://github.com/mfshaf7/security-architecture/pull/182
+- openproject://work_packages/1229
+- openproject://work_packages/1249
+- operator-orchestration-service/docs/records/change-records/2026-10-04-v5-work-session-lifecycle-owner-binding.md
+lessons:
+- id: serialized-workflow-handoffs-must-preserve-selection-identity
+  title: Serializer, schema, and selector must share one exact identity contract
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    Earlier v5 controls correctly separated outcome applicability from evidence
+    ownership, but the persistent work-session path was tested only at its
+    endpoints. The session retained the selected Landing Unit and the lifecycle
+    selector required it, while the compatibility-plan serializer omitted the
+    field and its schema rejected it. The correct plan therefore became invalid
+    only at live continuation.
+  impact: >-
+    Work item 1229 created its bounded source worktree and then stopped before
+    source work, forcing another control-plane repair cycle and delaying the
+    primary Epic despite a valid operator decision.
+  status: closed
+  expected_control_types:
+  - workflow
+  - contract
+  - validator
+  - test
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session.js
+    owner_repo: operator-orchestration-service
+    note: Serializes the persisted Landing Unit id into the lifecycle plan.
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-lifecycle/lifecycle-plan.schema.json
+    owner_repo: operator-orchestration-service
+    note: Preserves historical compatibility while admitting the identity used by current plans.
+  - type: validator
+    path: operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+    owner_repo: operator-orchestration-service
+    note: Requires one exact current v5 owner identity and rejects missing, stale, or ambiguous matches.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Exercises identity continuity across the real session-to-plan continuation seam.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-lifecycle-controller.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers missing, stale, and ambiguous v5 identity rejection.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
