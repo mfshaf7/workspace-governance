@@ -168,11 +168,11 @@ work items must belong to them, and the source landing graph must order the
 producer before the consumer. Descriptive producer and consumer names alone do
 not constitute an executable cross-repo acceptance contract.
 
-Workspace Governance validates schema versions 1 through 5. V4 remains the
-only authoring shape eligible for a new work start while v5 is staged. V5 must
-not become current until OOS producer and work-session parity, WGCF custody and
-readiness parity, Security delta review, and a non-pristine session inventory
-are complete. Schema acceptance is therefore not activation authority.
+Workspace Governance validates schema versions 1 through 5. V5 is the current
+authoring shape for a new work start. Its activation record binds the completed
+OOS producer and work-session parity, WGCF custody and readiness parity,
+Security delta review, and non-pristine session inventory. Schema acceptance
+alone is not activation authority.
 
 V5 retains the v4 execution-plan and capability-boundary model and separates
 two meanings that earlier versions overloaded. `applies_to_work_item_ids`
@@ -186,18 +186,17 @@ child-to-parent closure steps. A parent Feature may therefore depend on proof
 owned by a child Landing Unit without assigning that proof obligation to every
 supporting child.
 
-V1 through v3 remain immutable, read-only historical evidence. V4 remains the
-current authoring shape until the staged cutover, and v5 support must not
-rewrite any earlier packet. Historical prose runtime boundaries remain valid
-and are never inferred into capability ids.
+V1 through v4 remain immutable, read-only historical evidence, and v5 support
+must not rewrite any earlier packet. Historical prose runtime boundaries remain
+valid and are never inferred into capability ids.
 
-An already-started session may continue against its pinned v1-v3 packet while
+An already-started session may continue against its pinned v1-v4 packet while
 fresh ART truth confirms that material architecture semantics are unchanged.
 Historical compatibility never permits a new start or a replacement write in
-an old version. Before a current architecture pointer moves to v4, the operator
-must inventory non-pristine sessions so a format-only supersession does not
-strand active work. The durable v3 packet recorded in contract activation
-remains historical proof of the earlier activation; it is not rewritten as v4.
+an old version. Before the current architecture pointer moved to v5, the
+operator inventoried non-pristine sessions so the format cutover did not strand
+active work. The durable v3 packet recorded in contract activation remains
+historical proof of the earlier activation; it is not rewritten as v4 or v5.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated

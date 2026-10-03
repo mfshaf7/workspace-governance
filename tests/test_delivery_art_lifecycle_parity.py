@@ -250,7 +250,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
-    def test_architecture_v4_remains_current_while_v5_is_staged(self) -> None:
+    def test_architecture_v5_is_current_with_activation_evidence(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"
         ]
@@ -259,26 +259,35 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         ]["architecture_packet"]
         readiness_rules = self.operator_path["readiness_model"]["rules"]
 
-        self.assertEqual(architecture_contract["schema_version"], 4)
+        self.assertEqual(architecture_contract["schema_version"], 5)
         self.assertEqual(
             architecture_contract["supported_schema_versions"], [1, 2, 3, 4, 5]
         )
-        self.assertEqual(architecture_contract["staged_schema_version"], 5)
         self.assertEqual(
-            architecture_contract["staged_parity_fixture_ref"],
+            architecture_contract["parity_fixture_ref"],
             "contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json",
         )
         self.assertEqual(
-            architecture_contract["staged_activation_requirements"],
-            [
-                "operator-orchestration-service producer and work-session parity",
-                "workspace-governance-control-fabric custody and readiness parity",
-                "security-architecture delta review",
-                "non-pristine work-session inventory and disposition",
-            ],
+            architecture_contract["compatibility_schema_versions"], [1, 2, 3, 4]
+        )
+        self.assertNotIn("staged_schema_version", architecture_contract)
+        activation_evidence = architecture_contract["activation_evidence"]
+        self.assertEqual(activation_evidence["scope"], "dev-integration")
+        self.assertEqual(
+            activation_evidence["security_review"]["decision"],
+            "approved-dev-integration",
         )
         self.assertEqual(
-            architecture_contract["compatibility_schema_versions"], [1, 2, 3]
+            activation_evidence["security_review"]["stage_and_prod"],
+            "not-approved",
+        )
+        self.assertEqual(
+            activation_evidence["work_session_inventory"]["delivery_1203_session_count"],
+            0,
+        )
+        self.assertEqual(
+            activation_evidence["work_session_inventory"]["v4_bound_session_count"],
+            0,
         )
         self.assertTrue(architecture_contract["new_work_requires_current_schema"])
         self.assertTrue(architecture_contract["historical_versions_are_read_only"])
@@ -293,7 +302,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             ]
         )
         # The v3 packet remains immutable activation evidence; it is not the
-        # current authoring version after the v4 correction.
+        # current authoring version after the v5 activation.
         self.assertEqual(activation_packet["schema_version"], 3)
         self.assertEqual(
             activation_packet["artifact_id"],

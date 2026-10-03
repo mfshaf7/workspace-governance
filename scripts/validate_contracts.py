@@ -4079,19 +4079,19 @@ def validate_delivery_art_artifact_contracts(
             "architecture-v3-execution-plan-valid",
         )
 
-        current_v4 = copy.deepcopy(split_gate_v3)
-        current_v4["schema_version"] = 4
-        current_v4["artifact_id"] = "architecture-packet:delivery-698-v4"
-        current_v4["scope_fingerprint"] = _delivery_art_projection_digest(
-            _architecture_scope_projection(current_v4)
+        compatibility_v4 = copy.deepcopy(split_gate_v3)
+        compatibility_v4["schema_version"] = 4
+        compatibility_v4["artifact_id"] = "architecture-packet:delivery-698-v4"
+        compatibility_v4["scope_fingerprint"] = _delivery_art_projection_digest(
+            _architecture_scope_projection(compatibility_v4)
         )
         require_accepted(
             "architecture_packet",
-            current_v4,
-            "current architecture packet v4 with capability-id runtime boundaries",
+            compatibility_v4,
+            "historical architecture packet v4 with capability-id runtime boundaries",
         )
 
-        v4_with_v5_evidence_owner = copy.deepcopy(current_v4)
+        v4_with_v5_evidence_owner = copy.deepcopy(compatibility_v4)
         v4_with_v5_evidence_owner["conformance_plan"]["cases"][0][
             "evidence_owner_landing_unit_id"
         ] = "delivery-698-contract"
@@ -4101,15 +4101,15 @@ def validate_delivery_art_artifact_contracts(
             "immutable v4 architecture packet using a v5-only evidence-owner field",
         )
 
-        staged_v5 = copy.deepcopy(current_v4)
-        staged_v5["schema_version"] = 5
-        staged_v5["artifact_id"] = "architecture-packet:delivery-698-v5"
+        current_v5 = copy.deepcopy(compatibility_v4)
+        current_v5["schema_version"] = 5
+        current_v5["artifact_id"] = "architecture-packet:delivery-698-v5"
         landing_unit_by_fixture_work_item = {
             work_item_id: landing_unit["id"]
-            for landing_unit in staged_v5["architecture"]["landing_units"]
+            for landing_unit in current_v5["architecture"]["landing_units"]
             for work_item_id in landing_unit["covered_work_item_ids"]
         }
-        for case in staged_v5["conformance_plan"]["cases"]:
+        for case in current_v5["conformance_plan"]["cases"]:
             case["evidence_owner_landing_unit_id"] = (
                 landing_unit_by_fixture_work_item[
                     case["applies_to_work_item_ids"][0]
@@ -4126,17 +4126,17 @@ def validate_delivery_art_artifact_contracts(
                 case["evidence_owner_landing_unit_id"] = (
                     "delivery-698-security-acceptance"
                 )
-        staged_v5["scope_fingerprint"] = _delivery_art_projection_digest(
-            _architecture_scope_projection(staged_v5)
+        current_v5["scope_fingerprint"] = _delivery_art_projection_digest(
+            _architecture_scope_projection(current_v5)
         )
         require_accepted(
             "architecture_packet",
-            staged_v5,
-            "staged architecture packet v5 with separate outcome applicability and evidence ownership",
+            current_v5,
+            "current architecture packet v5 with separate outcome applicability and evidence ownership",
             "architecture-v5-evidence-owner-valid",
         )
 
-        v5_without_evidence_owner = copy.deepcopy(staged_v5)
+        v5_without_evidence_owner = copy.deepcopy(current_v5)
         v5_without_evidence_owner["conformance_plan"]["cases"][0].pop(
             "evidence_owner_landing_unit_id"
         )
@@ -4146,7 +4146,7 @@ def validate_delivery_art_artifact_contracts(
             "architecture v5 case without an evidence-owner Landing Unit",
         )
 
-        v5_unknown_evidence_owner = copy.deepcopy(staged_v5)
+        v5_unknown_evidence_owner = copy.deepcopy(current_v5)
         v5_unknown_evidence_owner["conformance_plan"]["cases"][0][
             "evidence_owner_landing_unit_id"
         ] = "delivery-698-unknown"
@@ -4158,7 +4158,7 @@ def validate_delivery_art_artifact_contracts(
             expected_fragment="references unknown evidence-owner Landing Unit",
         )
 
-        v5_unordered_evidence_owner = copy.deepcopy(staged_v5)
+        v5_unordered_evidence_owner = copy.deepcopy(current_v5)
         real_git_case = next(
             case
             for case in v5_unordered_evidence_owner["conformance_plan"]["cases"]
@@ -4174,7 +4174,7 @@ def validate_delivery_art_artifact_contracts(
             expected_fragment="is not causally ordered before applicable outcome",
         )
 
-        v5_cyclic_parent_links = copy.deepcopy(staged_v5)
+        v5_cyclic_parent_links = copy.deepcopy(current_v5)
         v5_cyclic_parent_links["architecture"]["descendant_owner_map"][0][
             "parent_work_item_id"
         ] = "work-item-802"
@@ -4190,7 +4190,7 @@ def validate_delivery_art_artifact_contracts(
             expected_fragment="parent links must be acyclic",
         )
 
-        v4_with_legacy_boundaries = copy.deepcopy(current_v4)
+        v4_with_legacy_boundaries = copy.deepcopy(compatibility_v4)
         v4_with_legacy_boundaries["architecture"]["runtime_boundaries"] = (
             copy.deepcopy(
                 historical_prose_architecture["architecture"]["runtime_boundaries"]

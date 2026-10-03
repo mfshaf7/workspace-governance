@@ -72,11 +72,11 @@ sequence.
 
 Read the current and supported architecture packet versions from
 `contracts/delivery-art-operator-path.yaml`; do not infer them from an older
-activation record or hard-code a remembered version. V4 remains the current
-authoring version while v5 is staged. V1 through v3 are immutable historical
-compatibility, and v5 must not be selected for new work until the machine
-contract records its activation after OOS, WGCF, Security, and session-inventory
-gates pass.
+activation record or hard-code a remembered version. V5 is the current
+authoring version. V1 through v4 are immutable historical compatibility. The
+machine contract's v5 activation evidence records the completed OOS, WGCF,
+Security, and session-inventory gates; consumer runtime support must still be
+verified before persisting a new v5 packet.
 
 V3 introduced the Landing Unit registry, source landing graph, and one
 execution plan with start prerequisites, close prerequisites, and emitted
