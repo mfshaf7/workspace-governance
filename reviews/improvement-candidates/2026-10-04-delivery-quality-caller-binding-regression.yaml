@@ -1,0 +1,73 @@
+schema_version: 1
+id: 2026-10-04-delivery-quality-caller-binding-regression
+title: Keep Platform quality probes aligned with identity-bound broker callers
+recorded_on: '2026-10-04'
+owner_repo: workspace-governance
+summary: >-
+  The active OOS profile correctly moved all allowed callers to distinct
+  identity-bound secrets, but Platform's Delivery ART quality checker still
+  selected the first allowed id and paired it with the compatibility shared
+  secret. Projection quality therefore failed with caller_auth_invalid after
+  the earlier caller-binding lesson had been treated as closed.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-03-post-merge-review-packet-architecture-recovery-regression.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: delivery-quality-probe-used-mismatched-caller-secret
+  title: Quality projection paired a bound caller with the shared compatibility secret
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    Epic 1203 projection sync succeeded, but its required quality check returned
+    caller_auth_invalid. Live preflight proved every id in CALLER_ALLOWED_IDS
+    had an exact CALLER_AUTH_SECRETS_JSON entry, while the Platform checker
+    selected the first id and always sent CALLER_AUTH_SHARED_SECRET. OOS
+    correctly rejected the mismatched pair. Platform PR 262 now selects an
+    exact bound pair, uses the shared secret only for an allowed unbound caller,
+    and fails closed when neither pairing exists. Merged-main live proof
+    returned a clean checkpoint and zero quality findings for Epic 1203.
+  source_refs:
+  - https://github.com/mfshaf7/platform-engineering/pull/262
+  - platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+  - platform-engineering/docs/records/change-records/2026-10-04-delivery-quality-caller-binding.md
+  - openproject://work_packages/1203
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-04-delivery-quality-caller-binding-closure.yaml
+  control_refs:
+  - type: workflow
+    path: platform-engineering/products/openproject/scripts/openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Platform PR 262 pairs allowed identity-bound callers with their exact secret and isolates the shared-secret fallback to unbound callers.
+  - type: test
+    path: platform-engineering/products/openproject/scripts/test_openproject_check_delivery_art_quality.py
+    owner_repo: platform-engineering
+    note: Platform PR 262 rejects the prior first-id/shared-secret assumption in focused regression checks.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-04-delivery-quality-caller-binding.md
+    owner_repo: platform-engineering
+    note: Records identity judgment, live proof, rollback, and the exact bounded repair.
+  note: >-
+    Platform PR 262 merged the identity-pairing repair. The normal Epic 1203
+    projection sync then completed with dirty=false, quality exit 0, and zero
+    quality findings. Security PR 183 indexed the merged change record. The
+    linked after-action closes the regression without weakening OOS caller
+    binding or creating another ART defect.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
