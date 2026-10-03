@@ -88,6 +88,24 @@ signals:
   - https://github.com/mfshaf7/operator-orchestration-service/pull/265
   - wgcf://artifacts/delivery-art/sha256/d58f27720c4a8a67758a5241a11786e3f92fc38ead4b5ac4ae821c82e0a5d400
   - wgcf://artifacts/delivery-art/sha256/215b8363f7bf0be55e26b73c8b76eb805cf631d00187f85725e7b4cbb60b0eb4
+- id: v5-causal-closure-cycle-termination-gap
+  title: V5 causal closure could loop after detecting cyclic parent links
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The staged v5 semantic validator detected cyclic descendant parent links
+    but then continued into causal parent closure without a visited-node guard.
+    A malformed packet could therefore hang validation instead of returning
+    the already-established cycle error. Cross-repo inspection found the same
+    algorithm in Workspace Governance, OOS, and WGCF before v5 activation.
+    The closing control must make the closure traversal terminating in all
+    three consumers and add a cyclic-parent regression case before activation.
+  source_refs:
+  - workspace-governance/scripts/validate_contracts.py
+  - operator-orchestration-service/src/delivery-art/contracts.js
+  - workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_contracts.py
 resolution:
   after_action_ref: null
   control_refs: []

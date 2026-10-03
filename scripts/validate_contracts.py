@@ -1748,7 +1748,13 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         parent_work_item_id = parent_by_work_item.get(
                             ordered_work_item_id
                         )
-                        while isinstance(parent_work_item_id, str):
+                        visited_parent_work_item_ids: set[str] = set()
+                        while (
+                            isinstance(parent_work_item_id, str)
+                            and parent_work_item_id
+                            not in visited_parent_work_item_ids
+                        ):
+                            visited_parent_work_item_ids.add(parent_work_item_id)
                             causally_ordered_outcomes.add(parent_work_item_id)
                             parent_work_item_id = parent_by_work_item.get(
                                 parent_work_item_id
@@ -4166,6 +4172,22 @@ def validate_delivery_art_artifact_contracts(
             v5_unordered_evidence_owner,
             "architecture v5 evidence owner ordered after its applicable outcome",
             expected_fragment="is not causally ordered before applicable outcome",
+        )
+
+        v5_cyclic_parent_links = copy.deepcopy(staged_v5)
+        v5_cyclic_parent_links["architecture"]["descendant_owner_map"][0][
+            "parent_work_item_id"
+        ] = "work-item-802"
+        v5_cyclic_parent_links["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(v5_cyclic_parent_links)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            v5_cyclic_parent_links,
+            "architecture v5 cyclic parent links terminate validation",
+            expected_fragment="parent links must be acyclic",
         )
 
         v4_with_legacy_boundaries = copy.deepcopy(current_v4)
