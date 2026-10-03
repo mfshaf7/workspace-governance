@@ -679,9 +679,14 @@ def validate_delivery_art_operator_path_contract(
         errors.append(
             f"{contract_path}: architecture readiness must require a conformance plan"
         )
-    if protocol_preflight.get("merge_ready_requires_applicable_cases_pass") is not True:
+    if (
+        protocol_preflight.get(
+            "merge_ready_requires_applicable_merge_ready_cases_pass"
+        )
+        is not True
+    ):
         errors.append(
-            f"{contract_path}: merge readiness must require applicable conformance cases to pass"
+            f"{contract_path}: merge readiness must require applicable merge-ready conformance cases to pass"
         )
     if protocol_preflight.get("fidelity_class_required") is not True:
         errors.append(
@@ -739,6 +744,37 @@ def validate_delivery_art_operator_path_contract(
             )
         if not (repo_root / schema_ref).exists():
             errors.append(f"{repo_root / schema_ref}: missing Delivery ART artifact schema")
+
+    architecture_contract = artifact_contracts.get("architecture_packet") or {}
+    if architecture_contract.get("schema_version") != 4:
+        errors.append(
+            f"{contract_path}: architecture packet v4 must remain current until staged v5 activation"
+        )
+    if architecture_contract.get("supported_schema_versions") != [1, 2, 3, 4, 5]:
+        errors.append(
+            f"{contract_path}: architecture packet support must include immutable v1-v4 and staged v5"
+        )
+    if architecture_contract.get("staged_schema_version") != 5:
+        errors.append(
+            f"{contract_path}: architecture packet v5 must remain explicitly staged before activation"
+        )
+    if architecture_contract.get("staged_parity_fixture_ref") != (
+        "contracts/fixtures/delivery-art-workflow/"
+        "architecture-packet-v5-parity-vectors.valid.json"
+    ):
+        errors.append(
+            f"{contract_path}: architecture packet v5 must bind the canonical consumer parity fixture"
+        )
+    required_v5_activation = {
+        "operator-orchestration-service producer and work-session parity",
+        "workspace-governance-control-fabric custody and readiness parity",
+        "security-architecture delta review",
+        "non-pristine work-session inventory and disposition",
+    }
+    if set(architecture_contract.get("staged_activation_requirements") or []) != required_v5_activation:
+        errors.append(
+            f"{contract_path}: staged architecture packet v5 activation requirements are incomplete"
+        )
 
     readiness = operator_path.get("readiness_model") or {}
     if readiness.get("ordered_levels") != [
@@ -835,6 +871,7 @@ def validate_delivery_art_operator_path_contract(
             "architecture-ready",
             "session and scenario-execution binding",
             "positive and negative contract cases",
+            "evidence_owner_landing_unit_id",
         ):
             if required not in skill_text:
                 errors.append(
@@ -844,6 +881,10 @@ def validate_delivery_art_operator_path_contract(
         if forbidden in skill_text:
             errors.append(
                 f"{skill_path}: still teaches direct kubectl broker calls as the normal ART path"
+            )
+        if "V3 is the normal OOS and WGCF shape" in skill_text:
+            errors.append(
+                f"{skill_path}: still teaches architecture packet v3 as the normal shape"
             )
     else:
         errors.append(f"{skill_path}: missing project-delivery-operator skill")

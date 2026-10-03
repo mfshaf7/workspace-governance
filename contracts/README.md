@@ -306,9 +306,15 @@ Use these contracts to declare:
     v1 compatibility topology, separated v2 ART work dependencies, Landing
     Units, source landing order, required human gates, lifecycle and authority
     model, explicit protocol applicability, complete protocol conformance
-    dimensions when applicable, dimension-bound executable cases,
-    contradictions, integrity, and opaque WGCF artifact-registry custody with a
-    digest-bound custody receipt
+    dimensions when applicable, dimension-bound executable cases, and staged
+    v5 separation between outcome applicability and one evidence-owner Landing
+    Unit per atomic case; v4 remains the current authoring version until the
+    declared consumer, Security, and session-inventory activation gates pass
+  - also defines contradictions, integrity, and opaque WGCF artifact-registry
+    custody with a digest-bound custody receipt
+- `schemas/delivery-art-architecture-v5-parity-vectors.schema.json`
+  - defines the shared owner-and-readiness selection vectors that OOS and WGCF
+    must pass before v5 can become current
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and
@@ -341,6 +347,8 @@ Use these contracts to declare:
     finalized artifact, and source-artifact custody receipt examples consumed
     by `validate_contracts.py`; the validator derives and proves valid receipt
     subjects for the other three readiness levels as well
+  - includes the staged v5 parity vector proving that Feature outcome scope
+    does not make every applicable work item an evidence producer
   - the validator also proves
     negative cases for stale decisions, inexact Git refs, failed merge
     evidence, prose result strings, partial or unresolved acceptance mapping,

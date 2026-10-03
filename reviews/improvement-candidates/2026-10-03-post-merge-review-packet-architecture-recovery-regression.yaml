@@ -1,0 +1,111 @@
+schema_version: 1
+id: 2026-10-03-post-merge-review-packet-architecture-recovery-regression
+title: Prevent invalid operating-readiness allocation and preserve merged recovery evidence
+recorded_on: '2026-10-03'
+owner_repo: workspace-governance
+summary: >-
+  Delivery 1203 architecture validation checked topology, conformance coverage,
+  polarity, and fidelity but used one applicability field for two different
+  meanings: which work-item outcomes depend on a case and which Landing Unit
+  must produce its evidence. Invalid live-backend obligations were
+  therefore projected onto supporting children and discovered only after work
+  item 1228 had merged. Superseding the architecture then exposed a second gap:
+  the normal work-session recovery command could not preserve the already-
+  merged source and durable merge-ready Review Packet while moving work to the
+  corrected architecture.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-24-art-architecture-topology-capture-regression.yaml
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: conformance-applicability-and-evidence-ownership-conflated
+  title: Architecture approval conflated outcome applicability with evidence ownership
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The schema-v4 architecture contract models only
+    applies_to_work_item_ids. Workspace validation and OOS runtime projection
+    both interpret that same list as the acceptance scope and as the set of
+    work items required to provide evidence. WGCF readiness selection repeats
+    the same interpretation. Those are different concepts for
+    composed Feature outcomes: a Feature may depend on an operating case while
+    one or more explicitly assigned activation work items produce the proof.
+    The overloaded field allowed live-backend obligations to be projected onto
+    supporting source, Console, or Security children and still pass
+    architecture validation. The canonical project-delivery-operator skill
+    compounded the risk by still calling v3 the normal shape after v4 was
+    activated. The error was found only when work item 1228
+    attempted finalization, repeating the closed topology and evidence-
+    authoring lesson. The durable fix must model outcome applicability and
+    evidence ownership separately at Landing Unit granularity, validate causal
+    closure from the evidence owner to each external applicable outcome, and
+    make OOS and WGCF select evidence by the declared owner and readiness phase.
+  source_refs:
+  - openproject://work_packages/1203
+  - openproject://work_packages/1228
+  - wgcf://artifacts/delivery-art/sha256/d58f27720c4a8a67758a5241a11786e3f92fc38ead4b5ac4ae821c82e0a5d400
+  - wgcf://artifacts/delivery-art/sha256/215b8363f7bf0be55e26b73c8b76eb805cf631d00187f85725e7b4cbb60b0eb4
+  - workspace-governance/reviews/improvement-candidates/2026-09-30-delivery-art-historical-artifact-compatibility-gap.yaml
+  - workspace-governance/skills-src/project-delivery-operator/SKILL.md
+  - 'conversation:2026-10-03 operator stated that the planning mistake keeps recurring and must be fixed now'
+- id: post-merge-evidence-recovery-gap
+  title: Architecture supersession left a merged evidence-bearing session without a legal recovery transition
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    OOS correctly rejected finalization when the earlier architecture assigned
+    operating-ready cases to supporting source child 1228. After the corrected
+    architecture became current, work status correctly projected
+    architecture-superseded, but work recover rejected the session solely
+    because its already-merged source had a merge-ready Review Packet. The
+    documented recovery contract handles merged sessions only when no Review
+    Packet exists, so the two fail-closed controls form a dead end. The
+    strongest bounded repair is a distinct recovery mode that accepts only an
+    exact merged PR plus an existing non-finalized merge-ready packet, archives
+    both without rewriting them, emits a digest-bound recovery receipt, and
+    still requires a new Landing Unit identity and full recovery-supersession
+    chain under the current architecture.
+  source_refs:
+  - openproject://work_packages/1228
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/265
+  - wgcf://artifacts/delivery-art/sha256/d58f27720c4a8a67758a5241a11786e3f92fc38ead4b5ac4ae821c82e0a5d400
+  - wgcf://artifacts/delivery-art/sha256/215b8363f7bf0be55e26b73c8b76eb805cf631d00187f85725e7b4cbb60b0eb4
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    The evidence-preserving recovery mode has landed through OOS PR 266 and was
+    exercised successfully against work item 1228. The candidate remains open
+    because the earlier architecture control still does not prevent invalid
+    operating-readiness allocation. The operator directed that the recurring
+    planning mistake be fixed now without inventing additional ART defects.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-06'
+  note: >-
+    Stage Delivery ART Architecture Packet v5 so conformance cases declare
+    outcome applicability separately from one exact evidence-owner Landing
+    Unit. Enforce causal closure in Workspace Governance, owner- and phase-based
+    selection in OOS and WGCF, and an explicit post-merge operating-evidence
+    acquisition step before finalization. Keep v4 current until consumer parity,
+    Security delta review, and non-pristine session inventory pass; then
+    activate v5, supersede the Delivery 1203 packet, and close this regression
+    through a linked after-action with exact landed control references.

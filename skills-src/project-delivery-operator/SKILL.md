@@ -58,28 +58,35 @@ replay and recovery semantics, bounded failure mapping, authorization integrity
 and replay resistance, session and scenario-execution binding, complete owner
 receipts, immutable baseline and restore evidence, lifecycle-state matrices,
 cross-artifact timeline ordering, shared-validator compatibility, and
-`positive and negative contract cases`. Bind every case to the work items and
-dimensions it proves; declare the applicable dimensions for each work item,
-and require positive and negative `merge-ready` cases for every applicable
-work-item/dimension pair. Architecture readiness requires the
+`positive and negative contract cases`. Bind every case to the work-item
+outcomes and dimensions it proves; declare the applicable dimensions for each
+work item, and require positive and negative `merge-ready` cases for every
+applicable work-item/dimension pair. Under v5, separately bind each atomic case
+to one evidence-owner Landing Unit. Architecture readiness requires the
 approved plan, not implementation results that cannot exist yet. Applicable
-cases must pass before merge readiness. Use a `real-git` case for Git-history
-causality, and declare the exact work items and dimensions whose claims require
-that fidelity; a synthetic resolver cannot prove a real commit sequence.
+`merge-ready` cases must pass before merge readiness; owned `operating-ready`
+cases pass after merge and before finalization. Use a `real-git` case for
+Git-history causality, and declare the exact work items and dimensions whose
+claims require that fidelity; a synthetic resolver cannot prove a real commit
+sequence.
 
-Workspace Governance accepts architecture packet v1, v2, and v3. V1 and v2
-remain bounded compatibility for historical packets and recovery. V3 is the
-normal OOS and WGCF shape. It keeps the Landing Unit registry and source
-landing graph, and replaces the v2 ART graph with one execution plan that
-declares start prerequisites, close prerequisites, and emitted human gates per
-work item. Gate evidence prerequisites must precede the authority item that
-emits the gate. Never infer source landing order from ART readiness or store a
-second inverse dependency list.
+Read the current and supported architecture packet versions from
+`contracts/delivery-art-operator-path.yaml`; do not infer them from an older
+activation record or hard-code a remembered version. V4 remains the current
+authoring version while v5 is staged. V1 through v3 are immutable historical
+compatibility, and v5 must not be selected for new work until the machine
+contract records its activation after OOS, WGCF, Security, and session-inventory
+gates pass.
 
-Contract correction `1121`, OOS adoption `1122`, WGCF custody and readiness
-`1123`, and Workspace Governance activation `1124` establish the active v3
-path. The activation contract binds the exact durable v3 packet and custody
-receipt. V1 and v2 must not be selected for new normal-path architecture work.
+V3 introduced the Landing Unit registry, source landing graph, and one
+execution plan with start prerequisites, close prerequisites, and emitted
+human gates. V4 retained that topology and required capability-id runtime
+boundaries. V5 retains both and separates outcome applicability from evidence
+production. Each atomic v5 case uses `applies_to_work_item_ids` for acceptance
+scope and exactly one `evidence_owner_landing_unit_id` for accountability. Split
+a case when multiple Landing Units must independently prove it. The evidence
+owner must causally precede every external applicable outcome; do not infer
+ownership from work-item type, repository role, parentage, or applicability.
 
 Keep the four readiness decisions distinct:
 
@@ -436,9 +443,13 @@ activation items land.
      final evidence edits with heredocs, raw redirection, or one-off overwrites
      unless the generator itself is the reviewed control
    - after merge, build the final Review Packet from that predecessor, update
-     it to `merged_pr`, add the merge commit and later evidence without
-     rewriting reviewed evidence, resolve the matching WGCF readiness receipt,
-     finalize it, and use the finalized digest in ART completion evidence
+     it to `merged_pr`, preserve the reviewed evidence, and acquire every
+     `operating-ready` conformance case owned by that Landing Unit at its
+     planned fidelity before finalization; outcome applicability does not make
+     other Landing Units evidence producers
+   - only after that explicit post-merge evidence step, add the merge commit
+     and later evidence, resolve the matching WGCF readiness receipt, finalize
+     the packet, and use the finalized digest in ART completion evidence
    - do not mark source-backed ART children `done` until a finalized Review
      Packet covers them with merged PR evidence, approved direct-land evidence,
      or equivalent durable source evidence

@@ -151,6 +151,13 @@ DELIVERY_ART_ARTIFACT_CASES = {
         ("contracts/fixtures/delivery-art-workflow/readiness-receipt.valid.json",),
     ),
 }
+DELIVERY_ART_ARCHITECTURE_V5_PARITY_SCHEMA_REF = (
+    "contracts/schemas/delivery-art-architecture-v5-parity-vectors.schema.json"
+)
+DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF = (
+    "contracts/fixtures/delivery-art-workflow/"
+    "architecture-packet-v5-parity-vectors.valid.json"
+)
 AGENT_ACTION_ARTIFACT_CASES = {
     "request": (
         "contracts/schemas/agent-action-request.schema.json",
@@ -585,6 +592,28 @@ def _delivery_art_graph_is_acyclic(
             if indegree[target] == 0:
                 ready.append(target)
     return visited_count == len(nodes)
+
+
+def _delivery_art_graph_has_path(
+    edges: list[tuple[str, str]], source: str, target: str
+) -> bool:
+    """Return whether directed closure ordering connects source to target."""
+    if source == target:
+        return True
+    adjacency: dict[str, set[str]] = {}
+    for edge_source, edge_target in edges:
+        adjacency.setdefault(edge_source, set()).add(edge_target)
+    pending = list(adjacency.get(source, set()))
+    visited = set()
+    while pending:
+        current = pending.pop()
+        if current == target:
+            return True
+        if current in visited:
+            continue
+        visited.add(current)
+        pending.extend(adjacency.get(current, set()))
+    return False
 
 
 def _artifact_timestamp(value: object) -> datetime | None:
@@ -1136,9 +1165,10 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             "architecture.dependency_merge_dag.merge_order violates "
                             f"{before} before {after}: {before_repo} must precede {after_repo}"
                         )
-        elif schema_version in {2, 3, 4}:
+        elif schema_version in {2, 3, 4, 5}:
             execution_plan_by_work_item = {}
             emitted_gate_authorities = {}
+            combined_schedule_edges = []
             if schema_version == 2:
                 work_graph = _artifact_object(
                     architecture.get("work_dependency_graph")
@@ -1336,7 +1366,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             if not _delivery_art_graph_is_acyclic(source_nodes, source_edges):
                 errors.append("architecture.source_landing_graph must be acyclic")
 
-            if schema_version in {3, 4}:
+            if schema_version in {3, 4, 5}:
                 source_dependents = {}
                 for prerequisite, dependent in source_edges:
                     source_dependents.setdefault(prerequisite, set()).add(dependent)
@@ -1475,7 +1505,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             f"architecture human gate {gate_id} blocks source merge for non-source Landing Units: "
                             + ", ".join(sorted(non_source_landing_units))
                         )
-                if schema_version in {3, 4}:
+                if schema_version in {3, 4, 5}:
                     evidence_prerequisites = set(
                         _artifact_string_list(
                             gate.get("evidence_prerequisite_work_item_ids")
@@ -1510,7 +1540,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             + ", ".join(sorted(missing_authority_prerequisites))
                         )
 
-            if schema_version in {3, 4}:
+            if schema_version in {3, 4, 5}:
                 declared_gate_ids = set(gate_ids)
                 emitted_gate_ids = set(emitted_gate_authorities)
                 unknown_emitted_gates = emitted_gate_ids - declared_gate_ids
@@ -1674,6 +1704,9 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             for work_item_id, dimensions in applicability_by_work_item.items()
             for dimension in dimensions
         }
+        execution_order_edges = (
+            list(combined_schedule_edges) if schema_version == 5 else []
+        )
         for case in conformance_cases:
             case_id = case.get("id")
             applicability = set(
@@ -1682,6 +1715,51 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             case_dimensions = set(
                 _artifact_string_list(case.get("dimension_ids"))
             )
+            if schema_version == 5:
+                evidence_owner_landing_unit_id = case.get(
+                    "evidence_owner_landing_unit_id"
+                )
+                evidence_owner_landing_unit = landing_unit_by_id.get(
+                    evidence_owner_landing_unit_id
+                )
+                if evidence_owner_landing_unit is None:
+                    errors.append(
+                        f"conformance case {case_id} references unknown evidence-owner Landing Unit "
+                        f"{evidence_owner_landing_unit_id}"
+                    )
+                else:
+                    evidence_owner_work_items = set(
+                        _artifact_string_list(
+                            evidence_owner_landing_unit.get("covered_work_item_ids")
+                        )
+                    )
+                    causally_ordered_outcomes = set(evidence_owner_work_items)
+                    for evidence_owner_work_item_id in evidence_owner_work_items:
+                        causally_ordered_outcomes.update(
+                            candidate_work_item_id
+                            for candidate_work_item_id in covered_work_items
+                            if _delivery_art_graph_has_path(
+                                execution_order_edges,
+                                evidence_owner_work_item_id,
+                                candidate_work_item_id,
+                            )
+                        )
+                    for ordered_work_item_id in list(causally_ordered_outcomes):
+                        parent_work_item_id = parent_by_work_item.get(
+                            ordered_work_item_id
+                        )
+                        while isinstance(parent_work_item_id, str):
+                            causally_ordered_outcomes.add(parent_work_item_id)
+                            parent_work_item_id = parent_by_work_item.get(
+                                parent_work_item_id
+                            )
+                    for applicable_work_item_id in applicability:
+                        if applicable_work_item_id not in causally_ordered_outcomes:
+                            errors.append(
+                                f"conformance case {case_id} evidence-owner Landing Unit "
+                                f"{evidence_owner_landing_unit_id} is not causally ordered before "
+                                f"applicable outcome {applicable_work_item_id}"
+                            )
             conformance_items.update(applicability)
             executable_dimensions.update(case_dimensions)
             for work_item_id in applicability.intersection(covered_work_items):
@@ -3023,6 +3101,108 @@ def delivery_art_artifact_integrity_errors(payload: dict) -> list[str]:
     return errors
 
 
+def validate_delivery_art_architecture_v5_parity_vectors(
+    errors: list[str], repo_root: Path
+) -> None:
+    schema_path = repo_root / DELIVERY_ART_ARCHITECTURE_V5_PARITY_SCHEMA_REF
+    fixture_path = repo_root / DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF
+    if not schema_path.exists():
+        errors.append(
+            f"{DELIVERY_ART_ARCHITECTURE_V5_PARITY_SCHEMA_REF}: v5 parity schema is missing"
+        )
+        return
+    if not fixture_path.exists():
+        errors.append(
+            f"{DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF}: v5 parity fixture is missing"
+        )
+        return
+    validate_schema(errors, fixture_path, schema_path)
+    payload = load_json(fixture_path)
+    for vector in _artifact_object_list(payload.get("vectors")):
+        vector_id = vector.get("id")
+        landing_units = _artifact_object_list(vector.get("landing_units"))
+        cases = _artifact_object_list(vector.get("cases"))
+        expectations = _artifact_object_list(vector.get("selection_expectations"))
+        owner_work_items = {
+            unit.get("id"): set(
+                _artifact_string_list(unit.get("covered_work_item_ids"))
+            )
+            for unit in landing_units
+            if isinstance(unit.get("id"), str)
+        }
+        parent_by_work_item = _artifact_object(vector.get("parent_by_work_item"))
+        execution_edges = [
+            (
+                edge.get("prerequisite_work_item_id"),
+                edge.get("dependent_work_item_id"),
+            )
+            for edge in _artifact_object_list(vector.get("execution_edges"))
+            if isinstance(edge.get("prerequisite_work_item_id"), str)
+            and isinstance(edge.get("dependent_work_item_id"), str)
+        ]
+        expected_by_owner_and_phase = {
+            (entry.get("landing_unit_id"), entry.get("target_readiness")): set(
+                _artifact_string_list(entry.get("selected_case_ids"))
+            )
+            for entry in expectations
+        }
+        for key, expected_case_ids in expected_by_owner_and_phase.items():
+            landing_unit_id, target_readiness = key
+            actual_case_ids = {
+                case.get("id")
+                for case in cases
+                if case.get("evidence_owner_landing_unit_id") == landing_unit_id
+                and case.get("target_readiness") == target_readiness
+            }
+            if actual_case_ids != expected_case_ids:
+                errors.append(
+                    f"{DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF}: vector {vector_id} "
+                    f"selection mismatch for {landing_unit_id}/{target_readiness}"
+                )
+        demonstrates_separation = False
+        for case in cases:
+            case_id = case.get("id")
+            evidence_owner_landing_unit_id = case.get(
+                "evidence_owner_landing_unit_id"
+            )
+            owned_work_items = owner_work_items.get(
+                evidence_owner_landing_unit_id, set()
+            )
+            applicable_work_items = set(
+                _artifact_string_list(case.get("applies_to_work_item_ids"))
+            )
+            external_outcomes = applicable_work_items - owned_work_items
+            demonstrates_separation = demonstrates_separation or bool(
+                external_outcomes
+            )
+            ordered_outcomes = set(owned_work_items)
+            for owned_work_item in owned_work_items:
+                ordered_outcomes.update(
+                    candidate_work_item
+                    for candidate_work_item in parent_by_work_item
+                    if _delivery_art_graph_has_path(
+                        execution_edges, owned_work_item, candidate_work_item
+                    )
+                )
+            for ordered_work_item in list(ordered_outcomes):
+                parent_work_item = parent_by_work_item.get(ordered_work_item)
+                while isinstance(parent_work_item, str):
+                    ordered_outcomes.add(parent_work_item)
+                    parent_work_item = parent_by_work_item.get(parent_work_item)
+            unordered_outcomes = applicable_work_items - ordered_outcomes
+            if unordered_outcomes:
+                errors.append(
+                    f"{DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF}: vector {vector_id} "
+                    f"case {case_id} has causally unordered outcomes: "
+                    + ", ".join(sorted(unordered_outcomes))
+                )
+        if not demonstrates_separation:
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF}: vector {vector_id} "
+                "must separate at least one external outcome from its evidence owner"
+            )
+
+
 def validate_delivery_art_artifact_contracts(
     errors: list[str],
     repo_root: Path,
@@ -3903,6 +4083,89 @@ def validate_delivery_art_artifact_contracts(
             "architecture_packet",
             current_v4,
             "current architecture packet v4 with capability-id runtime boundaries",
+        )
+
+        v4_with_v5_evidence_owner = copy.deepcopy(current_v4)
+        v4_with_v5_evidence_owner["conformance_plan"]["cases"][0][
+            "evidence_owner_landing_unit_id"
+        ] = "delivery-698-contract"
+        require_rejected(
+            "architecture_packet",
+            v4_with_v5_evidence_owner,
+            "immutable v4 architecture packet using a v5-only evidence-owner field",
+        )
+
+        staged_v5 = copy.deepcopy(current_v4)
+        staged_v5["schema_version"] = 5
+        staged_v5["artifact_id"] = "architecture-packet:delivery-698-v5"
+        landing_unit_by_fixture_work_item = {
+            work_item_id: landing_unit["id"]
+            for landing_unit in staged_v5["architecture"]["landing_units"]
+            for work_item_id in landing_unit["covered_work_item_ids"]
+        }
+        for case in staged_v5["conformance_plan"]["cases"]:
+            case["evidence_owner_landing_unit_id"] = (
+                landing_unit_by_fixture_work_item[
+                    case["applies_to_work_item_ids"][0]
+                ]
+            )
+            if case["id"] in {
+                "case:security-acceptance-positive",
+                "case:security-acceptance-negative",
+            }:
+                case["applies_to_work_item_ids"] = [
+                    "work-item-801",
+                    "work-item-803",
+                ]
+                case["evidence_owner_landing_unit_id"] = (
+                    "delivery-698-security-acceptance"
+                )
+        staged_v5["scope_fingerprint"] = _delivery_art_projection_digest(
+            _architecture_scope_projection(staged_v5)
+        )
+        require_accepted(
+            "architecture_packet",
+            staged_v5,
+            "staged architecture packet v5 with separate outcome applicability and evidence ownership",
+            "architecture-v5-evidence-owner-valid",
+        )
+
+        v5_without_evidence_owner = copy.deepcopy(staged_v5)
+        v5_without_evidence_owner["conformance_plan"]["cases"][0].pop(
+            "evidence_owner_landing_unit_id"
+        )
+        require_rejected(
+            "architecture_packet",
+            v5_without_evidence_owner,
+            "architecture v5 case without an evidence-owner Landing Unit",
+        )
+
+        v5_unknown_evidence_owner = copy.deepcopy(staged_v5)
+        v5_unknown_evidence_owner["conformance_plan"]["cases"][0][
+            "evidence_owner_landing_unit_id"
+        ] = "delivery-698-unknown"
+        require_rejected(
+            "architecture_packet",
+            v5_unknown_evidence_owner,
+            "architecture v5 case with an unknown evidence-owner Landing Unit",
+            "architecture-v5-evidence-owner-invalid",
+            expected_fragment="references unknown evidence-owner Landing Unit",
+        )
+
+        v5_unordered_evidence_owner = copy.deepcopy(staged_v5)
+        real_git_case = next(
+            case
+            for case in v5_unordered_evidence_owner["conformance_plan"]["cases"]
+            if case["id"] == "case:real-git-positive"
+        )
+        real_git_case["evidence_owner_landing_unit_id"] = (
+            "delivery-698-security-acceptance"
+        )
+        require_rejected(
+            "architecture_packet",
+            v5_unordered_evidence_owner,
+            "architecture v5 evidence owner ordered after its applicable outcome",
+            expected_fragment="is not causally ordered before applicable outcome",
         )
 
         v4_with_legacy_boundaries = copy.deepcopy(current_v4)
@@ -6919,6 +7182,7 @@ def main() -> int:
                 lifecycle_transition_projection_schema_path,
             )
 
+    validate_delivery_art_architecture_v5_parity_vectors(errors, repo_root)
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
     )
