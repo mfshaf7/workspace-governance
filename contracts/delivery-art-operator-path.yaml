@@ -516,28 +516,59 @@ delivery_art_operator_path:
   artifact_contracts:
     architecture_packet:
       schema_ref: contracts/schemas/delivery-art-architecture-packet.schema.json
-      schema_version: 4
+      schema_version: 5
       supported_schema_versions:
         - 1
         - 2
         - 3
         - 4
         - 5
-      staged_schema_version: 5
-      staged_parity_fixture_ref: contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json
-      staged_activation_requirements:
-        - operator-orchestration-service producer and work-session parity
-        - workspace-governance-control-fabric custody and readiness parity
-        - security-architecture delta review
-        - non-pristine work-session inventory and disposition
+      parity_fixture_ref: contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json
       compatibility_schema_versions:
         - 1
         - 2
         - 3
+        - 4
       new_work_requires_current_schema: true
       historical_versions_are_read_only: true
       bound_historical_session_may_continue_if_material_semantics_unchanged: true
       current_pointer_cutover_requires_non_pristine_session_inventory: true
+      activation_evidence:
+        evidence_captured_at: '2026-10-03T07:33:59.625Z'
+        scope: dev-integration
+        prerequisite_changes:
+          workspace_governance_foundation:
+            pull_request: https://github.com/mfshaf7/workspace-governance/pull/229
+            merge_commit: acad88ce4489a96a48bee75cd19abfa44518efda
+          workspace_governance_cycle_termination:
+            pull_request: https://github.com/mfshaf7/workspace-governance/pull/230
+            merge_commit: cd75086b7ab0266cfb055d22ab3bc02fadb9f2ba
+          operator_orchestration_service_support:
+            pull_request: https://github.com/mfshaf7/operator-orchestration-service/pull/268
+            merge_commit: 1c99cc98cc8beebbb56d37307bc1b2e8b2fded1d
+          operator_orchestration_service_cycle_termination:
+            pull_request: https://github.com/mfshaf7/operator-orchestration-service/pull/269
+            merge_commit: a1458b2ce5888e4c00b0ff66724e64d656ce25b8
+          workspace_governance_control_fabric_support:
+            pull_request: https://github.com/mfshaf7/workspace-governance-control-fabric/pull/95
+            merge_commit: 897bb984fe6821a9872595d1f5e70b0ce42ab419
+        security_review:
+          decision: approved-dev-integration
+          review_ref: security-architecture/docs/reviews/components/2026-10-03-delivery-art-architecture-v5-evidence-ownership.md
+          pull_request: https://github.com/mfshaf7/security-architecture/pull/176
+          merge_commit: 26afd611c7ef75a54af9e7b695c1f60d38224080
+          stage_and_prod: not-approved
+        work_session_inventory:
+          captured_at: '2026-10-03T07:33:59.625Z'
+          source: operator-orchestration-service-dev-integration-runtime-store
+          active_session_count: 3
+          delivery_1203_session_count: 0
+          v4_bound_session_count: 0
+          retained_unbound_cleanup_blocked_delivery_ids:
+            - delivery-892
+            - delivery-898
+            - delivery-900
+          disposition: retained-unrelated-cleanup-residue
       producer_repo: operator-orchestration-service
       custody_repo: workspace-governance-control-fabric
       durable_when: operator decision is architecture-ready or blocked-pending-architecture-decision
