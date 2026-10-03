@@ -14,7 +14,7 @@ summary: >-
   merged source and durable merge-ready Review Packet while moving work to the
   corrected architecture.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-24-art-architecture-topology-capture-regression.yaml
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -142,11 +142,11 @@ signals:
     that the operator runtime directory was root-owned, the user systemd
     manager was absent, and the interrupted Temporal Helm release was still
     pending. Fail-closed cleanup preserved persistent state, but the late checks
-    caused repeated full composition cycles. The proposed durable control is a
+    caused repeated full composition cycles. The durable control is a
     non-mutating composition preflight that proves source dependency readiness,
     operator runtime-directory ownership, the user systemd/auto-resume path,
     and absence of pending Helm operations before the first profile mutation.
-    This Platform control remains unimplemented pending operator approval.
+    Platform PR 261 implements that fail-fast composition boundary.
   source_refs:
   - platform-engineering/scripts/dev_integration.py
   - platform-engineering/scripts/dev_integration_auto_resume.py
@@ -164,13 +164,61 @@ signals:
     composition as inactive, even though the surrounding refinement-catalog
     composition status proved those dependencies active. The standalone smoke
     action does not carry the current composition identifier, so it cannot prove
-    the composed dependencies it appears to report. The proposed durable
-    control is for smoke to derive or receive the active composition binding and
-    fail when expected composed dependencies are not checked. This Platform
-    control remains unimplemented pending operator approval.
+    the composed dependencies it appears to report. The durable control makes
+    smoke derive or receive the one active operator-owned composition binding
+    and fail on missing, degraded, or ambiguous context. Platform PR 261
+    implements and tests that behavior.
   source_refs:
   - platform-engineering/scripts/dev_integration.py
   - /home/mfshaf7/projects/.dev-integration/sessions/accepted-idea-delivery-mfshaf7-20261003T095658Z/accepted-idea-delivery-mfshaf7-20261003T095658Z-smoke-20261003T100420691011Z-f0cfb8c4.result.yaml
+- id: composition-aware-smoke-exposed-unbound-inbound-caller
+  title: Active-context smoke exposed a shared-secret caller on an identity-bound read route
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - rollout-evidence-gap
+  finding: >-
+    The first composition-aware accepted-idea-delivery smoke correctly stopped
+    reporting Refinement, Catalog, Workspace Intake, and Workspace Inventory as
+    inactive, then received caller_identity_unbound from the read-only Workspace
+    Inventory registry route. Live preflight proved the composition-owned OOS
+    and WGCF caller ids, enable flags, endpoints, and credential digests matched.
+    Contract and code truth then proved the inbound smoke caller still used only
+    CALLER_AUTH_SHARED_SECRET while the registry route requires a caller-specific
+    credential. The old standalone smoke concealed this profile defect because
+    it never invoked the composed registry check. Closure now requires the OOS
+    profile to bind its exact smoke caller id in CALLER_AUTH_SECRETS_JSON and a
+    live composition-aware smoke to prove the route without weakening its
+    identity requirement.
+  source_refs:
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/smoke.sh
+  - operator-orchestration-service/test/workspace-inventory-http.test.js
+  - 'live:2026-10-03 refinement-catalog smoke returned caller_identity_unbound on GET /v1/workspace-inventory/registry'
+- id: first-caller-binding-repair-reused-the-shared-secret
+  title: The first caller-binding repair violated the existing distinct-secret invariant
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - unsafe-assumption
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    The first OOS repair added the smoke caller to CALLER_AUTH_SECRETS_JSON but
+    reused BROKER_CALLER_SECRET as both that caller-specific value and
+    CALLER_AUTH_SHARED_SECRET. OOS correctly refuses this ambiguous
+    configuration, so the exact-source composition rehearsal entered
+    CrashLoopBackOff with the explicit distinct-secret validation error. The
+    source assertion proved only that the map entry existed and did not inspect
+    the already-enforced configuration invariant in src/config.js. The repair
+    must generate a separate private compatibility shared secret, preserve
+    BROKER_CALLER_SECRET for the exact smoke identity, test both projections,
+    and repeat the live composition-aware smoke before closure.
+  source_refs:
+  - operator-orchestration-service/src/config.js
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/common.sh
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+  - operator-orchestration-service/test/devint-host-service-profile.test.js
+  - 'live:2026-10-03 OOS startup rejected CALLER_AUTH_SECRETS_JSON because its value matched CALLER_AUTH_SHARED_SECRET'
 - id: v5-predecision-preflight-required-an-evidence-owner
   title: V5 pre-decision work preflight selected owner evidence before an owner existed
   trigger: machine-visible-workflow-drift
@@ -194,8 +242,50 @@ signals:
   - operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-v5-predecision-preflight.md
   - openproject://work_packages/1229
   - wgcf://artifacts/delivery-art/sha256/1615866d716014b21d3aec544b04f24e2d48c4d8cc49ff844efacd0b3f45e240
+- id: composition-smoke-exposed-expired-workspace-operations-token
+  title: Stronger composition smoke exposed stale Workspace operations credentials
+  trigger: late-host-drift-discovery
+  failure_classes:
+  - host-drift-undetected
+  - rollout-evidence-gap
+  finding: >-
+    After the caller binding was corrected, the composed registry request
+    reached GitHub and failed with provider HTTP 401. Direct in-pod proof showed
+    that the short-lived Workspace operations installation token had expired;
+    the earlier status surface had proved only structural projection and not
+    provider freshness. Exact-source activation correctly blocked rotation
+    after the source pins changed, so Security PR 181 reviewed the repaired
+    OOS and Platform heads before the Platform pin refresh landed. Merged-main
+    delivery and status now prove authenticated Intake preparation, Inventory
+    registry readback, and invalid-caller denial for the current session.
+  source_refs:
+  - https://github.com/mfshaf7/security-architecture/pull/181
+  - https://github.com/mfshaf7/platform-engineering/pull/261
+  - platform-engineering/scripts/workspace_intake_identity.py
+  - /tmp/workspace-intake-identity-status-merged-2026-10-03.json
+- id: agent-source-publication-rejected-workflow-file-change
+  title: Landing Unit planning assumed a workflow-file edit the source identity could not publish
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: >-
+    The first Platform branch history changed a GitHub Actions workflow before
+    checking the Agent source identity's intentional lack of workflow-write
+    permission. Publication failed closed. Inspection then proved the existing
+    CI entrypoint already imports the expanded composition test suite, so the
+    workflow edit was unnecessary. The branch was rebuilt as one Agent-authored
+    commit containing only the required product changes and published without
+    broadening identity permissions. Future Landing Unit design must prove the
+    existing CI entrypoint and source-identity path boundary before adding a
+    workflow-file change.
+  source_refs:
+  - https://github.com/mfshaf7/platform-engineering/pull/261
+  - platform-engineering/scripts/test_dev_integration_compositions.py
+  - platform-engineering/.github/workflows/validate.yml
+  - platform-engineering/security/agent-source-identity.yaml
 resolution:
-  after_action_ref: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-03-dev-integration-preflight-smoke-context-closure.yaml
   control_refs:
   - type: contract
     path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
@@ -227,6 +317,36 @@ resolution:
     note: >-
       PR 272 repairs schema-v5 pre-decision projection while retaining exact
       evidence-owner selection after the Landing Unit decision.
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration_preflight.py
+    owner_repo: platform-engineering
+    note: >-
+      Platform PR 261 proves composition-wide source, host restart, writable
+      state, and Helm prerequisites before the first profile mutation.
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration.py
+    owner_repo: platform-engineering
+    note: >-
+      Platform PR 261 derives one active operator-owned composition for profile
+      smoke and rejects missing, degraded, or ambiguous composition context.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-03-devint-smoke-distinct-caller-secret.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 274 binds the exact smoke caller with a secret distinct from the
+      compatibility shared secret and validates the invariant before mutation.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-03-workspace-operations-post-repair-pin-refresh.md
+    owner_repo: security-architecture
+    note: >-
+      Security PR 181 accepts the exact repaired OOS and Platform revisions
+      used for Workspace operations credential delivery and runtime proof.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-03-dev-integration-composition-preflight-and-smoke-context.md
+    owner_repo: platform-engineering
+    note: >-
+      Platform PR 261 records implementation, validation, live proof, rollback,
+      and the retained dev-integration-only boundary.
   note: >-
     The evidence-preserving recovery mode has landed through OOS PR 266 and was
     exercised successfully against work item 1228. Architecture Packet v5 and
@@ -235,15 +355,15 @@ resolution:
     repair and pre-decision repair are also merged and proven in the live
     composition. Delivery 1203 now points to the durable v5 packet at
     sha256:1615866d716014b21d3aec544b04f24e2d48c4d8cc49ff844efacd0b3f45e240.
-    The candidate remains open only until the operator decides whether to
-    approve the proposed Platform composition-preflight and smoke-context
-    controls. No additional ART Defect was created for this maintenance.
+    The approved Platform composition-preflight and composition-aware smoke
+    controls landed in PR 261. The stronger smoke exposed the OOS profile's
+    unbound caller, rejected the first shared-secret repair through the existing
+    invariant, and then proved the distinct-secret correction from OOS PR 274.
+    Security PR 181 accepted the exact repaired source pins. Canonical merged-
+    main composition up, status, smoke, and Workspace operations identity status
+    all passed on 2026-10-03. The full closure is recorded in the linked
+    after-action. No additional ART Defect was created for this maintenance.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-06'
-  note: >-
-    Present the two still-unimplemented Platform controls for operator
-    decision: preflight all composition source/restart prerequisites before
-    mutation, and bind profile smoke to its active composition context. Close
-    this regression only through a linked after-action after the approved
-    controls land with exact evidence.
+  owner_repo: null
+  due_on: null
+  note: null

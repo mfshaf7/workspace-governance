@@ -1,0 +1,247 @@
+schema_version: 1
+id: 2026-10-03-dev-integration-preflight-smoke-context-closure
+title: Composition preflight and context-aware smoke now fail before costly reconciliation
+recorded_on: '2026-10-03'
+owner_repo: workspace-governance
+summary: >-
+  The Delivery 1203 recovery work exposed a chain of distinct control gaps:
+  architecture v4 conflated outcome applicability with evidence ownership,
+  work recovery could not preserve merged evidence after supersession, broad
+  initiative reads and pre-decision owner selection made normal work fragile,
+  and dev-integration composition checks occurred too late or outside their
+  active context. The architecture and work-session controls were repaired
+  first. Platform now preflights the complete composition before mutation and
+  binds profile smoke to the one active composition. The stronger proof then
+  exposed and closed an OOS caller-secret defect and an expired exact-source
+  Workspace operations credential. Canonical merged-main up, status, smoke,
+  and identity proof all passed without creating another ART Defect.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-03-post-merge-review-packet-architecture-recovery-regression.yaml
+- https://github.com/mfshaf7/operator-orchestration-service/pull/266
+- https://github.com/mfshaf7/operator-orchestration-service/pull/271
+- https://github.com/mfshaf7/operator-orchestration-service/pull/272
+- https://github.com/mfshaf7/operator-orchestration-service/pull/273
+- https://github.com/mfshaf7/operator-orchestration-service/pull/274
+- https://github.com/mfshaf7/security-architecture/pull/179
+- https://github.com/mfshaf7/security-architecture/pull/180
+- https://github.com/mfshaf7/security-architecture/pull/181
+- https://github.com/mfshaf7/platform-engineering/pull/261
+- /tmp/platform-merged-status.log
+- /tmp/platform-merged-smoke.log
+- /tmp/workspace-intake-identity-status-merged-2026-10-03.json
+lessons:
+- id: architecture-must-separate-outcomes-from-evidence-owners
+  title: Outcome applicability and evidence ownership are separate architecture facts
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    Schema v4 used one work-item list both for outcomes that depended on a case
+    and for Landing Units that had to produce the proof. The invalid allocation
+    survived planning and was detected only after child 1228 had merged. The
+    corrected v5 model assigns evidence owners explicitly, proves causal closure
+    to applicable outcomes, and selects readiness evidence by owner and phase.
+    OOS also gained an evidence-preserving recovery transition for exact merged
+    source plus a non-finalized merge-ready packet.
+  impact: >-
+    The mistake caused an unnecessary post-merge architecture supersession and
+    blocked legal work-session continuation despite durable source evidence.
+  status: closed
+  expected_control_types:
+  - contract
+  - validator
+  - workflow
+  - skill
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+    owner_repo: workspace-governance
+    note: V5 separates outcome scope from exact Landing Unit evidence owners.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Validates coverage, causal closure, and terminating parent traversal.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Selects v5 evidence owners and preserves merged evidence during recovery.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes v5 the normal planning and delivery shape.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: initiative-work-must-be-bounded-before-projection
+  title: Initiative-scoped work must be bounded at the backend and tolerate pre-decision state
+  failure_class: rollout-evidence-gap
+  trigger: machine-visible-workflow-drift
+  finding: >-
+    OOS originally enumerated the full Delivery ART before narrowing one
+    initiative, and the v5 work preflight demanded an evidence owner before a
+    Landing Unit decision existed. Native backend filters and bounded relation
+    hydration now constrain reads, while pre-decision projection exposes
+    applicable cases without selecting owner cases until the decision exists.
+  impact: >-
+    Normal read-only work took minutes, timed out during live proof, and could
+    fail before presenting the operator with the decision it needed.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - change-record
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: Uses bounded OpenProject filters and relation hydration for one initiative.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers pre-decision and post-decision v5 evidence-owner projection.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-initiative-relation-read-scope.md
+    owner_repo: operator-orchestration-service
+    note: Records the bounded-read repair and merged-main timing proof.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: composition-controls-must-run-before-mutation-and-inside-context
+  title: Composition prerequisites and smoke context are one operating boundary
+  failure_class: workflow-doctrine-gap
+  trigger: late-host-drift-discovery
+  finding: >-
+    Branch-bound source dependencies, runtime-directory ownership, user
+    systemd, auto-resume state, writable session ancestry, and pending Helm
+    operations were discovered only after composition mutation had started.
+    Standalone profile smoke then omitted active composition bindings and could
+    report composed dependencies inactive. Platform PR 261 resolves every
+    profile first, runs one non-mutating composition preflight, and makes normal
+    profile smoke derive exactly one active operator-owned composition.
+  impact: >-
+    The operator endured repeated long reconciliation cycles, while a passing
+    smoke gave incomplete assurance about the actual composed runtime.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - runbook
+  - change-record
+  control_refs:
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration_preflight.py
+    owner_repo: platform-engineering
+    note: Proves complete source and host restart prerequisites before mutation.
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration.py
+    owner_repo: platform-engineering
+    note: Binds smoke to one active composition and rejects degraded or ambiguous state.
+  - type: test
+    path: platform-engineering/scripts/test_dev_integration_compositions.py
+    owner_repo: platform-engineering
+    note: Exercises composition preflight ordering and smoke-context selection through the existing CI entrypoint.
+  - type: runbook
+    path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+    owner_repo: platform-engineering
+    note: Defines normal composition startup, status, smoke, and identity proof order.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-03-dev-integration-composition-preflight-and-smoke-context.md
+    owner_repo: platform-engineering
+    note: Records validation, live proof, rollback, and the dev-integration-only boundary.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: stronger-smoke-must-close-dependent-auth-findings-with-exact-source-proof
+  title: Stronger smoke findings require invariant-aware repair and exact-source activation
+  failure_class: unsafe-assumption
+  trigger: late-root-cause-discovery
+  finding: >-
+    Composition-aware smoke first exposed an unbound inbound caller. The first
+    repair mapped that caller to the compatibility shared secret and violated
+    OOS's existing distinct-secret invariant, so startup failed closed. The
+    corrected repair generates separate values and validates them before
+    mutation. That proof then exposed an expired GitHub App token. Security
+    reviewed the exact repaired heads before Platform refreshed its pins and
+    delivered a new session-bound token. Status proved authenticated Intake,
+    Inventory, and invalid-caller denial from the live pod.
+  impact: >-
+    Two narrow assumptions extended the maintenance window: one ignored an
+    existing runtime invariant and the other treated structural credential
+    projection as freshness proof.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - change-record
+  - doc
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+    owner_repo: operator-orchestration-service
+    note: Projects a distinct caller-specific smoke secret and rejects invalid values before mutation.
+  - type: test
+    path: operator-orchestration-service/test/devint-host-service-profile.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves caller mapping and shared-secret separation.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-03-devint-smoke-distinct-caller-secret.md
+    owner_repo: operator-orchestration-service
+    note: Records the superseding OOS repair and exact validation.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-03-workspace-operations-post-repair-pin-refresh.md
+    owner_repo: security-architecture
+    note: Accepts the exact repaired revisions used by runtime identity delivery.
+  - type: workflow
+    path: platform-engineering/scripts/workspace_intake_identity.py
+    owner_repo: platform-engineering
+    note: Delivers a session-bound token and proves live authenticated operations plus denial.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: landing-unit-design-must-respect-source-identity-paths
+  title: Source publication capability is a Landing Unit precondition
+  failure_class: unsafe-assumption
+  trigger: machine-visible-workflow-drift
+  finding: >-
+    The first Platform history changed a workflow file although Agent Gary has
+    no workflow-write permission. The provider rejected publication. The
+    existing validation workflow already imported the expanded test module, so
+    the workflow edit was removed and the Landing Unit was rebuilt as one clean
+    Agent-authored commit. No permission was broadened.
+  impact: >-
+    The avoidable branch rewrite delayed publication but did not bypass the
+    human-review boundary or weaken the source identity.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/owner-source-cli.js
+    owner_repo: operator-orchestration-service
+    note: Preserves the bounded Agent source publication path.
+  - type: test
+    path: platform-engineering/scripts/test_dev_integration_compositions.py
+    owner_repo: platform-engineering
+    note: Is imported by the existing CI entrypoint, eliminating the unnecessary workflow edit.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
