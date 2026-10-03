@@ -1,0 +1,60 @@
+schema_version: 1
+id: 2026-09-19-prototype-closure-premature-source-closeout
+title: Prototype Closure source closed without concrete owner readers
+recorded_on: '2026-09-19'
+owner_repo: operator-orchestration-service
+summary: ART 1150 was closed after an injected-reader composition landed, while normal
+  OOS lacked concrete owner adapters and WGCF/Platform authority remained unavailable.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance-control-fabric
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-half-baked-callout
+  title: The operator explicitly said the work is half-baked, incomplete, sloppy,
+    or should have been caught already.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Merged PR 214 and a passing synthetic test were treated as satisfying owner-backed
+    composition despite runtime injection being absent and baseline receipt ownership
+    conflicting with implemented maturity source.
+  source_refs:
+  - openproject://work_packages/1150
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/214
+- id: reopened-work-item-terminal-alias-preflight-miss
+  title: Reopened work reused a terminal Landing Unit identity.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    After #1101 was reopened for the ingress-first Closure correction,
+    work start returned its earlier closed session. Replaying work close
+    removed the stale alias, but reusing the old Landing Unit ID created a
+    session shadowed by its terminal cleanup receipt. A distinct correction
+    Landing Unit ID under the same ART child restored the normal path. #1149
+    reproduced the same identity collision. The preflight must check both
+    terminal cleanup and Landing Unit identity before work start.
+  source_refs:
+  - openproject://work_packages/1101
+  - openproject://work_packages/1149
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-09-30'
+  note: Resolve exact owner authority and readback contracts and add a
+    non-synthetic configured-path gate before closing 1150 again. Review the
+    reopened-work-item preflight after the current correction is delivered;
+    use a distinct correction Landing Unit without creating another ART child.

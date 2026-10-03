@@ -1,0 +1,67 @@
+schema_version: 1
+id: 2026-09-12-prototype-maturity-preflight-miss
+title: Prototype Maturity work exposed late cross-owner assumptions
+recorded_on: '2026-09-12'
+owner_repo: workspace-governance
+summary: >-
+  The operator reports that Feature #920 required repeated correction after work
+  started because the full owner and workflow boundary was not inspected first.
+  Feature #921 must not repeat that sequence; its source, target, identity,
+  runtime, and evidence contracts need one pre-implementation decision.
+regression_of: null
+status: new
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - workspace-prototype-studio
+    - operator-orchestration-service
+  related_products:
+    - governance-operations-console
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: prototype-maturity-late-cross-owner-discovery
+    title: Feature 920 needed repeated correction after implementation began
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      The operator explicitly called out narrow inspection and repeated late
+      fixes during #920. Initial #921 inspection already found an ambiguous
+      Delivery-versus-source-custody closure rule and no authorized closure
+      writer in the currently commissioned Prototype identities. These are
+      architecture decisions, not isolated code defects.
+    source_refs:
+      - conversation:2026-09-12-feature-921-preflight-callout
+      - openproject://work_packages/920
+      - openproject://work_packages/921
+  - id: prototype-closure-agent-source-repository-admission-miss
+    title: Closure source owners were absent from Agent Gary's admitted repository set
+    trigger: machine-visible-workflow-drift
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      OOS work continue for #1104 failed with agent_source_repository_not_admitted.
+      The selected-repository App and pinned Platform/OOS definitions omit both
+      WGCF (#1104) and the Console (#1108), although both were planned as
+      source-backed Landing Units in the approved #892 architecture packet.
+      Source repository admission was not verified before #921 implementation.
+    source_refs:
+      - openproject://work_packages/1104
+      - openproject://work_packages/1108
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Capture only the signal now. Do not auto-land a new validator or expand
+    Feature #921 from this record before the cross-owner preflight is discussed.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-09-30'
+  note: >-
+    Compare the #921 architecture packet and execution against #920 late
+    discoveries, then propose the smallest durable preflight control.
