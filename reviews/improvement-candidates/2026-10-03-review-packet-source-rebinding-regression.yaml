@@ -11,7 +11,7 @@ summary: >-
   completion evidence for 1206. The contract exists, but ART now attributes its
   implementation to the wrong source change.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -44,15 +44,21 @@ signals:
   - workspace-governance/reviews/improvement-candidates/2026-10-01-owner-evidence-fidelity-regression.yaml
   - workspace-governance/reviews/after-action/2026-10-01-owner-evidence-fidelity-closure.yaml
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
-follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-06'
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-03-review-packet-source-rebinding-closure.yaml
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Makes recovered Landing Unit identity terminal and requires an exact durable recovery-supersession chain for later source intent.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves the recovery-rebinding guard and pre-finalization and closeout rejection cases.
   note: >-
-    Design the narrow OOS guard that prevents a recovered or superseded Landing
-    Unit identity from closing against a different source change without an
-    explicit new Landing Unit decision and durable supersession binding. Correct
-    the historical 1206 evidence account through an existing governed route or
-    an operator-approved bounded repair; do not create a replacement Defect.
+    Closed after OOS PR 262 and Security index PR 174 landed, and the governed
+    OOS update route corrected work item 1206 while preserving the incorrect
+    finalized packet as explicit immutable audit history.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
