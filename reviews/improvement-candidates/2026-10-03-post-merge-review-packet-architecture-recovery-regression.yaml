@@ -19,6 +19,7 @@ source_type: machine-audit
 scope:
   related_repos:
   - operator-orchestration-service
+  - platform-engineering
   - security-architecture
   - workspace-governance
   - workspace-governance-control-fabric
@@ -106,24 +107,114 @@ signals:
   - workspace-governance/scripts/validate_contracts.py
   - operator-orchestration-service/src/delivery-art/contracts.js
   - workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_contracts.py
+- id: delivery-art-initiative-read-scope-was-unbounded
+  title: Initiative evidence reads enumerated the full Delivery ART before scoping
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The first live v5 smoke timed out because OOS retrieved more than 1,100
+    Delivery ART work packages through sequential project-wide pages before it
+    projected one requested initiative. Limiting relation processing alone did
+    not remove that initial enumeration. OOS PR 271 now uses native OpenProject
+    id and ancestor filters, hydrates only required external relation endpoints
+    and ancestor chains, and resolves work-item evidence through the same
+    bounded path. The merged-main read-only smoke completed in 17.56 seconds
+    and covered active-session, initiative-evidence, and work-item closeout
+    reads. The durable lesson is that initiative-scoped operator reads must be
+    bounded at the backend query, not only after retrieval.
+  source_refs:
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/271
+  - operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-initiative-relation-read-scope.md
+  - /home/mfshaf7/projects/.dev-integration/sessions/accepted-idea-delivery-mfshaf7-20261003T095658Z/accepted-idea-delivery-mfshaf7-20261003T095658Z-smoke-20261003T100420691011Z-f0cfb8c4.result.yaml
+- id: dev-integration-composition-preflight-gap
+  title: Composition mutation began before source and restart prerequisites were proven
+  trigger: late-host-drift-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  - host-drift-undetected
+  finding: >-
+    A branch-bound rehearsal started an OOS host service from a worktree that
+    lacked installed Node dependencies, so the executor failed on the ajv
+    import and the full composition suspended itself. After a later host crash,
+    the runner again began reconciling multiple profiles before discovering
+    that the operator runtime directory was root-owned, the user systemd
+    manager was absent, and the interrupted Temporal Helm release was still
+    pending. Fail-closed cleanup preserved persistent state, but the late checks
+    caused repeated full composition cycles. The proposed durable control is a
+    non-mutating composition preflight that proves source dependency readiness,
+    operator runtime-directory ownership, the user systemd/auto-resume path,
+    and absence of pending Helm operations before the first profile mutation.
+    This Platform control remains unimplemented pending operator approval.
+  source_refs:
+  - platform-engineering/scripts/dev_integration.py
+  - platform-engineering/scripts/dev_integration_auto_resume.py
+  - operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+  - /home/mfshaf7/projects/.dev-integration/accepted-idea-delivery/mfshaf7/host-services/delivery-source-executor/service.log
+- id: profile-smoke-lost-composition-context
+  title: Profile smoke omitted active composition bindings and skipped their checks
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    The accepted-idea-delivery smoke passed its bounded ART reads while printing
+    the Refinement and Catalog composition and Workspace Intake and Inventory
+    composition as inactive, even though the surrounding refinement-catalog
+    composition status proved those dependencies active. The standalone smoke
+    action does not carry the current composition identifier, so it cannot prove
+    the composed dependencies it appears to report. The proposed durable
+    control is for smoke to derive or receive the active composition binding and
+    fail when expected composed dependencies are not checked. This Platform
+    control remains unimplemented pending operator approval.
+  source_refs:
+  - platform-engineering/scripts/dev_integration.py
+  - /home/mfshaf7/projects/.dev-integration/sessions/accepted-idea-delivery-mfshaf7-20261003T095658Z/accepted-idea-delivery-mfshaf7-20261003T095658Z-smoke-20261003T100420691011Z-f0cfb8c4.result.yaml
 resolution:
   after_action_ref: null
-  control_refs: []
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/schemas/delivery-art-architecture-packet.schema.json
+    owner_repo: workspace-governance
+    note: >-
+      PRs 229, 230, and 231 define and activate v5 outcome scope, exact
+      evidence-owner Landing Units, causal closure, and terminating traversal.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: PR 231 makes v5 the normal operator shape while preserving v1-v4 as historical.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      PRs 268 through 270 activate exact evidence-owner and readiness-phase
+      selection for v5 work sessions.
+  - type: validator
+    path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_readiness.py
+    owner_repo: workspace-governance-control-fabric
+    note: PRs 95 and 96 activate v5 readiness evaluation and owner selection.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-03-delivery-art-initiative-relation-read-scope.md
+    owner_repo: operator-orchestration-service
+    note: PR 271 records and proves bounded backend reads for one Delivery ART initiative.
   note: >-
     The evidence-preserving recovery mode has landed through OOS PR 266 and was
-    exercised successfully against work item 1228. The candidate remains open
-    because the earlier architecture control still does not prevent invalid
-    operating-readiness allocation. The operator directed that the recurring
-    planning mistake be fixed now without inventing additional ART defects.
+    exercised successfully against work item 1228. Architecture Packet v5 and
+    its cycle-termination repair are now active across Workspace Governance,
+    OOS, and WGCF with the required Security delta review. The bounded OOS read
+    repair is also merged and proven in the live composition. The candidate
+    remains open until a fresh v5 packet supersedes Delivery 1203's historical
+    packet and the operator decides whether to approve the proposed Platform
+    composition-preflight and smoke-context controls. No additional ART Defect
+    was created for this maintenance.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-06'
   note: >-
-    Stage Delivery ART Architecture Packet v5 so conformance cases declare
-    outcome applicability separately from one exact evidence-owner Landing
-    Unit. Enforce causal closure in Workspace Governance, owner- and phase-based
-    selection in OOS and WGCF, and an explicit post-merge operating-evidence
-    acquisition step before finalization. Keep v4 current until consumer parity,
-    Security delta review, and non-pristine session inventory pass; then
-    activate v5, supersede the Delivery 1203 packet, and close this regression
-    through a linked after-action with exact landed control references.
+    Inventory non-pristine OOS work sessions, persist a fresh Delivery 1203 v5
+    packet, and prove its current pointer and readiness. Then present the two
+    still-unimplemented Platform controls for operator decision: preflight all
+    composition source/restart prerequisites before mutation, and bind profile
+    smoke to its active composition context. Close this regression only through
+    a linked after-action after the approved controls land with exact evidence.
