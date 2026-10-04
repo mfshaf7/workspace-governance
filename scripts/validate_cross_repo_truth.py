@@ -512,6 +512,19 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
     }:
         errors.append("work-session canonical source set differs from the approved contract")
 
+    recovery_identity = (work_session.get("session_identity") or {}).get(
+        "recovery"
+    ) or {}
+    if recovery_identity != {
+        "logical_landing_unit_id": "stable",
+        "session_generation": "increment",
+        "branch": "replace",
+        "supersedes_recoveries": "required",
+    }:
+        errors.append(
+            "work-session recovery must preserve the logical Landing Unit and rotate the attempt"
+        )
+
     next_action = work_session.get("next_action") or {}
     if next_action.get("cardinality") != "exactly-one":
         errors.append("work-session results must expose exactly one next action")
@@ -549,6 +562,9 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
         "percent-complete-change",
         "work-note-change",
         "evidence-reference-append",
+        "repository-revision-advance",
+        "owner-evidence-profile-maintenance",
+        "execution-retry-or-recovery",
     }:
         errors.append("work-session ordinary progress inputs differ from the approved contract")
 
@@ -581,9 +597,74 @@ def delivery_art_work_session_contract_errors(work_session: dict) -> list[str]:
     return errors
 
 
+def delivery_art_owner_evidence_profile_coverage_errors(
+    workspace_root: Path,
+    active_repos: list[str],
+    coverage: dict,
+) -> list[str]:
+    errors: list[str] = []
+    profile_path = coverage.get("profile_path")
+    activated = coverage.get("activated_owner_repos") or []
+    nonactivated_entries = coverage.get("nonactivated_owner_repos") or []
+    nonactivated = [entry.get("repo") for entry in nonactivated_entries]
+
+    if len(set(activated)) != len(activated):
+        errors.append("owner evidence profile activation contains duplicate repos")
+    if len(set(nonactivated)) != len(nonactivated):
+        errors.append("owner evidence profile nonactivation contains duplicate repos")
+    overlap = sorted(set(activated) & set(nonactivated))
+    if overlap:
+        errors.append(
+            "owner evidence profile inventory activates and excludes the same repos: "
+            + ", ".join(overlap)
+        )
+    inventory = set(activated) | set(nonactivated)
+    active = set(active_repos)
+    if inventory != active:
+        missing = sorted(active - inventory)
+        extra = sorted(inventory - active)
+        errors.append(
+            "owner evidence profile inventory must exactly cover active repos"
+            f"; missing={missing}; extra={extra}"
+        )
+
+    if profile_path != "contracts/delivery-art-work-session/evidence-profile.json":
+        errors.append("owner evidence profile path differs from the approved contract")
+        return errors
+
+    for repo_name in activated:
+        path = workspace_root / repo_name / profile_path
+        if not path.exists():
+            errors.append(f"{path}: activated owner evidence profile is missing")
+            continue
+        try:
+            profile = load_json(path)
+        except (OSError, ValueError) as exc:
+            errors.append(f"{path}: invalid owner evidence profile: {exc}")
+            continue
+        if profile.get("schema_version") != 1:
+            errors.append(f"{path}: owner evidence profile schema_version must be 1")
+        if profile.get("owner_repo") != repo_name:
+            errors.append(f"{path}: owner_repo must equal {repo_name}")
+        commands = profile.get("commands") or []
+        kinds = {command.get("kind") for command in commands}
+        if not {"tests", "validations"}.issubset(kinds):
+            errors.append(f"{path}: profile must provide tests and validations")
+        if not any(
+            command.get("conformance_binding") == "matching-fidelity"
+            for command in commands
+        ):
+            errors.append(
+                f"{path}: profile must provide matching-fidelity evidence acquisition"
+            )
+
+    return errors
+
+
 def validate_delivery_art_operator_path_contract(
     workspace_root: Path,
     repo_root: Path,
+    active_repos: list[str],
     errors: list[str],
 ) -> None:
     contract_path = repo_root / "contracts/delivery-art-operator-path.yaml"
@@ -729,6 +810,11 @@ def validate_delivery_art_operator_path_contract(
         work_session
     ):
         errors.append(f"{contract_path}: {work_session_error}")
+    coverage = work_session.get("owner_evidence_profile_coverage") or {}
+    for coverage_error in delivery_art_owner_evidence_profile_coverage_errors(
+        workspace_root, active_repos, coverage
+    ):
+        errors.append(f"{contract_path}: {coverage_error}")
 
     expected_artifact_schemas = {
         "architecture_packet": "contracts/schemas/delivery-art-architecture-packet.schema.json",
@@ -1112,7 +1198,9 @@ def main() -> int:
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)
     validate_delivery_art_blocker_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_lineage_contract(workspace_root, errors)
-    validate_delivery_art_operator_path_contract(workspace_root, repo_root, errors)
+    validate_delivery_art_operator_path_contract(
+        workspace_root, repo_root, active_repos, errors
+    )
 
     for product_name, product in contracts["products"]["products"].items():
         if product["lifecycle"] not in {"platform-integrated", "fully-governed"}:

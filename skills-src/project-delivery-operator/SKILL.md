@@ -50,6 +50,15 @@ cross-repo protocol, or control-plane change:
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
+Do not create or supersede an Architecture Packet for a repository commit,
+owner evidence-profile repair, timestamp, retry, or recovery. Those facts
+belong to the exact work-start, Review Packet, session-generation, and recovery
+evidence. Recovery keeps the logical Landing Unit ID, rotates the branch, and
+increments the session generation while preserving the complete recovery
+chain. A new Architecture Packet is justified only by a material change to
+scope, ownership or rollback boundary, dependency or merge order, protocol,
+human gates, conformance obligations, or the approved architecture decision.
+
 Record protocol applicability explicitly in every architecture packet. For
 cross-repo protocol work, define an executable conformance plan before
 implementation is declared ready and include every mandated dimension. It must cover command acknowledgement,
