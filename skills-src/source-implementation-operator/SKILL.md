@@ -97,10 +97,17 @@ gh pr review <pr-number> --repo mfshaf7/<owner-repo> \
 gh pr checks <pr-number> --repo mfshaf7/<owner-repo> --watch --interval 5
 ```
 
-For the current single-human-reviewer repositories whose rulesets allow the
-accountable reviewer to bypass after approval, use the known merge command
-directly. Do not first try a normal merge and do not fall back to unsupported
-auto-merge:
+For accepted ART work, stop after approval and checks, reread
+`work status <work-item-id>`, and execute only its exact next action. Source may
+merge only through `npm run art -- work merge <work-item-id>` after OOS has
+recorded durable merge-ready Review Packet custody. Never use `gh pr merge`
+for an active ART work session, even when the PR source and checks are valid or
+a preceding `work continue` partially succeeded.
+
+For owner-repo maintenance outside accepted ART scope, the current
+single-human-reviewer repositories allow the accountable reviewer to bypass
+after approval. Use the known merge command directly. Do not first try a
+normal merge and do not fall back to unsupported auto-merge:
 
 ```bash
 gh pr merge <pr-number> --repo mfshaf7/<owner-repo> \

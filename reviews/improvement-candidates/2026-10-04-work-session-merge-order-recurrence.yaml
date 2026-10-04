@@ -1,0 +1,260 @@
+schema_version: 1
+id: 2026-10-04-work-session-merge-order-recurrence
+title: Epic 1203 work-session and live-acceptance regressions
+recorded_on: '2026-10-04'
+owner_repo: operator-orchestration-service
+summary: >-
+  Epic 1203 repeatedly reached a later delivery phase before the preceding
+  control was proven against the live cross-repo path. Governance Operations
+  Console PR 49 bypassed its active OOS merge-ready transition; composition
+  activation erased required bindings; synthetic evidence omitted the
+  operating-ready live-backend cases; OOS and WGCF disagreed on the repository
+  authority digest; and WGCF accepted only the obsolete v1 authority fixture
+  while the canonical repos.yaml has used schema v2 since 2026-09-06. The
+  resumed commissioning path also lacked OpenProject serialization
+  compatibility and repeat-run lifecycle/idempotency coverage. Finally, the
+  configured-path preflight silently lost its evidence requirements at the
+  source-executor transport boundary, so a Platform Landing Unit started and
+  merged even though its accepted base lacked the required live-backend
+  evidence command. The eventual live evidence command then restarted the OOS
+  controller that was awaiting it, and the generic CI marker used to avoid
+  that restart leaked into the unit-test process and changed test semantics.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-25-work-session-merge-order-bypass.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: art-session-used-maintenance-merge-command
+  title: Active ART source was merged through the maintenance-only GitHub path
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    After work continue published PR 49 but returned a later ART mutation
+    failure, work status explicitly required the merge-ready transition. The
+    source implementation skill still presented direct gh pr merge in a shared
+    review section without limiting it to owner-repo maintenance, and the
+    operator agent used that command instead of OOS work continue and work
+    merge. Valid source therefore merged before durable Review Packet custody.
+  source_refs:
+  - openproject://work_packages/1229
+  - https://github.com/mfshaf7/governance-operations-console/pull/49
+  - workspace-governance/skills-src/source-implementation-operator/SKILL.md
+- id: local-draft-merged-session-has-no-recovery-path
+  title: Incomplete local-draft packet blocks every merged-session recovery mode
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The lifecycle classifies a merged PR paired with a local-draft Review
+    Packet as pre-merge-source-binding-invalid and permits work recover, but
+    ordinary recovery rejects any Review Packet while evidence-bearing
+    recovery requires a merge-ready packet. The exact failed ordering state is
+    therefore detected but cannot be archived through a supported command.
+  source_refs:
+  - operator-orchestration-service/src/delivery-art/lifecycle.js
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+- id: agent-source-push-used-ambient-credential-helper
+  title: Bounded Agent Gary publication allowed an ambient credential helper first
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    Agent source provider preflight proved the exact repository token, but Git
+    push consulted the operator's global credential cache before the configured
+    askpass. The cached human credential returned 403 and the bounded command
+    hid the provider detail, proving the transport did not enforce its declared
+    no-human-fallback boundary.
+  source_refs:
+  - operator-orchestration-service/src/delivery-art/agent-source-identity.js
+  - runtime://agent-source/maintenance-publish/http-403
+- id: composition-reactivation-erased-required-bindings
+  title: Profile activation silently replaced the active composition bindings
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - unsafe-assumption
+  finding: >-
+    A generic dev-integration profile activation after restart omitted the
+    refinement-catalog composition and its repository-path bindings. Later
+    acceptance therefore exercised a different runtime shape until the exact
+    composition was explicitly restored. The same narrow command choice
+    recurred after the Catalog repair: activating only
+    `accepted-idea-delivery` reset the composition-only Catalog flags and made
+    Workspace Operations identity stale until the complete composition was
+    reapplied.
+  source_refs:
+  - platform-engineering/dev-integration/compositions/refinement-catalog/composition.yaml
+  - runtime://dev-integration/refinement-catalog/recovery-2026-10-04
+- id: synthetic-acceptance-omitted-operating-ready-cases
+  title: Merge-ready evidence passed without the required live-backend outcomes
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    Earlier acceptance concentrated on source and synthetic protocol checks.
+    The active work contract later exposed two operating-ready live-backend
+    cases covering items 1211 and 1231 that had not been exercised before the
+    source changes were described as complete.
+  source_refs:
+  - openproject://work_packages/1211
+  - openproject://work_packages/1231
+  - oos://work-sessions/delivery-1203-repository-catalog-platform-recovery-2
+- id: repository-readiness-authority-contract-drift
+  title: Repository readiness was never tested against the canonical v2 authority
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - workflow-doctrine-gap
+  finding: >-
+    WGCF repository-readiness tests generated a simplified schema-v1 repos.yaml
+    fixture, while the canonical Workspace Governance authority has used schema
+    v2 since 2026-09-06. The live first-use Catalog mutation therefore failed
+    closed with authority-contract-invalid only after the full composition was
+    commissioned. A preceding OOS fix also had to replace semantic YAML hashing
+    with the exact content digest required by WGCF.
+  source_refs:
+  - workspace-governance/contracts/repos.yaml
+  - workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/repository_readiness.py
+  - workspace-governance-control-fabric/tests/test_repository_readiness.py
+  - operator-orchestration-service/docs/records/change-records/2026-10-04-repository-readiness-content-digest.md
+- id: openproject-catalog-state-serialization-not-proven
+  title: Catalog commissioning missed the real OpenProject Setting serializer
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - workflow-doctrine-gap
+  finding: >-
+    Catalog state shared Ruby object references between the stored registry
+    value and receipt result. Rails serialized those references as YAML anchors,
+    but OpenProject 17.2 on Ruby 3.4 reloads Setting values with aliases denied,
+    raising Psych::AliasesNotEnabled. Unit fixtures did not exercise the real
+    Setting serialization and reload boundary. The repair detaches state through
+    JSON before both persistence boundaries and the already-written row was
+    normalized in place without discarding Catalog data.
+  source_refs:
+  - platform-engineering/products/openproject/catalog-control/openproject_delivery_catalog_control.rb
+  - platform-engineering/products/openproject/catalog-control/test_validate_catalog_control.py
+  - runtime://openproject/delivery-catalog-control-v1
+- id: repository-catalog-commissioning-not-repeatable
+  title: Catalog commissioning encoded first-run assumptions as acceptance truth
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    The full commissioning command initially compared the volatile
+    last_projected_at timestamp as persisted state, read Catalog status before
+    the restarted Console was ready, reused a stored readiness binding without
+    refresh, and reused one idempotency key across later deliberate operator
+    acceptances. These assumptions were invisible in the source-only tests and
+    surfaced sequentially only when the complete command was rerun against the
+    preserved backend. The final proof now excludes only projection time,
+    waits for application readiness, refreshes existing bindings, and scopes
+    mutation idempotency to one stable operator acceptance.
+  source_refs:
+  - platform-engineering/products/governance-operations-console/scripts/console_cross_domain_activation.py
+  - governance-operations-console/src/domain-workspaces/delivery/server/refinement-catalog-oos-client.ts
+  - openproject://work_packages/1231
+  - runtime://governance-console/repository-catalog-commissioning
+- id: configured-path-evidence-requirements-dropped-in-transport
+  title: Source-executor transport bypassed the accepted-base evidence preflight
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    OOS configured-path evaluation correctly derived both merge-ready and
+    operating-ready conformance cases and passed them to
+    inspectConfiguredPath. The source-executor client and action dispatcher
+    forwarded only the session object, discarding conformanceCases and
+    requiredEvidenceKinds. The exact accepted Platform base therefore skipped
+    the evidence-profile coverage check, even though its profile had no
+    runtime_and_live command. The same Landing Unit later merged and only then
+    failed operating-evidence acquisition. This regresses the earlier
+    evidence-profile-preflight lesson and must be repaired at the transport
+    contract, with an end-to-end negative test proving no source resource is
+    created when the accepted base lacks an operating-ready fidelity or kind.
+  source_refs:
+  - operator-orchestration-service/src/delivery-art/source-executor.js
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+  - operator-orchestration-service/docs/records/change-records/2026-10-02-evidence-profile-preflight.md
+  - openproject://work_packages/1231
+- id: evidence-command-restarted-requesting-controller
+  title: In-process evidence execution restarted the controller awaiting its receipt
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - unsafe-assumption
+  finding: >-
+    The Platform runtime_and_live evidence command invoked the full
+    commissioning sequence, including replacement of the OOS deployment whose
+    request was waiting for the source executor. The host source executor
+    completed independently, but the requesting controller exited before it
+    could durably record the result. The command therefore returned exit 137
+    without host memory pressure, and a retry could repeat the expensive work
+    because the executor retained no replayable result custody.
+  source_refs:
+  - operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+  - operator-orchestration-service/src/delivery-art/source-executor.js
+  - platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+  - runtime://delivery-art/work-item-1231/controller-replacement
+- id: generic-ci-marker-changed-evidence-test-semantics
+  title: Generic CI state was mistaken for a live evidence-execution boundary
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - workflow-doctrine-gap
+  finding: >-
+    The immediate containment routed commissioning to a non-disruptive verifier
+    when CI, NO_COLOR, and two OOS mutation variables were present. OOS applies
+    those variables to every profile command, so the unit-test process also
+    entered the live verifier branch and one otherwise passing test failed.
+    Evidence execution needs an explicit purpose-bound environment marker;
+    generic CI state is not an execution contract.
+  source_refs:
+  - operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+  - platform-engineering/products/governance-operations-console/scripts/console_cross_domain_activation.py
+  - openproject://work_packages/1231
+- id: capability-activation-ref-bound-unmerged-source
+  title: Workspace capability activation pointed at a source commit absent from OOS main
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    OOS PR 278 squash-merged the repaired capability manifest, but the Workspace
+    activation contract retained the Agent branch commit. The manifest bytes and
+    digest were correct while the declared activation commit was not an ancestor
+    of OOS main, so cross-repo truth correctly rejected closure.
+  source_refs:
+  - operator-orchestration-service://commit/92f0967242f535b46aad9e585c72694c6ff1863b
+  - workspace-governance/contracts/delivery-art-operator-path.yaml
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-04-epic-1203-work-session-and-live-acceptance-closure.yaml
+  control_refs: []
+  note: >-
+    The linked after-action closes the regression with merged OOS, WGCF,
+    Platform, Security, and workspace skill controls plus merged-main live
+    composition proof. Delivery item 1231 and Feature 1211 are closed through
+    their governed Review Packet and readiness receipts; no new ART defect or
+    architecture version was created for this maintenance.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

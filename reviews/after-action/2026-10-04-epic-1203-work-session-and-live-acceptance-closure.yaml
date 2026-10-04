@@ -1,0 +1,238 @@
+schema_version: 1
+id: 2026-10-04-epic-1203-work-session-and-live-acceptance-closure
+title: Epic 1203 work-session and live-acceptance controls now fail at their owning boundaries
+recorded_on: '2026-10-04'
+owner_repo: workspace-governance
+summary: >-
+  Epic 1203 exposed a connected control failure rather than one product defect:
+  active ART source was merged through a maintenance path, accepted-base
+  evidence requirements were dropped at a transport seam, source-only checks
+  missed current authority and persistence behavior, evidence execution could
+  restart its waiting controller, and direct profile activation could erase an
+  active composition's bindings. The repaired system now separates ART and
+  maintenance merge paths, preserves evidence requirements end to end, validates
+  canonical runtime boundaries, makes evidence completion replay-safe, and
+  routes composition-owned mutation through the composition. Item 1231 and
+  Feature 1211 closed with governed evidence; the merged-source
+  `refinement-catalog` composition is active and healthy.
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  change_classes:
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-04-work-session-merge-order-recurrence.yaml
+- https://github.com/mfshaf7/governance-operations-console/pull/49
+- https://github.com/mfshaf7/operator-orchestration-service/pull/278
+- https://github.com/mfshaf7/operator-orchestration-service/pull/280
+- https://github.com/mfshaf7/operator-orchestration-service/pull/281
+- https://github.com/mfshaf7/workspace-governance-control-fabric/pull/97
+- https://github.com/mfshaf7/platform-engineering/pull/263
+- https://github.com/mfshaf7/platform-engineering/pull/265
+- https://github.com/mfshaf7/platform-engineering/pull/266
+- https://github.com/mfshaf7/security-architecture/pull/195
+- openproject://work_packages/1231
+- openproject://work_packages/1211
+- art-readiness-receipt:395e1407594089df92f91f51
+- art-readiness-receipt:407da9d7342a98039b04d1da
+- runtime://dev-integration/refinement-catalog/merged-main-reconciliation-2026-10-04
+lessons:
+- id: art-and-maintenance-source-paths-must-not-share-a-merge-command
+  title: ART state, not Git state alone, owns accepted-work merge order
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    A valid Agent-authored PR with passing checks was merged through the
+    maintenance command while its active OOS session still required a
+    merge-ready transition. The workflow also lacked a complete local-draft
+    merged-session recovery path and initially allowed an ambient human Git
+    credential helper to precede the bounded Agent credential. After the
+    recovery squash-merged, the Workspace capability contract also retained
+    the unmerged Agent source commit instead of the durable OOS main commit.
+  impact: >-
+    Source landed before durable Review Packet custody, recovery work expanded,
+    and operator identity boundaries had to be repaired during active delivery.
+  status: closed
+  expected_control_types:
+  - skill
+  - workflow
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Separates accepted ART merge through OOS from owner-maintenance GitHub merge.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Preserves broker-owned transition and recovery ordering.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-04-local-draft-merged-session-recovery.md
+    owner_repo: operator-orchestration-service
+    note: Records the bounded merged-session recovery and exact source-identity correction.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Binds capability activation to the durable OOS squash-merge commit whose manifest digest is validated cross-repo.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: accepted-base-evidence-must-survive-every-transport-seam
+  title: Configured-path preflight is only real when the executor receives the same requirements
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    OOS derived operating-ready cases before source work, but the source-executor
+    client dropped their conformance and evidence-kind requirements. A Platform
+    base without the live evidence command therefore started and merged before
+    the missing contract was detected.
+  impact: >-
+    The strongest early gate became a local illusion, causing another recovery
+    Landing Unit and delaying item 1231 until after merge.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/source-executor.js
+    owner_repo: operator-orchestration-service
+    note: Transports the complete configured-path inspection request across the executor boundary.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-source-executor.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves exact request transport and rejection before source creation.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-04-configured-path-evidence-transport.md
+    owner_repo: operator-orchestration-service
+    note: Records the end-to-end accepted-base preflight repair.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: live-acceptance-must-use-current-authority-and-real-persistence
+  title: Source-only agreement cannot substitute for the canonical live boundary
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    Synthetic fixtures used obsolete repository-authority schema v1, omitted the
+    real OpenProject Setting serializer, and assumed commissioning ran only once.
+    The full live path exposed the schema-v2 mismatch, YAML-alias incompatibility,
+    readiness windows, stale bindings, and reused acceptance identity in series.
+  impact: >-
+    Each narrow proof passed while the next real boundary failed, creating the
+    appearance of repeated regressions and extending one child over two days.
+  status: closed
+  expected_control_types:
+  - test
+  - validator
+  - doc
+  control_refs:
+  - type: test
+    path: workspace-governance-control-fabric/tests/test_repository_readiness.py
+    owner_repo: workspace-governance-control-fabric
+    note: Exercises repository readiness against canonical schema-v2 authority.
+  - type: test
+    path: platform-engineering/products/openproject/catalog-control/test_validate_catalog_control.py
+    owner_repo: platform-engineering
+    note: Covers the real serializer-compatible detached Catalog state shape.
+  - type: test
+    path: platform-engineering/products/governance-operations-console/scripts/test_console_cross_domain_activation.py
+    owner_repo: platform-engineering
+    note: Covers repeat commissioning, bounded retry, availability waits, denial, rollback, and readback.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-04-repository-catalog-devint-commissioning.md
+    owner_repo: platform-engineering
+    note: Records the complete live commissioning and exact completion evidence.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: evidence-execution-must-be-verification-only-and-replay-safe
+  title: A verifier cannot restart its requester or rely on generic CI identity
+  failure_class: workflow-doctrine-gap
+  trigger: repeated-operator-friction
+  finding: >-
+    The runtime evidence command invoked disruptive commissioning and restarted
+    the OOS controller waiting for its response. The first containment used
+    generic CI state as a behavior switch, which leaked into unit tests. The
+    host executor also lacked durable completed-result custody.
+  impact: >-
+    The request died with exit 137 despite healthy memory, and retry could repeat
+    expensive live actions while tests behaved differently under evidence runs.
+  status: closed
+  expected_control_types:
+  - workflow
+  - doc
+  - runbook
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/source-action-result-store.js
+    owner_repo: operator-orchestration-service
+    note: Stores a private digest-bound completed result before replying and replays exact retries.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: Projects explicit verification-only context only to runtime evidence commands.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-source-executor.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves replay after executor restart with one underlying execution.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-04-evidence-execution-boundary.md
+    owner_repo: operator-orchestration-service
+    note: Defines the corrected execution and trust boundary.
+  - type: runbook
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Defines verification-only evidence commands and durable replay behavior for operators.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: composition-ownership-must-be-enforced-before-profile-mutation
+  title: Recorded composition ownership must route mutating lifecycle commands
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    The shared runner recorded composition ownership but trusted the operator to
+    remember it. A direct profile `up` silently omitted Catalog and identity
+    bindings and replaced the active runtime shape.
+  impact: >-
+    Later acceptance exercised a different system than the reviewed composition
+    and required another full reconciliation cycle.
+  status: closed
+  expected_control_types:
+  - test
+  - runbook
+  control_refs:
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration.py
+    owner_repo: platform-engineering
+    note: Refuses direct active-composition mutation before owner command dispatch.
+  - type: test
+    path: platform-engineering/scripts/test_dev_integration.py
+    owner_repo: platform-engineering
+    note: Covers direct denial, exact composition-child admission, and suspended reset or restore.
+  - type: runbook
+    path: platform-engineering/docs/runbooks/dev-integration-profiles.md
+    owner_repo: platform-engineering
+    note: Makes composition lifecycle the primary route for owned profile mutation.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-04-composition-owned-profile-mutation-guard.md
+    owner_repo: platform-engineering
+    note: Records the merged control and live merged-main proof requirement.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
