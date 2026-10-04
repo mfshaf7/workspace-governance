@@ -250,6 +250,82 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
+    def test_recovery_keeps_logical_landing_unit_identity(self) -> None:
+        recovery = self.work_session_contract["session_identity"]["recovery"]
+
+        self.assertEqual(
+            recovery,
+            {
+                "logical_landing_unit_id": "stable",
+                "session_generation": "increment",
+                "branch": "replace",
+                "supersedes_recoveries": "required",
+            },
+        )
+
+    def test_owner_evidence_profile_inventory_covers_every_active_repo(self) -> None:
+        repos = yaml.safe_load(
+            (REPO_ROOT / "contracts/repos.yaml").read_text(encoding="utf-8")
+        )["repos"]
+        active_repos = {
+            name
+            for name, payload in repos.items()
+            if payload.get("lifecycle") == "active"
+        }
+        coverage = self.work_session_contract["owner_evidence_profile_coverage"]
+        inventory = set(coverage["activated_owner_repos"]) | {
+            entry["repo"] for entry in coverage["nonactivated_owner_repos"]
+        }
+
+        self.assertEqual(inventory, active_repos)
+
+    def test_activated_owner_evidence_profile_must_exist(self) -> None:
+        evidence_profile_path = self.manifest_path.parent.parent / (
+            "delivery-art-work-session/evidence-profile.json"
+        )
+        evidence_profile_path.parent.mkdir(parents=True, exist_ok=True)
+        evidence_profile_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "owner_repo": "operator-orchestration-service",
+                    "commands": [
+                        {
+                            "kind": "tests",
+                            "conformance_binding": "matching-fidelity",
+                        },
+                        {
+                            "kind": "validations",
+                            "conformance_binding": "none",
+                        },
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        coverage = {
+            "profile_path": "contracts/delivery-art-work-session/evidence-profile.json",
+            "activated_owner_repos": ["operator-orchestration-service"],
+            "nonactivated_owner_repos": [],
+        }
+        errors = self.validator.delivery_art_owner_evidence_profile_coverage_errors(
+            self.workspace_root,
+            ["operator-orchestration-service"],
+            coverage,
+        )
+
+        self.assertEqual(errors, [])
+
+        evidence_profile_path.unlink()
+        errors = self.validator.delivery_art_owner_evidence_profile_coverage_errors(
+            self.workspace_root,
+            ["operator-orchestration-service"],
+            coverage,
+        )
+        self.assertTrue(
+            any("activated owner evidence profile is missing" in error for error in errors)
+        )
+
     def test_architecture_v5_is_current_with_activation_evidence(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"

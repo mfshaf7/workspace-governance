@@ -1,0 +1,81 @@
+schema_version: 1
+id: 2026-10-04-owner-evidence-profile-coverage-regression
+title: Keep Delivery ART architecture stable and prove owner evidence readiness
+recorded_on: '2026-10-04'
+owner_repo: workspace-governance
+summary: 'Delivery #1232 exposed two coupled control failures: admitted source owners
+  could reach work preflight without a base-owned evidence profile, and routine source
+  revision or recovery changes were represented as new Architecture Packets and new
+  logical Landing Units. Prior controls validated each session narrowly but did not
+  enforce workspace-wide profile activation or separate stable architecture decisions
+  from attempt-specific execution evidence.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-02-cross-repo-owner-evidence-fidelity-recurrence.yaml
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  - workspace-prototype-studio
+  - context-governance-gateway
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: >-
+    OOS work preflight for work-item-1232 correctly returned
+    delivery_art_evidence_profile_missing, but only after the architecture had admitted
+    workspace-prototype-studio. The same workflow encoded exact repository revisions in
+    successively named architecture files and treated recovery as a new logical Landing
+    Unit, causing execution churn to look like architecture churn. Context Governance
+    Gateway, a later Epic 1203 source owner, also lacked an evidence profile and would
+    have repeated the failure.
+  source_refs:
+  - openproject://work_packages/1232
+  - openproject://work_packages/1203
+  - conversation:2026-10-04-work-preflight-1232
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Defines stable architecture and complete evidence-profile activation inventory.
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: Proves the inventory and activated owner profiles across the workspace.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/service.js
+    owner_repo: operator-orchestration-service
+    note: Rejects source-only architecture supersession.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Preserves logical Landing Unit identity and separates recovery attempts.
+  - type: contract
+    path: workspace-prototype-studio/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-prototype-studio
+    note: Supplies the missing exact-base evidence acquisition contract for work item 1232.
+  - type: contract
+    path: context-governance-gateway/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: context-governance-gateway
+    note: Prevents the same profile failure in the later Epic 1203 Landing Unit.
+  note: The approved repair extends the existing Delivery ART path; it does not add
+    another control plane, ART defect, or architecture version.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-07'
+  note: Land both missing profiles, enforce the complete profile-or-nonactivation
+    inventory, make architecture supersession semantic, and preserve logical Landing
+    Unit identity across recovery. Close only after merged and live #1232 preflight proof.

@@ -133,6 +133,7 @@
         "next_action",
         "human_gates",
         "artifact_discovery",
+        "owner_evidence_profile_coverage",
         "freshness",
         "compatibility",
         "activation",
@@ -210,7 +211,7 @@
         "session_identity": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["key", "aliases", "stable_across"],
+          "required": ["key", "aliases", "stable_across", "recovery"],
           "properties": {
             "key": { "const": "delivery-id-plus-landing-unit" },
             "aliases": {
@@ -223,6 +224,22 @@
                 "worktree-relocation",
                 "disposable-worktree-cleanup"
               ]
+            },
+            "recovery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "logical_landing_unit_id",
+                "session_generation",
+                "branch",
+                "supersedes_recoveries"
+              ],
+              "properties": {
+                "logical_landing_unit_id": { "const": "stable" },
+                "session_generation": { "const": "increment" },
+                "branch": { "const": "replace" },
+                "supersedes_recoveries": { "const": "required" }
+              }
             }
           }
         },
@@ -291,6 +308,64 @@
             "absolute_worktree_path_persistence": { "const": "prohibited" }
           }
         },
+        "owner_evidence_profile_coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract_version",
+            "profile_path",
+            "activated_owner_repos",
+            "nonactivated_owner_repos",
+            "rules"
+          ],
+          "properties": {
+            "contract_version": { "const": 1 },
+            "profile_path": {
+              "const": "contracts/delivery-art-work-session/evidence-profile.json"
+            },
+            "activated_owner_repos": {
+              "const": [
+                "workspace-governance",
+                "workspace-governance-control-fabric",
+                "context-governance-gateway",
+                "workspace-prototype-studio",
+                "governance-operations-console",
+                "platform-engineering",
+                "security-architecture",
+                "operator-orchestration-service"
+              ]
+            },
+            "nonactivated_owner_repos": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["repo", "reason"],
+                "properties": {
+                  "repo": { "$ref": "#/$defs/identifier" },
+                  "reason": { "$ref": "#/$defs/nonEmptyString" }
+                }
+              }
+            },
+            "rules": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "active_repo_inventory_must_be_complete",
+                "activated_owner_profile_must_exist_on_fetched_base",
+                "architecture_preflight_must_check_inventory",
+                "work_start_must_validate_exact_base_profile"
+              ],
+              "properties": {
+                "active_repo_inventory_must_be_complete": { "const": true },
+                "activated_owner_profile_must_exist_on_fetched_base": { "const": true },
+                "architecture_preflight_must_check_inventory": { "const": true },
+                "work_start_must_validate_exact_base_profile": { "const": true }
+              }
+            }
+          }
+        },
         "freshness": {
           "type": "object",
           "additionalProperties": false,
@@ -323,7 +398,10 @@
                 "lifecycle-status-change",
                 "percent-complete-change",
                 "work-note-change",
-                "evidence-reference-append"
+                "evidence-reference-append",
+                "repository-revision-advance",
+                "owner-evidence-profile-maintenance",
+                "execution-retry-or-recovery"
               ]
             },
             "ordinary_progress_result": {

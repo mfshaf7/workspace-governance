@@ -258,6 +258,35 @@ delivery_art_operator_path:
         - context-compaction
         - worktree-relocation
         - disposable-worktree-cleanup
+      recovery:
+        logical_landing_unit_id: stable
+        session_generation: increment
+        branch: replace
+        supersedes_recoveries: required
+    owner_evidence_profile_coverage:
+      contract_version: 1
+      profile_path: contracts/delivery-art-work-session/evidence-profile.json
+      activated_owner_repos:
+        - workspace-governance
+        - workspace-governance-control-fabric
+        - context-governance-gateway
+        - workspace-prototype-studio
+        - governance-operations-console
+        - platform-engineering
+        - security-architecture
+        - operator-orchestration-service
+      nonactivated_owner_repos:
+        - repo: openclaw-runtime-distribution
+          reason: Delivery ART work-session evidence acquisition is not activated for this owner.
+        - repo: openclaw-host-bridge
+          reason: Delivery ART work-session evidence acquisition is not activated for this owner.
+        - repo: openclaw-telegram-enhanced
+          reason: Delivery ART work-session evidence acquisition is not activated for this owner.
+      rules:
+        active_repo_inventory_must_be_complete: true
+        activated_owner_profile_must_exist_on_fetched_base: true
+        architecture_preflight_must_check_inventory: true
+        work_start_must_validate_exact_base_profile: true
     states:
       - decision-required
       - architecture-required
@@ -310,6 +339,9 @@ delivery_art_operator_path:
         - percent-complete-change
         - work-note-change
         - evidence-reference-append
+        - repository-revision-advance
+        - owner-evidence-profile-maintenance
+        - execution-retry-or-recovery
       ordinary_progress_result: historical-architecture-remains-valid
       material_change_result: block-and-require-architecture-refresh
     compatibility:

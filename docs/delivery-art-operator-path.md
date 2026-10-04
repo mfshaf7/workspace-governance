@@ -321,6 +321,20 @@ restart, context compaction, worktree relocation, and disposable-worktree
 cleanup. ART, owner-repo Git, WGCF artifacts, and Review Packets remain the
 canonical sources.
 
+The logical Landing Unit is also stable across recovery. Recovery closes one
+attempt, increments the session generation, requires a new branch, and carries
+the exact `supersedes_recoveries` chain; it does not invent a new Landing Unit
+or revise the delivery architecture.
+
+The machine contract inventories evidence-profile activation for every active
+owner repo. An activated owner must carry
+`contracts/delivery-art-work-session/evidence-profile.json` on the exact
+fetched base before architecture preflight or source creation can succeed. A
+repo without an activated profile must be explicitly listed as nonactivated;
+silence is not acceptance. Cross-repo validation fails when an active repo is
+missing from that inventory or an activated profile is absent, malformed, or
+owned by another repo.
+
 Every result exposes exactly one next action with a code, command, reason, and
 authority. Ambiguity blocks instead of presenting several guessed actions.
 Architecture, Landing Unit, exception or risk, PR review, source merge,
@@ -409,7 +423,10 @@ Freshness is evaluated at the transition that needs it. Initial architecture
 persistence requires a fresh scoped snapshot, and every later transition
 requires a fresh candidate snapshot. A persisted architecture packet remains
 immutable historical evidence; ordinary lifecycle status, percent-complete,
-work-note, and evidence-reference updates do not expire it. Covered scope or
+work-note, evidence-reference, repository-revision, owner evidence-profile,
+and execution retry or recovery updates do not expire it. Exact commits and
+attempt state bind through work-start, Review Packet, and recovery evidence;
+they are not architecture decisions. Covered scope or
 parent, owner or rollback boundary, work-dependency or source Landing Unit
 topology, human-gate binding, architecture or protocol, and validation or
 Security-obligation changes are material. Those changes block the transition
