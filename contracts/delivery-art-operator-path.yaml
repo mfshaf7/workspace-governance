@@ -17,7 +17,7 @@ delivery_art_operator_path:
       repo: operator-orchestration-service
       manifest_path: contracts/delivery-art-lifecycle/capabilities.json
       manifest_digest: sha256:dbaa372cac39894a711f5d02445bc5667057c77b9ff4ff48a42f7c2cd3b05581
-      activated_at_commit: ecb2c19b40d0b38078d5c4deb3760a8be1ff1125
+      activated_at_commit: 92f0967242f535b46aad9e585c72694c6ff1863b
     capability_projection:
       schema_version: 2
       contract_id: operator-orchestration-service.delivery-art-lifecycle.v2
