@@ -1668,6 +1668,21 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         errors.append(
                             f"architecture runtime activation chain {chain_id} source evidence repo must match source owner {source_owner_repo}"
                         )
+                    source_snapshot = _artifact_object(payload.get("source_snapshot"))
+                    source_revision_by_repo = {
+                        entry.get("repo"): entry.get("commit")
+                        for entry in _artifact_object_list(
+                            source_snapshot.get("repo_revisions")
+                        )
+                        if isinstance(entry.get("repo"), str)
+                        and isinstance(entry.get("commit"), str)
+                    }
+                    if source_evidence.get("revision") != source_revision_by_repo.get(
+                        source_owner_repo
+                    ):
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source evidence revision must match source snapshot revision for {source_owner_repo}"
+                        )
                     authority_landing_unit_id = landing_unit_by_work_item.get(
                         gate.get("authority_work_item_id")
                     )
@@ -4440,7 +4455,11 @@ def validate_delivery_art_artifact_contracts(
                 "source_activation_posture": "owner-source-change-required",
                 "source_activation_evidence": {
                     "repo": "operator-orchestration-service",
-                    "revision": "b" * 40,
+                    "revision": next(
+                        entry["commit"]
+                        for entry in staged_v6["source_snapshot"]["repo_revisions"]
+                        if entry["repo"] == "operator-orchestration-service"
+                    ),
                     "path": "contracts/example/manifest.json",
                     "field": "runtime_activation",
                     "observed_value": False,
@@ -4492,6 +4511,18 @@ def validate_delivery_art_artifact_contracts(
             v6_wrong_source_evidence,
             "architecture v6 source posture evidenced by the wrong owner",
             expected_fragment="source evidence repo must match source owner",
+        )
+
+        v6_wrong_source_revision = copy.deepcopy(staged_v6)
+        v6_wrong_source_revision["architecture"]["runtime_activation_chains"][0][
+            "source_activation_evidence"
+        ]["revision"] = "f" * 40
+        require_rejected(
+            "architecture_packet",
+            v6_wrong_source_revision,
+            "architecture v6 source evidence from a different source snapshot revision",
+            "architecture-v6-source-evidence-revision-invalid",
+            expected_fragment="source evidence revision must match source snapshot revision",
         )
 
         v6_unordered_activation = copy.deepcopy(staged_v6)

@@ -255,7 +255,11 @@
                 ],
                 "properties": {
                   "repo": { "$ref": "#/$defs/repoName" },
-                  "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+                  "revision": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{40}$",
+                    "description": "Must equal the source_snapshot.repo_revisions commit for repo."
+                  },
                   "path": { "$ref": "#/$defs/nonEmptyString" },
                   "field": { "$ref": "#/$defs/nonEmptyString" },
                   "observed_value": {

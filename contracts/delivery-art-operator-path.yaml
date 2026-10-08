@@ -542,6 +542,7 @@ delivery_art_operator_path:
       architecture_v3_gate_evidence_precedes_authority_close: true
       architecture_v3_security_descendants_emit_explicit_gates: true
       architecture_v6_runtime_gates_declare_source_activation_posture: true
+      architecture_v6_source_evidence_revision_matches_snapshot: true
       architecture_v6_required_source_change_has_owner_landing_unit: true
       architecture_v6_activation_order_is_security_then_source_then_commissioning: true
       v1_dependency_relation_precedence:
@@ -739,6 +740,7 @@ delivery_art_operator_path:
       - id: architecture-v6-runtime-activation-ownership
         claim_refs:
           - readiness_model.rules.architecture_v6_runtime_gates_declare_source_activation_posture
+          - readiness_model.rules.architecture_v6_source_evidence_revision_matches_snapshot
           - readiness_model.rules.architecture_v6_required_source_change_has_owner_landing_unit
           - readiness_model.rules.architecture_v6_activation_order_is_security_then_source_then_commissioning
         enforcement_state: active-local
@@ -748,6 +750,7 @@ delivery_art_operator_path:
           - architecture-v6-runtime-activation-chain-valid
         negative_case_ids:
           - architecture-v6-runtime-activation-chain-invalid
+          - architecture-v6-source-evidence-revision-invalid
         enforcement_layers:
           - json-schema
           - semantic-validator

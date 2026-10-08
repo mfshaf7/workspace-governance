@@ -987,6 +987,7 @@
             "architecture_v3_gate_evidence_precedes_authority_close",
             "architecture_v3_security_descendants_emit_explicit_gates",
             "architecture_v6_runtime_gates_declare_source_activation_posture",
+            "architecture_v6_source_evidence_revision_matches_snapshot",
             "architecture_v6_required_source_change_has_owner_landing_unit",
             "architecture_v6_activation_order_is_security_then_source_then_commissioning",
             "v1_dependency_relation_precedence"
@@ -1011,6 +1012,7 @@
             "architecture_v3_gate_evidence_precedes_authority_close": { "const": true },
             "architecture_v3_security_descendants_emit_explicit_gates": { "const": true },
             "architecture_v6_runtime_gates_declare_source_activation_posture": { "const": true },
+            "architecture_v6_source_evidence_revision_matches_snapshot": { "const": true },
             "architecture_v6_required_source_change_has_owner_landing_unit": { "const": true },
             "architecture_v6_activation_order_is_security_then_source_then_commissioning": { "const": true },
             "v1_dependency_relation_precedence": {
