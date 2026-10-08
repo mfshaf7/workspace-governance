@@ -77,6 +77,22 @@ is context admission control.
    Source-backed closeout needs a finalized Review Packet that maps the landed
    PR or approved source evidence to the covered ART children.
 
+## Process Environment Safety
+
+Process environments are credential-bearing context, not ordinary diagnostic
+text. Inspect names first and suppress values. Never turn captured
+`NAME=value` entries from `env`, `printenv`, `/proc/<pid>/environ`, Kubernetes
+Secret data, or credential files into command arguments: command-line parsers
+commonly echo invalid arguments and can disclose the complete environment.
+
+Use a minimal environment allowlist for reproduction whenever possible. If an
+exact environment is required, pass it only through the child environment
+without printing it or converting it to argv, and admit the resulting output
+through the same redaction and packet path as other sensitive diagnostics.
+Accidental value output is a credential exposure and requires immediate
+rotation of every exposed credential plus registered-composition
+reconciliation before work resumes.
+
 ## Status Model
 
 - `declared`: workspace-level behavior is declared; owner-native adoption may

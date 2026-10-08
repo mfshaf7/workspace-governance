@@ -34,6 +34,21 @@ burn tokens if pasted raw.
 7. Record packet refs, digests, receipts, and redaction decisions in evidence
    when the packet is used for completion or review.
 
+## Process Environment Diagnostics
+
+- Inspect environment variable names first and keep values suppressed. Do not
+  use `env`, `printenv`, `/proc/<pid>/environ`, Kubernetes Secret data, or a
+  credential file as raw diagnostic output.
+- Never expand captured `NAME=value` entries into a command's arguments. A
+  parser or command error can echo its argument list and disclose every value.
+- When reproducing a child process, prefer a minimal allowlist. If exact
+  environment inheritance is genuinely required, pass entries through the
+  child process environment without printing them or converting them to argv,
+  and keep command output behind the normal context-admission boundary.
+- Treat any accidental environment-value output as credential exposure:
+  stop the affected runtime path, rotate every exposed credential, reconcile
+  the registered composition, and retain only secret-free evidence.
+
 ## Guardrails
 
 - Do not paste raw terminal, CI, ART, Kubernetes, OpenProject, or security
@@ -42,5 +57,7 @@ burn tokens if pasted raw.
 - Do not use CGG as a custom LLM gateway, scanner, observability backend,
   object store, WGCF replacement, or ART mutation authority.
 - Default uncertain sensitive material to denied raw model projection.
+- Do not use argument-building forms such as `xargs ... env` on captured
+  process environments; environment entries must never become argv.
 - If CGG is unavailable, use the documented rollback path and record the
   limitation instead of pretending the context was governed.

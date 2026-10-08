@@ -53,6 +53,7 @@ context_behavior:
       - raw terminal output copied into model prompts
       - raw CI logs copied into model prompts
       - environment dumps projected without redaction report
+      - process environment values expanded into command arguments or parser errors
       - ART execution context projected without packet digest
       - Kubernetes logs projected without profile gate and packet receipt
       - secret-like material projected because detection was uncertain
