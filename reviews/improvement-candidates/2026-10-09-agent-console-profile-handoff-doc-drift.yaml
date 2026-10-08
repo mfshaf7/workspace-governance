@@ -1,0 +1,71 @@
+schema_version: 1
+id: 2026-10-09-agent-console-profile-handoff-doc-drift
+title: Keep active profile handoff checks aligned with its operator README
+recorded_on: '2026-10-09'
+owner_repo: workspace-governance
+summary: >-
+  The merged default-off Agent Console runtime hook added a required stage
+  handoff check to the active accepted-idea-delivery profile but omitted the
+  same check from that profile's primary operator README.
+regression_of: null
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - platform-contract
+signals:
+- id: active-profile-handoff-documentation-drift
+  title: Cross-repo truth audit rejected a profile-to-README handoff mismatch
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The accepted-idea-delivery profile includes the required check "default-off
+    Agent Console endpoint, caller, credential, operator binding, state custody,
+    and teardown", while its Stage Handoff Checks documentation omits that exact
+    string. The runtime remains default-off and unchanged, but the primary
+    operator surface is incomplete.
+  source_refs:
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/profile.yaml
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/README.md
+  - openproject://work_packages/1245
+  - conversation:2026-10-09-epic-1203-candidate-cleanup
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: doc
+    path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/README.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      Restores the exact default-off Agent Console check under the active
+      profile's primary Stage Handoff Checks surface.
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: >-
+      Proves active profile required checks and README handoff checks remain
+      exactly aligned.
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-profiles.yaml
+    owner_repo: workspace-governance
+    note: >-
+      Keeps the active workspace registry aligned with the owner profile and
+      its primary operator surface.
+  note: >-
+    OOS PR #299 merged at 232f21aced79657c758622a5ca91626cf736177d
+    with exact-head human approval, green repository CI, and 1,253 passing local
+    tests with 2 skips. Final closure awaits the corresponding Workspace
+    Governance registry sync and validation.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-09'
+  note: >-
+    Land the active-profile registry sync, rerun the candidate and learning
+    audits, then close the candidate with zero open records.
