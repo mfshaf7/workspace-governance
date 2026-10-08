@@ -4,13 +4,14 @@ title: Delivery planning and closeout now stop unnecessary source work
 recorded_on: '2026-10-08'
 owner_repo: workspace-governance
 summary: >-
-  Epic 1203 exposed five related control gaps: incomplete owner evidence
+  Epic 1203 exposed six related control gaps: incomplete owner evidence
   coverage, confused human and machine attribution, cross-capability evidence
   execution, omitted source-activation ownership, and source recovery started
-  after implementation and current proof were already complete. Existing owner
-  controls now cover the first four, and the delivery skills plus OOS operator
-  surface require an explicit remaining-work classification before any
-  successor source resources are created.
+  after implementation and current proof were already complete, followed by
+  accepted-base preflight demanding a verifier that the planned Landing Unit
+  was meant to add. Existing owner controls now cover all six with explicit
+  lifecycle-phase boundaries and remaining-work classification before source
+  resources are created.
 scope:
   related_repos:
   - governance-operations-console
@@ -31,8 +32,10 @@ source_refs:
 - https://github.com/mfshaf7/governance-operations-console/pull/53
 - https://github.com/mfshaf7/operator-orchestration-service/pull/287
 - https://github.com/mfshaf7/operator-orchestration-service/pull/291
+- https://github.com/mfshaf7/operator-orchestration-service/pull/292
 - https://github.com/mfshaf7/platform-engineering/pull/267
 - https://github.com/mfshaf7/security-architecture/pull/211
+- https://github.com/mfshaf7/security-architecture/pull/212
 - https://github.com/mfshaf7/platform-engineering/pull/278
 - openproject://work_packages/1236
 - workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
@@ -40,6 +43,7 @@ source_refs:
 - workspace-governance/reviews/improvement-candidates/2026-10-08-cross-capability-owner-evidence-binding-regression.yaml
 - workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
 - workspace-governance/reviews/improvement-candidates/2026-10-08-proposal-target-exact-revision-coupling-regression.yaml
+- workspace-governance/reviews/improvement-candidates/2026-10-08-evidence-profile-phase-boundary-regression.yaml
 lessons:
 - id: owner-evidence-readiness-precedes-work-start
   title: Every admitted source owner needs an active evidence profile before work starts
@@ -169,6 +173,34 @@ lessons:
     path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
     owner_repo: operator-orchestration-service
     note: OOS PR 291 makes the same stop condition explicit in the primary operator surface.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: evidence-profile-coverage-respects-lifecycle-phase
+  title: Accepted-base preflight cannot require a verifier implemented by the planned change
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: OOS checked operating-ready live-backend cases against the old base even though the lifecycle reads those cases from the reviewed merged head.
+  impact: Work item 1237 was blocked before source creation and initially appeared to require a false preparatory Studio profile change.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - runbook
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Checks only merge-ready cases during accepted-base configured-path preflight.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves operating-ready obligations remain projected without blocking the source start they depend on.
+  - type: runbook
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Defines accepted-base merge evidence and accepted-head operating evidence as separate phases.
   follow_up:
     owner_repo: null
     due_on: null
