@@ -1,0 +1,47 @@
+schema_version: 1
+id: 2026-10-08-delivery-plan-activation-ownership-regression
+title: Reject Delivery plans that omit source activation ownership
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: Epic 1203 planning passed graph and temporal validation while assigning Platform
+  commissioning immediately after Security even though the reviewed OOS manifest remains
+  runtime-inactive and only OOS can activate that source.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The whole-initiative plan includes OOS implementation, Security review,
+    and Platform commissioning, but no OOS-owned source activation Landing Unit. The
+    dependency graph is acyclic yet operationally unsatisfiable because Platform cannot
+    change the embedded OOS runtime_activation gate.
+  source_refs:
+  - openproject://work_packages/1203
+  - openproject://work_packages/1233
+  - openproject://work_packages/1235
+  - openproject://work_packages/1236
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-11'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
