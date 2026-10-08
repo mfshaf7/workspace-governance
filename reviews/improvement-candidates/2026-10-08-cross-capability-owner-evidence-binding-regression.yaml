@@ -1,0 +1,45 @@
+schema_version: 1
+id: 2026-10-08-cross-capability-owner-evidence-binding-regression
+title: Scope owner evidence commands to requested conformance cases
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: 'Delivery #1236 project-review evidence ran the unrelated Repository and
+  Catalog live commissioning command because owner evidence commands were selected
+  by fidelity alone, causing a valid Proposal Target source revision to block without
+  durable-state progress.'
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-02-cross-repo-owner-evidence-fidelity-recurrence.yaml
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'The accepted Platform evidence profile contains a Repository and Catalog
+    command with matching-fidelity live-backend binding. OOS executed every profile
+    command even when that command bound zero requested cases, and the contract could
+    not restrict a capability-specific command to exact conformance cases. Work continue
+    for #1236 therefore failed twice after source and CI were green.'
+  source_refs:
+  - openproject://work_packages/1236
+  - conversation:2026-10-08-operator-directed-in-place-activation
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-11'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
