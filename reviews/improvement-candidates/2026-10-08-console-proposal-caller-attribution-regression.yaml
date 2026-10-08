@@ -1,0 +1,43 @@
+schema_version: 1
+id: 2026-10-08-console-proposal-caller-attribution-regression
+title: Separate Console human authorization from OOS machine attribution
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: Proposal commissioning exposed that the Console Proposal adapter sends the
+  verified human session principal as the OOS command operator even though the OOS
+  Proposal contract requires the authenticated machine caller identity.
+regression_of: null
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The live Console-to-OOS Proposal write returned proposal_operator_binding_mismatch.
+    Platform projected operator:workspace-owner for same-origin session authorization,
+    OOS authenticated governance-operations-console, and Console tests explicitly
+    expected the conflicting human identifier in the OOS command body.
+  source_refs:
+  - openproject://work_packages/1236
+  - conversation:2026-10-08-proposal-target-commissioning
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-11'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
