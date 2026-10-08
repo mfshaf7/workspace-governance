@@ -1,0 +1,47 @@
+schema_version: 1
+id: 2026-10-08-proposal-target-public-source-prepublication-regression
+title: Reject private Proposal content before public Prototype source publication
+recorded_on: '2026-10-08'
+owner_repo: workspace-prototype-studio
+summary: The Proposal target application contract allowed free-form Proposal and operator
+  content into generated files on a public Prototype Studio review branch. Human review
+  happened after publication, so it could not act as the pre-publication safety boundary.
+regression_of: null
+status: triaged
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-prototype-studio
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: security-review-publication-boundary-discovery
+  title: Security review found private fields crossing into a public source branch
+  trigger: late-architecture-discovery
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: The source request and generated capture included operator_ref, suggested
+    name and objective, route and custody rationales, and other free-form source
+    values. A public Git branch is already disclosure, so later PR review cannot be
+    the admission control. The target boundary must accept and persist only opaque
+    canonical references, digests, generated labels, and enumerated posture.
+  source_refs:
+  - openproject://work_packages/1235
+  - conversation:2026-10-08-proposal-target-security-review
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-prototype-studio
+  due_on: '2026-10-09'
+  note: Land the owner-first public-safe request and capture contract, update the OOS
+    adapter to construct only that projection and reject free-form fields, then repeat
+    Security review against the exact merged revisions before runtime activation.
