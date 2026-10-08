@@ -7,7 +7,7 @@ summary: The Proposal target application contract allowed free-form Proposal and
   content into generated files on a public Prototype Studio review branch. Human review
   happened after publication, so it could not act as the pre-publication safety boundary.
 regression_of: null
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -36,12 +36,33 @@ signals:
   - openproject://work_packages/1235
   - conversation:2026-10-08-proposal-target-security-review
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-proposal-target-public-source-prepublication-closure.yaml
+  control_refs:
+  - type: contract
+    path: workspace-prototype-studio/contracts/proposal-target-application/request.schema.json
+    owner_repo: workspace-prototype-studio
+    note: Closed v2 schema admits only generated identities and bounded public-safe fields.
+  - type: test
+    path: workspace-prototype-studio/tests/test_proposal_target_application.py
+    owner_repo: workspace-prototype-studio
+    note: Proves unsafe caller-written fields are rejected before source publication.
+  - type: workflow
+    path: operator-orchestration-service/src/proposal-target-application/service.js
+    owner_repo: operator-orchestration-service
+    note: Projects private Proposal state into the exact public-safe Studio contract.
+  - type: test
+    path: operator-orchestration-service/test/proposal-target-boundary.test.js
+    owner_repo: operator-orchestration-service
+    note: Prevents private Proposal fields from re-entering the public source request.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-08-proposal-target-application-trust-boundary.md
+    owner_repo: security-architecture
+    note: Records the exact repaired revisions and bounded activation decision.
+  note: >-
+    Closed after Studio PR 23 and OOS PR 285 landed the structural
+    pre-publication controls, Security PR 199 approved their exact merged
+    revisions, and ART item 1235 finalized the review evidence.
 follow_up:
-  owner_repo: workspace-prototype-studio
-  due_on: '2026-10-09'
-  note: Land the owner-first public-safe request and capture contract, update the OOS
-    adapter to construct only that projection and reject free-form fields, then repeat
-    Security review against the exact merged revisions before runtime activation.
+  owner_repo: null
+  due_on: null
+  note: null
