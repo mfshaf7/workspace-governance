@@ -7,7 +7,7 @@ summary: Epic 1203 planning passed graph and temporal validation while assigning
   commissioning immediately after Security even though the reviewed OOS manifest remains
   runtime-inactive and only OOS can activate that source.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
-status: triaged
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -37,11 +37,28 @@ signals:
   - openproject://work_packages/1235
   - openproject://work_packages/1236
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires every runtime gate to name its source owner and orders an owner Landing Unit before commissioning when source must change.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Stages machine-enforced v6 activation-chain validation as defense in depth without making it current prematurely.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-08-proposal-target-source-activation.md
+    owner_repo: operator-orchestration-service
+    note: Records the actual OOS-owned source activation Landing Unit before Platform commissioning.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-08-delivery-art-architecture-v6-activation-ownership.md
+    owner_repo: security-architecture
+    note: Approves the staged fail-closed machine control while keeping its later activation separate.
+  note: Closed for the current planning failure by the landed OOS owner-maintenance
+    activation and the installed planning gate. No extra ART child was required;
+    staged v6 remains a future defense-in-depth activation, not false current authority.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-11'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

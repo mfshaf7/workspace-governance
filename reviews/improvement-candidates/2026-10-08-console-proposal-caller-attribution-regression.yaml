@@ -7,7 +7,7 @@ summary: Proposal commissioning exposed that the Console Proposal adapter sends 
   verified human session principal as the OOS command operator even though the OOS
   Proposal contract requires the authenticated machine caller identity.
 regression_of: null
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -33,11 +33,23 @@ signals:
   - openproject://work_packages/1236
   - conversation:2026-10-08-proposal-target-commissioning
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/domain-workspaces/proposal/server/proposal-oos-client.ts
+    owner_repo: governance-operations-console
+    note: Emits the authenticated Console machine caller as OOS Proposal command attribution.
+  - type: test
+    path: governance-operations-console/tests/operation-runtime/proposal-live-adapter.test.mjs
+    owner_repo: governance-operations-console
+    note: Proves the human Console principal does not enter the machine-attribution field.
+  - type: doc
+    path: governance-operations-console/docs/product/proposal-live-integration.md
+    owner_repo: governance-operations-console
+    note: Separates same-origin human authorization from OOS machine attribution.
+  note: Closed by Governance Operations Console PR 53 and the successful Proposal
+    Target commissioning path for work item 1236.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-11'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

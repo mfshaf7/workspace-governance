@@ -50,6 +50,15 @@ cross-repo protocol, or control-plane change:
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
+For every runtime-activation gate in the plan, name the repository that owns
+the gated source field and its observed posture. If that owner must change
+source, schedule its Landing Unit after the human authority and before runtime
+commissioning; a downstream Platform task cannot satisfy an upstream owner
+source change. Use the work-home routing contract to decide whether that
+Landing Unit belongs to an existing ART item or owner-repo maintenance. Do not
+create another ART child merely to represent maintenance that the accepted
+item and rollback boundary already cover.
+
 Do not create or supersede an Architecture Packet for a repository commit,
 owner evidence-profile repair, timestamp, retry, or recovery. Those facts
 belong to the exact work-start, Review Packet, session-generation, and recovery
@@ -58,6 +67,34 @@ increments the session generation while preserving the complete recovery
 chain. A new Architecture Packet is justified only by a material change to
 scope, ownership or rollback boundary, dependency or merge order, protocol,
 human gates, conformance obligations, or the approved architecture decision.
+
+### Remaining Work Classification Gate
+
+Before starting any recovery successor, classify the remaining obligation as
+exactly one of:
+
+- `source-change`: an exact behavior and the owner-repo files that must change
+  are identified
+- `operating-evidence-refresh`: merged behavior is current and only fresh
+  runtime or owner evidence remains
+- `historical-evidence-superseded`: preserved older evidence no longer
+  describes the current accepted source but requires no replacement source
+- `art-only-completion`: implementation and required proof already satisfy the
+  item and only the supported ART completion path remains
+
+Only `source-change` may create a branch, worktree, source credential, pull
+request, or successor work session. The other three classifications use their
+existing evidence or ART route and must not manufacture source work. After any
+fresh proof passes, stop and run this classification again before another
+source action. Recovery history remains immutable audit evidence; it does not
+by itself prove that a new source delta exists.
+
+Before landing maintenance in a repository whose exact head is pinned by an
+active runtime, commissioning verifier, or Security acceptance, enumerate
+those exact-revision consumers and record whether each needs no refresh,
+reacceptance, or ordered recommissioning. Sequence required consumer updates
+before calling the maintenance Landing Unit complete. Do not discover exact-head
+coupling for the first time after merge.
 
 Record protocol applicability explicitly in every architecture packet. For
 cross-repo protocol work, define an executable conformance plan before

@@ -21,9 +21,20 @@ or live governed state.
 1. Identify the real change class.
 2. Check the product or repo workflow maturity.
 3. List the minimum evidence that should exist.
-4. After source-backed work lands, run the post-landing cleanup gate before reporting final completion.
-5. If you are about to recommend a restart or session close, run the restart-readiness gate first.
-6. Call out what is still missing instead of implying completion.
+4. Classify remaining work before creating or continuing source resources.
+5. After source-backed work lands, run the post-landing cleanup gate before reporting final completion.
+6. If you are about to recommend a restart or session close, run the restart-readiness gate first.
+7. Call out what is still missing instead of implying completion.
+
+## Remaining Work Gate
+
+Use the Project Delivery Operator classifications when recovery or stale
+evidence is involved. Require an identified behavior and file delta before
+calling the remaining work source-backed. If implementation is already merged
+and only current operating proof, superseded historical evidence, or ART
+completion remains, do not create a branch, worktree, credential, pull request,
+or successor session. After fresh proof passes, reclassify before taking any
+further source action.
 
 ## Post-Landing Cleanup Gate
 
@@ -57,6 +68,9 @@ Before telling the operator that a restart is safe or recommended:
 ## Minimum Checks
 
 - owner repo change exists
+- every newly created source resource is justified by an identified remaining
+  behavior and file delta; evidence refresh and ART-only completion do not
+  masquerade as source work
 - post-landing branch and worktree cleanup is complete for source-backed work,
   and the exact owner-repo cleanup check passes before final completion is reported
 - validation ran at the owning layer
