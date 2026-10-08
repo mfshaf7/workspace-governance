@@ -179,8 +179,10 @@ V6 is staged and cannot authorize a new work start yet. It adds an explicit
 gate. Each chain must say whether the source-owned activation prerequisite is
 already ready or requires a separate owner-repo source Landing Unit. When a
 source change is required, validation binds the exact source owner and Landing
-Unit and proves the order `human authority -> source activation -> runtime
-commissioning` in both the source graph and work-item execution plan. This
+Unit. The evidence revision must equal that owner's commit in the packet's
+source snapshot, so evidence cannot cite a different source generation. The
+same validation proves the order `human authority -> source activation ->
+runtime commissioning` in both the source graph and work-item execution plan. This
 prevents Platform commissioning from being planned as though it could change
 an embedded activation gate owned by another repository.
 

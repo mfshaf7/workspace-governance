@@ -309,7 +309,8 @@ Use these contracts to declare:
     dimensions when applicable, dimension-bound executable cases, and active
     v5 separation between outcome applicability and one evidence-owner Landing
     Unit per atomic case, plus the staged v6 runtime-activation chain that makes
-    source ownership and Security-to-source-to-commissioning order explicit;
+    source ownership, source-snapshot revision binding, and
+    Security-to-source-to-commissioning order explicit;
     v1-v4 remain immutable historical compatibility while v5 stays current
   - also defines contradictions, integrity, and opaque WGCF artifact-registry
     custody with a digest-bound custody receipt
