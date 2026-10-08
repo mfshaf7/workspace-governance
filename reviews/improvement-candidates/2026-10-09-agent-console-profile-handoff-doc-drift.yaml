@@ -8,7 +8,7 @@ summary: >-
   handoff check to the active accepted-idea-delivery profile but omitted the
   same check from that profile's primary operator README.
 regression_of: null
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -61,11 +61,9 @@ resolution:
   note: >-
     OOS PR #299 merged at 232f21aced79657c758622a5ca91626cf736177d
     with exact-head human approval, green repository CI, and 1,253 passing local
-    tests with 2 skips. Final closure awaits the corresponding Workspace
-    Governance registry sync and validation.
+    tests with 2 skips. Workspace Governance PR #251 carries the matching active
+    profile registry entry and these validated closure records.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-09'
-  note: >-
-    Land the active-profile registry sync, rerun the candidate and learning
-    audits, then close the candidate with zero open records.
+  owner_repo: null
+  due_on: null
+  note: null
