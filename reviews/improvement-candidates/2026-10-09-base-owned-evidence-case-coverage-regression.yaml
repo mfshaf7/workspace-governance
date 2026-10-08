@@ -1,0 +1,77 @@
+schema_version: 1
+id: 2026-10-09-base-owned-evidence-case-coverage-regression
+title: Bootstrap capability evidence before starting its source session
+recorded_on: '2026-10-09'
+owner_repo: platform-engineering
+summary: >-
+  Delivery ART work item 1246 was started before the immutable Platform base
+  contained its capability-specific Agent Console evidence commands. Generic
+  real-git suites made the source path contractually admissible, but the more
+  precise checks added on the candidate branch could not validate that same
+  candidate under the base-owned evidence contract.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: base-profile-capability-bootstrap-missed
+  title: Planning omitted the capability evidence bootstrap before work start
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  finding: >-
+    Work start for #1246 accepted Platform base revision
+    4df06f09e6960b94235be48a9afb2976b24d9eb6 and created the Landing Unit
+    worktree before that revision's evidence profile contained the focused Agent
+    Console protocol commands. The existing unscoped real-git suites legitimately
+    satisfied the generic fallback contract, so this is not an OOS admission
+    defect. It is a planning and sequencing miss: the capability-specific profile
+    bootstrap should have landed before the #1246 session was started.
+  source_refs:
+  - openproject://work_packages/1246
+  - operator-orchestration-service/src/delivery-art
+  - platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+  - conversation:2026-10-09-epic-1203-platform-evidence-preflight
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: contract
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      Defines exact selectors for capability-specific commands while preserving
+      intentionally generic matching-fidelity commands for repository-wide suites.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      Filters explicitly scoped commands by case and permits unscoped generic
+      commands to bind matching-fidelity cases.
+  - type: contract
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: >-
+      The recorded #1246 base already supplies generic real-git tests and the
+      required validation kind; the candidate adds focused Agent Console commands
+      for subsequent sessions without changing current-session admission truth.
+  note: >-
+    Closed after contract and code inspection disproved the proposed admission
+    defect. The #1246 start correctly used the intentionally generic real-git
+    fallback from its immutable base. Requiring exact selectors for every case,
+    bootstrapping a second Platform landing, or recovering the active session
+    would add rigidity without correcting a violated contract. The Agent Console
+    branch remains responsible for its focused tests and normal CI-equivalent
+    validation before review.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
