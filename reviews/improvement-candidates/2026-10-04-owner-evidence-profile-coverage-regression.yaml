@@ -75,7 +75,10 @@ resolution:
     another control plane, ART defect, or architecture version.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-07'
-  note: Land both missing profiles, enforce the complete profile-or-nonactivation
+  due_on: '2026-10-11'
+  note: >-
+    Land both missing profiles, enforce the complete profile-or-nonactivation
     inventory, make architecture supersession semantic, and preserve logical Landing
-    Unit identity across recovery. Close only after merged and live #1232 preflight proof.
+    Unit identity across recovery. The source controls and live #1232 preflight proof
+    have landed; complete the closure audit and after-action linkage by the revised
+    due date.
