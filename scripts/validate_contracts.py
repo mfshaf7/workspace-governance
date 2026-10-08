@@ -158,6 +158,13 @@ DELIVERY_ART_ARCHITECTURE_V5_PARITY_FIXTURE_REF = (
     "contracts/fixtures/delivery-art-workflow/"
     "architecture-packet-v5-parity-vectors.valid.json"
 )
+DELIVERY_ART_ARCHITECTURE_V6_PARITY_SCHEMA_REF = (
+    "contracts/schemas/delivery-art-architecture-v6-activation-parity-vectors.schema.json"
+)
+DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF = (
+    "contracts/fixtures/delivery-art-workflow/"
+    "architecture-packet-v6-activation-parity-vectors.valid.json"
+)
 AGENT_ACTION_ARTIFACT_CASES = {
     "request": (
         "contracts/schemas/agent-action-request.schema.json",
@@ -1165,7 +1172,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             "architecture.dependency_merge_dag.merge_order violates "
                             f"{before} before {after}: {before_repo} must precede {after_repo}"
                         )
-        elif schema_version in {2, 3, 4, 5}:
+        elif schema_version in {2, 3, 4, 5, 6}:
             execution_plan_by_work_item = {}
             emitted_gate_authorities = {}
             combined_schedule_edges = []
@@ -1366,7 +1373,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             if not _delivery_art_graph_is_acyclic(source_nodes, source_edges):
                 errors.append("architecture.source_landing_graph must be acyclic")
 
-            if schema_version in {3, 4, 5}:
+            if schema_version in {3, 4, 5, 6}:
                 source_dependents = {}
                 for prerequisite, dependent in source_edges:
                     source_dependents.setdefault(prerequisite, set()).add(dependent)
@@ -1505,7 +1512,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             f"architecture human gate {gate_id} blocks source merge for non-source Landing Units: "
                             + ", ".join(sorted(non_source_landing_units))
                         )
-                if schema_version in {3, 4, 5}:
+                if schema_version in {3, 4, 5, 6}:
                     evidence_prerequisites = set(
                         _artifact_string_list(
                             gate.get("evidence_prerequisite_work_item_ids")
@@ -1540,7 +1547,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             + ", ".join(sorted(missing_authority_prerequisites))
                         )
 
-            if schema_version in {3, 4, 5}:
+            if schema_version in {3, 4, 5, 6}:
                 declared_gate_ids = set(gate_ids)
                 emitted_gate_ids = set(emitted_gate_authorities)
                 unknown_emitted_gates = emitted_gate_ids - declared_gate_ids
@@ -1586,6 +1593,181 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                         errors.append(
                             f"architecture Security-owned work item {work_item_id} must emit at least one explicit human gate"
                         )
+
+            if schema_version == 6:
+                gate_by_id = {
+                    gate.get("gate_id"): gate
+                    for gate in human_gates
+                    if isinstance(gate.get("gate_id"), str)
+                }
+                runtime_gate_ids = {
+                    gate_id
+                    for gate_id, gate in gate_by_id.items()
+                    if gate.get("blocked_transition") == "before_runtime_activation"
+                }
+                activation_chains = _artifact_object_list(
+                    architecture.get("runtime_activation_chains")
+                )
+                activation_chain_ids = [
+                    chain.get("chain_id")
+                    for chain in activation_chains
+                    if isinstance(chain.get("chain_id"), str)
+                ]
+                if len(activation_chain_ids) != len(set(activation_chain_ids)):
+                    errors.append(
+                        "architecture.runtime_activation_chains ids must be unique"
+                    )
+                activation_gate_ids = [
+                    chain.get("gate_id")
+                    for chain in activation_chains
+                    if isinstance(chain.get("gate_id"), str)
+                ]
+                if len(activation_gate_ids) != len(set(activation_gate_ids)):
+                    errors.append(
+                        "architecture.runtime_activation_chains must contain one chain per runtime activation gate"
+                    )
+                if set(activation_gate_ids) != runtime_gate_ids:
+                    missing = runtime_gate_ids - set(activation_gate_ids)
+                    extra = set(activation_gate_ids) - runtime_gate_ids
+                    detail = []
+                    if missing:
+                        detail.append("missing " + ", ".join(sorted(missing)))
+                    if extra:
+                        detail.append("unexpected " + ", ".join(sorted(extra)))
+                    errors.append(
+                        "architecture.runtime_activation_chains must exactly cover before_runtime_activation gates: "
+                        + "; ".join(detail)
+                    )
+                for chain in activation_chains:
+                    chain_id = chain.get("chain_id")
+                    gate_id = chain.get("gate_id")
+                    gate = gate_by_id.get(gate_id)
+                    if gate is None:
+                        continue
+                    commissioning_units = set(
+                        _artifact_string_list(
+                            chain.get("commissioning_landing_unit_ids")
+                        )
+                    )
+                    affected_units = set(
+                        _artifact_string_list(gate.get("affected_landing_unit_ids"))
+                    )
+                    if commissioning_units != affected_units:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} commissioning Landing Units must exactly match gate {gate_id} affected Landing Units"
+                        )
+                    source_owner_repo = chain.get("source_owner_repo")
+                    if source_owner_repo not in owner_repos:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source owner {source_owner_repo} is outside descendant ownership"
+                        )
+                    source_evidence = _artifact_object(
+                        chain.get("source_activation_evidence")
+                    )
+                    if source_evidence.get("repo") != source_owner_repo:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source evidence repo must match source owner {source_owner_repo}"
+                        )
+                    authority_landing_unit_id = landing_unit_by_work_item.get(
+                        gate.get("authority_work_item_id")
+                    )
+                    for commissioning_unit_id in commissioning_units:
+                        commissioning_unit = landing_unit_by_id.get(
+                            commissioning_unit_id
+                        )
+                        if commissioning_unit is None:
+                            continue
+                        if commissioning_unit.get("source_backed") is not True:
+                            errors.append(
+                                f"architecture runtime activation chain {chain_id} commissioning Landing Unit {commissioning_unit_id} must be source-backed"
+                            )
+                    posture = chain.get("source_activation_posture")
+                    if source_evidence.get("observed_posture") != posture:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source evidence posture must match declared source activation posture"
+                        )
+                    activation_landing_unit_id = chain.get(
+                        "source_activation_landing_unit_id"
+                    )
+                    if posture == "source-ready":
+                        for commissioning_unit_id in commissioning_units:
+                            if (
+                                authority_landing_unit_id in source_nodes
+                                and commissioning_unit_id in source_nodes
+                                and not source_path_exists(
+                                    authority_landing_unit_id,
+                                    commissioning_unit_id,
+                                )
+                            ):
+                                errors.append(
+                                    f"architecture runtime activation chain {chain_id} does not order gate authority Landing Unit {authority_landing_unit_id} before commissioning Landing Unit {commissioning_unit_id}"
+                                )
+                        continue
+                    if posture != "owner-source-change-required":
+                        continue
+                    activation_landing_unit = landing_unit_by_id.get(
+                        activation_landing_unit_id
+                    )
+                    if activation_landing_unit is None:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} references unknown source activation Landing Unit {activation_landing_unit_id}"
+                        )
+                        continue
+                    if activation_landing_unit.get("source_backed") is not True:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source activation Landing Unit {activation_landing_unit_id} must be source-backed"
+                        )
+                    if activation_landing_unit.get("owner_repo") != source_owner_repo:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} source activation Landing Unit {activation_landing_unit_id} is not owned by {source_owner_repo}"
+                        )
+                    if activation_landing_unit_id in commissioning_units:
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} must separate source activation from commissioning"
+                        )
+                    if (
+                        authority_landing_unit_id in source_nodes
+                        and activation_landing_unit_id in source_nodes
+                        and not source_path_exists(
+                            authority_landing_unit_id,
+                            activation_landing_unit_id,
+                        )
+                    ):
+                        errors.append(
+                            f"architecture runtime activation chain {chain_id} does not order gate authority Landing Unit {authority_landing_unit_id} before source activation Landing Unit {activation_landing_unit_id}"
+                        )
+                    authority_work_item_id = gate.get("authority_work_item_id")
+                    for activation_work_item_id in _artifact_string_list(
+                        activation_landing_unit.get("covered_work_item_ids")
+                    ):
+                        activation_plan = execution_plan_by_work_item.get(
+                            activation_work_item_id, {}
+                        )
+                        activation_prerequisites = set(
+                            _artifact_string_list(
+                                activation_plan.get("start_after_work_item_ids")
+                            )
+                        ) | set(
+                            _artifact_string_list(
+                                activation_plan.get("close_after_work_item_ids")
+                            )
+                        )
+                        if authority_work_item_id not in activation_prerequisites:
+                            errors.append(
+                                f"architecture runtime activation chain {chain_id} source activation work item {activation_work_item_id} must wait for gate authority work item {authority_work_item_id}"
+                            )
+                    for commissioning_unit_id in commissioning_units:
+                        if (
+                            activation_landing_unit_id in source_nodes
+                            and commissioning_unit_id in source_nodes
+                            and not source_path_exists(
+                                activation_landing_unit_id,
+                                commissioning_unit_id,
+                            )
+                        ):
+                            errors.append(
+                                f"architecture runtime activation chain {chain_id} does not order source activation Landing Unit {activation_landing_unit_id} before commissioning Landing Unit {commissioning_unit_id}"
+                            )
 
         source_snapshot = _artifact_object(payload.get("source_snapshot"))
         if (
@@ -1705,7 +1887,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             for dimension in dimensions
         }
         execution_order_edges = (
-            list(combined_schedule_edges) if schema_version == 5 else []
+            list(combined_schedule_edges) if schema_version in {5, 6} else []
         )
         for case in conformance_cases:
             case_id = case.get("id")
@@ -1715,7 +1897,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             case_dimensions = set(
                 _artifact_string_list(case.get("dimension_ids"))
             )
-            if schema_version == 5:
+            if schema_version in {5, 6}:
                 evidence_owner_landing_unit_id = case.get(
                     "evidence_owner_landing_unit_id"
                 )
@@ -3209,6 +3391,112 @@ def validate_delivery_art_architecture_v5_parity_vectors(
             )
 
 
+def validate_delivery_art_architecture_v6_parity_vectors(
+    errors: list[str], repo_root: Path
+) -> None:
+    schema_path = repo_root / DELIVERY_ART_ARCHITECTURE_V6_PARITY_SCHEMA_REF
+    fixture_path = repo_root / DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF
+    if not schema_path.exists():
+        errors.append(
+            f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_SCHEMA_REF}: v6 parity schema is missing"
+        )
+        return
+    if not fixture_path.exists():
+        errors.append(
+            f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: v6 parity fixture is missing"
+        )
+        return
+    validate_schema(errors, fixture_path, schema_path)
+    payload = load_json(fixture_path)
+    for vector in _artifact_object_list(payload.get("vectors")):
+        vector_id = vector.get("id")
+        landing_units = {
+            unit.get("id"): unit
+            for unit in _artifact_object_list(vector.get("landing_units"))
+            if isinstance(unit.get("id"), str)
+        }
+        source_edges = [
+            (
+                edge.get("prerequisite_landing_unit_id"),
+                edge.get("dependent_landing_unit_id"),
+            )
+            for edge in _artifact_object_list(vector.get("source_landing_edges"))
+        ]
+        gate = _artifact_object(vector.get("human_gate"))
+        chain = _artifact_object(vector.get("runtime_activation_chain"))
+        if chain.get("gate_id") != gate.get("gate_id"):
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} activation chain must bind its runtime gate"
+            )
+        source_evidence = _artifact_object(chain.get("source_activation_evidence"))
+        if (
+            source_evidence.get("repo") != chain.get("source_owner_repo")
+            or source_evidence.get("observed_posture")
+            != chain.get("source_activation_posture")
+        ):
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} source evidence must match its owner and posture"
+            )
+        commissioning = set(
+            _artifact_string_list(chain.get("commissioning_landing_unit_ids"))
+        )
+        affected = set(
+            _artifact_string_list(gate.get("affected_landing_unit_ids"))
+        )
+        if commissioning != affected:
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} commissioning scope must match its runtime gate"
+            )
+        activation_id = chain.get("source_activation_landing_unit_id")
+        activation_unit = landing_units.get(activation_id)
+        if activation_unit is None or activation_unit.get("owner_repo") != chain.get(
+            "source_owner_repo"
+        ):
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} source activation owner mismatch"
+            )
+        authority_work_item_id = gate.get("authority_work_item_id")
+        authority_unit_id = next(
+            (
+                landing_unit_id
+                for landing_unit_id, unit in landing_units.items()
+                if authority_work_item_id
+                in _artifact_string_list(unit.get("covered_work_item_ids"))
+            ),
+            None,
+        )
+        if not _delivery_art_graph_has_path(
+            source_edges, authority_unit_id, activation_id
+        ):
+            errors.append(
+                f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} must order Security authority before source activation"
+            )
+        for commissioning_id in commissioning:
+            if not _delivery_art_graph_has_path(
+                source_edges, activation_id, commissioning_id
+            ):
+                errors.append(
+                    f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} must order source activation before commissioning"
+                )
+        execution_plan = {
+            entry.get("work_item_id"): set(
+                _artifact_string_list(entry.get("start_after_work_item_ids"))
+            )
+            for entry in _artifact_object_list(
+                vector.get("work_item_execution_plan")
+            )
+        }
+        for activation_work_item_id in _artifact_string_list(
+            _artifact_object(activation_unit).get("covered_work_item_ids")
+        ):
+            if authority_work_item_id not in execution_plan.get(
+                activation_work_item_id, set()
+            ):
+                errors.append(
+                    f"{DELIVERY_ART_ARCHITECTURE_V6_PARITY_FIXTURE_REF}: vector {vector_id} source activation must wait for Security authority"
+                )
+
+
 def validate_delivery_art_artifact_contracts(
     errors: list[str],
     repo_root: Path,
@@ -4134,6 +4422,106 @@ def validate_delivery_art_artifact_contracts(
             current_v5,
             "current architecture packet v5 with separate outcome applicability and evidence ownership",
             "architecture-v5-evidence-owner-valid",
+        )
+
+        staged_v6 = copy.deepcopy(current_v5)
+        staged_v6["schema_version"] = 6
+        staged_v6["artifact_id"] = "architecture-packet:delivery-698-v6"
+        activation_gate = staged_v6["architecture"]["required_human_gates"][0]
+        activation_gate["blocked_transition"] = "before_runtime_activation"
+        activation_gate["affected_landing_unit_ids"] = [
+            "delivery-698-security-acceptance"
+        ]
+        staged_v6["architecture"]["runtime_activation_chains"] = [
+            {
+                "chain_id": "activation:implementation-to-commissioning",
+                "gate_id": "gate:implementation-admission",
+                "source_owner_repo": "operator-orchestration-service",
+                "source_activation_posture": "owner-source-change-required",
+                "source_activation_evidence": {
+                    "repo": "operator-orchestration-service",
+                    "revision": "b" * 40,
+                    "path": "contracts/example/manifest.json",
+                    "field": "runtime_activation",
+                    "observed_value": False,
+                    "observed_posture": "owner-source-change-required",
+                },
+                "source_activation_landing_unit_id": "delivery-698-implementation",
+                "commissioning_landing_unit_ids": [
+                    "delivery-698-security-acceptance"
+                ],
+            }
+        ]
+        staged_v6["scope_fingerprint"] = _delivery_art_projection_digest(
+            _architecture_scope_projection(staged_v6)
+        )
+        require_accepted(
+            "architecture_packet",
+            staged_v6,
+            "staged architecture packet v6 with explicit source activation ownership and ordering",
+            "architecture-v6-runtime-activation-chain-valid",
+        )
+
+        v6_without_activation_chain = copy.deepcopy(staged_v6)
+        v6_without_activation_chain["architecture"]["runtime_activation_chains"] = []
+        require_rejected(
+            "architecture_packet",
+            v6_without_activation_chain,
+            "architecture v6 runtime gate without an activation chain",
+            "architecture-v6-runtime-activation-chain-invalid",
+            expected_fragment="must exactly cover before_runtime_activation gates",
+        )
+
+        v6_wrong_activation_owner = copy.deepcopy(staged_v6)
+        v6_wrong_activation_owner["architecture"]["runtime_activation_chains"][0][
+            "source_activation_landing_unit_id"
+        ] = "delivery-698-contract"
+        require_rejected(
+            "architecture_packet",
+            v6_wrong_activation_owner,
+            "architecture v6 source activation assigned to the wrong owner",
+            expected_fragment="is not owned by operator-orchestration-service",
+        )
+
+        v6_wrong_source_evidence = copy.deepcopy(staged_v6)
+        v6_wrong_source_evidence["architecture"]["runtime_activation_chains"][0][
+            "source_activation_evidence"
+        ]["repo"] = "security-architecture"
+        require_rejected(
+            "architecture_packet",
+            v6_wrong_source_evidence,
+            "architecture v6 source posture evidenced by the wrong owner",
+            expected_fragment="source evidence repo must match source owner",
+        )
+
+        v6_unordered_activation = copy.deepcopy(staged_v6)
+        v6_unordered_activation["architecture"]["source_landing_graph"]["edges"].pop()
+        require_rejected(
+            "architecture_packet",
+            v6_unordered_activation,
+            "architecture v6 source activation not ordered before commissioning",
+            expected_fragment="does not order source activation Landing Unit",
+        )
+
+        v6_activation_before_security = copy.deepcopy(staged_v6)
+        v6_activation_before_security["architecture"]["work_item_execution_plan"][1][
+            "start_after_work_item_ids"
+        ] = []
+        require_rejected(
+            "architecture_packet",
+            v6_activation_before_security,
+            "architecture v6 source activation work starting before Security authority",
+            expected_fragment="must wait for gate authority work item",
+        )
+
+        v5_with_v6_activation_chain = copy.deepcopy(current_v5)
+        v5_with_v6_activation_chain["architecture"]["runtime_activation_chains"] = copy.deepcopy(
+            staged_v6["architecture"]["runtime_activation_chains"]
+        )
+        require_rejected(
+            "architecture_packet",
+            v5_with_v6_activation_chain,
+            "immutable v5 architecture packet using a v6-only activation-chain field",
         )
 
         v5_without_evidence_owner = copy.deepcopy(current_v5)
@@ -7205,6 +7593,7 @@ def main() -> int:
             )
 
     validate_delivery_art_architecture_v5_parity_vectors(errors, repo_root)
+    validate_delivery_art_architecture_v6_parity_vectors(errors, repo_root)
     delivery_art_proof_cases = validate_delivery_art_artifact_contracts(
         errors, repo_root
     )

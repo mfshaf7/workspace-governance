@@ -986,6 +986,9 @@
             "architecture_v3_start_and_close_schedule_is_satisfiable",
             "architecture_v3_gate_evidence_precedes_authority_close",
             "architecture_v3_security_descendants_emit_explicit_gates",
+            "architecture_v6_runtime_gates_declare_source_activation_posture",
+            "architecture_v6_required_source_change_has_owner_landing_unit",
+            "architecture_v6_activation_order_is_security_then_source_then_commissioning",
             "v1_dependency_relation_precedence"
           ],
           "properties": {
@@ -1007,6 +1010,9 @@
             "architecture_v3_start_and_close_schedule_is_satisfiable": { "const": true },
             "architecture_v3_gate_evidence_precedes_authority_close": { "const": true },
             "architecture_v3_security_descendants_emit_explicit_gates": { "const": true },
+            "architecture_v6_runtime_gates_declare_source_activation_posture": { "const": true },
+            "architecture_v6_required_source_change_has_owner_landing_unit": { "const": true },
+            "architecture_v6_activation_order_is_security_then_source_then_commissioning": { "const": true },
             "v1_dependency_relation_precedence": {
               "type": "object",
               "additionalProperties": false,
@@ -1153,6 +1159,9 @@
                 "compatibility_schema_versions",
                 "supported_schema_versions",
                 "parity_fixture_ref",
+                "staged_schema_version",
+                "staged_parity_fixture_ref",
+                "staged_activation_requirements",
                 "activation_evidence",
                 "new_work_requires_current_schema",
                 "historical_versions_are_read_only",
@@ -1163,10 +1172,19 @@
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
                 "schema_version": { "const": 5 },
                 "target_schema_version": false,
-                "supported_schema_versions": { "const": [1, 2, 3, 4, 5] },
-                "staged_schema_version": false,
-                "staged_parity_fixture_ref": false,
-                "staged_activation_requirements": false,
+                "supported_schema_versions": { "const": [1, 2, 3, 4, 5, 6] },
+                "staged_schema_version": { "const": 6 },
+                "staged_parity_fixture_ref": {
+                  "const": "contracts/fixtures/delivery-art-workflow/architecture-packet-v6-activation-parity-vectors.valid.json"
+                },
+                "staged_activation_requirements": {
+                  "const": [
+                    "operator-orchestration-service producer and work-session parity",
+                    "workspace-governance-control-fabric custody and readiness parity",
+                    "security-architecture delta review",
+                    "non-pristine work-session inventory and disposition"
+                  ]
+                },
                 "parity_fixture_ref": {
                   "const": "contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json"
                 },

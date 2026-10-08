@@ -308,12 +308,17 @@ Use these contracts to declare:
     model, explicit protocol applicability, complete protocol conformance
     dimensions when applicable, dimension-bound executable cases, and active
     v5 separation between outcome applicability and one evidence-owner Landing
-    Unit per atomic case; v1-v4 remain immutable historical compatibility
+    Unit per atomic case, plus the staged v6 runtime-activation chain that makes
+    source ownership and Security-to-source-to-commissioning order explicit;
+    v1-v4 remain immutable historical compatibility while v5 stays current
   - also defines contradictions, integrity, and opaque WGCF artifact-registry
     custody with a digest-bound custody receipt
 - `schemas/delivery-art-architecture-v5-parity-vectors.schema.json`
   - defines the shared owner-and-readiness selection vectors that OOS and WGCF
-    must pass before v5 can become current
+    continue to enforce for current v5 packets
+- `schemas/delivery-art-architecture-v6-activation-parity-vectors.schema.json`
+  - defines the staged shared source-activation ownership and ordering vector
+    that OOS and WGCF must pass before v6 can become current
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and

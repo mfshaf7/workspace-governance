@@ -326,7 +326,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             any("activated owner evidence profile is missing" in error for error in errors)
         )
 
-    def test_architecture_v5_is_current_with_activation_evidence(self) -> None:
+    def test_architecture_v5_remains_current_while_v6_is_staged(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"
         ]
@@ -337,7 +337,7 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(architecture_contract["schema_version"], 5)
         self.assertEqual(
-            architecture_contract["supported_schema_versions"], [1, 2, 3, 4, 5]
+            architecture_contract["supported_schema_versions"], [1, 2, 3, 4, 5, 6]
         )
         self.assertEqual(
             architecture_contract["parity_fixture_ref"],
@@ -346,7 +346,20 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
         self.assertEqual(
             architecture_contract["compatibility_schema_versions"], [1, 2, 3, 4]
         )
-        self.assertNotIn("staged_schema_version", architecture_contract)
+        self.assertEqual(architecture_contract["staged_schema_version"], 6)
+        self.assertEqual(
+            architecture_contract["staged_parity_fixture_ref"],
+            "contracts/fixtures/delivery-art-workflow/architecture-packet-v6-activation-parity-vectors.valid.json",
+        )
+        self.assertEqual(
+            architecture_contract["staged_activation_requirements"],
+            [
+                "operator-orchestration-service producer and work-session parity",
+                "workspace-governance-control-fabric custody and readiness parity",
+                "security-architecture delta review",
+                "non-pristine work-session inventory and disposition",
+            ],
+        )
         activation_evidence = architecture_contract["activation_evidence"]
         self.assertEqual(activation_evidence["scope"], "dev-integration")
         self.assertEqual(

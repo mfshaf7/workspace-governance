@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://workspace-governance.local/contracts/schemas/delivery-art-architecture-packet.schema.json",
   "title": "Delivery ART Architecture Packet",
-  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3-v5 execution-plan satisfiability, Landing Unit ownership, cross-repo handoff binding, human-gate binding, lifecycle endpoint binding, source-snapshot ownership, evidence-owner causal closure, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology. Authoring eligibility is declared separately by contracts/delivery-art-operator-path.yaml; accepting a schema version here does not activate it for new work.",
+  "$comment": "Exact descendant coverage, parent-forest validity, v1 compatibility topology, v2 work/source graph separation, v3-v6 execution-plan satisfiability, Landing Unit ownership, cross-repo handoff binding, human-gate binding, v6 runtime-activation ownership and ordering, lifecycle endpoint binding, source-snapshot ownership, evidence-owner causal closure, and acyclicity are enforced by scripts/validate_contracts.py because JSON Schema cannot validate dynamic graph topology. Authoring eligibility is declared separately by contracts/delivery-art-operator-path.yaml; accepting a schema version here does not activate it for new work.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -22,7 +22,7 @@
     "custody"
   ],
   "properties": {
-    "schema_version": { "enum": [1, 2, 3, 4, 5] },
+    "schema_version": { "enum": [1, 2, 3, 4, 5, 6] },
     "artifact_type": { "const": "delivery_art_architecture_packet" },
     "artifact_id": { "$ref": "#/$defs/artifactId" },
     "delivery_id": { "$ref": "#/$defs/deliveryId" },
@@ -219,6 +219,79 @@
                 "items": { "$ref": "#/$defs/workItemId" }
               }
             }
+          }
+        },
+        "runtime_activation_chains": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "chain_id",
+              "gate_id",
+              "source_owner_repo",
+              "source_activation_posture",
+              "source_activation_evidence",
+              "commissioning_landing_unit_ids"
+            ],
+            "properties": {
+              "chain_id": { "$ref": "#/$defs/identifier" },
+              "gate_id": { "$ref": "#/$defs/identifier" },
+              "source_owner_repo": { "$ref": "#/$defs/repoName" },
+              "source_activation_posture": {
+                "enum": ["source-ready", "owner-source-change-required"]
+              },
+              "source_activation_evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "repo",
+                  "revision",
+                  "path",
+                  "field",
+                  "observed_value",
+                  "observed_posture"
+                ],
+                "properties": {
+                  "repo": { "$ref": "#/$defs/repoName" },
+                  "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+                  "path": { "$ref": "#/$defs/nonEmptyString" },
+                  "field": { "$ref": "#/$defs/nonEmptyString" },
+                  "observed_value": {
+                    "oneOf": [
+                      { "type": "boolean" },
+                      { "$ref": "#/$defs/nonEmptyString" }
+                    ]
+                  },
+                  "observed_posture": {
+                    "enum": ["source-ready", "owner-source-change-required"]
+                  }
+                }
+              },
+              "source_activation_landing_unit_id": { "$ref": "#/$defs/landingUnitId" },
+              "commissioning_landing_unit_ids": { "$ref": "#/$defs/landingUnitIds" }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "source_activation_posture": {
+                      "const": "owner-source-change-required"
+                    }
+                  },
+                  "required": ["source_activation_posture"]
+                },
+                "then": {
+                  "required": ["source_activation_landing_unit_id"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["source_activation_landing_unit_id"]
+                  }
+                }
+              }
+            ]
           }
         },
         "lifecycle_state_model": {
@@ -504,7 +577,8 @@
                 { "required": ["work_item_execution_plan"] },
                 { "required": ["landing_units"] },
                 { "required": ["source_landing_graph"] },
-                { "required": ["required_human_gates"] }
+                { "required": ["required_human_gates"] },
+                { "required": ["runtime_activation_chains"] }
               ]
             },
             "properties": {
@@ -533,7 +607,8 @@
             "not": {
               "anyOf": [
                 { "required": ["dependency_merge_dag"] },
-                { "required": ["work_item_execution_plan"] }
+                { "required": ["work_item_execution_plan"] },
+                { "required": ["runtime_activation_chains"] }
               ]
             }
           }
@@ -557,7 +632,8 @@
             "not": {
               "anyOf": [
                 { "required": ["dependency_merge_dag"] },
-                { "required": ["work_dependency_graph"] }
+                { "required": ["work_dependency_graph"] },
+                { "required": ["runtime_activation_chains"] }
               ]
             },
             "properties": {
@@ -600,7 +676,8 @@
             "not": {
               "anyOf": [
                 { "required": ["dependency_merge_dag"] },
-                { "required": ["work_dependency_graph"] }
+                { "required": ["work_dependency_graph"] },
+                { "required": ["runtime_activation_chains"] }
               ]
             },
             "properties": {
@@ -659,6 +736,61 @@
               "landing_units",
               "source_landing_graph",
               "required_human_gates"
+            ],
+            "not": {
+              "anyOf": [
+                { "required": ["dependency_merge_dag"] },
+                { "required": ["work_dependency_graph"] },
+                { "required": ["runtime_activation_chains"] }
+              ]
+            },
+            "properties": {
+              "runtime_boundaries": { "$ref": "#/$defs/capabilityRuntimeBoundaries" },
+              "required_human_gates": {
+                "items": {
+                  "required": ["evidence_prerequisite_work_item_ids"]
+                }
+              },
+              "evidence_receipt_handoffs": {
+                "items": {
+                  "required": [
+                    "handoff_id",
+                    "producer_landing_unit_id",
+                    "consumer_landing_unit_id",
+                    "producer_work_item_id",
+                    "consumer_work_item_id",
+                    "integration_point"
+                  ]
+                }
+              }
+            }
+          },
+          "conformance_plan": {
+            "properties": {
+              "cases": {
+                "items": {
+                  "required": ["evidence_owner_landing_unit_id"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 6 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": {
+          "architecture": {
+            "required": [
+              "work_item_execution_plan",
+              "landing_units",
+              "source_landing_graph",
+              "required_human_gates",
+              "runtime_activation_chains"
             ],
             "not": {
               "anyOf": [
