@@ -1,0 +1,91 @@
+schema_version: 1
+id: 2026-10-09-preview-runtime-atomic-source-binding-regression
+title: Enforce reviewed checkout and atomic expected-state binding in owner commands
+recorded_on: '2026-10-09'
+owner_repo: workspace-governance
+summary: >-
+  Security review of Delivery ART work item 1239 found that the Preview Runtime
+  implementation could report a reviewed Git revision from a dirty checkout and
+  checked the Console's expected runtime state in a separate process before the
+  Studio owner acquired its mutation lock. The first implementation therefore
+  did not fully enforce its exact-source and stale-command claims.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-01-temporal-protocol-completeness-review-loop.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - governance-operations-console
+  - security-architecture
+  - workspace-governance
+  - workspace-prototype-studio
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: preview-runtime-owner-atomicity-missed
+  title: Security review found non-atomic stale-state enforcement and mutable source execution
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    The planned protocol required exact reviewed source and fail-closed stale
+    commands. Studio derived source_revision from HEAD without rejecting tracked
+    or served-source drift, while Console compared expected state before launching
+    a separate owner command that did not receive that binding. A concurrent
+    restart could therefore change instance identity between review and mutation,
+    and a dirty checkout could execute or serve bytes not represented by the
+    reported revision.
+  source_refs:
+  - openproject://work_packages/1239
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/26
+  - https://github.com/mfshaf7/governance-operations-console/pull/58
+  - conversation:2026-10-09-epic-1203-preview-runtime-security-review
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: workflow
+    path: workspace-prototype-studio/packages/prototype_preview/runtime.py
+    owner_repo: workspace-prototype-studio
+    note: >-
+      Rejects dirty or untracked served source and validates the complete expected
+      runtime state while holding the owner mutation lock.
+  - type: test
+    path: workspace-prototype-studio/tests/test_prototype_preview.py
+    owner_repo: workspace-prototype-studio
+    note: >-
+      Covers dirty checkout, served-file custody, stale expected state, replay,
+      and exact source binding for the owner lifecycle.
+  - type: workflow
+    path: governance-operations-console/src/domain-workspaces/prototype/server/prototype-preview-owner-client.ts
+    owner_repo: governance-operations-console
+    note: >-
+      Passes the complete reviewed state into the Studio owner command and
+      verifies that the receipt preserves that exact binding.
+  - type: test
+    path: governance-operations-console/tests/operation-runtime/prototype-preview-live-adapter.test.mjs
+    owner_repo: governance-operations-console
+    note: >-
+      Covers stale-state conflicts, malformed owner output, source digest
+      preservation, and the bounded owner error contract.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-09-prototype-preview-runtime-execution-boundary.md
+    owner_repo: security-architecture
+    note: >-
+      Approves the exact corrected Studio and Console revisions for the private,
+      synthetic, mutation-free Preview Runtime boundary.
+  note: >-
+    Closed by Studio PR #27 at merge 2af8cfb95d40536ca8d50fbb5163e49df26c628e,
+    Console PR #59 at merge d8bd3f1e7e528ea3bd8009db104f386e691cc2ad,
+    and Security PR #213 at merge 98b4e12b87427fe1530386a2158cf3f1c5262c0d.
+    Live proof at the corrected Studio revision passed four positive readbacks and
+    all eight negative denials, then exact-state cleanup stopped the runtime.
+    Delivery ART work items 1237 and Feature 1213 closed without a new defect or
+    replacement source story.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
