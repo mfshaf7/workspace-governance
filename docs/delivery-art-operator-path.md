@@ -168,11 +168,21 @@ work items must belong to them, and the source landing graph must order the
 producer before the consumer. Descriptive producer and consumer names alone do
 not constitute an executable cross-repo acceptance contract.
 
-Workspace Governance validates schema versions 1 through 5. V5 is the current
+Workspace Governance validates schema versions 1 through 6. V5 is the current
 authoring shape for a new work start. Its activation record binds the completed
 OOS producer and work-session parity, WGCF custody and readiness parity,
 Security delta review, and non-pristine session inventory. Schema acceptance
 alone is not activation authority.
+
+V6 is staged and cannot authorize a new work start yet. It adds an explicit
+`runtime_activation_chains` record for every `before_runtime_activation` human
+gate. Each chain must say whether the source-owned activation prerequisite is
+already ready or requires a separate owner-repo source Landing Unit. When a
+source change is required, validation binds the exact source owner and Landing
+Unit and proves the order `human authority -> source activation -> runtime
+commissioning` in both the source graph and work-item execution plan. This
+prevents Platform commissioning from being planned as though it could change
+an embedded activation gate owned by another repository.
 
 V5 retains the v4 execution-plan and capability-boundary model and separates
 two meanings that earlier versions overloaded. `applies_to_work_item_ids`
@@ -186,9 +196,10 @@ child-to-parent closure steps. A parent Feature may therefore depend on proof
 owned by a child Landing Unit without assigning that proof obligation to every
 supporting child.
 
-V1 through v4 remain immutable, read-only historical evidence, and v5 support
-must not rewrite any earlier packet. Historical prose runtime boundaries remain
-valid and are never inferred into capability ids.
+V1 through v4 remain immutable, read-only historical evidence, v5 remains the
+current immutable format once superseded, and v6 support must not rewrite any
+earlier packet. Historical prose runtime boundaries remain valid and are never
+inferred into capability ids.
 
 An already-started session may continue against its pinned v1-v4 packet while
 fresh ART truth confirms that material architecture semantics are unchanged.

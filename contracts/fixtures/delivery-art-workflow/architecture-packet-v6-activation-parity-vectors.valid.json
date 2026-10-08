@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "architecture_packet_schema_version": 6,
+  "vectors": [
+    {
+      "id": "security-to-source-activation-to-platform-commissioning",
+      "landing_units": [
+        {
+          "id": "delivery-1203-proposal-target-security",
+          "owner_repo": "security-architecture",
+          "source_backed": true,
+          "covered_work_item_ids": ["work-item-1235"]
+        },
+        {
+          "id": "delivery-1203-proposal-target-oos-activation",
+          "owner_repo": "operator-orchestration-service",
+          "source_backed": true,
+          "covered_work_item_ids": ["work-item-1249"]
+        },
+        {
+          "id": "delivery-1203-proposal-target-platform",
+          "owner_repo": "platform-engineering",
+          "source_backed": true,
+          "covered_work_item_ids": ["work-item-1236"]
+        }
+      ],
+      "source_landing_edges": [
+        {
+          "prerequisite_landing_unit_id": "delivery-1203-proposal-target-security",
+          "dependent_landing_unit_id": "delivery-1203-proposal-target-oos-activation"
+        },
+        {
+          "prerequisite_landing_unit_id": "delivery-1203-proposal-target-oos-activation",
+          "dependent_landing_unit_id": "delivery-1203-proposal-target-platform"
+        }
+      ],
+      "work_item_execution_plan": [
+        {
+          "work_item_id": "work-item-1235",
+          "start_after_work_item_ids": []
+        },
+        {
+          "work_item_id": "work-item-1249",
+          "start_after_work_item_ids": ["work-item-1235"]
+        },
+        {
+          "work_item_id": "work-item-1236",
+          "start_after_work_item_ids": ["work-item-1249"]
+        }
+      ],
+      "human_gate": {
+        "gate_id": "gate:proposal-target-controlled-activation",
+        "authority_work_item_id": "work-item-1235",
+        "blocked_transition": "before_runtime_activation",
+        "affected_landing_unit_ids": ["delivery-1203-proposal-target-platform"]
+      },
+      "runtime_activation_chain": {
+        "chain_id": "activation:proposal-target",
+        "gate_id": "gate:proposal-target-controlled-activation",
+        "source_owner_repo": "operator-orchestration-service",
+        "source_activation_posture": "owner-source-change-required",
+        "source_activation_evidence": {
+          "repo": "operator-orchestration-service",
+          "revision": "bd8f88d477ad34c28a70b6c56811cc740262f49e",
+          "path": "contracts/proposal-target-application/manifest.json",
+          "field": "runtime_activation",
+          "observed_value": false,
+          "observed_posture": "owner-source-change-required"
+        },
+        "source_activation_landing_unit_id": "delivery-1203-proposal-target-oos-activation",
+        "commissioning_landing_unit_ids": ["delivery-1203-proposal-target-platform"]
+      }
+    }
+  ]
+}

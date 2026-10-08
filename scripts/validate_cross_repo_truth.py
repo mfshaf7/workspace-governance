@@ -834,11 +834,11 @@ def validate_delivery_art_operator_path_contract(
     architecture_contract = artifact_contracts.get("architecture_packet") or {}
     if architecture_contract.get("schema_version") != 5:
         errors.append(
-            f"{contract_path}: architecture packet v5 must be current after activation"
+            f"{contract_path}: architecture packet v5 must remain current until staged v6 activation"
         )
-    if architecture_contract.get("supported_schema_versions") != [1, 2, 3, 4, 5]:
+    if architecture_contract.get("supported_schema_versions") != [1, 2, 3, 4, 5, 6]:
         errors.append(
-            f"{contract_path}: architecture packet support must include current v5 and immutable v1-v4"
+            f"{contract_path}: architecture packet support must include immutable v1-v5 and staged v6"
         )
     if architecture_contract.get("compatibility_schema_versions") != [1, 2, 3, 4]:
         errors.append(
@@ -851,16 +851,26 @@ def validate_delivery_art_operator_path_contract(
         errors.append(
             f"{contract_path}: architecture packet v5 must bind the canonical consumer parity fixture"
         )
-    if any(
-        key in architecture_contract
-        for key in (
-            "staged_schema_version",
-            "staged_parity_fixture_ref",
-            "staged_activation_requirements",
+    if architecture_contract.get("staged_schema_version") != 6:
+        errors.append(
+            f"{contract_path}: architecture packet v6 must remain explicitly staged before activation"
         )
+    if architecture_contract.get("staged_parity_fixture_ref") != (
+        "contracts/fixtures/delivery-art-workflow/"
+        "architecture-packet-v6-activation-parity-vectors.valid.json"
     ):
         errors.append(
-            f"{contract_path}: activated architecture packet v5 must not retain staged markers"
+            f"{contract_path}: architecture packet v6 must bind the canonical activation parity fixture"
+        )
+    required_v6_activation = {
+        "operator-orchestration-service producer and work-session parity",
+        "workspace-governance-control-fabric custody and readiness parity",
+        "security-architecture delta review",
+        "non-pristine work-session inventory and disposition",
+    }
+    if set(architecture_contract.get("staged_activation_requirements") or []) != required_v6_activation:
+        errors.append(
+            f"{contract_path}: architecture packet v6 activation requirements are incomplete"
         )
     v5_activation = architecture_contract.get("activation_evidence") or {}
     prerequisite_changes = v5_activation.get("prerequisite_changes") or {}
