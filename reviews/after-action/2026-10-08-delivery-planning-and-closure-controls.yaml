@@ -1,0 +1,175 @@
+schema_version: 1
+id: 2026-10-08-delivery-planning-and-closure-controls
+title: Delivery planning and closeout now stop unnecessary source work
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: >-
+  Epic 1203 exposed five related control gaps: incomplete owner evidence
+  coverage, confused human and machine attribution, cross-capability evidence
+  execution, omitted source-activation ownership, and source recovery started
+  after implementation and current proof were already complete. Existing owner
+  controls now cover the first four, and the delivery skills plus OOS operator
+  surface require an explicit remaining-work classification before any
+  successor source resources are created.
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  - workspace-prototype-studio
+  - context-governance-gateway
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/governance-operations-console/pull/53
+- https://github.com/mfshaf7/operator-orchestration-service/pull/287
+- https://github.com/mfshaf7/operator-orchestration-service/pull/291
+- https://github.com/mfshaf7/platform-engineering/pull/267
+- https://github.com/mfshaf7/security-architecture/pull/211
+- https://github.com/mfshaf7/platform-engineering/pull/278
+- openproject://work_packages/1236
+- workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
+- workspace-governance/reviews/improvement-candidates/2026-10-08-console-proposal-caller-attribution-regression.yaml
+- workspace-governance/reviews/improvement-candidates/2026-10-08-cross-capability-owner-evidence-binding-regression.yaml
+- workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
+- workspace-governance/reviews/improvement-candidates/2026-10-08-proposal-target-exact-revision-coupling-regression.yaml
+lessons:
+- id: owner-evidence-readiness-precedes-work-start
+  title: Every admitted source owner needs an active evidence profile before work starts
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: Admitted owners reached work preflight before complete profile activation and recovery attempts were mistaken for architecture changes.
+  impact: Work item 1232 encountered avoidable preflight and recovery churn.
+  status: closed
+  expected_control_types:
+  - contract
+  - validator
+  control_refs:
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: Proves complete profile-or-nonactivation coverage.
+  - type: contract
+    path: workspace-prototype-studio/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-prototype-studio
+    note: Supplies the Studio owner evidence profile.
+  - type: contract
+    path: context-governance-gateway/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: context-governance-gateway
+    note: Supplies the CGG owner evidence profile.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: human-authorization-and-machine-attribution-are-distinct
+  title: Console authorization must not overwrite OOS machine attribution
+  failure_class: workflow-doctrine-gap
+  trigger: machine-visible-workflow-drift
+  finding: The Proposal adapter serialized the human Console principal where OOS requires the authenticated machine caller.
+  impact: Live Proposal Target commissioning failed at the caller/operator binding.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/domain-workspaces/proposal/server/proposal-oos-client.ts
+    owner_repo: governance-operations-console
+    note: Separates human authorization from OOS command attribution.
+  - type: test
+    path: governance-operations-console/tests/operation-runtime/proposal-live-adapter.test.mjs
+    owner_repo: governance-operations-console
+    note: Locks the machine caller into Proposal commands.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: evidence-commands-bind-exact-capability-cases
+  title: Same-fidelity evidence must still be scoped to requested cases
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: OOS ran an unrelated Repository and Catalog live command while proving Proposal Target because both used live-backend fidelity.
+  impact: Work item 1236 blocked without relevant state progress.
+  status: closed
+  expected_control_types:
+  - contract
+  - workflow
+  - test
+  control_refs:
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-work-session/evidence-profile.schema.json
+    owner_repo: operator-orchestration-service
+    note: Defines exact conformance-case selectors.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+    owner_repo: operator-orchestration-service
+    note: Omits unmatched commands.
+  - type: contract
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: Binds each live command to its capability cases.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: source-activation-owner-precedes-commissioning
+  title: A downstream commissioner cannot satisfy an owner source gate
+  failure_class: workflow-doctrine-gap
+  trigger: closed-lesson-regression
+  finding: The plan initially jumped from Security to Platform while the OOS-owned source gate remained inactive.
+  impact: Commissioning could not begin until OOS landed the reviewed activation change.
+  status: closed
+  expected_control_types:
+  - skill
+  - contract
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires explicit owner source ordering without automatically creating another ART child.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-08-proposal-target-source-activation.md
+    owner_repo: operator-orchestration-service
+    note: Records the actual owner-maintenance activation before Platform commissioning.
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Retains staged v6 machine enforcement as later defense in depth.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
+- id: remaining-work-classification-precedes-source-recovery
+  title: No source delta means no source recovery resources
+  failure_class: learning-closure-regression
+  trigger: repeated-operator-friction
+  finding: Fresh current proof had passed and only ART completion remained, but an unnecessary successor source session was started.
+  impact: The session created avoidable branch, credential, cleanup, and operator churn.
+  status: closed
+  expected_control_types:
+  - skill
+  - runbook
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Defines four exclusive remaining-work classifications and allows source resources only for an identified source delta.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Rechecks the classification after fresh proof and before completion.
+  - type: runbook
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: OOS PR 291 makes the same stop condition explicit in the primary operator surface.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null

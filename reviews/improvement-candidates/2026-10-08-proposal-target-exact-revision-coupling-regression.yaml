@@ -1,0 +1,98 @@
+schema_version: 1
+id: 2026-10-08-proposal-target-exact-revision-coupling-regression
+title: Proposal Target revision coupling and closure-path misclassification caused
+  repeated recovery churn
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: Epic 1203 post-merge operating evidence regressed because the Proposal Target
+  verifier binds the entire OOS repository head to one Security-approved revision. After
+  current-source proof succeeded, the delivery workflow was then misclassified as needing
+  another source recovery instead of direct ART completion against already-merged source,
+  creating avoidable branch, credential, and cleanup churn.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-03-post-merge-review-packet-architecture-recovery-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: After OOS PR 290 repaired merged-evidence recovery, Platform PR 277 passed
+    source evidence and merged, but the post-merge Proposal Target verifier rejected
+    current OOS main c0ef285 because its exact security pin remains 0e935. The recovery
+    control changed Delivery ART evidence handling, not Proposal Target runtime behavior,
+    yet the whole-repository pin forced another Security and Platform repair cycle.
+    The earlier recovery closure did not model the closure impact of maintenance commits
+    on exact-revision consumers.
+  source_refs:
+  - openproject://work_packages/1236
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/290
+  - https://github.com/mfshaf7/platform-engineering/pull/277
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly identified repeated overcomplication and demanded a durable
+    prevention control.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: After the current OOS and Security pins were accepted and fresh commissioning
+    proof passed, the agent treated superseded historical operating evidence as a reason
+    to create source session r2. No implementation change remained. The existing direct
+    ART completion route accepted the merged source and current live proof, so r2 was
+    unnecessary and caused a cleanup mismatch because a source-backed session correctly
+    expected merged-PR evidence. The system was not confused or defective; the agent chose
+    the wrong completion posture. Current delivery skills explain source recovery in detail
+    but do not require a fail-closed classification of remaining work as source change,
+    operating-evidence refresh, historical-evidence supersession, or ART-only completion
+    before a successor source session may start.
+  source_refs:
+  - 'conversation: operator said superseded evidence should be closed instead of creating another recovery mechanism'
+  - 'conversation: operator corrected the claim that cleanup behavior was a system bug and identified agent-created workflow confusion'
+  - openproject://work_packages/1236
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires exact-revision consumer impact review and remaining-work classification before source resources exist.
+  - type: skill
+    path: workspace-governance/skills-src/done-criteria-enforcer/SKILL.md
+    owner_repo: workspace-governance
+    note: Prevents evidence refresh or ART-only closeout from masquerading as source work.
+  - type: runbook
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Makes source successors conditional on an identified behavior and file delta.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-08-proposal-target-application-trust-boundary.md
+    owner_repo: security-architecture
+    note: Reaccepted the exact current OOS recovery revision through Security PR 211.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-08-proposal-target-devint-commissioning.md
+    owner_repo: platform-engineering
+    note: Refreshes exact commissioning pins through Platform PR 278.
+  note: Closed after current exact pins and live proof passed, item 1236 completed
+    directly, the unnecessary r2 source resources were retired, and OOS PR 291
+    plus the workspace skills made the classification stop explicit.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

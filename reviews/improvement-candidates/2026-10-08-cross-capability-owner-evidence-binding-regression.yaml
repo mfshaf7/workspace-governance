@@ -8,7 +8,7 @@ summary: 'Delivery #1236 project-review evidence ran the unrelated Repository an
   by fidelity alone, causing a valid Proposal Target source revision to block without
   durable-state progress.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-02-cross-repo-owner-evidence-fidelity-recurrence.yaml
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -35,11 +35,27 @@ signals:
   - openproject://work_packages/1236
   - conversation:2026-10-08-operator-directed-in-place-activation
 resolution:
-  after_action_ref: null
-  control_refs: []
-  note: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-work-session/evidence-profile.schema.json
+    owner_repo: operator-orchestration-service
+    note: Adds exact conformance-case selectors for capability-specific commands.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+    owner_repo: operator-orchestration-service
+    note: Omits commands that bind none of the requested cases.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-review-evidence-acquisition.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves unrelated same-fidelity commands do not execute.
+  - type: contract
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: Separately scopes Repository and Catalog proof from Proposal Target proof.
+  note: Closed by OOS PR 287 and Platform PR 267; current Proposal Target proof
+    completed without invoking the unrelated Repository and Catalog command.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-11'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

@@ -10,7 +10,7 @@ summary: 'Delivery #1232 exposed two coupled control failures: admitted source o
   enforce workspace-wide profile activation or separate stable architecture decisions
   from attempt-specific execution evidence.'
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-02-cross-repo-owner-evidence-fidelity-recurrence.yaml
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -45,7 +45,7 @@ signals:
   - openproject://work_packages/1203
   - conversation:2026-10-04-work-preflight-1232
 resolution:
-  after_action_ref: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
   control_refs:
   - type: contract
     path: workspace-governance/contracts/delivery-art-operator-path.yaml
@@ -71,14 +71,11 @@ resolution:
     path: context-governance-gateway/contracts/delivery-art-work-session/evidence-profile.json
     owner_repo: context-governance-gateway
     note: Prevents the same profile failure in the later Epic 1203 Landing Unit.
-  note: The approved repair extends the existing Delivery ART path; it does not add
-    another control plane, ART defect, or architecture version.
+  note: The missing owner profiles, complete activation inventory, semantic
+    architecture supersession, and stable recovery identity are landed and
+    validated. The repair extended the existing Delivery ART path without a new
+    control plane or ART defect.
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-11'
-  note: >-
-    Land both missing profiles, enforce the complete profile-or-nonactivation
-    inventory, make architecture supersession semantic, and preserve logical Landing
-    Unit identity across recovery. The source controls and live #1232 preflight proof
-    have landed; complete the closure audit and after-action linkage by the revised
-    due date.
+  owner_repo: null
+  due_on: null
+  note: null
