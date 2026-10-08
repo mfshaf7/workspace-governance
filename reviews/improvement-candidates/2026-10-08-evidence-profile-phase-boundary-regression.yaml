@@ -1,0 +1,71 @@
+schema_version: 1
+id: 2026-10-08-evidence-profile-phase-boundary-regression
+title: Scope accepted-base evidence preflight to the pre-merge lifecycle phase
+recorded_on: '2026-10-08'
+owner_repo: workspace-governance
+summary: >-
+  Delivery work item 1237 exposed that OOS checked operating-ready live-backend
+  cases against the accepted base before the Landing Unit that implements the
+  verifier could start, contradicting the documented accepted-head operating
+  evidence path and forcing an impossible preparatory source change.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-04-work-session-merge-order-recurrence.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  - workspace-prototype-studio
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: accepted-base-preflight-crossed-lifecycle-phase
+  title: Accepted-base profile validation required a future operating verifier
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    OOS correctly retained merge-ready and operating-ready obligations in the
+    work contract, but configured-path preflight sent both phases to the
+    accepted-base profile validator. Work item 1237 therefore could not start
+    because its old Studio base did not contain the live-backend verifier that
+    the item itself is responsible for implementing. The lifecycle already
+    reads the operating profile from the reviewed merged head, so the earlier
+    check was both premature and inconsistent with the primary operator
+    contract.
+  source_refs:
+  - openproject://work_packages/1237
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/292
+  - conversation:2026-10-08-epic-1203-preview-runtime-start
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Limits accepted-base configured-path coverage to merge-ready cases while preserving all obligations in the work contract.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves a future live-backend verifier does not block source start and remains visible as an operating obligation.
+  - type: runbook
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Defines the merge-ready accepted-base and operating-ready accepted-head phase boundary.
+  - type: doc
+    path: security-architecture/registers/security-change-record-index.yaml
+    owner_repo: security-architecture
+    note: Indexes the merged OOS delivery/runtime security evidence.
+  note: >-
+    Closed by OOS PR 292 and Security Architecture PR 212. The repair preserves
+    fail-closed merge evidence and post-merge operating evidence without a new
+    ART item, architecture version, or preparatory Studio Landing Unit.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
