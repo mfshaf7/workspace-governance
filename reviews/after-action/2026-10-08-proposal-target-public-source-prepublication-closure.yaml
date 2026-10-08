@@ -1,0 +1,75 @@
+schema_version: 1
+id: 2026-10-08-proposal-target-public-source-prepublication-closure
+title: Proposal target publication now admits only public-safe generated content
+recorded_on: '2026-10-08'
+owner_repo: workspace-prototype-studio
+summary: >-
+  Security review found that the first Proposal target contract could publish
+  free-form Proposal and operator content to a public Prototype Studio branch
+  before human review. Studio PR 23 replaced that boundary with a closed v2
+  contract containing generated identities, bounded references, digests, and
+  enumerated posture. OOS PR 285 now projects only that public-safe shape, and
+  Security PR 199 approved the repaired exact revisions before activation.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-prototype-studio
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+source_refs:
+- https://github.com/mfshaf7/workspace-prototype-studio/pull/23
+- https://github.com/mfshaf7/operator-orchestration-service/pull/285
+- https://github.com/mfshaf7/security-architecture/pull/199
+- openproject://work_packages/1235
+- workspace-governance/reviews/improvement-candidates/2026-10-08-proposal-target-public-source-prepublication-regression.yaml
+lessons:
+- id: public-source-admission-must-precede-branch-publication
+  title: Public source needs structural admission before any review branch is pushed
+  failure_class: unsafe-assumption
+  trigger: late-architecture-discovery
+  finding: >-
+    The original implementation treated pull-request review as the disclosure
+    boundary even though branch publication had already copied caller-written
+    Proposal and operator content into a public repository. Public-source
+    admission belongs in the target contract and the caller projection before
+    source preparation begins.
+  impact: >-
+    The source-backed feature could not safely proceed to runtime activation.
+    Studio and OOS required owner-first corrective Landing Units, Security had
+    to repeat its exact-revision review, and Epic 1203 was delayed until the
+    disclosure path was structurally closed.
+  status: closed
+  expected_control_types:
+  - contract
+  - test
+  - doc
+  control_refs:
+  - type: contract
+    path: workspace-prototype-studio/contracts/proposal-target-application/request.schema.json
+    owner_repo: workspace-prototype-studio
+    note: Closed v2 public request schema rejects caller-written content and accepts only bounded public-safe fields.
+  - type: test
+    path: workspace-prototype-studio/tests/test_proposal_target_application.py
+    owner_repo: workspace-prototype-studio
+    note: Proves generated public capture and rejection of operator, suggestion, rationale, and custody-reference fields.
+  - type: workflow
+    path: operator-orchestration-service/src/proposal-target-application/service.js
+    owner_repo: operator-orchestration-service
+    note: Constructs the Studio request through an explicit private-to-public projection.
+  - type: test
+    path: operator-orchestration-service/test/proposal-target-boundary.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves private Proposal content cannot cross the public source boundary.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-08-proposal-target-application-trust-boundary.md
+    owner_repo: security-architecture
+    note: Approves only the exact repaired revisions and sequences activation after the repaired boundary.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
