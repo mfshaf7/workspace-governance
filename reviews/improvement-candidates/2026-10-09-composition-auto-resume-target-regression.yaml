@@ -1,0 +1,77 @@
+schema_version: 1
+id: 2026-10-09-composition-auto-resume-target-regression
+title: Preserve composition ownership during operator-login recovery
+recorded_on: '2026-10-09'
+owner_repo: workspace-governance
+summary: >-
+  After a WSL restart, the accepted-idea-delivery operator-login unit replayed a
+  standalone profile up command even though the active runtime was owned by the
+  refinement-catalog composition. The composition guard rejected every retry,
+  leaving the volatile Delivery source-executor directory absent, OOS unable to
+  restart, and the user unit retrying indefinitely.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-03-post-merge-review-packet-architecture-recovery-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: composition-owned-auto-resume-replayed-standalone-profile
+  title: Operator-login recovery lost the active runtime composition boundary
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - host-drift-undetected
+  - workflow-doctrine-gap
+  finding: >-
+    The generated systemd unit always encoded `up --profile
+    accepted-idea-delivery`. After restart, the preserved session correctly
+    identified refinement-catalog as its active owner, so the direct-profile
+    guard refused the command. Systemd retried the same impossible command more
+    than 200 times because the unit disabled start limiting. The source-executor
+    runtime directory under /run/user/1000 was therefore never recreated, the
+    OOS pod remained unavailable, and normal Delivery work-session commands
+    failed. Manual recovery through `devint-up COMPOSITION=refinement-catalog`
+    restored OOS and both declared host services without data loss.
+  source_refs:
+  - platform-engineering/scripts/dev_integration_auto_resume.py
+  - platform-engineering/scripts/dev_integration.py
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/README.md
+  - systemd://user/workspace-devint-accepted-idea-delivery-mfshaf7.service
+  - openproject://work_packages/1247
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration_auto_resume.py
+    owner_repo: platform-engineering
+    note: Replays the owning composition and bounds failed systemd retries.
+  - type: workflow
+    path: platform-engineering/scripts/dev_integration.py
+    owner_repo: platform-engineering
+    note: Preserves active composition identity and explicit source overrides in the generated unit.
+  - type: test
+    path: platform-engineering/scripts/test_dev_integration_auto_resume.py
+    owner_repo: platform-engineering
+    note: Proves the composition target and bounded retry contract.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-09-composition-aware-devint-auto-resume.md
+    owner_repo: platform-engineering
+    note: Records PR 281, merged as 5e712eb75896db20a49b15a69452046833a798db after exact-head human approval and green CI.
+  note: >-
+    Closed after merged-main composition reconciliation regenerated the enabled
+    unit with `--composition refinement-catalog`, StartLimitBurst=3,
+    StartLimitIntervalSec=10min, and RestartSec=60s. OOS returned 1/1 ready,
+    both Delivery host services passed readiness, and work-session status for
+    #1247 remained available at source commit 1bfe4dee23cc7169acc5ca766d3b5f38ce59435b.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
