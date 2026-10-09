@@ -172,6 +172,66 @@ class RuntimeCompositionContractTests(unittest.TestCase):
             for projection in dependency["endpoint_projections"]
         )
         self.assertEqual(temporal_projection["address_format"], "host-port")
+        cgg_dependency = next(
+            dependency
+            for dependency in composition["dependencies"]
+            if dependency["provider_profile_id"] == "context-governance-gateway"
+        )
+        self.assertEqual(
+            {
+                projection["environment_variable"]
+                for projection in cgg_dependency["endpoint_projections"]
+            },
+            {"CGG_REFINEMENT_BASE_URL", "CGG_AGENT_CONSOLE_BASE_URL"},
+        )
+        self.assertEqual(
+            composition["caller_bindings"]["agent-console-cgg-caller"],
+            {
+                "owner_repo": "platform-engineering",
+                "purpose": "Bind the OOS Agent Console caller identity to both sides of its CGG projection boundary.",
+                "caller_id": "operator-orchestration-service",
+                "consumer_profile_id": "accepted-idea-delivery",
+                "provider_profile_id": "context-governance-gateway",
+                "consumer_environment_variable": "CGG_AGENT_CONSOLE_CALLER_ID",
+                "provider_environment_variable": "CGG_AGENT_CONSOLE_ALLOWED_CALLERS",
+            },
+        )
+        self.assertEqual(
+            {
+                (projection["profile_id"], projection["environment_variable"])
+                for projection in composition["credential_bindings"]
+                ["agent-console-cgg-caller"]["projections"]
+            },
+            {
+                ("accepted-idea-delivery", "CGG_AGENT_CONSOLE_CALLER_SHARED_SECRET"),
+                ("context-governance-gateway", "CGG_AGENT_CONSOLE_CALLER_SHARED_SECRET"),
+            },
+        )
+        self.assertEqual(
+            {
+                binding_id: (
+                    composition["profile_bindings"][binding_id]["profile_id"],
+                    composition["profile_bindings"][binding_id]["environment_variable"],
+                    composition["profile_bindings"][binding_id]["source"]["value"],
+                )
+                for binding_id in (
+                    "agent-console-oos-enabled",
+                    "agent-console-cgg-enabled",
+                )
+            },
+            {
+                "agent-console-oos-enabled": (
+                    "accepted-idea-delivery",
+                    "OOS_AGENT_CONSOLE_ENABLED",
+                    "true",
+                ),
+                "agent-console-cgg-enabled": (
+                    "context-governance-gateway",
+                    "CGG_AGENT_CONSOLE_ACTIVATION_ENABLED",
+                    "true",
+                ),
+            },
+        )
         wgcf_dependency = next(
             dependency
             for dependency in composition["dependencies"]

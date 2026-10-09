@@ -120,11 +120,20 @@ revision. Workspace Governance source authority, runtime state, and the
 dedicated GitHub App credential remain separately mounted or delivered by the
 owning runtime; none of their values are stored in this contract.
 
+Agent Console reuses this composition without adding a browser or product
+profile. The contract projects the existing CGG service endpoint to OOS, binds
+the exact `operator-orchestration-service` caller on both sides, generates one
+composition-lifetime caller credential, and enables the matching default-off
+OOS and CGG owner hooks together. The Console still calls only OOS through its
+same-origin server adapter, and the governed AI gateway remains the only model
+provider path. Missing, partial, standalone, or torn-down composition state
+keeps both owner hooks fail closed.
+
 These bindings define the existing composition shape but do not by themselves
 prove live activation. Platform commissioning, refreshed Security acceptance
-for the exact merged revisions, identity delivery, denial checks, rollback,
-revocation, and teardown evidence remain required before the Workspace Intake
-and Inventory runtime can be reported operational.
+for the exact merged revisions, identity delivery where required, denial
+checks, rollback, revocation, and teardown evidence remain required before a
+composed capability can be reported operational.
 
 The Governance Operations Console is deliberately not a composition profile.
 Its browser continues to call same-origin Console routes only; the Console
