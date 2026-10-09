@@ -62,7 +62,7 @@ runtime_compositions:
   refinement-catalog:
     lifecycle: active
     owner_repo: platform-engineering
-    summary: Compose the accepted-idea delivery runtime with model-safe Refinement context, governed AI advice, repository readiness, durable execution, and profile-owned Catalog control bindings.
+    summary: Compose the accepted-idea delivery runtime with model-safe Refinement and Agent Console context, governed AI access, repository readiness, durable execution, and profile-owned Catalog control bindings.
     root_profile_id: accepted-idea-delivery
     profiles:
       accepted-idea-delivery:
@@ -80,6 +80,11 @@ runtime_compositions:
         provider_profile_id: context-governance-gateway
         endpoint_projections:
           - environment_variable: CGG_REFINEMENT_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: context-governance-gateway-api
+            service_port: 8080
+          - environment_variable: CGG_AGENT_CONSOLE_BASE_URL
             address_format: url
             scheme: http
             service_name: context-governance-gateway-api
@@ -126,6 +131,14 @@ runtime_compositions:
         provider_profile_id: context-governance-gateway
         consumer_environment_variable: CGG_REFINEMENT_CALLER_ID
         provider_environment_variable: CGG_REFINEMENT_ALLOWED_CALLERS
+      agent-console-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Bind the OOS Agent Console caller identity to both sides of its CGG projection boundary.
+        caller_id: operator-orchestration-service
+        consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        consumer_environment_variable: CGG_AGENT_CONSOLE_CALLER_ID
+        provider_environment_variable: CGG_AGENT_CONSOLE_ALLOWED_CALLERS
       catalog-wgcf-caller:
         owner_repo: platform-engineering
         purpose: Bind the OOS Catalog caller identity to the WGCF repository-readiness boundary.
@@ -145,6 +158,16 @@ runtime_compositions:
             environment_variable: CGG_REFINEMENT_CALLER_SECRET
           - profile_id: context-governance-gateway
             environment_variable: CGG_REFINEMENT_CALLER_SHARED_SECRET
+      agent-console-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate OOS to the Agent Console projection boundary without storing the shared credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: CGG_AGENT_CONSOLE_CALLER_SHARED_SECRET
+          - profile_id: context-governance-gateway
+            environment_variable: CGG_AGENT_CONSOLE_CALLER_SHARED_SECRET
       catalog-wgcf-caller:
         owner_repo: platform-engineering
         purpose: Authenticate OOS to repository, Workspace Intake, and Workspace Inventory readiness without storing the shared credential in Git.
@@ -194,6 +217,22 @@ runtime_compositions:
         purpose: Enable the reviewed Refinement worker only when this composition is active.
         profile_id: accepted-idea-delivery
         environment_variable: OOS_REFINEMENT_WORKER_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      agent-console-oos-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the reviewed OOS Agent Console path only when this composition is active.
+        profile_id: accepted-idea-delivery
+        environment_variable: OOS_AGENT_CONSOLE_ENABLED
+        source:
+          kind: literal
+          value: "true"
+      agent-console-cgg-enabled:
+        owner_repo: platform-engineering
+        purpose: Enable the reviewed CGG Agent Console projection only when this composition is active.
+        profile_id: context-governance-gateway
+        environment_variable: CGG_AGENT_CONSOLE_ACTIVATION_ENABLED
         source:
           kind: literal
           value: "true"

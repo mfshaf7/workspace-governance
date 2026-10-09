@@ -1,0 +1,64 @@
+schema_version: 1
+id: 2026-10-09-agent-console-composition-activation-ownership-regression
+title: Bind every admitted runtime hook in the owning composition contract
+recorded_on: '2026-10-09'
+owner_repo: workspace-governance
+summary: Agent Console owner hooks and Platform commissioning source landed, but the
+  active refinement-catalog contract did not project the endpoint, caller, credential,
+  or activation bindings required to make the fail-closed hooks operable.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - workspace-governance
+  - context-governance-gateway
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components:
+  - context-governance-gateway
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: Exact runtime hooks existed without their composition-owned projections
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    The accepted work item 1246 commissioning command requires a live OOS-to-CGG
+    Agent Console path, while the canonical refinement-catalog composition contains
+    no Agent Console endpoint, caller, credential, or enablement binding. Both owner
+    hooks therefore remain correctly disabled and the planned operating proof is
+    impossible.
+  source_refs:
+  - openproject://work_packages/1246
+  - openproject://work_packages/1248
+  - workspace-governance/contracts/developer-integration-profiles.yaml
+  - platform-engineering/products/governance-operations-console/agent-console-commissioning-policy.yaml
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/developer-integration-profiles.yaml
+    owner_repo: workspace-governance
+    note: The existing refinement-catalog composition now owns the complete Agent Console endpoint, caller, credential, and paired activation projections.
+  - type: test
+    path: workspace-governance/tests/test_developer_integration_runtime_composition.py
+    owner_repo: workspace-governance
+    note: Exact assertions prevent any Agent Console composition projection from being omitted independently.
+  - type: doc
+    path: workspace-governance/docs/developer-integration-runtime-composition.md
+    owner_repo: workspace-governance
+    note: The primary composition contract now states the fail-closed Agent Console ownership and operating-proof boundary.
+  note: Closed by extending the existing composition rather than adding a new runtime,
+    ART item, architecture packet version, or parallel activation mechanism.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
