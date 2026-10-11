@@ -1,0 +1,70 @@
+schema_version: 1
+id: 2026-10-12-initiative-lineage-reference-scope-regression
+title: Validate initiative lineage references against portfolio scope
+recorded_on: '2026-10-12'
+owner_repo: operator-orchestration-service
+summary: >-
+  Guided Epic 1203 closeout rejected the valid external Architecture Anchor Ref
+  to top-level Epic 880 because the OOS lineage validator searched only the
+  target initiative and its descendants. Cross-initiative anchor and upstream
+  references therefore became impossible to validate during governance writes.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-26-art-initiative-lineage-governance-gap.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: scoped-lineage-reference-false-negative
+  title: Valid external initiative lineage references failed at closeout
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    Epic 1203 carries Architecture Anchor Ref openproject://work_packages/880
+    and Required Upstream Ref openproject://work_packages/886. A direct broker
+    read proved work package 880 is an existing top-level Epic, but the final
+    closeout mutation raised initiative-anchor-ref-must-point-to-top-level-epic.
+    updateDeliveryInitiative constructed buildDeliveryProjectState with
+    initiativeRecordId 1203, which intentionally contains only that root and
+    its descendants; validateDeliveryInitiativeLineageRefs then searched that
+    scoped map for external portfolio references. Tests covered local lineage
+    shapes but not a real cross-initiative anchor during a write.
+  source_refs:
+  - openproject://work_packages/1203
+  - openproject://work_packages/880
+  - openproject://work_packages/886
+  - operator-orchestration-service/src/openproject-client.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 306 validates external lineage references against portfolio-wide read state while keeping execution and mutation scoped to the target initiative.
+  - type: test
+    path: operator-orchestration-service/test/openproject-client.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves the real initiative update path resolves an external top-level anchor and required upstream record.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-12-initiative-lineage-reference-scope.md
+    owner_repo: operator-orchestration-service
+    note: Records merged OOS PR 306 at a78372ca87c2d2e87a9f52f91699ad873f467072 and the unchanged mutation boundary.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-09-agent-console-composed-runtime.md
+    owner_repo: security-architecture
+    note: Security PR 228 approves the exact read-scope repair without adding identity, credential, field-write, action, or mutation authority.
+  note: Closed after the unchanged guided closeout payload succeeded and authoritative readback showed Epic 1203 done with all 36 descendants done and no weak or missing evidence.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

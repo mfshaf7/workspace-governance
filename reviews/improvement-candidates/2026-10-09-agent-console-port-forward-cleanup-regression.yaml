@@ -1,0 +1,56 @@
+schema_version: 1
+id: 2026-10-09-agent-console-port-forward-cleanup-regression
+title: Terminate the complete Agent Console port-forward process group
+recorded_on: '2026-10-09'
+owner_repo: platform-engineering
+summary: The Agent Console verifier terminated the k3s wrapper process but left
+  its child kubectl port-forward alive, causing subsequent operating proofs to
+  collide with or connect through an orphaned local tunnel.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-agent-console-composition-activation-ownership-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  - context-governance-gateway
+  change_classes:
+  - source-behavior
+signals:
+- id: agent-console-port-forward-orphan
+  title: Failed proof cleanup left a live kubectl tunnel on the verifier port
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - shell-reliability-miss
+  finding: >-
+    After an Agent Console proof failed, the Python context manager terminated
+    the k3s wrapper it spawned but not the child kubectl process. The child kept
+    port 38180 open and the next proof failed during readiness instead of
+    creating a fresh bounded tunnel.
+  source_refs:
+  - openproject://work_packages/1246
+  - platform-engineering/products/governance-operations-console/scripts/agent_console_platform.py
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: platform-engineering/products/governance-operations-console/scripts/agent_console_platform.py
+    owner_repo: platform-engineering
+    note: Platform PR 282 gives every verifier tunnel its own process group and terminates the complete group on every exit path.
+  - type: test
+    path: platform-engineering/products/governance-operations-console/scripts/test_agent_console_platform.py
+    owner_repo: platform-engineering
+    note: Covers process-group cleanup after both successful and failed verifier execution.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-09-agent-console-port-forward-cleanup.md
+    owner_repo: platform-engineering
+    note: Records exact source and validation evidence for merged Platform PR 282 at c60a83a19c6e356cf3dcca0a825ce6c07aec5452.
+  note: Closed after Platform PR 282 landed, subsequent Agent Console proof created a fresh bounded tunnel, and the managed loopback tunnel recovered cleanly after runtime convergence.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -1,0 +1,66 @@
+schema_version: 1
+id: 2026-10-09-governed-ai-runtime-version-drift
+title: Reconcile the governed Ollama runtime pin before operating proof
+recorded_on: '2026-10-09'
+owner_repo: platform-engineering
+summary: >-
+  Epic 1203 operating proof found that the host Ollama runtime had advanced
+  from the Security-reviewed 0.32.15 release to 0.40.1 while the exact
+  qwen3:8b model digest remained unchanged. The governed AI gateway correctly
+  failed closed, but the drift was discovered only at the final live proof.
+regression_of: null
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components:
+  - governed-ai-gateway
+  change_classes:
+  - live-drift-repair
+  - runtime-composition
+signals:
+- id: ollama-runtime-pin-drifted-before-agent-console-proof
+  title: Governed provider rejected an unreviewed host runtime version
+  trigger: late-host-drift-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - host-drift-undetected
+  finding: >-
+    The Agent Console invocation reached the governed AI gateway and received
+    an allow policy decision, but provider integrity failed before inference
+    because the live host reported Ollama 0.40.1 while every active profile
+    still pinned 0.32.15. A bounded compatibility probe using the exact model
+    digest, synthetic Agent Console input, and strict response schema passed
+    on 0.40.1.
+  source_refs:
+  - openproject://work_packages/1246
+  - platform-engineering/security/governed-ai-model-profiles.yaml
+  - runtime://devint-governed-ai-gateway-mfshaf7/provider-integrity
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/security/governed-ai-model-profiles.yaml
+    owner_repo: platform-engineering
+    note: Platform PR 283 binds the admitted local Ollama provider to runtime 0.40.1 while preserving the exact qwen3:8b digest and fail-closed posture.
+  - type: test
+    path: platform-engineering/scripts/test_ai_model_profiles.py
+    owner_repo: platform-engineering
+    note: Validates the governed runtime pin across the registered model profiles.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-09-governed-ai-runtime-0-40-1.md
+    owner_repo: platform-engineering
+    note: Records the synthetic compatibility proof and merged Platform PR 283 at d9796f6db70d5c68012be0212ca3c4050f54794e.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-09-agent-console-composed-runtime.md
+    owner_repo: security-architecture
+    note: Security explicitly approves the exact runtime version and model digest inside the bounded Agent Console composition.
+  note: Closed after the pin was reconciled, Security rebound the exact revisions, the existing composition converged, and the Agent Console operating proof passed.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

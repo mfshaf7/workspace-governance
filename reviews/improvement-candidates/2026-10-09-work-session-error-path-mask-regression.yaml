@@ -1,0 +1,56 @@
+schema_version: 1
+id: 2026-10-09-work-session-error-path-mask-regression
+title: Preserve source-executor failures without persisting absolute paths
+recorded_on: '2026-10-09'
+owner_repo: operator-orchestration-service
+summary: A bounded GitHub provider failure carried a request path in structured
+  details, and command-record persistence rejected that path before it could
+  record and replay the real source-executor error.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-24-nullable-credential-reference-preflight-mask.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: source-executor-error-path-mask
+  title: Coordination-state validation masked a bounded provider failure
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - diagnostic-ordering-miss
+  finding: >-
+    A transient Agent source publish failure returned method, provider request
+    path, and status details. The work-session command-record store rejected the
+    leading-slash request path as an absolute filesystem path, left the command
+    record pending, and surfaced delivery_art_work_session_absolute_path_forbidden
+    instead of the real agent_source_provider_request_failed condition.
+  source_refs:
+  - openproject://work_packages/1248
+  - operator-orchestration-service/src/delivery-art/work-session-service.js
+  - operator-orchestration-service/src/delivery-art/work-session-store.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-service.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 300 redacts absolute-path-shaped diagnostic values before persistence while preserving the source error class and safe provider details.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-service.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves bounded provider failures remain recordable and replayable without persisting forbidden absolute paths.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-09-agent-console-closeout-regression-repair.md
+    owner_repo: operator-orchestration-service
+    note: Records merged OOS PR 300 at cbcab89c517d90ef6609bb26368d1ea0e2374f3e.
+  note: Closed after the durable sanitizer landed and subsequent source-executor failures retained their real error semantics without reopening the path-persistence guard.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

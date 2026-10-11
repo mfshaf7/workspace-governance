@@ -1,0 +1,79 @@
+schema_version: 1
+id: 2026-10-12-refinement-catalog-first-start-readiness-regression
+title: Make Refinement and Catalog first-start readiness deterministic
+recorded_on: '2026-10-12'
+owner_repo: operator-orchestration-service
+summary: >-
+  The registered refinement-catalog composition projected the broker-only Agent
+  Console enable flag into the Refinement worker without the separate Agent
+  Console credential. The worker therefore became briefly Ready, failed closed
+  during runtime construction, and entered CrashLoopBackOff. Rollout readiness
+  could race that exit and report a false successful first start.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-composition-auto-resume-target-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+  - runtime-composition
+signals:
+- id: first-clean-start-requires-second-composition-up
+  title: Refinement worker inherited a broker-only Agent Console capability
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - unsafe-assumption
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  finding: >-
+    Live pod logs proved that the Refinement worker constructed the full OOS
+    runtime with OOS_AGENT_CONSOLE_ENABLED=true inherited from the broker
+    environment secret, but correctly lacked the broker-only Agent Console CGG
+    credential. Runtime construction failed with agent_console_configuration_missing.
+    Because the worker has no readiness probe, it could become Ready before Node
+    exited, allowing rollout status and the aggregate composition check to race
+    the crash. PR 304 added exact-generation rollout waiting and resource-specific
+    diagnostics, which remain useful controls, but a post-merge replay proved
+    they did not isolate the capability or prevent the false-success crash loop.
+  source_refs:
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/common.sh
+  - operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+  - operator-orchestration-service/test/devint-refinement-catalog-composition.test.js
+  - platform-engineering/scripts/dev_integration_compositions.py
+  - runtime://dev-integration/refinement-catalog/mfshaf7/current-composition.yaml
+  - runtime://k3s/devint-accepted-idea-delivery-mfshaf7/deployment/operator-orchestration-service-refinement-worker
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-08-delivery-planning-and-closure-controls.yaml
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+    owner_repo: operator-orchestration-service
+    note: OOS PR 305 disables the broker-only Agent Console capability in the Refinement worker and adds delayed process readiness.
+  - type: test
+    path: operator-orchestration-service/test/devint-refinement-catalog-composition.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves exact-generation rollout handling, worker capability isolation, credential absence, readiness, and bounded diagnostics.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-12-refinement-catalog-rollout-generation.md
+    owner_repo: operator-orchestration-service
+    note: Records the exact-generation and diagnostic controls merged in OOS PR 304 at dafedc11bc3aadb62d67d1bc184f3ad06211f48b.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-12-refinement-worker-capability-isolation.md
+    owner_repo: operator-orchestration-service
+    note: Records the capability-isolation repair merged in OOS PR 305 at 43e5e0b623e901dc5fb877f64d357ac01aed1065.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-09-agent-console-composed-runtime.md
+    owner_repo: security-architecture
+    note: Security approves the exact least-privilege worker boundary and current OOS revision.
+  note: Closed after a clean composition convergence held the Refinement worker Ready with zero restarts and Delivery item 1246 plus Epic 1203 completed through that runtime.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
