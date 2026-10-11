@@ -1,0 +1,61 @@
+schema_version: 1
+id: 2026-10-09-agent-console-projection-time-precision-regression
+title: Align Agent Console projection time precision across CGG and OOS
+recorded_on: '2026-10-09'
+owner_repo: operator-orchestration-service
+summary: CGG emits whole-second projection timestamps and permits the documented
+  one-second precision boundary, while OOS required the projection timestamp to
+  be later than a subsecond request and rejected a valid live handoff.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-agent-console-composition-activation-ownership-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - context-governance-gateway
+  - operator-orchestration-service
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components:
+  - context-governance-gateway
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: live-agent-console-time-precision-mismatch
+  title: Valid whole-second CGG evidence was rejected by a subsecond OOS comparison
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - contract-drift
+  finding: >-
+    The live #1246 operating proof reached CGG and received a current, safe
+    projection, but OOS returned agent_console_context_projection_invalid because
+    CGG's whole-second projected_at value was fractionally earlier than the
+    request's microsecond timestamp. CGG already admits this bounded one-second
+    precision difference, so the consumer and provider disagreed on the same
+    timeline contract.
+  source_refs:
+  - openproject://work_packages/1246
+  - context-governance-gateway/apps/api/src/cgg_api/projection.py
+  - operator-orchestration-service/src/agent-console/service.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/agent-console/service.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 300 applies the provider-compatible bounded whole-second precision rule when validating CGG projection time.
+  - type: test
+    path: operator-orchestration-service/test/agent-console-service.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves the exact accepted precision boundary and rejects evidence outside it.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-09-agent-console-closeout-regression-repair.md
+    owner_repo: operator-orchestration-service
+    note: Records merged OOS PR 300 at cbcab89c517d90ef6609bb26368d1ea0e2374f3e and its closeout regression evidence.
+  note: Closed after OOS PR 300 landed and the repaired path completed the Agent Console operating proof and Delivery item 1246 closeout.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -1,0 +1,64 @@
+schema_version: 1
+id: 2026-10-09-owner-evidence-failure-replay-regression
+title: Keep failed owner evidence retryable after repair
+recorded_on: '2026-10-09'
+owner_repo: operator-orchestration-service
+summary: >-
+  Delivery work item 1246 exposed that the OOS source executor durably replayed
+  a completed owner-evidence acquisition even when its verification results
+  contained failures. The normal repair-and-retry action therefore returned
+  the stale failure instead of executing the repaired verifier.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: failed-owner-evidence-became-permanent-replay
+  title: Repair and retry replayed stale failed evidence
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    After the Agent Console verifier and runtime were repaired, work continue
+    for item 1246 returned the exact first failed evidence receipt without
+    invoking the owner verifier again. The source-action result store treated
+    every returned evidence receipt as a successful idempotent result even
+    when one or more bounded command results were failures.
+  source_refs:
+  - openproject://work_packages/1246
+  - operator-orchestration-service/src/delivery-art/source-action-result-store.js
+  - operator-orchestration-service/src/delivery-art/source-executor.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/source-action-result-store.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 301 retains replay only for passing owner-evidence acquisition and ignores legacy failed results.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-source-executor.test.js
+    owner_repo: operator-orchestration-service
+    note: Proves a repaired verifier executes again while passing evidence remains replay-safe.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS PRs 302 and 303 complete lifecycle replacement of failed operating evidence without weakening passing or merge-ready evidence.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-09-failed-owner-evidence-retry.md
+    owner_repo: operator-orchestration-service
+    note: Records the complete repair sequence through OOS PR 303 at 877cd2f1a9c873070e6c29587739eed5d599c418.
+  note: Closed after repaired evidence was reacquired, Delivery item 1246 closed from the finalized Review Packet, and Epic 1203 reached terminal closeout.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
