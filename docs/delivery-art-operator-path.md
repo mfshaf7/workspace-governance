@@ -348,6 +348,17 @@ silence is not acceptance. Cross-repo validation fails when an active repo is
 missing from that inventory or an activated profile is absent, malformed, or
 owned by another repo.
 
+Architecture preflight must also prove evidence-profile compatibility for
+every source-backed Landing Unit in the initiative before the first source
+Landing Unit starts. For each owner repository, compare every planned
+merge-ready conformance case's evidence kind and fidelity with the accepted-base
+profile commands that use `matching-fidelity`, and record the all-owner result.
+Do not limit this check to the current child or active front. A gap in any
+future Landing Unit blocks the first source start and is repaired as owner-repo
+maintenance through the existing profile contract. It does not create another
+ART child, and the architecture fidelity must not be weakened to fit a stale
+profile.
+
 Every result exposes exactly one next action with a code, command, reason, and
 authority. Ambiguity blocks instead of presenting several guessed actions.
 Architecture, Landing Unit, exception or risk, PR review, source merge,

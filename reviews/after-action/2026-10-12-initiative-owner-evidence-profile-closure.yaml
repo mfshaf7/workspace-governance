@@ -1,0 +1,86 @@
+schema_version: 1
+id: 2026-10-12-initiative-owner-evidence-profile-closure
+title: Initiative planning now proves every owner evidence profile before source start
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: >-
+  Epic 894 exposed that exact work-start preflight correctly checked the selected
+  Landing Unit but initiative planning had not checked all later owner profiles.
+  Existing profiles were repaired in their owner repos, and the Delivery operator
+  control now requires one recorded whole-initiative compatibility result before the
+  first source Landing Unit starts.
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - operator-orchestration-service
+  - governance-operations-console
+  - platform-engineering
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- openproject://work_packages/894
+- openproject://work_packages/1254
+- https://github.com/mfshaf7/workspace-governance-control-fabric/pull/99
+- https://github.com/mfshaf7/operator-orchestration-service/pull/310
+- https://github.com/mfshaf7/governance-operations-console/pull/62
+- https://github.com/mfshaf7/platform-engineering/pull/284
+- https://github.com/mfshaf7/security-architecture/pull/232
+lessons:
+- id: planning-must-prove-every-owner-profile
+  title: Child-local enforcement cannot replace whole-initiative compatibility planning
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    The previous repair proved evidence-profile inventory and exact-base profile
+    validity, but planning exercised that compatibility only when each child reached
+    work preflight. The first Epic 894 implementation child therefore exposed WGCF's
+    missing sandbox-runtime binding late; a deliberate whole-Epic audit found the same
+    latent mismatch in three later owner repositories.
+  impact: >-
+    Primary delivery stopped for repeated owner-repo maintenance, consumed several
+    review and merge cycles, and would have failed again at work items 1255, 1256, and
+    1258 if execution had continued child by child.
+  status: closed
+  expected_control_types:
+  - contract
+  - skill
+  - test
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Blocks first source start until every source Landing Unit has compatible accepted-base evidence coverage.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires one all-owner compatibility pass instead of child-by-child discovery.
+  - type: test
+    path: workspace-governance/tests/test_delivery_art_lifecycle_parity.py
+    owner_repo: workspace-governance
+    note: Locks the whole-initiative planning rules and forbids ART-child or fidelity-downgrade workarounds.
+  - type: contract
+    path: workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-governance-control-fabric
+    note: WGCF PR 99 provides the required sandbox-runtime binding.
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: operator-orchestration-service
+    note: OOS PR 310 provides the required sandbox-runtime binding.
+  - type: contract
+    path: governance-operations-console/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: governance-operations-console
+    note: Console PR 62 provides the required sandbox-runtime binding.
+  - type: contract
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: Platform PR 284 provides the required sandbox-runtime binding.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
