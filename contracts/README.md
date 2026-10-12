@@ -191,6 +191,19 @@ Use these contracts to declare:
   - defines owner roles, typed transition envelopes, evidence, preconditions,
     recovery decisions, and stable-state invariants without claiming runtime
     implementation
+- `product-publication.yaml`
+  - defines product-owned manifest, publication packet, and terminal receipt
+    boundaries for governed portfolio listing
+  - binds inventory classification, exact owner revision, lifecycle evidence,
+    audience, listing scope, access class, authority evidence, idempotency, and
+    cross-boundary denial without granting runtime, release, source, security,
+    or lifecycle authority
+- `schemas/product-publication-manifest.schema.json`
+  - defines the revision-bound evidence artifact published by the product owner
+- `schemas/product-publication-packet.schema.json`
+  - defines the exact governed publication request and authority bindings
+- `schemas/product-publication-receipt.schema.json`
+  - defines the terminal request, manifest, result, and version receipt
 - `schemas/lifecycle-transition-projection.schema.json`
   - defines the strict OOS-owned source projection consumed by lifecycle
     operator surfaces for the three admitted Proposal and Prototype routes

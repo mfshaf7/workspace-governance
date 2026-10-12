@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version", "artifact_type", "manifest_id", "product_id",
+    "product_record_ref", "product_record_version", "product_classification",
+    "lifecycle_state", "owner_repo", "owner_role", "owner_revision",
+    "source_refs", "lifecycle_evidence", "issued_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "product-publication-owner-manifest" },
+    "manifest_id": { "type": "string", "pattern": "^product-publication-manifest:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
+    "product_id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
+    "product_record_ref": { "type": "string", "pattern": "^workspace-governance://products/[a-z0-9][a-z0-9._-]*/v[0-9]+$" },
+    "product_record_version": { "type": "integer", "minimum": 1 },
+    "product_classification": { "enum": ["owner-managed", "platform-integrated", "fully-governed"] },
+    "lifecycle_state": { "enum": ["active", "suspended", "retired"] },
+    "owner_repo": { "$ref": "#/$defs/repo" },
+    "owner_role": { "enum": ["runtime-owner", "source-owner"] },
+    "owner_revision": { "$ref": "#/$defs/revision" },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["repo", "revision", "path"],
+        "properties": {
+          "repo": { "$ref": "#/$defs/repo" },
+          "revision": { "$ref": "#/$defs/revision" },
+          "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "lifecycle_evidence": {
+      "type": "object",
+      "required": [
+        "project_phase", "source_custody", "runtime_environment",
+        "release_posture", "publication_posture", "evidence_refs"
+      ],
+      "properties": {
+        "project_phase": { "enum": ["proposed", "incubating", "delivery-governed", "operational", "retired"] },
+        "source_custody": { "enum": ["none", "incubation-repo", "dedicated-owner-repo", "shared-owner-repo"] },
+        "runtime_environment": { "enum": ["none", "local-preview", "dev-integration", "stage", "production"] },
+        "release_posture": { "enum": ["not-applicable", "unreleased", "candidate", "released", "withdrawn"] },
+        "publication_posture": { "enum": ["unlisted", "internal", "client", "public", "archived"] },
+        "evidence_refs": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "issued_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "repo": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+  }
+}

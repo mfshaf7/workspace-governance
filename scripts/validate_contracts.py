@@ -34,6 +34,12 @@ from project_lifecycle_contract import (
     projection_issues as lifecycle_transition_projection_issues,
 )
 from project_lifecycle_proof import proof_suite_issues as project_lifecycle_proof_issues
+from product_publication_contract import (
+    contract_issues as product_publication_contract_issues,
+    manifest_issues as product_publication_manifest_issues,
+    packet_issues as product_publication_packet_issues,
+    receipt_issues as product_publication_receipt_issues,
+)
 from prototype_landing_contract import contract_issues as prototype_landing_contract_issues
 from prototype_maturity_contract import contract_issues as prototype_maturity_contract_issues
 from prototype_closure_contract import contract_issues as prototype_closure_contract_issues
@@ -220,6 +226,20 @@ PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS = (
     "contracts/schemas/prototype-closure-studio-readback.schema.json",
     "contracts/schemas/prototype-closure-receipt.schema.json",
 )
+PRODUCT_PUBLICATION_ARTIFACT_CASES = {
+    "manifest": (
+        "contracts/schemas/product-publication-manifest.schema.json",
+        "contracts/fixtures/product-publication/manifest.valid.json",
+    ),
+    "packet": (
+        "contracts/schemas/product-publication-packet.schema.json",
+        "contracts/fixtures/product-publication/packet.valid.json",
+    ),
+    "receipt": (
+        "contracts/schemas/product-publication-receipt.schema.json",
+        "contracts/fixtures/product-publication/receipt.valid.json",
+    ),
+}
 LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF = (
     "contracts/schemas/lifecycle-transition-projection.schema.json"
 )
@@ -7488,6 +7508,7 @@ def main() -> int:
         "lifecycle": repo_root / "contracts/lifecycle.yaml",
         "project_lifecycle": repo_root / "contracts/project-lifecycle.yaml",
         "project_lifecycle_proof": repo_root / "contracts/project-lifecycle-proof.yaml",
+        "product_publication": repo_root / "contracts/product-publication.yaml",
         "prototype_landing": repo_root / "contracts/prototype-landing.yaml",
         "prototype_maturity": repo_root / "contracts/prototype-maturity.yaml",
         "prototype_closure": repo_root / "contracts/prototype-closure.yaml",
@@ -7579,6 +7600,22 @@ def main() -> int:
             Draft202012Validator.check_schema(load_json(schema_path))
         except SchemaError as exc:
             errors.append(f"{rel_path}: invalid JSON Schema: {exc.message}")
+
+    for artifact_name, (schema_ref, fixture_ref) in PRODUCT_PUBLICATION_ARTIFACT_CASES.items():
+        schema_path = repo_root / schema_ref
+        fixture_path = repo_root / fixture_ref
+        if not schema_path.exists():
+            errors.append(f"{schema_ref}: product publication {artifact_name} schema is missing")
+            continue
+        try:
+            Draft202012Validator.check_schema(load_json(schema_path))
+        except SchemaError as exc:
+            errors.append(f"{schema_ref}: invalid JSON Schema: {exc.message}")
+            continue
+        if not fixture_path.exists():
+            errors.append(f"{fixture_ref}: product publication {artifact_name} fixture is missing")
+            continue
+        validate_schema(errors, fixture_path, schema_path)
 
     for rel_path in WORKSPACE_INVENTORY_ARTIFACT_SCHEMAS:
         schema_path = repo_root / rel_path
@@ -7827,6 +7864,46 @@ def main() -> int:
     errors.extend(
         f"contracts/project-lifecycle.yaml: {error}"
         for error in project_lifecycle_errors
+    )
+    product_publication_errors = product_publication_contract_issues(
+        contracts["product_publication"],
+        known_repos=active_repos,
+    )
+    errors.extend(
+        f"contracts/product-publication.yaml: {error}"
+        for error in product_publication_errors
+    )
+    product_publication_manifest = load_json(
+        repo_root / PRODUCT_PUBLICATION_ARTIFACT_CASES["manifest"][1]
+    )
+    product_publication_packet = load_json(
+        repo_root / PRODUCT_PUBLICATION_ARTIFACT_CASES["packet"][1]
+    )
+    product_publication_receipt = load_json(
+        repo_root / PRODUCT_PUBLICATION_ARTIFACT_CASES["receipt"][1]
+    )
+    errors.extend(
+        f"{PRODUCT_PUBLICATION_ARTIFACT_CASES['manifest'][1]}: {error}"
+        for error in product_publication_manifest_issues(
+            contracts["product_publication"],
+            product_publication_manifest,
+            contracts["products"],
+        )
+    )
+    errors.extend(
+        f"{PRODUCT_PUBLICATION_ARTIFACT_CASES['packet'][1]}: {error}"
+        for error in product_publication_packet_issues(
+            contracts["product_publication"],
+            product_publication_packet,
+            product_publication_manifest,
+        )
+    )
+    errors.extend(
+        f"{PRODUCT_PUBLICATION_ARTIFACT_CASES['receipt'][1]}: {error}"
+        for error in product_publication_receipt_issues(
+            product_publication_receipt,
+            product_publication_packet,
+        )
     )
     if lifecycle_transition_projection_fixture_path.exists():
         lifecycle_transition_projection_errors = (

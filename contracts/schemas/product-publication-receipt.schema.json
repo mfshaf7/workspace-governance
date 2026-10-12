@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version", "artifact_type", "receipt_id", "packet_id", "request_id",
+    "request_digest", "manifest_digest", "product_id", "outcome",
+    "publication_version", "publication_posture", "owner_receipt_ref",
+    "recorded_at", "secret_values_embedded"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "product-publication-receipt" },
+    "receipt_id": { "type": "string", "pattern": "^product-publication-receipt:[a-z0-9][a-z0-9._:-]*$" },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "request_id": { "type": "string", "minLength": 1 },
+    "request_digest": { "$ref": "#/$defs/digest" },
+    "manifest_digest": { "$ref": "#/$defs/digest" },
+    "product_id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
+    "outcome": { "enum": ["applied", "replayed", "rejected", "failed"] },
+    "publication_version": { "type": ["integer", "null"], "minimum": 1 },
+    "publication_posture": { "type": ["string", "null"], "enum": [null, "unlisted", "internal", "client", "public", "archived"] },
+    "owner_receipt_ref": { "type": "string", "pattern": "^oos://.+" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "secret_values_embedded": { "const": false }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

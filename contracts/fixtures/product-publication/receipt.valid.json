@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "artifact_type": "product-publication-receipt",
+  "receipt_id": "product-publication-receipt:governance-operations-console:1",
+  "packet_id": "product-publication-packet:governance-operations-console:1",
+  "request_id": "product-publication-request:governance-operations-console:1",
+  "request_digest": "sha256:5d114b0e06a4cac715a9fe1cee78a9d4cd1cdad31f6206d508268477d2b95626",
+  "manifest_digest": "sha256:18705c4a7afb6fe71e666e60bfa5e8337ba62e4edd151c0f4df56c273247146f",
+  "product_id": "product:governance-operations-console",
+  "outcome": "applied",
+  "publication_version": 1,
+  "publication_posture": "internal",
+  "owner_receipt_ref": "oos://product-publication/owner-receipts/1",
+  "recorded_at": "2026-10-12T03:02:00Z",
+  "secret_values_embedded": false
+}

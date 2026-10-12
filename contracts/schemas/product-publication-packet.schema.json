@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version", "artifact_type", "packet_id", "request_id",
+    "idempotency_key", "request_digest", "expected_publication_version",
+    "action", "product_id", "manifest_binding", "current_publication_posture",
+    "target_publication", "authority_refs", "previous_receipt", "grants",
+    "requested_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "product-publication-packet" },
+    "packet_id": { "type": "string", "pattern": "^product-publication-packet:[a-z0-9][a-z0-9._:-]*$" },
+    "request_id": { "type": "string", "pattern": "^product-publication-request:[a-z0-9][a-z0-9._:-]*$" },
+    "idempotency_key": { "type": "string", "minLength": 1 },
+    "request_digest": { "$ref": "#/$defs/digest" },
+    "expected_publication_version": { "type": "integer", "minimum": 0 },
+    "action": { "enum": ["publish", "update", "unpublish", "archive"] },
+    "product_id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
+    "manifest_binding": {
+      "type": "object",
+      "required": ["manifest_id", "manifest_digest", "owner_repo", "owner_revision"],
+      "properties": {
+        "manifest_id": { "type": "string", "minLength": 1 },
+        "manifest_digest": { "$ref": "#/$defs/digest" },
+        "owner_repo": { "$ref": "#/$defs/repo" },
+        "owner_revision": { "$ref": "#/$defs/revision" }
+      },
+      "additionalProperties": false
+    },
+    "current_publication_posture": { "enum": ["unlisted", "internal", "client", "public", "archived"] },
+    "target_publication": {
+      "type": "object",
+      "required": ["posture", "listing_scope", "audience", "access_class"],
+      "properties": {
+        "posture": { "enum": ["unlisted", "internal", "client", "public", "archived"] },
+        "listing_scope": { "type": ["string", "null"], "enum": [null, "workspace-portfolio", "client-portfolio", "public-catalog", "historical-archive"] },
+        "audience": { "type": ["string", "null"], "enum": [null, "workspace-operators", "authorized-clients", "public", "historical"] },
+        "access_class": { "type": ["string", "null"], "enum": [null, "workspace-authenticated", "client-authorized", "public-anonymous", "historical-read-only"] }
+      },
+      "additionalProperties": false
+    },
+    "authority_refs": {
+      "type": "object",
+      "required": ["operator_decision_ref", "readiness_receipt_ref", "security_decision_ref"],
+      "properties": {
+        "operator_decision_ref": { "type": "string", "pattern": "^oos://.+" },
+        "readiness_receipt_ref": { "type": "string", "pattern": "^wgcf://.+" },
+        "security_decision_ref": { "type": "string", "pattern": "^security-architecture://.+" }
+      },
+      "additionalProperties": false
+    },
+    "previous_receipt": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["receipt_id", "receipt_digest", "publication_version"],
+          "properties": {
+            "receipt_id": { "type": "string", "minLength": 1 },
+            "receipt_digest": { "$ref": "#/$defs/digest" },
+            "publication_version": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "grants": {
+      "type": "object",
+      "required": ["source_authority", "runtime_authority", "release_authority", "security_acceptance", "lifecycle_mutation"],
+      "properties": {
+        "source_authority": { "const": false },
+        "runtime_authority": { "const": false },
+        "release_authority": { "const": false },
+        "security_acceptance": { "const": false },
+        "lifecycle_mutation": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "requested_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "repo": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+  }
+}

@@ -1,0 +1,227 @@
+schema_version: 1
+product_publication:
+  owner_repo: workspace-governance
+  implementation_posture: contract-ready
+  primary_operator_surface: docs/product-publication.md
+  product_inventory_ref: contracts/products.yaml
+  lifecycle_contract_ref: contracts/project-lifecycle.yaml
+  purpose: >-
+    Define how an active product owner supplies revision-bound lifecycle evidence
+    for a separate governed portfolio-publication decision without transferring
+    source, runtime, release, security, or lifecycle authority.
+  authorities:
+    publication-contract:
+      owner_kind: repo
+      owner_ref: workspace-governance
+      responsibilities:
+        - publication-vocabulary
+        - artifact-contracts
+        - publication-policy
+    owner-manifest:
+      owner_kind: dynamic
+      owner_ref: product-owner-repo
+      responsibilities:
+        - product-owned-manifest
+        - source-and-lifecycle-evidence
+    readiness-evaluation:
+      owner_kind: repo
+      owner_ref: workspace-governance-control-fabric
+      responsibilities:
+        - publication-readiness
+        - policy-receipt
+    workflow-orchestration:
+      owner_kind: repo
+      owner_ref: operator-orchestration-service
+      responsibilities:
+        - request-journal
+        - idempotency
+        - terminal-owner-receipt
+    operator-projection:
+      owner_kind: repo
+      owner_ref: governance-operations-console
+      responsibilities:
+        - portfolio-projection
+    security-acceptance:
+      owner_kind: repo
+      owner_ref: security-architecture
+      responsibilities:
+        - exact-revision-security-decision
+    runtime-activation:
+      owner_kind: repo
+      owner_ref: platform-engineering
+      responsibilities:
+        - environment-activation
+        - live-operating-proof
+  vocabulary:
+    product_classifications:
+      - owner-managed
+      - platform-integrated
+      - fully-governed
+    product_lifecycle_states:
+      - active
+      - suspended
+      - retired
+    publication_postures:
+      - unlisted
+      - internal
+      - client
+      - public
+      - archived
+    listing_scopes:
+      - workspace-portfolio
+      - client-portfolio
+      - public-catalog
+      - historical-archive
+    audiences:
+      - workspace-operators
+      - authorized-clients
+      - public
+      - historical
+    access_classes:
+      - workspace-authenticated
+      - client-authorized
+      - public-anonymous
+      - historical-read-only
+    publication_actions:
+      - publish
+      - update
+      - unpublish
+      - archive
+  posture_bindings:
+    unlisted:
+      listing_scope: null
+      audience: null
+      access_class: null
+      allowed_lifecycle_states:
+        - active
+        - suspended
+        - retired
+    internal:
+      listing_scope: workspace-portfolio
+      audience: workspace-operators
+      access_class: workspace-authenticated
+      allowed_lifecycle_states:
+        - active
+    client:
+      listing_scope: client-portfolio
+      audience: authorized-clients
+      access_class: client-authorized
+      allowed_lifecycle_states:
+        - active
+    public:
+      listing_scope: public-catalog
+      audience: public
+      access_class: public-anonymous
+      allowed_lifecycle_states:
+        - active
+    archived:
+      listing_scope: historical-archive
+      audience: historical
+      access_class: historical-read-only
+      allowed_lifecycle_states:
+        - retired
+  action_bindings:
+    publish:
+      allowed_source_postures:
+        - unlisted
+      allowed_target_postures:
+        - internal
+        - client
+        - public
+    update:
+      allowed_source_postures:
+        - internal
+        - client
+        - public
+      allowed_target_postures:
+        - internal
+        - client
+        - public
+    unpublish:
+      allowed_source_postures:
+        - internal
+        - client
+        - public
+      allowed_target_postures:
+        - unlisted
+    archive:
+      allowed_source_postures:
+        - unlisted
+      allowed_target_postures:
+        - archived
+  artifact_contracts:
+    owner_manifest:
+      schema_ref: contracts/schemas/product-publication-manifest.schema.json
+      authority_role: owner-manifest
+      digest_scope: canonical-json-entire-artifact
+    publication_packet:
+      schema_ref: contracts/schemas/product-publication-packet.schema.json
+      authority_role: publication-contract
+      digest_scope: canonical-json-entire-artifact
+    terminal_receipt:
+      schema_ref: contracts/schemas/product-publication-receipt.schema.json
+      authority_role: workflow-orchestration
+      digest_scope: canonical-json-entire-artifact
+  manifest_obligations:
+    required_inventory_bindings:
+      - product_id
+      - product_record_ref
+      - product_record_version
+      - product_classification
+      - lifecycle_state
+      - owner_repo
+      - owner_role
+    required_source_bindings:
+      - owner_revision
+      - source_refs
+    required_lifecycle_axes:
+      - project-phase
+      - source-custody
+      - runtime-environment
+      - release-posture
+      - publication-posture
+    owner_revision_format: full-git-commit
+  packet_obligations:
+    required_authority_refs:
+      - operator_decision_ref
+      - readiness_receipt_ref
+      - security_decision_ref
+    required_manifest_bindings:
+      - manifest_id
+      - manifest_digest
+      - owner_repo
+      - owner_revision
+    replay_binding:
+      identity_fields:
+        - request_id
+        - idempotency_key
+      conflict_rule: same-idempotency-key-requires-identical-request-digest
+      version_rule: expected-publication-version-must-match-current-version
+    cross_boundary_grants:
+      source_authority: false
+      runtime_authority: false
+      release_authority: false
+      security_acceptance: false
+      lifecycle_mutation: false
+  semantic_rules:
+    - manifest-product-must-exist-in-active-inventory
+    - manifest-owner-must-match-product-owner-binding
+    - manifest-classification-and-lifecycle-must-match-inventory
+    - manifest-must-bind-all-lifecycle-axes
+    - listed-posture-requires-operational-durable-source
+    - listed-posture-requires-not-applicable-or-released-release-posture
+    - posture-audience-scope-and-access-must-match
+    - packet-must-bind-exact-manifest-identity-digest-owner-and-revision
+    - action-source-and-target-postures-must-match
+    - authority-refs-must-be-present-and-owner-scoped
+    - replay-conflicts-must-fail-closed
+    - publication-must-not-grant-cross-boundary-authority
+    - receipt-must-bind-the-exact-request-manifest-result-and-version
+  denied_shortcuts:
+    - infer-publication-from-product-inventory
+    - infer-publication-from-release-or-runtime-state
+    - publish-from-console-owned-fixture-data
+    - accept-unversioned-or-branch-only-owner-source
+    - accept-missing-or-mismatched-authority-evidence
+    - reuse-an-idempotency-key-for-different-request-content
+    - let-publication-grant-source-runtime-release-security-or-lifecycle-authority
