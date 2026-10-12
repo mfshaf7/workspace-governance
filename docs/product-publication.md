@@ -21,7 +21,8 @@ transitions remain in
 
 The workflow preserves six owner boundaries:
 
-1. The product owner commits a product-owned manifest at an exact Git revision.
+1. The product owner binds an exact product-source revision in a product-owned
+   manifest, then commits that manifest at a separate exact manifest revision.
 2. Workspace Governance supplies vocabulary and artifact contracts; it does not
    fabricate owner evidence.
 3. Workspace Governance Control Fabric evaluates the exact manifest and emits
@@ -44,8 +45,14 @@ identify:
 - the inventory classification and lifecycle state;
 - whether the submitting repo is the inventory's runtime owner or a declared
   source owner;
-- a full owner commit plus every supporting source reference;
+- a full product-source commit plus every supporting source reference;
 - all five lifecycle axes and the durable evidence references supporting them.
+
+`owner_revision` is the product source snapshot described by the manifest. It
+is not the later commit that adds the manifest, because a file cannot contain
+the hash of the commit that contains itself. WGCF readiness evidence separately
+binds the manifest commit, proves that it descends from `owner_revision`, and
+proves that the committed manifest digest equals the submitted manifest digest.
 
 The manifest is evidence, not a mutation request. Its `publication_posture`
 describes current owner-observed truth. The publication packet separately asks
@@ -56,7 +63,7 @@ Validate an owner manifest before submitting it:
 ```bash
 python3 scripts/product_publication_contract.py \
   --manifest <owner-repo>/<manifest.json> \
-  --observed-owner-revision <current-full-owner-commit>
+  --observed-owner-revision <product-source-snapshot-commit>
 ```
 
 The validator rejects unknown products, mismatched product versions,
@@ -92,7 +99,7 @@ Validate the complete binding when a packet is available:
 ```bash
 python3 scripts/product_publication_contract.py \
   --manifest <owner-repo>/<manifest.json> \
-  --observed-owner-revision <current-full-owner-commit> \
+  --observed-owner-revision <product-source-snapshot-commit> \
   --packet <publication-packet.json>
 ```
 
@@ -113,7 +120,7 @@ Validate all three artifacts together:
 ```bash
 python3 scripts/product_publication_contract.py \
   --manifest <owner-repo>/<manifest.json> \
-  --observed-owner-revision <current-full-owner-commit> \
+  --observed-owner-revision <product-source-snapshot-commit> \
   --packet <publication-packet.json> \
   --receipt <terminal-receipt.json>
 ```
@@ -125,6 +132,8 @@ Do not publish when any of these are true:
 - the product is absent from the active Workspace Governance inventory;
 - the manifest owner, revision, classification, lifecycle state, or product
   record version does not match authority truth;
+- the committed manifest revision does not descend from the product-source
+  revision or its manifest digest differs from the submitted artifact;
 - a listed posture lacks operational phase, durable source custody, or valid
   release posture;
 - the audience, listing scope, or access class contradicts the target posture;

@@ -181,6 +181,12 @@ product_publication:
       - release-posture
       - publication-posture
     owner_revision_format: full-git-commit
+    owner_revision_semantics: product-source-snapshot
+    manifest_custody_binding:
+      owner: readiness-evaluation
+      manifest_revision_location: readiness-receipt
+      manifest_revision_must_descend_from_owner_revision: true
+      committed_manifest_digest_must_match_submitted_manifest: true
   packet_obligations:
     required_authority_refs:
       - operator_decision_ref
