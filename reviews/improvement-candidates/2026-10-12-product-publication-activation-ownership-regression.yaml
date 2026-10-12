@@ -82,6 +82,31 @@ signals:
   - https://github.com/mfshaf7/governance-operations-console/pull/67
   - workspace-governance/docs/product-publication.md
   - workspace-governance/docs/workspace-active-inventory.md
+- id: product-publication-runtime-preflight-regression
+  title: Runtime execution retried from remembered fields instead of the exact contract
+  trigger: repeated-operator-friction
+  failure_classes:
+  - learning-closure-regression
+  - diagnostic-ordering-miss
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    During the repaired Feature 924 operating sequence, execution first attempted
+    Product Publication activation before the documented dev-integration source
+    session had reconciled the newly merged exact OOS revision. After activation
+    succeeded, the archive request was then assembled from remembered field names
+    and used target_publication.publication_posture even though the live Console
+    contract requires target_publication.posture. The API rejected the request
+    before mutation, but both failures repeated the same control gap: the exact
+    rollout step and machine-readable request contract were not proven immediately
+    before the live action. Runtime execution must preflight the current source
+    session, exact dependency pins, current state, and exact accepted projection
+    before each lifecycle mutation instead of relying on prior-session memory.
+  source_refs:
+  - openproject://work_packages/1273
+  - governance-operations-console/src/domain-workspaces/portfolio/live-runtime/product-publication-live-contract.ts
+  - platform-engineering/docs/dev-integration.md
+  - platform-engineering/products/product-publication/README.md
 resolution:
   after_action_ref: null
   control_refs:
