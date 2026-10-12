@@ -1,0 +1,63 @@
+schema_version: 1
+id: 2026-10-12-wgcf-real-git-evidence-coverage-regression
+title: Prove every admitted fidelity and evidence-kind pair before source start
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: >-
+  Delivery item 1267 could not start because WGCF's accepted-base evidence
+  profile had tests at filesystem and sandbox-runtime fidelity but not at the
+  real-git fidelity required by the approved merge-ready conformance cases.
+  The earlier initiative-wide compatibility control reported the later Epic
+  894 Landing Units as covered even though it did not prove every required
+  evidence-kind and fidelity pair used by configured-path preflight.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-12-wgcf-owner-evidence-profile-regression.yaml
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  - operator-orchestration-service
+  related_products: []
+  related_components:
+  - workspace-governance-control-fabric
+  change_classes:
+  - source-behavior
+signals:
+- id: configured-path-real-git-coverage-gap
+  title: Approved WGCF work was blocked before source admission
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    OOS configured-path preflight for work item 1267 returned
+    delivery_art_evidence_profile_incomplete. Its merge-ready cases require
+    both tests and validations at real-git fidelity; WGCF supplied only the
+    real-git validation command. The earlier compatibility audit checked the
+    prior sandbox-runtime need but did not preserve pairwise coverage for the
+    later approved architecture packet.
+  source_refs:
+  - openproject://work_packages/1267
+  - workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
+  - workspace-governance/reviews/improvement-candidates/2026-10-12-wgcf-owner-evidence-profile-regression.yaml
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-governance-control-fabric
+    note: >-
+      WGCF PR 104 adds real-git owner-test acquisition alongside the existing
+      real-git source-diff validation and unblocks configured-path admission.
+  note: >-
+    Immediate containment extends the existing WGCF base-owned profile with
+    real-git test acquisition and proved configured-path admission for 1267.
+    No ART child, evidence mechanism, or architecture change is required.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-16'
+  note: >-
+    Extend the existing initiative compatibility validator to prove every
+    required evidence-kind and fidelity pair before the first source session.
+    Do not implement the durable closing control without operator approval.
