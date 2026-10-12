@@ -240,6 +240,9 @@ PRODUCT_PUBLICATION_ARTIFACT_CASES = {
         "contracts/fixtures/product-publication/receipt.valid.json",
     ),
 }
+PRODUCT_PUBLICATION_PRODUCTS_FIXTURE_REF = (
+    "contracts/fixtures/product-publication/products.valid.yaml"
+)
 LIFECYCLE_TRANSITION_PROJECTION_SCHEMA_REF = (
     "contracts/schemas/lifecycle-transition-projection.schema.json"
 )
@@ -7617,6 +7620,15 @@ def main() -> int:
             continue
         validate_schema(errors, fixture_path, schema_path)
 
+    product_fixture_path = repo_root / PRODUCT_PUBLICATION_PRODUCTS_FIXTURE_REF
+    products_schema_path = repo_root / "contracts/schemas/products.schema.json"
+    if not product_fixture_path.exists():
+        errors.append(
+            f"{PRODUCT_PUBLICATION_PRODUCTS_FIXTURE_REF}: Product Publication product fixture is missing"
+        )
+    else:
+        validate_schema(errors, product_fixture_path, products_schema_path)
+
     for rel_path in WORKSPACE_INVENTORY_ARTIFACT_SCHEMAS:
         schema_path = repo_root / rel_path
         if not schema_path.exists():
@@ -7876,6 +7888,9 @@ def main() -> int:
     product_publication_manifest = load_json(
         repo_root / PRODUCT_PUBLICATION_ARTIFACT_CASES["manifest"][1]
     )
+    product_publication_products = yaml.safe_load(
+        (repo_root / PRODUCT_PUBLICATION_PRODUCTS_FIXTURE_REF).read_text(encoding="utf-8")
+    )
     product_publication_packet = load_json(
         repo_root / PRODUCT_PUBLICATION_ARTIFACT_CASES["packet"][1]
     )
@@ -7887,7 +7902,7 @@ def main() -> int:
         for error in product_publication_manifest_issues(
             contracts["product_publication"],
             product_publication_manifest,
-            contracts["products"],
+            product_publication_products,
         )
     )
     errors.extend(
