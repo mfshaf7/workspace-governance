@@ -20,6 +20,12 @@ Use this skill before the first source mutation that is intended to land.
 - Agent Gary is the source author, committer, branch pusher, and pull-request
   opener.
 - `mfshaf7` is the delegated accountable reviewer, approver, and merger.
+- Standing delegated review and merge authority is executable authority, not a
+  prompt to ask the operator to repeat approval. After proving the exact
+  author, head, checks, and review state, perform the human review and the
+  workflow-appropriate merge step directly. Ask the operator again only when
+  the delegation was revoked, the provider rejects the human identity, or the
+  requested action falls outside the recorded delegation.
 - Never use ambient human GitHub credentials for implementation publication.
 - Never use Agent Gary credentials for approval, merge, branch deletion,
   repository administration, or installation-scope changes.
@@ -89,7 +95,8 @@ instead of bypassing it.
 ## Review, Merge, And Cleanup
 
 Use the delegated human identity only after proving the PR author, exact head,
-required checks, and review state:
+required checks, and review state. Do not replace these commands with a manual
+link or an operator confirmation request when standing delegation is active:
 
 ```bash
 gh pr review <pr-number> --repo mfshaf7/<owner-repo> \

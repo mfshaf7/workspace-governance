@@ -1,0 +1,59 @@
+schema_version: 1
+id: 2026-10-12-delegated-source-closeout-regression
+title: Make delegated source closeout fully mechanical
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: The established Agent Gary source workflow still depended on session memory
+  for delegated human review, and the managed ART merge command could not satisfy
+  the repository's approved single-reviewer branch policy.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-agent-source-operator-preflight-regression.yaml
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  finding: Codex again asked the operator to approve and merge despite standing delegated
+    mfshaf7 authority and an installed skill that requires Codex to execute that review.
+    After the exact head was approved, OOS work merge used a normal squash merge and
+    failed against the repository policy instead of using the already-authorized bounded
+    admin merge path.
+  source_refs:
+  - conversation:2026-10-12 operator said Codex keeps forgetting standing delegated
+    approval
+  - github:workspace-governance#255 exact approved head b41f8678cf7ccf5f22f6f47e3dea5ae1af580366
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-12-delegated-source-closeout-closure.yaml
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 309 uses the admitted human ruleset bypass only after exact identity, review, head, and durable merge-readiness gates pass.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: The regression assertion requires both the bounded admin mode and immutable head match.
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Standing delegated review and merge authority is now explicit executable authority rather than a repeat prompt.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-12-oos-art-human-admin-merge.md
+    owner_repo: security-architecture
+    note: Security PR 230 approved the bounded existing-human bypass without widening Agent Gary authority.
+  note: Work item 1253 merged through the repaired managed path, finalized its Review Packet, closed in ART, and retired its source resources.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

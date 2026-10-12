@@ -1,0 +1,71 @@
+schema_version: 1
+id: 2026-10-12-delegated-source-closeout-closure
+title: Delegated source closeout now executes the recorded human boundary
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: >-
+  The source workflow already separated Agent Gary authorship from accountable
+  human review, but Codex still treated the recorded human delegation as a
+  reason to ask the operator again, and OOS invoked a normal merge that the
+  single-human-reviewer ruleset could not accept. The repaired path makes the
+  standing delegation explicit, preserves Agent Gary's publication-only
+  boundary, and uses the existing human ruleset bypass only after exact-head,
+  approval, check, and durable Review Packet gates pass.
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-12-delegated-source-closeout-regression.yaml
+- https://github.com/mfshaf7/security-architecture/pull/230
+- https://github.com/mfshaf7/security-architecture/pull/231
+- https://github.com/mfshaf7/operator-orchestration-service/pull/309
+- https://github.com/mfshaf7/workspace-governance/pull/255
+- openproject://work_packages/1253
+lessons:
+- id: standing-delegation-must-be-executed-and-provider-policy-must-be-modeled
+  title: A recorded human boundary is incomplete when the agent re-prompts or the provider rejects the final command
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    Codex asked the operator to perform approval and merge despite the installed
+    source workflow assigning those steps to the delegated mfshaf7 identity.
+    After approval was recorded on the exact Agent Gary head, OOS still used a
+    normal squash merge even though the repository's approved ruleset requires
+    the configured human bypass actor to use administrator merge mode.
+  impact: >-
+    Story 1253 remained open after its implementation and evidence were ready,
+    the operator had to repeat an already delegated instruction, and primary
+    delivery paused for an avoidable control-plane repair.
+  status: closed
+  expected_control_types:
+  - skill
+  - workflow
+  - test
+  control_refs:
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Requires direct execution of standing delegated review and the workflow-appropriate merge after exact proof.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: Adds the bounded human ruleset bypass after the existing exact review, identity, PR, and head checks.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: Locks the admin and immutable-head arguments together in the managed merge adapter.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-12-oos-art-human-admin-merge.md
+    owner_repo: security-architecture
+    note: Approves the bounded existing-human privilege use and retains final security closure with the accountable human reviewer.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
