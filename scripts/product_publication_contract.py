@@ -32,7 +32,7 @@ EXPECTED_VOCABULARY = {
     "listing_scopes": {"workspace-portfolio", "client-portfolio", "public-catalog", "historical-archive"},
     "audiences": {"workspace-operators", "authorized-clients", "public", "historical"},
     "access_classes": {"workspace-authenticated", "client-authorized", "public-anonymous", "historical-read-only"},
-    "publication_actions": {"publish", "update", "unpublish", "archive"},
+    "publication_actions": {"publish", "update", "unpublish", "archive", "restore"},
 }
 EXPECTED_ARTIFACT_SCHEMAS = {
     "owner_manifest": "contracts/schemas/product-publication-manifest.schema.json",
@@ -72,6 +72,8 @@ def model(contract: Mapping[str, Any]) -> Mapping[str, Any]:
 def contract_issues(contract: Mapping[str, Any], *, known_repos: set[str]) -> list[str]:
     publication = model(contract)
     issues: list[str] = []
+    if contract.get("schema_version") != 2:
+        issues.append("product publication contract must use schema version 2")
     if publication.get("implementation_posture") != "contract-ready":
         issues.append("implementation posture must remain contract-ready")
     if publication.get("primary_operator_surface") != "docs/product-publication.md":
@@ -177,6 +179,17 @@ def contract_issues(contract: Mapping[str, Any], *, known_repos: set[str]) -> li
         issues.append(
             "manifest custody must bind a descendant manifest commit and exact digest in readiness evidence"
         )
+    lifecycle_binding = manifest_obligations.get("lifecycle_maintenance_binding", {})
+    if lifecycle_binding.get("required_from_schema_version") != 2:
+        issues.append("schema-v2 owner manifests must bind lifecycle maintenance evidence")
+    if set(lifecycle_binding.get("required_fields", [])) != {
+        "action",
+        "receipt_ref",
+        "history_event_ref",
+        "previous_event_ref",
+        "after",
+    }:
+        issues.append("lifecycle maintenance binding must preserve exact receipt and history fields")
 
     packet_obligations = publication.get("packet_obligations", {})
     if set(packet_obligations.get("required_authority_refs", [])) != {
@@ -203,9 +216,30 @@ def contract_issues(contract: Mapping[str, Any], *, known_repos: set[str]) -> li
         "expected-publication-version-must-match-current-version"
     ):
         issues.append("packet replay binding must preserve publication version concurrency")
+    restore_binding = packet_obligations.get("restore_binding", {})
+    if restore_binding != {
+        "source_posture": "archived",
+        "target_posture": "unlisted",
+        "required_owner_lifecycle_action": "restore",
+        "required_owner_lifecycle_state": "active",
+        "previous_publication_receipt_required": True,
+        "previous_publication_receipt_posture": "archived",
+    }:
+        issues.append("restore binding must remain archived-to-unlisted and owner-restore-bound")
+    lifecycle_history_binding = packet_obligations.get("lifecycle_history_binding", {})
+    if lifecycle_history_binding.get("required_from_schema_version") != 2:
+        issues.append("schema-v2 packets must preserve lifecycle history bindings")
     grants = packet_obligations.get("cross_boundary_grants")
     if grants != EXPECTED_CROSS_BOUNDARY_GRANTS:
         issues.append("publication packets must deny every cross-boundary authority grant")
+    history_contract = publication.get("history_contract", {})
+    if set(history_contract.get("prohibited_behavior", [])) != {
+        "rewrite-prior-publication-receipt",
+        "omit-owner-lifecycle-history",
+        "restore-directly-to-listed-posture",
+        "infer-runtime-release-access-or-security-restoration",
+    }:
+        issues.append("publication history contract must preserve owner and publication history")
     return issues
 
 
@@ -257,6 +291,34 @@ def manifest_issues(
         and manifest.get("owner_revision") != observed_owner_revision
     ):
         issues.append("manifest owner revision is stale against observed owner source")
+
+    if manifest.get("schema_version") == 2:
+        lifecycle_binding = manifest.get("inventory_lifecycle_binding", {})
+        after = lifecycle_binding.get("after", {})
+        receipt_ref = lifecycle_binding.get("receipt_ref", {})
+        history_event_ref = lifecycle_binding.get("history_event_ref", {})
+        expected_event_prefix = f"workspace-inventory-event:product:{product_name}:"
+        if not str(receipt_ref.get("id", "")).startswith(
+            "workspace-inventory-lifecycle-receipt:"
+        ):
+            issues.append("manifest lifecycle receipt identity is not Workspace Inventory evidence")
+        if not str(history_event_ref.get("id", "")).startswith(expected_event_prefix):
+            issues.append("manifest lifecycle history event does not identify the same product")
+        if after.get("record_version") != manifest.get("product_record_version"):
+            issues.append("manifest lifecycle history record version does not match product record")
+        if after.get("record_digest") != canonical_digest(product):
+            issues.append("manifest lifecycle history record digest does not match active inventory")
+        if after.get("posture") != manifest.get("lifecycle_state"):
+            issues.append("manifest lifecycle history posture does not match lifecycle state")
+        if lifecycle_binding.get("action") == "restore":
+            if manifest.get("lifecycle_state") != "active":
+                issues.append("restored owner manifest must bind active lifecycle state")
+            if lifecycle_binding.get("previous_event_ref") is None:
+                issues.append("restored owner manifest must bind the prior lifecycle event")
+            elif not str(lifecycle_binding.get("previous_event_ref", {}).get("id", "")).startswith(
+                expected_event_prefix
+            ):
+                issues.append("restored owner manifest prior event does not identify the same product")
 
     evidence = manifest.get("lifecycle_evidence", {})
     posture = evidence.get("publication_posture")
@@ -346,8 +408,33 @@ def packet_issues(
             issues.append("target archived posture requires a retired project")
 
     manifest_posture = manifest.get("lifecycle_evidence", {}).get("publication_posture")
-    if packet.get("current_publication_posture") != manifest_posture:
+    restore = action == "restore"
+    if not restore and packet.get("current_publication_posture") != manifest_posture:
         issues.append("packet current posture does not match owner lifecycle evidence")
+    lifecycle_binding = manifest.get("inventory_lifecycle_binding", {})
+    packet_history = packet.get("lifecycle_history_binding", {})
+    if packet.get("schema_version") == 2:
+        if manifest.get("schema_version") != 2:
+            issues.append("schema-v2 packet requires a schema-v2 owner manifest")
+        if packet_history.get("inventory_lifecycle_receipt_ref") != lifecycle_binding.get(
+            "receipt_ref"
+        ):
+            issues.append("packet lifecycle receipt does not match the exact owner manifest")
+        if packet_history.get("inventory_history_event_ref") != lifecycle_binding.get(
+            "history_event_ref"
+        ):
+            issues.append("packet lifecycle history event does not match the exact owner manifest")
+    if restore:
+        if manifest.get("schema_version") != 2:
+            issues.append("restore requires a schema-v2 owner manifest")
+        if lifecycle_binding.get("action") != "restore":
+            issues.append("restore requires an exact owner lifecycle restore event")
+        if manifest.get("lifecycle_state") != "active" or manifest_posture != "unlisted":
+            issues.append("restore owner evidence must be active and safely unlisted")
+        if packet.get("current_publication_posture") != "archived":
+            issues.append("restore source publication posture must be archived")
+        if target.get("posture") != "unlisted":
+            issues.append("restore target publication posture must be unlisted")
     if packet.get("grants") != EXPECTED_CROSS_BOUNDARY_GRANTS:
         issues.append("publication packet attempts to grant cross-boundary authority")
 
@@ -360,6 +447,16 @@ def packet_issues(
         or previous.get("publication_version") != expected_version
     ):
         issues.append("packet expected publication version must match the previous receipt")
+    if packet.get("schema_version") == 2 and isinstance(previous, Mapping):
+        if previous.get("publication_posture") not in EXPECTED_VOCABULARY[
+            "publication_postures"
+        ]:
+            issues.append("schema-v2 previous receipt must bind its publication posture")
+    if restore and (
+        not isinstance(previous, Mapping)
+        or previous.get("publication_posture") != "archived"
+    ):
+        issues.append("restore must bind the exact archived publication receipt")
     return issues
 
 
@@ -388,6 +485,15 @@ def receipt_issues(
     for key, value in expected.items():
         if receipt.get(key) != value:
             issues.append(f"receipt {key} does not match the exact publication packet")
+    if receipt.get("schema_version") != packet.get("schema_version"):
+        issues.append("receipt schema version does not match the publication packet")
+    if receipt.get("schema_version") == 2:
+        if receipt.get("previous_receipt") != packet.get("previous_receipt"):
+            issues.append("receipt previous_receipt does not preserve the packet history link")
+        if receipt.get("lifecycle_history_binding") != packet.get(
+            "lifecycle_history_binding"
+        ):
+            issues.append("receipt lifecycle history does not preserve the packet binding")
     if receipt.get("outcome") in {"applied", "replayed"}:
         if receipt.get("publication_version") != packet.get("expected_publication_version", 0) + 1:
             issues.append("successful receipt publication version must advance exactly once")

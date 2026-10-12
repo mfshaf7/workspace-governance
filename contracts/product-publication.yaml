@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 product_publication:
   owner_repo: workspace-governance
   implementation_posture: contract-ready
@@ -87,6 +87,7 @@ product_publication:
       - update
       - unpublish
       - archive
+      - restore
   posture_bindings:
     unlisted:
       listing_scope: null
@@ -149,6 +150,11 @@ product_publication:
         - unlisted
       allowed_target_postures:
         - archived
+    restore:
+      allowed_source_postures:
+        - archived
+      allowed_target_postures:
+        - unlisted
   artifact_contracts:
     owner_manifest:
       schema_ref: contracts/schemas/product-publication-manifest.schema.json
@@ -187,6 +193,19 @@ product_publication:
       manifest_revision_location: readiness-receipt
       manifest_revision_must_descend_from_owner_revision: true
       committed_manifest_digest_must_match_submitted_manifest: true
+    lifecycle_maintenance_binding:
+      required_from_schema_version: 2
+      authority: workspace-inventory-lifecycle
+      required_fields:
+        - action
+        - receipt_ref
+        - history_event_ref
+        - previous_event_ref
+        - after
+      restore_rules:
+        action: restore
+        resulting_lifecycle_state: active
+        previous_event_required: true
   packet_obligations:
     required_authority_refs:
       - operator_decision_ref
@@ -203,12 +222,36 @@ product_publication:
         - idempotency_key
       conflict_rule: same-idempotency-key-requires-identical-request-digest
       version_rule: expected-publication-version-must-match-current-version
+    lifecycle_history_binding:
+      required_from_schema_version: 2
+      exact_manifest_refs:
+        - inventory_lifecycle_receipt_ref
+        - inventory_history_event_ref
+      terminal_receipt_must_preserve:
+        - previous_receipt
+        - lifecycle_history_binding
+    restore_binding:
+      source_posture: archived
+      target_posture: unlisted
+      required_owner_lifecycle_action: restore
+      required_owner_lifecycle_state: active
+      previous_publication_receipt_required: true
+      previous_publication_receipt_posture: archived
     cross_boundary_grants:
       source_authority: false
       runtime_authority: false
       release_authority: false
       security_acceptance: false
       lifecycle_mutation: false
+  history_contract:
+    publication_ordering: Every successful version advances exactly once and binds the exact previous terminal receipt.
+    owner_history: Schema-v2 artifacts bind the exact append-only Workspace Inventory lifecycle receipt and history event.
+    restoration: Restoration appends a publication version at unlisted and never rewrites the archived receipt or owner lifecycle history.
+    prohibited_behavior:
+      - rewrite-prior-publication-receipt
+      - omit-owner-lifecycle-history
+      - restore-directly-to-listed-posture
+      - infer-runtime-release-access-or-security-restoration
   semantic_rules:
     - manifest-product-must-exist-in-active-inventory
     - manifest-owner-must-match-product-owner-binding
@@ -223,6 +266,9 @@ product_publication:
     - replay-conflicts-must-fail-closed
     - publication-must-not-grant-cross-boundary-authority
     - receipt-must-bind-the-exact-request-manifest-result-and-version
+    - schema-v2-artifacts-must-bind-exact-owner-lifecycle-history
+    - restore-must-bind-archived-receipt-and-owner-restore-event
+    - restore-target-must-be-unlisted
   denied_shortcuts:
     - infer-publication-from-product-inventory
     - infer-publication-from-release-or-runtime-state
@@ -231,3 +277,6 @@ product_publication:
     - accept-missing-or-mismatched-authority-evidence
     - reuse-an-idempotency-key-for-different-request-content
     - let-publication-grant-source-runtime-release-security-or-lifecycle-authority
+    - restore-directly-to-internal-client-or-public
+    - treat-publication-restoration-as-runtime-release-access-or-security-restoration
+    - rewrite-or-drop-owner-or-publication-history

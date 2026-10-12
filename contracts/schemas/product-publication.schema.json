@@ -3,7 +3,7 @@
   "type": "object",
   "required": ["schema_version", "product_publication"],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 2 },
     "product_publication": {
       "type": "object",
       "required": [
@@ -11,7 +11,7 @@
         "product_inventory_ref", "lifecycle_contract_ref", "purpose",
         "authorities", "vocabulary", "posture_bindings", "action_bindings",
         "artifact_contracts", "manifest_obligations", "packet_obligations",
-        "semantic_rules", "denied_shortcuts"
+        "history_contract", "semantic_rules", "denied_shortcuts"
       ],
       "properties": {
         "owner_repo": { "const": "workspace-governance" },
@@ -56,6 +56,7 @@
         },
         "manifest_obligations": { "$ref": "#/$defs/nonEmptyObject" },
         "packet_obligations": { "$ref": "#/$defs/nonEmptyObject" },
+        "history_contract": { "$ref": "#/$defs/nonEmptyObject" },
         "semantic_rules": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
         "denied_shortcuts": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
       },

@@ -8,7 +8,7 @@
     "recorded_at", "secret_values_embedded"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "enum": [1, 2] },
     "artifact_type": { "const": "product-publication-receipt" },
     "receipt_id": { "type": "string", "pattern": "^product-publication-receipt:[a-z0-9][a-z0-9._:-]*$" },
     "packet_id": { "type": "string", "minLength": 1 },
@@ -19,12 +19,73 @@
     "outcome": { "enum": ["applied", "replayed", "rejected", "failed"] },
     "publication_version": { "type": ["integer", "null"], "minimum": 1 },
     "publication_posture": { "type": ["string", "null"], "enum": [null, "unlisted", "internal", "client", "public", "archived"] },
+    "previous_receipt": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["receipt_id", "receipt_digest", "publication_version", "publication_posture"],
+          "properties": {
+            "receipt_id": { "type": "string", "minLength": 1 },
+            "receipt_digest": { "$ref": "#/$defs/digest" },
+            "publication_version": { "type": "integer", "minimum": 1 },
+            "publication_posture": { "enum": ["unlisted", "internal", "client", "public", "archived"] }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "lifecycle_history_binding": {
+      "type": "object",
+      "required": ["inventory_lifecycle_receipt_ref", "inventory_history_event_ref"],
+      "properties": {
+        "inventory_lifecycle_receipt_ref": { "$ref": "#/$defs/artifactRef" },
+        "inventory_history_event_ref": { "$ref": "#/$defs/historyEventRef" }
+      },
+      "additionalProperties": false
+    },
     "owner_receipt_ref": { "type": "string", "pattern": "^oos://.+" },
     "recorded_at": { "type": "string", "format": "date-time" },
     "secret_values_embedded": { "const": false }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 2 } },
+        "required": ["schema_version"]
+      },
+      "then": { "required": ["previous_receipt", "lifecycle_history_binding"] },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["previous_receipt"] },
+            { "required": ["lifecycle_history_binding"] }
+          ]
+        }
+      }
+    }
+  ],
   "additionalProperties": false,
   "$defs": {
-    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "historyEventRef": {
+      "type": "object",
+      "required": ["id", "digest", "sequence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "sequence": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
   }
 }
