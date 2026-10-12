@@ -1,0 +1,63 @@
+schema_version: 1
+id: 2026-10-13-product-publication-authority-bundle-sequencing-regression
+title: Validate dependent authority bundles after upstream merge
+recorded_on: '2026-10-13'
+owner_repo: workspace-governance
+summary: WGCF lifecycle-readiness source landed while its embedded Product Publication
+  bundle still pinned the earlier internal-only Workspace Governance authority, so
+  live readiness failed closed after the upstream lifecycle policy merged.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-source-lifecycle-command-regression.yaml
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The cross-repo sequence merged the Workspace Governance lifecycle policy
+    and WGCF evaluator without refreshing WGCF's authority commit and digests against
+    the merged upstream main. Unit tests exercised synthetic fixtures and did not
+    run a current-authority bundle check, allowing source-complete work to reach live
+    commissioning with an impossible authority binding.
+  source_refs:
+  - openproject://work_packages/1273
+  - runtime://devint-governance-control-fabric-mfshaf7/product-publication-authority-changed
+  - conversation:2026-10-13-operator-requested-contradiction-repair-before-continuation
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance-control-fabric/contracts/product-publication/manifest.json
+    owner_repo: workspace-governance-control-fabric
+    note: The executable WGCF bundle now binds the merged lifecycle-maintenance Workspace Governance authority and exact policy digest.
+  - type: test
+    path: workspace-governance-control-fabric/tests/test_product_publication_readiness.py
+    owner_repo: workspace-governance-control-fabric
+    note: Exact coverage rejects regression to the superseded internal-only authority bundle.
+  - type: contract
+    path: platform-engineering/products/governance-operations-console/product-publication-commissioning-policy.yaml
+    owner_repo: platform-engineering
+    note: Platform selects the repaired WGCF implementation while retaining the Security-reviewed ancestor as the lineage gate.
+  note: >-
+    Closed by WGCF PR #106 at merge
+    98ba2b6964f031d774d55a032c3621a1c3f93997 and Platform PR #292 at merge
+    80560eb076a2e39c88fdcb0c5268af3f571605e3. The dependent bundle was
+    refreshed from merged upstream authority, covered by an exact regression
+    test, and selected by the runtime commissioning policy before lifecycle
+    work resumed.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
