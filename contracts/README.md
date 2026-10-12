@@ -319,20 +319,20 @@ Use these contracts to declare:
     v1 compatibility topology, separated v2 ART work dependencies, Landing
     Units, source landing order, required human gates, lifecycle and authority
     model, explicit protocol applicability, complete protocol conformance
-    dimensions when applicable, dimension-bound executable cases, and active
-    v5 separation between outcome applicability and one evidence-owner Landing
-    Unit per atomic case, plus the staged v6 runtime-activation chain that makes
+    dimensions when applicable, dimension-bound executable cases, and v5+
+    separation between outcome applicability and one evidence-owner Landing
+    Unit per atomic case, plus the active v6 runtime-activation chain that makes
     source ownership, source-snapshot revision binding, and
     Security-to-source-to-commissioning order explicit;
-    v1-v4 remain immutable historical compatibility while v5 stays current
+    v1-v5 remain immutable historical compatibility while v6 stays current
   - also defines contradictions, integrity, and opaque WGCF artifact-registry
     custody with a digest-bound custody receipt
 - `schemas/delivery-art-architecture-v5-parity-vectors.schema.json`
   - defines the shared owner-and-readiness selection vectors that OOS and WGCF
-    continue to enforce for current v5 packets
+    continue to enforce for historical v5 packets and current v6 packets
 - `schemas/delivery-art-architecture-v6-activation-parity-vectors.schema.json`
-  - defines the staged shared source-activation ownership and ordering vector
-    that OOS and WGCF must pass before v6 can become current
+  - defines the active shared source-activation ownership and ordering vector
+    that OOS and WGCF enforce for current v6 packets
 - `schemas/delivery-art-work-start-record.schema.json`
   - defines the Landing Unit decision, exact base revisions, architecture
     binding, scope fingerprint, the complete readiness invalidation set, and

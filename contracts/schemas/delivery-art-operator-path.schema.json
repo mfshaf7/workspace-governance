@@ -1054,18 +1054,16 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "workspace_governance_foundation",
-            "workspace_governance_cycle_termination",
-            "operator_orchestration_service_support",
-            "operator_orchestration_service_cycle_termination",
-            "workspace_governance_control_fabric_support"
+            "workspace_governance_v6_foundation",
+            "workspace_governance_v6_revision_binding",
+            "operator_orchestration_service_activation",
+            "workspace_governance_control_fabric_activation"
           ],
           "properties": {
-            "workspace_governance_foundation": { "$ref": "#/$defs/mergedPullRequestEvidence" },
-            "workspace_governance_cycle_termination": { "$ref": "#/$defs/mergedPullRequestEvidence" },
-            "operator_orchestration_service_support": { "$ref": "#/$defs/mergedPullRequestEvidence" },
-            "operator_orchestration_service_cycle_termination": { "$ref": "#/$defs/mergedPullRequestEvidence" },
-            "workspace_governance_control_fabric_support": { "$ref": "#/$defs/mergedPullRequestEvidence" }
+            "workspace_governance_v6_foundation": { "$ref": "#/$defs/mergedPullRequestEvidence" },
+            "workspace_governance_v6_revision_binding": { "$ref": "#/$defs/mergedPullRequestEvidence" },
+            "operator_orchestration_service_activation": { "$ref": "#/$defs/mergedPullRequestEvidence" },
+            "workspace_governance_control_fabric_activation": { "$ref": "#/$defs/mergedPullRequestEvidence" }
           }
         },
         "security_review": {
@@ -1087,18 +1085,24 @@
             "captured_at",
             "source",
             "active_session_count",
-            "delivery_1203_session_count",
-            "v4_bound_session_count",
+            "delivery_894_session_count",
+            "v5_bound_session_count",
             "retained_unbound_cleanup_blocked_delivery_ids",
+            "retained_historical_v3_cleanup_blocked_delivery_ids",
             "disposition"
           ],
           "properties": {
             "captured_at": { "type": "string", "format": "date-time" },
             "source": { "const": "operator-orchestration-service-dev-integration-runtime-store" },
             "active_session_count": { "type": "integer", "minimum": 0 },
-            "delivery_1203_session_count": { "const": 0 },
-            "v4_bound_session_count": { "const": 0 },
+            "delivery_894_session_count": { "const": 0 },
+            "v5_bound_session_count": { "const": 0 },
             "retained_unbound_cleanup_blocked_delivery_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" }
+            },
+            "retained_historical_v3_cleanup_blocked_delivery_ids": {
               "type": "array",
               "uniqueItems": true,
               "items": { "type": "string", "pattern": "^delivery-[1-9][0-9]*$" }
@@ -1175,9 +1179,6 @@
                 "compatibility_schema_versions",
                 "supported_schema_versions",
                 "parity_fixture_ref",
-                "staged_schema_version",
-                "staged_parity_fixture_ref",
-                "staged_activation_requirements",
                 "activation_evidence",
                 "new_work_requires_current_schema",
                 "historical_versions_are_read_only",
@@ -1186,25 +1187,16 @@
               ],
               "properties": {
                 "schema_ref": { "const": "contracts/schemas/delivery-art-architecture-packet.schema.json" },
-                "schema_version": { "const": 5 },
+                "schema_version": { "const": 6 },
                 "target_schema_version": false,
                 "supported_schema_versions": { "const": [1, 2, 3, 4, 5, 6] },
-                "staged_schema_version": { "const": 6 },
-                "staged_parity_fixture_ref": {
+                "parity_fixture_ref": {
                   "const": "contracts/fixtures/delivery-art-workflow/architecture-packet-v6-activation-parity-vectors.valid.json"
                 },
-                "staged_activation_requirements": {
-                  "const": [
-                    "operator-orchestration-service producer and work-session parity",
-                    "workspace-governance-control-fabric custody and readiness parity",
-                    "security-architecture delta review",
-                    "non-pristine work-session inventory and disposition"
-                  ]
-                },
-                "parity_fixture_ref": {
-                  "const": "contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json"
-                },
-                "compatibility_schema_versions": { "const": [1, 2, 3, 4] },
+                "compatibility_schema_versions": { "const": [1, 2, 3, 4, 5] },
+                "staged_schema_version": false,
+                "staged_parity_fixture_ref": false,
+                "staged_activation_requirements": false,
                 "new_work_requires_current_schema": { "const": true },
                 "historical_versions_are_read_only": { "const": true },
                 "bound_historical_session_may_continue_if_material_semantics_unchanged": { "const": true },

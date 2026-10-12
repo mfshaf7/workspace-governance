@@ -832,81 +832,75 @@ def validate_delivery_art_operator_path_contract(
             errors.append(f"{repo_root / schema_ref}: missing Delivery ART artifact schema")
 
     architecture_contract = artifact_contracts.get("architecture_packet") or {}
-    if architecture_contract.get("schema_version") != 5:
+    if architecture_contract.get("schema_version") != 6:
         errors.append(
-            f"{contract_path}: architecture packet v5 must remain current until staged v6 activation"
+            f"{contract_path}: architecture packet v6 must be the current authoring version"
         )
     if architecture_contract.get("supported_schema_versions") != [1, 2, 3, 4, 5, 6]:
         errors.append(
-            f"{contract_path}: architecture packet support must include immutable v1-v5 and staged v6"
+            f"{contract_path}: architecture packet support must include immutable v1-v5 and current v6"
         )
-    if architecture_contract.get("compatibility_schema_versions") != [1, 2, 3, 4]:
+    if architecture_contract.get("compatibility_schema_versions") != [1, 2, 3, 4, 5]:
         errors.append(
-            f"{contract_path}: architecture packet compatibility must preserve immutable v1-v4"
+            f"{contract_path}: architecture packet compatibility must preserve immutable v1-v5"
         )
     if architecture_contract.get("parity_fixture_ref") != (
-        "contracts/fixtures/delivery-art-workflow/"
-        "architecture-packet-v5-parity-vectors.valid.json"
-    ):
-        errors.append(
-            f"{contract_path}: architecture packet v5 must bind the canonical consumer parity fixture"
-        )
-    if architecture_contract.get("staged_schema_version") != 6:
-        errors.append(
-            f"{contract_path}: architecture packet v6 must remain explicitly staged before activation"
-        )
-    if architecture_contract.get("staged_parity_fixture_ref") != (
         "contracts/fixtures/delivery-art-workflow/"
         "architecture-packet-v6-activation-parity-vectors.valid.json"
     ):
         errors.append(
             f"{contract_path}: architecture packet v6 must bind the canonical activation parity fixture"
         )
-    required_v6_activation = {
-        "operator-orchestration-service producer and work-session parity",
-        "workspace-governance-control-fabric custody and readiness parity",
-        "security-architecture delta review",
-        "non-pristine work-session inventory and disposition",
-    }
-    if set(architecture_contract.get("staged_activation_requirements") or []) != required_v6_activation:
-        errors.append(
-            f"{contract_path}: architecture packet v6 activation requirements are incomplete"
+    if any(
+        field in architecture_contract
+        for field in (
+            "staged_schema_version",
+            "staged_parity_fixture_ref",
+            "staged_activation_requirements",
         )
-    v5_activation = architecture_contract.get("activation_evidence") or {}
-    prerequisite_changes = v5_activation.get("prerequisite_changes") or {}
+    ):
+        errors.append(
+            f"{contract_path}: activated architecture packet v6 must not retain staged-version fields"
+        )
+    v6_activation = architecture_contract.get("activation_evidence") or {}
+    prerequisite_changes = v6_activation.get("prerequisite_changes") or {}
     required_prerequisites = {
-        "workspace_governance_foundation",
-        "workspace_governance_cycle_termination",
-        "operator_orchestration_service_support",
-        "operator_orchestration_service_cycle_termination",
-        "workspace_governance_control_fabric_support",
+        "workspace_governance_v6_foundation",
+        "workspace_governance_v6_revision_binding",
+        "operator_orchestration_service_activation",
+        "workspace_governance_control_fabric_activation",
     }
     if set(prerequisite_changes) != required_prerequisites:
         errors.append(
-            f"{contract_path}: architecture packet v5 activation evidence must bind every prerequisite merge"
+            f"{contract_path}: architecture packet v6 activation evidence must bind every prerequisite merge"
         )
-    security_review = v5_activation.get("security_review") or {}
+    security_review = v6_activation.get("security_review") or {}
     if (
         security_review.get("decision") != "approved-dev-integration"
         or security_review.get("stage_and_prod") != "not-approved"
     ):
         errors.append(
-            f"{contract_path}: architecture packet v5 activation must preserve the Security scope boundary"
+            f"{contract_path}: architecture packet v6 activation must preserve the Security scope boundary"
         )
-    session_inventory = v5_activation.get("work_session_inventory") or {}
+    session_inventory = v6_activation.get("work_session_inventory") or {}
     if (
-        session_inventory.get("delivery_1203_session_count") != 0
-        or session_inventory.get("v4_bound_session_count") != 0
+        session_inventory.get("delivery_894_session_count") != 0
+        or session_inventory.get("v5_bound_session_count") != 0
     ):
         errors.append(
-            f"{contract_path}: architecture packet v5 activation requires zero Delivery 1203 and v4-bound active sessions"
+            f"{contract_path}: architecture packet v6 activation requires zero Delivery 894 and v5-bound active sessions"
         )
-    retained_sessions = session_inventory.get(
+    retained_unbound_sessions = session_inventory.get(
         "retained_unbound_cleanup_blocked_delivery_ids"
     ) or []
-    if session_inventory.get("active_session_count") != len(retained_sessions):
+    retained_v3_sessions = session_inventory.get(
+        "retained_historical_v3_cleanup_blocked_delivery_ids"
+    ) or []
+    if session_inventory.get("active_session_count") != (
+        len(retained_unbound_sessions) + len(retained_v3_sessions)
+    ):
         errors.append(
-            f"{contract_path}: architecture packet v5 session inventory count must match its retained session disposition"
+            f"{contract_path}: architecture packet v6 session inventory count must match its retained session disposition"
         )
 
     readiness = operator_path.get("readiness_model") or {}
