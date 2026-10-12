@@ -1,0 +1,56 @@
+schema_version: 1
+id: 2026-10-12-product-publication-self-referential-revision
+title: Separate product source revision from manifest custody revision
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: The initial product-publication operator guidance described owner_revision
+  as both the source snapshot inside a manifest and the current commit containing
+  that manifest, creating an impossible self-reference after the manifest was committed.
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products:
+  - governance-operations-console
+  related_components:
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+signals:
+- id: late-architecture-discovery
+  title: Revision custody semantics were discovered only after implementation started.
+  trigger: late-architecture-discovery
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: A manifest cannot embed the hash of the commit that contains that same
+    manifest. The source snapshot and committed manifest custody revision are two
+    distinct facts and must be bound separately.
+  source_refs:
+  - openproject://work_packages/1253
+  - openproject://work_packages/1254
+  - workspace-governance/contracts/product-publication.yaml
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-12-product-publication-revision-custody-closure.yaml
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/product-publication.yaml
+    owner_repo: workspace-governance
+    note: Defines owner_revision as the product source snapshot and assigns manifest-commit custody to WGCF readiness evidence.
+  - type: doc
+    path: workspace-governance/docs/product-publication.md
+    owner_repo: workspace-governance
+    note: Gives operators a non-self-referential authoring and validation sequence.
+  - type: test
+    path: workspace-governance/tests/test_product_publication_contract.py
+    owner_repo: workspace-governance
+    note: Locks the separate source-snapshot and manifest-custody semantics.
+  note: The accepted artifact shapes remain compatible. WGCF readiness will bind the
+    external manifest commit and digest without adding another ART child or weakening
+    revision evidence.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

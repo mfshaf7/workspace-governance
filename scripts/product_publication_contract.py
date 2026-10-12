@@ -166,6 +166,17 @@ def contract_issues(contract: Mapping[str, Any], *, known_repos: set[str]) -> li
         issues.append("manifest obligations must bind all five lifecycle axes")
     if manifest_obligations.get("owner_revision_format") != "full-git-commit":
         issues.append("manifest owner revision must remain a full Git commit")
+    if manifest_obligations.get("owner_revision_semantics") != "product-source-snapshot":
+        issues.append("manifest owner revision must describe the product source snapshot")
+    if manifest_obligations.get("manifest_custody_binding") != {
+        "owner": "readiness-evaluation",
+        "manifest_revision_location": "readiness-receipt",
+        "manifest_revision_must_descend_from_owner_revision": True,
+        "committed_manifest_digest_must_match_submitted_manifest": True,
+    }:
+        issues.append(
+            "manifest custody must bind a descendant manifest commit and exact digest in readiness evidence"
+        )
 
     packet_obligations = publication.get("packet_obligations", {})
     if set(packet_obligations.get("required_authority_refs", [])) != {
@@ -411,7 +422,7 @@ def main() -> int:
     parser.add_argument(
         "--observed-owner-revision",
         required=True,
-        help="Current full Git commit observed from the manifest owner repository.",
+        help="Exact product source snapshot described by owner_revision, not the later commit that adds the manifest.",
     )
     parser.add_argument("--packet", type=Path)
     parser.add_argument("--receipt", type=Path)

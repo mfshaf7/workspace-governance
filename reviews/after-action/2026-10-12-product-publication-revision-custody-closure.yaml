@@ -1,0 +1,52 @@
+schema_version: 1
+id: 2026-10-12-product-publication-revision-custody-closure
+title: Product publication now separates source evidence from manifest custody
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: The product-publication contract now treats the revision described by an
+  owner manifest and the later revision that commits that manifest as distinct facts.
+scope:
+  related_repos:
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products:
+  - governance-operations-console
+  related_components:
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+source_refs:
+- openproject://work_packages/1253
+- openproject://work_packages/1254
+- workspace-governance/contracts/product-publication.yaml
+lessons:
+- id: content-cannot-bind-its-own-commit-hash
+  title: Self-contained evidence and Git custody require separate revision identities
+  failure_class: unsafe-assumption
+  trigger: late-architecture-discovery
+  finding: The original operator wording required a manifest field to equal the commit
+    that contained the field, which no Git commit can satisfy.
+  impact: WGCF implementation would either reject every merged owner manifest as stale
+    or weaken exact-revision validation to make the impossible contract appear usable.
+  status: closed
+  expected_control_types:
+  - contract
+  - doc
+  - test
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/product-publication.yaml
+    owner_repo: workspace-governance
+    note: Separates product-source revision semantics from manifest custody evidence.
+  - type: doc
+    path: workspace-governance/docs/product-publication.md
+    owner_repo: workspace-governance
+    note: Explains the two-revision sequence and the WGCF custody proof.
+  - type: test
+    path: workspace-governance/tests/test_product_publication_contract.py
+    owner_repo: workspace-governance
+    note: Prevents the two revision identities from being collapsed again.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null

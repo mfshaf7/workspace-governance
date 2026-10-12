@@ -80,6 +80,17 @@ class ProductPublicationContractTests(unittest.TestCase):
             canonical_digest(self.manifest),
         )
         self.assertEqual(self.packet["request_digest"], packet_request_digest(self.packet))
+        obligations = self.contract["product_publication"]["manifest_obligations"]
+        self.assertEqual(obligations["owner_revision_semantics"], "product-source-snapshot")
+        self.assertEqual(
+            obligations["manifest_custody_binding"],
+            {
+                "owner": "readiness-evaluation",
+                "manifest_revision_location": "readiness-receipt",
+                "manifest_revision_must_descend_from_owner_revision": True,
+                "committed_manifest_digest_must_match_submitted_manifest": True,
+            },
+        )
 
     def test_missing_authority_evidence_is_rejected(self) -> None:
         invalid = copy.deepcopy(self.packet)
