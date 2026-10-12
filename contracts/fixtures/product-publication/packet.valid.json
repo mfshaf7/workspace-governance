@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "artifact_type": "product-publication-packet",
+  "packet_id": "product-publication-packet:governance-operations-console:1",
+  "request_id": "product-publication-request:governance-operations-console:1",
+  "idempotency_key": "product-publication:governance-operations-console:1",
+  "request_digest": "sha256:5d114b0e06a4cac715a9fe1cee78a9d4cd1cdad31f6206d508268477d2b95626",
+  "expected_publication_version": 0,
+  "action": "publish",
+  "product_id": "product:governance-operations-console",
+  "manifest_binding": {
+    "manifest_id": "product-publication-manifest:governance-operations-console:1",
+    "manifest_digest": "sha256:18705c4a7afb6fe71e666e60bfa5e8337ba62e4edd151c0f4df56c273247146f",
+    "owner_repo": "governance-operations-console",
+    "owner_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "current_publication_posture": "unlisted",
+  "target_publication": {
+    "posture": "internal",
+    "listing_scope": "workspace-portfolio",
+    "audience": "workspace-operators",
+    "access_class": "workspace-authenticated"
+  },
+  "authority_refs": {
+    "operator_decision_ref": "oos://product-publication/operator-decisions/1",
+    "readiness_receipt_ref": "wgcf://product-publication/readiness-receipts/1",
+    "security_decision_ref": "security-architecture://product-publication/decisions/1"
+  },
+  "previous_receipt": null,
+  "grants": {
+    "source_authority": false,
+    "runtime_authority": false,
+    "release_authority": false,
+    "security_acceptance": false,
+    "lifecycle_mutation": false
+  },
+  "requested_at": "2026-10-12T03:01:00Z"
+}

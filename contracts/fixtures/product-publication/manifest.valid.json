@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "artifact_type": "product-publication-owner-manifest",
+  "manifest_id": "product-publication-manifest:governance-operations-console:1",
+  "product_id": "product:governance-operations-console",
+  "product_record_ref": "workspace-governance://products/governance-operations-console/v1",
+  "product_record_version": 1,
+  "product_classification": "owner-managed",
+  "lifecycle_state": "active",
+  "owner_repo": "governance-operations-console",
+  "owner_role": "runtime-owner",
+  "owner_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_refs": [
+    {
+      "repo": "governance-operations-console",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "path": "product-publication/manifest.json"
+    }
+  ],
+  "lifecycle_evidence": {
+    "project_phase": "operational",
+    "source_custody": "dedicated-owner-repo",
+    "runtime_environment": "local-preview",
+    "release_posture": "not-applicable",
+    "publication_posture": "unlisted",
+    "evidence_refs": [
+      "git://governance-operations-console/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ]
+  },
+  "issued_at": "2026-10-12T03:00:00Z"
+}
