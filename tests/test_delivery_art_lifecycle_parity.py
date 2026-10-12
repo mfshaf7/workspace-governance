@@ -279,6 +279,25 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
 
         self.assertEqual(inventory, active_repos)
 
+    def test_architecture_preflight_checks_all_landing_unit_profiles_up_front(self) -> None:
+        rules = self.work_session_contract["owner_evidence_profile_coverage"][
+            "rules"
+        ]
+
+        self.assertTrue(rules["architecture_preflight_must_check_every_source_landing_unit"])
+        self.assertTrue(
+            rules[
+                "architecture_preflight_must_compare_case_kind_and_fidelity_to_accepted_base_profile"
+            ]
+        )
+        self.assertTrue(rules["architecture_preflight_must_record_all_owner_coverage_result"])
+        self.assertTrue(rules["future_landing_unit_gap_blocks_first_source_start"])
+        self.assertEqual(rules["profile_repair_classification"], "owner-repo-maintenance")
+        self.assertEqual(rules["art_child_creation_for_profile_repair"], "prohibited")
+        self.assertEqual(
+            rules["architecture_fidelity_downgrade_to_fit_profile"], "prohibited"
+        )
+
     def test_activated_owner_evidence_profile_must_exist(self) -> None:
         evidence_profile_path = self.manifest_path.parent.parent / (
             "delivery-art-work-session/evidence-profile.json"

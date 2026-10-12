@@ -1,0 +1,73 @@
+schema_version: 1
+id: 2026-10-12-wgcf-owner-evidence-profile-regression
+title: Keep WGCF owner evidence aligned with admitted conformance
+recorded_on: '2026-10-12'
+owner_repo: workspace-governance
+summary: Delivery item 1254 could not start because WGCF's accepted-base owner evidence
+  profile bound tests only to filesystem fidelity while the approved architecture
+  requires sandbox-runtime and real-git merge-ready cases. A whole-Epic audit then
+  found the same latent gap for the later OOS, Console, and Platform Landing Units.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  - governance-operations-console
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: OOS work preflight correctly returned delivery_art_evidence_profile_incomplete
+    for work-item-1254. The prior cross-repo profile coverage control proved profile
+    presence but did not prove each active architecture case is coverable by the owner's
+    accepted-base profile before execution.
+  source_refs:
+  - openproject://work_packages/1254
+  - workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-12-initiative-owner-evidence-profile-closure.yaml
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Requires a recorded all-owner profile compatibility result before first source start.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Makes the whole-initiative profile check part of the active Delivery operator workflow.
+  - type: contract
+    path: workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: workspace-governance-control-fabric
+    note: WGCF PR 99 adds sandbox-runtime evidence acquisition.
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: operator-orchestration-service
+    note: OOS PR 310 adds sandbox-runtime evidence acquisition.
+  - type: contract
+    path: governance-operations-console/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: governance-operations-console
+    note: Console PR 62 adds sandbox-runtime evidence acquisition.
+  - type: contract
+    path: platform-engineering/contracts/delivery-art-work-session/evidence-profile.json
+    owner_repo: platform-engineering
+    note: Platform PR 284 adds sandbox-runtime evidence acquisition.
+  note: All six Epic 894 source Landing Units now pass the architecture-to-profile
+    compatibility audit. The repair extended existing owner profiles and the existing
+    Delivery operator control; it created neither a new ART child nor a new mechanism.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

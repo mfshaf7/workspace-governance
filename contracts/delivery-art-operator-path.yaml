@@ -286,7 +286,14 @@ delivery_art_operator_path:
         active_repo_inventory_must_be_complete: true
         activated_owner_profile_must_exist_on_fetched_base: true
         architecture_preflight_must_check_inventory: true
+        architecture_preflight_must_check_every_source_landing_unit: true
+        architecture_preflight_must_compare_case_kind_and_fidelity_to_accepted_base_profile: true
+        architecture_preflight_must_record_all_owner_coverage_result: true
+        future_landing_unit_gap_blocks_first_source_start: true
         work_start_must_validate_exact_base_profile: true
+        profile_repair_classification: owner-repo-maintenance
+        art_child_creation_for_profile_repair: prohibited
+        architecture_fidelity_downgrade_to_fit_profile: prohibited
     states:
       - decision-required
       - architecture-required

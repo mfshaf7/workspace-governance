@@ -355,13 +355,27 @@
                 "active_repo_inventory_must_be_complete",
                 "activated_owner_profile_must_exist_on_fetched_base",
                 "architecture_preflight_must_check_inventory",
-                "work_start_must_validate_exact_base_profile"
+                "architecture_preflight_must_check_every_source_landing_unit",
+                "architecture_preflight_must_compare_case_kind_and_fidelity_to_accepted_base_profile",
+                "architecture_preflight_must_record_all_owner_coverage_result",
+                "future_landing_unit_gap_blocks_first_source_start",
+                "work_start_must_validate_exact_base_profile",
+                "profile_repair_classification",
+                "art_child_creation_for_profile_repair",
+                "architecture_fidelity_downgrade_to_fit_profile"
               ],
               "properties": {
                 "active_repo_inventory_must_be_complete": { "const": true },
                 "activated_owner_profile_must_exist_on_fetched_base": { "const": true },
                 "architecture_preflight_must_check_inventory": { "const": true },
-                "work_start_must_validate_exact_base_profile": { "const": true }
+                "architecture_preflight_must_check_every_source_landing_unit": { "const": true },
+                "architecture_preflight_must_compare_case_kind_and_fidelity_to_accepted_base_profile": { "const": true },
+                "architecture_preflight_must_record_all_owner_coverage_result": { "const": true },
+                "future_landing_unit_gap_blocks_first_source_start": { "const": true },
+                "work_start_must_validate_exact_base_profile": { "const": true },
+                "profile_repair_classification": { "const": "owner-repo-maintenance" },
+                "art_child_creation_for_profile_repair": { "const": "prohibited" },
+                "architecture_fidelity_downgrade_to_fit_profile": { "const": "prohibited" }
               }
             }
           }

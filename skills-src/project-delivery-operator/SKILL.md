@@ -50,6 +50,25 @@ cross-repo protocol, or control-plane change:
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
+Before recording `architecture-ready` or starting the first source Landing
+Unit, run one whole-initiative owner evidence-profile compatibility check:
+
+- enumerate every source-backed Landing Unit, including later children that
+  are not yet the active front
+- read each owner repository's accepted-base
+  `contracts/delivery-art-work-session/evidence-profile.json`
+- compare every planned `merge-ready` conformance case's evidence kind and
+  fidelity with commands whose `conformance_binding` is `matching-fidelity`
+- record an all-owner result; one uncovered future Landing Unit blocks the
+  first source start
+- repair a stale profile as owner-repo maintenance through its existing
+  contract, without creating another ART child and without weakening the
+  architecture case to fit the profile
+
+Do not repeat the check one child at a time. Exact work-start preflight remains
+the final base-bound enforcement for the selected Landing Unit; it is not a
+substitute for this initiative-wide planning check.
+
 For every runtime-activation gate in the plan, name the repository that owns
 the gated source field and its observed posture. If that owner must change
 source, schedule its Landing Unit after the human authority and before runtime
