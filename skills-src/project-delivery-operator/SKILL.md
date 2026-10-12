@@ -126,7 +126,7 @@ cross-artifact timeline ordering, shared-validator compatibility, and
 `positive and negative contract cases`. Bind every case to the work-item
 outcomes and dimensions it proves; declare the applicable dimensions for each
 work item, and require positive and negative `merge-ready` cases for every
-applicable work-item/dimension pair. Under v5, separately bind each atomic case
+applicable work-item/dimension pair. Under v5 and v6, separately bind each atomic case
 to one evidence-owner Landing Unit. Architecture readiness requires the
 approved plan, not implementation results that cannot exist yet. Applicable
 `merge-ready` cases must pass before merge readiness; owned `operating-ready`
@@ -137,21 +137,26 @@ sequence.
 
 Read the current and supported architecture packet versions from
 `contracts/delivery-art-operator-path.yaml`; do not infer them from an older
-activation record or hard-code a remembered version. V5 is the current
-authoring version. V1 through v4 are immutable historical compatibility. The
-machine contract's v5 activation evidence records the completed OOS, WGCF,
+activation record or hard-code a remembered version. V6 is the current
+authoring version. V1 through v5 are immutable historical compatibility. The
+machine contract's v6 activation evidence records the completed OOS, WGCF,
 Security, and session-inventory gates; consumer runtime support must still be
-verified before persisting a new v5 packet.
+verified before persisting a new v6 packet.
 
 V3 introduced the Landing Unit registry, source landing graph, and one
 execution plan with start prerequisites, close prerequisites, and emitted
 human gates. V4 retained that topology and required capability-id runtime
 boundaries. V5 retains both and separates outcome applicability from evidence
-production. Each atomic v5 case uses `applies_to_work_item_ids` for acceptance
+production. Each atomic v5+ case uses `applies_to_work_item_ids` for acceptance
 scope and exactly one `evidence_owner_landing_unit_id` for accountability. Split
 a case when multiple Landing Units must independently prove it. The evidence
 owner must causally precede every external applicable outcome; do not infer
 ownership from work-item type, repository role, parentage, or applicability.
+For every `before_runtime_activation` gate, v6 additionally requires an exact
+`runtime_activation_chains` entry. When an owner source change is required,
+plan a separate source-owner Landing Unit after the human authority and before
+every commissioning Landing Unit; do not assign that source mutation to the
+commissioning owner or omit it because the downstream runtime can be deployed.
 
 Keep the four readiness decisions distinct:
 

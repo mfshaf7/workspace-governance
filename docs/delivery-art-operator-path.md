@@ -168,13 +168,12 @@ work items must belong to them, and the source landing graph must order the
 producer before the consumer. Descriptive producer and consumer names alone do
 not constitute an executable cross-repo acceptance contract.
 
-Workspace Governance validates schema versions 1 through 6. V5 is the current
-authoring shape for a new work start. Its activation record binds the completed
-OOS producer and work-session parity, WGCF custody and readiness parity,
-Security delta review, and non-pristine session inventory. Schema acceptance
-alone is not activation authority.
+Workspace Governance validates schema versions 1 through 6. V6 is the current
+authoring shape for a new work start. Its activation record binds the exact
+merged OOS and WGCF consumer changes, Security delta review, and non-pristine
+session inventory. Schema acceptance alone is not activation authority.
 
-V6 is staged and cannot authorize a new work start yet. It adds an explicit
+V6 adds an explicit
 `runtime_activation_chains` record for every `before_runtime_activation` human
 gate. Each chain must say whether the source-owned activation prerequisite is
 already ready or requires a separate owner-repo source Landing Unit. When a
@@ -186,7 +185,7 @@ runtime commissioning` in both the source graph and work-item execution plan. Th
 prevents Platform commissioning from being planned as though it could change
 an embedded activation gate owned by another repository.
 
-V5 retains the v4 execution-plan and capability-boundary model and separates
+V5 introduced the separation of
 two meanings that earlier versions overloaded. `applies_to_work_item_ids`
 declares the outcomes whose acceptance depends on a case.
 `evidence_owner_landing_unit_id` declares the one Landing Unit accountable for
@@ -198,18 +197,18 @@ child-to-parent closure steps. A parent Feature may therefore depend on proof
 owned by a child Landing Unit without assigning that proof obligation to every
 supporting child.
 
-V1 through v4 remain immutable, read-only historical evidence, v5 remains the
-current immutable format once superseded, and v6 support must not rewrite any
-earlier packet. Historical prose runtime boundaries remain valid and are never
-inferred into capability ids.
+V6 retains the v5 evidence-owner semantics alongside the activation chain.
+V1 through v5 remain immutable, read-only historical evidence, and activation
+must not rewrite any earlier packet. Historical prose runtime boundaries remain
+valid and are never inferred into capability ids.
 
-An already-started session may continue against its pinned v1-v4 packet while
+An already-started session may continue against its pinned v1-v5 packet while
 fresh ART truth confirms that material architecture semantics are unchanged.
 Historical compatibility never permits a new start or a replacement write in
-an old version. Before the current architecture pointer moved to v5, the
+an old version. Before the current architecture pointer moved to v6, the
 operator inventoried non-pristine sessions so the format cutover did not strand
 active work. The durable v3 packet recorded in contract activation remains
-historical proof of the earlier activation; it is not rewritten as v4 or v5.
+historical proof of the earlier activation; it is not rewritten as a later version.
 
 Every architecture packet records whether it changes a cross-repo protocol and
 why. When protocol conformance applies, the packet must include every mandated
@@ -229,10 +228,11 @@ it cannot prove a claim about real Git history. The packet therefore declares
 the exact applicable dimensions for each work item, and Git-causality claims
 separately name the work items and dimensions that require `real-git` fidelity.
 
-For v5, readiness evidence is selected by
+For v5 and v6, readiness evidence is selected by
 `evidence_owner_landing_unit_id`, not by overlap with outcome applicability.
 The owner must pass its `merge-ready` cases before source merge and must acquire
-its `operating-ready` cases after merge before finalization. Outcome
+its `operating-ready` cases after merge before finalization. V6 additionally
+requires exact source-activation ownership and ordering. Outcome
 applicability still drives acceptance coverage; it does not make every
 applicable work item an evidence producer. V1 through v4 retain their immutable
 historical interpretation.
@@ -240,8 +240,8 @@ historical interpretation.
 The machine schema is
 [`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
 OOS and WGCF must prove identical owner-and-phase selection against
-[`architecture-packet-v5-parity-vectors.valid.json`](../contracts/fixtures/delivery-art-workflow/architecture-packet-v5-parity-vectors.valid.json)
-before v5 activation.
+[`architecture-packet-v6-activation-parity-vectors.valid.json`](../contracts/fixtures/delivery-art-workflow/architecture-packet-v6-activation-parity-vectors.valid.json)
+for current v6 activation; the v5 vector remains historical compatibility proof.
 
 ## Readiness Levels
 
@@ -575,7 +575,7 @@ architecture packet; a Review Packet resolves its work-start record and that
 record's architecture packet. The resolved chain must preserve Delivery id,
 work-item coverage, Landing Unit decision, owner and branch plan, exact base
 revisions, scope fingerprint, and architecture decision. Architecture
-conformance cases declare the work-item outcomes they apply to. Under v5 they
+conformance cases declare the work-item outcomes they apply to. Under v5+ they
 also declare their exact evidence-owner Landing Unit. A Review Packet must
 satisfy the cases owned by its Landing Unit at the target readiness phase, with
 passing evidence at the planned fidelity. A required conformance plan still

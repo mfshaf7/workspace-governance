@@ -4455,7 +4455,7 @@ def validate_delivery_art_artifact_contracts(
         require_accepted(
             "architecture_packet",
             current_v5,
-            "current architecture packet v5 with separate outcome applicability and evidence ownership",
+            "historical architecture packet v5 with separate outcome applicability and evidence ownership",
             "architecture-v5-evidence-owner-valid",
         )
 
@@ -4497,7 +4497,7 @@ def validate_delivery_art_artifact_contracts(
         require_accepted(
             "architecture_packet",
             staged_v6,
-            "staged architecture packet v6 with explicit source activation ownership and ordering",
+            "current architecture packet v6 with explicit source activation ownership and ordering",
             "architecture-v6-runtime-activation-chain-valid",
         )
 
