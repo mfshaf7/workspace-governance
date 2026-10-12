@@ -26,3 +26,31 @@ events:
   previous_event_ref: null
   operator_ref: governance-operations-console
   applied_at: '2026-10-12T19:25:08.480Z'
+- event_id: workspace-inventory-event:product:governance-operations-console:3
+  event_digest: sha256:f55e483554629f434fb069a44ace2d1d56156f53854bcd1d29b792f50fe9b9f6
+  sequence: 2
+  target:
+    kind: product
+    name: governance-operations-console
+    record_id: product:governance-operations-console
+  action: restore
+  idempotency_key: workspace-inventory-lifecycle-request:console-delivery-894-restore-20261013:v1
+  before:
+    record_version: 2
+    record_digest: sha256:7e826fe288fe596b04cd7b5ee9be351e5637ada86c9113b06c19f6c14ebdc166
+    posture: retired
+  after:
+    record_version: 3
+    record_digest: sha256:ff1fddc2ae2600ccc63040ef153acceade9c1c2e470af38ceff344c2bb39adda
+    posture: active
+  request_ref:
+    id: workspace-inventory-lifecycle-request:console-delivery-894-restore-20261013
+    digest: sha256:8d4e97a2e83defd2a8866a7b7c55cc123c83d80e858f5882bc6ade899b23659b
+  readiness_ref:
+    id: workspace-inventory-lifecycle-readiness:workspace-inventory-lifecycle:d7fb35299d018fb39e975dcc5283eb0a087fa052eec3e845ab7ed8e86d78385e
+    digest: sha256:9a3531f2bcac400698ba2804baf9cb584a641f3a7bc5801fd16c7cbc4ea668f3
+  previous_event_ref:
+    id: workspace-inventory-event:product:governance-operations-console:2
+    digest: sha256:c4d0031c997ebc7caf030a41c5d19e904648f6a1de85277f4c702d7aa61868dd
+  operator_ref: governance-operations-console
+  applied_at: '2026-10-12T21:02:05.921Z'
