@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-10-13-product-publication-static-authority-selection-regression
+title: Select current authority by reviewed content instead of repository head
+recorded_on: '2026-10-13'
+owner_repo: workspace-governance
+summary: Platform projected the reviewed Workspace Governance commit as the live
+  Product Publication authority, so a later governance-record-only merge made WGCF
+  correctly report the command as stale even though every governing authority file
+  remained unchanged.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-13-product-publication-authority-bundle-sequencing-regression.yaml
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  - workspace-governance-control-fabric
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: closed-lesson-regressed-at-runtime
+  title: A just-closed authority-bundle lesson failed its next live request.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The bundle refresh fixed stale contract contents but Platform still
+    supplied the static reviewed commit to Console commands. Merging the closure
+    record advanced Workspace Governance main and immediately made the otherwise
+    valid command stale. Current authority must be selected by clean reviewed
+    ancestry plus exact bundled file digests, not repository-head equality.
+  source_refs:
+  - openproject://work_packages/1273
+  - runtime://devint-governance-control-fabric-mfshaf7/product-publication/stale-authority
+  - conversation:2026-10-13-operator-requested-contradiction-repair-before-continuation
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: platform-engineering/products/governance-operations-console/scripts/product_publication_platform.py
+    owner_repo: platform-engineering
+    note: Activation selects current clean Workspace Governance main only after reviewed ancestry and every WGCF-bundled authority-file digest pass.
+  - type: test
+    path: platform-engineering/products/governance-operations-console/scripts/test_product_publication_platform.py
+    owner_repo: platform-engineering
+    note: Coverage accepts unrelated descendant commits and rejects any bundled authority-file drift.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-13-product-lifecycle-maintenance-commissioning.md
+    owner_repo: platform-engineering
+    note: The operating record distinguishes reviewed authority content from the selected current source revision.
+  note: >-
+    Closed by Platform PR #293 at merge
+    3d788a88857920cc8174b7d9f25e937ef9311d1f. Activation receipt
+    20261012T185847Z-activate.json selected current Workspace Governance main,
+    and Product Publication request
+    product-publication-request:platform:1273:unpublish:20261012b then applied
+    version 2 with receipt digest
+    sha256:6373c20db7bd370a98035aa59872ceee44027756faaf718ff86abc6e5e68f69a.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
