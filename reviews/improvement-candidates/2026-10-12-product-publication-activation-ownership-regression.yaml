@@ -5,21 +5,25 @@ recorded_on: '2026-10-12'
 owner_repo: workspace-governance
 summary: Epic 894 repeated the closed activation-ownership planning failure by
   placing Platform commissioning directly after Security review even though OOS
-  still owned an inactive source gate, while the completed OOS implementation
-  accepted a syntactically valid Security reference without independently
-  binding the exact accepted decision.
+  and WGCF each retained an inactive source gate and no product-owner manifest
+  existed. The completed OOS implementation also accepted a syntactically valid
+  Security reference without independently binding the exact accepted decision
+  and did not constrain the decision to the intended internal-only posture.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
 status: new
 source_type: conversation
 scope:
   related_repos:
   - workspace-governance
+  - workspace-governance-control-fabric
   - operator-orchestration-service
+  - governance-operations-console
   - security-architecture
   - platform-engineering
   related_products:
   - governance-operations-console
   related_components:
+  - workspace-governance-control-fabric
   - operator-orchestration-service
   change_classes:
   - architecture-shaping
@@ -33,17 +37,23 @@ signals:
   - unsafe-assumption
   finding: The Epic 894 architecture packet ordered OOS implementation, Console
     implementation, Security review, and Platform commissioning but omitted the
-    OOS-owned source activation required after Security approval. Security review
-    then found that OOS compared only the shape of the submitted Security reference,
-    not the URI, digest, and revision of an independently configured accepted
-    decision. The missing acceptance binding was repaired in OOS pull request 312;
-    the source activation must remain separate until Security 1257 decides.
+    OOS-owned and WGCF-owned source activations required after Security approval.
+    It also omitted the committed product-owner manifest that WGCF must verify from
+    merged owner-repository truth. Security review then found that OOS compared only
+    the shape of the submitted Security reference, not the URI, digest, and revision
+    of an independently configured accepted decision, and allowed broader target
+    postures under the internal decision example. OOS pull requests 312 and 313
+    repaired the exact decision and internal-only scope; Console pull request 64
+    added the missing owner manifest. Both source activation gates must remain
+    separate and inactive until Security 1257 decides.
   source_refs:
   - openproject://work_packages/894
   - openproject://work_packages/1255
   - openproject://work_packages/1257
   - openproject://work_packages/1258
   - https://github.com/mfshaf7/operator-orchestration-service/pull/312
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/313
+  - https://github.com/mfshaf7/governance-operations-console/pull/64
 resolution:
   after_action_ref: null
   control_refs:
@@ -51,16 +61,26 @@ resolution:
     path: operator-orchestration-service/docs/records/change-records/2026-10-12-product-publication-security-decision-binding.md
     owner_repo: operator-orchestration-service
     note: Repairs exact Security decision verification before readiness access or journal mutation without activating the runtime.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-12-product-publication-target-posture-binding.md
+    owner_repo: operator-orchestration-service
+    note: Constrains the initial source-owned activation scope to internal publication before readiness access or journal mutation.
+  - type: contract
+    path: governance-operations-console/product-publication/manifest.json
+    owner_repo: governance-operations-console
+    note: Supplies the exact product-owner source snapshot and current unlisted local-preview lifecycle evidence required by WGCF.
   note: >-
     Immediate containment uses owner-repo maintenance linked to the existing ART
-    work: merge the decision-binding repair, finish Security 1257 against the
-    corrected revision, then land the already-required OOS activation change before
-    Platform 1258. No new ART child or parallel mechanism is needed.
+    work: merge the decision-binding, internal-only scope, and owner-manifest
+    repairs; finish Security 1257 against those exact revisions; then land the
+    already-required OOS and WGCF activation changes before Platform 1258. No new
+    ART child or parallel mechanism is needed.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-16'
   note: >-
     Triage an extension of the existing delivery-plan activation validation so a
-    plan cannot pass when an owner-controlled source gate or independent acceptance
-    verifier is absent from the ordered Landing Units. Do not implement the closing
-    control without operator approval.
+    plan cannot pass when an owner-controlled source gate, required owner evidence,
+    independent acceptance verifier, or accepted target-scope binding is absent from
+    the ordered Landing Units. Do not implement the closing control without operator
+    approval.
