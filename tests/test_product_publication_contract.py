@@ -59,6 +59,109 @@ class ProductPublicationContractTests(unittest.TestCase):
         )
         return [error.message for error in validator.iter_errors(payload)]
 
+    def restore_artifacts(self) -> tuple[dict, dict, dict, dict]:
+        products = copy.deepcopy(self.products)
+        product = products["products"]["governance-operations-console"]
+        product["record"]["version"] = 3
+        product["record"]["last_mutation"].update(
+            {
+                "id": "workspace-inventory-event:product:governance-operations-console:3",
+                "action": "restore",
+                "idempotency_key": "restore-governance-operations-console-3",
+            }
+        )
+        lifecycle_receipt_ref = {
+            "id": "workspace-inventory-lifecycle-receipt:restore-console:1",
+            "digest": "sha256:" + "b" * 64,
+        }
+        history_event_ref = {
+            "id": "workspace-inventory-event:product:governance-operations-console:1",
+            "digest": "sha256:" + "c" * 64,
+            "sequence": 3,
+        }
+        manifest = copy.deepcopy(self.manifest)
+        manifest.update(
+            {
+                "schema_version": 2,
+                "manifest_id": "product-publication-manifest:governance-operations-console:2",
+                "product_record_ref": "workspace-governance://products/governance-operations-console/v3",
+                "product_record_version": 3,
+                "inventory_lifecycle_binding": {
+                    "action": "restore",
+                    "receipt_ref": lifecycle_receipt_ref,
+                    "history_event_ref": history_event_ref,
+                    "previous_event_ref": {
+                        "id": "workspace-inventory-event:product:governance-operations-console:2",
+                        "digest": "sha256:" + "d" * 64,
+                    },
+                    "after": {
+                        "record_version": 3,
+                        "record_digest": canonical_digest(product),
+                        "posture": "active",
+                    },
+                },
+            }
+        )
+        manifest["lifecycle_evidence"]["publication_posture"] = "unlisted"
+        manifest["lifecycle_evidence"]["evidence_refs"].extend(
+            [lifecycle_receipt_ref["id"], history_event_ref["id"]]
+        )
+
+        previous_receipt = {
+            "receipt_id": "product-publication-receipt:governance-operations-console:2",
+            "receipt_digest": "sha256:" + "e" * 64,
+            "publication_version": 2,
+            "publication_posture": "archived",
+        }
+        lifecycle_history_binding = {
+            "inventory_lifecycle_receipt_ref": lifecycle_receipt_ref,
+            "inventory_history_event_ref": history_event_ref,
+        }
+        packet = copy.deepcopy(self.packet)
+        packet.update(
+            {
+                "schema_version": 2,
+                "packet_id": "product-publication-packet:governance-operations-console:3",
+                "request_id": "product-publication-request:governance-operations-console:3",
+                "idempotency_key": "product-publication:governance-operations-console:restore:3",
+                "expected_publication_version": 2,
+                "action": "restore",
+                "current_publication_posture": "archived",
+                "target_publication": {
+                    "posture": "unlisted",
+                    "listing_scope": None,
+                    "audience": None,
+                    "access_class": None,
+                },
+                "previous_receipt": previous_receipt,
+                "lifecycle_history_binding": copy.deepcopy(lifecycle_history_binding),
+            }
+        )
+        packet["manifest_binding"].update(
+            {
+                "manifest_id": manifest["manifest_id"],
+                "manifest_digest": canonical_digest(manifest),
+            }
+        )
+        packet["request_digest"] = packet_request_digest(packet)
+
+        receipt = copy.deepcopy(self.receipt)
+        receipt.update(
+            {
+                "schema_version": 2,
+                "receipt_id": "product-publication-receipt:governance-operations-console:3",
+                "packet_id": packet["packet_id"],
+                "request_id": packet["request_id"],
+                "request_digest": packet["request_digest"],
+                "manifest_digest": packet["manifest_binding"]["manifest_digest"],
+                "publication_version": 3,
+                "publication_posture": "unlisted",
+                "previous_receipt": previous_receipt,
+                "lifecycle_history_binding": copy.deepcopy(lifecycle_history_binding),
+            }
+        )
+        return products, manifest, packet, receipt
+
     def test_canonical_contract_and_artifacts_are_valid(self) -> None:
         known_repos = {
             "workspace-governance",
@@ -95,6 +198,59 @@ class ProductPublicationContractTests(unittest.TestCase):
     def test_missing_authority_evidence_is_rejected(self) -> None:
         invalid = copy.deepcopy(self.packet)
         del invalid["authority_refs"]["security_decision_ref"]
+
+        self.assertTrue(self.schema_issues("packet", invalid))
+
+    def test_schema_v2_restore_preserves_owner_and_publication_history(self) -> None:
+        products, manifest, packet, receipt = self.restore_artifacts()
+
+        self.assertEqual(self.schema_issues("manifest", manifest), [])
+        self.assertEqual(self.schema_issues("packet", packet), [])
+        self.assertEqual(self.schema_issues("receipt", receipt), [])
+        self.assertEqual(manifest_issues(self.contract, manifest, products), [])
+        self.assertEqual(packet_issues(self.contract, packet, manifest), [])
+        self.assertEqual(receipt_issues(receipt, packet), [])
+
+    def test_restore_rejects_listed_target_and_missing_archived_receipt(self) -> None:
+        _, manifest, packet, _ = self.restore_artifacts()
+        packet["target_publication"] = {
+            "posture": "internal",
+            "listing_scope": "workspace-portfolio",
+            "audience": "workspace-operators",
+            "access_class": "workspace-authenticated",
+        }
+        packet["previous_receipt"]["publication_posture"] = "internal"
+        packet["request_digest"] = packet_request_digest(packet)
+
+        schema_issues = self.schema_issues("packet", packet)
+        semantic_issues = packet_issues(self.contract, packet, manifest)
+
+        self.assertTrue(schema_issues)
+        self.assertTrue(
+            any("target publication posture must be unlisted" in issue for issue in semantic_issues),
+            semantic_issues,
+        )
+        self.assertTrue(
+            any("exact archived publication receipt" in issue for issue in semantic_issues),
+            semantic_issues,
+        )
+
+    def test_restore_rejects_mismatched_owner_lifecycle_history(self) -> None:
+        _, manifest, packet, receipt = self.restore_artifacts()
+        packet["lifecycle_history_binding"]["inventory_history_event_ref"]["digest"] = (
+            "sha256:" + "f" * 64
+        )
+        packet["request_digest"] = packet_request_digest(packet)
+        receipt["request_digest"] = packet["request_digest"]
+
+        issues = packet_issues(self.contract, packet, manifest)
+
+        self.assertTrue(any("history event does not match" in issue for issue in issues), issues)
+
+    def test_schema_v1_cannot_claim_restore(self) -> None:
+        invalid = copy.deepcopy(self.packet)
+        invalid["action"] = "restore"
+        invalid["request_digest"] = packet_request_digest(invalid)
 
         self.assertTrue(self.schema_issues("packet", invalid))
 

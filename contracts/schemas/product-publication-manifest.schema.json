@@ -8,7 +8,7 @@
     "source_refs", "lifecycle_evidence", "issued_at"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "enum": [1, 2] },
     "artifact_type": { "const": "product-publication-owner-manifest" },
     "manifest_id": { "type": "string", "pattern": "^product-publication-manifest:[a-z0-9][a-z0-9._-]*:[0-9]+$" },
     "product_id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
@@ -52,11 +52,69 @@
       },
       "additionalProperties": false
     },
+    "inventory_lifecycle_binding": { "$ref": "#/$defs/inventoryLifecycleBinding" },
     "issued_at": { "type": "string", "format": "date-time" }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 2 } },
+        "required": ["schema_version"]
+      },
+      "then": { "required": ["inventory_lifecycle_binding"] },
+      "else": { "not": { "required": ["inventory_lifecycle_binding"] } }
+    }
+  ],
   "additionalProperties": false,
   "$defs": {
     "repo": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
-    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "historyEventRef": {
+      "type": "object",
+      "required": ["id", "digest", "sequence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "sequence": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "inventoryState": {
+      "type": "object",
+      "required": ["record_version", "record_digest", "posture"],
+      "properties": {
+        "record_version": { "type": "integer", "minimum": 1 },
+        "record_digest": { "$ref": "#/$defs/digest" },
+        "posture": { "enum": ["active", "suspended", "retired"] }
+      },
+      "additionalProperties": false
+    },
+    "inventoryLifecycleBinding": {
+      "type": "object",
+      "required": ["action", "receipt_ref", "history_event_ref", "previous_event_ref", "after"],
+      "properties": {
+        "action": { "enum": ["update", "suspend", "restore", "retire"] },
+        "receipt_ref": { "$ref": "#/$defs/artifactRef" },
+        "history_event_ref": { "$ref": "#/$defs/historyEventRef" },
+        "previous_event_ref": {
+          "oneOf": [
+            { "$ref": "#/$defs/artifactRef" },
+            { "type": "null" }
+          ]
+        },
+        "after": { "$ref": "#/$defs/inventoryState" }
+      },
+      "additionalProperties": false
+    }
   }
 }

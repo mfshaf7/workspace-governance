@@ -9,14 +9,14 @@
     "requested_at"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "enum": [1, 2] },
     "artifact_type": { "const": "product-publication-packet" },
     "packet_id": { "type": "string", "pattern": "^product-publication-packet:[a-z0-9][a-z0-9._:-]*$" },
     "request_id": { "type": "string", "pattern": "^product-publication-request:[a-z0-9][a-z0-9._:-]*$" },
     "idempotency_key": { "type": "string", "minLength": 1 },
     "request_digest": { "$ref": "#/$defs/digest" },
     "expected_publication_version": { "type": "integer", "minimum": 0 },
-    "action": { "enum": ["publish", "update", "unpublish", "archive"] },
+    "action": { "enum": ["publish", "update", "unpublish", "archive", "restore"] },
     "product_id": { "type": "string", "pattern": "^product:[a-z0-9][a-z0-9._-]*$" },
     "manifest_binding": {
       "type": "object",
@@ -60,11 +60,21 @@
           "properties": {
             "receipt_id": { "type": "string", "minLength": 1 },
             "receipt_digest": { "$ref": "#/$defs/digest" },
-            "publication_version": { "type": "integer", "minimum": 1 }
+            "publication_version": { "type": "integer", "minimum": 1 },
+            "publication_posture": { "enum": ["unlisted", "internal", "client", "public", "archived"] }
           },
           "additionalProperties": false
         }
       ]
+    },
+    "lifecycle_history_binding": {
+      "type": "object",
+      "required": ["inventory_lifecycle_receipt_ref", "inventory_history_event_ref"],
+      "properties": {
+        "inventory_lifecycle_receipt_ref": { "$ref": "#/$defs/artifactRef" },
+        "inventory_history_event_ref": { "$ref": "#/$defs/historyEventRef" }
+      },
+      "additionalProperties": false
     },
     "grants": {
       "type": "object",
@@ -80,10 +90,81 @@
     },
     "requested_at": { "type": "string", "format": "date-time" }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "schema_version": { "const": 1 } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "properties": { "action": { "enum": ["publish", "update", "unpublish", "archive"] } },
+        "not": { "required": ["lifecycle_history_binding"] }
+      },
+      "else": { "required": ["lifecycle_history_binding"] }
+    },
+    {
+      "if": {
+        "properties": { "action": { "const": "restore" } },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "schema_version": { "const": 2 },
+          "current_publication_posture": { "const": "archived" },
+          "target_publication": {
+            "properties": {
+              "posture": { "const": "unlisted" },
+              "listing_scope": { "const": null },
+              "audience": { "const": null },
+              "access_class": { "const": null }
+            }
+          },
+          "previous_receipt": {
+            "type": "object",
+            "required": ["receipt_id", "receipt_digest", "publication_version", "publication_posture"],
+            "properties": { "publication_posture": { "const": "archived" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "schema_version": { "const": 2 },
+          "previous_receipt": { "type": "object" }
+        },
+        "required": ["schema_version", "previous_receipt"]
+      },
+      "then": {
+        "properties": {
+          "previous_receipt": { "required": ["publication_posture"] }
+        }
+      }
+    }
+  ],
   "additionalProperties": false,
   "$defs": {
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "repo": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
-    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "artifactRef": {
+      "type": "object",
+      "required": ["id", "digest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "historyEventRef": {
+      "type": "object",
+      "required": ["id", "digest", "sequence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "sequence": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
   }
 }
