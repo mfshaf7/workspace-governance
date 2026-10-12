@@ -1,2 +1,28 @@
 schema_version: 1
-events: []
+events:
+- event_id: workspace-inventory-event:product:governance-operations-console:2
+  event_digest: sha256:c4d0031c997ebc7caf030a41c5d19e904648f6a1de85277f4c702d7aa61868dd
+  sequence: 1
+  target:
+    kind: product
+    name: governance-operations-console
+    record_id: product:governance-operations-console
+  action: retire
+  idempotency_key: workspace-inventory-lifecycle-request:console-delivery-894-retire-20261012b:v1
+  before:
+    record_version: 1
+    record_digest: sha256:18a055df8020c6956e858f6913f34b2cc5c963f89b2680b023849a87d3dc002a
+    posture: active
+  after:
+    record_version: 2
+    record_digest: sha256:7e826fe288fe596b04cd7b5ee9be351e5637ada86c9113b06c19f6c14ebdc166
+    posture: retired
+  request_ref:
+    id: workspace-inventory-lifecycle-request:console-delivery-894-retire-20261012b
+    digest: sha256:d9b375ab0c5c0b41883086d0e4accad52549fce0f2d06eab1369e9d6d4c72c39
+  readiness_ref:
+    id: workspace-inventory-lifecycle-readiness:workspace-inventory-lifecycle:447dbb88b06444a72a4660d42900da63b1f419d0c1dcdd9014f9591e30a443eb
+    digest: sha256:ac2e92588158b693371f241f9ca179c22b4092aed76e33b33f7ba93f1aff120b
+  previous_event_ref: null
+  operator_ref: governance-operations-console
+  applied_at: '2026-10-12T19:25:08.480Z'
