@@ -10,6 +10,7 @@
         "owner_repo", "implementation_posture", "primary_operator_surface",
         "product_inventory_ref", "lifecycle_contract_ref", "purpose",
         "authorities", "vocabulary", "posture_bindings", "action_bindings",
+        "lifecycle_maintenance_sequences",
         "artifact_contracts", "manifest_obligations", "packet_obligations",
         "history_contract", "semantic_rules", "denied_shortcuts"
       ],
@@ -48,6 +49,15 @@
           "type": "object",
           "minProperties": 1,
           "additionalProperties": { "$ref": "#/$defs/actionBinding" }
+        },
+        "lifecycle_maintenance_sequences": {
+          "type": "object",
+          "required": ["archive", "restore"],
+          "properties": {
+            "archive": { "$ref": "#/$defs/nonEmptyUniqueStrings" },
+            "restore": { "$ref": "#/$defs/nonEmptyUniqueStrings" }
+          },
+          "additionalProperties": false
         },
         "artifact_contracts": {
           "type": "object",

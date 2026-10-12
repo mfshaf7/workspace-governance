@@ -155,6 +155,17 @@ product_publication:
         - archived
       allowed_target_postures:
         - unlisted
+  lifecycle_maintenance_sequences:
+    archive:
+      - refresh-owner-manifest-for-current-listed-posture-if-needed
+      - unpublish-while-owner-lifecycle-is-active-if-needed
+      - retire-through-workspace-inventory
+      - refresh-schema-v2-owner-manifest-for-retired-unlisted-state
+      - archive-unlisted-to-archived
+    restore:
+      - restore-through-workspace-inventory
+      - refresh-schema-v2-owner-manifest-for-active-unlisted-state
+      - restore-archived-to-unlisted
   artifact_contracts:
     owner_manifest:
       schema_ref: contracts/schemas/product-publication-manifest.schema.json

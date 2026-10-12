@@ -125,14 +125,22 @@ receipt; initial publication starts at version zero with no previous receipt.
 
 Retirement and publication archive remain separate ordered decisions:
 
-1. The product owner retires the product through Workspace Inventory, which
-   appends the immutable owner lifecycle event.
-2. Publication is first moved to `unlisted` when needed.
-3. `archive` may then move only `unlisted` to `archived` using retired owner
-   evidence.
-4. A later product restoration first runs through Workspace Inventory and
+1. If publication is `internal`, `client`, or `public`, the product owner first
+   commits a fresh manifest for that exact active/listed state and publication
+   moves to `unlisted`. Unpublish cannot follow retirement because listed
+   postures permit only an active owner lifecycle.
+2. The product owner then retires the product through Workspace Inventory,
+   which appends the immutable owner lifecycle event.
+3. The owner commits a fresh schema-v2 manifest for the exact
+   retired/`unlisted` state, bound to that retirement receipt and history event.
+4. `archive` may then move only `unlisted` to `archived` using that fresh
+   retired owner evidence.
+5. A later product restoration first runs through Workspace Inventory and
    appends an owner `restore` event.
-5. Publication `restore` binds that exact owner receipt and history event plus
+6. The owner commits a fresh schema-v2 manifest for the exact
+   active/`unlisted` state, bound to that restore event and its prior lifecycle
+   event.
+7. Publication `restore` binds that exact owner receipt and history event plus
    the exact previous archived publication receipt, and moves only `archived`
    to `unlisted`.
 

@@ -194,6 +194,45 @@ class ProductPublicationContractTests(unittest.TestCase):
                 "committed_manifest_digest_must_match_submitted_manifest": True,
             },
         )
+        self.assertEqual(
+            self.contract["product_publication"]["lifecycle_maintenance_sequences"],
+            {
+                "archive": [
+                    "refresh-owner-manifest-for-current-listed-posture-if-needed",
+                    "unpublish-while-owner-lifecycle-is-active-if-needed",
+                    "retire-through-workspace-inventory",
+                    "refresh-schema-v2-owner-manifest-for-retired-unlisted-state",
+                    "archive-unlisted-to-archived",
+                ],
+                "restore": [
+                    "restore-through-workspace-inventory",
+                    "refresh-schema-v2-owner-manifest-for-active-unlisted-state",
+                    "restore-archived-to-unlisted",
+                ],
+            },
+        )
+
+    def test_retire_before_unpublish_sequence_is_rejected(self) -> None:
+        invalid = copy.deepcopy(self.contract)
+        invalid["product_publication"]["lifecycle_maintenance_sequences"]["archive"] = [
+            "retire-through-workspace-inventory",
+            "unpublish-while-owner-lifecycle-is-active-if-needed",
+            "archive-unlisted-to-archived",
+        ]
+
+        issues = contract_issues(
+            invalid,
+            known_repos={
+                "workspace-governance",
+                "workspace-governance-control-fabric",
+                "operator-orchestration-service",
+                "governance-operations-console",
+                "security-architecture",
+                "platform-engineering",
+            },
+        )
+
+        self.assertTrue(any("approved owner-evidence" in issue for issue in issues), issues)
 
     def test_missing_authority_evidence_is_rejected(self) -> None:
         invalid = copy.deepcopy(self.packet)
