@@ -51,6 +51,20 @@ EXPECTED_CROSS_BOUNDARY_GRANTS = {
     "security_acceptance": False,
     "lifecycle_mutation": False,
 }
+EXPECTED_LIFECYCLE_MAINTENANCE_SEQUENCES = {
+    "archive": [
+        "refresh-owner-manifest-for-current-listed-posture-if-needed",
+        "unpublish-while-owner-lifecycle-is-active-if-needed",
+        "retire-through-workspace-inventory",
+        "refresh-schema-v2-owner-manifest-for-retired-unlisted-state",
+        "archive-unlisted-to-archived",
+    ],
+    "restore": [
+        "restore-through-workspace-inventory",
+        "refresh-schema-v2-owner-manifest-for-active-unlisted-state",
+        "restore-archived-to-unlisted",
+    ],
+}
 
 
 def canonical_digest(payload: Mapping[str, Any]) -> str:
@@ -131,6 +145,14 @@ def contract_issues(contract: Mapping[str, Any], *, known_repos: set[str]) -> li
         )
         if referenced - known_postures:
             issues.append(f"action {action} references unsupported publication postures")
+
+    if publication.get("lifecycle_maintenance_sequences") != (
+        EXPECTED_LIFECYCLE_MAINTENANCE_SEQUENCES
+    ):
+        issues.append(
+            "lifecycle maintenance must preserve the approved owner-evidence, "
+            "inventory, and publication order"
+        )
 
     artifact_contracts = publication.get("artifact_contracts", {})
     if set(artifact_contracts) != set(EXPECTED_ARTIFACT_SCHEMAS):

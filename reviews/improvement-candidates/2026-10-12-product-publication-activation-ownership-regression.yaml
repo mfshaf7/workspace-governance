@@ -8,9 +8,12 @@ summary: Epic 894 repeated the closed activation-ownership planning failure by
   and WGCF each retained an inactive source gate and no product-owner manifest
   existed. The completed OOS implementation also accepted a syntactically valid
   Security reference without independently binding the exact accepted decision
-  and did not constrain the decision to the intended internal-only posture.
+  and did not constrain the decision to the intended internal-only posture. A
+  later lifecycle-maintenance slice repeated the same planning class by wiring
+  archive and restore directly to a prior publication result without proving the
+  required Workspace Inventory transition or a fresh schema-v2 owner manifest.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
-status: new
+status: accepted
 source_type: conversation
 scope:
   related_repos:
@@ -54,6 +57,31 @@ signals:
   - https://github.com/mfshaf7/operator-orchestration-service/pull/312
   - https://github.com/mfshaf7/operator-orchestration-service/pull/313
   - https://github.com/mfshaf7/governance-operations-console/pull/64
+- id: product-maintenance-sequence-acceptance-gap
+  title: Lifecycle maintenance reused stale publication evidence and skipped owner prerequisites
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: The merged Console lifecycle-maintenance implementation offered archive
+    for an active product and restore for a retired product, then copied the prior
+    publication command's manifest source. The Workspace Governance operator guide
+    also ordered retirement before unpublish even though its own validator permits
+    a listed posture only while the product is active. The valid archive sequence
+    is fresh current-state owner evidence, unpublish if listed, inventory retirement,
+    then a fresh schema-v2 retired/unlisted owner manifest and archive. Restore
+    similarly requires inventory restore and fresh owner evidence. Component tests
+    did not exercise that complete sequence. Security 1271 detected the contradiction
+    before source activation, so the invalid maintenance actions remain inactive.
+  source_refs:
+  - openproject://work_packages/924
+  - openproject://work_packages/1270
+  - openproject://work_packages/1271
+  - https://github.com/mfshaf7/governance-operations-console/pull/67
+  - workspace-governance/docs/product-publication.md
+  - workspace-governance/docs/workspace-active-inventory.md
 resolution:
   after_action_ref: null
   control_refs:
@@ -70,17 +98,21 @@ resolution:
     owner_repo: governance-operations-console
     note: Supplies the exact product-owner source snapshot and current unlisted local-preview lifecycle evidence required by WGCF.
   note: >-
-    Immediate containment uses owner-repo maintenance linked to the existing ART
-    work: merge the decision-binding, internal-only scope, and owner-manifest
-    repairs; finish Security 1257 against those exact revisions; then land the
-    already-required OOS and WGCF activation changes before Platform 1258. No new
-    ART child or parallel mechanism is needed.
+    Immediate containment keeps lifecycle maintenance inactive. The operator
+    approved reusing the existing Workspace Registry lifecycle and Product
+    Publication paths: correct existing child 1270 so archive and restore require
+    the proper inventory state, publication posture, and fresh schema-v2 owner
+    evidence; replace isolated component acceptance with a complete operator
+    sequence proof; then resume Security 1271, OOS activation 1272, and Platform
+    commissioning 1273. No new ART child, backend, authority, or parallel workflow
+    is needed.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-16'
   note: >-
-    Triage an extension of the existing delivery-plan activation validation so a
-    plan cannot pass when an owner-controlled source gate, required owner evidence,
-    independent acceptance verifier, or accepted target-scope binding is absent from
-    the ordered Landing Units. Do not implement the closing control without operator
-    approval.
+    Land the operator-approved extension of the existing delivery-plan activation
+    validation so a plan cannot pass when an owner-controlled source gate, required
+    owner evidence, prerequisite owner transition, independent acceptance verifier,
+    accepted target-scope binding, or complete operator-sequence conformance case is
+    absent from the ordered Landing Units. Close through a linked after-action only
+    after the Feature 924 repair and durable planning control both land.
