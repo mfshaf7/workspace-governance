@@ -1,0 +1,39 @@
+schema_version: 2
+products:
+  governance-operations-console:
+    lifecycle: owner-managed
+    platform_owner: platform-engineering
+    security_owner: security-architecture
+    runtime_owner: governance-operations-console
+    source_owners:
+    - governance-operations-console
+    stage_supported: false
+    governed_prod_promotion: false
+    highest_real_endpoint: owner-repository-local-preview
+    validation_behavior:
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-readiness-aggregate
+      catalog_refs:
+      - component-contracts
+      - security-bindings
+      - review-coverage
+      notes: Synthetic fixture authority for Product Publication contract validation.
+    maturity: owner-managed
+    posture: active
+    record:
+      id: product:governance-operations-console
+      version: 1
+      lineage:
+        source: legacy-migration
+        source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
+        source_digest: sha256:d7a27f46f21f2d25b70ecd1e6c3010182f57fcd8bcb16377b6a1c8eb097d8713
+        intake_entry_version: null
+      last_mutation:
+        id: workspace-inventory-migration:product:governance-operations-console:v1-v2
+        action: migrate
+        idempotency_key: workspace-inventory-migration:product:governance-operations-console:v1-v2
+        request_ref: null
+        request_digest: null
+        readiness_ref: null
+        readiness_digest: null
+        applied_at: '2026-08-30T18:27:30+08:00'

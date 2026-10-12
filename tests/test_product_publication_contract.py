@@ -27,7 +27,6 @@ from product_publication_contract import (  # noqa: E402
 
 
 CONTRACT_PATH = REPO_ROOT / "contracts/product-publication.yaml"
-PRODUCTS_PATH = REPO_ROOT / "contracts/products.yaml"
 FIXTURE_ROOT = REPO_ROOT / "contracts/fixtures/product-publication"
 SCHEMA_ROOT = REPO_ROOT / "contracts/schemas"
 
@@ -43,7 +42,7 @@ def load_json(path: Path) -> dict:
 class ProductPublicationContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.contract = load_yaml(CONTRACT_PATH)
-        self.products = load_yaml(PRODUCTS_PATH)
+        self.products = load_yaml(FIXTURE_ROOT / "products.valid.yaml")
         self.manifest = load_json(FIXTURE_ROOT / "manifest.valid.json")
         self.packet = load_json(FIXTURE_ROOT / "packet.valid.json")
         self.receipt = load_json(FIXTURE_ROOT / "receipt.valid.json")
@@ -210,6 +209,20 @@ class ProductPublicationContractTests(unittest.TestCase):
                     "restore-archived-to-unlisted",
                 ],
             },
+        )
+
+    def test_contract_fixture_context_is_independent_of_live_inventory_lifecycle(self) -> None:
+        live_products = load_yaml(REPO_ROOT / "contracts/products.yaml")
+        live_product = live_products["products"]["governance-operations-console"]
+        live_product["posture"] = "retired"
+        live_product["record"]["version"] = 2
+        self.assertEqual(
+            manifest_issues(self.contract, self.manifest, self.products),
+            [],
+        )
+        self.assertIn(
+            "manifest lifecycle state does not match active inventory",
+            manifest_issues(self.contract, self.manifest, live_products),
         )
 
     def test_retire_before_unpublish_sequence_is_rejected(self) -> None:
