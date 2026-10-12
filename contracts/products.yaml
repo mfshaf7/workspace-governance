@@ -103,21 +103,21 @@ products:
         not live backend, authenticated identity, governed AI, stage, production,
         release, public, or client-visible runtime readiness.
     maturity: owner-managed
-    posture: active
+    posture: retired
     record:
       id: product:governance-operations-console
-      version: 1
+      version: 2
       lineage:
         source: legacy-migration
         source_ref: git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26
         source_digest: sha256:d7a27f46f21f2d25b70ecd1e6c3010182f57fcd8bcb16377b6a1c8eb097d8713
         intake_entry_version: null
       last_mutation:
-        id: workspace-inventory-migration:product:governance-operations-console:v1-v2
-        action: migrate
-        idempotency_key: workspace-inventory-migration:product:governance-operations-console:v1-v2
-        request_ref: null
-        request_digest: null
-        readiness_ref: null
-        readiness_digest: null
-        applied_at: '2026-08-30T18:27:30+08:00'
+        id: workspace-inventory-lifecycle:workspace-inventory-lifecycle-request:console-delivery-894-retire-20261012:v1
+        action: retire
+        idempotency_key: workspace-inventory-lifecycle-request:console-delivery-894-retire-20261012:v1
+        request_ref: workspace-inventory-lifecycle-request:console-delivery-894-retire-20261012
+        request_digest: sha256:1e888092558e0df26605ce904fd8ebe256e9e4da654877d1dd5c81e052fb73fe
+        readiness_ref: workspace-inventory-lifecycle-readiness:workspace-inventory-lifecycle:2eb450eb129b6282763faa58849e0909da7b4f0f391b6b4edeee43f0c31bf09d
+        readiness_digest: sha256:4a8ca1f23a2e28d8c8594e56fe5f1a4d74eeb691d435d70883e6a26df79d10ae
+        applied_at: '2026-10-12T19:19:01.832Z'
