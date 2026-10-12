@@ -1,0 +1,63 @@
+schema_version: 1
+id: 2026-10-13-product-publication-activation-bootstrap-order-regression
+title: Make capability bindings precede source rollout readiness
+recorded_on: '2026-10-13'
+owner_repo: workspace-governance
+summary: Product Publication source and Security scope advanced together, but the
+  refinement-catalog up path rolled the new OOS source before Platform projected the
+  matching runtime binding, causing the replacement pod to fail closed and blocking
+  reconciliation.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-agent-console-composition-activation-ownership-regression.yaml
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The documented sequence ran composition up before Product Publication activate.
+    The new OOS image therefore read the prior Security decision from the deployment
+    and correctly rejected it before Platform could reach the later activation step.
+    The activation procedure and its tests did not prove upgrade ordering across source
+    and runtime configuration.
+  source_refs:
+  - openproject://work_packages/1273
+  - runtime://devint-accepted-idea-delivery-mfshaf7/operator-orchestration-service/product-publication-security-decision-mismatch
+  - conversation:2026-10-13-operator-requested-contradiction-repair-before-continuation
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: platform-engineering/products/governance-operations-console/scripts/product_publication_platform.py
+    owner_repo: platform-engineering
+    note: Product Publication activation primes the exact reviewed Security binding before any cross-domain runtime readiness wait.
+  - type: test
+    path: platform-engineering/products/governance-operations-console/scripts/test_product_publication_platform.py
+    owner_repo: platform-engineering
+    note: Order-sensitive coverage proves binding projection precedes base activation and complete workload reconciliation.
+  - type: runbook
+    path: platform-engineering/products/governance-operations-console/runbooks/commission-product-publication.md
+    owner_repo: platform-engineering
+    note: The primary operator path requires activation before source rollout and final reconciliation after exact sources are active.
+  note: >-
+    Closed by Platform PR #291 at merge
+    540455a8a1d4ce302d9815f0b93df05b9ce67801. The live containment used the
+    same reviewed Security decision, restored the OOS rollout, and no product
+    lifecycle mutation occurred before the durable source control landed.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
