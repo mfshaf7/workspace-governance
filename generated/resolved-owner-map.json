@@ -522,14 +522,14 @@
       "record": {
         "id": "product:governance-operations-console",
         "last_mutation": {
-          "action": "migrate",
-          "applied_at": "2026-08-30T18:27:30+08:00",
-          "id": "workspace-inventory-migration:product:governance-operations-console:v1-v2",
-          "idempotency_key": "workspace-inventory-migration:product:governance-operations-console:v1-v2",
-          "readiness_digest": null,
-          "readiness_ref": null,
-          "request_digest": null,
-          "request_ref": null
+          "action": "restore",
+          "applied_at": "2026-10-12T21:02:05.921Z",
+          "id": "workspace-inventory-lifecycle:workspace-inventory-lifecycle-request:console-delivery-894-restore-20261013:v1",
+          "idempotency_key": "workspace-inventory-lifecycle-request:console-delivery-894-restore-20261013:v1",
+          "readiness_digest": "sha256:9a3531f2bcac400698ba2804baf9cb584a641f3a7bc5801fd16c7cbc4ea668f3",
+          "readiness_ref": "workspace-inventory-lifecycle-readiness:workspace-inventory-lifecycle:d7fb35299d018fb39e975dcc5283eb0a087fa052eec3e845ab7ed8e86d78385e",
+          "request_digest": "sha256:8d4e97a2e83defd2a8866a7b7c55cc123c83d80e858f5882bc6ade899b23659b",
+          "request_ref": "workspace-inventory-lifecycle-request:console-delivery-894-restore-20261013"
         },
         "lineage": {
           "intake_entry_version": null,
@@ -537,7 +537,7 @@
           "source_digest": "sha256:d7a27f46f21f2d25b70ecd1e6c3010182f57fcd8bcb16377b6a1c8eb097d8713",
           "source_ref": "git://workspace-governance/6fd843eb43405f6bdcc439d23b18e556eca05b26"
         },
-        "version": 1
+        "version": 3
       },
       "runtime_owner": "governance-operations-console",
       "security_owner": "security-architecture",
