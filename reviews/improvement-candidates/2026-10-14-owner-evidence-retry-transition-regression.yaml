@@ -1,0 +1,46 @@
+schema_version: 1
+id: 2026-10-14-owner-evidence-retry-transition-regression
+title: Restore bounded owner-evidence retry after failed acquisition
+recorded_on: '2026-10-14'
+owner_repo: operator-orchestration-service
+summary: A transient Console build crash produced a blocked owner-evidence projection,
+  but the normal work continue path could not retry it even after the build passed.
+  The recent loop-prevention change made blocked evidence current without providing
+  a retry transition.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-owner-evidence-failure-replay-regression.yaml
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'Delivery item 1284 proved that one failed pre-merge acquisition becomes
+    a permanent evidence gate: work continue records acquisition.state=blocked, then
+    returns owner-evidence-acquisition-required while subsequent work continue calls
+    cannot reacquire. This contradicts the documented repair-and-retry contract and
+    regresses the earlier failed-evidence retry lesson.'
+  source_refs:
+  - openproject://work_packages/1284
+  - operator-orchestration-service@11b6d08f116d674c2b35d7d495b2e23b95ca5ce9:src/delivery-art/lifecycle-controller.js
+  - kernel:dmesg node SIGSEGV 2026-10-14T07:07:32+08:00
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-17'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
