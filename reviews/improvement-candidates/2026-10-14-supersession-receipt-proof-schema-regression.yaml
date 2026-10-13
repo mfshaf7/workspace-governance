@@ -1,0 +1,62 @@
+schema_version: 1
+id: 2026-10-14-supersession-receipt-proof-schema-regression
+title: Keep work-session supersession proof and receipt schema in lockstep
+recorded_on: '2026-10-14'
+owner_repo: operator-orchestration-service
+summary: The pristine-base repair added base_commit_available to the live reconstruction
+  proof, but the architecture supersession receipt schema and realistic reconstruction
+  test were not updated. The first real superseded session therefore failed receipt
+  validation after it had already retired resources and replaced session state, leaving
+  the replacement current without the required supersession receipt.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-14-pristine-work-session-invalid-base-repair-gap.yaml
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Live work reconstruct for item 1284 produced delivery_art_work_session_supersession_receipt_invalid
+    because pristine_proof.source contained base_commit_available while the receipt
+    schema forbids that property; the prior closed repair validated its helper and
+    synthetic controller fixture separately rather than the exact serialized receipt
+    path.
+  source_refs:
+  - openproject://work_packages/1284
+  - operator-orchestration-service:PR-325
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/contracts/delivery-art-work-session/architecture-supersession-receipt.schema.json
+- id: receipt-validation-failure-replaced-session-state
+  title: Failed supersession receipt validation was not atomic with session replacement
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Work status after the failed reconstruct command showed the new current
+    architecture and implementation-ready state even though no supersession receipt
+    existed. The controller retired source resources and replaced persisted session
+    state before calling the receipt store's schema and integrity gate.
+  source_refs:
+  - openproject://work_packages/1284
+  - oos://delivery-art/work-session-command-receipts/work-session-command%3Acli-reconstruct-1284-b76a4ee165fdafd8-649079d5-cefa-42ba-81aa-0a020a5db867
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-17'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.
