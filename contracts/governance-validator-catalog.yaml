@@ -433,6 +433,7 @@ governance_validator_catalog:
         - generated/resolved-dependency-graph.json
         - generated/stale-content-rules.json
         - generated/governance-engine-boundary-map.json
+        - generated/console-operational-capabilities.json
       wgcf_posture: candidate-for-wgcf-invocation
       retirement_posture: keep-direct-until-shadow-parity
     governance-engine-shadow-parity:

@@ -1,0 +1,533 @@
+{
+  "capabilities": [
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1281",
+        "openproject://work_packages/1282"
+      ],
+      "authority_refs": [
+        "contracts/project-lifecycle.yaml"
+      ],
+      "canonical_authority_ref": "openproject://projects/workspace-proposals",
+      "failure_state_ids": [
+        "authority-unavailable",
+        "qualification-blocked",
+        "stale-proposal-state"
+      ],
+      "id": "idea-proposal-operation",
+      "journey_order": 1,
+      "journey_stage": "idea-and-proposal",
+      "lifecycle_state_ids": [
+        "captured",
+        "qualifying",
+        "accepted",
+        "rejected",
+        "parked"
+      ],
+      "operator_intent_ids": [
+        "idea.capture",
+        "proposal.qualify",
+        "proposal.route"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "proposal-lifecycle-projection",
+      "recovery_action_ids": [
+        "proposal.resume",
+        "proposal.retry-current-step"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1281",
+        "openproject://work_packages/1282"
+      ],
+      "authority_refs": [
+        "contracts/prototype-landing.yaml",
+        "contracts/prototype-maturity.yaml",
+        "contracts/prototype-closure.yaml"
+      ],
+      "canonical_authority_ref": "repo://workspace-prototype-studio",
+      "failure_state_ids": [
+        "readiness-blocked",
+        "apply-failed",
+        "stale-prototype-state"
+      ],
+      "id": "prototype-operation",
+      "journey_order": 2,
+      "journey_stage": "prototype-incubation",
+      "lifecycle_state_ids": [
+        "landing",
+        "landed",
+        "candidate",
+        "baseline",
+        "delivery-routed"
+      ],
+      "operator_intent_ids": [
+        "prototype.land",
+        "prototype.promote-candidate",
+        "prototype.promote-baseline",
+        "prototype.route-to-delivery"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "prototype-lifecycle-projection",
+      "recovery_action_ids": [
+        "prototype.resume",
+        "prototype.retry-current-step"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1281",
+        "openproject://work_packages/1282"
+      ],
+      "authority_refs": [
+        "contracts/delivery-art-operator-path.yaml"
+      ],
+      "canonical_authority_ref": "openproject://projects/workspace-delivery-art",
+      "failure_state_ids": [
+        "planning-incomplete",
+        "dependency-blocked",
+        "stale-art-snapshot"
+      ],
+      "id": "delivery-planning-operation",
+      "journey_order": 3,
+      "journey_stage": "delivery-planning",
+      "lifecycle_state_ids": [
+        "initiating",
+        "planning",
+        "executing",
+        "closing",
+        "done"
+      ],
+      "operator_intent_ids": [
+        "delivery.plan",
+        "delivery.repair-plan",
+        "delivery.inspect-governance"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "delivery-art-planning-projection",
+      "recovery_action_ids": [
+        "delivery.resume-planning",
+        "delivery.repair-current-plan"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1284"
+      ],
+      "authority_refs": [
+        "contracts/schemas/delivery-art-architecture-packet.schema.json",
+        "contracts/delivery-art-operator-path.yaml"
+      ],
+      "canonical_authority_ref": "wgcf://artifacts/delivery-art",
+      "failure_state_ids": [
+        "decision-required",
+        "scope-mismatch",
+        "persistence-blocked"
+      ],
+      "id": "architecture-operation",
+      "journey_order": 4,
+      "journey_stage": "architecture-decision",
+      "lifecycle_state_ids": [
+        "draft",
+        "architecture-ready",
+        "durable",
+        "superseded"
+      ],
+      "operator_intent_ids": [
+        "architecture.author",
+        "architecture.approve",
+        "architecture.persist"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "delivery-art-architecture-projection",
+      "recovery_action_ids": [
+        "architecture.correct-candidate",
+        "architecture.resume-persistence"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1285",
+        "openproject://work_packages/1286"
+      ],
+      "authority_refs": [
+        "contracts/agent-source-implementation.yaml",
+        "contracts/delivery-art-operator-path.yaml"
+      ],
+      "canonical_authority_ref": "git://resolved-owner-repository",
+      "failure_state_ids": [
+        "credential-required",
+        "source-drift",
+        "validation-failed"
+      ],
+      "id": "source-realization-operation",
+      "journey_order": 5,
+      "journey_stage": "source-realization",
+      "lifecycle_state_ids": [
+        "implementation-ready",
+        "source-work",
+        "review-required",
+        "merge-ready"
+      ],
+      "operator_intent_ids": [
+        "source.start",
+        "source.continue",
+        "source.recover"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "delivery-source-session-projection",
+      "recovery_action_ids": [
+        "source.reconstruct",
+        "source.retry-current-step"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1285",
+        "openproject://work_packages/1286"
+      ],
+      "authority_refs": [
+        "contracts/agent-source-implementation.yaml",
+        "docs/pull-request-review-and-automation.md"
+      ],
+      "canonical_authority_ref": "github://human-review",
+      "failure_state_ids": [
+        "wrong-author",
+        "stale-head",
+        "checks-failed",
+        "approval-missing"
+      ],
+      "id": "human-review-operation",
+      "journey_order": 6,
+      "journey_stage": "human-review",
+      "lifecycle_state_ids": [
+        "review-required",
+        "approved"
+      ],
+      "operator_intent_ids": [
+        "review.approve-exact-head"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "source-review-projection",
+      "recovery_action_ids": [
+        "review.refresh-exact-head",
+        "review.resume"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1286"
+      ],
+      "authority_refs": [
+        "contracts/review-obligations.yaml",
+        "contracts/agent-action-authority.yaml"
+      ],
+      "canonical_authority_ref": "repo://security-architecture",
+      "failure_state_ids": [
+        "evidence-incomplete",
+        "revision-mismatch",
+        "trust-boundary-unaccepted"
+      ],
+      "id": "security-acceptance-operation",
+      "journey_order": 7,
+      "journey_stage": "security-acceptance",
+      "lifecycle_state_ids": [
+        "review-required",
+        "accepted",
+        "denied",
+        "revoked"
+      ],
+      "operator_intent_ids": [
+        "security.review-exact-boundary",
+        "security.accept-or-deny"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "security-acceptance-projection",
+      "recovery_action_ids": [
+        "security.refresh-evidence",
+        "security.resume-review"
+      ],
+      "workflow_owner_repo": "security-architecture"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1285",
+        "openproject://work_packages/1286"
+      ],
+      "authority_refs": [
+        "contracts/agent-source-implementation.yaml",
+        "contracts/delivery-art-operator-path.yaml"
+      ],
+      "canonical_authority_ref": "github://source-merge",
+      "failure_state_ids": [
+        "approval-missing",
+        "security-gate-missing",
+        "stale-head",
+        "merge-failed"
+      ],
+      "id": "source-merge-operation",
+      "journey_order": 8,
+      "journey_stage": "source-merge",
+      "lifecycle_state_ids": [
+        "merge-ready",
+        "merging",
+        "merged"
+      ],
+      "operator_intent_ids": [
+        "source.merge"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "source-merge-projection",
+      "recovery_action_ids": [
+        "source.refresh-merge-readiness",
+        "source.resume-merge"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1294",
+        "openproject://work_packages/1295"
+      ],
+      "authority_refs": [
+        "contracts/workspace-intake.yaml",
+        "contracts/workspace-active-inventory.yaml",
+        "contracts/workspace-inventory-lifecycle.yaml"
+      ],
+      "canonical_authority_ref": "repo://workspace-governance",
+      "failure_state_ids": [
+        "classification-required",
+        "readiness-blocked",
+        "stale-inventory-binding"
+      ],
+      "id": "workspace-intake-inventory-operation",
+      "journey_order": 9,
+      "journey_stage": "workspace-intake-and-inventory",
+      "lifecycle_state_ids": [
+        "out-of-scope",
+        "proposed",
+        "admitted",
+        "active",
+        "suspended",
+        "retired"
+      ],
+      "operator_intent_ids": [
+        "workspace.classify-intake",
+        "workspace.promote-active-inventory",
+        "workspace.update-inventory-lifecycle"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "workspace-intake-inventory-projection",
+      "recovery_action_ids": [
+        "workspace.resume-intake",
+        "workspace.retry-inventory-transition"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1288",
+        "openproject://work_packages/1289",
+        "openproject://work_packages/1291",
+        "openproject://work_packages/1292"
+      ],
+      "authority_refs": [
+        "contracts/developer-integration-policy.yaml",
+        "contracts/developer-integration-profiles.yaml",
+        "contracts/durable-orchestration.yaml"
+      ],
+      "canonical_authority_ref": "repo://platform-engineering",
+      "failure_state_ids": [
+        "dependency-unavailable",
+        "identity-unavailable",
+        "health-check-failed",
+        "rollback-failed"
+      ],
+      "id": "runtime-release-operation",
+      "journey_order": 10,
+      "journey_stage": "runtime-and-release",
+      "lifecycle_state_ids": [
+        "proposed",
+        "build-admitted",
+        "active",
+        "degraded",
+        "suspended",
+        "retired"
+      ],
+      "operator_intent_ids": [
+        "runtime.start",
+        "runtime.status",
+        "runtime.restart",
+        "runtime.rollback",
+        "runtime.stop"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "runtime-release-projection",
+      "recovery_action_ids": [
+        "runtime.resume",
+        "runtime.retry-current-step",
+        "runtime.restore-baseline"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1294",
+        "openproject://work_packages/1295"
+      ],
+      "authority_refs": [
+        "contracts/products.yaml",
+        "contracts/product-publication.yaml"
+      ],
+      "canonical_authority_ref": "repo://workspace-governance",
+      "failure_state_ids": [
+        "publication-readiness-blocked",
+        "stale-product-binding",
+        "projection-unavailable"
+      ],
+      "id": "product-portfolio-operation",
+      "journey_order": 11,
+      "journey_stage": "product-portfolio",
+      "lifecycle_state_ids": [
+        "unlisted",
+        "listed",
+        "withdrawn"
+      ],
+      "operator_intent_ids": [
+        "product.publish",
+        "product.update-publication",
+        "product.withdraw-publication"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "product-portfolio-projection",
+      "recovery_action_ids": [
+        "product.resume-publication",
+        "product.retry-projection"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
+        "openproject://work_packages/1282",
+        "openproject://work_packages/1292",
+        "openproject://work_packages/1297",
+        "openproject://work_packages/1298",
+        "openproject://work_packages/1299"
+      ],
+      "authority_refs": [
+        "contracts/durable-orchestration.yaml",
+        "contracts/delivery-art-operator-path.yaml",
+        "contracts/work-home-routing.yaml"
+      ],
+      "canonical_authority_ref": "oos://delivery-workflows",
+      "failure_state_ids": [
+        "state-conflict",
+        "receipt-missing",
+        "owner-unavailable",
+        "cleanup-incomplete"
+      ],
+      "id": "journey-recovery-audit-operation",
+      "journey_order": 12,
+      "journey_stage": "interruption-recovery-and-audit",
+      "lifecycle_state_ids": [
+        "running",
+        "blocked",
+        "failed",
+        "cancelled",
+        "complete"
+      ],
+      "operator_intent_ids": [
+        "journey.resume",
+        "journey.retry-current-step",
+        "journey.cancel",
+        "journey.inspect-receipts"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "cross-domain-continuation-projection",
+      "recovery_action_ids": [
+        "journey.reconstruct",
+        "journey.resume",
+        "journey.rollback-current-boundary"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    }
+  ],
+  "contract_id": "workspace-governance.console-operational-capabilities.v1",
+  "fixture_boundary": {
+    "allowed_modes": [
+      "unit-test",
+      "storybook",
+      "disconnected-preview"
+    ],
+    "fixture_completion_evidence_allowed": false,
+    "fixture_live_fallback_allowed": false,
+    "live_mode_source": "live-authority",
+    "live_owner_unavailable_behavior": "fail-closed-visible"
+  },
+  "schema_version": 1,
+  "target_outcome": "One operator can move a real idea through proposal, prototype, delivery, architecture, source, human review and merge, intake, runtime, and portfolio operation from the Governance Operations Console without routine CLI or Codex intervention.",
+  "target_scope": "local-dev-integration",
+  "terminal_completion_profile": "operational-live",
+  "truth_dimensions": [
+    "contract_state",
+    "implementation_state",
+    "runtime_state",
+    "evidence_state",
+    "demonstration_source"
+  ]
+}

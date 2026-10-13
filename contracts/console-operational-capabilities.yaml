@@ -1,0 +1,477 @@
+schema_version: 1
+console_operational_capabilities:
+  contract_id: workspace-governance.console-operational-capabilities.v1
+  owner_repo: workspace-governance
+  console_adapter_repo: governance-operations-console
+  orchestration_owner_repo: operator-orchestration-service
+  target_scope: local-dev-integration
+  target_outcome: >-
+    One operator can move a real idea through proposal, prototype, delivery,
+    architecture, source, human review and merge, intake, runtime, and portfolio
+    operation from the Governance Operations Console without routine CLI or
+    Codex intervention.
+  activation_ref: openproject://work_packages/1278
+  status_dimensions:
+    contract_state:
+      - missing
+      - defined
+    implementation_state:
+      - absent
+      - planned
+      - implemented
+    runtime_state:
+      - unavailable
+      - degraded
+      - available
+    evidence_state:
+      - unproven
+      - validated
+    demonstration_source:
+      - none
+      - fixture
+      - disconnected-preview
+      - live-authority
+  status_profiles:
+    planned:
+      contract_state: defined
+      implementation_state: planned
+      runtime_state: unavailable
+      evidence_state: unproven
+      demonstration_source: none
+    implemented-uncommissioned:
+      contract_state: defined
+      implementation_state: implemented
+      runtime_state: unavailable
+      evidence_state: validated
+      demonstration_source: none
+    fixture-demonstration:
+      contract_state: defined
+      implementation_state: implemented
+      runtime_state: unavailable
+      evidence_state: validated
+      demonstration_source: fixture
+    disconnected-preview:
+      contract_state: defined
+      implementation_state: implemented
+      runtime_state: unavailable
+      evidence_state: validated
+      demonstration_source: disconnected-preview
+    degraded-live:
+      contract_state: defined
+      implementation_state: implemented
+      runtime_state: degraded
+      evidence_state: validated
+      demonstration_source: live-authority
+    operational-live:
+      contract_state: defined
+      implementation_state: implemented
+      runtime_state: available
+      evidence_state: validated
+      demonstration_source: live-authority
+  fixture_boundary:
+    allowed_modes:
+      - unit-test
+      - storybook
+      - disconnected-preview
+    live_mode_source: live-authority
+    live_owner_unavailable_behavior: fail-closed-visible
+    fixture_completion_evidence_allowed: false
+    fixture_live_fallback_allowed: false
+  plan_completeness:
+    required_capability_fields:
+      - id
+      - journey_order
+      - journey_stage
+      - canonical_authority_ref
+      - workflow_owner_repo
+      - read_model_id
+      - operator_intent_ids
+      - lifecycle_state_ids
+      - failure_state_ids
+      - recovery_action_ids
+      - proof_classes
+      - activation_work_item_refs
+      - authority_refs
+    required_proof_classes:
+      - positive
+      - negative
+      - terminal
+    required_journey_stages:
+      - idea-and-proposal
+      - prototype-incubation
+      - delivery-planning
+      - architecture-decision
+      - source-realization
+      - human-review
+      - security-acceptance
+      - source-merge
+      - workspace-intake-and-inventory
+      - runtime-and-release
+      - product-portfolio
+      - interruption-recovery-and-audit
+    terminal_completion_profile: operational-live
+    hidden_cli_state_transition_allowed: false
+    console_owned_canonical_state_allowed: false
+  capabilities:
+    - id: idea-proposal-operation
+      journey_order: 1
+      journey_stage: idea-and-proposal
+      canonical_authority_ref: openproject://projects/workspace-proposals
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: proposal-lifecycle-projection
+      operator_intent_ids:
+        - idea.capture
+        - proposal.qualify
+        - proposal.route
+      lifecycle_state_ids:
+        - captured
+        - qualifying
+        - accepted
+        - rejected
+        - parked
+      failure_state_ids:
+        - authority-unavailable
+        - qualification-blocked
+        - stale-proposal-state
+      recovery_action_ids:
+        - proposal.resume
+        - proposal.retry-current-step
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1281
+        - openproject://work_packages/1282
+      authority_refs:
+        - contracts/project-lifecycle.yaml
+    - id: prototype-operation
+      journey_order: 2
+      journey_stage: prototype-incubation
+      canonical_authority_ref: repo://workspace-prototype-studio
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: prototype-lifecycle-projection
+      operator_intent_ids:
+        - prototype.land
+        - prototype.promote-candidate
+        - prototype.promote-baseline
+        - prototype.route-to-delivery
+      lifecycle_state_ids:
+        - landing
+        - landed
+        - candidate
+        - baseline
+        - delivery-routed
+      failure_state_ids:
+        - readiness-blocked
+        - apply-failed
+        - stale-prototype-state
+      recovery_action_ids:
+        - prototype.resume
+        - prototype.retry-current-step
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1281
+        - openproject://work_packages/1282
+      authority_refs:
+        - contracts/prototype-landing.yaml
+        - contracts/prototype-maturity.yaml
+        - contracts/prototype-closure.yaml
+    - id: delivery-planning-operation
+      journey_order: 3
+      journey_stage: delivery-planning
+      canonical_authority_ref: openproject://projects/workspace-delivery-art
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: delivery-art-planning-projection
+      operator_intent_ids:
+        - delivery.plan
+        - delivery.repair-plan
+        - delivery.inspect-governance
+      lifecycle_state_ids:
+        - initiating
+        - planning
+        - executing
+        - closing
+        - done
+      failure_state_ids:
+        - planning-incomplete
+        - dependency-blocked
+        - stale-art-snapshot
+      recovery_action_ids:
+        - delivery.resume-planning
+        - delivery.repair-current-plan
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1281
+        - openproject://work_packages/1282
+      authority_refs:
+        - contracts/delivery-art-operator-path.yaml
+    - id: architecture-operation
+      journey_order: 4
+      journey_stage: architecture-decision
+      canonical_authority_ref: wgcf://artifacts/delivery-art
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: delivery-art-architecture-projection
+      operator_intent_ids:
+        - architecture.author
+        - architecture.approve
+        - architecture.persist
+      lifecycle_state_ids:
+        - draft
+        - architecture-ready
+        - durable
+        - superseded
+      failure_state_ids:
+        - decision-required
+        - scope-mismatch
+        - persistence-blocked
+      recovery_action_ids:
+        - architecture.correct-candidate
+        - architecture.resume-persistence
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1284
+      authority_refs:
+        - contracts/schemas/delivery-art-architecture-packet.schema.json
+        - contracts/delivery-art-operator-path.yaml
+    - id: source-realization-operation
+      journey_order: 5
+      journey_stage: source-realization
+      canonical_authority_ref: git://resolved-owner-repository
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: delivery-source-session-projection
+      operator_intent_ids:
+        - source.start
+        - source.continue
+        - source.recover
+      lifecycle_state_ids:
+        - implementation-ready
+        - source-work
+        - review-required
+        - merge-ready
+      failure_state_ids:
+        - credential-required
+        - source-drift
+        - validation-failed
+      recovery_action_ids:
+        - source.reconstruct
+        - source.retry-current-step
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1285
+        - openproject://work_packages/1286
+      authority_refs:
+        - contracts/agent-source-implementation.yaml
+        - contracts/delivery-art-operator-path.yaml
+    - id: human-review-operation
+      journey_order: 6
+      journey_stage: human-review
+      canonical_authority_ref: github://human-review
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: source-review-projection
+      operator_intent_ids:
+        - review.approve-exact-head
+      lifecycle_state_ids:
+        - review-required
+        - approved
+      failure_state_ids:
+        - wrong-author
+        - stale-head
+        - checks-failed
+        - approval-missing
+      recovery_action_ids:
+        - review.refresh-exact-head
+        - review.resume
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1285
+        - openproject://work_packages/1286
+      authority_refs:
+        - contracts/agent-source-implementation.yaml
+        - docs/pull-request-review-and-automation.md
+    - id: security-acceptance-operation
+      journey_order: 7
+      journey_stage: security-acceptance
+      canonical_authority_ref: repo://security-architecture
+      workflow_owner_repo: security-architecture
+      read_model_id: security-acceptance-projection
+      operator_intent_ids:
+        - security.review-exact-boundary
+        - security.accept-or-deny
+      lifecycle_state_ids:
+        - review-required
+        - accepted
+        - denied
+        - revoked
+      failure_state_ids:
+        - evidence-incomplete
+        - revision-mismatch
+        - trust-boundary-unaccepted
+      recovery_action_ids:
+        - security.refresh-evidence
+        - security.resume-review
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1286
+      authority_refs:
+        - contracts/review-obligations.yaml
+        - contracts/agent-action-authority.yaml
+    - id: source-merge-operation
+      journey_order: 8
+      journey_stage: source-merge
+      canonical_authority_ref: github://source-merge
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: source-merge-projection
+      operator_intent_ids:
+        - source.merge
+      lifecycle_state_ids:
+        - merge-ready
+        - merging
+        - merged
+      failure_state_ids:
+        - approval-missing
+        - security-gate-missing
+        - stale-head
+        - merge-failed
+      recovery_action_ids:
+        - source.refresh-merge-readiness
+        - source.resume-merge
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1285
+        - openproject://work_packages/1286
+      authority_refs:
+        - contracts/agent-source-implementation.yaml
+        - contracts/delivery-art-operator-path.yaml
+    - id: workspace-intake-inventory-operation
+      journey_order: 9
+      journey_stage: workspace-intake-and-inventory
+      canonical_authority_ref: repo://workspace-governance
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: workspace-intake-inventory-projection
+      operator_intent_ids:
+        - workspace.classify-intake
+        - workspace.promote-active-inventory
+        - workspace.update-inventory-lifecycle
+      lifecycle_state_ids:
+        - out-of-scope
+        - proposed
+        - admitted
+        - active
+        - suspended
+        - retired
+      failure_state_ids:
+        - classification-required
+        - readiness-blocked
+        - stale-inventory-binding
+      recovery_action_ids:
+        - workspace.resume-intake
+        - workspace.retry-inventory-transition
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1294
+        - openproject://work_packages/1295
+      authority_refs:
+        - contracts/workspace-intake.yaml
+        - contracts/workspace-active-inventory.yaml
+        - contracts/workspace-inventory-lifecycle.yaml
+    - id: runtime-release-operation
+      journey_order: 10
+      journey_stage: runtime-and-release
+      canonical_authority_ref: repo://platform-engineering
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: runtime-release-projection
+      operator_intent_ids:
+        - runtime.start
+        - runtime.status
+        - runtime.restart
+        - runtime.rollback
+        - runtime.stop
+      lifecycle_state_ids:
+        - proposed
+        - build-admitted
+        - active
+        - degraded
+        - suspended
+        - retired
+      failure_state_ids:
+        - dependency-unavailable
+        - identity-unavailable
+        - health-check-failed
+        - rollback-failed
+      recovery_action_ids:
+        - runtime.resume
+        - runtime.retry-current-step
+        - runtime.restore-baseline
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1288
+        - openproject://work_packages/1289
+        - openproject://work_packages/1291
+        - openproject://work_packages/1292
+      authority_refs:
+        - contracts/developer-integration-policy.yaml
+        - contracts/developer-integration-profiles.yaml
+        - contracts/durable-orchestration.yaml
+    - id: product-portfolio-operation
+      journey_order: 11
+      journey_stage: product-portfolio
+      canonical_authority_ref: repo://workspace-governance
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: product-portfolio-projection
+      operator_intent_ids:
+        - product.publish
+        - product.update-publication
+        - product.withdraw-publication
+      lifecycle_state_ids:
+        - unlisted
+        - listed
+        - withdrawn
+      failure_state_ids:
+        - publication-readiness-blocked
+        - stale-product-binding
+        - projection-unavailable
+      recovery_action_ids:
+        - product.resume-publication
+        - product.retry-projection
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1294
+        - openproject://work_packages/1295
+      authority_refs:
+        - contracts/products.yaml
+        - contracts/product-publication.yaml
+    - id: journey-recovery-audit-operation
+      journey_order: 12
+      journey_stage: interruption-recovery-and-audit
+      canonical_authority_ref: oos://delivery-workflows
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: cross-domain-continuation-projection
+      operator_intent_ids:
+        - journey.resume
+        - journey.retry-current-step
+        - journey.cancel
+        - journey.inspect-receipts
+      lifecycle_state_ids:
+        - running
+        - blocked
+        - failed
+        - cancelled
+        - complete
+      failure_state_ids:
+        - state-conflict
+        - receipt-missing
+        - owner-unavailable
+        - cleanup-incomplete
+      recovery_action_ids:
+        - journey.reconstruct
+        - journey.resume
+        - journey.rollback-current-boundary
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1282
+        - openproject://work_packages/1292
+        - openproject://work_packages/1297
+        - openproject://work_packages/1298
+        - openproject://work_packages/1299
+      authority_refs:
+        - contracts/durable-orchestration.yaml
+        - contracts/delivery-art-operator-path.yaml
+        - contracts/work-home-routing.yaml

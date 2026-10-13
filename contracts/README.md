@@ -306,6 +306,19 @@ Use these contracts to declare:
     integrity, artifact custody, proof-obligation registry, read hierarchy,
     guided closeout intents, fallback model, compatibility boundary, and
     activation state
+- `console-operational-capabilities.yaml`
+  - defines the complete ordered idea-to-product capability matrix for the
+    Governance Operations Console, including canonical authority, workflow
+    owner, operator intents, lifecycle and recovery states, activation work,
+    proof classes, fixture isolation, and independent contract,
+    implementation, runtime, evidence, and demonstration-source truth
+  - only the `operational-live` profile can prove terminal capability; fixture
+    and disconnected-preview postures cannot be used as live fallback or
+    completion evidence
+- `schemas/console-operational-capabilities.schema.json`
+  - validates the closed capability-matrix shape while semantic validation
+    rejects missing journey stages, Console-owned canonical workflow state,
+    incomplete proof, fixture-backed live claims, and conflated status profiles
 - `delivery-art-work-session/evidence-profile.json`
   - bounded owner-repository command profile used by the Delivery ART work
     session to acquire exact-base and exact-head Workspace Governance test,

@@ -59,6 +59,7 @@ CONTRACT_FILES = {
     "context_behavior": "contracts/context-behavior.yaml",
     "raw_context_retirement": "contracts/raw-context-retirement.yaml",
     "delivery_art_operator_path": "contracts/delivery-art-operator-path.yaml",
+    "console_operational_capabilities": "contracts/console-operational-capabilities.yaml",
 }
 
 SCHEMA_FILES = {
@@ -112,6 +113,7 @@ SCHEMA_FILES = {
     "context_behavior": "contracts/schemas/context-behavior.schema.json",
     "raw_context_retirement": "contracts/schemas/raw-context-retirement.schema.json",
     "delivery_art_operator_path": "contracts/schemas/delivery-art-operator-path.schema.json",
+    "console_operational_capabilities": "contracts/schemas/console-operational-capabilities.schema.json",
 }
 
 REPO_RULES_SCHEMA = "contracts/schemas/repo-rules.schema.json"

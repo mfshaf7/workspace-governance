@@ -13,6 +13,7 @@ import yaml
 from delivery_art_resource_retirement_contract import (
     resource_retirement_definition_issues,
 )
+from console_operational_capabilities_contract import generated_view as console_capability_view
 
 from contracts_lib import (
     active_repo_names,
@@ -1028,6 +1029,9 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
     output_manifest = contracts["governance_engine_output_manifest"][
         "governance_engine_output_manifest"
     ]
+    console_capabilities = console_capability_view(
+        contracts["console_operational_capabilities"]
+    )
 
     dependency_edges: list[dict[str, str]] = []
     for repo_name, payload in repos.items():
@@ -1133,6 +1137,7 @@ def build_generated_contracts(repo_root: Path, contracts: dict[str, object]) -> 
             "emitted_output_families": emitted_outputs,
             "invariants": boundary_map["invariants"],
         },
+        "console_operational_capabilities": console_capabilities,
     }
 
 
