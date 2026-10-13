@@ -1,0 +1,64 @@
+schema_version: 1
+id: 2026-10-14-cgg-rollout-exec-pod-selection-race
+title: Select a current ready CGG pod for post-rollout startup actions
+recorded_on: '2026-10-14'
+owner_repo: context-governance-gateway
+summary: >-
+  The active CGG dev-integration profile waited for the current API and worker
+  deployments, then used kubectl exec against the Deployment resource while
+  terminating historical pods were still present. Kubernetes selected a pod
+  that disappeared during connection setup, so two composition starts failed
+  and rolled back even though the new rollout was ready.
+regression_of: null
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - context-governance-gateway
+  - platform-engineering
+  related_products: []
+  related_components:
+  - context-governance-gateway
+  change_classes:
+  - source-behavior
+signals:
+- id: cgg-post-rollout-exec-selected-terminating-pod
+  title: Post-rollout initialization raced a disappearing historical pod
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: >-
+    Two consecutive refinement-catalog starts reached successful CGG Deployment
+    rollout and then failed with "unable to upgrade connection: pod does not
+    exist" during seed_projection_if_needed. The profile invokes kubectl exec
+    on deployment/context-governance-gateway-api instead of resolving a current,
+    ready, non-terminating API pod. The namespace contained ready historical pods
+    with deletion timestamps, proving the selector could race an obsolete pod.
+  source_refs:
+  - context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+  - platform-engineering/docs/runbooks/dev-integration-profiles.md
+  - runtime://devint-context-governance-gateway-mfshaf7
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+    owner_repo: context-governance-gateway
+    note: Resolves the newest current ready non-terminating API pod before exec.
+  - type: script
+    path: context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/smoke.sh
+    owner_repo: context-governance-gateway
+    note: Reuses the same safe pod-resolution path for read-only smoke.
+  - type: test
+    path: context-governance-gateway/tests/test_dev_integration_profile.py
+    owner_repo: context-governance-gateway
+    note: Proves terminating and unready pods cannot be selected.
+  note: >-
+    Closed by Agent Gary PR #25, merged as
+    a2f4e9274338ddc55824616e78a1d01cee079227 after exact-head human approval,
+    passing CI, and successful live refinement-catalog reconciliation.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -114,12 +114,15 @@ envelope. The projection carries:
 action. Blocked and returned states identify the required fix and its owner.
 Applied state requires the completion receipt declared by the selected route.
 
-The contract is `contract-ready`; the runtime remains `contract-only`. The
-canonical fixture proves the schema and semantic rules, but it is not evidence
-that OOS, WGCF, target adapters, or the Console are live-wired. Synthetic
-projection fixtures are permitted only in an explicitly disconnected preview.
-Configured live mode must fail closed when owner-backed projection truth is
-missing, stale, unavailable, or contradictory.
+The contract is `contract-ready`, and the OOS transition journal is active in
+`dev-integration` for these three routes. The runtime binding pins the merged
+OOS source revision, owner manifest and digest, operator surface, and exact
+active transition identifiers. It explicitly denies stage and production.
+This does not claim that WGCF evaluation, target-system application adapters,
+or the Console are live-wired. Synthetic projection fixtures are permitted
+only in an explicitly disconnected preview. Configured live mode must fail
+closed when owner-backed projection truth is missing, stale, unavailable, or
+contradictory.
 
 ## Transition Contract
 
@@ -228,8 +231,11 @@ blocked future wiring. Regenerate it with `--write` and verify it with
 
 ## Current Maturity
 
-The transition architecture remains `contract-only`. Its schema, semantic
-validator, and deterministic local simulation are implemented and locally
-proven, but transition adapters, governed runtime actions, backend fields, and
-Console projection wiring are not claimed as live. A passing proof is ready
-for baseline review, not evidence of production operation.
+The lifecycle architecture is `dev-integration`, but only for
+`proposal-route-incubation`, `proposal-route-delivery`, and
+`incubation-promote-delivery` through the bound OOS journal. Every source
+custody, runtime promotion, release, publication, delivery-completion, and
+retirement transition remains `contract-only`. WGCF evaluation, target-system
+application, Console projection wiring, stage, and production are not claimed
+as live. The deterministic proof verifies these maturity boundaries; it is not
+evidence of production operation.

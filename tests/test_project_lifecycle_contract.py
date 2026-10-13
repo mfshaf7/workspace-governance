@@ -92,6 +92,50 @@ class ProjectLifecycleContractTests(unittest.TestCase):
             [],
         )
 
+    def test_only_bound_projection_transitions_are_dev_integration(self) -> None:
+        model = self.contract["project_lifecycle"]
+        active = {
+            transition_id
+            for transition_id, transition in model["transitions"].items()
+            if transition["implementation_maturity"] == "dev-integration"
+        }
+
+        self.assertEqual(
+            active,
+            {
+                "proposal-route-incubation",
+                "proposal-route-delivery",
+                "incubation-promote-delivery",
+            },
+        )
+        self.assertEqual(
+            set(model["projection_contract"]["runtime_binding"]["active_transition_ids"]),
+            active,
+        )
+        self.assertTrue(
+            all(
+                transition["implementation_maturity"] == "contract-only"
+                for transition_id, transition in model["transitions"].items()
+                if transition_id not in active
+            )
+        )
+
+    def test_unbound_transition_maturity_drift_is_rejected(self) -> None:
+        invalid = copy.deepcopy(self.contract)
+        invalid["project_lifecycle"]["transitions"]["delivery-complete-operational"][
+            "implementation_maturity"
+        ] = "dev-integration"
+
+        issues = contract_issues(invalid, known_repos=self.known_repos)
+
+        self.assertTrue(
+            any(
+                "delivery-complete-operational maturity must be 'contract-only'" in issue
+                for issue in issues
+            ),
+            issues,
+        )
+
     def test_contradictory_ownership_is_rejected(self) -> None:
         invalid = copy.deepcopy(self.contract)
         invalid["project_lifecycle"]["ownership_roles"]["console-projection"][
@@ -254,7 +298,7 @@ class ProjectLifecycleContractTests(unittest.TestCase):
             base_state(),
             base_state(**{"project-phase": "delivery-governed"}),
         )
-        request["implementation_maturity"] = "dev-integration"
+        request["implementation_maturity"] = "governed"
 
         issues = transition_request_issues(self.contract, request)
 

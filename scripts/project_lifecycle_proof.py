@@ -17,7 +17,7 @@ REQUIRED_CAPABILITY_POSTURES = {
     "canonical-lifecycle-contract": "implemented",
     "semantic-transition-validator": "implemented",
     "deterministic-local-simulation": "implemented",
-    "transition-backend-adapters": "contract-only",
+    "transition-backend-adapters": "implemented",
     "governed-runtime-wiring": "blocked-future-wiring",
     "console-projection-wiring": "blocked-future-wiring",
 }

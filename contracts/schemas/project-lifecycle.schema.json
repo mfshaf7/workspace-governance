@@ -24,7 +24,7 @@
       ],
       "properties": {
         "owner_repo": { "const": "workspace-governance" },
-        "implementation_posture": { "const": "contract-only" },
+        "implementation_posture": { "const": "dev-integration" },
         "primary_architecture_surface": { "type": "string", "minLength": 1 },
         "purpose": { "type": "string", "minLength": 1 },
         "axis_order": {
@@ -204,6 +204,7 @@
         "schema_version",
         "contract_maturity",
         "runtime_maturity",
+        "runtime_binding",
         "purpose",
         "source_authority_envelope",
         "locked_routes",
@@ -219,7 +220,8 @@
         },
         "schema_version": { "const": 1 },
         "contract_maturity": { "const": "contract-ready" },
-        "runtime_maturity": { "const": "contract-only" },
+        "runtime_maturity": { "const": "dev-integration" },
+        "runtime_binding": { "$ref": "#/$defs/projectionRuntimeBinding" },
         "purpose": { "type": "string", "minLength": 1 },
         "source_authority_envelope": {
           "type": "object",
@@ -303,6 +305,36 @@
           "uniqueItems": true,
           "items": { "type": "string", "minLength": 1 }
         }
+      },
+      "additionalProperties": false
+    },
+    "projectionRuntimeBinding": {
+      "type": "object",
+      "required": [
+        "owner_repo",
+        "runtime_profile",
+        "source_revision",
+        "manifest_path",
+        "manifest_digest",
+        "operator_surface",
+        "active_transition_ids",
+        "denied_environments"
+      ],
+      "properties": {
+        "owner_repo": { "const": "operator-orchestration-service" },
+        "runtime_profile": { "const": "dev-integration" },
+        "source_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "manifest_path": { "const": "contracts/lifecycle-transition/manifest.json" },
+        "manifest_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "operator_surface": { "const": "docs/operations/lifecycle-transition-operator-surface.md" },
+        "active_transition_ids": {
+          "const": [
+            "proposal-route-incubation",
+            "proposal-route-delivery",
+            "incubation-promote-delivery"
+          ]
+        },
+        "denied_environments": { "const": ["stage", "production"] }
       },
       "additionalProperties": false
     },
