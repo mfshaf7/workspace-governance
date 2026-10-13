@@ -62,6 +62,17 @@ def should_preflight(repo_name: str, rel_path: str) -> bool:
     return is_workspace_structured_record(repo_name, rel_path) or is_change_record(rel_path)
 
 
+def owner_repo_root(
+    repo_name: str,
+    *,
+    workspace_root: Path,
+    repo_root: Path,
+) -> Path:
+    if repo_name == "workspace-governance":
+        return repo_root
+    return workspace_root / repo_name
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run immediate structured-record preflight for touched governance records.",
@@ -111,7 +122,11 @@ def main() -> int:
     else:
         contracts = load_contracts(repo_root)
         for repo_name in sorted(active_repo_names(contracts)):
-            owner_root = workspace_root / repo_name
+            owner_root = owner_repo_root(
+                repo_name,
+                workspace_root=workspace_root,
+                repo_root=repo_root,
+            )
             if not (owner_root / ".git").exists():
                 continue
             try:

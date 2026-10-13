@@ -24,8 +24,8 @@ project_lifecycle_proof:
       posture: implemented
       reason: Positive and negative scenarios produce stable state projections and content-addressed receipts.
     - capability_id: transition-backend-adapters
-      posture: contract-only
-      reason: Owner services have typed obligations, but this proof does not claim their transition adapters are active.
+      posture: implemented
+      reason: The OOS transition journal is active in dev-integration for the three admitted proposal and prototype routing transitions only.
     - capability_id: governed-runtime-wiring
       posture: blocked-future-wiring
       reason: Stage and production execution require later platform and security implementation and evidence.
@@ -49,7 +49,7 @@ project_lifecycle_proof:
             project-phase: delivery-governed
           source_authority_role: operator-workflow-authority
           target_owner_role: operator-workflow-authority
-          implementation_maturity: &contract_only contract-only
+          implementation_maturity: &dev_integration dev-integration
           envelope_type: project-handoff
           omit_envelope_fields: []
           evidence_types: [operator-decision, target-admission, owner-receipt]
@@ -63,7 +63,7 @@ project_lifecycle_proof:
             source-custody: dedicated-owner-repo
           source_authority_role: operator-workflow-authority
           target_owner_role: durable-source-authority
-          implementation_maturity: *contract_only
+          implementation_maturity: &contract_only contract-only
           envelope_type: source-custody-assignment
           omit_envelope_fields: []
           evidence_types: [operator-decision, durable-source-record, validation-receipt, owner-receipt]
@@ -183,7 +183,7 @@ project_lifecycle_proof:
             project-phase: incubating
           source_authority_role: operator-workflow-authority
           target_owner_role: incubation-source-authority
-          implementation_maturity: *contract_only
+          implementation_maturity: *dev_integration
           envelope_type: project-handoff
           omit_envelope_fields: []
           evidence_types: [operator-decision, target-admission, owner-receipt]
@@ -219,7 +219,7 @@ project_lifecycle_proof:
             project-phase: delivery-governed
           source_authority_role: incubation-source-authority
           target_owner_role: operator-workflow-authority
-          implementation_maturity: *contract_only
+          implementation_maturity: *dev_integration
           envelope_type: project-handoff
           omit_envelope_fields: []
           evidence_types: [operator-decision, validation-receipt, target-admission, owner-receipt]
@@ -526,7 +526,7 @@ project_lifecycle_proof:
 
     - scenario_id: reject-maturity-overstatement
       class: negative
-      purpose: Reject a dev-integration implementation claim for a contract-only transition.
+      purpose: Reject a governed implementation claim above the transition's dev-integration maturity.
       initial_state: *initial_proposed
       steps:
         - step_id: claim-live-adapter
@@ -535,7 +535,7 @@ project_lifecycle_proof:
             project-phase: delivery-governed
           source_authority_role: operator-workflow-authority
           target_owner_role: operator-workflow-authority
-          implementation_maturity: dev-integration
+          implementation_maturity: governed
           envelope_type: project-handoff
           omit_envelope_fields: []
           evidence_types: [operator-decision, target-admission, owner-receipt]

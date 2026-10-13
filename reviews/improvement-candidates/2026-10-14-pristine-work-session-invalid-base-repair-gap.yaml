@@ -1,0 +1,78 @@
+schema_version: 1
+id: 2026-10-14-pristine-work-session-invalid-base-repair-gap
+title: Repair a pristine work session whose persisted base is invalid for its owner
+recorded_on: '2026-10-14'
+owner_repo: operator-orchestration-service
+summary: >-
+  The ownership-changing reconstruction fix prevents future sessions from
+  pairing a replacement owner with the superseded owner's base, but work item
+  1281 had already persisted that invalid pair before the fix landed. The
+  session has no worktree, branch, pull request, or evidence activity, yet the
+  existing reconstruct command rejects it because its architecture packet is
+  already current.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-14-work-session-owner-change-base-resolution.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: pristine-current-architecture-session-cannot-repair-invalid-owner-base
+  title: Current architecture hides a pre-fix invalid source binding from reconstruction
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    After the future-path repair was deployed, work status for item 1281
+    correctly identified Workspace Governance as owner but work continue still
+    attempted to create that repo's worktree at OOS commit
+    2b0ab79493939243629f3b0ae3486ab878aa24eb. The session is pristine and the
+    current architecture is valid, but work reconstruct currently accepts only
+    architecture supersession and therefore offers no bounded repair for this
+    already-persisted invalid base.
+  source_refs:
+  - openproject://work_packages/1281
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+  - workspace-governance/reviews/improvement-candidates/2026-10-14-work-session-owner-change-base-resolution.yaml
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: The existing reconstruct path detects an unavailable owner-repo base and permits replacement only for pristine source and evidence state.
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: Work status exposes the bounded source-binding reconstruction action before worktree creation.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Regression coverage proves invalid current-owner bases are replaced only for pristine sessions.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    owner_repo: operator-orchestration-service
+    note: Documents the bounded reconstruction condition and prohibited non-pristine repair.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-14-work-session-replacement-owner-base.md
+    owner_repo: operator-orchestration-service
+    note: Records both owner-change and already-persisted invalid-base repair evidence.
+  note: >-
+    Closed by Agent Gary PR #325, merged as
+    74109a6824a1460c0f661cc581f5113d0111e014 after exact-head human approval
+    and passing CI. Live work reconstruct then replaced work item 1281's invalid
+    OOS base with Workspace Governance base
+    ae000f65c8348364e81ebdbf48cd9bc4231a26ea, and work continue created the
+    correct Workspace Governance worktree and entered source-work.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

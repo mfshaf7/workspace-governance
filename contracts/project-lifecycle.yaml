@@ -1,7 +1,7 @@
 schema_version: 1
 project_lifecycle:
   owner_repo: workspace-governance
-  implementation_posture: contract-only
+  implementation_posture: dev-integration
   primary_architecture_surface: docs/project-lifecycle-architecture.md
   purpose: Define product-neutral project lifecycle, ownership, handoff, evidence, and recovery truth without creating a new runtime authority.
   axis_order:
@@ -302,7 +302,21 @@ project_lifecycle:
     schema_ref: contracts/schemas/lifecycle-transition-projection.schema.json
     schema_version: 1
     contract_maturity: contract-ready
-    runtime_maturity: contract-only
+    runtime_maturity: dev-integration
+    runtime_binding:
+      owner_repo: operator-orchestration-service
+      runtime_profile: dev-integration
+      source_revision: 74109a6824a1460c0f661cc581f5113d0111e014
+      manifest_path: contracts/lifecycle-transition/manifest.json
+      manifest_digest: sha256:00603e37d0cb3489faad097a5f5973d56aa3fc83aa126adf5e5575f4306959e9
+      operator_surface: docs/operations/lifecycle-transition-operator-surface.md
+      active_transition_ids:
+        - proposal-route-incubation
+        - proposal-route-delivery
+        - incubation-promote-delivery
+      denied_environments:
+        - stage
+        - production
     purpose: Project the current state, exact next action, bounded history, and owner evidence for the three admitted cross-domain routes without granting mutation authority to a consumer.
     source_authority_envelope:
       artifact_type: console-source-projection
@@ -418,7 +432,7 @@ project_lifecycle:
   transitions:
     proposal-route-incubation:
       axis: project-phase
-      implementation_maturity: &transition_maturity contract-only
+      implementation_maturity: &active_transition_maturity dev-integration
       from_states:
         - proposed
       to_states:
@@ -438,7 +452,7 @@ project_lifecycle:
       preconditions: []
     proposal-route-delivery:
       axis: project-phase
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *active_transition_maturity
       from_states:
         - proposed
       to_states:
@@ -454,7 +468,7 @@ project_lifecycle:
       preconditions: []
     incubation-promote-delivery:
       axis: project-phase
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *active_transition_maturity
       from_states:
         - incubating
       to_states:
@@ -471,7 +485,7 @@ project_lifecycle:
       preconditions: []
     delivery-complete-operational:
       axis: project-phase
-      implementation_maturity: *transition_maturity
+      implementation_maturity: &contract_only_transition_maturity contract-only
       from_states:
         - delivery-governed
       to_states:
@@ -492,7 +506,7 @@ project_lifecycle:
             - shared-owner-repo
     retire-project:
       axis: project-phase
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - proposed
         - incubating
@@ -520,7 +534,7 @@ project_lifecycle:
             - unlisted
     source-admit-incubation:
       axis: source-custody
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - none
       to_states:
@@ -538,7 +552,7 @@ project_lifecycle:
             - incubating
     source-create-durable-owner:
       axis: source-custody
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - none
       to_states:
@@ -559,7 +573,7 @@ project_lifecycle:
             - delivery-governed
     source-graduate-durable-owner:
       axis: source-custody
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - incubation-repo
       to_states:
@@ -581,7 +595,7 @@ project_lifecycle:
             - delivery-governed
     runtime-start-incubation-preview:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - none
       to_states:
@@ -599,7 +613,7 @@ project_lifecycle:
             - incubation-repo
     runtime-start-owner-preview:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - none
       to_states:
@@ -618,7 +632,7 @@ project_lifecycle:
             - shared-owner-repo
     runtime-enter-dev-integration:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - none
         - local-preview
@@ -640,7 +654,7 @@ project_lifecycle:
             - shared-owner-repo
     runtime-promote-stage:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - dev-integration
       to_states:
@@ -661,7 +675,7 @@ project_lifecycle:
             - operational
     runtime-promote-production:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - stage
       to_states:
@@ -683,7 +697,7 @@ project_lifecycle:
             - released
     runtime-stop-local-preview:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - local-preview
       to_states:
@@ -697,7 +711,7 @@ project_lifecycle:
       preconditions: []
     runtime-stop-governed:
       axis: runtime-environment
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - dev-integration
         - stage
@@ -715,7 +729,7 @@ project_lifecycle:
       preconditions: []
     release-create-candidate:
       axis: release-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - unreleased
       to_states:
@@ -735,7 +749,7 @@ project_lifecycle:
             - stage
     release-publish:
       axis: release-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - candidate
       to_states:
@@ -757,7 +771,7 @@ project_lifecycle:
             - production
     release-withdraw:
       axis: release-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - candidate
         - released
@@ -774,7 +788,7 @@ project_lifecycle:
       preconditions: []
     publication-list:
       axis: publication-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - unlisted
       to_states:
@@ -800,7 +814,7 @@ project_lifecycle:
             - released
     publication-change-audience:
       axis: publication-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - internal
         - client
@@ -822,7 +836,7 @@ project_lifecycle:
             - operational
     publication-unlist:
       axis: publication-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - internal
         - client
@@ -839,7 +853,7 @@ project_lifecycle:
       preconditions: []
     publication-archive:
       axis: publication-posture
-      implementation_maturity: *transition_maturity
+      implementation_maturity: *contract_only_transition_maturity
       from_states:
         - unlisted
       to_states:

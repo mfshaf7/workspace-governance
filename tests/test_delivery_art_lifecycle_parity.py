@@ -345,6 +345,19 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             any("activated owner evidence profile is missing" in error for error in errors)
         )
 
+    def test_preexisting_capability_disposition_blocks_invented_source_work(self) -> None:
+        disposition = self.operator_path["initiative_architecture_preflight"][
+            "preexisting_capability_disposition"
+        ]
+
+        self.assertEqual(
+            disposition["allowed_dispositions"],
+            ["reuse", "extend", "replace", "new"],
+        )
+        self.assertTrue(disposition["requires_contract_code_runtime_comparison"])
+        self.assertTrue(disposition["reuse_prohibits_new_source_delta"])
+        self.assertTrue(disposition["contradiction_blocks_architecture_ready"])
+
     def test_architecture_v5_remains_current_while_v6_is_staged(self) -> None:
         architecture_contract = self.operator_path["artifact_contracts"][
             "architecture_packet"

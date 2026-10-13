@@ -62,6 +62,15 @@ PROJECTION_ROUTES = {
         "completion_evidence": "target-application-receipt",
     },
 }
+ACTIVE_PROJECTION_TRANSITIONS = {
+    route["canonical_transition_id"] for route in PROJECTION_ROUTES.values()
+}
+PROJECTION_RUNTIME_BINDING = {
+    "owner_repo": "operator-orchestration-service",
+    "runtime_profile": "dev-integration",
+    "manifest_path": "contracts/lifecycle-transition/manifest.json",
+    "operator_surface": "docs/operations/lifecycle-transition-operator-surface.md",
+}
 PROJECTION_STATES = {
     "prepared",
     "validating",
@@ -197,6 +206,8 @@ def contract_issues(
 
     if model_maturity not in IMPLEMENTATION_MATURITY:
         issues.append(f"unknown lifecycle implementation posture {model_maturity!r}")
+    elif model_maturity != "dev-integration":
+        issues.append("lifecycle implementation posture must match the active dev-integration projection")
 
     if set(model.get("axis_order", [])) != EXPECTED_AXES:
         issues.append("axis_order must contain the five lifecycle axes exactly once")
@@ -263,8 +274,18 @@ def contract_issues(
         issues.append("projection contract must reference the canonical projection schema")
     if projection_contract.get("contract_maturity") != "contract-ready":
         issues.append("projection contract maturity must be contract-ready")
-    if projection_contract.get("runtime_maturity") != "contract-only":
-        issues.append("projection runtime maturity must remain contract-only")
+    if projection_contract.get("runtime_maturity") != "dev-integration":
+        issues.append("projection runtime maturity must match the active dev-integration binding")
+    runtime_binding = projection_contract.get("runtime_binding", {})
+    for field, expected in PROJECTION_RUNTIME_BINDING.items():
+        if runtime_binding.get(field) != expected:
+            issues.append(
+                f"projection runtime binding {field} must be {expected!r}"
+            )
+    if set(runtime_binding.get("active_transition_ids", [])) != ACTIVE_PROJECTION_TRANSITIONS:
+        issues.append("projection runtime binding must activate the three canonical transitions exactly")
+    if runtime_binding.get("denied_environments") != ["stage", "production"]:
+        issues.append("projection runtime binding must deny stage and production")
     if projection_contract.get("locked_routes") != PROJECTION_ROUTES:
         issues.append("projection contract must define the three locked routes exactly")
     if set(projection_contract.get("states", [])) != PROJECTION_STATES:
@@ -299,6 +320,15 @@ def contract_issues(
         ):
             issues.append(
                 f"transition {transition_id} maturity {transition_maturity!r} exceeds lifecycle posture {model_maturity!r}"
+            )
+        expected_maturity = (
+            "dev-integration"
+            if transition_id in ACTIVE_PROJECTION_TRANSITIONS
+            else "contract-only"
+        )
+        if transition_maturity != expected_maturity:
+            issues.append(
+                f"transition {transition_id} maturity must be {expected_maturity!r}"
             )
         for field in ("from_states", "to_states"):
             unknown_states = sorted(set(transition.get(field, [])) - known_states)

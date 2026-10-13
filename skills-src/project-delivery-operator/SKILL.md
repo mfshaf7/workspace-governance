@@ -50,6 +50,24 @@ cross-repo protocol, or control-plane change:
 6. Reopen the preflight when an owner boundary, protocol, lifecycle, or
    evidence handoff materially changes.
 
+Before assigning any source-backed Landing Unit an implementation delta,
+compare the accepted-base contract, code, and active runtime truth for the
+claimed capability and record exactly one disposition:
+
+- `reuse`: the required capability already exists; remove the invented source
+  delta and use existing evidence or the correct non-source completion path
+- `extend`: the existing owner and capability are correct, but an exact missing
+  behavior must be added in that owner repo
+- `replace`: the existing behavior is active but wrong or obsolete; name the
+  exact replacement and rollback boundary in the owning repo
+- `new`: no existing owner or control fits after the search; name the evidence
+  for that absence and the proposed owner
+
+Do not infer a source delta from stale ART wording alone. A contradiction
+between the plan and current contract, code, or runtime truth blocks
+`architecture-ready` until reconciled. Apply this comparison to the whole
+initiative, not only the active child.
+
 Before recording `architecture-ready` or starting the first source Landing
 Unit, run one whole-initiative owner evidence-profile compatibility check:
 

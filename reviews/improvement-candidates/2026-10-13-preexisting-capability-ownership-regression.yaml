@@ -1,0 +1,69 @@
+schema_version: 1
+id: 2026-10-13-preexisting-capability-ownership-regression
+title: Reject plans that misclassify existing capability and omit contract owner work
+recorded_on: '2026-10-13'
+owner_repo: workspace-governance
+summary: Epic 1275 planning assigned work item 1281 only to OOS as new source implementation
+  even though its lifecycle journal is already implemented and live in dev-integration,
+  while the Workspace Governance lifecycle contract still declares the projection
+  contract-only and no contract-owner Landing Unit was planned.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The v6 Architecture Packet passed planning checks without comparing the
+    planned implementation claim to current code and runtime truth or reconciling
+    the canonical contract owner. Continuing would duplicate OOS mechanics while leaving
+    authoritative maturity contradictory.
+  source_refs:
+  - openproject://work_packages/1281
+  - oos://contracts/lifecycle-transition/manifest.json
+  - workspace-governance://contracts/project-lifecycle.yaml
+  - architecture-packet:delivery-1275-v1
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Initiative preflight now requires an explicit reuse, extend, replace, or new disposition from contract, code, and runtime truth before assigning source work.
+  - type: skill
+    path: workspace-governance/skills-src/project-delivery-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: The delivery operator must remove invented source work when existing capability is classified as reuse.
+  - type: validator
+    path: workspace-governance/scripts/validate_cross_repo_truth.py
+    owner_repo: workspace-governance
+    note: Cross-repo validation protects the planning disposition controls and the exact OOS lifecycle runtime binding.
+  - type: test
+    path: workspace-governance/tests/test_delivery_art_lifecycle_parity.py
+    owner_repo: workspace-governance
+    note: Regression coverage proves the pre-existing capability disposition remains mandatory.
+  - type: contract
+    path: workspace-governance/contracts/project-lifecycle.yaml
+    owner_repo: workspace-governance
+    note: Reconciles canonical maturity to the already implemented OOS journal for only the three admitted transitions.
+  note: >-
+    Closed in Landing Unit delivery-1275-canonical-projections by reusing the
+    existing OOS journal, assigning only the contract-owner delta to Workspace
+    Governance, and extending the existing initiative planning preflight. Merge
+    and completion evidence are bound through the work item 1281 Review Packet.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

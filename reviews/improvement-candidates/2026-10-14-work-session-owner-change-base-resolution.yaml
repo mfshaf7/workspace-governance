@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-10-14-work-session-owner-change-base-resolution
+title: Resolve reconstructed work-session base from the replacement owner repo
+recorded_on: '2026-10-14'
+owner_repo: operator-orchestration-service
+summary: >-
+  Delivery ART architecture reconstruction correctly changed work item 1281 from
+  operator-orchestration-service to workspace-governance ownership, but resolved
+  the replacement base commit from the superseded session owner. The resulting
+  session paired an OOS commit with a Workspace Governance worktree and failed
+  before source work could start.
+regression_of: null
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: reconstructed-session-mixed-old-owner-base-with-new-owner-worktree
+  title: Architecture reconstruction produced a cross-repo-invalid source binding
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    The current Architecture Packet and live ART both assign work-item-1281 to
+    workspace-governance, but reconstruct() called resolveBase with
+    session.owner_repo from the superseded OOS session. The source executor then
+    attempted to create the Workspace Governance worktree at OOS commit
+    2b0ab79493939243629f3b0ae3486ab878aa24eb and Git rejected the invalid
+    reference. Replacement owner, base, work-start, and worktree must be resolved
+    from one current-architecture binding.
+  source_refs:
+  - openproject://work_packages/1281
+  - wgcf://artifacts/delivery-art/sha256/0c6ccf162af11e5603be7782d91b5a96670019eaa09d1f2f178e04c7e471efe0
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Replacement base resolution now uses the current target item's owner repo.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Regression coverage proves an ownership-changing reconstruction resolves the new owner's base.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-14-work-session-replacement-owner-base.md
+    owner_repo: operator-orchestration-service
+    note: Records the reviewed maintenance repair and validation evidence.
+  note: >-
+    Closed by Agent Gary PR #324, merged as
+    5824b3dd53c9a5127d65a64b4a0df91adc23bdec after exact-head human approval
+    and passing CI.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

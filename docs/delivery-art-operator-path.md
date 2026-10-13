@@ -339,6 +339,16 @@ attempt, increments the session generation, requires a new branch, and carries
 the exact `supersedes_recoveries` chain; it does not invent a new Landing Unit
 or revise the delivery architecture.
 
+Before assigning an implementation delta to any source-backed Landing Unit,
+architecture preflight compares the accepted-base contract, code, and active
+runtime truth and records exactly one disposition: `reuse`, `extend`,
+`replace`, or `new`. `Reuse` means there is no new source delta and the plan
+must not invent a branch or implementation task for that capability. `Extend`,
+`replace`, and `new` must name the exact missing behavior and its owner repo;
+`new` is valid only after the existing owner and control search finds no fit.
+Any contradiction between the planned claim and those three truth layers
+blocks `architecture-ready` until the plan is reconciled.
+
 The machine contract inventories evidence-profile activation for every active
 owner repo. An activated owner must carry
 `contracts/delivery-art-work-session/evidence-profile.json` on the exact

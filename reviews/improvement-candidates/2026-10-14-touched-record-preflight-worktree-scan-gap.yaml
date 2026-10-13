@@ -1,0 +1,55 @@
+schema_version: 1
+id: 2026-10-14-touched-record-preflight-worktree-scan-gap
+title: Make touched-record preflight honor the selected Workspace Governance worktree
+recorded_on: '2026-10-14'
+owner_repo: workspace-governance
+summary: >-
+  The touched-record preflight accepted a Workspace Governance --repo-root but
+  still scanned the workspace main checkout for changed records. In a governed
+  feature worktree it therefore reported no touched records even when contracts
+  and improvement candidates were modified.
+regression_of: null
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: selected-worktree-was-not-scanned
+  title: Structured-record preflight ignored its repository root
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    Running preflight_touched_records.py with --repo-root set to the work item
+    1281 worktree returned "touched structured records valid: none" while that
+    worktree contained modified lifecycle contracts and four untracked
+    improvement candidates. The implementation used workspace_root/repo_name
+    for every scan and used repo_root only to locate the validator and load
+    contracts.
+  source_refs:
+  - workspace-governance/scripts/preflight_touched_records.py
+  - openproject://work_packages/1281
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: script
+    path: workspace-governance/scripts/preflight_touched_records.py
+    owner_repo: workspace-governance
+    note: Workspace Governance scans now use the explicitly selected repo_root while other owner repos remain rooted in the workspace inventory.
+  - type: test
+    path: workspace-governance/tests/test_preflight_touched_records.py
+    owner_repo: workspace-governance
+    note: Regression coverage distinguishes the selected Workspace Governance worktree from other active owner-repo paths.
+  note: >-
+    Closed in Landing Unit delivery-1275-canonical-projections. The repaired
+    command discovered and validated all ten structured records touched in the
+    work item 1281 worktree.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

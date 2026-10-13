@@ -89,6 +89,9 @@ DELIVERY_ART_INITIATIVE_LINEAGE_CONTRACT_PATHS = {
 DELIVERY_ART_LIFECYCLE_CAPABILITY_PATH = Path(
     "operator-orchestration-service/contracts/delivery-art-lifecycle/capabilities.json"
 )
+PROJECT_LIFECYCLE_RUNTIME_MANIFEST_PATH = Path(
+    "operator-orchestration-service/contracts/lifecycle-transition/manifest.json"
+)
 
 DELIVERY_ART_REQUIRED_NORMAL_CAPABILITIES = {
     "scoped-art-snapshot",
@@ -662,6 +665,65 @@ def delivery_art_owner_evidence_profile_coverage_errors(
     return errors
 
 
+def validate_project_lifecycle_runtime_binding(
+    workspace_root: Path,
+    contracts: dict[str, object],
+    errors: list[str],
+) -> None:
+    lifecycle = contracts["project_lifecycle"]["project_lifecycle"]
+    binding = lifecycle.get("projection_contract", {}).get("runtime_binding", {})
+    owner_repo = binding.get("owner_repo")
+    manifest_relative = binding.get("manifest_path")
+    source_revision = binding.get("source_revision")
+    expected_digest = binding.get("manifest_digest")
+    operator_surface = binding.get("operator_surface")
+    if owner_repo != "operator-orchestration-service" or manifest_relative != str(
+        Path(*PROJECT_LIFECYCLE_RUNTIME_MANIFEST_PATH.parts[1:])
+    ):
+        errors.append(
+            "project lifecycle runtime binding must resolve to the canonical OOS lifecycle-transition manifest"
+        )
+        return
+
+    owner_root = workspace_root / owner_repo
+    manifest_path = owner_root / manifest_relative
+    if not manifest_path.exists():
+        errors.append(f"{manifest_path}: project lifecycle runtime manifest is missing")
+        return
+    actual_digest = "sha256:" + hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    if actual_digest != expected_digest:
+        errors.append("project lifecycle runtime manifest digest differs from the bound OOS manifest")
+
+    if not isinstance(source_revision, str):
+        errors.append("project lifecycle runtime binding must declare an OOS source revision")
+    else:
+        revision_check = subprocess.run(
+            ["git", "-C", str(owner_root), "cat-file", "-e", f"{source_revision}^{{commit}}"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if revision_check.returncode != 0:
+            errors.append("project lifecycle runtime binding source revision is unavailable in OOS")
+        else:
+            source_manifest = subprocess.run(
+                ["git", "-C", str(owner_root), "show", f"{source_revision}:{manifest_relative}"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            if source_manifest.returncode != 0:
+                errors.append("project lifecycle runtime manifest is absent from the bound OOS revision")
+            else:
+                source_digest = "sha256:" + hashlib.sha256(source_manifest.stdout).hexdigest()
+                if source_digest != expected_digest:
+                    errors.append("project lifecycle runtime manifest digest differs at the bound OOS revision")
+
+    surface_path = owner_root / str(operator_surface or "")
+    if not operator_surface or not surface_path.is_file():
+        errors.append("project lifecycle runtime binding operator surface is missing from OOS")
+
+
 def validate_delivery_art_operator_path_contract(
     workspace_root: Path,
     repo_root: Path,
@@ -724,6 +786,38 @@ def validate_delivery_art_operator_path_contract(
         errors.append(
             f"{contract_path}: initiative architecture preflight decisions must be exactly "
             + ", ".join(sorted(required_decisions))
+        )
+
+    capability_disposition = (
+        architecture_preflight.get("preexisting_capability_disposition") or {}
+    )
+    required_disposition_controls = {
+        "required_before_landing_unit_delta_assignment",
+        "requires_contract_code_runtime_comparison",
+        "requires_explicit_disposition",
+        "reuse_prohibits_new_source_delta",
+        "extend_replace_new_require_exact_owner_delta",
+        "new_requires_no_existing_owner_control",
+        "contradiction_blocks_architecture_ready",
+    }
+    missing_disposition_controls = sorted(
+        control
+        for control in required_disposition_controls
+        if capability_disposition.get(control) is not True
+    )
+    if missing_disposition_controls:
+        errors.append(
+            f"{contract_path}: pre-existing capability disposition controls must remain active: "
+            + ", ".join(missing_disposition_controls)
+        )
+    if capability_disposition.get("allowed_dispositions") != [
+        "reuse",
+        "extend",
+        "replace",
+        "new",
+    ]:
+        errors.append(
+            f"{contract_path}: pre-existing capability dispositions must be exactly reuse, extend, replace, and new"
         )
 
     protocol_preflight = architecture_preflight.get("protocol_conformance_preflight") or {}
@@ -1210,6 +1304,7 @@ def main() -> int:
     validate_delivery_art_operator_path_contract(
         workspace_root, repo_root, active_repos, errors
     )
+    validate_project_lifecycle_runtime_binding(workspace_root, contracts, errors)
 
     for product_name, product in contracts["products"]["products"].items():
         if product["lifecycle"] not in {"platform-integrated", "fully-governed"}:

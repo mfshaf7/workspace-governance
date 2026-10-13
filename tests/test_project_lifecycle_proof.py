@@ -49,6 +49,49 @@ class ProjectLifecycleProofTests(unittest.TestCase):
             )
         )
 
+    def test_positive_proof_claims_only_three_dev_integration_transitions(self) -> None:
+        positive_steps = [
+            step
+            for scenario in self.proof["project_lifecycle_proof"]["scenarios"]
+            if scenario["class"] == "positive"
+            for step in scenario["steps"]
+        ]
+        active = {
+            step["transition_id"]
+            for step in positive_steps
+            if step["implementation_maturity"] == "dev-integration"
+        }
+
+        self.assertEqual(
+            active,
+            {
+                "proposal-route-incubation",
+                "proposal-route-delivery",
+                "incubation-promote-delivery",
+            },
+        )
+        self.assertEqual(
+            sum(
+                step["implementation_maturity"] == "dev-integration"
+                for step in positive_steps
+            ),
+            3,
+        )
+        self.assertTrue(
+            all(
+                step["implementation_maturity"] in {"contract-only", "dev-integration"}
+                for step in positive_steps
+            )
+        )
+
+    def test_transition_backend_posture_matches_live_dev_integration_binding(self) -> None:
+        postures = {
+            item["capability_id"]: item["posture"]
+            for item in self.proof["project_lifecycle_proof"]["capability_postures"]
+        }
+
+        self.assertEqual(postures["transition-backend-adapters"], "implemented")
+
     def test_negative_scenario_detects_a_weakened_authority_check(self) -> None:
         weakened = copy.deepcopy(self.proof)
         scenario = next(

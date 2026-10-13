@@ -1843,6 +1843,7 @@
         "packet_schema_ref",
         "packet_required_sections",
         "decision_gate",
+        "preexisting_capability_disposition",
         "protocol_conformance_preflight"
       ],
       "properties": {
@@ -1880,6 +1881,30 @@
             "execution_sequence_locked_before_child_work": { "const": true },
             "reopen_when_owner_boundary_or_protocol_changes": { "const": true },
             "allowed_results": { "const": ["architecture-ready", "blocked-pending-architecture-decision"] }
+          }
+        },
+        "preexisting_capability_disposition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_before_landing_unit_delta_assignment",
+            "requires_contract_code_runtime_comparison",
+            "requires_explicit_disposition",
+            "allowed_dispositions",
+            "reuse_prohibits_new_source_delta",
+            "extend_replace_new_require_exact_owner_delta",
+            "new_requires_no_existing_owner_control",
+            "contradiction_blocks_architecture_ready"
+          ],
+          "properties": {
+            "required_before_landing_unit_delta_assignment": { "const": true },
+            "requires_contract_code_runtime_comparison": { "const": true },
+            "requires_explicit_disposition": { "const": true },
+            "allowed_dispositions": { "const": ["reuse", "extend", "replace", "new"] },
+            "reuse_prohibits_new_source_delta": { "const": true },
+            "extend_replace_new_require_exact_owner_delta": { "const": true },
+            "new_requires_no_existing_owner_control": { "const": true },
+            "contradiction_blocks_architecture_ready": { "const": true }
           }
         },
         "protocol_conformance_preflight": {

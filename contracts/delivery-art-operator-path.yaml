@@ -840,6 +840,27 @@ delivery_art_operator_path:
           the next known transition non-mutatively. Security work item 969,
           WGCF custody work item 971, and activation work item 970 bind that
           behavior to the active dev-integration path.
+      - id: preexisting-capability-disposition
+        claim_refs:
+          - initiative_architecture_preflight.preexisting_capability_disposition.required_before_landing_unit_delta_assignment
+          - initiative_architecture_preflight.preexisting_capability_disposition.requires_contract_code_runtime_comparison
+          - initiative_architecture_preflight.preexisting_capability_disposition.requires_explicit_disposition
+          - initiative_architecture_preflight.preexisting_capability_disposition.reuse_prohibits_new_source_delta
+          - initiative_architecture_preflight.preexisting_capability_disposition.extend_replace_new_require_exact_owner_delta
+          - initiative_architecture_preflight.preexisting_capability_disposition.new_requires_no_existing_owner_control
+          - initiative_architecture_preflight.preexisting_capability_disposition.contradiction_blocks_architecture_ready
+        enforcement_state: doctrine
+        owner_repo: workspace-governance
+        owner_art_refs: []
+        positive_case_ids: []
+        negative_case_ids: []
+        enforcement_layers:
+          - operator-contract
+        rationale: >-
+          Initiative planning must classify existing capability before assigning
+          a source delta. Reuse removes invented implementation work; extend,
+          replace, and new require an exact owner-repo delta supported by
+          current contract, code, and runtime truth.
       - id: work-session-resource-retirement
         claim_refs:
           - work_session_lifecycle.resource_retirement.rules.explicit_close_intent_required
@@ -1282,6 +1303,19 @@ delivery_art_operator_path:
       allowed_results:
         - architecture-ready
         - blocked-pending-architecture-decision
+    preexisting_capability_disposition:
+      required_before_landing_unit_delta_assignment: true
+      requires_contract_code_runtime_comparison: true
+      requires_explicit_disposition: true
+      allowed_dispositions:
+        - reuse
+        - extend
+        - replace
+        - new
+      reuse_prohibits_new_source_delta: true
+      extend_replace_new_require_exact_owner_delta: true
+      new_requires_no_existing_owner_control: true
+      contradiction_blocks_architecture_ready: true
     protocol_conformance_preflight:
       required_when_cross_repo_protocol_changes: true
       applicability_must_be_explicit: true

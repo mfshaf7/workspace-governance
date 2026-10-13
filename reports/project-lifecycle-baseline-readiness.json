@@ -17,8 +17,8 @@
     },
     {
       "capability_id": "transition-backend-adapters",
-      "posture": "contract-only",
-      "reason": "Owner services have typed obligations, but this proof does not claim their transition adapters are active."
+      "posture": "implemented",
+      "reason": "The OOS transition journal is active in dev-integration for the three admitted proposal and prototype routing transitions only."
     },
     {
       "capability_id": "governed-runtime-wiring",
@@ -31,9 +31,9 @@
       "reason": "The Console projection remains fixture-backed until canonical backend reads and writes are implemented."
     }
   ],
-  "lifecycle_contract_digest": "sha256:1ca79be001a7c383b26ff0cc3a8050ca08972f58f32409298edf02cc763cc6ef",
+  "lifecycle_contract_digest": "sha256:430b34b0e11e28651764dab7f3d7da74265f6397f6f738538fae008a44b27060",
   "lifecycle_contract_ref": "contracts/project-lifecycle.yaml",
-  "proof_contract_digest": "sha256:73e99c66893177e40da117663e94c895cc87477bbb5f619af6ded651849fa96d",
+  "proof_contract_digest": "sha256:82a0d43c766b62f30bdbfabe9ec77a7c04e3f008f342c1a005fcb578390653fc",
   "proof_posture": "local-deterministic",
   "representative_project": {
     "incubation_repo_ref": "workspace-prototype-studio",
@@ -862,7 +862,7 @@
       },
       "final_state_matches": true,
       "passed": true,
-      "purpose": "Reject a dev-integration implementation claim for a contract-only transition.",
+      "purpose": "Reject a governed implementation claim above the transition's dev-integration maturity.",
       "resulting_state": {
         "project-phase": "proposed",
         "publication-posture": "unlisted",
@@ -875,12 +875,12 @@
         {
           "expected_outcome": "rejected",
           "issues": [
-            "transition proposal-route-delivery maturity claim 'dev-integration' exceeds contract maturity 'contract-only'"
+            "transition proposal-route-delivery maturity claim 'governed' exceeds contract maturity 'dev-integration'"
           ],
           "missing_expected_issues": [],
           "outcome": "rejected",
           "passed": true,
-          "receipt_id": "lifecycle-proof-receipt:6692c8ba72afdeda188c6656267faa28346ec5263e14cf310b1b2d5b43d9af20",
+          "receipt_id": "lifecycle-proof-receipt:b7666c44482f4aaf4963180406067932daacdb2eb2e86685891628a54f45292c",
           "resulting_state": {
             "project-phase": "proposed",
             "publication-posture": "unlisted",
