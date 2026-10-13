@@ -107,6 +107,38 @@ signals:
   - governance-operations-console/src/domain-workspaces/portfolio/live-runtime/product-publication-live-contract.ts
   - platform-engineering/docs/dev-integration.md
   - platform-engineering/products/product-publication/README.md
+- id: product-publication-verifier-and-closeout-recovery-gap
+  title: Commissioning fixtures, rollout ordering, and ART recovery diverged from the live contract
+  trigger: repeated-operator-friction
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - workflow-doctrine-gap
+  finding: >-
+    Final commissioning exposed four late gaps that the earlier plan and tests
+    should have caught together. Platform verifier fixtures modeled an obsolete
+    lifecycle result and post-state envelope; the process-loss probe crossed a
+    private OOS path instead of the public Console intent boundary; runtime
+    reconciliation opened loopback tunnels before replacement workloads had
+    completed rollout; and OOS recovery both preferred missing evidence over a
+    recorded failure and referenced an obsolete recovery state name. After those
+    repairs landed, the post-merge evidence profile still invoked Product
+    Publication verification without propagating the Security-approved OOS and
+    Security source pins, so the governed verifier rejected a newer maintenance
+    checkout until the approved dependency revisions were aligned explicitly.
+    Each symptom was individually bounded, but their combination turned normal
+    closeout into repeated manual recovery even though the product behavior was
+    already correct.
+  source_refs:
+  - openproject://work_packages/1273
+  - https://github.com/mfshaf7/platform-engineering/pull/298
+  - https://github.com/mfshaf7/platform-engineering/pull/299
+  - https://github.com/mfshaf7/platform-engineering/pull/300
+  - https://github.com/mfshaf7/platform-engineering/pull/301
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/322
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/323
+  - https://github.com/mfshaf7/platform-engineering/pull/302
 resolution:
   after_action_ref: null
   control_refs:
@@ -122,15 +154,23 @@ resolution:
     path: governance-operations-console/product-publication/manifest.json
     owner_repo: governance-operations-console
     note: Supplies the exact product-owner source snapshot and current unlisted local-preview lifecycle evidence required by WGCF.
+  - type: change-record
+    path: platform-engineering/docs/records/change-records/2026-10-13-product-lifecycle-maintenance-commissioning.md
+    owner_repo: platform-engineering
+    note: Records the repaired verifier envelopes, public-boundary process-loss probe, rollout-before-tunnel ordering, exact commissioning sequence, and finalized operating evidence for work item 1273.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-13-operating-evidence-failure-precedence.md
+    owner_repo: operator-orchestration-service
+    note: Makes recorded conformance failure take precedence over missing evidence and repairs the recovery route to the active retry-required lifecycle state.
   note: >-
-    Immediate containment keeps lifecycle maintenance inactive. The operator
-    approved reusing the existing Workspace Registry lifecycle and Product
-    Publication paths: correct existing child 1270 so archive and restore require
-    the proper inventory state, publication posture, and fresh schema-v2 owner
-    evidence; replace isolated component acceptance with a complete operator
-    sequence proof; then resume Security 1271, OOS activation 1272, and Platform
-    commissioning 1273. No new ART child, backend, authority, or parallel workflow
-    is needed.
+    Epic 894 and Feature 924 are now complete. The existing Workspace Registry
+    lifecycle and Product Publication paths were repaired without adding another
+    ART child, backend, authority, or parallel workflow. Work item 1273 closed
+    with merged Platform PR 302, finalized operating-ready evidence, successful
+    operating and process-loss verification, and complete source-resource cleanup.
+    The candidate remains accepted because the durable planning control must still
+    prevent the combined owner-gate, verifier-fidelity, dependency-pin propagation,
+    rollout-ordering, and recovery-state gaps before a future implementation starts.
 follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-16'
