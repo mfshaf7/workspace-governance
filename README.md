@@ -20,6 +20,11 @@ It also now owns the explicit governance-engine output manifest and the shared
 materializer implementation that emits workspace-root files, managed live
 skills, and generated governance artifacts from that contract.
 
+The [Console operational capability contract](docs/console-operational-capabilities.md)
+defines the complete idea-to-product capability plan and keeps contract
+presence, implementation, runtime availability, evidence, and fixture or live
+demonstration truth separate.
+
 The same governance layer owns the intake model for new repos, products, and
 components. Nothing needs to be governed by default, but new entrants should
 be classified explicitly before they drift into the operator-facing control

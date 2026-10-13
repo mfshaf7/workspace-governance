@@ -18,6 +18,9 @@ import yaml
 from agent_action_conformance import (
     contract_issues as agent_action_conformance_issues,
 )
+from console_operational_capabilities_contract import (
+    contract_issues as console_operational_capability_issues,
+)
 from contracts_lib import (
     REPO_RULES_SCHEMA,
     SCHEMA_FILES,
@@ -7559,6 +7562,9 @@ def main() -> int:
         "context_behavior": repo_root / "contracts/context-behavior.yaml",
         "raw_context_retirement": repo_root / "contracts/raw-context-retirement.yaml",
         "delivery_art_operator_path": repo_root / "contracts/delivery-art-operator-path.yaml",
+        "console_operational_capabilities": (
+            repo_root / "contracts/console-operational-capabilities.yaml"
+        ),
     }
 
     for key, rel_path in SCHEMA_FILES.items():
@@ -7876,6 +7882,15 @@ def main() -> int:
     errors.extend(
         f"contracts/project-lifecycle.yaml: {error}"
         for error in project_lifecycle_errors
+    )
+    console_capability_errors = console_operational_capability_issues(
+        contracts["console_operational_capabilities"],
+        known_repos=active_repos,
+        repo_root=repo_root,
+    )
+    errors.extend(
+        f"contracts/console-operational-capabilities.yaml: {error}"
+        for error in console_capability_errors
     )
     product_publication_errors = product_publication_contract_issues(
         contracts["product_publication"],
@@ -9947,6 +9962,7 @@ def main() -> int:
             ("resolved_dependency_graph", "generated/resolved-dependency-graph.json", "json"),
             ("stale_content_rules", "generated/stale-content-rules.json", "json"),
             ("governance_engine_boundary_map", "generated/governance-engine-boundary-map.json", "json"),
+            ("console_operational_capabilities", "generated/console-operational-capabilities.json", "json"),
         }
         actual_generated_outputs = {
             (entry["id"], entry.get("emitted_path"), entry.get("format"))

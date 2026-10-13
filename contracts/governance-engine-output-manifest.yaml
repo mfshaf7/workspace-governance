@@ -72,3 +72,6 @@ governance_engine_output_manifest:
         - id: governance_engine_boundary_map
           format: json
           emitted_path: generated/governance-engine-boundary-map.json
+        - id: console_operational_capabilities
+          format: json
+          emitted_path: generated/console-operational-capabilities.json

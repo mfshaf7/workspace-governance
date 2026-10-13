@@ -28,6 +28,7 @@ validators:
       - generated/resolved-dependency-graph.json
       - generated/stale-content-rules.json
       - generated/governance-engine-boundary-map.json
+      - generated/console-operational-capabilities.json
   governance-engine-shadow-parity:
     script: scripts/validate_governance_engine_shadow_parity.py
     scope: local-workspace

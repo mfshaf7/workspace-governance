@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "console_operational_capabilities"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "console_operational_capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "owner_repo",
+        "console_adapter_repo",
+        "orchestration_owner_repo",
+        "target_scope",
+        "target_outcome",
+        "activation_ref",
+        "status_dimensions",
+        "status_profiles",
+        "fixture_boundary",
+        "plan_completeness",
+        "capabilities"
+      ],
+      "properties": {
+        "contract_id": {"type": "string", "minLength": 1},
+        "owner_repo": {"type": "string", "minLength": 1},
+        "console_adapter_repo": {"type": "string", "minLength": 1},
+        "orchestration_owner_repo": {"type": "string", "minLength": 1},
+        "target_scope": {"const": "local-dev-integration"},
+        "target_outcome": {"type": "string", "minLength": 1},
+        "activation_ref": {"type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$"},
+        "status_dimensions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract_state",
+            "implementation_state",
+            "runtime_state",
+            "evidence_state",
+            "demonstration_source"
+          ],
+          "properties": {
+            "contract_state": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "implementation_state": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "runtime_state": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "evidence_state": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "demonstration_source": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+          }
+        },
+        "status_profiles": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/statusProfile"},
+          "minProperties": 1
+        },
+        "fixture_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "allowed_modes",
+            "live_mode_source",
+            "live_owner_unavailable_behavior",
+            "fixture_completion_evidence_allowed",
+            "fixture_live_fallback_allowed"
+          ],
+          "properties": {
+            "allowed_modes": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "live_mode_source": {"type": "string", "minLength": 1},
+            "live_owner_unavailable_behavior": {"type": "string", "minLength": 1},
+            "fixture_completion_evidence_allowed": {"type": "boolean"},
+            "fixture_live_fallback_allowed": {"type": "boolean"}
+          }
+        },
+        "plan_completeness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_capability_fields",
+            "required_proof_classes",
+            "required_journey_stages",
+            "terminal_completion_profile",
+            "hidden_cli_state_transition_allowed",
+            "console_owned_canonical_state_allowed"
+          ],
+          "properties": {
+            "required_capability_fields": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "required_proof_classes": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "required_journey_stages": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+            "terminal_completion_profile": {"type": "string", "minLength": 1},
+            "hidden_cli_state_transition_allowed": {"type": "boolean"},
+            "console_owned_canonical_state_allowed": {"type": "boolean"}
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/capability"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "statusProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_state",
+        "implementation_state",
+        "runtime_state",
+        "evidence_state",
+        "demonstration_source"
+      ],
+      "properties": {
+        "contract_state": {"type": "string", "minLength": 1},
+        "implementation_state": {"type": "string", "minLength": 1},
+        "runtime_state": {"type": "string", "minLength": 1},
+        "evidence_state": {"type": "string", "minLength": 1},
+        "demonstration_source": {"type": "string", "minLength": 1}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "journey_order",
+        "journey_stage",
+        "canonical_authority_ref",
+        "workflow_owner_repo",
+        "read_model_id",
+        "operator_intent_ids",
+        "lifecycle_state_ids",
+        "failure_state_ids",
+        "recovery_action_ids",
+        "proof_classes",
+        "activation_work_item_refs",
+        "authority_refs"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "journey_order": {"type": "integer", "minimum": 1},
+        "journey_stage": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "canonical_authority_ref": {"type": "string", "minLength": 1},
+        "workflow_owner_repo": {"type": "string", "minLength": 1},
+        "read_model_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "operator_intent_ids": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "lifecycle_state_ids": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "failure_state_ids": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "recovery_action_ids": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "proof_classes": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"enum": ["positive", "negative", "terminal"]}
+        },
+        "activation_work_item_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$"}
+        },
+        "authority_refs": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+      }
+    }
+  }
+}

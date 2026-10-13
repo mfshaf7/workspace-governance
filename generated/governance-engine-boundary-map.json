@@ -79,7 +79,8 @@
         "generated/resolved-owner-map.json",
         "generated/resolved-dependency-graph.json",
         "generated/stale-content-rules.json",
-        "generated/governance-engine-boundary-map.json"
+        "generated/governance-engine-boundary-map.json",
+        "generated/console-operational-capabilities.json"
       ]
     }
   ],
