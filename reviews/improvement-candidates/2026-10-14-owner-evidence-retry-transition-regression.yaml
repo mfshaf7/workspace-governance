@@ -8,7 +8,7 @@ summary: A transient Console build crash produced a blocked owner-evidence proje
   The recent loop-prevention change made blocked evidence current without providing
   a retry transition.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-owner-evidence-failure-replay-regression.yaml
-status: triaged
+status: closed
 source_type: manual
 scope:
   related_repos:
@@ -37,10 +37,30 @@ signals:
   - kernel:dmesg node SIGSEGV 2026-10-14T07:07:32+08:00
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 330 projects invalid pre-merge evidence as an executable bounded retry instead of a permanent gate.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+    owner_repo: operator-orchestration-service
+    note: OOS PR 330 stops after one failed acquisition per continue call, permits a later retry, and preserves passing evidence immutability.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-lifecycle-controller.test.js
+    owner_repo: operator-orchestration-service
+    note: Covers one-attempt failure return, repaired reacquisition, and conflict rejection for passing evidence identity.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-14-owner-evidence-retry-transition.md
+    owner_repo: operator-orchestration-service
+    note: Records the repair landed by OOS PR 330 at merge commit dfd9a00ceb94ec9e524a4fd5fe557318e96f04bc.
+  note: >-
+    Closed after the repaired lifecycle was activated in dev-integration and
+    Delivery item 1284 proved the complete live path: one failed acquisition
+    returned retry state, the next continue reacquired passing exact-head evidence,
+    PR 78 merged through the governed workflow, its Review Packet finalized, and
+    the ART item closed.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-17'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null
