@@ -1202,6 +1202,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             execution_plan_by_work_item = {}
             emitted_gate_authorities = {}
             combined_schedule_edges = []
+            work_precedence_edges = []
             if schema_version == 2:
                 work_graph = _artifact_object(
                     architecture.get("work_dependency_graph")
@@ -1229,6 +1230,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     work_edges.append((prerequisite, dependent))
                 if not _delivery_art_graph_is_acyclic(work_nodes, work_edges):
                     errors.append("architecture.work_dependency_graph must be acyclic")
+                work_precedence_edges = work_edges
             else:
                 execution_plan = _artifact_object_list(
                     architecture.get("work_item_execution_plan")
@@ -1320,6 +1322,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                     errors.append(
                         "architecture.work_item_execution_plan has no executable start-and-close schedule"
                     )
+                work_precedence_edges = combined_schedule_edges
 
             landing_units = _artifact_object_list(
                 architecture.get("landing_units")
@@ -1495,6 +1498,7 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
             human_gates = _artifact_object_list(
                 architecture.get("required_human_gates")
             )
+            early_human_gate_edges = []
             gate_ids = [
                 gate.get("gate_id")
                 for gate in human_gates
@@ -1538,6 +1542,26 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             f"architecture human gate {gate_id} blocks source merge for non-source Landing Units: "
                             + ", ".join(sorted(non_source_landing_units))
                         )
+                if gate.get("blocked_transition") in {
+                    "before_implementation",
+                    "before_source_merge",
+                }:
+                    authority_landing_unit_id = landing_unit_by_work_item.get(
+                        authority_work_item_id
+                    )
+                    for affected_landing_unit_id in affected_landing_units:
+                        if (
+                            authority_landing_unit_id in landing_unit_id_set
+                            and affected_landing_unit_id in landing_unit_id_set
+                            and authority_landing_unit_id
+                            != affected_landing_unit_id
+                        ):
+                            early_human_gate_edges.append(
+                                (
+                                    authority_landing_unit_id,
+                                    affected_landing_unit_id,
+                                )
+                            )
                 if schema_version in {3, 4, 5, 6}:
                     evidence_prerequisites = set(
                         _artifact_string_list(
@@ -1572,6 +1596,35 @@ def delivery_art_artifact_semantic_errors(payload: dict) -> list[str]:
                             f"architecture human gate {gate_id} evidence prerequisites are absent from authority work item {authority_work_item_id} execution prerequisites: "
                             + ", ".join(sorted(missing_authority_prerequisites))
                         )
+
+            combined_landing_edges = list(source_edges)
+            for prerequisite_work_item_id, dependent_work_item_id in (
+                work_precedence_edges
+            ):
+                prerequisite_landing_unit_id = landing_unit_by_work_item.get(
+                    prerequisite_work_item_id
+                )
+                dependent_landing_unit_id = landing_unit_by_work_item.get(
+                    dependent_work_item_id
+                )
+                if (
+                    prerequisite_landing_unit_id in landing_unit_id_set
+                    and dependent_landing_unit_id in landing_unit_id_set
+                    and prerequisite_landing_unit_id != dependent_landing_unit_id
+                ):
+                    combined_landing_edges.append(
+                        (
+                            prerequisite_landing_unit_id,
+                            dependent_landing_unit_id,
+                        )
+                    )
+            combined_landing_edges.extend(early_human_gate_edges)
+            if not _delivery_art_graph_is_acyclic(
+                landing_unit_id_set, combined_landing_edges
+            ):
+                errors.append(
+                    "architecture combined work, source-landing, and early human-gate topology must be acyclic"
+                )
 
             if schema_version in {3, 4, 5, 6}:
                 declared_gate_ids = set(gate_ids)
@@ -4406,6 +4459,29 @@ def validate_delivery_art_artifact_contracts(
             split_gate_v3,
             "architecture packet v3 with separately schedulable Security gates",
             "architecture-v3-execution-plan-valid",
+        )
+        require_accepted(
+            "architecture_packet",
+            split_gate_v3,
+            "architecture packet with a satisfiable combined early-gate schedule",
+            "architecture-cross-topology-gate-schedule-valid",
+        )
+
+        cyclic_early_gate_v3 = copy.deepcopy(split_gate_v3)
+        cyclic_early_gate_v3["architecture"]["required_human_gates"][1][
+            "blocked_transition"
+        ] = "before_source_merge"
+        cyclic_early_gate_v3["scope_fingerprint"] = (
+            _delivery_art_projection_digest(
+                _architecture_scope_projection(cyclic_early_gate_v3)
+            )
+        )
+        require_rejected(
+            "architecture_packet",
+            cyclic_early_gate_v3,
+            "architecture packet whose source order places an early gate authority after the Landing Unit it blocks",
+            "architecture-cross-topology-gate-cycle-invalid",
+            expected_fragment="combined work, source-landing, and early human-gate topology must be acyclic",
         )
 
         compatibility_v4 = copy.deepcopy(split_gate_v3)

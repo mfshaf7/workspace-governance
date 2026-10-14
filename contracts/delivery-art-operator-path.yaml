@@ -544,6 +544,7 @@ delivery_art_operator_path:
       architecture_v2_landing_units_exactly_cover_work_items: true
       architecture_v2_source_landing_graph_is_bound_and_acyclic: true
       architecture_v2_human_gates_bind_authority_scope_and_transition: true
+      architecture_cross_topology_early_gate_schedule_is_satisfiable: true
       architecture_v3_execution_plan_exactly_covers_work_items: true
       architecture_v3_start_and_close_schedule_is_satisfiable: true
       architecture_v3_gate_evidence_precedes_authority_close: true
@@ -715,7 +716,7 @@ delivery_art_operator_path:
         enforcement_layers:
           - json-schema
           - semantic-validator
-        rationale: V2 validates ART work readiness, source landing, Landing Unit ownership, and human gates as independent topologies.
+        rationale: V2 preserves distinct ART, source, Landing Unit, and human-gate meanings while also rejecting cycles in their combined pre-source schedule.
       - id: architecture-v3-temporal-satisfiability
         claim_refs:
           - readiness_model.rules.architecture_v3_execution_plan_exactly_covers_work_items
@@ -733,9 +734,26 @@ delivery_art_operator_path:
           - json-schema
           - semantic-validator
         rationale: >-
-          V3 proves that start prerequisites, close prerequisites, and human-gate
-          evidence form one executable schedule before implementation begins.
+          V3 proves that start prerequisites, close prerequisites, source
+          landing, and early human-gate authority form one executable schedule
+          before implementation begins.
           OOS production and WGCF custody adoption remain separate owner work.
+      - id: architecture-cross-topology-early-gate-satisfiability
+        claim_refs:
+          - readiness_model.rules.architecture_cross_topology_early_gate_schedule_is_satisfiable
+        enforcement_state: active-local
+        owner_repo: workspace-governance
+        owner_art_refs: []
+        positive_case_ids:
+          - architecture-cross-topology-gate-schedule-valid
+        negative_case_ids:
+          - architecture-cross-topology-gate-cycle-invalid
+        enforcement_layers:
+          - semantic-validator
+        rationale: >-
+          Early human-gate authority, cross-Landing-Unit work prerequisites, and
+          source landing must admit one schedule even though each topology keeps
+          its distinct meaning.
       - id: architecture-v6-runtime-activation-ownership
         claim_refs:
           - readiness_model.rules.architecture_v6_runtime_gates_declare_source_activation_posture

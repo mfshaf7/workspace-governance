@@ -140,6 +140,15 @@ structures:
 The v2 human-gate field is always present. An empty array is the explicit
 decision that no human gate applies; omitting the field is invalid.
 
+These structures have separate meanings, but they are not validated in
+isolation. The semantic validator projects cross-Landing-Unit work
+prerequisites, source-landing edges, and `before_implementation` or
+`before_source_merge` human-gate authority edges into one schedule and rejects
+cycles. A gate authority therefore cannot be ordered after the source merge it
+must unlock. Later `before_runtime_activation` and `before_operating_ready`
+gates remain outside that pre-source schedule because their evidence is
+intentionally produced after source landing.
+
 This separation permits contract, implementation, independent Security review,
 and later activation to follow their real authorities without pretending they
 are one dependency or merge graph.

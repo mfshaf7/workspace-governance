@@ -1,0 +1,74 @@
+schema_version: 1
+id: 2026-10-14-delivery-art-human-gate-topology-regression
+title: Reject human-gate authority cycles across ART and source topology
+recorded_on: '2026-10-14'
+owner_repo: workspace-governance
+summary: >-
+  Epic 1275 Architecture Packet v2 assigned three differently timed Security
+  gates to one source-backed authority item, while its source Landing Unit was
+  ordered after work whose earlier merge that same item had to unlock. The
+  packet passed validation and blocked source-realization item 1285 only after
+  its exact merge-ready head existed.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-08-24-art-architecture-topology-capture-regression.yaml
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - workspace-governance
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components:
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+signals:
+- id: human-gate-authority-source-cycle
+  title: Accepted architecture packet contains a cross-topology Security gate cycle
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: >-
+    Gate gate:source-realization-security blocks the merge of Landing Unit
+    delivery-1275-source-realization until Security authority item 1286 closes,
+    but item 1286 belongs to source-backed Landing Unit
+    delivery-1275-security-gates, which the same packet orders after
+    delivery-1275-orchestration-adapters and therefore indirectly after source
+    realization. Items 1288 and 1291 also require distinct later exact-head
+    decisions from the same still-open Security item. Workspace Governance,
+    OOS, and WGCF validators checked their individual topologies but did not
+    compose the human-gate edges with the source landing graph, so the cycle
+    escaped planning and surfaced at the first real merge gate.
+  source_refs:
+  - openproject://work_packages/1285
+  - openproject://work_packages/1286
+  - architecture-packet:delivery-1275-v2
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/331
+  - workspace-governance/docs/delivery-art-operator-path.md
+  - operator-orchestration-service/src/delivery-art/work-session.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    owner_repo: workspace-governance
+    note: Requires one satisfiable pre-source schedule across work, source-landing, and early human-gate authority edges.
+  - type: validator
+    path: workspace-governance/scripts/validate_contracts.py
+    owner_repo: workspace-governance
+    note: Rejects the Epic 1275 cycle shape and preserves a positive separately schedulable gate vector.
+  note: >-
+    The operator approved the repair. Epic 1275 now uses separate Security
+    authority items and Landing Units for source realization, orchestration,
+    and platform operation, and the invalid Architecture Packet was superseded.
+    Candidate closure still waits for validator parity to land in Workspace
+    Governance, OOS, and WGCF with finalized defect evidence.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-15'
+  note: >-
+    Land the approved combined-topology validator through work item 1304, prove
+    parity in OOS and WGCF, then close this regression through linked evidence.
