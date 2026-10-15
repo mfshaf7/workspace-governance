@@ -24,6 +24,15 @@
         "rejected",
         "parked"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "idea.capture",
         "proposal.qualify",
@@ -67,6 +76,15 @@
         "baseline",
         "delivery-routed"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "fixture",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "fixture-demonstration",
+        "runtime_state": "unavailable"
+      },
       "operator_intent_ids": [
         "prototype.land",
         "prototype.promote-candidate",
@@ -109,6 +127,15 @@
         "closing",
         "done"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "fixture",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "fixture-demonstration",
+        "runtime_state": "unavailable"
+      },
       "operator_intent_ids": [
         "delivery.plan",
         "delivery.repair-plan",
@@ -149,6 +176,15 @@
         "durable",
         "superseded"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "architecture.author",
         "architecture.approve",
@@ -168,6 +204,60 @@
     },
     {
       "activation_work_item_refs": [
+        "openproject://work_packages/1288",
+        "openproject://work_packages/1302",
+        "openproject://work_packages/1291"
+      ],
+      "authority_refs": [
+        "contracts/repository-custody.yaml"
+      ],
+      "canonical_authority_ref": "github://repository-custody",
+      "failure_state_ids": [
+        "policy-profile-missing",
+        "credential-required",
+        "provider-mismatch",
+        "reconciliation-failed"
+      ],
+      "id": "repository-custody-operation",
+      "journey_order": 5,
+      "journey_stage": "repository-custody",
+      "lifecycle_state_ids": [
+        "decision-required",
+        "preparing",
+        "provisioned",
+        "reconciled",
+        "revoked"
+      ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "none",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "implemented-uncommissioned",
+        "runtime_state": "unavailable"
+      },
+      "operator_intent_ids": [
+        "repository.prepare",
+        "repository.provision",
+        "repository.reconcile",
+        "repository.revoke"
+      ],
+      "proof_classes": [
+        "positive",
+        "negative",
+        "terminal"
+      ],
+      "read_model_id": "repository-custody-projection",
+      "recovery_action_ids": [
+        "repository.resume",
+        "repository.retry-current-step",
+        "repository.rollback"
+      ],
+      "workflow_owner_repo": "operator-orchestration-service"
+    },
+    {
+      "activation_work_item_refs": [
         "openproject://work_packages/1285",
         "openproject://work_packages/1286"
       ],
@@ -182,7 +272,7 @@
         "validation-failed"
       ],
       "id": "source-realization-operation",
-      "journey_order": 5,
+      "journey_order": 6,
       "journey_stage": "source-realization",
       "lifecycle_state_ids": [
         "implementation-ready",
@@ -190,6 +280,15 @@
         "review-required",
         "merge-ready"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "source.start",
         "source.continue",
@@ -224,12 +323,21 @@
         "approval-missing"
       ],
       "id": "human-review-operation",
-      "journey_order": 6,
+      "journey_order": 7,
       "journey_stage": "human-review",
       "lifecycle_state_ids": [
         "review-required",
         "approved"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "review.approve-exact-head"
       ],
@@ -260,7 +368,7 @@
         "trust-boundary-unaccepted"
       ],
       "id": "security-acceptance-operation",
-      "journey_order": 7,
+      "journey_order": 8,
       "journey_stage": "security-acceptance",
       "lifecycle_state_ids": [
         "review-required",
@@ -268,6 +376,15 @@
         "denied",
         "revoked"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "security.review-exact-boundary",
         "security.accept-or-deny"
@@ -301,13 +418,22 @@
         "merge-failed"
       ],
       "id": "source-merge-operation",
-      "journey_order": 8,
+      "journey_order": 9,
       "journey_stage": "source-merge",
       "lifecycle_state_ids": [
         "merge-ready",
         "merging",
         "merged"
       ],
+      "observed_profile_qualifies_for_reuse": true,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "operational-live",
+        "runtime_state": "available"
+      },
       "operator_intent_ids": [
         "source.merge"
       ],
@@ -340,7 +466,7 @@
         "stale-inventory-binding"
       ],
       "id": "workspace-intake-inventory-operation",
-      "journey_order": 9,
+      "journey_order": 10,
       "journey_stage": "workspace-intake-and-inventory",
       "lifecycle_state_ids": [
         "out-of-scope",
@@ -350,6 +476,15 @@
         "suspended",
         "retired"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "none",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "implemented-uncommissioned",
+        "runtime_state": "unavailable"
+      },
       "operator_intent_ids": [
         "workspace.classify-intake",
         "workspace.promote-active-inventory",
@@ -387,7 +522,7 @@
         "rollback-failed"
       ],
       "id": "runtime-release-operation",
-      "journey_order": 10,
+      "journey_order": 11,
       "journey_stage": "runtime-and-release",
       "lifecycle_state_ids": [
         "proposed",
@@ -397,6 +532,15 @@
         "suspended",
         "retired"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "degraded-live",
+        "runtime_state": "degraded"
+      },
       "operator_intent_ids": [
         "runtime.start",
         "runtime.status",
@@ -433,13 +577,22 @@
         "projection-unavailable"
       ],
       "id": "product-portfolio-operation",
-      "journey_order": 11,
+      "journey_order": 12,
       "journey_stage": "product-portfolio",
       "lifecycle_state_ids": [
         "unlisted",
         "listed",
         "withdrawn"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "fixture",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "fixture-demonstration",
+        "runtime_state": "unavailable"
+      },
       "operator_intent_ids": [
         "product.publish",
         "product.update-publication",
@@ -478,7 +631,7 @@
         "cleanup-incomplete"
       ],
       "id": "journey-recovery-audit-operation",
-      "journey_order": 12,
+      "journey_order": 13,
       "journey_stage": "interruption-recovery-and-audit",
       "lifecycle_state_ids": [
         "running",
@@ -487,6 +640,15 @@
         "cancelled",
         "complete"
       ],
+      "observed_profile_qualifies_for_reuse": false,
+      "observed_status": {
+        "contract_state": "defined",
+        "demonstration_source": "live-authority",
+        "evidence_state": "validated",
+        "implementation_state": "implemented",
+        "profile": "degraded-live",
+        "runtime_state": "degraded"
+      },
       "operator_intent_ids": [
         "journey.resume",
         "journey.retry-current-step",
@@ -519,8 +681,16 @@
     "live_mode_source": "live-authority",
     "live_owner_unavailable_behavior": "fail-closed-visible"
   },
+  "operating_truth": {
+    "fresh_evidence_required": true,
+    "observation_scope": "local-dev-integration",
+    "observed_at": "2026-10-15T13:38:38Z",
+    "reuse_requires_profile": "operational-live",
+    "source_ref": "wgcf://artifacts/delivery-art/sha256/8ad9c43664bb580a2eef7a23a8ddfa77c95bdea7bfc00efcb424d5008b71062a",
+    "stale_or_missing_behavior": "not-reusable"
+  },
   "schema_version": 1,
-  "target_outcome": "One operator can move a real idea through proposal, prototype, delivery, architecture, source, human review and merge, intake, runtime, and portfolio operation from the Governance Operations Console without routine CLI or Codex intervention.",
+  "target_outcome": "One operator can move a real idea through proposal, prototype, delivery, architecture, repository custody, source, human review and merge, intake, runtime, and portfolio operation from the Governance Operations Console without routine CLI or Codex intervention.",
   "target_scope": "local-dev-integration",
   "terminal_completion_profile": "operational-live",
   "truth_dimensions": [

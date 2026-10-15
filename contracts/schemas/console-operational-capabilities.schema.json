@@ -18,6 +18,7 @@
         "activation_ref",
         "status_dimensions",
         "status_profiles",
+        "operating_truth",
         "fixture_boundary",
         "plan_completeness",
         "capabilities"
@@ -52,6 +53,26 @@
           "type": "object",
           "additionalProperties": {"$ref": "#/$defs/statusProfile"},
           "minProperties": 1
+        },
+        "operating_truth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "observed_at",
+            "observation_scope",
+            "source_ref",
+            "reuse_requires_profile",
+            "fresh_evidence_required",
+            "stale_or_missing_behavior"
+          ],
+          "properties": {
+            "observed_at": {"type": "string", "format": "date-time"},
+            "observation_scope": {"const": "local-dev-integration"},
+            "source_ref": {"type": "string", "minLength": 1},
+            "reuse_requires_profile": {"const": "operational-live"},
+            "fresh_evidence_required": {"const": true},
+            "stale_or_missing_behavior": {"const": "not-reusable"}
+          }
         },
         "fixture_boundary": {
           "type": "object",
@@ -140,7 +161,8 @@
         "recovery_action_ids",
         "proof_classes",
         "activation_work_item_refs",
-        "authority_refs"
+        "authority_refs",
+        "observed_status"
       ],
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
@@ -166,7 +188,28 @@
           "uniqueItems": true,
           "items": {"type": "string", "pattern": "^openproject://work_packages/[1-9][0-9]*$"}
         },
-        "authority_refs": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+        "authority_refs": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "observed_status": {"$ref": "#/$defs/observedStatus"}
+      }
+    },
+    "observedStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_state",
+        "implementation_state",
+        "runtime_state",
+        "evidence_state",
+        "demonstration_source"
+      ],
+      "properties": {
+        "profile": {"type": "string", "minLength": 1},
+        "contract_state": {"type": "string", "minLength": 1},
+        "implementation_state": {"type": "string", "minLength": 1},
+        "runtime_state": {"type": "string", "minLength": 1},
+        "evidence_state": {"type": "string", "minLength": 1},
+        "demonstration_source": {"type": "string", "minLength": 1}
       }
     }
   }

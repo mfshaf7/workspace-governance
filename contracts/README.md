@@ -312,6 +312,9 @@ Use these contracts to declare:
     owner, operator intents, lifecycle and recovery states, activation work,
     proof classes, fixture isolation, and independent contract,
     implementation, runtime, evidence, and demonstration-source truth
+  - records the dated five-dimensional operating observation for every
+    capability, treats repository custody as an explicit journey stage, and
+    permits reuse only with fresh `operational-live` authority evidence
   - only the `operational-live` profile can prove terminal capability; fixture
     and disconnected-preview postures cannot be used as live fallback or
     completion evidence

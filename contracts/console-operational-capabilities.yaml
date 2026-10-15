@@ -7,9 +7,9 @@ console_operational_capabilities:
   target_scope: local-dev-integration
   target_outcome: >-
     One operator can move a real idea through proposal, prototype, delivery,
-    architecture, source, human review and merge, intake, runtime, and portfolio
-    operation from the Governance Operations Console without routine CLI or
-    Codex intervention.
+    architecture, repository custody, source, human review and merge, intake,
+    runtime, and portfolio operation from the Governance Operations Console
+    without routine CLI or Codex intervention.
   activation_ref: openproject://work_packages/1278
   status_dimensions:
     contract_state:
@@ -68,6 +68,13 @@ console_operational_capabilities:
       runtime_state: available
       evidence_state: validated
       demonstration_source: live-authority
+  operating_truth:
+    observed_at: '2026-10-15T13:38:38Z'
+    observation_scope: local-dev-integration
+    source_ref: wgcf://artifacts/delivery-art/sha256/8ad9c43664bb580a2eef7a23a8ddfa77c95bdea7bfc00efcb424d5008b71062a
+    reuse_requires_profile: operational-live
+    fresh_evidence_required: true
+    stale_or_missing_behavior: not-reusable
   fixture_boundary:
     allowed_modes:
       - unit-test
@@ -92,6 +99,7 @@ console_operational_capabilities:
       - proof_classes
       - activation_work_item_refs
       - authority_refs
+      - observed_status
     required_proof_classes:
       - positive
       - negative
@@ -101,6 +109,7 @@ console_operational_capabilities:
       - prototype-incubation
       - delivery-planning
       - architecture-decision
+      - repository-custody
       - source-realization
       - human-review
       - security-acceptance
@@ -142,6 +151,13 @@ console_operational_capabilities:
         - openproject://work_packages/1282
       authority_refs:
         - contracts/project-lifecycle.yaml
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: prototype-operation
       journey_order: 2
       journey_stage: prototype-incubation
@@ -174,6 +190,13 @@ console_operational_capabilities:
         - contracts/prototype-landing.yaml
         - contracts/prototype-maturity.yaml
         - contracts/prototype-closure.yaml
+      observed_status:
+        profile: fixture-demonstration
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: unavailable
+        evidence_state: validated
+        demonstration_source: fixture
     - id: delivery-planning-operation
       journey_order: 3
       journey_stage: delivery-planning
@@ -203,6 +226,13 @@ console_operational_capabilities:
         - openproject://work_packages/1282
       authority_refs:
         - contracts/delivery-art-operator-path.yaml
+      observed_status:
+        profile: fixture-demonstration
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: unavailable
+        evidence_state: validated
+        demonstration_source: fixture
     - id: architecture-operation
       journey_order: 4
       journey_stage: architecture-decision
@@ -231,8 +261,55 @@ console_operational_capabilities:
       authority_refs:
         - contracts/schemas/delivery-art-architecture-packet.schema.json
         - contracts/delivery-art-operator-path.yaml
-    - id: source-realization-operation
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
+    - id: repository-custody-operation
       journey_order: 5
+      journey_stage: repository-custody
+      canonical_authority_ref: github://repository-custody
+      workflow_owner_repo: operator-orchestration-service
+      read_model_id: repository-custody-projection
+      operator_intent_ids:
+        - repository.prepare
+        - repository.provision
+        - repository.reconcile
+        - repository.revoke
+      lifecycle_state_ids:
+        - decision-required
+        - preparing
+        - provisioned
+        - reconciled
+        - revoked
+      failure_state_ids:
+        - policy-profile-missing
+        - credential-required
+        - provider-mismatch
+        - reconciliation-failed
+      recovery_action_ids:
+        - repository.resume
+        - repository.retry-current-step
+        - repository.rollback
+      proof_classes: [positive, negative, terminal]
+      activation_work_item_refs:
+        - openproject://work_packages/1288
+        - openproject://work_packages/1302
+        - openproject://work_packages/1291
+      authority_refs:
+        - contracts/repository-custody.yaml
+      observed_status:
+        profile: implemented-uncommissioned
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: unavailable
+        evidence_state: validated
+        demonstration_source: none
+    - id: source-realization-operation
+      journey_order: 6
       journey_stage: source-realization
       canonical_authority_ref: git://resolved-owner-repository
       workflow_owner_repo: operator-orchestration-service
@@ -260,8 +337,15 @@ console_operational_capabilities:
       authority_refs:
         - contracts/agent-source-implementation.yaml
         - contracts/delivery-art-operator-path.yaml
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: human-review-operation
-      journey_order: 6
+      journey_order: 7
       journey_stage: human-review
       canonical_authority_ref: github://human-review
       workflow_owner_repo: operator-orchestration-service
@@ -286,8 +370,15 @@ console_operational_capabilities:
       authority_refs:
         - contracts/agent-source-implementation.yaml
         - docs/pull-request-review-and-automation.md
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: security-acceptance-operation
-      journey_order: 7
+      journey_order: 8
       journey_stage: security-acceptance
       canonical_authority_ref: repo://security-architecture
       workflow_owner_repo: security-architecture
@@ -313,8 +404,15 @@ console_operational_capabilities:
       authority_refs:
         - contracts/review-obligations.yaml
         - contracts/agent-action-authority.yaml
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: source-merge-operation
-      journey_order: 8
+      journey_order: 9
       journey_stage: source-merge
       canonical_authority_ref: github://source-merge
       workflow_owner_repo: operator-orchestration-service
@@ -340,8 +438,15 @@ console_operational_capabilities:
       authority_refs:
         - contracts/agent-source-implementation.yaml
         - contracts/delivery-art-operator-path.yaml
+      observed_status:
+        profile: operational-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: available
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: workspace-intake-inventory-operation
-      journey_order: 9
+      journey_order: 10
       journey_stage: workspace-intake-and-inventory
       canonical_authority_ref: repo://workspace-governance
       workflow_owner_repo: operator-orchestration-service
@@ -372,8 +477,15 @@ console_operational_capabilities:
         - contracts/workspace-intake.yaml
         - contracts/workspace-active-inventory.yaml
         - contracts/workspace-inventory-lifecycle.yaml
+      observed_status:
+        profile: implemented-uncommissioned
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: unavailable
+        evidence_state: validated
+        demonstration_source: none
     - id: runtime-release-operation
-      journey_order: 10
+      journey_order: 11
       journey_stage: runtime-and-release
       canonical_authority_ref: repo://platform-engineering
       workflow_owner_repo: operator-orchestration-service
@@ -410,8 +522,15 @@ console_operational_capabilities:
         - contracts/developer-integration-policy.yaml
         - contracts/developer-integration-profiles.yaml
         - contracts/durable-orchestration.yaml
+      observed_status:
+        profile: degraded-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: degraded
+        evidence_state: validated
+        demonstration_source: live-authority
     - id: product-portfolio-operation
-      journey_order: 11
+      journey_order: 12
       journey_stage: product-portfolio
       canonical_authority_ref: repo://workspace-governance
       workflow_owner_repo: operator-orchestration-service
@@ -438,8 +557,15 @@ console_operational_capabilities:
       authority_refs:
         - contracts/products.yaml
         - contracts/product-publication.yaml
+      observed_status:
+        profile: fixture-demonstration
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: unavailable
+        evidence_state: validated
+        demonstration_source: fixture
     - id: journey-recovery-audit-operation
-      journey_order: 12
+      journey_order: 13
       journey_stage: interruption-recovery-and-audit
       canonical_authority_ref: oos://delivery-workflows
       workflow_owner_repo: operator-orchestration-service
@@ -475,3 +601,10 @@ console_operational_capabilities:
         - contracts/durable-orchestration.yaml
         - contracts/delivery-art-operator-path.yaml
         - contracts/work-home-routing.yaml
+      observed_status:
+        profile: degraded-live
+        contract_state: defined
+        implementation_state: implemented
+        runtime_state: degraded
+        evidence_state: validated
+        demonstration_source: live-authority

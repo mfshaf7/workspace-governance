@@ -75,6 +75,40 @@ class ConsoleOperationalCapabilitiesTests(unittest.TestCase):
 
         self.assertInvalid(invalid, "terminal completion must require")
 
+    def test_reuse_requires_fresh_operational_live_truth(self) -> None:
+        invalid = copy.deepcopy(self.contract)
+        invalid["console_operational_capabilities"]["operating_truth"][
+            "reuse_requires_profile"
+        ] = "implemented-uncommissioned"
+        invalid["console_operational_capabilities"]["operating_truth"][
+            "fresh_evidence_required"
+        ] = False
+
+        self.assertInvalid(invalid, "reuse must require the operational-live profile")
+        self.assertInvalid(invalid, "reuse must require fresh evidence")
+
+    def test_observed_status_must_match_its_named_profile(self) -> None:
+        invalid = copy.deepcopy(self.contract)
+        invalid["console_operational_capabilities"]["capabilities"][0][
+            "observed_status"
+        ]["runtime_state"] = "unavailable"
+
+        self.assertInvalid(invalid, "observed status must exactly match profile")
+
+    def test_repository_custody_is_an_explicit_non_live_journey_stage(self) -> None:
+        capabilities = self.contract["console_operational_capabilities"]["capabilities"]
+        custody = next(
+            capability
+            for capability in capabilities
+            if capability["id"] == "repository-custody-operation"
+        )
+
+        self.assertEqual(custody["journey_stage"], "repository-custody")
+        self.assertEqual(
+            custody["observed_status"]["profile"],
+            "implemented-uncommissioned",
+        )
+
     def test_live_mode_cannot_fall_back_to_fixtures(self) -> None:
         invalid = copy.deepcopy(self.contract)
         invalid["console_operational_capabilities"]["fixture_boundary"][
