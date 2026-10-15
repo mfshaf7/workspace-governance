@@ -67,6 +67,7 @@ REQUIRED_STAGES = [
     "prototype-incubation",
     "delivery-planning",
     "architecture-decision",
+    "repository-custody",
     "source-realization",
     "human-review",
     "security-acceptance",
@@ -91,6 +92,7 @@ REQUIRED_CAPABILITY_FIELDS = {
     "proof_classes",
     "activation_work_item_refs",
     "authority_refs",
+    "observed_status",
 }
 WORK_ITEM_REF = re.compile(r"^openproject://work_packages/[1-9][0-9]*$")
 
@@ -131,6 +133,18 @@ def contract_issues(
         issues.append("status_dimensions must preserve the five independent truth dimensions")
     if model.get("status_profiles") != REQUIRED_PROFILES:
         issues.append("status_profiles must preserve truthful planned, preview, degraded, and live profiles")
+
+    operating_truth = model.get("operating_truth", {})
+    if operating_truth.get("observation_scope") != "local-dev-integration":
+        issues.append("operating truth must remain scoped to local-dev-integration")
+    if operating_truth.get("reuse_requires_profile") != "operational-live":
+        issues.append("capability reuse must require the operational-live profile")
+    if operating_truth.get("fresh_evidence_required") is not True:
+        issues.append("capability reuse must require fresh evidence")
+    if operating_truth.get("stale_or_missing_behavior") != "not-reusable":
+        issues.append("stale or missing operating truth must not be reusable")
+    if not operating_truth.get("source_ref"):
+        issues.append("operating truth must cite its exact observation source")
 
     fixture = model.get("fixture_boundary", {})
     if fixture.get("live_mode_source") != "live-authority":
@@ -199,6 +213,16 @@ def contract_issues(
                 issues.append(f"{label} contains duplicate {field}")
         if set(capability.get("proof_classes", [])) != REQUIRED_PROOF_CLASSES:
             issues.append(f"{label} must require positive, negative, and terminal proof")
+        observed_status = capability.get("observed_status", {})
+        profile_name = observed_status.get("profile")
+        profile = REQUIRED_PROFILES.get(profile_name)
+        if profile is None:
+            issues.append(f"{label} has unknown observed status profile {profile_name!r}")
+        elif {
+            key: observed_status.get(key)
+            for key in REQUIRED_DIMENSIONS
+        } != profile:
+            issues.append(f"{label} observed status must exactly match profile {profile_name!r}")
         for ref in capability.get("activation_work_item_refs", []):
             if not isinstance(ref, str) or not WORK_ITEM_REF.fullmatch(ref):
                 issues.append(f"{label} has invalid activation work item ref {ref!r}")
@@ -222,6 +246,7 @@ def generated_view(contract: Mapping[str, Any]) -> dict[str, Any]:
             "terminal_completion_profile"
         ),
         "truth_dimensions": list(model.get("status_dimensions", {}).keys()),
+        "operating_truth": model.get("operating_truth"),
         "fixture_boundary": model.get("fixture_boundary"),
         "capabilities": [
             {
@@ -238,6 +263,11 @@ def generated_view(contract: Mapping[str, Any]) -> dict[str, Any]:
                 "proof_classes": capability.get("proof_classes"),
                 "activation_work_item_refs": capability.get("activation_work_item_refs"),
                 "authority_refs": capability.get("authority_refs"),
+                "observed_status": capability.get("observed_status"),
+                "observed_profile_qualifies_for_reuse": capability.get(
+                    "observed_status", {}
+                ).get("profile")
+                == model.get("operating_truth", {}).get("reuse_requires_profile"),
             }
             for capability in model.get("capabilities", [])
         ],

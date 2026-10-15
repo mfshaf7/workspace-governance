@@ -38,6 +38,14 @@ evidence is validated, and the demonstration source is the live authority.
 `planned`, `implemented-uncommissioned`, fixture, disconnected-preview, and
 degraded profiles remain truthful non-terminal postures.
 
+The contract also records one dated operating observation for every capability.
+That observation is not inferred from feature presence: it names the exact
+five-dimensional profile seen in the local `dev-integration` composition and
+cites the source packet that captured the audit. A dependency may be reused
+only when fresh authority evidence still resolves it as `operational-live`.
+Missing or stale evidence makes it non-reusable; it does not inherit the last
+successful claim.
+
 ## Plan Completeness
 
 An idea-to-product plan is complete only when every ordered journey stage has:
@@ -49,10 +57,16 @@ An idea-to-product plan is complete only when every ordered journey stage has:
 - accepted activation work and current authority references
 
 The required journey is idea and proposal, prototype incubation, Delivery ART
-planning, architecture decision, source realization, exact-head human review,
-distinct Security acceptance, governed source merge, Workspace Intake and
-Active Inventory, runtime and release, Product Portfolio, and interruption
-recovery and audit.
+planning, architecture decision, repository custody, source realization,
+exact-head human review, distinct Security acceptance, governed source merge,
+Workspace Intake and Active Inventory, runtime and release, Product Portfolio,
+and interruption recovery and audit.
+
+Repository custody is explicit because a new-product journey cannot enter
+source realization until the real repository, provider policy, dedicated
+credential, reconciliation, revocation, and rollback path are operational. A
+contract-only or uncommissioned adapter is therefore visible as
+`implemented-uncommissioned`, not silently treated as reusable infrastructure.
 
 The Console remains an adapter. OOS owns durable cross-domain orchestration,
 domain owners retain canonical state, WGCF evaluates and stores bounded
