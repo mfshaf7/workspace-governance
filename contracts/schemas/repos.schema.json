@@ -15,6 +15,7 @@
           "posture": { "enum": ["active", "suspended"] },
           "lifecycle": { "type": "string", "minLength": 1 },
           "repo_class": { "type": "string", "minLength": 1 },
+          "provider_repository": { "$ref": "#/$defs/providerRepository" },
           "requires_security_bindings": { "type": "boolean" },
           "security_review_subject": { "type": "boolean" },
           "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
@@ -34,6 +35,7 @@
           "posture": { "const": "retired" },
           "lifecycle": { "const": "retired" },
           "repo_class": { "type": "string", "minLength": 1 },
+          "provider_repository": { "$ref": "#/$defs/providerRepository" },
           "requires_security_bindings": { "type": "boolean" },
           "security_review_subject": { "type": "boolean" },
           "owns": { "type": "array", "items": { "type": "string", "minLength": 1 } },
@@ -59,6 +61,16 @@
     }
   },
   "$defs": {
+    "providerRepository": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id", "full_name"],
+      "properties": {
+        "provider": { "const": "github" },
+        "provider_repository_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "full_name": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$" }
+      },
+      "additionalProperties": false
+    },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "nullableText": { "type": ["string", "null"], "minLength": 1 },
     "recordEnvelope": {

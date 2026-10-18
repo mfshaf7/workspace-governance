@@ -68,6 +68,13 @@ human operator, and the merged head read back from the source provider.
 
 The provider installation is selected-repository only. Its minimum permissions
 are Metadata read, Contents write, Pull requests write, and Checks read.
+These remain the exact ordinary-source token permissions, even after an App-level
+Workflows grant. The contract's `source_purposes` separates ordinary source,
+trusted proposed-owner bootstrap and explicitly approved workflow maintenance.
+Only the latter two may use separately approved workflow-write authority; no
+model receives it. Platform owns installation selection and purpose-bound
+credential custody. An installed App or a prepared scaffold does not admit a
+repository or grant an operational runtime.
 Evidence records the bindings and durable references, never private keys,
 installation tokens, or other secret values.
 

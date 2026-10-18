@@ -174,6 +174,36 @@ class WorkspaceIntakeTests(unittest.TestCase):
                 self.assertEqual(artifacts["receipt"]["outcome"], "prepared")
                 self.assertEqual(artifacts["readback"]["authority_state"], "review-branch")
 
+    def test_proposed_provider_identity_preserves_custody_without_checkout(self) -> None:
+        provider = {"provider": "github", "provider_repository_id": "1421451929", "full_name": "sample-org/sample-source"}
+        request = request_for(self.repo_root, "repo", "sample-source")
+        request["requested_record"]["provider_repository"] = provider
+        request = intake.bind_artifact_digest(request)
+        first = self.apply(request, decision_for(request))
+        self.assertEqual(provider, first["readback"]["record"]["provider_repository"])
+        self.assertFalse((self.repo_root.parent / "sample-source").exists())
+        replay = self.apply(request, decision_for(request))
+        self.assertEqual(provider, replay["readback"]["record"]["provider_repository"])
+        duplicate = request_for(self.repo_root, "repo", "other-source", key="intake:duplicate")
+        duplicate["requested_record"]["provider_repository"] = provider
+        duplicate = intake.bind_artifact_digest(duplicate)
+        with self.assertRaisesRegex(intake.WorkspaceIntakeError, "already belongs"):
+            self.apply(duplicate, decision_for(duplicate))
+        update = request_for(self.repo_root, "repo", "sample-source", action="update", key="intake:change-provider")
+        update["source"] = request["source"]
+        update["requested_record"]["provider_repository"] = {**provider, "provider_repository_id": "42"}
+        update = intake.bind_artifact_digest(update)
+        with self.assertRaisesRegex(intake.WorkspaceIntakeError, "identity is immutable"):
+            self.apply(update, decision_for(update))
+
+    def test_provider_repository_wire_is_closed_and_uses_rest_identity(self) -> None:
+        for value in ("R_123", "0", "-1", 1421451929):
+            request = request_for(self.repo_root, "repo", "bad-provider")
+            request["requested_record"]["provider_repository"] = {"provider": "github", "provider_repository_id": value, "full_name": "sample-org/source"}
+            request = intake.bind_artifact_digest(request)
+            with self.subTest(value=value), self.assertRaises(intake.WorkspaceIntakeError):
+                self.apply(request, decision_for(request))
+
     def test_temporal_migration_preserves_v1_truth_and_digest(self) -> None:
         legacy = json.loads(
             (

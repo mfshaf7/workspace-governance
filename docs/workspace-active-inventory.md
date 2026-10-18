@@ -113,6 +113,15 @@ migrate without an unsafe cross-repository flag day:
 
 New consumers should use `posture` and `maturity` directly.
 
+An explicit repository `provider_repository` binding is copied unchanged from
+the admitted Intake record during promotion. Promotion cannot substitute or
+invent another physical repository. Ordinary inventory updates preserve its
+immutable `(provider, provider_repository_id)` pair; reviewed current `full_name`
+coordinates may change after a real provider rename/transfer. Existing legacy
+records without explicit provider coordinates remain valid. Neither this field,
+promotion nor an App installation grants source credentials or activates a
+runtime. Provider installation selection remains Platform authority.
+
 ## Migration
 
 The one-time v1 migration preserves existing domain values and adds versioned,

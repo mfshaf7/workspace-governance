@@ -141,7 +141,7 @@ class WorkspaceInventoryTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def admit(self, kind: str, name: str, classification: str = "admitted") -> None:
+    def admit(self, kind: str, name: str, classification: str = "admitted", provider_repository: dict | None = None) -> None:
         state = intake.current_state(self.repo_root, kind, name)
         request = {
             "schema_version": 2,
@@ -162,6 +162,8 @@ class WorkspaceInventoryTests(unittest.TestCase):
             "expected_state": state["expected_state"],
             "idempotency_key": f"intake:{kind}:{name}",
         }
+        if provider_repository:
+            request["requested_record"]["provider_repository"] = provider_repository
         request = intake.bind_artifact_digest(request)
         decision = {
             "schema_version": 2,
@@ -315,6 +317,45 @@ class WorkspaceInventoryTests(unittest.TestCase):
                 self.assertEqual(state["active_record_version"], 1)
                 self.assertEqual(artifacts["receipt"]["outcome"], "prepared")
                 self.assertEqual(artifacts["readback"]["active_record"]["posture"], "active")
+
+    def test_promotion_and_lifecycle_preserve_explicit_provider_identity(self) -> None:
+        provider = {"provider": "github", "provider_repository_id": "1421451929", "full_name": "sample-org/sample-source"}
+        self.admit("repo", "sample-source", provider_repository=provider)
+        request, readiness = self.promotion_artifacts("repo", "sample-source")
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "preserve the admitted provider"):
+            self.apply(request, readiness)
+        request["active_record"]["value"]["provider_repository"] = provider
+        request = inventory.bind_artifact_digest(request)
+        readiness["request_ref"]["digest"] = request["request_digest"]
+        readiness = inventory.bind_artifact_digest(readiness)
+        result = self.apply(request, readiness)
+        record = result["readback"]["active_record"]
+        self.assertEqual(provider, record["provider_repository"])
+        self.assertEqual(provider, self.apply(request, readiness)["readback"]["active_record"]["provider_repository"])
+        value = copy.deepcopy(record)
+        value.pop("record")
+        for replacement in (None, {}, "bad-provider", {**provider, "provider_repository_id": "42"}):
+            changed = copy.deepcopy(value)
+            if replacement is None:
+                changed.pop("provider_repository")
+            else:
+                changed["provider_repository"] = replacement
+            update, ready = self.lifecycle_artifacts("repo", "sample-source", "update", requested_value=changed)
+            with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "identity is immutable"):
+                self.apply_lifecycle(update, ready)
+        value["provider_repository"]["full_name"] = "other-org/renamed-source"
+        update, ready = self.lifecycle_artifacts("repo", "sample-source", "update", requested_value=value)
+        result = self.apply_lifecycle(update, ready)
+        self.assertEqual("1421451929", result["readback"]["record"]["provider_repository"]["provider_repository_id"])
+        self.admit("repo", "legacy-source")
+        request, readiness = self.promotion_artifacts("repo", "legacy-source")
+        result = self.apply(request, readiness)
+        value = copy.deepcopy(result["readback"]["active_record"])
+        value.pop("record")
+        value["provider_repository"] = provider
+        update, ready = self.lifecycle_artifacts("repo", "legacy-source", "update", requested_value=value)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "already belongs"):
+            self.apply_lifecycle(update, ready)
 
     def test_exact_replay_does_not_duplicate_or_increment(self) -> None:
         self.admit("component", "test-replay")

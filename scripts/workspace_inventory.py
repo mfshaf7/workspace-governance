@@ -17,7 +17,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from contracts_lib import dump_json, load_json, load_yaml
-from workspace_intake import canonical_digest
+from workspace_intake import canonical_digest, provider_repository_conflicts
 
 
 ARTIFACT_SCHEMAS = {
@@ -225,6 +225,8 @@ def _validate_request_bindings(
         raise WorkspaceInventoryError("active_record kind does not match promotion target")
     if request["active_record"]["id"] != target["record_id"]:
         raise WorkspaceInventoryError("active_record id does not match promotion target")
+    if target["kind"] == "repo" and request["active_record"]["value"].get("provider_repository") != intake_entry.get("provider_repository"):
+        raise WorkspaceInventoryError("promotion must preserve the admitted provider repository binding")
     _validate_compatibility_alias(target["kind"], request["active_record"]["value"])
 
 
@@ -412,6 +414,8 @@ def apply_promotion(
             raise WorkspaceInventoryError("promotion target is missing from Workspace Intake")
         _validate_request_bindings(request, readiness, state, intake_entry)
         record = _record_from_request(request, readiness, completed_at)
+        if kind == "repo" and record.get("provider_repository") and provider_repository_conflicts(repo_root, record["provider_repository"], name):
+            raise WorkspaceInventoryError("provider repository identity already belongs to another workspace record")
         del intake[COLLECTIONS[kind]][name]
         inventory.setdefault(COLLECTIONS[kind], {})[name] = record
         _validate_contract(repo_root, "intake-register.yaml", intake)
@@ -521,6 +525,11 @@ def _validate_lifecycle_bindings(
             raise WorkspaceInventoryError("requested_value must not replace the record envelope")
         if requested_value.get("posture") != current_posture:
             raise WorkspaceInventoryError("update must preserve inventory posture")
+        if target["kind"] == "repo":
+            previous = record.get("provider_repository")
+            provider = requested_value.get("provider_repository")
+            if previous and (not isinstance(provider, dict) or any(previous[key] != provider.get(key) for key in ("provider", "provider_repository_id"))):
+                raise WorkspaceInventoryError("inventory provider repository identity is immutable")
         _validate_compatibility_alias(target["kind"], requested_value)
     if action == "restore":
         prior_events = _target_history(history, target["record_id"])
@@ -762,6 +771,8 @@ def apply_lifecycle(
         history["events"].append(event)
         _validate_contract(repo_root, f"{COLLECTIONS[kind]}.yaml", inventory)
         _validate_history(repo_root, history)
+        if kind == "repo" and updated.get("provider_repository") and provider_repository_conflicts(repo_root, updated["provider_repository"], name):
+            raise WorkspaceInventoryError("provider repository identity already belongs to another workspace record")
         _write_pair_atomically(inventory_path, inventory, history_path, history)
         artifacts = _build_lifecycle_artifacts(
             request,

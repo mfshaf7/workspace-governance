@@ -12,6 +12,7 @@
     "profiles",
     "authority_separation",
     "required_bindings",
+    "source_purposes",
     "provider_boundary",
     "evidence",
     "bootstrap",
@@ -115,6 +116,16 @@
       },
       "additionalProperties": false
     },
+    "source_purposes": {
+      "type": "object",
+      "required": ["ordinary-source", "trusted-owner-bootstrap", "workflow-maintenance"],
+      "properties": {
+        "ordinary-source": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "admitted" }, "inventory_posture": { "const": "active" }, "model_writes_allowed": { "const": true }, "workflow_write": { "const": "denied" } } }] },
+        "trusted-owner-bootstrap": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "proposed" }, "inventory_posture": { "type": "null" }, "model_writes_allowed": { "const": false }, "workflow_write": { "const": "separately-approved-only" } } }] },
+        "workflow-maintenance": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "admitted" }, "inventory_posture": { "const": "active" }, "model_writes_allowed": { "const": false }, "workflow_write": { "const": "explicit-approval-required" } } }] }
+      },
+      "additionalProperties": false
+    },
     "provider_boundary": {
       "type": "object",
       "required": [
@@ -209,6 +220,18 @@
     }
   },
   "$defs": {
+    "sourcePurpose": {
+      "type": "object",
+      "required": ["intake_classification", "inventory_posture", "model_writes_allowed", "workflow_write", "rule"],
+      "properties": {
+        "intake_classification": { "enum": ["admitted", "proposed"] },
+        "inventory_posture": { "enum": ["active", null] },
+        "model_writes_allowed": { "type": "boolean" },
+        "workflow_write": { "enum": ["denied", "separately-approved-only", "explicit-approval-required"] },
+        "rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "uniqueStrings": {
       "type": "array",
       "minItems": 1,
