@@ -8,7 +8,10 @@ summary: >-
   gates to one source-backed authority item, while its source Landing Unit was
   ordered after work whose earlier merge that same item had to unlock. The
   packet passed validation and blocked source-realization item 1285 only after
-  its exact merge-ready head existed.
+  its exact merge-ready head existed. The later split topology still allowed
+  platform-operation Security item 1303 to close against the pre-change
+  Platform tree before item 1291 had produced the exact candidate policy tree
+  that the gate was meant to authorize.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-24-art-architecture-topology-capture-regression.yaml
 status: accepted
 source_type: machine-audit
@@ -49,6 +52,31 @@ signals:
   - https://github.com/mfshaf7/operator-orchestration-service/pull/331
   - workspace-governance/docs/delivery-art-operator-path.md
   - operator-orchestration-service/src/delivery-art/work-session.js
+- id: exact-tree-gate-closed-before-candidate-source
+  title: Exact-tree Security authority closed before the gated candidate tree existed
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    Work item 1303 approved and closed against Platform tree
+    0ce3a6aeedc81227f2e55ac06a7f93eb271065b2 while the reviewed Security
+    decision bound Architecture Packet digest 8ad9c43664bb580a2eef7a23a8ddfa77c95bdea7bfc00efcb424d5008b71062a.
+    That Platform tree still carried complete-runtime policy digest
+    ea428f9ad9a14368aa9f789be278d3aac44def2cb2a4bc31caec7768f03335bb,
+    so the existing runtime status command correctly denied the composition as
+    stale. The split authority items removed the earlier graph cycle but did
+    not enforce the temporal rule that an exact-tree gate must evaluate an
+    already materialized candidate source tree before the authority item can
+    close and before the gated merge occurs.
+  source_refs:
+  - openproject://work_packages/1291
+  - openproject://work_packages/1303
+  - architecture-packet:delivery-1275-v1
+  - https://github.com/mfshaf7/security-architecture/pull/262
+  - platform-engineering/products/governance-operations-console/complete-runtime-policy.yaml
+  - security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.yaml
 resolution:
   after_action_ref: null
   control_refs:
@@ -64,11 +92,27 @@ resolution:
     The operator approved the repair. Epic 1275 now uses separate Security
     authority items and Landing Units for source realization, orchestration,
     and platform operation, and the invalid Architecture Packet was superseded.
-    Candidate closure still waits for validator parity to land in Workspace
-    Governance, OOS, and WGCF with finalized defect evidence.
+    The new exact-tree regression requires the existing planning and work-session
+    controls to enforce candidate-source-before-authority-close ordering: the
+    gated Landing Unit may prepare and publish its candidate, Security must bind
+    that exact candidate tree, and only then may the gated merge proceed.
+    Candidate closure still waits for that temporal rule and validator parity to
+    land in Workspace Governance, OOS, and WGCF through the planned final-guidance
+    Landing Unit; no additional ART child is required.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-15'
+  due_on: '2026-10-20'
   note: >-
-    Land the approved combined-topology validator through work item 1304, prove
-    parity in OOS and WGCF, then close this regression through linked evidence.
+    The 2026-10-16 follow-up was missed while Epic1275 qualification remained
+    blocked. Re-review on 2026-10-18 through the same final-guidance work;
+    preserve the original missed date and do not imply closure.
+    Rehearse the corrected 1291 candidate -> 1303 exact-tree acceptance -> 1291
+    merge order, then land the candidate-source-before-authority-close rule and
+    validator parity through the existing Epic 1275 final-guidance work.
+
+    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson
+    remains open. The existing final-guidance owner still owes the control
+    described above; current admission/authoring tests do not close that work.
+    Next accountable review is 2026-10-20, not a claimed completion deadline.
+    This records a missed follow-up and its current disposition; it does not
+    erase the prior due dates or mark unlanded controls as implemented.
