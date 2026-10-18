@@ -15,6 +15,7 @@ canonical_truth:
     - Merged Workspace Governance source is the only canonical lifecycle truth.
     - Every accepted mutation increments the record version and appends exactly one immutable history event.
     - A lifecycle request changes one canonical record and never creates or deletes its identity.
+    - Explicit repository provider/id pairs cannot be removed, substituted or assigned to another workspace key. Reviewed full_name coordinates may change after a real provider rename or transfer without changing physical identity; legacy records without a provider binding remain valid.
 actions:
   update:
     allowed_from:

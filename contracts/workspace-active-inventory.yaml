@@ -15,6 +15,7 @@ canonical_truth:
     - An entrant identity exists in Workspace Intake or active inventory, never both.
     - Promotion removes one admitted intake entry and adds one active record in the same reviewed source change.
     - Merged Workspace Governance source is authority; WGCF decisions, OOS state, and Console projections are evidence only.
+    - Repository promotion preserves the exact admitted provider_repository binding, including its immutable provider/id pair and current coordinates; it cannot invent or substitute another physical repository.
 record_contract:
   schema_version: 2
   identity_format: <kind>:<name>

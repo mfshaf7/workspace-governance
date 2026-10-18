@@ -109,6 +109,8 @@ canonical_truth:
     - A merged canonical register readback is the only successful mutation result.
     - WGCF receipts and OOS workflow state are evidence, not substitute authority.
     - Intake mutation never activates runtime, grants security acceptance, or promotes product maturity.
+    - An explicit provider_repository binds the provider and immutable positive decimal REST provider_repository_id to current full_name coordinates; provider identity cannot be removed, substituted or reused under another intake or inventory key.
+    - Legacy repository records without explicit provider coordinates remain valid. Proposed classification may precede a physical checkout; it grants only separately approved trusted bootstrap, not ordinary source, admission or runtime activation.
 schema_refs:
   request: contracts/schemas/workspace-intake-request.schema.json
   decision: contracts/schemas/workspace-intake-decision.schema.json
