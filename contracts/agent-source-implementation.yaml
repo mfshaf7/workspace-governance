@@ -50,7 +50,7 @@ source_purposes:
     inventory_posture: active
     model_writes_allowed: true
     workflow_write: denied
-    rule: Require canonical admitted active ownership and the actual approved source subject, Landing Unit, branch, fetched base and human reviewer. Existing legacy owner mappings remain valid; explicit provider identities must be resolved through Platform's selected installation. Model writes stay within the accepted source change set.
+    rule: Require current active Inventory with canonical consumed admitted-Intake lineage, not simultaneous current Intake and Inventory entries, plus the actual approved source subject, Landing Unit, branch, fetched base and human reviewer. Existing legacy owner mappings remain valid; explicit provider identities must be resolved through Platform's selected installation. Model writes stay within the accepted source change set.
   trusted-owner-bootstrap:
     intake_classification: proposed
     inventory_posture: null

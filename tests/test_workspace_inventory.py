@@ -126,7 +126,8 @@ class WorkspaceInventoryTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def admit(self, kind: str, name: str, classification: str = "admitted", provider_repository: dict | None = None) -> None:
+    def admit(self, kind: str, name: str, classification: str = "admitted", provider_repository: dict | None = None,
+              domain_value: dict | None = None) -> None:
         if kind == "repo" and provider_repository is None:
             provider_repository = {"provider": "github", "provider_repository_id": str(int(hashlib.sha256(name.encode()).hexdigest()[:10], 16)),
                                    "full_name": f"example-organization/{name}"}
@@ -146,7 +147,7 @@ class WorkspaceInventoryTests(unittest.TestCase):
             "action": "add",
             "requested_classification": classification,
             "owner_route": "workspace-governance",
-            "requested_record": intake_domain_record(kind),
+            "requested_record": copy.deepcopy(domain_value) if domain_value is not None else intake_domain_record(kind),
             "expected_state": state["expected_state"],
             "idempotency_key": f"intake:{kind}:{name}",
         }

@@ -617,12 +617,22 @@ def delivery_art_owner_evidence_profile_coverage_errors(
     workspace_root: Path,
     active_repos: list[str],
     coverage: dict,
+    inventory_contracts: dict | None = None,
 ) -> list[str]:
     errors: list[str] = []
     profile_path = coverage.get("profile_path")
     activated = coverage.get("activated_owner_repos") or []
     nonactivated_entries = coverage.get("nonactivated_owner_repos") or []
     nonactivated = [entry.get("repo") for entry in nonactivated_entries]
+    # Extend the existing coverage inventory, not its core activation or
+    # explicit exclusions. Routine source admission cannot edit this policy.
+    derived = set()
+    if coverage.get("inventory_derived_source_owner_profiles") is True and inventory_contracts is not None:
+        from workspace_repo_registration import is_source_owner, source_owner_rule
+        derived = {name for name, entry in inventory_contracts["repos"]["repos"].items()
+                   if is_source_owner(name, entry)
+                   and inventory_contracts["repo_rules"].get(name) == source_owner_rule(name, entry)}
+        derived -= set(activated) | set(nonactivated)
 
     if len(set(activated)) != len(activated):
         errors.append("owner evidence profile activation contains duplicate repos")
@@ -634,7 +644,7 @@ def delivery_art_owner_evidence_profile_coverage_errors(
             "owner evidence profile inventory activates and excludes the same repos: "
             + ", ".join(overlap)
         )
-    inventory = set(activated) | set(nonactivated)
+    inventory = set(activated) | derived | set(nonactivated)
     active = set(active_repos)
     if inventory != active:
         missing = sorted(active - inventory)
@@ -648,7 +658,7 @@ def delivery_art_owner_evidence_profile_coverage_errors(
         errors.append("owner evidence profile path differs from the approved contract")
         return errors
 
-    for repo_name in activated:
+    for repo_name in [*activated, *sorted(derived)]:
         path = workspace_root / repo_name / profile_path
         if not path.exists():
             errors.append(f"{path}: activated owner evidence profile is missing")
@@ -741,6 +751,7 @@ def validate_delivery_art_operator_path_contract(
     repo_root: Path,
     active_repos: list[str],
     errors: list[str],
+    inventory_contracts: dict | None = None,
 ) -> None:
     contract_path = repo_root / "contracts/delivery-art-operator-path.yaml"
     if not contract_path.exists():
@@ -919,7 +930,7 @@ def validate_delivery_art_operator_path_contract(
         errors.append(f"{contract_path}: {work_session_error}")
     coverage = work_session.get("owner_evidence_profile_coverage") or {}
     for coverage_error in delivery_art_owner_evidence_profile_coverage_errors(
-        workspace_root, active_repos, coverage
+        workspace_root, active_repos, coverage, inventory_contracts
     ):
         errors.append(f"{contract_path}: {coverage_error}")
 
@@ -1314,7 +1325,7 @@ def main() -> int:
     validate_delivery_art_blocker_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_lineage_contract(workspace_root, errors)
     validate_delivery_art_operator_path_contract(
-        workspace_root, repo_root, active_repos, errors
+        workspace_root, repo_root, active_repos, errors, contracts
     )
     validate_project_lifecycle_runtime_binding(workspace_root, contracts, errors)
 

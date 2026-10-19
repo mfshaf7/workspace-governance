@@ -1,4 +1,5 @@
 import copy
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -14,8 +15,8 @@ from contracts_lib import load_yaml
 from workspace_repo_registration import (GUIDANCE_PATHS, INDEX_START, INDEX_END,
     RepositoryRegistrationError, inventory_companion_projection, is_source_owner,
     source_owner_index, source_owner_rule, validate_source_owner_guidance_delta,
-    source_owner_context, source_owner_raw_context, validate_registration_companions)
-from validate_cross_repo_truth import validate_workspace_root_repo_coverage
+    source_owner_context, source_owner_raw_context, validate_registration_companions, proposed_source_owner_authority)
+from validate_cross_repo_truth import validate_workspace_root_repo_coverage, delivery_art_owner_evidence_profile_coverage_errors
 
 
 def source_entry():
@@ -134,6 +135,45 @@ class SourceOwnerProjectionTests(unittest.TestCase):
                 source_owner_rule("synthetic-source", entry)
         self.assertFalse(is_source_owner("workspace-governance", self.before["repos"]["workspace-governance"]))
 
+    def test_source_owner_profile_coverage_is_derived_but_the_real_profile_is_still_required(self):
+        coverage = {"profile_path": "contracts/delivery-art-work-session/evidence-profile.json",
+                    "activated_owner_repos": [], "nonactivated_owner_repos": [],
+                    "inventory_derived_source_owner_profiles": True}
+        contracts = {"repos": self.after, "repo_rules": {"synthetic-source": source_owner_rule("synthetic-source", source_entry())}}
+        def check():
+            return delivery_art_owner_evidence_profile_coverage_errors(Path(self.temp.name), ["synthetic-source"], coverage, contracts)
+        errors = check()
+        self.assertTrue(any("activated owner evidence profile is missing" in error for error in errors), errors)
+        self.assertFalse(any("must exactly cover" in error for error in errors), errors)
+        target = Path(self.temp.name) / "synthetic-source" / coverage["profile_path"]
+        target.parent.mkdir(parents=True)
+        # Metadata fixture only; no app tests are executed or claimed here.
+        profile = {"schema_version": 1, "profile_id": "synthetic-source-metadata-fixture", "owner_repo": "synthetic-source",
+                   "commands": [{"id": "fixture-tests", "kind": "tests", "conformance_binding": "matching-fidelity"},
+                                {"id": "fixture-validation", "kind": "validations", "conformance_binding": "none"}]}
+        target.write_text(json.dumps(profile))
+        self.assertEqual(check(), [])
+        profile["owner_repo"] = "substituted-owner"
+        target.write_text(json.dumps(profile))
+        self.assertTrue(any("owner_repo must equal synthetic-source" in error for error in check()))
+        coverage["nonactivated_owner_repos"] = [{"repo": "synthetic-source", "reason": "Explicit reviewed nonactivation"}]
+        target.unlink()
+        self.assertEqual(check(), [], "Explicit nonactivation must win over derived source eligibility")
+
+    def test_derived_profile_coverage_cannot_activate_foreign_or_custom_owner_controls(self):
+        coverage = {"profile_path": "contracts/delivery-art-work-session/evidence-profile.json",
+                    "activated_owner_repos": [], "nonactivated_owner_repos": [],
+                    "inventory_derived_source_owner_profiles": True}
+        for entry, rule in (
+            ({**source_entry(), "requires_security_bindings": True}, source_owner_rule("synthetic-source", source_entry())),
+            (source_entry(), {**source_owner_rule("synthetic-source", source_entry()), "required_patterns": {"readme": ["custom"], "agents": []}}),
+        ):
+            inventory = copy.deepcopy(self.after)
+            inventory["repos"]["synthetic-source"] = entry
+            errors = delivery_art_owner_evidence_profile_coverage_errors(Path(self.temp.name), ["synthetic-source"], coverage,
+                {"repos": inventory, "repo_rules": {"synthetic-source": rule}})
+            self.assertTrue(any("must exactly cover" in error for error in errors), errors)
+
     def test_guidance_companion_can_change_only_derived_data_not_instructions(self):
         text = (self.root / GUIDANCE_PATHS[1]).read_text()
         projected = inventory_companion_projection(self.root, "repo", self.before, self.after)[GUIDANCE_PATHS[1]]
@@ -168,6 +208,62 @@ class SourceOwnerProjectionTests(unittest.TestCase):
                 (self.root / relative).write_text(content)
             self.assert_full_model_valid(following)
             current = following
+
+
+class ProposedSourceOwnerAuthorityTests(unittest.TestCase):
+    def setUp(self):
+        from test_workspace_inventory import WorkspaceInventoryTests
+        self.native = WorkspaceInventoryTests()
+        self.native.setUp()
+        self.addCleanup(self.native.tearDown)
+        self.root = self.native.repo_root
+        self.binding = {"provider": "github", "provider_repository_id": "123456789", "full_name": "example-organization/bootstrap-owner"}
+        self.domain = {"kind": "repo", "repo_class": "product-source", "requires_security_bindings": False,
+                       "security_owner": "security-architecture", "notes": "Source-only test purpose; no app or runtime acceptance.",
+                       "validation_behavior": source_entry()["validation_behavior"]}
+
+    def test_native_proposed_projection_is_read_only_and_never_becomes_ordinary_source(self):
+        self.native.admit("repo", "bootstrap-owner", classification="proposed", provider_repository=self.binding, domain_value=self.domain)
+        before = {path: path.read_bytes() for path in (self.root / "contracts").rglob("*") if path.is_file()}
+        value = proposed_source_owner_authority(self.root, "bootstrap-owner", self.binding)
+        self.assertEqual(value, proposed_source_owner_authority(self.root, "bootstrap-owner", self.binding))
+        self.assertEqual(value["classification"], "proposed")
+        self.assertEqual(value["intake_entry_ref"]["id"], "repo:bootstrap-owner")
+        self.assertEqual(value["intake_entry_ref"]["version"], 1)
+        self.assertEqual(value["provider_repository"], self.binding)
+        self.assertTrue(value["source_bootstrap_eligible"])
+        self.assertFalse(value["ordinary_source_eligible"])
+        self.assertFalse(value["model_writes_allowed"])
+        self.assertFalse(value["canonical_mutation"])
+        self.assertFalse(value["runtime_activation"])
+        self.assertIsNone(value["inventory_posture"])
+        self.assertTrue(all(path.read_bytes() == content for path, content in before.items()))
+        self.assertFalse((self.root.parent / "bootstrap-owner").exists(), "Authority reading must not check out the selected repo")
+        with self.assertRaisesRegex(RepositoryRegistrationError, "differs"):
+            proposed_source_owner_authority(self.root, "bootstrap-owner", {**self.binding, "provider_repository_id": "42"})
+
+    def test_missing_admitted_out_of_scope_and_existing_active_targets_do_not_borrow_bootstrap(self):
+        with self.assertRaisesRegex(RepositoryRegistrationError, "current proposed"):
+            proposed_source_owner_authority(self.root, "missing-owner", self.binding)
+        for classification in ("admitted", "out-of-scope"):
+            name = f"{classification}-owner"
+            domain = self.domain if classification == "admitted" else {
+                "kind": "repo", "repo_class": None, "requires_security_bindings": None,
+                "security_owner": None, "notes": "Explicitly out of scope."}
+            self.native.admit("repo", name, classification=classification, domain_value=domain)
+            with self.assertRaisesRegex(RepositoryRegistrationError, "current proposed"):
+                proposed_source_owner_authority(self.root, name, self.binding)
+        self.native.admit("repo", "active-owner", domain_value=self.domain)
+        request, readiness = self.native.promotion_artifacts("repo", "active-owner")
+        self.native.apply(request, readiness)
+        with self.assertRaisesRegex(RepositoryRegistrationError, "active or retired"):
+            proposed_source_owner_authority(self.root, "active-owner", self.binding)
+
+    def test_proposed_control_or_security_bound_owner_is_not_a_source_bootstrap_subject(self):
+        domain = {**self.domain, "requires_security_bindings": True}
+        self.native.admit("repo", "bootstrap-owner", classification="proposed", provider_repository=self.binding, domain_value=domain)
+        with self.assertRaisesRegex(RepositoryRegistrationError, "control/Security"):
+            proposed_source_owner_authority(self.root, "bootstrap-owner", self.binding)
 
 
 if __name__ == "__main__":

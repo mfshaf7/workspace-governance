@@ -314,6 +314,7 @@
           "required": [
             "contract_version",
             "profile_path",
+            "inventory_derived_source_owner_profiles",
             "activated_owner_repos",
             "nonactivated_owner_repos",
             "rules"
@@ -323,6 +324,7 @@
             "profile_path": {
               "const": "contracts/delivery-art-work-session/evidence-profile.json"
             },
+            "inventory_derived_source_owner_profiles": { "const": true },
             "activated_owner_repos": {
               "const": [
                 "workspace-governance",

@@ -266,6 +266,7 @@ delivery_art_operator_path:
     owner_evidence_profile_coverage:
       contract_version: 1
       profile_path: contracts/delivery-art-work-session/evidence-profile.json
+      inventory_derived_source_owner_profiles: true
       activated_owner_repos:
         - workspace-governance
         - workspace-governance-control-fabric

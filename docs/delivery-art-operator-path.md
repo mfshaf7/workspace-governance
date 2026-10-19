@@ -367,6 +367,17 @@ silence is not acceptance. Cross-repo validation fails when an active repo is
 missing from that inventory or an activated profile is absent, malformed, or
 owned by another repo.
 
+The fixed core-owner activation and explicit exclusions remain reviewed policy.
+With `inventory_derived_source_owner_profiles`, the same coverage check also
+includes provider-bound, Intake-promoted source-only owners from current
+Inventory whose repo rules are the exact derived source-owner rule. An explicit
+exclusion still wins. This avoids a core-policy patch for each new app without
+granting shared/control-owner authority or allowing the registration writer to
+edit the operator-path contract. The actual owner profile must still exist and
+validate; OOS must select and validate its exact fetched-base profile against
+the accepted cases, evidence kinds and fidelity before source start. Inventory
+membership alone, a template label or bootstrap-only tests are not app evidence.
+
 Architecture preflight must also prove evidence-profile compatibility for
 every source-backed Landing Unit in the initiative before the first source
 Landing Unit starts. For each owner repository, compare every planned

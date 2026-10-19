@@ -60,8 +60,27 @@ signals:
     owner transaction, OOS finite publication/readback and early WGCF findings
     are staged, not accepted or activated. Source/consumer pin refresh,
     proposed-owner bootstrap and full Console operating proof remain unfinished
-    in the approved maintenance units. No new ART child,
-    closing control or completion claim is created by this capture.
+    in the approved maintenance units. The next applicability inspection also
+    proved that Delivery profile coverage is a schema-constant eight-owner
+    list plus three exclusions, with exact active-inventory coverage required;
+    a new valid source owner is not yet included. OOS canonicalRepo additionally
+    requires the actual local owner checkout. Neither the full local WG model
+    nor a Platform metadata refresh alone proves these cross-repo/source-start
+    prerequisites. Extend the existing profile coverage under the approved
+    source-only registration policy, keep real fetched-base profile and
+    conformance checks, and establish the exact custody-bound checkout through
+    bootstrap rather than hidden operator repair. Do not waive controls or
+    treat source registration as operating acceptance. No new ART child,
+    closing control or completion claim is created by this capture. During
+    pre-activation bootstrap wiring, source inspection additionally proved
+    that Repository Custody authenticates its workspace API but does not
+    privately assign each historical request to its calling adapter. Correct
+    uncommitted caller-owned-custody wording: the new source preparation,
+    request, approval and session are caller/operator-bound, while successful
+    canonical custody remains shared workspace authority. Preserve its actual
+    contract and exact receipt/provider binding instead of inventing legacy
+    ownership, an adoption mechanism or a new repair item. This is a source
+    review correction before activation, not an observed live custody defect.
   source_refs:
   - repo://workspace-governance/scripts/validate_contracts.py
   - repo://workspace-governance/scripts/audit_workspace_layout.py

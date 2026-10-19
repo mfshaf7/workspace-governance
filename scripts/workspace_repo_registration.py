@@ -25,29 +25,71 @@ class RepositoryRegistrationError(RuntimeError):
     pass
 
 
-def is_source_owner(name: str, entry: dict[str, Any]) -> bool:
-    """An indexed source owner is not an implicit new control-plane owner."""
-    envelope = entry.get("record", {})
-    lineage = envelope.get("lineage", {})
+def _source_owner_admission_metadata(entry: dict[str, Any]) -> bool:
     validation = entry.get("validation_behavior", {})
     binding = entry.get("provider_repository", {})
+    if not isinstance(validation, dict) or not isinstance(binding, dict):
+        return False
     return (
-        bool(NAME.fullmatch(name))
-        and entry.get("requires_security_bindings") is False
+        entry.get("requires_security_bindings") is False
         and entry.get("security_review_subject", False) is False
-        and bool(entry.get("owns")) and bool(entry.get("must_not_own"))
         and validation.get("posture") == "covered-by-owner-repo"
         and validation.get("wgcf_graph_role") == "product-runtime-source"
-        and envelope.get("id") == f"repo:{name}"
-        and lineage.get("source") == "workspace-intake"
-        and lineage.get("source_ref") == f"repo:{name}"
         and binding.get("provider") == "github"
         and bool(re.fullmatch(r"[1-9][0-9]*", str(binding.get("provider_repository_id", ""))))
         and bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+", str(binding.get("full_name", ""))))
         and str(binding.get("full_name", "")).split("/")[-1] not in {".", ".."}
+    )
+
+
+def is_source_owner(name: str, entry: dict[str, Any]) -> bool:
+    """An indexed source owner is not an implicit new control-plane owner."""
+    envelope = entry.get("record", {})
+    lineage = envelope.get("lineage", {})
+    return (
+        bool(NAME.fullmatch(name)) and _source_owner_admission_metadata(entry)
+        and bool(entry.get("owns")) and bool(entry.get("must_not_own"))
+        and envelope.get("id") == f"repo:{name}"
+        and lineage.get("source") == "workspace-intake"
+        and lineage.get("source_ref") == f"repo:{name}"
         and entry.get("posture") in {"active", "suspended", "retired"}
         and entry.get("lifecycle") == entry.get("posture")
     )
+
+
+def proposed_source_owner_authority(repo_root: Path, name: str, expected_provider_repository: dict) -> dict:
+    """Read the real proposed entry, never a synthetic active source identity.
+
+    OOS must independently verify successful canonical custody under its
+    authenticated workspace API contract and pass
+    that exact binding. This projection creates no target checkout, credential,
+    profile, admission, source session, workflow state or effect authorization.
+    """
+    from contracts_lib import load_yaml
+    from workspace_intake import _load_register, _validate_register, canonical_digest, provider_repository_conflicts
+
+    if not isinstance(name, str) or not NAME.fullmatch(name):
+        raise RepositoryRegistrationError("Bootstrap requires an exact canonical repository key.")
+    register = _load_register(repo_root)
+    _validate_register(repo_root, register)
+    inventory = load_yaml(repo_root / "contracts/repos.yaml")
+    if name in inventory.get("repos", {}) or name in inventory.get("retired_repos", {}):
+        raise RepositoryRegistrationError("Bootstrap cannot replace an active or retired Inventory identity.")
+    entry = register.get("repos", {}).get(name)
+    if not entry or entry.get("status") != "proposed" or entry["record"]["id"] != f"repo:{name}":
+        raise RepositoryRegistrationError("Bootstrap requires the current proposed Intake entry; ordinary source remains denied.")
+    if not _source_owner_admission_metadata(entry):
+        raise RepositoryRegistrationError("This proposed owner requires explicit control/Security registration, not source-only bootstrap.")
+    binding = entry["provider_repository"]
+    if binding != expected_provider_repository or provider_repository_conflicts(repo_root, binding, name):
+        raise RepositoryRegistrationError("Bootstrap provider identity differs from current canonical custody binding or has another workspace key.")
+    return {"schema_version": 1, "owner_repo": name,
+            "intake_entry_ref": {"id": entry["record"]["id"], "version": entry["record"]["version"], "digest": canonical_digest(entry)},
+            "intake_register_digest": canonical_digest(register), "classification": "proposed", "inventory_posture": None,
+            "provider_repository": copy.deepcopy(binding), "owner_purpose": entry["notes"],
+            "validation_behavior": copy.deepcopy(entry["validation_behavior"]),
+            "source_bootstrap_eligible": True, "ordinary_source_eligible": False,
+            "model_writes_allowed": False, "canonical_mutation": False, "runtime_activation": False}
 
 
 def source_owner_rule(name: str, entry: dict[str, Any]) -> dict[str, Any]:
