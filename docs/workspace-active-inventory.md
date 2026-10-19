@@ -122,6 +122,14 @@ records without explicit provider coordinates remain valid. Neither this field,
 promotion nor an App installation grants source credentials or activates a
 runtime. Provider installation selection remains Platform authority.
 
+Workspace layout validation uses an explicit GitHub provider binding's current
+`full_name` for the canonical SSH origin. It does not infer that organization
+repositories live under the personal account or that their local owner key
+must equal the provider repository name. Unbound legacy owners keep their
+existing personal-account origin rule; malformed explicit bindings fail closed.
+This does not waive required repo rules, physical-owner guidance, review,
+validation or the separate runtime/source-purpose boundaries.
+
 ## Migration
 
 The one-time v1 migration preserves existing domain values and adds versioned,
