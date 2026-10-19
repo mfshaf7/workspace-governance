@@ -16,6 +16,16 @@
     "readback_digest"
   ],
   "$defs": {
+    "providerRepository": {
+      "type": "object",
+      "required": ["provider", "provider_repository_id", "full_name"],
+      "properties": {
+        "provider": { "const": "github" },
+        "provider_repository_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "full_name": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$" }
+      },
+      "additionalProperties": false
+    },
     "text": { "type": "string", "minLength": 1 },
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
     "artifactRef": {
@@ -129,6 +139,7 @@
         "validation_behavior": {},
         "ai_suggestion": {},
         "repo_class": {},
+        "provider_repository": { "$ref": "#/$defs/providerRepository" },
         "requires_security_bindings": {},
         "security_owner": {},
         "notes": {}

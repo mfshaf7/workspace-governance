@@ -9,7 +9,7 @@ summary: The pristine-base repair added base_commit_available to the live recons
   validation after it had already retired resources and replaced session state, leaving
   the replacement current without the required supersession receipt.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-14-pristine-work-session-invalid-base-repair-gap.yaml
-status: triaged
+status: closed
 source_type: manual
 scope:
   related_repos:
@@ -53,10 +53,46 @@ signals:
   - operator-orchestration-service/src/delivery-art/work-session-controller.js
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - type: contract
+    path: operator-orchestration-service/contracts/delivery-art-work-session/architecture-supersession-receipt.schema.json
+    owner_repo: operator-orchestration-service
+    note: Requires the actual source adapter's boolean base_commit_available proof field.
+  - type: script
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: Validates and persists the immutable supersession receipt in beforePersist before replacement session state is written.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session-cli-adapters.test.js
+    owner_repo: operator-orchestration-service
+    note: Real source-adapter pristine proof is checked through the actual receipt schema rather than a disconnected synthetic shape.
+  - type: test
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    owner_repo: operator-orchestration-service
+    note: Receipt validation failure preserves the previous persisted architecture binding; normal pristine reconstruction emits the bound receipt.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-14-supersession-receipt-proof-schema.md
+    owner_repo: operator-orchestration-service
+    note: Historical repair record documents both causes and the durable source controls.
+  note: >-
+    Reconciled existing landed controls, not a due-date extension or new repair.
+    Gary PR327 merged a81b689d1e766e1786b71a6a3860b42ba2a326d2 and PR328
+    merged7d83d298cc157c074568d24743e9f97af6f0422c; fresh provider readback
+    confirms both exact final heads had mfshaf7 approval and passing checks.
+    Current accepted OOS4c74d35 contains both changes. On recovery the complete
+    work-session and CLI-adapter suites passed81/81 with no skips, including
+    actual proof-schema compatibility and rejected-receipt atomicity. Fresh
+    ART evidence packet pack-20261017T160727Z-e12b4ec6c8 proves1284 done with
+    valid completion evidence/narrative, and normal work status reports closed,
+    no active session, next work-complete. The old record's pending-merge/live
+    retry note is historical-evidence-superseded: do not recreate or reopen a
+    closed work session merely to repeat an obsolete reconstruction step.
+    No missing historical live receipt is fabricated or claimed recovered.
+    Closure is the already-approved durable controls plus current regression
+    and terminal work-state proof; the broader operating-truth lesson remains
+    open. This metadata reconciliation belongs to existing final-guidance
+    work and does not itself claim that its pending source has landed.
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-17'
-  note: Review and approve the strongest durable control before treating this lesson
-    as closed.
+  owner_repo: null
+  due_on: null
+  note: null

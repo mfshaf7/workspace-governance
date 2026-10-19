@@ -151,7 +151,15 @@ def validate_workspace_root_repo_coverage(
     workspace_root_docs: Path,
     active_repos: list[str],
     errors: list[str],
+    contracts: dict | None = None,
 ) -> None:
+    indexed = set()
+    if contracts is not None:
+        from workspace_repo_registration import (is_source_owner, source_owner_rule,
+            source_owner_index, INDEX_START, INDEX_END)
+        indexed = {name for name, entry in contracts["repos"]["repos"].items()
+                   if is_source_owner(name, entry)
+                   and contracts["repo_rules"].get(name) == source_owner_rule(name, entry)}
     for filename, headings in WORKSPACE_ROOT_REPO_COVERAGE_REQUIREMENTS.items():
         path = workspace_root_docs / filename
         if not path.exists():
@@ -159,13 +167,17 @@ def validate_workspace_root_repo_coverage(
             continue
 
         text = path.read_text(encoding="utf-8")
+        if contracts is not None:
+            expected = source_owner_index(contracts["repos"])
+            if text.count(INDEX_START) != 1 or text.count(INDEX_END) != 1 or expected not in text:
+                errors.append(f"{path}: source-only owner index does not match canonical Inventory")
         for heading in headings:
             section = extract_section(text, heading)
             if section is None:
                 errors.append(f"{path}: missing section {heading!r} for active repo coverage check")
                 continue
 
-            missing_repos = [repo_name for repo_name in active_repos if repo_name not in section]
+            missing_repos = [repo_name for repo_name in active_repos if repo_name not in indexed and repo_name not in section]
             if missing_repos:
                 missing_text = ", ".join(repr(repo_name) for repo_name in missing_repos)
                 errors.append(
@@ -605,12 +617,22 @@ def delivery_art_owner_evidence_profile_coverage_errors(
     workspace_root: Path,
     active_repos: list[str],
     coverage: dict,
+    inventory_contracts: dict | None = None,
 ) -> list[str]:
     errors: list[str] = []
     profile_path = coverage.get("profile_path")
     activated = coverage.get("activated_owner_repos") or []
     nonactivated_entries = coverage.get("nonactivated_owner_repos") or []
     nonactivated = [entry.get("repo") for entry in nonactivated_entries]
+    # Extend the existing coverage inventory, not its core activation or
+    # explicit exclusions. Routine source admission cannot edit this policy.
+    derived = set()
+    if coverage.get("inventory_derived_source_owner_profiles") is True and inventory_contracts is not None:
+        from workspace_repo_registration import is_source_owner, source_owner_rule
+        derived = {name for name, entry in inventory_contracts["repos"]["repos"].items()
+                   if is_source_owner(name, entry)
+                   and inventory_contracts["repo_rules"].get(name) == source_owner_rule(name, entry)}
+        derived -= set(activated) | set(nonactivated)
 
     if len(set(activated)) != len(activated):
         errors.append("owner evidence profile activation contains duplicate repos")
@@ -622,7 +644,7 @@ def delivery_art_owner_evidence_profile_coverage_errors(
             "owner evidence profile inventory activates and excludes the same repos: "
             + ", ".join(overlap)
         )
-    inventory = set(activated) | set(nonactivated)
+    inventory = set(activated) | derived | set(nonactivated)
     active = set(active_repos)
     if inventory != active:
         missing = sorted(active - inventory)
@@ -636,7 +658,7 @@ def delivery_art_owner_evidence_profile_coverage_errors(
         errors.append("owner evidence profile path differs from the approved contract")
         return errors
 
-    for repo_name in activated:
+    for repo_name in [*activated, *sorted(derived)]:
         path = workspace_root / repo_name / profile_path
         if not path.exists():
             errors.append(f"{path}: activated owner evidence profile is missing")
@@ -729,6 +751,7 @@ def validate_delivery_art_operator_path_contract(
     repo_root: Path,
     active_repos: list[str],
     errors: list[str],
+    inventory_contracts: dict | None = None,
 ) -> None:
     contract_path = repo_root / "contracts/delivery-art-operator-path.yaml"
     if not contract_path.exists():
@@ -907,7 +930,7 @@ def validate_delivery_art_operator_path_contract(
         errors.append(f"{contract_path}: {work_session_error}")
     coverage = work_session.get("owner_evidence_profile_coverage") or {}
     for coverage_error in delivery_art_owner_evidence_profile_coverage_errors(
-        workspace_root, active_repos, coverage
+        workspace_root, active_repos, coverage, inventory_contracts
     ):
         errors.append(f"{contract_path}: {coverage_error}")
 
@@ -1295,14 +1318,14 @@ def main() -> int:
             if pattern and re.search(pattern, agents_text, re.MULTILINE):
                 errors.append(f"{agents_path}: found forbidden routing pattern {pattern!r}")
 
-    validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors)
+    validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors, contracts)
     validate_security_architecture_component_coverage(workspace_root, contracts, errors)
     validate_delivery_art_planning_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)
     validate_delivery_art_blocker_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_lineage_contract(workspace_root, errors)
     validate_delivery_art_operator_path_contract(
-        workspace_root, repo_root, active_repos, errors
+        workspace_root, repo_root, active_repos, errors, contracts
     )
     validate_project_lifecycle_runtime_binding(workspace_root, contracts, errors)
 

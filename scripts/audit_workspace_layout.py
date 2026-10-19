@@ -1,10 +1,28 @@
 #!/usr/bin/env python3
 import argparse
 import fnmatch
+import re
 import subprocess
 from pathlib import Path
 
 from contracts_lib import active_repo_names, load_contracts
+
+
+def expected_repository_origin(repo_name: str, record: dict) -> str:
+    """Use explicit canonical provider coordinates; retain legacy owner roots."""
+    if "provider_repository" not in record:
+        return f"git@github.com:mfshaf7/{repo_name}.git"
+    binding = record["provider_repository"]
+    if (
+        not isinstance(binding, dict)
+        or binding.get("provider") != "github"
+        or not re.fullmatch(r"[1-9][0-9]*", str(binding.get("provider_repository_id", "")))
+        or not isinstance(binding.get("full_name"), str)
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+", binding["full_name"])
+        or binding["full_name"].split("/")[1] in {".", ".."}
+    ):
+        raise ValueError(f"{repo_name}: invalid canonical GitHub provider binding")
+    return f"git@github.com:{binding['full_name']}.git"
 
 
 def run(cmd: list[str], *, cwd: Path | None = None) -> str:
@@ -88,7 +106,11 @@ def main() -> int:
             if not (repo_root / required_file).exists():
                 errors.append(f"{repo_root}: missing {required_file}")
 
-        expected_origin = f"git@github.com:mfshaf7/{repo_name}.git"
+        try:
+            expected_origin = expected_repository_origin(repo_name, contracts["repos"]["repos"][repo_name])
+        except ValueError as error:
+            errors.append(str(error))
+            continue
         origin = run(["git", "-C", str(repo_root), "remote", "get-url", "origin"])
         if origin != expected_origin:
             errors.append(f"{repo_root}: expected origin {expected_origin!r}, got {origin!r}")

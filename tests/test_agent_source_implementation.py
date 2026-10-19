@@ -62,6 +62,25 @@ class AgentSourceImplementationTests(unittest.TestCase):
 
         self.assertContractInvalid(contract)
 
+    def test_source_purposes_do_not_grant_workflow_power_to_models(self) -> None:
+        purposes = self.contract["source_purposes"]
+        self.assertEqual("proposed", purposes["trusted-owner-bootstrap"]["intake_classification"])
+        self.assertIsNone(purposes["trusted-owner-bootstrap"]["inventory_posture"])
+        for purpose, field, value in (
+            ("ordinary-source", "workflow_write", "explicit-approval-required"),
+            ("trusted-owner-bootstrap", "model_writes_allowed", True),
+            ("trusted-owner-bootstrap", "intake_classification", "admitted"),
+            ("workflow-maintenance", "model_writes_allowed", True),
+            ("workflow-maintenance", "workflow_write", "denied"),
+        ):
+            with self.subTest(purpose=purpose, field=field):
+                contract = copy.deepcopy(self.contract)
+                contract["source_purposes"][purpose][field] = value
+                self.assertContractInvalid(contract)
+        contract = copy.deepcopy(self.contract)
+        contract.pop("source_purposes")
+        self.assertContractInvalid(contract)
+
     def test_unattributed_git_author_is_rejected(self) -> None:
         contract = copy.deepcopy(self.contract)
         contract["profiles"]["agent-gary"]["git_author"]["email"] = (

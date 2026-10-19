@@ -44,6 +44,25 @@ required_bindings:
     - pushed_head
     - reviewed_head
     - merged_head
+source_purposes:
+  ordinary-source:
+    intake_classification: admitted
+    inventory_posture: active
+    model_writes_allowed: true
+    workflow_write: denied
+    rule: Require current active Inventory with canonical consumed admitted-Intake lineage, not simultaneous current Intake and Inventory entries, plus the actual approved source subject, Landing Unit, branch, fetched base and human reviewer. Existing legacy owner mappings remain valid; explicit provider identities must be resolved through Platform's selected installation. Model writes stay within the accepted source change set.
+  trusted-owner-bootstrap:
+    intake_classification: proposed
+    inventory_posture: null
+    model_writes_allowed: false
+    workflow_write: separately-approved-only
+    rule: Require current proposed Intake and exact custody/provider identity before preparing a checkout. Bind the operator decision, trusted scaffold template digest, finite owner files, repository, Landing Unit, branch and fetched base. Publish only through Agent Gary and exact-head human review. Bootstrap cannot admit or activate its own repository, import arbitrary app code, or fabricate owner acceptance. Select validation appropriate to the owner; CI, a service and deployment are not universal project requirements.
+  workflow-maintenance:
+    intake_classification: admitted
+    inventory_posture: active
+    model_writes_allowed: false
+    workflow_write: explicit-approval-required
+    rule: Require separate operator approval of the App permission and installation acceptance, exact repository, Landing Unit, non-default branch, fetched base and approval reference. Platform issues a separately marked short-lived projection. Ordinary runtime/model/source-intent consumers cannot adopt it. Revoke after publication; preserve normal human review and merge. The operator approved Gary Workflows write on 2026-10-19; that grant does not expand repository selection or ordinary tokens.
 provider_boundary:
   provider_kind: github-app
   repository_selection: selected-repositories-only

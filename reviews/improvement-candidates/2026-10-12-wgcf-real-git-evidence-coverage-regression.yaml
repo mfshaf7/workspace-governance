@@ -56,8 +56,17 @@ resolution:
     No ART child, evidence mechanism, or architecture change is required.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-16'
+  due_on: '2026-10-20'
   note: >-
+    The 2026-10-16 follow-up was missed while Epic1275 qualification remained
+    blocked. Re-review on 2026-10-18; source containment is not lesson closure.
     Extend the existing initiative compatibility validator to prove every
     required evidence-kind and fidelity pair before the first source session.
     Do not implement the durable closing control without operator approval.
+
+    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson
+    remains open. The existing final-guidance owner still owes the control
+    described above; current admission/authoring tests do not close that work.
+    Next accountable review is 2026-10-20, not a claimed completion deadline.
+    This records a missed follow-up and its current disposition; it does not
+    erase the prior due dates or mark unlanded controls as implemented.

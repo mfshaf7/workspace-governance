@@ -442,3 +442,13 @@ python3 /home/mfshaf7/projects/workspace-governance/scripts/workspace_control_pl
 - Canonical Telegram source: [openclaw-telegram-enhanced/README.md](/home/mfshaf7/projects/openclaw-telegram-enhanced/README.md)
 - Canonical host bridge: [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)
 - Security governance: [security-architecture/README.md](/home/mfshaf7/projects/security-architecture/README.md)
+
+## Additional Source-Only Owners
+
+These source owners use their local `AGENTS.md` and `README.md`. Registration
+does not confer control-plane or runtime authority. Suspended entries deny new
+references; retired owners remain in Inventory history rather than this index.
+
+<!-- workspace-source-owner-index:start -->
+No additional source-only repository owners are registered.
+<!-- workspace-source-owner-index:end -->

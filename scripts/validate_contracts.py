@@ -11891,6 +11891,12 @@ def main() -> int:
         errors.append("contracts/repo-rules: missing active repo rules for " + ", ".join(missing_rules))
     for repo_name, rule in repo_rules.items():
         if repo_name not in active_repos:
+            # A source-only owner keeps its exact derived rule as retirement
+            # history. This does not admit retired control or Security owners.
+            from workspace_repo_registration import is_source_owner, source_owner_rule
+            retired = contracts["repos"].get("retired_repos", {}).get(repo_name)
+            if retired and is_source_owner(repo_name, retired) and rule == source_owner_rule(repo_name, retired):
+                continue
             errors.append(f"contracts/repo-rules/{repo_name}.yaml: repo is not in active repos")
             continue
         repo_payload = contracts["repos"]["repos"][repo_name]

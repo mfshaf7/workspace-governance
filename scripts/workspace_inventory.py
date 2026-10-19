@@ -17,7 +17,7 @@ from typing import Any
 from jsonschema import Draft202012Validator, FormatChecker
 
 from contracts_lib import dump_json, load_json, load_yaml
-from workspace_intake import canonical_digest
+from workspace_intake import canonical_digest, provider_repository_conflicts
 
 
 ARTIFACT_SCHEMAS = {
@@ -225,6 +225,11 @@ def _validate_request_bindings(
         raise WorkspaceInventoryError("active_record kind does not match promotion target")
     if request["active_record"]["id"] != target["record_id"]:
         raise WorkspaceInventoryError("active_record id does not match promotion target")
+    if target["kind"] == "repo" and request["active_record"]["value"].get("provider_repository") != intake_entry.get("provider_repository"):
+        raise WorkspaceInventoryError("promotion must preserve the admitted provider repository binding")
+    if target["kind"] == "repo" and any(request["active_record"]["value"].get(field) != intake_entry.get(field)
+            for field in ("repo_class", "requires_security_bindings")):
+        raise WorkspaceInventoryError("promotion must preserve the admitted repository class and Security-binding classification")
     _validate_compatibility_alias(target["kind"], request["active_record"]["value"])
 
 
@@ -288,27 +293,67 @@ def _write_pair_atomically(
     intake: dict[str, Any],
     inventory_path: Path,
     inventory: dict[str, Any],
+    companions: dict[Path, str] | None = None,
 ) -> None:
-    original_intake = intake_path.read_bytes()
-    original_inventory = inventory_path.read_bytes()
-    intake_temp = _write_yaml_temp(intake_path, intake)
-    inventory_temp = _write_yaml_temp(inventory_path, inventory)
-    inventory_replaced = False
-    intake_replaced = False
+    import yaml
+
+    pending = {inventory_path: yaml.safe_dump(inventory, sort_keys=False),
+               intake_path: yaml.safe_dump(intake, sort_keys=False)}
+    for path, text in (companions or {}).items():
+        if path in pending or path.is_symlink() or not path.parent.is_dir():
+            raise WorkspaceInventoryError("Inventory companion target is unsafe or duplicates canonical source.")
+        pending[path] = text
+    original = {path: path.read_bytes() if path.exists() else None for path in pending}
+    staged: dict[Path, Path] = {}
+    replaced: list[Path] = []
     try:
-        os.replace(inventory_temp, inventory_path)
-        inventory_replaced = True
-        os.replace(intake_temp, intake_path)
-        intake_replaced = True
+        # Prepare and fsync every byte before the first replacement. The Git
+        # review commit is the durable multi-file publication boundary; this
+        # rollback handles process exceptions, not host power-loss atomicity.
+        for path, text in pending.items():
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                    prefix=f".{path.name}.", delete=False) as handle:
+                staged[path] = Path(handle.name)
+                handle.write(text)
+                handle.flush()
+                os.fsync(handle.fileno())
+        for path, temporary in staged.items():
+            os.replace(temporary, path)
+            replaced.append(path)
     except BaseException:
-        if inventory_replaced:
-            inventory_path.write_bytes(original_inventory)
-        if intake_replaced:
-            intake_path.write_bytes(original_intake)
+        for path in reversed(replaced):
+            if original[path] is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_bytes(original[path])
         raise
     finally:
-        intake_temp.unlink(missing_ok=True)
-        inventory_temp.unlink(missing_ok=True)
+        for temporary in staged.values():
+            temporary.unlink(missing_ok=True)
+
+
+def _registration_companions(repo_root: Path, kind: str, before: dict, after: dict) -> dict[Path, str]:
+    from workspace_repo_registration import inventory_companion_projection, RepositoryRegistrationError
+    try:
+        return {repo_root / relative: text for relative, text in
+                inventory_companion_projection(repo_root, kind, before, after).items()}
+    except RepositoryRegistrationError as error:
+        raise WorkspaceInventoryError(str(error)) from error
+
+
+def _verify_registration_replay(repo_root: Path, kind: str, name: str, inventory: dict) -> None:
+    from workspace_repo_registration import is_source_owner, source_owner_rule, _update_context_rows
+    from contracts_lib import load_contracts
+    record = _inventory_record(inventory, kind, name)
+    if kind == "repo" and record and is_source_owner(name, record):
+        contracts = load_contracts(repo_root)
+        if contracts["repo_rules"].get(name) != source_owner_rule(name, record):
+            raise WorkspaceInventoryError("Inventory replay is missing its exact source-owner rule.")
+        # Validate without writing; active includes preserved suspended entries.
+        active = name in inventory.get("repos", {})
+        _update_context_rows(contracts, name, active, active)
+    if _registration_companions(repo_root, kind, inventory, inventory):
+        raise WorkspaceInventoryError("Inventory replay has missing or stale canonical source companions.")
 
 
 def _build_artifacts(
@@ -401,6 +446,7 @@ def apply_promotion(
                 and last_mutation.get("request_digest") == request["request_digest"]
                 and last_mutation.get("readiness_digest") == readiness["readiness_digest"]
             ):
+                _verify_registration_replay(repo_root, kind, name, inventory)
                 artifacts = _build_artifacts(
                     request, readiness, existing, intake, inventory, source_branch, completed_at, "replayed"
                 )
@@ -412,11 +458,15 @@ def apply_promotion(
             raise WorkspaceInventoryError("promotion target is missing from Workspace Intake")
         _validate_request_bindings(request, readiness, state, intake_entry)
         record = _record_from_request(request, readiness, completed_at)
+        if kind == "repo" and record.get("provider_repository") and provider_repository_conflicts(repo_root, record["provider_repository"], name):
+            raise WorkspaceInventoryError("provider repository identity already belongs to another workspace record")
+        before_inventory = copy.deepcopy(inventory)
         del intake[COLLECTIONS[kind]][name]
         inventory.setdefault(COLLECTIONS[kind], {})[name] = record
         _validate_contract(repo_root, "intake-register.yaml", intake)
         _validate_contract(repo_root, f"{COLLECTIONS[kind]}.yaml", inventory)
-        _write_pair_atomically(intake_path, intake, inventory_path, inventory)
+        companions = _registration_companions(repo_root, kind, before_inventory, inventory)
+        _write_pair_atomically(intake_path, intake, inventory_path, inventory, companions)
         artifacts = _build_artifacts(
             request, readiness, record, intake, inventory, source_branch, completed_at, "prepared"
         )
@@ -521,6 +571,11 @@ def _validate_lifecycle_bindings(
             raise WorkspaceInventoryError("requested_value must not replace the record envelope")
         if requested_value.get("posture") != current_posture:
             raise WorkspaceInventoryError("update must preserve inventory posture")
+        if target["kind"] == "repo":
+            previous = record.get("provider_repository")
+            provider = requested_value.get("provider_repository")
+            if previous and (not isinstance(provider, dict) or any(previous[key] != provider.get(key) for key in ("provider", "provider_repository_id"))):
+                raise WorkspaceInventoryError("inventory provider repository identity is immutable")
         _validate_compatibility_alias(target["kind"], requested_value)
     if action == "restore":
         prior_events = _target_history(history, target["record_id"])
@@ -740,6 +795,7 @@ def apply_lifecycle(
                 raise WorkspaceInventoryError(
                     "lifecycle replay is superseded by a later canonical mutation"
                 )
+            _verify_registration_replay(repo_root, kind, name, inventory)
             artifacts = _build_lifecycle_artifacts(
                 request,
                 readiness,
@@ -757,12 +813,16 @@ def apply_lifecycle(
         state = current_lifecycle_state(repo_root, kind, name)
         next_posture = _validate_lifecycle_bindings(request, readiness, state, record, history)
         updated = _lifecycle_record_after(request, readiness, record, next_posture, completed_at)
+        before_inventory = copy.deepcopy(inventory)
         _replace_inventory_record(inventory, kind, name, updated)
         event = _build_history_event(request, readiness, record, updated, history, completed_at)
         history["events"].append(event)
         _validate_contract(repo_root, f"{COLLECTIONS[kind]}.yaml", inventory)
         _validate_history(repo_root, history)
-        _write_pair_atomically(inventory_path, inventory, history_path, history)
+        if kind == "repo" and updated.get("provider_repository") and provider_repository_conflicts(repo_root, updated["provider_repository"], name):
+            raise WorkspaceInventoryError("provider repository identity already belongs to another workspace record")
+        companions = _registration_companions(repo_root, kind, before_inventory, inventory)
+        _write_pair_atomically(inventory_path, inventory, history_path, history, companions)
         artifacts = _build_lifecycle_artifacts(
             request,
             readiness,

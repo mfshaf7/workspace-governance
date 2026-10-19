@@ -1,0 +1,1175 @@
+schema_version: 1
+id: 2026-10-15-console-capability-operating-truth-regression
+title: Require operating truth before reusing a Console capability
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: >-
+  Epic 1275 treated several pre-existing Console capabilities as reusable
+  operating truth because contracts and source existed, even though the live
+  Console still exposed prototype-local Repository, Delivery, and Prototype
+  surfaces, repository custody remained contract-only, and Registry and
+  Portfolio continuity were unavailable. The capability inventory defined the
+  five status dimensions but did not record or validate an observed status for
+  each capability before planning marked it reusable.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-13-preexisting-capability-ownership-regression.yaml
+status: new
+source_type: conversation
+scope:
+  related_repos:
+  - workspace-governance
+  - governance-operations-console
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  change_classes:
+  - architecture-shaping
+  - source-behavior
+  - runtime-composition
+signals:
+- id: promoted-owner-proof-omitted-required-workspace-registration-surfaces
+  title: Pair-of-record promotion proof did not cover full owner registration
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    October19 inspection before proposed-owner bootstrap confirmed that the
+    native Inventory command and OOS promotion adapter prepare only Intake
+    and the selected Inventory file. The full Workspace Governance contract
+    validator additionally requires one matching repo-rule per active owner.
+    The workspace layout audit also inferred every origin under mfshaf7,
+    contradicting the already-selected organization custody/provider binding.
+    Schema-valid promotion and credential proof therefore do not yet prove
+    complete new-owner registration. Keep the normal-business admission and
+    activation hold. Extend the existing owner workflow and validator rather
+    than treating App installation, relaxed validation or manual hidden
+    operator repair as completion. Preserve exact review, atomic preparation,
+    replay, lineage, lifecycle and rollback behavior. Provider-aware origin
+    validation is staged with positive and fail-closed tests; complete
+    registration integration now also includes conservative context/raw-output
+    declarations and the existing generated metadata, guarded as exact typed
+    companion data rather than broad instruction/policy permission. Native
+    full-model add/suspend/retire/restore and actual Git record-refresh proof
+    pass in disposable engineering scope; changed instructions, raw grants,
+    extra policy, stale metadata and missing companions are denied. The native
+    owner transaction, OOS finite publication/readback and early WGCF findings
+    are staged, not accepted or activated. Source/consumer pin refresh,
+    proposed-owner bootstrap and full Console operating proof remain unfinished
+    in the approved maintenance units. The next applicability inspection also
+    proved that Delivery profile coverage is a schema-constant eight-owner
+    list plus three exclusions, with exact active-inventory coverage required;
+    a new valid source owner is not yet included. OOS canonicalRepo additionally
+    requires the actual local owner checkout. Neither the full local WG model
+    nor a Platform metadata refresh alone proves these cross-repo/source-start
+    prerequisites. Extend the existing profile coverage under the approved
+    source-only registration policy, keep real fetched-base profile and
+    conformance checks, and establish the exact custody-bound checkout through
+    bootstrap rather than hidden operator repair. Do not waive controls or
+    treat source registration as operating acceptance. No new ART child,
+    closing control or completion claim is created by this capture. During
+    pre-activation bootstrap wiring, source inspection additionally proved
+    that Repository Custody authenticates its workspace API but does not
+    privately assign each historical request to its calling adapter. Correct
+    uncommitted caller-owned-custody wording: the new source preparation,
+    request, approval and session are caller/operator-bound, while successful
+    canonical custody remains shared workspace authority. Preserve its actual
+    contract and exact receipt/provider binding instead of inventing legacy
+    ownership, an adoption mechanism or a new repair item. This is a source
+    review correction before activation, not an observed live custody defect.
+  source_refs:
+  - repo://workspace-governance/scripts/validate_contracts.py
+  - repo://workspace-governance/scripts/audit_workspace_layout.py
+  - repo://workspace-governance/scripts/workspace_inventory.py
+  - repo://operator-orchestration-service/src/workspace-inventory/source-client.js
+- id: source-admission-consumers-required-an-intake-record-after-atomic-promotion
+  title: Staged credential consumers contradicted the actual Inventory promotion transition
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: >-
+    October19 native-source inspection found that Workspace Inventory
+    apply_promotion atomically removes the admitted Intake entry and records
+    its id, version and digest as active Inventory lineage. The new Platform
+    credential reader and uncommitted OOS consumer instead required admitted
+    Intake and active Inventory to coexist. Synthetic positive fixtures
+    accidentally supplied that impossible steady state. Platform10e8d6e is
+    published in held PR320 but has not been merged, accepted or activated;
+    no live ordinary source credential was issued to the new product owner.
+    Fix the existing consumers against actual owner transition semantics:
+    current active Inventory plus canonical promotion lineage and exact
+    provider identity are authority after promotion, not a second retained
+    Intake entry. Reuse immutable pre-promotion Git evidence when verifying
+    the consumed admitted classification; do not resurrect Intake, loosen
+    active-state checks, add another record/writer, or fabricate receipts.
+    Require the native owner promotion output to feed both actual consumers,
+    including absence of Intake after promotion, before publishing revised
+    heads. Preserve legacy behavior, suspension/retirement denials, provider
+    identity uniqueness and immutable credential bindings. This is an
+    implementation/contract-reading miss in the existing approved maintenance
+    units, not a new live Defect, ART child or closing-control proposal.
+  source_refs:
+  - repo://workspace-governance/scripts/workspace_inventory.py
+  - https://github.com/mfshaf7/platform-engineering/pull/320
+  - repo://platform-engineering/scripts/agent_source_identity.py
+  - repo://operator-orchestration-service/scripts/workspace_inventory_source.py
+- id: image-smoke-proof-did-not-replay-ci-startup-wait
+  title: Eventual local health proof omitted the exact fixed CI startup predicate
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    PR350 passed tests and image builds but failed its fixed-two-second API
+    smoke wait. Local paired image checks observed accepted-source health at
+    1.79 seconds and staged-source health at 2.15 seconds with the expected
+    body. Earlier eventual-health probing therefore did not reproduce that
+    exact CI timing predicate. Repair the existing CI wait with bounded live
+    readiness retry and bounded failure diagnostics, not a new story, startup
+    success claim before readiness or product rewrite. The actual retry is
+    locally verified, including Docker proxy connection reset handling. Its
+    workflow-file publication requires the separately excluded App Workflows
+    permission; keep that external gate explicit and do not use ambient human
+    source publication as a fallback. This does not diagnose the prior host
+    SIGSEGVs or imply completed Console operation.
+  source_refs:
+  - https://github.com/mfshaf7/operator-orchestration-service/actions/runs/39170949545
+  - repo://operator-orchestration-service/.github/workflows/validate-governance-docs.yaml
+- id: bounded-diagnostic-blocker-stopped-independent-approved-work
+  title: Narrow crash diagnostics incorrectly stopped the whole approved journey
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  - unsafe-assumption
+  finding: >-
+    During October19 recovery, unavailable administrator-only kernel logs were
+    treated as a blocker for all Epic1275 work even though the accepted runtime
+    had recovered and independent Console/owner preparation could proceed.
+    After acknowledging the mistake, the agent ended another turn instead of
+    executing the promised next step, and the operator called out the repeat.
+    Kernel logs remain relevant to the unproven native Node SIGSEGV cause;
+    they neither prove a product defect nor block every independent source
+    change. Preserve failed full validation as unresolved and withhold merge
+    readiness while continuing independent approved work. This is an execution
+    correction, not a new story, validator, approval gate or crash diagnosis.
+  source_refs:
+  - 'conversation: operator asked why work stopped and then called out another stop on October19'
+  - openproject://work_packages/1298
+- id: normal-source-credential-delivery-remains-engineering-only
+  title: Fresh Console source sessions cannot obtain their exact Platform credential
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    Whole-path source inspection on October18 proves that the existing Delivery
+    configured-path preflight returns agent-source-credential-required and asks
+    Platform to deliver the exact binding before work start. The configured
+    agent adapter only reads a preprojected credential file; prepare configures
+    the Git author and publish consumes that file. The Console-facing Platform
+    provider admits only six dev-integration actions, not source-identity issue,
+    renewal or revocation. The primary Delivery operator surface explicitly
+    routes missing/expired bindings back to the Platform identity operator
+    surface. Manual maintenance delivery is appropriate for engineering work,
+    but is not a self-contained normal Console source path. No live app session
+    was fabricated or started to manufacture this finding. Existing fail-closed
+    identity behavior is correct; this is an unimplemented Console-only seam,
+    not proof that working source publication regressed. It affects existing
+    Delivery as well as Prototype and the later new-owner path. Include one
+    bounded credential lifecycle action in the already-planned OOS/Platform
+    owner work: real approved subject/source-start intent or session, exact admitted repository/id,
+    installation, branch/base, caller/operator and expiry; Platform alone keeps
+    the key and token, returns only secret-free evidence, renews on approved
+    source actions and revokes on close. Preserve separate trusted bootstrap
+    scope. Delivery needs a credential before session creation: reuse its real
+    canonical subject and approved prospective work-start input, never require
+    or fabricate an already-active session just to obtain that credential.
+    Recheck exact intent/base/branch at work start and deny cancelled or changed
+    intent reuse. Preserve any later permission gate;
+    do not broaden App/install selection,
+    expose a general shell/mint endpoint or borrow human/provisioning credentials.
+    The operator approved this bounded extension on October18 by answering
+    continue to the explicit scope question. This is prospective implementation
+    authority, not runtime activation or a provider permission grant. Extend
+    the existing eight-owner conformance plan before issuer source starts;
+    include pre-session Delivery authorization, actual Prototype identity,
+    immutable intent replay, renewal, terminal revocation and negative scope
+    tests. Keep the existing Studio/WG merge hold and exact final Security
+    acceptance. No new ART child, provider grant or source-purpose activation
+    is authorized by this approval.
+    Platform source is now staged in draftPR320 at exact Gary
+    5a8fb9134b8e0835a7b04c877743677911c0bbc2 with native33suites/468run,
+    463passed/5existing opt-in native skips, all21new credential cases executed
+    through the admitted runtime suite, provider CI and exact-head mfshaf7
+    approval. It is held, not merged or commissioned; publication credential
+    revoked and clean open-PR source retained. Tests distinguish known pre-mint
+    retry from uncertain issuance and preserve normal same-LU recovery with
+    explicit revoked predecessor, new approved start digest and rotated branch;
+    old revoke cannot mutate a successor. OOS canonical intent authorization,
+    strict new receipt/failure consumers and Console actions remain required.
+    No actual app source or credential automation has been operated.
+    Subsequent consumer inspection caught an unnecessary producer restriction
+    before deployment: after expiry and exact predecessor revocation, fresh
+    explicit operator approval of unchanged canonical work would still require
+    a different source-start digest. That would force unrelated source-session
+    or branch churn merely to renew authorization. The existing manual issuer
+    does not require changed source for fresh authorization, and the approved
+    bounded extension requires fresh approval, not invented new work. Correct
+    this within the existing unmerged Platform/OOS units: preserve revoked
+    predecessor, exact subject/caller/provider/session bindings and historical
+    isolation; permit explicitly approved reauthorization of the same valid
+    canonical session; never auto-create successor approval after expiry. Add
+    producer/consumer and session-adoption negative/positive cases before
+    publishing the revised heads. This is a pre-activation implementation miss,
+    not another live product Defect or authority to create a new mechanism.
+    The same consumer contract inspection found a producer grammar mismatch:
+    Studio registry and OOS/Platform admit canonical one-character Prototype
+    slugs, while the new CGG subject regex requires two characters and admits
+    trailing/doubled hyphens rejected by Studio. Align the new CGG producer
+    with the existing canonical slug grammar and add native positive/negative
+    cases; do not narrow the upstream contract to fit the consumer. This is
+    pre-activation source compatibility work in the existing owner plan, not
+    another business defect, ART child or runtime mechanism.
+    During the same uncommitted consumer work, the agent added an independent
+    OOS Prototype activation manifest/flag before rereading the existing
+    Landing Unit decision, which explicitly retained the existing composed
+    Platform/Security commissioning boundary without a second activation gate.
+    The new model purpose needs its native suspended profile and exact composed
+    acceptance, not a parallel OOS approval mechanism. This was caught before
+    publication or deployment. Remove the uncommitted duplicate manifest/gate,
+    reuse existing source-realization composition/configuration, and preserve
+    the native inactive Prototype model-purpose boundary. Record the affected
+    source checkpoint truthfully and prove HTTP/runtime denial through existing
+    owner controls; do not rewrite the accepted plan to justify the duplicate.
+    No new ART item or closing-control proposal is created by this correction.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - repo://operator-orchestration-service/src/delivery-art/agent-source-identity.js
+  - repo://operator-orchestration-service/src/delivery-art/work-session-cli-adapters.js
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  - repo://platform-engineering/products/governance-operations-console/scripts/platform_operation_provider.py
+  - https://github.com/mfshaf7/platform-engineering/pull/320
+- id: landing-preview-draft-consumer-not-qualified
+  title: Normal Landing emits an inert Preview draft rejected as an executable profile
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After Console89/Security278 activation passed, a normal corrected Console
+    submission preserved prototype:proposal-1305 and opened Studio PR29 at
+    40d401e40393cea9ea34eeb5d79f6762044b61ac. The browser continuation timed out,
+    but canonical owner readback recovered the same review-required request
+    prototype-landing-request:proposal-1305:17922501474041; do not resubmit it
+    because of a lost acknowledgement. Its validate check39044303290 failed
+    and the exact clean review head reproduces the same failure locally.
+    Landing's documented preview-profile-draft output has six fields and
+    runtime_activation false; Preview validate_profiles instead applies the
+    full executable-profile schema to every YAML and rejects missing profile_id.
+    Neither hypothetical browser persistence requirements nor a permission
+    failure caused this rejection. Preserve strict runnable-profile validation,
+    admit only the exact closed inert draft shape bound to a known Prototype,
+    and prove that real owner-emitted drafts remain non-executable. Add a
+    Landing-to-Preview consumer regression and remove the test assumption that
+    the committed repository always contains exactly one Preview profile.
+    Do not invent a runnable port/configuration, skip malformed drafts, weaken
+    activation, edit the workflow-owned review head, bypass failing CI or
+    create another repair ART child. Keep the failed review unmerged and use
+    existing immutable cancellation/corrected-submission semantics after the
+    owner fix is accepted and commissioned. This remains the existing1298
+    maintenance path, not app-generation or final-readiness evidence.
+    Studio PR30 subsequently merged a4dff00628ad54b7c05bd48aebbbcf3ec2a18d6b
+    after all78 clean committed tests, every owner validator, producer-vocabulary
+    parity, strict inert-draft negatives and actual emitter/non-execution
+    regressions passed. Security PR279 merged412b669ec567fc4101f304c889b261c3c2a0694b
+    accepts that exact Studio control revision without changing other owners,
+    the executable profile schema, activation authority or Platform tree.
+    The cancelled failed attempt's leftover branch was retired only after
+    exact closed-review/head guards and a verified complete recovery bundle;
+    history and source remain recoverable. Both exact maintenance credentials
+    are revoked; only proven merged review resources were retired, and strict
+    exact Studio/Security audits pass. Normal composed activation passed with
+    receipt20261017T154443Z-activate.json. Corrected same-Prototype immutable
+    request17922519451811 opened Studio31 atb41781a; native78tests/all owner
+    validators and providerCI39046501652 passed, exact delegated human review
+    mergedf668a26ce5fdb4d0794d949d08205f10d9f50741. The old failed PR29 remains
+    cancelled/unmerged. Final continuation exposed another actual consumer
+    omission: Platform canonical record classification rejects the documented
+    fixtures/prototypes/proposal-1305/.gitkeep output. Direct admission of the
+    actual12-file merged delta reproduces that single denied path; Console
+    collection returns503 and checkpoints are withheld while credentials
+    remain maintained. Existing1298 blocker updated, no new repair child.
+    Repair the existing fixture-data namespace classification with real-Git
+    producer-shape and negative boundary regressions, exact Security acceptance
+    and normal composition proof before continuing the SAME request. Do not
+    delete fixture output, weaken code/schema/mode/provider/history checks,
+    rewrite the immutable request or claim source merge is operating success.
+    Platform319 mergedac854a4e08a6d075bd1842127513c55de59f3997 and Security280
+    merged7e65781f828ac90f4fa16c44e55a62c42ca6878c after full443test/native
+    local proof, exact provider checks and human review. All exact consumers
+    were updated together, credentials revoked and merged resources retired;
+    strict owner audits pass. Activation20261017T160904Z passes current
+    credentials/model/records and Console collection200 reads the registration.
+    Normal cold-browser Continue Landing still fails before a write: the
+    button is disabled because modal draft mutability and source-derived
+    landing completion override the pending OOS review-required4 state.
+    Its own displayed message says complete while owner readback/receipt are
+    pending. Code and browser prove this against the primary procedure's
+    continue-after-merge contract; no direct API bypass or new request was
+    used. Repair existing Landing continuation/status predicates, preserving
+    readonly accepted drafts, canonical terminal lifecycle and failed/cancelled
+    workflow denials, plus server authority. Cover merged canonical source
+    with every pending/terminal owner state and actual cold UI continuation,
+    not merely server-client submission tests. Maturity's separate existing
+    owner-progress control is the checked pattern, not another mechanism.
+    October18 post-crash recovery also caught a diagnostic overreach before
+    source work: a gateway readiness consumer was described as OOS, but its
+    actual fixed deployment is governed-ai-consumer-probe. The proposed boot
+    ordering repair was dropped before any Platform branch/code/credential/PR.
+    Actual readiness returned provider-unavailable while Windows Ollama was
+    stopped; starting its existing application restored endpoint200 at the
+    already approved0.40.5 and gateway readiness. The disposable failed OOS pod
+    was replaced and its owner-defined volatile executor directory restored
+    with0700/user ownership; persistent workflow state was preserved. Neither
+    transient directory absence before later profile startup nor repeated
+    activation attempts proves a source ordering or retry-policy defect.
+    Resolve exact named wait targets and actual provider preconditions before
+    stating a cause or assigning another repair. No source fix is justified
+    for that unproven inference; retain the real Console cold-resume repair.
+    The real cold-resume repair subsequently merged as Console90 b840fa731f25
+    and Security281 74de8bbf1006, after full565test/local build/base-aware proof,
+    exact provider CI and human review. All four Console consumers were
+    reaccepted together; no Platform ordering source change was made. Both
+    credentials were revoked and exact merged worktrees/branches retired;
+    strict Console/Security audits pass. Accepted activation082656Z passes
+    live/current Console, current record authorities, primary registers and
+    approved model; renewal082752Z recovered automatically after the lifecycle
+    lock released, leaving no failed user units. Normal Console continuation
+    of SAME request17922519451811 succeeded at08:28Z, revision5, with Studio31
+    mergef668a26, human-reviewed merged-authority readback and terminal receipt
+    digest74afb40863ab806f906acf3313497110ae48b561452bfcfce7d2c7a1ed230ad5.
+    A fresh browser reconstructs Landing Complete without Landing writes.
+    This closes the registration operating-proof gap only. Prototype app
+    authoring, packet preparation, approved source transfer, org source
+    admission/trusted CI, bounded app runtime and final all-route proof still
+    require the existing whole-path architecture decisions; do not fabricate
+    source work from historical recovery or claim the app/Epic complete.
+    Whole-path preflight on October18 subsequently checked all29 descendants,
+    all eight owner evidence profiles and fresh provider metadata before
+    authoring source. Target1421451929 remains README-only. Gary App4907049
+    deliberately has no Workflows permission; GitHub requires it to create
+    the initial CI workflow. Existing-repository maintenance can reuse CI,
+    but a new owner cannot be treated as already source-execution-ready.
+    Record this as a provider/bootstrap prerequisite, not another defect or
+    permission mystery. Proposed trusted CI/scaffold issuance is separately
+    bounded to one organization repository/branch, short-lived credentials,
+    reviewed template and human merge; normal model/source tokens keep their
+    existing permissions. App grant and installation acceptance require an
+    explicit operator action before this authority is used. No App permission,
+    selection, target token or product source was changed during inspection.
+    Preserve staged bootstrap/classification/admission and approved-source
+    transfer in the whole-path plan rather than patching a screen first.
+    Operator correction then exposed an over-specific planning assumption:
+    the to-do demonstration was being treated as the universal repository/CI
+    route. GitHub really requires Workflows permission for writing workflow
+    files, but that does not prove every project requires a workflow file,
+    or that this permission is the next required Console action. Retract the
+    unconditional permission blocker; do not grant it or replace it with a
+    validation bypass. First use existing lifecycle, repository custody,
+    source/non-source work and owner evidence contracts to classify outcome,
+    source home, runtime/release need, confidentiality and risk. Distinguish
+    supported operating routes from contract-only, missing and out-of-scope
+    capabilities. Preserve required trusted source validation where applicable,
+    but select its implementation from the owner/project rather than assuming
+    GitHub Actions. Qualify contrasting source, no-new-repository, no-runtime,
+    non-source and privacy-sensitive cases without building a product for
+    every case or silently expanding the accepted public-demo scope.
+    This updates the existing lesson, not another repair story or a landed
+    universal project taxonomy. The proposed CI authority remains unapproved.
+    The existing whole-owner evidence preflight then aligned only the two
+    actual missing sandbox-runtime command declarations, reusing the existing
+    full-suite dual-fidelity pattern already present in OOS/Console/Platform.
+    CGG26 mergedddadcfaae6df and Studio32 merged0754b123b5c5 after80/78 committed
+    native tests with no skips, existing validators, provider CI and exact-head
+    review; no application/CI/identity/model behavior changed. Security282
+    mergeda34a7881b8b7 reaccepted those exact metadata revisions. All three
+    credentials were revoked, proven merged resources retired and strict
+    exact-owner audits passed zero. Retained normal activation092632Z and
+    renewal092947Z pass current source/record/credential bindings. Fresh
+    browser proof preserves the same succeeded registration receipt74afb408
+    and Landing Complete with zero Landing writes. The initial read-only UI
+    timeout passed on retry without a source/runtime fix; its cause remains
+    unproven. Existing focused route suites passed61OOS+41Console tests, not
+    full live route acceptance. This closes the metadata prerequisite only;
+    real authoring, approved source transfer, target admission and app/runtime
+    operating proof remain open. Do not create another metadata successor,
+    universal CI mandate, repair ART child or app/Epic completion claim.
+    Whole-path implementation then replaced the stale local inspection plan,
+    including exact approved-source import and post-squash merged-owner evidence
+    sequencing. All eight immutable accepted-base owner profiles admit48planned
+    positive/negative cases; that is not feature conformance. CGG27 merged3981c8f
+    after91native tests/provider39117150613/exact-head human review, without
+    changing legacy Delivery schemas or the shared projection kernel. Its token
+    is revoked and proven merged resources retired; strict CGG audit passes.
+    The live primary remains acceptedddadcf; no Prototype generation is enabled.
+    Studio's source preparation is deliberately read-only: exact committed scope
+    and deterministic Preview file plans, with application/recovery retained by
+    the existing source executor and the existing packet emitter kept as sole
+    packet producer. Paired browser-local declarations, actual HTTP-write denial
+    and explicit non-browser/non-sandbox proof limits are separately tested.
+    Before Studio merge, whole-path inspection corrected the rollout assumption:
+    private record refresh follows remote main, not merely the local primary,
+    and rejects unaccepted control-code deltas. Holding only primary checkouts
+    back would not protect current Console records. Hold Studio/WG source PRs
+    open until the complete dependent chain/review inputs are prepared, then
+    use one bounded ordered landing/final Security/activation window with honest
+    transition status. This was caught before the affected merge; it is not a
+    proven live regression, new defect or justification for another pinning
+    mechanism. Actual app/owner/runtime/all-route acceptance remains pending.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/29
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/30
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/31
+  - https://github.com/mfshaf7/platform-engineering/pull/319
+  - https://github.com/mfshaf7/security-architecture/pull/280
+  - https://github.com/mfshaf7/security-architecture/pull/279
+  - https://github.com/mfshaf7/governance-operations-console/pull/90
+  - https://github.com/mfshaf7/security-architecture/pull/281
+  - https://github.com/mfshaf7/context-governance-gateway/pull/26
+  - https://github.com/mfshaf7/context-governance-gateway/pull/27
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/32
+  - https://github.com/mfshaf7/security-architecture/pull/282
+  - repo://workspace-prototype-studio/packages/prototype_landing/landing.py
+  - repo://workspace-prototype-studio/packages/prototype_preview/runtime.py
+  - repo://workspace-prototype-studio/tests/test_prototype_preview.py
+- id: private-client-custody-not-qualified-end-to-end
+  title: Public demo workaround and shared Studio custody missed the private-client requirement
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - unsafe-assumption
+  - owner-boundary-miss
+  - diagnostic-ordering-miss
+  finding: >-
+    The operator rejected making the to-do repository public because the
+    system must also build private client applications. This supersedes the
+    earlier visibility question; retain the existing private repository and
+    do not treat continue as permission to expose it or waive provider
+    enforcement. Fresh GitHub readback proves workspace-prototype-studio is
+    public while repository1421451929 remains private. Current Landing would
+    create app source and design records in that public Studio; the registry
+    private-internal label is not provider access control. No to-do app source
+    has been generated. The contract already admits reference-only dedicated
+    owner custody, but Landing still requires public Studio documentation and
+    Preview currently resolves only Studio-local prototype paths. Reusing
+    those pieces does not yet prove confidential end-to-end custody. Extend
+    existing source-custody, owner-record and runtime boundaries together;
+    keep client source, detailed design, model context, evidence and build
+    output out of public paths, and expose only explicitly approved metadata.
+    Separately, GitHub refuses protection and ruleset reads for the current
+    private target under its plan. Executor checks and simulated provider
+    denial are not equivalent to actual GitHub branch enforcement. A supported
+    provider plan or an explicit, bounded test-only security decision is
+    needed before protected source execution can be claimed. No paid plan,
+    visibility change, org source token, policy waiver or new ART child was
+    performed at discovery. The operator subsequently explicitly approved
+    making only the synthetic to-do demo public to prove actual system
+    operation first. Provider readback proves repository1421451929 public,
+    with unchanged README-only main. Native rulesets25266184 and25266185 now
+    restrict main updates to the exact human via PR, require fresh review,
+    and deny force/deletion. This removes the private-plan restriction, not
+    the remaining source admission, actual trusted CI or authoring gaps.
+    Private-client custody remains unqualified and outside this public-demo
+    source batch; no confidential data, paid plan, policy waiver or public
+    runtime exposure was authorized. Keep the complete private journey
+    unproven until actual owner and runtime evidence qualifies it; simulation
+    cannot certify production client security.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-prototype-studio
+  - https://github.com/mfshaf7-workspace/console-todo-1275
+  - repo://workspace-governance/contracts/prototype-landing.yaml
+  - repo://workspace-prototype-studio/packages/prototype_landing/landing.py
+  - repo://workspace-prototype-studio/packages/prototype_preview/runtime.py
+  - repo://platform-engineering/security/agent-source-identity.yaml
+- id: github-app-installation-account-guidance-unverified
+  title: Repeated install guidance omitted the existing App visibility prerequisite
+  trigger: repeated-operator-friction
+  failure_classes:
+  - diagnostic-ordering-miss
+  - unsafe-assumption
+  finding: >-
+    The agent supplied an organization-targeted Gary installation link before
+    proving that the personal-account-owned App permitted installation on
+    another account. Repeating the link after the operator reported a missing
+    to-do repository sent them back to the personal account. The organization
+    repository existed; the personal-only installation and unavailable public
+    App metadata were already observable. Check App installability, target
+    account and immutable repository together before giving GUI instructions;
+    a target_id query is not evidence that GitHub selected that account.
+    After the operator changed installability and installed the existing App,
+    actual GitHub reads proved organization installation172173010 for Gary
+    App4907049 and repository1421451929. Its original personal installation
+    remained160815600. The later browser connection error did not undo the
+    installation; its exact redirect cause remains unverified. No extra App,
+    key, broadened token or duplicate repository was created by the agent.
+    Installation does not substitute for source admission or Security review.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7-workspace/console-todo-1275
+  - repo://platform-engineering/security/agent-source-identity.yaml
+- id: prototype-readiness-caller-consumption-not-qualified
+  title: Live Prototype Landing exposed stale WGCF caller bindings despite valid provider tokens
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  finding: >-
+    After the post-crash health repair, the actual Console accepted Landing for
+    the preserved Proposal 1305 capture, but its normal continue returned 401
+    from WGCF readiness before source publication. Secret-value-suppressed
+    runtime comparisons proved that Landing, Maturity and Closure caller
+    credentials differ from the current WGCF OOS registry caller credential;
+    the existing Repository readiness caller matches. Valid GitHub tokens and
+    primary-register reads therefore do not prove readiness authentication.
+    Reconcile the existing Platform-owned caller projection and normal renewal
+    consumption, test all affected families together, and resume the SAME
+    accepted Landing request. Do not create a duplicate Prototype, waive WGCF,
+    widen caller permissions, expose credentials, or infer repository damage.
+    Pre-merge adjacent binding inspection also proved that the three OOS
+    issuer expectations still reference historical activation implementations
+    while the current reviewed WGCF image emits its actual current revision.
+    The same grouped Platform reconciliation must prove the running issuer
+    against Security-accepted source and bind all three consumers to that
+    exact revision. Preserve OOS's exact issuer checks and historical evidence;
+    do not weaken validation or treat a successful authentication probe as a
+    complete readiness receipt.
+    Whole-process inspection covered every WGCF secret and implementation-ref
+    environment binding before merge: all shared caller credentials already
+    match; only the three dedicated Prototype copies differ. Product
+    Publication additionally retains historical issuer4aee019d, while Workspace
+    Intake already matches7077ddf6. The same fixed current-issuer reconciliation
+    covers all five existing issuer consumers, with unchanged enablement,
+    caller privileges and Security gates. It is not a new publication route.
+    After Platform318/Security276 activation, all three real authenticated
+    reads and invalid-credential denials passed and all five issuer expectations
+    matched. SAME-request Console continuation then reached a separate503.
+    A read-only snapshot inside the actual WGCF API proved
+    "Prototype Studio source schema differs from the reviewed WGCF bundle".
+    Landing and Maturity pin registry schema a4951c88, while current reviewed
+    Studio and Closure use defdc5c2 (Closure's existing delivery-governed phase
+    and source-custody additions). Synchronize those affected consumer copies
+    and source pins, preserve exact-schema denial, and prove both readers
+    against current committed Studio before another operating claim. This is
+    accepted-owner contract drift, not justification to weaken the check or
+    create another repair ART child. Caller source units are merged, revoked,
+    cleaned and strict owner audits pass; the journey remains blocked.
+  source_refs:
+  - openproject://work_packages/1298
+  - console://prototype-landing/sessions/prototype-landing-request:proposal-1305:17921538302561
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/scripts/prototype_workflow_identity.py
+  - repo://operator-orchestration-service/src/prototype-landing/wgcf-client.js
+- id: operator-reported-repeat
+  title: The operator identified another narrow plan that treated incomplete capability work as reusable completion.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    The Epic 1275 plan could pass while capability rows carried no observed
+    contract, implementation, runtime, evidence, and demonstration status.
+    Browser proof then found prototype-local primary workspaces, a
+    contract-only repository-custody authority, and unavailable Registry and
+    Portfolio projections only after most children were marked done.
+  source_refs:
+  - openproject://work_packages/1275
+  - openproject://work_packages/1278
+  - openproject://work_packages/1298
+  - workspace-governance://contracts/console-operational-capabilities.yaml
+  - workspace-governance://contracts/repository-custody.yaml
+- id: complete-runtime-omitted-terminal-capability-composition
+  title: Complete-runtime proof passed without composing repository provisioning
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    Platform item 1291 passed its complete-runtime operating proof even though
+    the coordinator did not deliver the approved repository-provisioning
+    identity, activate WGCF repository-custody readiness, enable and persist
+    the OOS repository-custody runtime, or project the policy and credential
+    references required by the Console. The proof exercised Platform-operation
+    restart and rollback behavior but did not assert the terminal capabilities
+    required by item 1298. The fixture-free browser journey correctly exposed
+    Repository Control as non-executable before any real repository was
+    created.
+  source_refs:
+  - openproject://work_packages/1291
+  - openproject://work_packages/1298
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/products/governance-operations-console/complete-runtime-policy.yaml
+  - repo://operator-orchestration-service/contracts/repository-custody/manifest.json
+  - console://capabilities/repository-provisioning
+- id: cleanup-left-startup-services-bound-to-retired-worktree
+  title: Runtime cleanup removed source paths still required by startup services
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    The 2026-10-16 restart exposed that both the composition auto-resume unit
+    and Platform operation provider still referenced the retired delivery-1275-
+    platform-composition-repair worktree. Startup failed with systemd status
+    200/CHDIR. The volatile source-executor directory was never recreated and
+    OOS failed its hostPath mount. The previously closed composition recovery
+    lesson covered the composition target but did not cover source-path
+    survival after worktree cleanup. Recovery must rebind generated services
+    to surviving reviewed source before retiring a worktree, then verify the
+    generated paths and cold-start dependency chain.
+  source_refs:
+  - workspace-governance/reviews/improvement-candidates/2026-10-09-composition-auto-resume-target-regression.yaml
+  - systemd://user/workspace-devint-accepted-idea-delivery-mfshaf7.service
+  - systemd://user/governance-console-platform-operation-provider.service
+  - repo://platform-engineering/scripts/dev_integration_auto_resume.py
+  - openproject://work_packages/1298
+- id: provisioning-lifetime-and-browser-continuity-not-qualified
+  title: Activation proof omitted token lifetime and cold-browser continuity
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    The same final journey exposed two missing composed operating conditions.
+    OOS retained custody results, but Console could not enumerate them after
+    browser reload. Platform delivered a short-lived provisioning token only
+    during activation or restart, so a longer session would require routine
+    CLI intervention after expiry. The maintenance repair must prove canonical
+    register reconstruction and owner-managed early renewal, interrupted
+    credential-consumption recovery, stale-source denial, and rollback without
+    claiming that source tests are current operating evidence.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/344
+  - https://github.com/mfshaf7/governance-operations-console/pull/84
+  - https://github.com/mfshaf7/platform-engineering/pull/311
+- id: owner-probe-used-internal-not-public-error-contract
+  title: Platform commissioning compared Console errors with the internal OOS shape
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  - missing-deterministic-test-seam
+  finding: >-
+    The repaired runtime reached the real Console provisioning read route,
+    which correctly returned its public adapter code and exact missing-request
+    message. The new Platform probe instead expected the internal OOS error
+    code and falsely rejected availability. Its first tests mocked internal
+    bindings but did not exercise the observed public HTTP contract. Repair is
+    confined to the checker, with the real boundary response as the positive
+    fixture and wrong-route, wrong-identity, preview, transport-recovery and
+    bounded-unavailability cases as negative proof. No API or new workflow is
+    needed.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://governance-operations-console/src/domain-workspaces/repository/server/repository-custody-oos-client.ts
+- id: live-proposal-repository-gate-handoff-left-prototype-local
+  title: Accepted live Proposal repository requests had no canonical resolution path
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    After successful complete-runtime activation, the browser showed the real
+    accepted to-do Proposal blocked on its new-repository request. Opening
+    Repository Control showed zero records and no pending Proposal request.
+    The existing resolution command and ingress were prototype-local, correctly
+    excluded by live fixture isolation. Provisioning alone cannot advance the
+    canonical Proposal gate. Extend the existing Repository-owned outcome and
+    OOS Proposal mutation adapter to consume successful custody evidence with
+    source-version guards, durable typed history, replay and cold-read recovery.
+    Preserve completed Disposition; do not unlock it or manufacture local
+    resolution truth. Maintenance evidence must cover the whole handoff, not
+    just repository creation or individual surface availability.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://governance-operations-console/docs/product/domain-contracts/repository.md
+  - repo://governance-operations-console/src/domain-workspaces/repository/presentation/surface/use-repository-control-controller.ts
+  - repo://operator-orchestration-service/contracts/proposal-workflow/manifest.json
+- id: installed-image-contract-bundle-roots-unqualified
+  title: Live provisioning reached an installed-package contract path missing from the image configuration
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    After reviewed complete-runtime activation and credential renewal passed,
+    the real Console provisioning submission failed before provider access.
+    WGCF POST /v1/readiness/repository-custody returned HTTP 500 because its
+    installed Python loader searched /usr/local/contracts/repository-custody,
+    while the verified bundle was actually packaged at /app/contracts/repository-custody.
+    The image did not declare WGCF_REPOSITORY_CUSTODY_CONTRACT_ROOT. Owner
+    source tests loaded the checkout-relative default; image smoke proved
+    health and generic readiness, not packaged operation contract discovery.
+    Inspect every installed contract loader and prove packaged API/worker
+    loading without test-supplied root overrides. Repair the existing image
+    bindings and smoke coverage through maintenance; do not invent another
+    workflow or ART child. Refresh exact-head Security acceptance before
+    reactivation and retry through the real Console.
+    Disposition: extend existing WGCF image packaging. Landing Unit Decision:
+    child_isolated_landing_unit, delivery-1275-packaged-contracts, because WGCF
+    image review/deployment/rollback is independent of already-landed Console
+    and OOS repairs. Source base is WGCF981aa6259b2dcc65d41dc739bddadbb395794973.
+    Exact-head consumers: the existing complete-runtime Security decision
+    requires reacceptance after WGCF merge; Platform source needs no change,
+    but its private activation policy and WGCF image require recommissioning.
+    The dependent Security refresh uses child_isolated_landing_unit,
+    maintenance-1275-packaged-contracts-security, within the existing dated
+    complete-runtime decision and review. No new approval mechanism or ART
+    item is required. CI workflow edits were removed from the unpublished
+    candidate after the App correctly rejected them; the same installed,
+    non-root smoke is mandatory in the shared image build instead, preserving
+    existing App permissions and existing CI/publication workflows.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://workspace-governance-control-fabric/Dockerfile
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/repository_custody_contracts.py
+  - repo://workspace-governance-control-fabric/.github/workflows/validate.yaml
+- id: wgcf-custody-source-activation-owner-omitted
+  title: The approved OOS custody activation did not activate its WGCF readiness dependency
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - missing-deterministic-test-seam
+  - contract-drift
+  finding: >-
+    After the packaging repair landed and all installed bundles loaded in the
+    real pod, the same Console provisioning operation was correctly refused
+    with HTTP503: repository custody authority has not activated the runtime.
+    The canonical Workspace Governance schema requires runtime_activation.enabled
+    to remain false and maturity contract-only. OOS already consumes a separately
+    reviewed bounded source activation in its local manifest, but WGCF still
+    checks the immutable upstream false flag. Its source activation owner was
+    omitted from the commissioning chain. Loading contracts and generic health
+    cannot prove that the configured runtime factory can construct the admitted
+    capability. No provider operation or canonical custody result was created.
+    Reuse WGCF's existing manifest activation and pinned activation-review pattern,
+    scoped to link-existing/provision-new only; never flip the global authority
+    or activate repository lifecycle. Extend the existing Security source-activation
+    review before WGCF implementation, then refresh the existing exact-composition
+    decision before Platform activation. This is same-initiative maintenance,
+    not a new ART child or new architecture/control plane. Landing Unit Decisions:
+    child_isolated_landing_unit for maintenance-1275-custody-readiness-activation-security,
+    delivery-1275-custody-readiness-activation, and the later exact-composition
+    Security refresh, preserving their distinct owner/review/rollback boundaries.
+    Positive and negative proof must exercise the actual configured runtime
+    factory, including default denial, missing review, disabled source activation,
+    profile denial and unchanged lifecycle denial, before commissioning.
+    Final exact-composition refresh: child_isolated_landing_unit,
+    maintenance-1275-custody-readiness-composition-security, after the WGCF
+    maintenance merge. Only its new reviewed head changes; other owner heads
+    and the Platform tree remain accepted. Then recommission the existing
+    composition and resume the same real Console exercise.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://workspace-governance/contracts/schemas/repository-custody.schema.json
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/repository_custody_readiness.py
+  - repo://workspace-governance-control-fabric/contracts/prototype-maturity/manifest.json
+  - repo://operator-orchestration-service/contracts/repository-custody/manifest.json
+  - repo://security-architecture/docs/reviews/components/2026-10-15-repository-custody-controlled-activation.md
+- id: partial-provider-baseline-and-failed-result-recovery-unqualified
+  title: Real provider creation exposed a settings mismatch and hid its valid failure
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    The real Console request console-d732a3d8-fea8-4372-a1a0-4b1af2eb2150
+    created mfshaf7-workspace/console-todo-1275 exactly once, immutable GitHub
+    ID 1421451929. Provider readback matched the approved baseline except
+    delete_branch_on_merge, requested true but observed false. OOS correctly
+    retained a nonretryable failed result and immutable failure receipt.
+    Console incorrectly required failed readback settings to equal successful
+    intent, hiding the valid owner failure behind a 502 decoder error and
+    preventing canonical register restoration. The documented corrected-request
+    path creates a new identity, but provisioning currently treats the retained
+    repository as an unrelated name collision. GitHub documents the setting on
+    both create and update; do not claim the create parameter is unsupported.
+    Extend the existing provision-new workflow to finish its exact approved
+    mutable baseline only on its independently verified acknowledged repository,
+    with separate fresh readback. Use the existing causation field to bind an
+    explicitly reviewed correction to the retained failed creation and immutable
+    provider ID; never create again, overwrite the original terminal receipt,
+    accept a name collision, mutate an arbitrary repository, or substitute a
+    human provider token. Preserve strict success checks while accepting
+    structurally valid failed observations in Console. Restore the failed request
+    and its correction action through the existing dialog after reload.
+    Disposition: extend existing owner workflow and Console projection, within
+    the operator-approved maintenance path for acceptance failures; no ART child
+    or new control plane. Landing Unit Decisions: child_isolated_landing_unit
+    for maintenance-1275-provisioning-baseline-oos and
+    maintenance-1275-provisioning-baseline-console, because owner review and
+    rollback are separate. Sequence OOS then Console, followed by
+    maintenance-1275-provisioning-baseline-security updating the existing
+    exact-composition acceptance before Platform recommissioning. WG and WGCF
+    contracts and source activation require no change; Platform source requires
+    no change unless exact owner proof identifies a genuine composition delta.
+    Tests must cover partial creation, correction provenance and changed intent,
+    immutable failed history, permission/transport/readback denial, no duplicate
+    create, replay/process-loss recovery, failed canonical enumeration, and
+    retained strict success validation. Final proof remains the same real
+    browser journey, not a direct provider correction or fixture result.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7-workspace/console-todo-1275
+  - oos://receipts/repository-custody/2d9221b3e454938fadb127ea-070cdd248a2e5243afa481dba6945bb9acc8e8146cb66576dbcd3bc3caddcc3a.json
+  - repo://operator-orchestration-service/docs/operations/repository-custody-workflow.md
+  - repo://governance-operations-console/docs/product/repository-provisioning-live-integration.md
+  - https://docs.github.com/en/rest/repos/repos#create-an-organization-repository
+- id: crash-recovery-preflight-delayed-host-bugcheck-read
+  title: Current capacity checks did not establish stability after repeated host crashes
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - unsafe-assumption
+  finding: >-
+    The recovery preflight first proved available memory, service reachability
+    and Kubernetes pressure, but did not immediately read the Windows bugcheck
+    history. Production compilation then repeatedly failed, including an
+    untouched accepted-base checkout. The later read-only Windows event query
+    found MEMORY_MANAGEMENT 0x1A subtype 0x41792 and 0x12B before this boot.
+    Microsoft identifies memory corruption for these codes; the responsible
+    hardware, firmware, driver or device is not established. Do not confuse
+    available capacity with host stability, attribute this to application source
+    or WSL pressure, or weaken local proof silently. This is a crash-diagnostic
+    ordering lesson, not another Console product requirement or ART child.
+    Preserve source and failed build evidence, stop repeated heavy local builds,
+    and obtain explicit operator direction for host diagnostics or a bounded
+    remote-build evidence exception before source publication.
+    The operator then directed "no lets continue" after being offered successful
+    GitHub CI build proof versus host investigation. The execution interpretation
+    was stated back: continue the primary repair without host changes, use
+    successful GitHub CI for production-build evidence, and retain other local
+    checks, exact-head human review, Security acceptance and runtime proof.
+  source_refs:
+  - conversation://2026-10-16-crash-recovery-and-health-check
+  - https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x1a--memory-management
+  - https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x12b---faulty-hardware-corrupted-page
+- id: complete-runtime-omitted-required-workflow-credential-currency
+  title: Complete runtime passed while downstream workflow credentials had expired
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    After the accepted complete-runtime activation and successful real Console
+    repository correction, Proposal idea-1305 reached version-4 prepared handoff
+    but target start failed with proposal_target_provider_rejected. The exact
+    dedicated provider token returned GitHub HTTP401. Its managed Secret
+    annotated expiry was 2026-10-08T15:11:32Z. The same metadata audit found
+    expired Landing, Maturity, Closure and Intake credentials; provisioning
+    alone had current managed renewal. Complete-runtime activation proved one
+    credential family, not all terminal journey prerequisites. Preserve all
+    successful custody and Proposal history and recover only through the
+    existing dedicated identities, never ambient human credentials. Reuse and
+    extend the existing Platform complete-runtime credential lifecycle and
+    capability-specific health checks rather than invent another service or
+    ART child. Durable closure requires an explicit reviewed fix shape,
+    exact-composition Security acceptance and whole-journey operating proof.
+    Operator approved the bounded timer/readiness extension by directing
+    "continue" after the explicit repair proposal. Disposition: extend the
+    existing Platform lifecycle, not a new component or ART child. Landing Unit
+    Decisions: child_isolated_landing_unit for maintenance-1275-workflow-credential-lifecycle-platform
+    and maintenance-1275-workflow-credential-lifecycle-security. Implement only
+    rotation of the five already-enabled dedicated App bindings; preserve
+    unrelated Secret fields, workflow activation, owner state and source
+    authority. Batch token consumption into one OOS rollout and prove actual
+    mounted-token provider access. Existing pre-Console owner bindings remain
+    outside Console rollback deletion; stop renewal and preserve their bounded
+    credentials while revoking the Console-owned provider/provisioning token.
+    Exact-revision consumers: complete-runtime Security decision and its
+    private materialized policy require reacceptance/recommissioning; no OOS,
+    Console, WGCF or workspace source change is planned. Merge Platform first,
+    refresh the existing Security composition decision/index second, activate
+    only after both reviewed heads land, then prove all five identities before
+    resuming the same acceptance exercise. Preserve the earlier real successes.
+    Pre-activation native Kubernetes compatibility proof then caught an
+    implementation miss in Platform PR314: resource-version replacement
+    retained Secret data but used kubectl's default field manager, transferring
+    SSA field ownership away from the original identity producer and making
+    its later recovery apply conflict. A synthetic, isolated ConfigMap proved
+    the conflict without modifying any real workflow Secret and was removed.
+    Reusing only the producer name with Update still conflicts; the native
+    producer's server-side Apply operation was then proven with native
+    resourceVersion compare-and-swap: update succeeds, stale versions fail,
+    unrelated data survives and original producer recovery remains compatible.
+    Synthetic proof objects were removed. Unit-mocked replacement had not
+    proved that ownership protocol. Correct the same
+    bounded maintenance implementation
+    and add the real-Kubernetes positive/negative ownership case before
+    activation; do not create a new ART child, identity, or recovery mechanism.
+    The corrected native suite passed 37 cases, including actual producer
+    Secret/stringData manifests for all five identities with synthetic values.
+    Platform PR315 merged 31a12981a9f69f9c9f7006d3946f42ed5d611374 after full
+    exact-committed local validation and CI. Existing Security PR273 accepted
+    that exact tree and merged a5877015bf6ce750a03839b74c4bcb855c5c98d8.
+    Repair credentials, branches and worktrees were retired with strict owner
+    audits passing. Supported activation is now running; live group currency
+    and the real Console product exercise remain required, not inferred done.
+    Activation then passed with all five actual OOS mounted credentials accepted
+    by the provider. An unchanged managed renewal tick also passed without
+    minting. A post-unit status correctly caught two stopped profile host
+    helpers: the temporary systemd activation wrapper omitted RemainAfterExit,
+    so its default cgroup cleanup retired detached children after success.
+    Existing Platform auto-resume already has RemainAfterExit=yes. Classify this
+    as an invocation/supervision mistake, not a new source defect or capability:
+    restore through that existing admitted recovery unit and require status
+    after the launch controller has exited, not only inside activation.
+  source_refs:
+  - openproject://work_packages/1298
+  - console://api/proposals/idea-1305/target-application
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/security/proposal-target-identity.yaml
+  - repo://platform-engineering/docs/components/operator-orchestration-service/proposal-target-identity.md
+  - https://github.com/mfshaf7/platform-engineering/pull/315
+  - https://github.com/mfshaf7/security-architecture/pull/273
+- id: fixture-isolation-left-core-journey-without-live-records-or-realization-ui
+  title: Correct fixture denial was mistaken for complete live operator wiring
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    After real Proposal-to-Prototype capture succeeded, a cold Console Prototype
+    Control had no canonical record. Source confirms its primary loader declares
+    liveAuthorityAvailable false and live null, and bypasses effective projection
+    entirely outside fixture mode. Delivery workspace uses the same false/null
+    boundary and returns unavailable before its execution UI can mount. These
+    are missing live bindings, not a reason to re-enable fixtures or weaken
+    denial. A whole remaining-path check also found the commissioned OOS
+    source-realization API family but no corresponding Console API client,
+    routes or implementation/digest-acceptance interaction. Existing work-session
+    controls only start, continue, merge and close; they cannot perform the
+    backend's separate source-realization transitions. Live OOS also reports
+    OOS_SOURCE_REALIZATION_ENABLED false. The existing bounded-source-realization
+    Security review explicitly approves source merge only and requires later
+    model-profile, Platform and operating acceptance. That is an uncompleted
+    commissioning prerequisite, not a broken flag to override or a regression.
+    Include that existing gate chain in the same remaining-path repair plan.
+    Cold-read regression tests in the coherent repair caught another shared
+    cause: the live Maturity projector invoked fixture transition helpers,
+    which appended prototype-local evidence to a valid owner promotion. Remove
+    those helpers from live projection rather than weakening the test. Preserve
+    independently observed preview/evidence, project only merged owner lifecycle
+    and receipts, and guard against simulated effects crossing the live boundary.
+    This is part of the same approved maintenance batch, not another ART item.
+    Actual gateway contract inspection before commissioning found that the
+    realization caller_workflow did not match its caller_id suffix and its
+    provider schema reference pointed to OOS rather than the Platform-owned
+    strict provider schema. Correct both source bindings; retain the stricter
+    OOS acceptance schema and add matching positive/negative gateway proof.
+    The same inspection found no complete-runtime configuration for the existing
+    Studio Preview owner adapter. Its fixed control revision must remain reviewed
+    while its served canonical record revision follows the approved Platform
+    checkpoint; no new source runner or preview authority is needed. The real
+    committed Studio collection was read-only projected through the actual
+    Console mapper successfully, with all four current records and no browser
+    overlay. That is engineering fidelity evidence, not final operating proof.
+    Accepted case1298-positive
+    requires a real Console-created app; hidden Codex/CLI source work is forbidden.
+    Preserve all completed custody/capture history and the successful credential
+    repair. Keep1298 blocked, map the remaining primary-read and realization
+    links together, and extend the existing Studio/OOS/Console owner boundaries
+    rather than create ART children, an architecture-version loop, a generic
+    gateway, or another implementation mechanism. Existing Portfolio/Registry
+    and source execution must be checked for current supported handoffs, not
+    inferred defective from a placeholder elsewhere.
+    Whole-path contract inspection also found that WGCF intentionally reads a
+    deployment-refreshed origin/main ref and performs no fetch or checkout; its
+    profile requires local HEAD equal that ref, while complete-runtime acceptance
+    pins reviewed owner HEADs. OOS source adapters likewise depend on local trusted
+    Git history for provider revisions. Treat fresh canonical records versus
+    fixed reviewed execution code as an architecture decision, not a reason to
+    weaken guards or declare WGCF defective for following its contract. A future
+    post-merge failure has not been fabricated as observed live evidence.
+    Proposed posture is extend existing owners: Platform maintains approved data
+    freshness, OOS/WGCF consume authoritative snapshots, execution code stays
+    review-pinned and Console never gets Git authority. The architecture
+    discussion gate paused new implementation until that source/data boundary
+    was agreed. On 2026-10-16 the operator approved the required coherent fixes,
+    including this boundary, while requiring non-narrow implementation. The
+    pause is resolved; existing source review and operating acceptance gates
+    remain mandatory. Local remaining-path plan records the coherent batch;
+    no new service, identity expansion or ART child is authorized by this repair.
+    The same whole-path inspection found an interruption recovery gap in the
+    uncommissioned realization backend: generation persisted accepted before
+    invoking the model, but only draft-ready could be cancelled and retry
+    rejected any nonterminal predecessor. A retained accepted record therefore
+    had no normal operator exit after process loss. This is a source/state
+    recovery finding, not an invented observed live crash. Repair under the
+    existing OOS generation lock permits reason-bound cancellation only before
+    source acceptance; applying and apply-unknown still require exact-action
+    recovery. Keep it within the same approved owner maintenance unit and prove
+    interruption, no source mutation and linked retry before commissioning.
+    Console remaining-path inspection also confirmed that Candidate/Baseline
+    callbacks did not await or expose owner progress/review/failure, and that
+    Landing projected the source-code URI into the record-identity field later
+    compared with a canonical Delivery packet's record URI. Fix the existing
+    dialogs and owner-backed projections within the same Console Landing Unit.
+    Cold reconstruction must preserve verified owner promotion receipts without
+    re-running browser-local historical preview eligibility, must not fabricate
+    preview proof, and must not let an older workflow result downgrade a newer
+    canonical Studio lifecycle. Source UI defaults remain unaccepted defaults.
+    The operator's later Delivery question confirms this is still a visible
+    acceptance blocker, not a newly invented defect. Existing lifecycle and
+    realization contracts require the preserved incubation idea to hand off
+    into Delivery for Work Design and governed source execution. Prototype
+    exploration is not a substitute for that route; the real app remains
+    unbuilt and no hidden CLI implementation is permitted. Normal startup must
+    reapply the complete composition using the existing retained profile unit,
+    not raw startup that loses its new owner bindings. Security source remains
+    freshly validated while acceptance anchors only relevant decision files,
+    avoiding unrelated generated-index recommission loops. A web-service exit
+    at 17:31 and another at 17:49 returned zero and were not retried under
+    failure-only restart. A homepage HTTP200 after restart was only temporary
+    recovery, not lasting availability. Startup also reported damaged webpack
+    cache entries; these were moved aside recoverably, without claiming them
+    as the proven process-exit cause. The existing Platform source unit adds
+    always-restart for the web service, keeps tunnels failure-restarted and
+    requires actual live Delivery/Prototype registers during runtime status.
+    Tracing the operator's Delivery question found another route-specific
+    limitation: Studio exposes delivery-packet emission as an owner CLI, while
+    OOS and Console can apply only an already committed packet. No Console
+    authoring bridge was found in the current route inventory. The existing
+    Prototype capture must not be presented as an executable end-to-end
+    handoff, nor may a hidden CLI packet write substitute for Console proof.
+    The lifecycle contract also admits direct Proposal-to-Delivery without
+    mandatory incubation. Preserve the captured history and determine the
+    intended route explicitly before adding source or changing canonical
+    disposition. Any genuinely required authoring bridge must extend its
+    existing owner command and retain review, receipt and Security boundaries,
+    not invent another lifecycle or borrow another workflow's credentials.
+    The operator clarified that every supported route must be tested; asking
+    them to select an easier route was the wrong framing. Preserve idea1305 on
+    its existing Prototype-first route and qualify direct Delivery separately,
+    without duplicating the to-do product or silently changing Disposition.
+    The route coverage checkpoint distinguishes capture from actual prototype
+    exploration, baseline, packet authoring, Delivery implementation and final
+    durable product readback. CLI-only gaps are not waived by another route
+    succeeding. Do not fabricate a working prototype from Landing's README or
+    treat contract-only transitions as demonstrated runtime capability.
+    Further source inspection confirmed that live Prototype request/projection
+    writers remain fixture-gated and Preview profile editing has no live source
+    write. Landing's create-source operation emits a README and documentation
+    templates; the commissioned source-realization mechanism correctly requires
+    an active Delivery work session. Registration, maturity promotion and running
+    existing code do not constitute a Prototype design/source workbench. Filling
+    that gap requires an explicit Prototype subject binding and a reviewed source
+    path, not weakening Delivery eligibility or inventing an ART id. Reuse the
+    existing isolated source operations and Gary source identity, keep Studio
+    canonical ownership, and do not borrow Maturity or Closure tokens whose
+    declared paths exclude app source and Delivery packets. Prototype source
+    creation/refinement and deterministic packet preparation must be planned
+    together before their next source batch starts.
+    The existing reserved repository was verified through the provider: its main
+    commit ebc86d0e38e55b77ace1bb4c23add7c41d444432 contains README.md. It is
+    initialized, not an empty/unborn repository needing an invented bootstrap fix.
+    Its org repository is outside the currently declared eleven-repository Gary
+    source set. Treat later owner/source admission and any provider permission
+    action as explicit prerequisites, not automatic rights conferred by
+    provisioning. Inventory, publication, source custody and local runtime are
+    distinct claims; do not add publication or stage/prod requirements that the
+    accepted app exercise did not request.
+    After WGCF115 and Security277, deployed Landing and Maturity both read the
+    current Studio registry successfully and all five consumed issuer bindings
+    match the accepted WGCF revision. The same retained Console request now
+    receives a durable readiness finding rather than an authentication/source
+    outage. Canonical Studio has no prototypes/proposal-1305 path. WGCF correctly
+    requires null source_revision for create-studio-source; Console's builder
+    incorrectly copies the existing capture revision into that new-code source
+    field. Keep the Entry Packet and expected_state bound to actual capture and
+    authority revisions, but do not claim that absent app source has a revision.
+    Do not change posture to existing-source or weaken the policy to bypass it.
+    Include this projection repair and canonical-policy positive/negative
+    coverage in the coherent next Console owner batch, alongside the already
+    identified Prototype authoring and handoff seams, rather than commission
+    another isolated line-change deployment before inspecting those consumers.
+    The isolated existing-protocol mapper correction is now prepared in Console
+    PR89 at Gary49dad299009d0c11449ab6630f2a04d6e09372bb: committed561tests,
+    full build/check/audit and exact-head CI pass. Current WGCF pure policy
+    reproduces the old rejection and accepts the corrected actual capture
+    payload with all schema/digest/capture/concurrency bindings intact. This is
+    non-mutating engineering proof, not deployed readiness or a real app.
+    Post-crash recovery on October17 re-proved complete-runtime health and
+    repeated the full committed Console proof: all561 tests, architecture,
+    types, production build, source safety and dependency audit passed. Fresh
+    retained-capture/current-policy proof also passed without business writes.
+    Console PR89 merged as f2e506e7a4532c7ca2461d2631ec5f33367606a4.
+    Security PR278 merged as64a88aaddcf0d4342486521f80e4486f82ee2c63 after
+    exact-head CI and delegated human review. It reaccepts all four existing
+    Console consumers together, with every other source and the Platform tree
+    unchanged. Both exact maintenance credentials were revoked. The bounded
+    protocol repair is being commissioned as one Console plus Security slice rather
+    than held indefinitely for the architecture-unready new-purpose authoring
+    batch. Activation and actual reviewed Landing readback are still pending
+    at this checkpoint. Neither merged source nor pure policy proof establishes
+    app generation, private-client readiness or Epic completion.
+    Pre-source inspection also caught the target repository's provider-plan
+    boundary: private main is unprotected and protection/ruleset APIs return
+    a plan-limit403. No target source token was issued. The operator was asked
+    about public-demo visibility rather than changing it or silently waiving
+    the existing provider-enforcement guarantee. This is a prerequisite, not
+    another product defect or justification for a new repair ART child.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://governance-operations-console/src/domain-workspaces/prototype/presentation/surface/use-prototype-control-controller.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workspace/workspace-controller.tsx
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/delivery-work-session-api-routes.ts
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  - repo://operator-orchestration-service/docs/records/change-records/2026-10-14-bounded-source-realization.md
+  - https://github.com/mfshaf7/governance-operations-console/pull/89
+  - https://github.com/mfshaf7/security-architecture/pull/278
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Proposed closure: extend the existing capability contract and planning
+    preflight so every reused capability carries current five-dimensional
+    operating status, authoritative evidence references, and an activation
+    verdict. Reuse must be rejected when the observed profile is anything
+    other than operational-live for a terminal journey dependency. Repair the
+    existing Epic 1275 plan and reopen only acceptance-disproven children. The
+    complete-runtime owner proof must also assert every terminal capability
+    named by the downstream acceptance journey, including live repository
+    provisioning and its credential, readiness, state, and Console bindings.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-20'
+  note: >-
+    Original October18 review checkpoint was missed; explicitly re-reviewed
+    October19 after the staged admission-transition miss. October20 is the
+    next accountable review, not a claimed implementation completion date.
+    Correct the existing consumers and prove native promotion-to-issuance
+    before revised source publication. No new closing control is approved.
+    Close through the existing Epic 1275 final-guidance Landing Unit after the
+    repaired end-to-end browser journey proves every dependency live.

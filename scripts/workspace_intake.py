@@ -151,6 +151,18 @@ def _load_register(repo_root: Path) -> dict[str, Any]:
     return load_yaml(repo_root / "contracts" / "intake-register.yaml")
 
 
+def provider_repository_conflicts(repo_root: Path, provider: dict[str, Any], name: str) -> bool:
+    """One physical identity may not acquire another logical workspace key."""
+    register = _load_register(repo_root)
+    inventory = load_yaml(repo_root / "contracts" / "repos.yaml")
+    collections = (register.get("repos", {}), inventory.get("repos", {}), inventory.get("retired_repos", {}))
+    return any(
+        key != name and all(entry.get("provider_repository", {}).get(field) == provider.get(field)
+                            for field in ("provider", "provider_repository_id"))
+        for collection in collections for key, entry in collection.items()
+    )
+
+
 def _validate_register(repo_root: Path, register: dict[str, Any]) -> None:
     schema = load_json(repo_root / "contracts" / "schemas" / "intake-register.schema.json")
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
@@ -605,6 +617,15 @@ def _apply_intake_locked(
         raise WorkspaceIntakeError(
             f"intake and active inventory overlap is denied for {target['record_id']}"
         )
+    if kind == "repo":
+        provider = decision["outcome"]["approved_record"].get("provider_repository")
+        previous = (current_entry or {}).get("provider_repository")
+        identity_fields = ("provider", "provider_repository_id")
+        if previous and (not provider or any(previous[key] != provider[key] for key in identity_fields)):
+            raise WorkspaceIntakeError("intake provider repository identity is immutable")
+        if provider:
+            if provider_repository_conflicts(repo_root, provider, name):
+                raise WorkspaceIntakeError("provider repository identity already belongs to another workspace record")
     if decision["decision_source"] == "ai-suggested":
         ai_decision_id = decision["ai_suggestion"]["decision_id"]
         used_by = _used_ai_decision(register, ai_decision_id)

@@ -21,6 +21,24 @@ independent axis.
 
 An entrant may exist in intake or active inventory, never both.
 
+Repository entrants may carry `provider_repository` with `provider: github`,
+the positive decimal REST `provider_repository_id` string and current `full_name`
+(`owner/name`). The immutable provider/id pair identifies the physical repo;
+the workspace record key is not a provider-account assumption. These fields are
+part of the exact requested/approved record and its digest-bound source custody,
+not credential values or a browser assertion of source access. Existing legacy
+records without the field remain valid; do not manufacture provider identities
+for them. An existing explicit provider/id pair cannot be removed or substituted,
+and one physical identity cannot be added under another intake/inventory key.
+
+An already-provisioned repository can be classified `proposed` before a local
+checkout exists. Proposed classification permits only the separately approved
+trusted owner scaffold path; it does not authorize normal source/model work.
+Only after reviewed scaffold/owner validation may the normal `admitted` Intake
+and active Inventory workflows complete. An App installation or repository
+creation receipt alone is not admission. Platform resolves selected installation
+authority; Workspace Governance does not embed or select App installations here.
+
 ## Authority Chain
 
 1. A `workspace-intake-request` binds source, target, requested classification,
