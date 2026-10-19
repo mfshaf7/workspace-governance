@@ -60,9 +60,11 @@ command_contract:
   source_rules:
     - The command is denied on main, master, and detached heads.
     - The owner lock covers source reads, validation, mutation, replacement, and artifact emission.
-    - The changed inventory and history both validate before either canonical file is replaced.
-    - A process-level write failure restores both original files and emits no success artifact.
-    - Exact replay returns the existing event and record version without appending history.
+    - The changed inventory and history both validate and owner-derived registration companions are rendered before any canonical file is replaced.
+    - Source-only rules and routing-index data track the reviewed posture; retirement preserves the exact rule as history, removes active routing and context coverage, and does not claim raw-context parity or retirement permission.
+    - Core/control-owner posture changes require their explicit reviewed routing and policy source changes; routine source-only lifecycle must block before writing rather than silently leave mismatched controls.
+    - A process-level write failure restores the pair and all companions, including removal of newly created companions, and emits no success artifact. Durable publication is the reviewed Git commit, not host power-loss atomicity.
+    - Exact replay returns the existing event and record version without appending history only when its registration companions remain complete and current.
     - Reused identity or idempotency with different evidence fails closed.
   output_artifacts:
     - workspace-inventory-lifecycle-mutation

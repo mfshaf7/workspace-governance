@@ -186,14 +186,28 @@ def install_registered_skills(
     return (sorted(selected or registered_skills.keys()), errors)
 
 
-def _write_structured_output(path: Path, payload: Any, output_format: str) -> None:
+def structured_output_text(payload: Any, output_format: str) -> str:
     if output_format == "json":
-        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-        return
+        return json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if output_format == "yaml":
-        path.write_text(yaml.safe_dump(payload, sort_keys=False))
-        return
+        return yaml.safe_dump(payload, sort_keys=False)
     raise ValueError(f"unsupported generated output format: {output_format}")
+
+
+def _write_structured_output(path: Path, payload: Any, output_format: str) -> None:
+    path.write_text(structured_output_text(payload, output_format))
+
+
+def render_generated_artifacts(
+    repo_root: Path,
+    compiled_outputs: dict[str, Any],
+    *,
+    contracts: dict[str, Any] | None = None,
+) -> dict[Path, str]:
+    """Render the existing declared output family without materializing it."""
+    specs = generated_output_specs(repo_root, contracts)
+    return {specs[output_id]["path"]: structured_output_text(payload, specs[output_id]["format"])
+            for output_id, payload in compiled_outputs.items()}
 
 
 def _read_structured_output(path: Path, output_format: str) -> Any:

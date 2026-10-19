@@ -16,6 +16,7 @@ canonical_truth:
     - Promotion removes one admitted intake entry and adds one active record in the same reviewed source change.
     - Merged Workspace Governance source is authority; WGCF decisions, OOS state, and Console projections are evidence only.
     - Repository promotion preserves the exact admitted provider_repository binding, including its immutable provider/id pair and current coordinates; it cannot invent or substitute another physical repository.
+    - Repository promotion preserves the admitted repo_class and requires_security_bindings classification; changing either requires reviewing Intake first rather than weakening admission through promotion.
 record_contract:
   schema_version: 2
   identity_format: <kind>:<name>
@@ -51,9 +52,10 @@ promotion_contract:
   source_rules:
     - The command is denied on main, master, and detached heads.
     - The owner lock covers source reads, validation, comparison, replacement, and artifact emission.
-    - Both resulting contracts validate before either canonical file is replaced.
-    - A process-level write failure restores both original files and emits no success artifact.
-    - Exact replay returns the existing version without a duplicate record.
+    - Both resulting contracts validate and the complete owner-derived registration companions are rendered before any canonical file is replaced.
+    - Source-only repo registration includes its exact minimal repo rule, routing-index data, denied-by-default context declarations, and existing generated metadata. Shared/control or Security-bound owners require explicit reviewed registration rather than inferred authority.
+    - A process-level write failure restores the canonical pair and every companion, removes newly created companions, and emits no success artifact. The reviewed Git commit is the durable multi-file publication boundary, not a claim of power-loss atomicity.
+    - Exact replay returns the existing version without a duplicate record only when its source companions remain complete and current.
     - Reused identity or idempotency with different evidence fails closed.
   output_artifacts:
     - workspace-inventory-promotion-mutation

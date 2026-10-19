@@ -51,8 +51,16 @@ signals:
     operator repair as completion. Preserve exact review, atomic preparation,
     replay, lineage, lifecycle and rollback behavior. Provider-aware origin
     validation is staged with positive and fail-closed tests; complete
-    repo-rule/root-routing integration and full promoted-owner validation
-    remain unfinished in the approved maintenance units. No new ART child,
+    registration integration now also includes conservative context/raw-output
+    declarations and the existing generated metadata, guarded as exact typed
+    companion data rather than broad instruction/policy permission. Native
+    full-model add/suspend/retire/restore and actual Git record-refresh proof
+    pass in disposable engineering scope; changed instructions, raw grants,
+    extra policy, stale metadata and missing companions are denied. The native
+    owner transaction, OOS finite publication/readback and early WGCF findings
+    are staged, not accepted or activated. Source/consumer pin refresh,
+    proposed-owner bootstrap and full Console operating proof remain unfinished
+    in the approved maintenance units. No new ART child,
     closing control or completion claim is created by this capture.
   source_refs:
   - repo://workspace-governance/scripts/validate_contracts.py

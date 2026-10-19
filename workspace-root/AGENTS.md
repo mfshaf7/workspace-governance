@@ -567,3 +567,16 @@ If that evidence cannot be produced, the work is not complete.
   - `python3 scripts/audit_stale_content.py --workspace-root /home/mfshaf7/projects`
 - other repos
   - follow the local repo `AGENTS.md`
+
+## Additional Source-Only Owners
+
+The index below routes source work to each registered owner's local guidance.
+It does not grant shared workflow, Platform, Security, identity or runtime
+authority. Suspended owners deny new references; retired owners remain in
+Inventory history, not active routing. Core owners remain explicitly mapped
+above. Only the exact Inventory-derived index is routine registration data;
+these instructions remain a reviewed control change.
+
+<!-- workspace-source-owner-index:start -->
+No additional source-only repository owners are registered.
+<!-- workspace-source-owner-index:end -->

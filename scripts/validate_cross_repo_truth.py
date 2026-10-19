@@ -151,7 +151,15 @@ def validate_workspace_root_repo_coverage(
     workspace_root_docs: Path,
     active_repos: list[str],
     errors: list[str],
+    contracts: dict | None = None,
 ) -> None:
+    indexed = set()
+    if contracts is not None:
+        from workspace_repo_registration import (is_source_owner, source_owner_rule,
+            source_owner_index, INDEX_START, INDEX_END)
+        indexed = {name for name, entry in contracts["repos"]["repos"].items()
+                   if is_source_owner(name, entry)
+                   and contracts["repo_rules"].get(name) == source_owner_rule(name, entry)}
     for filename, headings in WORKSPACE_ROOT_REPO_COVERAGE_REQUIREMENTS.items():
         path = workspace_root_docs / filename
         if not path.exists():
@@ -159,13 +167,17 @@ def validate_workspace_root_repo_coverage(
             continue
 
         text = path.read_text(encoding="utf-8")
+        if contracts is not None:
+            expected = source_owner_index(contracts["repos"])
+            if text.count(INDEX_START) != 1 or text.count(INDEX_END) != 1 or expected not in text:
+                errors.append(f"{path}: source-only owner index does not match canonical Inventory")
         for heading in headings:
             section = extract_section(text, heading)
             if section is None:
                 errors.append(f"{path}: missing section {heading!r} for active repo coverage check")
                 continue
 
-            missing_repos = [repo_name for repo_name in active_repos if repo_name not in section]
+            missing_repos = [repo_name for repo_name in active_repos if repo_name not in indexed and repo_name not in section]
             if missing_repos:
                 missing_text = ", ".join(repr(repo_name) for repo_name in missing_repos)
                 errors.append(
@@ -1295,7 +1307,7 @@ def main() -> int:
             if pattern and re.search(pattern, agents_text, re.MULTILINE):
                 errors.append(f"{agents_path}: found forbidden routing pattern {pattern!r}")
 
-    validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors)
+    validate_workspace_root_repo_coverage(repo_root / "workspace-root", active_repos, errors, contracts)
     validate_security_architecture_component_coverage(workspace_root, contracts, errors)
     validate_delivery_art_planning_workflow_contract(workspace_root, errors)
     validate_delivery_art_initiative_review_workflow_contract(workspace_root, errors)

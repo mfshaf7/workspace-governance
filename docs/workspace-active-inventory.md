@@ -44,6 +44,28 @@ run from `main`, `master`, or a detached head.
 
 ## Review And Completion
 
+Promotion is a complete registration change, not merely two YAML files. All
+Inventory kinds refresh the existing generated metadata family. A routine new
+repository must have exact provider custody and the existing source-only
+`covered-by-owner-repo` / `product-runtime-source` posture, without shared-control
+or Security-binding authority. Its native owner transaction also derives the
+minimal repo rule, the bounded source-owner routing index in the three root
+documents, and conservative context/raw-output declarations. These declarations
+keep raw model projection denied; they do not claim packet adoption, parity,
+retirement eligibility, a CI toolchain, runtime activation or Security acceptance.
+Shared/control owners and Security-bound registration require their explicit
+reviewed source change; they cannot borrow this routine source-owner path.
+
+Only the exact generated index is registration data. Surrounding instructions,
+existing core/custom repo rules and context policy remain reviewed controls.
+OOS must publish and read back the complete owner-produced file set in one
+source commit. Platform's record refresh validates that exact semantic boundary
+with reviewed owner code rather than broadly allowing these control files.
+The full contract model and cross-repo validation remain required before merge.
+The local transaction stages/fsyncs all files and restores their original bytes
+on a process exception; Git publication, not the local filesystem, provides the
+durable multi-file boundary. Missing or drifted companions deny exact replay.
+
 1. Run owner validation after the source change is prepared.
 2. Open a pull request from the exact branch and review the exact head.
 3. Merge through the repository provider. The command never merges its own work.
@@ -95,6 +117,15 @@ replay returns the existing result without appending another event. Repository
 retirement moves the complete record to `retired_repos`; restoration moves it
 back to the active collection. Products and components remain in their current
 collection with explicit posture.
+
+Source-only lifecycle actions update the same rule, index and generated views.
+Retirement retains the exact derived rule as history but removes active routing
+and context coverage; restoration reinstates the denied-by-default declarations.
+An independently customized rule or context policy requires explicit control
+review instead of automatic replacement. No retirement fabricates CGG parity.
+Existing core/control-owner posture changes also require their explicit routing
+and policy review; readiness blocks the routine source-only route before a
+write. Existing legacy identities and ordinary source work are not re-admitted.
 
 Review, merge, and completion use the same boundary as promotion: validate the
 prepared source, review the exact pull-request head, merge through the provider,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -77,6 +78,7 @@ def active_value(kind: str) -> dict:
         "notes": "Test active inventory behavior.",
     }
     if kind == "repo":
+        behavior["wgcf_graph_role"] = "product-runtime-source"
         return {
             "posture": "active",
             "lifecycle": "active",
@@ -117,31 +119,17 @@ class WorkspaceInventoryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.repo_root = Path(self.temporary.name) / "workspace-governance"
-        contracts = self.repo_root / "contracts"
-        schemas = contracts / "schemas"
-        schemas.mkdir(parents=True)
-        for name in (
-            "intake-register.yaml",
-            "intake-policy.yaml",
-            "governed-intake-assist.yaml",
-            "repos.yaml",
-            "products.yaml",
-            "components.yaml",
-            "workspace-inventory-lifecycle.yaml",
-            "workspace-inventory-history.yaml",
-        ):
-            shutil.copy2(REPO_ROOT / "contracts" / name, contracts / name)
-        for pattern in ("workspace-intake-*.schema.json", "workspace-inventory-*.schema.json"):
-            for path in (REPO_ROOT / "contracts" / "schemas").glob(pattern):
-                shutil.copy2(path, schemas / path.name)
-        for name in ("intake-register.schema.json", "repos.schema.json", "products.schema.json", "components.schema.json"):
-            shutil.copy2(REPO_ROOT / "contracts" / "schemas" / name, schemas / name)
+        shutil.copytree(REPO_ROOT, self.repo_root, ignore=shutil.ignore_patterns(
+            ".git", ".art", ".workspace-ci", ".workspace-skills", "__pycache__", "session-handoff-*.md"))
         self.output_dir = self.repo_root / ".art" / "workspace-inventory"
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
     def admit(self, kind: str, name: str, classification: str = "admitted", provider_repository: dict | None = None) -> None:
+        if kind == "repo" and provider_repository is None:
+            provider_repository = {"provider": "github", "provider_repository_id": str(int(hashlib.sha256(name.encode()).hexdigest()[:10], 16)),
+                                   "full_name": f"example-organization/{name}"}
         state = intake.current_state(self.repo_root, kind, name)
         request = {
             "schema_version": 2,
@@ -218,6 +206,11 @@ class WorkspaceInventoryTests(unittest.TestCase):
             "approval_refs": ["openproject://work_packages/1071"],
         }
         request = inventory.bind_artifact_digest(request)
+        if kind == "repo":
+            entry = inventory.load_yaml(self.repo_root / "contracts/intake-register.yaml")["repos"][name]
+            if entry.get("provider_repository"):
+                request["active_record"]["value"]["provider_repository"] = copy.deepcopy(entry["provider_repository"])
+                request = inventory.bind_artifact_digest(request)
         readiness = inventory.bind_artifact_digest({
             "schema_version": 1,
             "artifact_type": "workspace-inventory-promotion-readiness",
@@ -322,6 +315,10 @@ class WorkspaceInventoryTests(unittest.TestCase):
         provider = {"provider": "github", "provider_repository_id": "1421451929", "full_name": "sample-org/sample-source"}
         self.admit("repo", "sample-source", provider_repository=provider)
         request, readiness = self.promotion_artifacts("repo", "sample-source")
+        request["active_record"]["value"].pop("provider_repository")
+        request = inventory.bind_artifact_digest(request)
+        readiness["request_ref"]["digest"] = request["request_digest"]
+        readiness = inventory.bind_artifact_digest(readiness)
         with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "preserve the admitted provider"):
             self.apply(request, readiness)
         request["active_record"]["value"]["provider_repository"] = provider
@@ -347,15 +344,32 @@ class WorkspaceInventoryTests(unittest.TestCase):
         update, ready = self.lifecycle_artifacts("repo", "sample-source", "update", requested_value=value)
         result = self.apply_lifecycle(update, ready)
         self.assertEqual("1421451929", result["readback"]["record"]["provider_repository"]["provider_repository_id"])
-        self.admit("repo", "legacy-source")
-        request, readiness = self.promotion_artifacts("repo", "legacy-source")
-        result = self.apply(request, readiness)
-        value = copy.deepcopy(result["readback"]["active_record"])
+        # Legacy owners without explicit bindings remain valid. New source
+        # admission does not manufacture another legacy identity.
+        value = copy.deepcopy(inventory._load_inventory(self.repo_root, "repo")["repos"]["workspace-prototype-studio"])
         value.pop("record")
         value["provider_repository"] = provider
-        update, ready = self.lifecycle_artifacts("repo", "legacy-source", "update", requested_value=value)
+        update, ready = self.lifecycle_artifacts("repo", "workspace-prototype-studio", "update", requested_value=value)
         with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "already belongs"):
             self.apply_lifecycle(update, ready)
+
+    def test_promotion_cannot_downgrade_admitted_classification_or_infer_control_owner_registration(self) -> None:
+        self.admit("repo", "classification-proof")
+        for field, value in (("repo_class", "shared-control"), ("requires_security_bindings", True)):
+            request, ready = self.promotion_artifacts("repo", "classification-proof")
+            request["active_record"]["value"][field] = value
+            request = inventory.bind_artifact_digest(request)
+            ready["request_ref"]["digest"] = request["request_digest"]
+            ready = inventory.bind_artifact_digest(ready)
+            with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "classification"):
+                self.apply(request, ready)
+        request, ready = self.promotion_artifacts("repo", "classification-proof")
+        request["active_record"]["value"]["validation_behavior"]["wgcf_graph_role"] = "catalog-authority-source"
+        request = inventory.bind_artifact_digest(request)
+        ready["request_ref"]["digest"] = request["request_digest"]
+        ready = inventory.bind_artifact_digest(ready)
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "explicit reviewed source"):
+            self.apply(request, ready)
 
     def test_exact_replay_does_not_duplicate_or_increment(self) -> None:
         self.admit("component", "test-replay")
@@ -413,6 +427,37 @@ class WorkspaceInventoryTests(unittest.TestCase):
             with self.assertRaisesRegex(OSError, "simulated second replace failure"):
                 self.apply(request, readiness)
         self.assertEqual((intake_path.read_bytes(), inventory_path.read_bytes()), before)
+
+    def test_failure_after_new_companion_creation_restores_every_original_byte(self) -> None:
+        self.admit("repo", "test-companion-rollback")
+        request, readiness = self.promotion_artifacts("repo", "test-companion-rollback")
+        before = {path: path.read_bytes() for folder in ("contracts", "generated", "workspace-root")
+                  for path in (self.repo_root / folder).rglob("*") if path.is_file()}
+        real_replace = inventory.os.replace
+        for fail_at in (3, 4, 7, 10):
+            calls = 0
+            def fail_selected(source, target):
+                nonlocal calls
+                calls += 1
+                if calls == fail_at:
+                    raise OSError("simulated companion replace failure")
+                return real_replace(source, target)
+            with self.subTest(fail_at=fail_at), mock.patch.object(inventory.os, "replace", side_effect=fail_selected):
+                with self.assertRaisesRegex(OSError, "simulated companion replace failure"):
+                    self.apply(request, readiness)
+            after = {path: path.read_bytes() for folder in ("contracts", "generated", "workspace-root")
+                     for path in (self.repo_root / folder).rglob("*") if path.is_file()}
+            self.assertEqual(after, before)
+            self.assertFalse(self.output_dir.exists())
+
+    def test_replay_denies_missing_registration_companions(self) -> None:
+        self.admit("repo", "test-replay-companion")
+        request, readiness = self.promotion_artifacts("repo", "test-replay-companion")
+        self.apply(request, readiness)
+        rule = self.repo_root / "contracts/repo-rules/test-replay-companion.yaml"
+        rule.unlink()
+        with self.assertRaisesRegex(inventory.WorkspaceInventoryError, "exact source-owner rule"):
+            self.apply(request, readiness)
 
     def test_default_branch_is_denied(self) -> None:
         self.admit("repo", "test-main")

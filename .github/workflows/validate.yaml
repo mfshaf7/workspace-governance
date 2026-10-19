@@ -86,9 +86,12 @@ jobs:
           from pathlib import Path
           import shutil
           import subprocess
+          import sys
           import yaml
 
           repo_root = Path(".").resolve()
+          sys.path.insert(0, str(repo_root / "scripts"))
+          from audit_workspace_layout import expected_repository_origin
           workspace_root = repo_root / ".workspace-ci"
           if workspace_root.exists():
               shutil.rmtree(workspace_root)
@@ -141,7 +144,8 @@ jobs:
               if repo_name not in history_bound_repos:
                   clone_command.extend(["--depth", "1"])
               clone_command.extend(
-                  [f"https://github.com/mfshaf7/{repo_name}.git", str(target)]
+                  [expected_repository_origin(repo_name, repos.get(repo_name, intake_repos.get(repo_name, {})))
+                      .replace("git@github.com:", "https://github.com/", 1), str(target)]
               )
               subprocess.run(
                   clone_command,

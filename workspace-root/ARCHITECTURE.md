@@ -314,3 +314,14 @@ operator interaction layer, not just a UI skin.
   - [openclaw-host-bridge/README.md](/home/mfshaf7/projects/openclaw-host-bridge/README.md)
 - trust boundaries, AI governance, or security review posture
   - [security-architecture/README.md](/home/mfshaf7/projects/security-architecture/README.md)
+
+## Additional Source-Only Owners
+
+This Inventory-derived index adds source custody, not shared orchestration,
+Platform, Security or runtime authority. Read each owner's local `AGENTS.md`
+and `README.md` before source work. Suspended owners deny new references;
+retired owners are retained only in Inventory history.
+
+<!-- workspace-source-owner-index:start -->
+No additional source-only repository owners are registered.
+<!-- workspace-source-owner-index:end -->

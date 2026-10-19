@@ -101,6 +101,12 @@
     `retire` actions against existing records while atomically appending their
     canonical history and rejecting stale bindings, illegal transitions, hard
     delete, and conflicting replay
+- `workspace_repo_registration.py`
+  - Routine Inventory registration companion rendering and semantic verification
+    live in `workspace_repo_registration.py`, called by the native Inventory
+    transaction and reviewed record refresh. It reuses the existing compiler;
+    it is not a second admission writer or a raw-context/runtime grant. The
+    primary operator surface remains `docs/workspace-active-inventory.md`.
 - `scaffold_intake.py`
   - temporary compatibility front end for intake adds; it constructs v2
     request and decision artifacts and delegates to `workspace_intake.py`
