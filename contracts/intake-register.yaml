@@ -1,5 +1,50 @@
 schema_version: 2
-repos: {}
+repos:
+  console-todo-1275:
+    status: proposed
+    decision_source: operator
+    owner_route: workspace-governance
+    record:
+      id: repo:console-todo-1275
+      version: 1
+      source:
+        class: repository-custody
+        digest: sha256:065a47c75ae32e2ea3fe4fb6c82c7b9e4d0cbf78644711f95a4a0921acda6e3d
+        ref: oos://repository-custody/requests/repository-custody-request%3Aconsole-f57a3006-7ea8-468e-b9d3-9d1a1e87d65f/intake/063539c785bd8afaa69bafcdf8c5bc2d7101c00378fc7a5abf8ec785fedcf402
+      decision:
+        id: workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
+        ref: workspace-intake-decision:workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
+        digest: sha256:0858f390dc196a61db3f4721017c930817d4790ecbe98f60d72ab1447470d578
+        source: operator
+        operator_ref: governance-operations-console
+        decided_at: '2026-10-20T19:42:57.389Z'
+      last_mutation:
+        id: workspace-intake-mutation:workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241:v1:apply
+        idempotency_key: workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241:v1
+        request_ref: workspace-intake-request:workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
+        request_digest: sha256:7460e7b28b77a3dbf262dea176884e20e61a511619e139fcd35385fb6a02f9bb
+        decision_ref: workspace-intake-decision:workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
+        decision_digest: sha256:0858f390dc196a61db3f4721017c930817d4790ecbe98f60d72ab1447470d578
+        applied_at: '2026-10-20T19:44:03.181Z'
+    validation_behavior:
+      catalog_refs: []
+      notes: Proposed source-only owner. Trusted bootstrap must establish the actual
+        fetched-base owner evidence profile before admitted Intake and active Inventory.
+        App transition/encoding tests and base-aware Git source checks are separate
+        from real browser and local-runtime acceptance.
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-runtime-source
+    provider_repository:
+      provider: github
+      provider_repository_id: '1421451929'
+      full_name: mfshaf7-workspace/console-todo-1275
+    notes: Own the reviewed Little List browser application source and product-local
+      validation. Public synthetic demonstration. Shared orchestration, credentials,
+      governance and runtime release authority remain with their existing owners.
+      No client data, accounts, backend or public hosting is admitted.
+    repo_class: product-source
+    requires_security_bindings: false
+    security_owner: null
 products: {}
 components:
   temporal:
@@ -19,7 +64,7 @@ components:
         digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
         source: operator
         operator_ref: operator:workspace-governance-owner
-        decided_at: "2026-07-31T13:25:01+08:00"
+        decided_at: '2026-07-31T13:25:01+08:00'
       last_mutation:
         id: migration:component:temporal:v2
         idempotency_key: migration:component:temporal:v2
@@ -27,7 +72,7 @@ components:
         request_digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
         decision_ref: git://workspace-governance/f3cb00e67c7ab9fa1a591dcffe685b3c5a015c3c/contracts/intake-register.yaml#components.temporal
         decision_digest: sha256:0dff18db9c5149c2165e1ecf9f331fb59a3ef4613942838f69188a4c6b249de8
-        applied_at: "2026-08-30T17:06:34+08:00"
+        applied_at: '2026-08-30T17:06:34+08:00'
     component_class: shared-platform
     owner_repo: platform-engineering
     security_owner: security-architecture
@@ -36,9 +81,14 @@ components:
       posture: proposed-profile-gated
       wgcf_graph_role: proposed-shared-platform-component
       catalog_refs:
-        - developer-integration
-        - devint-runner-read
-        - security-bindings
-        - review-coverage
-      notes: Temporal component admission remains proposed while its dev-integration profile is build-admitted; WGCF may consume later readiness evidence but cannot own aggregate orchestration or runtime activation.
-    notes: Proposed replaceable durable workflow runtime behind operator-orchestration-service. Build admission authorizes bounded owner-repo source implementation only; launch, workflow execution, stage/prod deployment, and direct Console access remain denied.
+      - developer-integration
+      - devint-runner-read
+      - security-bindings
+      - review-coverage
+      notes: Temporal component admission remains proposed while its dev-integration
+        profile is build-admitted; WGCF may consume later readiness evidence but cannot
+        own aggregate orchestration or runtime activation.
+    notes: Proposed replaceable durable workflow runtime behind operator-orchestration-service.
+      Build admission authorizes bounded owner-repo source implementation only; launch,
+      workflow execution, stage/prod deployment, and direct Console access remain
+      denied.
