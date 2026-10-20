@@ -10,6 +10,8 @@ import sys
 import tempfile
 import unittest
 
+from provider_identity_fixture import unused_provider_repository
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_ROOT = REPO_ROOT / "scripts"
@@ -175,7 +177,7 @@ class WorkspaceIntakeTests(unittest.TestCase):
                 self.assertEqual(artifacts["readback"]["authority_state"], "review-branch")
 
     def test_proposed_provider_identity_preserves_custody_without_checkout(self) -> None:
-        provider = {"provider": "github", "provider_repository_id": "1421451929", "full_name": "sample-org/sample-source"}
+        provider = unused_provider_repository(self.repo_root)
         request = request_for(self.repo_root, "repo", "sample-source")
         request["requested_record"]["provider_repository"] = provider
         request = intake.bind_artifact_digest(request)
@@ -197,7 +199,7 @@ class WorkspaceIntakeTests(unittest.TestCase):
             self.apply(update, decision_for(update))
 
     def test_provider_repository_wire_is_closed_and_uses_rest_identity(self) -> None:
-        for value in ("R_123", "0", "-1", 1421451929):
+        for value in ("R_123", "0", "-1", 123456):
             request = request_for(self.repo_root, "repo", "bad-provider")
             request["requested_record"]["provider_repository"] = {"provider": "github", "provider_repository_id": value, "full_name": "sample-org/source"}
             request = intake.bind_artifact_digest(request)

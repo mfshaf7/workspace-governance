@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from provider_identity_fixture import unused_provider_repository
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_ROOT = REPO_ROOT / "scripts"
@@ -313,7 +315,7 @@ class WorkspaceInventoryTests(unittest.TestCase):
                 self.assertEqual(artifacts["readback"]["active_record"]["posture"], "active")
 
     def test_promotion_and_lifecycle_preserve_explicit_provider_identity(self) -> None:
-        provider = {"provider": "github", "provider_repository_id": "1421451929", "full_name": "sample-org/sample-source"}
+        provider = unused_provider_repository(self.repo_root)
         self.admit("repo", "sample-source", provider_repository=provider)
         request, readiness = self.promotion_artifacts("repo", "sample-source")
         request["active_record"]["value"].pop("provider_repository")
@@ -344,7 +346,7 @@ class WorkspaceInventoryTests(unittest.TestCase):
         value["provider_repository"]["full_name"] = "other-org/renamed-source"
         update, ready = self.lifecycle_artifacts("repo", "sample-source", "update", requested_value=value)
         result = self.apply_lifecycle(update, ready)
-        self.assertEqual("1421451929", result["readback"]["record"]["provider_repository"]["provider_repository_id"])
+        self.assertEqual(provider["provider_repository_id"], result["readback"]["record"]["provider_repository"]["provider_repository_id"])
         # Legacy owners without explicit bindings remain valid. New source
         # admission does not manufacture another legacy identity.
         value = copy.deepcopy(inventory._load_inventory(self.repo_root, "repo")["repos"]["workspace-prototype-studio"])
