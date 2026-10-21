@@ -1,0 +1,10 @@
+schema_version: 1
+repo: console-todo-1275
+lifecycle: active
+required_repo_refs: []
+required_patterns:
+  readme: []
+  agents: []
+forbidden_patterns:
+  readme: []
+  agents: []
