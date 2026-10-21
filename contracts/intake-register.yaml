@@ -1,31 +1,31 @@
 schema_version: 2
 repos:
   console-todo-1275:
-    status: proposed
+    status: admitted
     decision_source: operator
     owner_route: workspace-governance
     record:
       id: repo:console-todo-1275
-      version: 1
+      version: 2
       source:
         class: repository-custody
         digest: sha256:065a47c75ae32e2ea3fe4fb6c82c7b9e4d0cbf78644711f95a4a0921acda6e3d
         ref: oos://repository-custody/requests/repository-custody-request%3Aconsole-f57a3006-7ea8-468e-b9d3-9d1a1e87d65f/intake/063539c785bd8afaa69bafcdf8c5bc2d7101c00378fc7a5abf8ec785fedcf402
       decision:
-        id: workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
-        ref: workspace-intake-decision:workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
-        digest: sha256:0858f390dc196a61db3f4721017c930817d4790ecbe98f60d72ab1447470d578
+        id: workspace-intake-decision:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
+        ref: workspace-intake-decision:workspace-intake-decision:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
+        digest: sha256:d0e88b2a769a09b272a0556627111fb9689b8422632634ae3d202d3992e60537
         source: operator
         operator_ref: governance-operations-console
-        decided_at: '2026-10-20T19:42:57.389Z'
+        decided_at: '2026-10-21T12:07:40.086Z'
       last_mutation:
-        id: workspace-intake-mutation:workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241:v1:apply
-        idempotency_key: workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241:v1
-        request_ref: workspace-intake-request:workspace-intake-request:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
-        request_digest: sha256:7460e7b28b77a3dbf262dea176884e20e61a511619e139fcd35385fb6a02f9bb
-        decision_ref: workspace-intake-decision:workspace-intake-decision:console-d3a603e2-abc0-4e0f-b62a-af30c346c241
-        decision_digest: sha256:0858f390dc196a61db3f4721017c930817d4790ecbe98f60d72ab1447470d578
-        applied_at: '2026-10-20T19:44:03.181Z'
+        id: workspace-intake-mutation:workspace-intake-request:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2:v1:apply
+        idempotency_key: workspace-intake-request:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2:v1
+        request_ref: workspace-intake-request:workspace-intake-request:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
+        request_digest: sha256:c70e9452e0002f42830143e4a3bc7cc4dba189c7c850e0f96559001529786038
+        decision_ref: workspace-intake-decision:workspace-intake-decision:console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
+        decision_digest: sha256:d0e88b2a769a09b272a0556627111fb9689b8422632634ae3d202d3992e60537
+        applied_at: '2026-10-21T12:07:59.561Z'
     validation_behavior:
       catalog_refs: []
       notes: Proposed source-only owner. Trusted bootstrap must establish the actual
