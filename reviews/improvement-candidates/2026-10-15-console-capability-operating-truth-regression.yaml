@@ -1884,8 +1884,18 @@ resolution:
     provisioning and its credential, readiness, state, and Console bindings.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-21'
+  due_on: '2026-10-23'
   note: >-
+    Re-reviewed October22 after interruption crossed the operator's local
+    midnight. Registry repairs OOS356 and Console101 are merged, but their exact
+    Security acceptance and recommissioning remain pending. Intake request
+    console-6d904255-6953-48c2-adc3-3ebf70fd4fe2 was cancelled through the Console
+    after its immutable source review failed on canonical overdue learning
+    records; WG286 is closed unmerged. The entrant is still proposed/v1, not
+    admitted or active. The durable-owner app import and final end-to-end
+    acceptance remain outstanding. The next accountable review is October23;
+    retain earlier missed checkpoints below and do not treat these repairs or
+    this review as closure, a waiver, or approval for another mechanism.
     October20 review checkpoint is overdue at the October21 local-date
     continuation. Reviewed still open; October21 is the next review checkpoint,
     not a completion promise or permission for another closing control.

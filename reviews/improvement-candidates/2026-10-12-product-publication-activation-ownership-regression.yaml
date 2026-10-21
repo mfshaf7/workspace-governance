@@ -173,8 +173,13 @@ resolution:
     rollout-ordering, and recovery-state gaps before a future implementation starts.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-21'
+  due_on: '2026-10-23'
   note: >-
+    Re-reviewed October22 after interruption crossed the operator's local
+    midnight. This accepted lesson remains open: Feature924 containment is
+    complete but the existing final-guidance planning control is not landed.
+    The next accountable review is October23; earlier missed checkpoints below
+    are retained. This is a review appointment, not completion evidence.
     October20 review checkpoint is overdue at the October21 local-date
     continuation. Reviewed still open; October21 is the next review checkpoint,
     not a completion promise or permission for another closing control.
