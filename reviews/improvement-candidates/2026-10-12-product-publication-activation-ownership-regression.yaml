@@ -173,11 +173,14 @@ resolution:
     rollout-ordering, and recovery-state gaps before a future implementation starts.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-20'
+  due_on: '2026-10-21'
   note: >-
+    October20 review checkpoint is overdue at the October21 local-date
+    continuation. Reviewed still open; October21 is the next review checkpoint,
+    not a completion promise or permission for another closing control.
     The 2026-10-16 follow-up was missed while Epic1275 qualification remained
-    blocked. Re-review on 2026-10-18; this does not mark the lesson closed or
-    erase the original missed date.
+    blocked. The October18 checkpoint was also missed; this reviewed October21
+    continuation does not close the lesson or erase either earlier missed date.
     Land the operator-approved extension of the existing delivery-plan activation
     validation so a plan cannot pass when an owner-controlled source gate, required
     owner evidence, prerequisite owner transition, independent acceptance verifier,

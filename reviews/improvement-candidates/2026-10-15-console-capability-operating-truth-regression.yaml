@@ -31,6 +31,718 @@ scope:
   - source-behavior
   - runtime-composition
 signals:
+- id: physical-owner-parent-mount-omits-reviewed-child-mountpoints
+  title: Sanitized source parent was tested without the existing nested read-only mounts
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    Actual activation after Platform326 and Security301 failed before admission.
+    Native containerd state reports OCI StartError creating the existing
+    /sources/governance-operations-console child mount under the new read-only
+    /sources parent. The sanitized parent intentionally excludes the three
+    existing reviewed source roots but did not retain their empty mountpoints.
+    The earlier isolated UID10001 Git probe proved the parent-only mount, not
+    the composed nested-mount topology. Stop automatic retries; extend existing
+    snapshot preparation with exact reserved empty directory validation and
+    preservation, then prove the real parent plus all child mounts in a
+    disposable container before reacceptance and commissioning. Do not mount
+    the host workspace, make the parent writable or waive admission. This is
+    the existing1298 maintenance boundary, not a new ART child or mechanism.
+    Platform327 actualmerge84fb9f72d3101a315dc4cd6160753e1accc2ca99 adds exact
+    reserved empty mountpoints and preservation/denial tests. The opt-in native
+    test exercises all three nested child mounts with a read-only root and
+    UID10001; actual canonical sources separately pass isolated native mount
+    and Git-presence proof. Full local/provider CI and exact human review
+    passed. Security302 actualmergeb01ade45324d62afe77ad1aa98c32200bd6117cd
+    reaccepts only the actual Platformtree; remaining pins stay unchanged.
+    First activation retry encountered the retained prior progress deadline;
+    normal supervised retry now has WGCF Ready with the corrected mounts.
+    Actual normal supervised activation120605Z and status120742Z now prove
+    current live composition, exact provider/source/operator bindings and
+    fresh records. The full native nested reader passes without an expectation
+    flag. Corrected original-source admission6d904255 reaches review-required
+    with WG286 before canonical mutation. The original business journey remains
+    required; this candidate is not closed by source or isolated tests alone.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_record_authority.py
+  - https://github.com/mfshaf7/platform-engineering/pull/326
+  - https://github.com/mfshaf7/platform-engineering/pull/327
+  - https://github.com/mfshaf7/security-architecture/pull/302
+- id: inventory-promotion-review-and-cold-recovery-controls-unbound
+  title: Registry promotion result cannot check its real review or recover acknowledged requests
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    Lookahead before the real admitted-owner promotion proves OOS returns
+    next_action review-and-merge at review-required, while the actual Console
+    promotion footer renders continuation only for next_action continue. Its
+    result panel shows a review number without its URL or check-review action.
+    The existing read/cancel methods are not called by any promotion control;
+    closing resets the only browser result. No retained request listing exists
+    in the promotion service/store, so cold recovery cannot rediscover the
+    acknowledged request through this surface. This contradicts the primary
+    Registry instruction to follow exact review and continue merged readback,
+    and the accepted Console-only/restart-safe qualification goal. Verify and
+    extend this existing promotion workflow with bounded caller/target request
+    discovery and visible read/review/continue/cancel recovery. Preserve original
+    identities, block duplicate pending promotion, never call hidden business
+    APIs from the proof or invent a replacement mutation. Maintenance stays
+    under1298 and the existing Console/OOS owners; no repair ART child or new
+    workflow framework. Before source edits, inspect matching Lifecycle recovery
+    so the same adapter omission is not rediscovered after another activation.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://operator-orchestration-service/src/workspace-inventory/service.js
+  - repo://operator-orchestration-service/src/workspace-inventory/store.js
+  - repo://governance-operations-console/src/workspace-registry/presentation/workspace-registry-promotion-workflow.tsx
+  - repo://governance-operations-console/src/workspace-registry/live-runtime/use-workspace-registry-live-runtime.ts
+  - repo://governance-operations-console/docs/product/workspace-registry-live-integration.md
+- id: completed-bootstrap-owner-not-visible-to-intake-readiness
+  title: Host owner checkout is complete but the readiness container cannot observe it
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console bootstrap10cf succeeded with canonical owner checkout at
+    d48e597d76bdbdb33f2b2398427b940517e458c6, exact human merge and revoked
+    source access. New legitimate admission request d6f250cd was acknowledged
+    then rejected before any source preparation or canonical mutation. Native
+    WGCF receipt7929c895 reports repository-not-present: the API checks its
+    authority checkout's parent /sources, but actual deployment mounts only
+    WG, Studio and Console, not the new owner. Host presence and bootstrap
+    control proof therefore do not prove the composed admission seam. Inspect
+    and extend the existing Platform bounded source visibility/record refresh
+    path; do not waive physical owner checks, mount the whole host workspace,
+    recreate bootstrap, invent another ART child or fake admission evidence.
+    The same receipt also correctly reports source-identity-changed because
+    this session's helper unnecessarily rewrote validation notes, changing
+    the custody-derived source selector. Preserve the original canonical
+    requested metadata/source on the corrected classification instead; no
+    product mechanism is justified for that helper mistake. Rejected original
+    remains immutable. Existing1298 maintenance approval covers required
+    in-scope repair; final implementation shape remains under inspection.
+    Native current WGCF UID10001 also rejects Git in the existing Console
+    read-only mount as dubious ownership. Its physical probe needs exact
+    per-command trusted-root handling, not global wildcard trust or fake Git.
+    Native actual-source projection into the built WGCF image at UID10001
+    proves the old raw Git denial and corrected probe success without a live
+    authority write. WGCF118 merged0c47261f after532 local tests, image/source/
+    worker checks, actualCI39568692419 and exact human approval; credential and
+    source resources retired with strict owner auditPASS. Platform326 remains
+    under review, including snapshot dirty/ignored-residue preservation. No
+    admission success is claimed. A later crash left one zero-byte local
+    tracking ref and interrupted ignored Terraform modules/provider cache;
+    preserve/quarantine exact targets, refetch/reinitialize through normal
+    tooling, Gitfsck verifies source objects intact. Windows runtime version
+    is now0.40.7 while six bindings pin0.40.6; actual adapter verifies0.40.7
+    with unchanged qwen3 digest. Approved exact-version source maintenance and
+    composed reacceptance remain required; no software downgrade/check waiver.
+  source_refs:
+  - openproject://work_packages/1298
+  - oos://repository-owner-bootstrap/requests/bootstrap-request%3A10cf3daf-c0ec-4f5d-8ff1-f7370cd3db72
+  - wgcf://readiness/workspace-intake/7929c895a08e3c439fe8691fb7ca77f4b36c032fe7f130c1c9e7a6c5a8c3a6bb
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/workspace_intake_policy.py
+- id: source-readers-confuse-contract-minimum-with-current-approved-baseline
+  title: Both host source readers reject a fresh approved cache after a legitimate reviewed baseline advance
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After actual accepted activation235220Z and exact fresh Console plan48d5ab,
+    the first create attempt e872c24b returns409. Native source-executor audit
+    proves bootstrap.inspect-source-identity/record_authority_unavailable;
+    native owner journal GET200 proves no pending request or record, and no
+    target credential/checkout exists. The actual Platform checkpoint is fresh,
+    clean HEAD and origin/main both5ef54a7, accepted reviewed baselinec508.
+    Both native proposed-bootstrap and ordinary-admitted-owner readers deny
+    it because their bundled contract minimum5746 is compared by equality to
+    that later approved baseline. Actual Git proves5746 ancestorc508 ancestor5ef.
+    The shared synchronous predicate conflates contract compatibility with
+    Platform's exact accepted control baseline. Preserve the trusted Platform
+    checkpoint, freshness, clean HEAD/ref and approved-baseline-to-record chain;
+    verify the bundled requirement as an ancestor of that approved baseline,
+    not an equal replacement or unchecked minimum of arbitrary current source.
+    Prove both actual readers against the actual cache plus native real-Git
+    denial cases. The Console also discards this named owner precondition into
+    a generic rejection; retain only this known safe dependency code/message,
+    never arbitrary upstream text. Prior composed readiness did not exercise
+    either host source-admission reader against the current accepted cache.
+    Approved same-exercise maintenance under1298, no new ART child, manifest
+    repin, checkpoint edit, refresh waiver or privileged workflow mechanism.
+    OOS355 mergedd6c515c and Console100 merged7c330d4 after full committed
+    local and actualCI39519375715/39519270392 passed and exact human reviews.
+    Security300 mergedd6cbc1f after actualCI39519980627 and exact review;
+    all three source scopes/temporary branches/worktrees retired, strict owner
+    audits pass. Normal activation final20261021T002537Z and full native nested
+    guard pass; both actual readers accept the unchanged current cache. Fresh
+    actual Console plan d03048 retains all ten reviewed files/provider/profile
+    unchanged. Actual same UI acceptance then returns200 and retains unique
+    bootstrap-request:10cf3daf-c0ec-4f5d-8ff1-f7370cd3db72 prepared, next source
+    authorization/start. No target token or checkout yet. This closes the
+    measured rejection, not bootstrap/admission/app or the overall candidate.
+  source_refs:
+  - repo://operator-orchestration-service/src/record-authority-freshness.js
+  - repo://operator-orchestration-service/src/repository-owner-bootstrap/authority-reader.js
+  - repo://operator-orchestration-service/src/delivery-art/source-repository-admission.js
+  - repo://governance-operations-console/src/domain-workspaces/repository/server/repository-bootstrap-oos-client.ts
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/355
+  - https://github.com/mfshaf7/governance-operations-console/pull/100
+  - https://github.com/mfshaf7/security-architecture/pull/300
+- id: optional-owner-ci-new-ref-has-no-previous-commit
+  title: Generated owner CI uses an absent previous commit on first branch push
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: >-
+    The actual Console owner preparation for console-todo-1275 proposes an
+    unfiltered push/pull_request workflow. Its selected real-git check uses
+    the push before SHA as a required commit. Octokit's canonical GitHub
+    with-new-branch payload proves created=true and an all-zero before SHA.
+    Materializing all ten exact displayed plan files in isolated real Git,
+    with the reviewed actual app, passes PR and existing-main inputs but
+    fails the exact workflow runner on that new-ref input with git exit128.
+    No target request, checkout or credential was created. Existing tests
+    covered exact substitution but not workflow event selection. The current
+    bootstrap contract qualifies public synthetic repositories on main only;
+    reuse the normal PR plus main-push trigger, preserve exact base/head
+    validation and prove both selected events and excluded new-ref/tag events.
+    This is approved same-exercise maintenance under1298, not another ART
+    item, no-CI waiver, guessed diff base or generic new workflow mechanism.
+    OOS354 merged1d17556 after all1533 committed source-enabled tests and
+    full local/actualCI39516002700 passed. Security299 merged86308e1 after
+    actualCI39516600013/exact review; both source scopes and temporary branches
+    and worktrees retired, strict owner audits pass. Normal activation final
+    20261020T235220Z passed current/live composition, consistent operator
+    bindings and primary records. The full native nested validator then passes
+    against actual current WG data without the precommissioning expectation.
+    Fresh actual Console preparation48d5ab matches all ten reviewed native
+    plan files byte-for-byte, preserving README/profile/provider and changed
+    CI trigger/template digest only. This qualifies the repaired plan, not
+    owner bootstrap, admission, application delivery or Epic completion.
+  source_refs:
+  - repo://operator-orchestration-service/templates/source-owner-bootstrap/validate.yaml.template
+  - repo://operator-orchestration-service/test/repository-owner-bootstrap-scaffold.test.js
+  - https://github.com/octokit/webhooks/blob/main/payload-examples/api.github.com/push/with-new-branch.payload.json
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/354
+  - https://github.com/mfshaf7/security-architecture/pull/299
+- id: concurrent-prototype-delivery-reads-block-current-closure-source
+  title: Dashboard and Closure launch overlapping identical owner reads and starve source preparation
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: >-
+    After Console98/Security297 and successful normal activation, actual cold
+    browser displays original Closure65387 succeeded with exact receipt5af8
+    and merged d830 readback. Current source preparation still fails: Dashboard
+    and Closure navigation launch four identical Deliveryapplication GETs within
+    300ms; all four time out at roughly30000ms. Finite actualbrowser trace proves
+    maxconcurrent4, no current source and a timeout panel. Isolated native OOS
+    GET returns the same original Delivery1306/receipt281fd8 in8109ms; the real
+    Consolefrontdoor GET returns it in9221ms. Records are intact and no missing
+    approval, corrupt receipt or persistent transport failure is proven.
+    The existing read hook has no in-flight coalescing, while primary records
+    already bound overlapping refreshes. Coalesce only simultaneous reads of
+    the same exact application identity; clear on completion or failure so
+    subsequent refreshes remain fresh and errors stay failclosed. Preserve
+    different identities, normal timeouts, validation and owner authority.
+    Prove concurrent/error/retry behavior in the actual client and repeat the
+    finite actualbrowser request trace plus current-source/terminalreceipt
+    witness after accepted source. This is approved maintenance under1298,
+    not a new ART item, backend data rewrite, timeout waiver or generic cache.
+    Console99 merged7194cab, Security298 mergedb63126c, actual normal activation
+    final231744Z passed. The same finite actualbrowser navigation now proves
+    maxDeliveryconcurrent1, ownerGET200/15788ms, both sourcepreparations200 in
+    about2s, no ownerfailures or pendingrequests, currentd830 source and original
+    Closure5af8 terminalreceipt visible. Full627 tests/actualCI39512010889 and
+    SecurityCI39512572308 passed before exactreviews/merges; ownedrepair
+    credentials/branches/worktrees retired and strictowner auditsPASS0.
+    This closes the measured overlap repair, not the whole candidate or Epic.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/use-prototype-delivery-live-runtime.ts
+  - repo://governance-operations-console/src/domain-workspaces/prototype/presentation/surface/use-prototype-control-controller.ts
+  - https://github.com/mfshaf7/governance-operations-console/pull/99
+  - https://github.com/mfshaf7/security-architecture/pull/298
+- id: closure-review-projection-cannot-survive-browser-round-trip
+  title: Native completed Closure receipt fails browser revalidation after server projection
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After accepted activation, original Closure65387 passed all9 readiness
+    checks through Console, explicit approval, native StudioPR40/full93tests/
+    actualCI/exactMFattestation and merge d830cac. Same Console continuation
+    reached canonical succeeded with completed receipt5af8c2f and exact merged
+    graduating/incubation-repo readback. Yet the browser retained pending-readback
+    and reports Closure review head missing or invalid. The server validates
+    raw review.head_commit and delegated_approval, then drops both fields in
+    its result projection; the browser invokes the same validator again and
+    rejects that projected response. This is a second-pass contract failure,
+    not an incomplete owner merge or a reason to reopen the completed request.
+    Preserve the bounded validated head and delegation proof across JSON, derive
+    human_reviewed from that proof rather than trusting a supplied boolean,
+    and prove native OOS response to server projection to browser validation
+    across review, pending-readback and terminal states with tamper denials.
+    The prior native HTTP proof stopped at the server reader and missed this
+    browser boundary. No new ART child, duplicate source event, new receipt,
+    validation waiver or hidden business mutation. Qualify actual cold browser
+    success/receipt display after accepted repaired source before advancing.
+    Console98 merged673ecfc and Security297 accepted that exact source through
+    actual activation223748Z. Fresh actualbrowser terminalResult/Refresh proves
+    succeeded, original receipt and mergedreadback visible without missinghead
+    error. The separate current-source overlap signal above remains open;
+    the completed owner request is not reopened and no replacement receipt exists.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/prototype-closure-live-contract.ts
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/prototype-closure-live-types.ts
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/use-prototype-closure-live-runtime.ts
+  - https://github.com/mfshaf7/governance-operations-console/pull/98
+  - https://github.com/mfshaf7/security-architecture/pull/297
+- id: complete-runtime-record-admission-not-propagated-to-nested-launcher
+  title: Accepted record-only descendant passes coordinator but fails nested activation
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual accepted activation after OOS353/Console97/Security295 fails only
+    after composition startup: nested cross-domain launcher demands exact WG
+    c508d9f while current clean main5ef54a7 adds the already-reviewed proposed
+    Intake record only. The complete coordinator explicitly admits this
+    descendant through its existing bounded record classifier and Security
+    accepts that source/data distinction. Native exact-source reader tests
+    stopped at the coordinator and did not call the generated nested policy's
+    validator. This is an omitted existing consumer, not corrupt data or an
+    excuse to repin Security for every normal business record. Stop its failing
+    automatic retry; retain the original Closure request and accepted source.
+    Propagate the existing reviewed-record-only binding through the generated
+    cross-domain policy and validate it with the existing classifier. Preserve
+    standalone exact-source behavior, current clean main/ancestry checks,
+    executable/schema/policy/dirty/non-main denials and exact other-owner pins.
+    Prove native complete policy generation to nested validation against real
+    Git record descendants, including the actual proposed record and rejected
+    control deltas, before the next accepted activation. No new ART child,
+    broad minimum-revision waiver, source rollback, removed business record,
+    receipt rewrite or new data-admission mechanism.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_cross_domain_activation.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_record_authority.py
+- id: closure-baseline-bridge-and-source-readback-disagree-with-producers
+  title: Real Closure exposes a missed Maturity hash bridge and copied subject prefix
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Baseline and native packet completed, actual Delivery target1306 has durable
+    receipt281fd8d, and proposed repository Intake completed at5ef54a7. Actual
+    Console apply-delivery Closure65387a28 retained evaluating/retryable after
+    WGCF503. Native running WGCF activation and exact Studio snapshot/schema
+    checks pass; no missing approval, changed schema pin or new policy is proven.
+    Its unchanged native owner-resolution query returns OOS503
+    prototype_closure_baseline_source_invalid for accepted_baseline_receipt_ref,
+    with zero readiness-ledger writes. Actual Baseline readback at5142d21 has
+    UTF-8 record digestbda7aa7, matching native Maturity. Closure's baseline
+    reader reuses its ASCII record digesteaefa93 and rejects that legitimate
+    Unicode record. Rebind only the Maturity baseline bridge to the existing
+    Maturity codec; preserve Closure's separate ASCII source-state protocol,
+    Delivery packet codec, existing artifacts and integrity/ancestry denials.
+    This is a consumer missed by the earlier Maturity codec repair, not an
+    independent business requirement. Cold Console GET also fails its source
+    binding because it expects prototype://prototype:proposal-1305 while the
+    actual OOS Closure producer emits prototype://proposal-1305 from its plain
+    canonical slug. Correct that exact consumer, not a broad prefix wildcard.
+    Prove native accepted Baseline to Closure owner resolution and policy,
+    real OOS source projection to Console readback, apply/replay/merged readback,
+    Unicode and wrong-source/tamper denials before another activation window.
+    Retain the original Closure request; no new ART child, receipt rehash,
+    manual business-state write, schema waiver or speculative WGCF pin repair.
+  source_refs:
+  - repo://operator-orchestration-service/src/prototype-closure/source-client.js
+  - repo://operator-orchestration-service/src/prototype-closure/baseline-owner-reader.js
+  - repo://governance-operations-console/src/domain-workspaces/prototype/server/prototype-closure-oos-client.ts
+- id: intake-unit-fixtures-reuse-live-provider-identity
+  title: Proposed real source owner collides with hard-coded unit fixture provider
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console proposed Intake request console-16e09579 produced WG PR283,
+    changing only the intake register. Native contract/intake validators pass,
+    but actual CI39481362393 and full local288 tests reproduce two failures.
+    Intake and Inventory tests copy current governed records, then use actual
+    to-do repository ID1421451929 for unrelated sample-org/sample-source. The
+    correct duplicate-provider guard rejects the now-real proposed entrant.
+    Do not change provider identity, remove the real record, waive CI or relax
+    identity immutability. Repair test-data isolation for both suites and prove
+    occupied fixture IDs/names across proposed, active and retired records are
+    avoided while real duplicate and immutable-identity denials remain tested.
+    Keep the original unmerged source review and request recoverable; if its
+    immutable source baseline must be superseded, cancel it through its normal
+    Console workflow and submit a freshly reviewed classification on accepted
+    repaired source. No new ART defect, product identity or test framework.
+  source_refs:
+  - repo://workspace-governance/tests/test_workspace_intake.py
+  - repo://workspace-governance/tests/test_workspace_inventory.py
+- id: live-baseline-source-preparation-rejects-artifact-integrity
+  title: Actual Baseline request reaches preparation but native artifact digest rejects
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After accepted activation and actual Candidate terminal readback, the
+    Console-started Studio Preview passed seven real browser checks. Actual
+    Baseline request proposal-1305:17925192134781 passed WGCF readiness and
+    explicit approve-baseline decision, but preparing stopped with
+    prototype_maturity_artifact_digest_mismatch before a preparation or PR was
+    returned. Canonical source remains Candidate at fdcb7e65. Root cause was
+    unproven at capture. Read-only validation of the exact retained artifacts
+    then proved request_digest matches native Console/OOS/WGCF UTF-8 and fails
+    only Studio's ensure_ascii=True digest; the other three ASCII-only inputs
+    pass both. The em dash in the legitimate Baseline title exposes the split.
+    Keep failed artifacts immutable; no duplicate active request, direct API
+    mutation, invented repair ART item, ASCII-only workaround or digest waiver.
+    Align Maturity-local canonical hashing across incoming/outgoing artifacts,
+    state/candidate records and Unicode names while preserving unrelated
+    Delivery packet serialization. Prove both transitions, native apply/replay/
+    readback, emitted artifacts and tamper denial using actual cross-owner
+    producer/consumer inputs, not only this title. Old source-pinned work uses
+    normal cancellation followed by a fresh explicit request on reviewed source,
+    not altered historical artifacts or a code-binding bypass. The same-window
+    real-Git producer/consumer proof then accepted actual OOS source-client
+    Unicode preparation, native merged readback, native Delivery emission,
+    Console packet shape and WGCF packet digest, but OOS Delivery rejected the
+    native packet before adapter inspection. Its packet-identity gate borrows
+    generic ART UTF-8 hashing while the existing Delivery packet contract is
+    ASCII-escaped. Correct only that packet-specific receiver and test emitted
+    Unicode packets, tamper denial and unchanged ART digests. This is caught
+    before live Delivery application, not a new operator-created work item.
+  source_refs:
+  - repo://operator-orchestration-service/src/prototype-maturity/source-client.js
+  - repo://workspace-prototype-studio/packages/prototype_maturity/maturity.py
+- id: preview-stop-acknowledgement-requires-running-receipt
+  title: Actual stopped Preview is rejected by the Console running-receipt check
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    The actual Console stop command ended Preview successfully, but its adapter
+    returned502 prototype_preview_owner_contract_invalid. Fresh native owner
+    status proves stopped, null instance/endpoint/latest_receipt and unchanged
+    source/profile digests. Studio intentionally removes running state on stop;
+    its status contract permits no latest receipt. Console nevertheless requires
+    latest_receipt.digest for every action. Honor the stopped-owner shape only
+    for a validated stop receipt and exact stopped readback; running start/
+    restart still require the exact current receipt. Retain identity, source,
+    expected-state and receipt-integrity checks, replay and conflict denials.
+    Do not add a second Studio state/receipt registry or claim502 means the
+    process is still running. Prove actual native owner subprocess/client
+    interoperability, not only isolated mocks. Existing app/browser proof is
+    historical once Preview stops and must not be revived as current proof.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/prototype/server/prototype-preview-owner-client.ts
+  - repo://workspace-prototype-studio/packages/prototype_preview/runtime.py
+- id: maturity-submission-confuses-display-ids-with-source-evidence
+  title: Live Candidate handoff sends receipt identifiers as resolvable evidence
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console Candidate request proposal-1305:17925141768731 stopped
+    requires-action before decision or source mutation. WGCF verified identity,
+    current source and packet integrity, but rejected source_refs containing a
+    prototype-landing-receipt identifier and record://prototypes/proposal-1305.
+    Neither resolves through the existing committed Studio evidence resolver;
+    its existing record://prototype-landings/slug and repo://Studio/file forms
+    must be used. The Console hook and server currently concatenate display
+    source, receipt and evidence identifiers without distinguishing authority
+    references. The analogous Baseline path adds Candidate receipt identifiers
+    and local Preview receipts, while canonical reconstruction initializes
+    retained evidence empty. Repair the existing Console handoff for both
+    transitions, retain original receipts and immutable stopped request, expose
+    the owner's exact readiness findings, and prove real committed-file
+    resolution plus missing/mismatched evidence denial. Keep live Preview
+    verification separate from committed design evidence; do not relabel a
+    health receipt as browser behavior proof or relax WGCF evidence validation.
+    No new ART item, resolver trust boundary, model generation or architecture
+    version. Continue through exact reviewed source and composed acceptance.
+    Same-boundary inspection also found Studio preserves a reopened cycle as
+    candidate-<digest> and declares candidate_record_ref, while WGCF always
+    validates candidate.json. Native Git proof must demonstrate that an old
+    valid candidate cannot mask a missing or invalid active one. Honor the
+    owner's bounded active reference rather than inventing another lifecycle
+    mechanism; retain the legacy default only when no active field is declared.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/use-prototype-maturity-live-runtime.ts
+  - repo://governance-operations-console/src/domain-workspaces/prototype/server/prototype-maturity-oos-client.ts
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/prototype_maturity_contracts.py
+- id: source-authorization-prepares-before-canonical-loading-and-cannot-reselect
+  title: Source authorization can omit a stopped predecessor during loading
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console recovery confirmed predecessor994e4ce3 revoked, but a new
+    browser preparation clicked while the hook still exposed preparation=null
+    before its canonical refresh. The enabled Prepare action created unapproved
+    intent1f6dbe41/digest80a035 with supersedes=null. Exact scope comparison caught
+    this before approval or issuance. The adapter also offers retained recovery
+    selection only for Delivery decisions, so Prototype cannot reselect the
+    actual revoked predecessor; select() itself refreshes back to newest rather
+    than retaining the selected intent. Fix the existing shared hook/panel:
+    pending/failed/initial reads cannot prepare, canonical scoped choices remain
+    selectable, and explicit choice survives reconciliation. Preserve all three
+    consumers, independent backend guards and immutable history. No new service,
+    ART item, credential workaround, automatic predecessor rewriting or broad
+    permission. Unapproved80a remains inert audit history; do not approve it.
+  source_refs:
+  - repo://governance-operations-console/src/environment-lifecycle/live-runtime/use-source-authorization.ts
+  - repo://governance-operations-console/src/environment-lifecycle/presentation/source-authorization-panel.tsx
+- id: provider-login-tools-not-in-service-execution-environment
+  title: Interactive issuer proof omitted the real provider service tool environment
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - rollout-evidence-gap
+  finding: >-
+    After automatic current-provider commissioning passed, actual Console issue
+    of the original approved scope reached its retained owner operation but
+    failed safely before mint. Its private intent remains approved/pending
+    preparing and has no credential projection. Names-first service environment
+    inspection proved Vault is installed under the operator local bin but is
+    absent from the provider's PATH; OpenSSL, Git and k3s resolve. Interactive
+    maintenance issuance succeeded because the login shell has a different
+    PATH. The exact native pre-mint Vault/private-key/App/installation GET
+    check fails FileNotFoundError under the actual service environment and
+    passes under a controlled local-bin plus standard-system path, with no
+    installation-token mint or private material projection. Inspect the whole
+    issuer pre-mint boundary before landing this fix, not just another catalog
+    readiness assertion. Reuse the existing provider unit with explicit
+    controlled PATH and required-tool preflight; no global environment change,
+    new package, source identity, approval, token, service or ART child. Preserve
+    and reconcile the original issue operation after accepted deployment; never
+    substitute engineering credential delivery or restart the business request.
+    During the repair, local full tests passed with installed host tools but
+    GitHub CI exposed an existing simulated activation test missing the new
+    prerequisite mock. Correct that fixture in the same source PR, retain real
+    missing-tool denial tests and require actual remote CI before acceptance;
+    host-specific local success is not hermetic test evidence.
+    Operating retry after the approved source repair then correctly denied
+    the retained d0bf command under current f4d as platform_provider_source_stale,
+    before issuer effects. The plan's unconditional same-command assumption
+    omitted this exact executable-source binding. Use existing Console exact
+    predecessor revocation and explicit successor authorization for the unchanged
+    business request/branch/LU/base; do not invent source-migration replay or a
+    new repair story. Review fresh expiry and digest explicitly.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/scripts/agent_source_identity.py
+  - repo://platform-engineering/scripts/agent_source_intent.py
+- id: running-provider-was-not-current-provider-after-activation
+  title: Complete activation accepted a running stale provider with source issuance unavailable
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    October20 accepted source activation134459 passed identity/read-model checks,
+    but actual Console issuance of the same prepared scope failed409
+    platform_operation_capability_unavailable before dispatch. Actual provider
+    catalog still advertised Platform72c3b13, while accepted current source was
+    7acd3eb; agent-source.issue was unavailable. The service had remained running
+    since boot. Activation enable--now does not restart an existing Python
+    process or reload its source/policy. Status verified service existence but
+    not current provider source or executable capabilities. Exact existing
+    service restart restored current7acd source and issuance availability;
+    the first immediate read raced process startup and the next read passed.
+    No business credential, source session or duplicate request was created.
+    Reuse existing activation/status/provider catalog and service restart:
+    compare exact accepted revision and finite capability availability, refresh
+    only a stale provider once, use bounded readiness polling, and fail status
+    instead of reporting current when source or required capability is stale.
+    No new daemon, worker mechanism, identity alias, ART repair child or guard
+    bypass. Preserve existing provider callback/idempotency and operation
+    recovery semantics; test current-provider no-restart, stale refresh and
+    persistent-denial behavior before reviewed source acceptance.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/platform_operation_provider.py
+- id: canonical-landed-record-keeps-capture-next-action-on-reload
+  title: Cold canonical Landing projection retained the capture action after owner completion
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    During the same final exercise, actual Console readback showed Landing
+    Landed beside a required action Complete Landing setup. Native Studio
+    record.json proves accepted static-site/interactive/local-only choices and
+    next_action candidate-promotion; the original OOS request is terminal and
+    must not be reopened or resubmitted. The live primary mapper sets landed
+    state while retaining the base capture currentMove. The retained-result
+    projector then calls a prototype-local idempotent helper which returns
+    early for already-landed input, so a warm captured-record test passed
+    without covering the cold canonical-document shape. Repair the existing
+    Console projection from owner facts, not a fixture transition or new owner
+    mutation. Preserve pending merged-readback continuation, separate Preview
+    proof, exact receipts and canonical later lifecycle. Add native canonical
+    cold-read and no-history coverage before the same final source acceptance;
+    no new ART story or invented promotion evidence.
+    October21 local-date continuation exposed the same lifecycle/navigation
+    mistake in Maturity: real Candidate source PR36 merged fdcb7e6, while the
+    original request17925163211871 remains review-required awaiting final owner
+    readback. Cold canonical Candidate routing replaces its only Candidate
+    entrypoint with Preview; neither Dashboard nor current live attention offers
+    another Maturity resume control. Do not bypass the missing UI with a direct
+    API write, resubmit promotion or reopen source. Preserve pending Candidate
+    and Baseline owner routes until their terminal receipt/readback; only then
+    route from canonical lifecycle. Same boundary inspection shows the live
+    Preview projector does not route a current proof to Baseline and advertises
+    any retained proof even after runtime generation changes. Bind active proof
+    to the running owner projection and its exact latest receipt; keep history
+    distinct. Cover the whole cold/warm pending/terminal and current/stale proof
+    navigation matrix before the existing maintenance acceptance, not another
+    workflow or architecture version. The prior source-evidence fix is valid
+    but missed this separate operator handoff; source-only success is not full
+    journey qualification.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/prototype-workspace-live-projection.ts
+  - repo://governance-operations-console/src/domain-workspaces/prototype/live-runtime/prototype-landing-live-projection.ts
+  - repo://workspace-prototype-studio/records/prototype-landings/proposal-1305/record.json
+- id: composed-console-source-operator-bindings-disagree
+  title: Accepted runtime binds one Console caller to inconsistent operator identities
+  trigger: repeated-operator-friction
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    October20 fresh accepted full activation passed, and the original c2aef
+    Prototype Preview request recovered through the actual Console. Its source
+    scope preparation then returned HTTP403 with
+    prototype_source_authoring_identity_forbidden, before any credential or
+    source resources were created. Live protected-environment comparison proved
+    the same Console caller is present in both Delivery/source-work and
+    Platform-operation maps but their accountable operator identities differ.
+    Platform complete-runtime policy and session principal use the generic
+    operator:workspace-owner, while the admitted profile derives source-work
+    identity from the actual dev-integration operator. The request remains
+    prepared with its original actor and has no source intent/session. This is
+    a composition identity contradiction, not a missing operator approval or a
+    reason to weaken the owner authorization guard. Inspect every current
+    Console operator binding and the primary principal projection before
+    selecting the smallest Platform-owned alignment. Preserve historical
+    receipts and the original request; do not add aliases, rewrite approvals,
+    inject a credential, duplicate the app or create another ART repair child.
+    Require native composed identity compatibility and wrong-operator denial
+    before exact reviewed source acceptance and normal recommissioning.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/complete-runtime-policy.yaml
+  - repo://platform-engineering/products/governance-operations-console/session-projection-policy.yaml
+  - repo://operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+  - repo://operator-orchestration-service/src/source-authoring/prototype-service.js
+- id: installed-provider-patch-advanced-after-reboot
+  title: Installed Ollama patch advanced beyond the accepted runtime binding
+  trigger: repeated-operator-friction
+  failure_classes:
+  - host-drift-undetected
+  - rollout-evidence-gap
+  finding: >-
+    October20 reboot recovery observed gateway readiness provider-integrity-failed
+    on all six otherwise eligible profiles. Metadata-only queries against the
+    actual configured provider proved Ollama0.40.6 while the accepted registry
+    still pins0.40.5. The selected qwen3:8b digest is unchanged. The integrity
+    guard correctly denied the mismatch; this is installed-runtime drift, not
+    a new workflow defect or corrupt app. Pause the known-failing auto-resume
+    attempt, align the existing reviewed binding through Platform and the
+    existing exact-source Security decision, then resume normally. Do not
+    weaken the guard, download/switch a model, invent another ART child or claim
+    host-crash resolution. The operator previously authorized aligning profiles
+    to the installed runtime. Preserve all existing source/request identities
+    and explicit external app authorship; no generation was running at this
+    recovery checkpoint. Future automatic update policy remains undecided;
+    do not silently disable host updates or accept arbitrary versions.
+  source_refs:
+  - repo://platform-engineering/security/governed-ai-model-profiles.yaml
+  - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/ollama_adapter.py
+- id: local-runtime-copy-omitted-trusted-bootstrap-assets
+  title: Container image proof did not cover the active dev-integration runtime copy
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    October20 actual complete-runtime activation reached the accepted-idea
+    broker rollout, but the broker crashed at module import because
+    /runtime/templates/source-owner-bootstrap/AGENTS.md.template was absent.
+    Live deployment inspection proved that the prepare-runtime init container
+    copies src and contracts from the accepted owner checkout into an emptyDir
+    mounted over the image runtime, without templates. The previously tested
+    production images contain those assets, so image health did not prove
+    the active source-mounted profile. Extend the existing approved OOS
+    maintenance boundary to carry the trusted assets through its real runtime
+    preparation and test that exact copy plus native app import/health without
+    credentials or business effects. Inspect every declared consumer of the
+    same preparation shape. Preserve all source and policy gates; no manual
+    container injection, new ART child, service or architecture mechanism.
+    Source publication and fresh exact Security acceptance must precede normal
+    activation. The real Console journey remains blocked, not completed.
+  source_refs:
+  - repo://operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/up.sh
+  - repo://operator-orchestration-service/src/repository-owner-bootstrap/scaffold.js
+  - repo://operator-orchestration-service/Dockerfile
+- id: native-model-profile-retirement-contradicted-consumer-authorization-checks
+  title: Lifecycle proof did not cover retirement through its real consumers
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    October20 recovery preserves the pre-crash in-memory native transition
+    proof: mutate_sources suspends Prototype successfully, but retire removes
+    its route authorization and validate_candidate then rejects that same
+    output because the route must still allow the retired profile. The
+    resolver likewise assumes every registry history row has live grants.
+    Tests additionally require today's named profiles to remain active, so a
+    legitimate later suspension can fail CI without changing implementation.
+    The previous focused green suites did not prove native lifecycle output
+    across producer, validator, resolver and gateway launcher. Reuse the
+    existing approved Platform maintenance unit to repair this contradiction,
+    retain retired history without invocation authority, and separate stable
+    synthetic behavior fixtures from generic actual-source conformance. Prove
+    independent lifecycle transitions and fail-closed invocation without a
+    new ART child, model, provider or activation mechanism. No live profile,
+    service or model mutation was performed by the diagnostic. The candidate
+    remains open; source tests are not full Console operating acceptance.
+    Staged native transition, launcher, denial and receipt-restore tests pass.
+    A separate exact-source all-retired snapshot run additionally caught the
+    status test's hardcoded activation text before review or merge; status was
+    correct and the test was repaired in the same Platform unit. Require the
+    complete affected suites against that legitimate configuration change,
+    not only the unchanged-source green run. Preserve the probe's synthetic
+    Git tree prerequisite rather than weakening provider source checks.
+  source_refs:
+  - repo://platform-engineering/scripts/model_profile_lifecycle.py
+  - repo://platform-engineering/scripts/validate_ai_model_profiles.py
+  - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/model_profile_resolver.py
+  - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/scripts/common.sh
+  - repo://platform-engineering/scripts/test_model_profile_lifecycle.py
 - id: promoted-owner-proof-omitted-required-workspace-registration-surfaces
   title: Pair-of-record promotion proof did not cover full owner registration
   trigger: late-root-cause-discovery
@@ -1054,7 +1766,15 @@ signals:
     failure-only restart. A homepage HTTP200 after restart was only temporary
     recovery, not lasting availability. Startup also reported damaged webpack
     cache entries; these were moved aside recoverably, without claiming them
-    as the proven process-exit cause. The existing Platform source unit adds
+    as the proven process-exit cause. October20 post-crash actual browser
+    verification found root HTTP500 and a generated .next vendor chunk failing
+    node --check with SyntaxError, despite successful owner API readiness.
+    Tracked Console source remains clean. Preserve the exact ignored cache
+    recoverably and restart only the existing web unit to regenerate it, then
+    require root/browser and original request readback. This is runtime-artifact
+    recovery, not proof of a hardware cause or a new source requirement. Do not
+    create another ART child, disable guards or add automatic destructive cache
+    pruning from this signal. The existing Platform source unit adds
     always-restart for the web service, keeps tunnels failure-restarted and
     requires actual live Delivery/Prototype registers during runtime status.
     Tracing the operator's Delivery question found another route-specific
@@ -1164,11 +1884,18 @@ resolution:
     provisioning and its credential, readiness, state, and Console bindings.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-20'
+  due_on: '2026-10-21'
   note: >-
+    October20 review checkpoint is overdue at the October21 local-date
+    continuation. Reviewed still open; October21 is the next review checkpoint,
+    not a completion promise or permission for another closing control.
     Original October18 review checkpoint was missed; explicitly re-reviewed
-    October19 after the staged admission-transition miss. October20 is the
-    next accountable review, not a claimed implementation completion date.
+    October19 after the staged admission-transition miss. That review scheduled
+    October20, which was also missed. Local learning capture was preserved but
+    not landed: both actual WG286 CI39597206006 and its full local rehearsal
+    correctly fail on four canonical October20 deadlines. Land the existing
+    reviewed open-record reconciliation before revalidating the Intake source;
+    do not waive the date gate, mark the lessons closed or invent new controls.
     Correct the existing consumers and prove native promotion-to-issuance
     before revised source publication. No new closing control is approved.
     Close through the existing Epic 1275 final-guidance Landing Unit after the

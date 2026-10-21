@@ -56,10 +56,14 @@ resolution:
     No ART child, evidence mechanism, or architecture change is required.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-20'
+  due_on: '2026-10-21'
   note: >-
+    October20 review checkpoint is overdue at the October21 local-date
+    continuation. Reviewed still open; October21 is the next review checkpoint,
+    not a completion promise or permission for another closing control.
     The 2026-10-16 follow-up was missed while Epic1275 qualification remained
-    blocked. Re-review on 2026-10-18; source containment is not lesson closure.
+    blocked. The October18 checkpoint was also missed; reviewed October21,
+    source containment is still not lesson closure.
     Extend the existing initiative compatibility validator to prove every
     required evidence-kind and fidelity pair before the first source session.
     Do not implement the durable closing control without operator approval.
