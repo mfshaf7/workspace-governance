@@ -101,11 +101,20 @@ resolution:
     Landing Unit; no additional ART child is required.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-20'
+  due_on: '2026-10-23'
   note: >-
+    Re-reviewed October22 after interruption crossed the operator's local
+    midnight. Exact-head reviews of maintenance repairs do not close the
+    existing final-guidance candidate-source ordering and validator-parity work.
+    The next accountable review is October23; earlier missed checkpoints below
+    are retained. This is a review appointment, not completion evidence.
+    October20 review checkpoint is overdue at the October21 local-date
+    continuation. Reviewed still open; October21 is the next review checkpoint,
+    not a completion promise or permission for another closing control.
     The 2026-10-16 follow-up was missed while Epic1275 qualification remained
-    blocked. Re-review on 2026-10-18 through the same final-guidance work;
-    preserve the original missed date and do not imply closure.
+    blocked. The October18 checkpoint was also missed; review continues on
+    October21 through the same final-guidance work. Preserve earlier missed
+    dates and do not imply closure.
     Rehearse the corrected 1291 candidate -> 1303 exact-tree acceptance -> 1291
     merge order, then land the candidate-source-before-authority-close rule and
     validator parity through the existing Epic 1275 final-guidance work.
