@@ -62,7 +62,7 @@ runtime_compositions:
   refinement-catalog:
     lifecycle: active
     owner_repo: platform-engineering
-    summary: Compose the accepted-idea delivery runtime with model-safe Refinement and Agent Console context, governed AI access, repository readiness, durable execution, and profile-owned Catalog control bindings.
+    summary: Compose the accepted-idea delivery runtime with model-safe Work Design, Refinement and Agent Console context, governed AI access, repository readiness, durable execution, and profile-owned Catalog control bindings.
     root_profile_id: accepted-idea-delivery
     profiles:
       accepted-idea-delivery:
@@ -79,6 +79,11 @@ runtime_compositions:
       - consumer_profile_id: accepted-idea-delivery
         provider_profile_id: context-governance-gateway
         endpoint_projections:
+          - environment_variable: CGG_WORK_DESIGN_BASE_URL
+            address_format: url
+            scheme: http
+            service_name: context-governance-gateway-api
+            service_port: 8080
           - environment_variable: CGG_REFINEMENT_BASE_URL
             address_format: url
             scheme: http
@@ -123,6 +128,14 @@ runtime_compositions:
             service_name: temporal-frontend
             service_port: 7233
     caller_bindings:
+      work-design-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Bind the OOS Work Design caller identity to both sides of the CGG projection boundary.
+        caller_id: operator-orchestration-service
+        consumer_profile_id: accepted-idea-delivery
+        provider_profile_id: context-governance-gateway
+        consumer_environment_variable: CGG_WORK_DESIGN_CALLER_ID
+        provider_environment_variable: CGG_WORK_DESIGN_ALLOWED_CALLERS
       refinement-cgg-caller:
         owner_repo: platform-engineering
         purpose: Bind the OOS Refinement caller identity to both sides of the CGG projection boundary.
@@ -148,6 +161,16 @@ runtime_compositions:
         consumer_environment_variable: WGCF_REPOSITORY_READINESS_CALLER_ID
         provider_environment_variable: WGCF_ARTIFACT_REGISTRY_OOS_CALLER_ID
     credential_bindings:
+      work-design-cgg-caller:
+        owner_repo: platform-engineering
+        purpose: Authenticate the accepted-idea delivery runtime to the Work Design projection boundary without storing the shared credential in Git.
+        value_source: runtime-generated
+        retention: composition-lifetime
+        projections:
+          - profile_id: accepted-idea-delivery
+            environment_variable: CGG_WORK_DESIGN_CALLER_SECRET
+          - profile_id: context-governance-gateway
+            environment_variable: CGG_WORK_DESIGN_CALLER_SHARED_SECRET
       refinement-cgg-caller:
         owner_repo: platform-engineering
         purpose: Authenticate OOS to the Refinement projection boundary without storing the shared credential in Git.
