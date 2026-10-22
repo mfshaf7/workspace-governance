@@ -273,11 +273,31 @@ class DeliveryArtLifecycleParityTests(unittest.TestCase):
             if payload.get("lifecycle") == "active"
         }
         coverage = self.work_session_contract["owner_evidence_profile_coverage"]
-        inventory = set(coverage["activated_owner_repos"]) | {
-            entry["repo"] for entry in coverage["nonactivated_owner_repos"]
-        }
+        contracts = self.validator.load_contracts(REPO_ROOT)
+        # Test the real qualification boundary, including Inventory-derived
+        # owners, rather than a second fixed inventory. These temporary
+        # profiles prove metadata coverage only, never owner/app acceptance.
+        for repo_name in active_repos:
+            path = self.workspace_root / repo_name / coverage["profile_path"]
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "owner_repo": repo_name,
+                        "commands": [
+                            {"kind": "tests", "conformance_binding": "matching-fidelity"},
+                            {"kind": "validations", "conformance_binding": "none"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
 
-        self.assertEqual(inventory, active_repos)
+        errors = self.validator.delivery_art_owner_evidence_profile_coverage_errors(
+            self.workspace_root, sorted(active_repos), coverage, contracts
+        )
+        self.assertEqual(errors, [])
 
     def test_architecture_preflight_checks_all_landing_unit_profiles_up_front(self) -> None:
         rules = self.work_session_contract["owner_evidence_profile_coverage"][
