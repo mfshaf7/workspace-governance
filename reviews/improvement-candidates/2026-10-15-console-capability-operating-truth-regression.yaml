@@ -31,6 +31,90 @@ scope:
   - source-behavior
   - runtime-composition
 signals:
+- id: complete-runtime-omits-registered-work-design-context-boundary
+  title: Complete Console runtime passes readiness without its Work Design caller binding
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  - unsafe-assumption
+  finding: >-
+    October23 full normal activation and current source acceptance passed,
+    but the actual same-target Delivery1306 Context Session assist returned503
+    context_projection_failed, Work Design upstream is not configured. Native
+    broker metadata-only environment inspection proves its Work Design context
+    URL and caller ID empty and its dedicated credential absent, while
+    Refinement, Agent Console and the gateway are present. The workspace
+    refinement-catalog composition omits the already registered Work Design
+    endpoint/caller/credential. Both OOS and CGG deliberately restrict that
+    boundary to work-design-advice, so a live secret patch or copied Refinement
+    credential would contradict the contract. Existing complete-runtime proof
+    did not exercise this primary plan-authoring route. Extend the existing
+    composition admission and both native guards/status producers together,
+    retaining dedicated Work Design authentication/replay and unrelated denies.
+    Prove both registered shapes, standalone/unregistered denial, missing/mixed
+    bindings and full producer-to-consumer configuration before exact composed
+    Security acceptance and actual Console context advice/apply. No new service,
+    model, caller, ART repair child or lifecycle engine is justified. No app
+    source import or canonical ART plan apply occurred; model inference failed
+    before CGG admission. Lookahead also confirms the live Refinement packet
+    projects only a metadata subset: no Acceptance Criteria/Definition of
+    Ready/Definition of Done values, and text-backed Target PI/Iteration are
+    represented as selects without allowed values. The existing editor already
+    supports per-target values and real enum choices; extend its real producer,
+    not a new editor or invented enumeration. Native read-only client/form
+    inspection of1306 proves actual writable fields and both String versus
+    CustomOption representations; no mutations. The current Work Design schema
+    intentionally lacks PI Objective. The existing change API already admits
+    PI Objective under Epic, but the visible Execution add menu omits it and
+    incorrectly offers Feature under PI Objective contrary to canonical parent
+    rules. Expose the existing legal action there; retain Work Design's schema,
+    real parent rules and actual review. Trace live metadata through canonical
+    values, per-type writability, accepted per-target fields and native writer
+    readback before landing; do not force future actual business value at
+    planning, use placeholder records, expand Work Design kinds or weaken ready
+    contracts. Existing acceptance1298 owns this maintenance.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - repo://workspace-governance/contracts/developer-integration-profiles.yaml
+  - repo://operator-orchestration-service/dev-integration/profiles/accepted-idea-delivery/scripts/common.sh
+  - repo://context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+- id: provider-version-preflight-not-refreshed-before-terminal-source-acceptance
+  title: Installed provider patch was checked only during composed activation
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  - host-drift-undetected
+  finding: >-
+    October23 normal activation after Security307 correctly refused gateway
+    readiness: installed Windows Ollama reports0.40.8 while the accepted six
+    existing bindings require0.40.7. The actual qwen3:8b model digest is still
+    500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41.
+    The installed provider version should have been refreshed before final
+    exact-source acceptance, rather than inferred from historical recovery
+    context. No model inference, app import or business mutation occurred.
+    Preserve exact integrity checks and update only the existing version pins
+    through normal Platform review and composed Security acceptance. Do not
+    downgrade the host, disable updates without an operator decision, widen
+    version admission, create an ART repair child or claim crash resolution.
+    Recheck actual provider version and digest immediately before acceptance
+    and activation. During that recovery, the agent also found the primary
+    Console dependency still installed at Next15.5.27 after its accepted lock
+    advanced to15.5.28. It stopped the Console for npm ci while activation was
+    concurrently checking cross-domain service health, directly causing the
+    06:29:53 activation failure. The lock install completed at15.5.28 and the
+    Console was restored. Dependency reconciliation must precede activation;
+    do not stop required services during an in-flight activation or blame
+    this operator-induced interruption on another source defect. Retain the
+    failed attempt and rerun the existing whole supervised activation after
+    proving the prerequisites, rather than bypassing retained helper custody.
+    This signal is captured in the preserved pending final
+    guidance candidate; capture is not landed control or candidate closure.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://platform-engineering/security/governed-ai-model-profiles.yaml
+  - https://github.com/mfshaf7/security-architecture/pull/307
 - id: maintenance-identity-cli-still-uses-frozen-inventory-after-native-promotion
   title: Maintenance issuance rejects current Inventory while the normal provider supports current records
   trigger: machine-visible-workflow-drift

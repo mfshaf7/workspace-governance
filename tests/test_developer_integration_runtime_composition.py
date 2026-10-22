@@ -182,8 +182,27 @@ class RuntimeCompositionContractTests(unittest.TestCase):
                 projection["environment_variable"]
                 for projection in cgg_dependency["endpoint_projections"]
             },
-            {"CGG_REFINEMENT_BASE_URL", "CGG_AGENT_CONSOLE_BASE_URL"},
+            {"CGG_WORK_DESIGN_BASE_URL", "CGG_REFINEMENT_BASE_URL", "CGG_AGENT_CONSOLE_BASE_URL"},
         )
+        dedicated_work_design = registry["runtime_compositions"]["work-design-advice"]
+        for collection in ("caller_bindings", "credential_bindings"):
+            self.assertEqual(
+                composition[collection]["work-design-cgg-caller"],
+                dedicated_work_design[collection]["work-design-cgg-caller"],
+            )
+        work_design_projections = {
+            (item["profile_id"], item["environment_variable"])
+            for item in composition["credential_bindings"]["work-design-cgg-caller"]["projections"]
+        }
+        refinement_projections = {
+            (item["profile_id"], item["environment_variable"])
+            for item in composition["credential_bindings"]["refinement-cgg-caller"]["projections"]
+        }
+        self.assertEqual(work_design_projections, {
+            ("accepted-idea-delivery", "CGG_WORK_DESIGN_CALLER_SECRET"),
+            ("context-governance-gateway", "CGG_WORK_DESIGN_CALLER_SHARED_SECRET"),
+        })
+        self.assertFalse(work_design_projections & refinement_projections)
         self.assertEqual(
             composition["caller_bindings"]["agent-console-cgg-caller"],
             {

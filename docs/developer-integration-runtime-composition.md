@@ -95,8 +95,8 @@ authority. Delivery work item `#1020` owns the merged-source runtime proof.
 
 Its root remains `accepted-idea-delivery`. The root depends on:
 
-- `context-governance-gateway` for receipt-bound Refinement projection
-- `governed-ai-gateway` for suggestion-only Refinement advice
+- `context-governance-gateway` for receipt-bound Work Design, Refinement and Agent Console projection
+- `governed-ai-gateway` for suggestion-only advice through the existing admitted profiles
 - `governance-control-fabric` for digest-bound repository readiness
 - `temporal` for recoverable Refinement apply execution
 
@@ -109,6 +109,17 @@ and WGCF Kubernetes namespaces, while the governed AI gateway receives the
 exact OOS namespace as its trusted consumer boundary. Workspace source stores
 none of those resolved runtime namespaces. The composition does not reuse the
 general OpenProject API token and stores no secret value.
+
+Work Design reuses its existing endpoint and dedicated composition-lifetime
+caller binding inside this complete composition. It does not borrow the
+Refinement or Agent Console credential. The separate `work-design-advice`
+composition remains available for its narrower integration job. Both native
+profile owners must admit and report the Work Design binding in either
+registered shape, and deny missing, mismatched, standalone or unregistered
+projections. A healthy Delivery register or an active model profile is not
+proof of Work Design context advice, canonical plan apply or Refinement handoff.
+Exact composed Security acceptance precedes activation of changed owners;
+actual Console advice/apply and canonical readback remain operating proof.
 
 The same composition also projects the existing WGCF service endpoint to the
 Workspace Intake and Workspace Inventory clients, reuses the one
