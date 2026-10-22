@@ -1935,6 +1935,38 @@ signals:
   - https://github.com/mfshaf7/workspace-governance/pull/289
   - repo://governance-operations-console/src/workspace-registry/server/workspace-registry-oos-client.ts
   - repo://operator-orchestration-service/src/workspace-inventory/provider-client.js
+- id: native-registration-remainder-not-rehearsed-before-parity-landing
+  title: A single repaired native test did not prove the remaining registration consumers
+  trigger: repeated-operator-friction
+  failure_classes:
+  - missing-deterministic-test-seam
+  - workflow-doctrine-gap
+  finding: >-
+    WG290 fixed the independently reproduced stale fixed-owner coverage test.
+    Its full CI ran against the unchanged eleven-owner inventory; only the
+    repaired test was separately exercised against native PR289's new owner.
+    The complete native registration workflow was not rehearsed with that
+    repair before landing and reacceptance. Fresh actual Console requestd1dc
+    then opened PR291 at9373476 with ten complete registration files and
+    correct admitted/v2 lineage. Its full local CI reaches the later
+    validate_pull_request_controls consumer, which rejects the exact derived
+    source-owner rule for missing review_control_requirements. The normative
+    PR preparation procedure requires active owners to carry Review guidelines,
+    CODEOWNERS, PR template and a validation workflow; the existing bootstrap
+    has the workflow but lacks those other review surfaces. Do not skip that
+    validator, invent a new requirement or claim registration/app completion.
+    Hold the immutable native review unmerged while checking all remaining CI
+    consumers, source-only policy applicability and the existing supported
+    bootstrap/owner-repair route before selecting the complete repair. Preserve
+    original identities, operator approval and the current accepted runtime.
+    No new repair ART child, control framework or authority bypass is approved.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-governance/pull/290
+  - https://github.com/mfshaf7/workspace-governance/pull/291
+  - repo://workspace-governance/scripts/validate_pull_request_controls.py
+  - repo://workspace-governance/scripts/workspace_repo_registration.py
+  - repo://workspace-governance/docs/pull-request-review-and-automation.md
 resolution:
   after_action_ref: null
   control_refs: []
@@ -1952,6 +1984,30 @@ follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-23'
   note: >-
+    Current October23 local checkpoint: operator continuation approved the
+    bounded extension described below. Actual Console cancelled original d1dc;
+    PR291 is closed unmerged, with its exact source and history retained.
+    Repair is in progress in owner-isolated maintenance Landing Units; no
+    merged or operating acceptance is claimed. Native real-Git repair/replay
+    proves three review-surface writes and preserves application/independent
+    control bytes. Full native registration and all-owner proof must pass
+    before the first repair merge, followed by exact Security acceptance,
+    normal activation and actual Console operating proof. No new repair ART
+    children or generic migration framework. Retain prior checkpoints as history.
+    Previous October22 checkpoint: native PR291 was held unmerged. Its full local
+    CI and provider check fail the missing PR-control rule requirements; every
+    remaining workflow step separately passes, which is not full CI success.
+    The required owner review surfaces are genuinely absent. Existing bootstrap
+    refuses admitted entrants and produces no source plan for an existing
+    valid profile, while ordinary source requires active Inventory. Do not
+    bypass those boundaries, merge invalid registration or mutate old receipts.
+    Proposed disposition is extend the existing trusted bootstrap and derived
+    registration coverage, not a new subsystem: control-only repair before
+    Inventory, including already-admitted source-only owners, with preserved
+    independent content and existing explicit source/human gates. This changes
+    the current proposed-only eligibility boundary and needs an operator design
+    decision before implementation; the continuation above now records that
+    approval without backdating it. Retain earlier checkpoints as history.
     October22 evening recovery confirms Intake288 merged and the entrant is
     admitted/v2. Inventory289 remains open and unmerged with the fixed-owner
     coverage-test failure recorded above; the actual app import and final

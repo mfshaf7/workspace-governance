@@ -39,6 +39,13 @@ def source_entry():
 
 
 class SourceOwnerProjectionTests(unittest.TestCase):
+    def test_derived_rule_keeps_existing_active_owner_review_policy(self):
+        requirements = source_owner_rule("synthetic-source", source_entry())["review_control_requirements"]
+        self.assertEqual(requirements["required_github_paths"], [".github/CODEOWNERS", ".github/pull_request_template.md"])
+        self.assertEqual(requirements["required_validation_paths"], [".github/workflows/validate.yaml"])
+        self.assertIn("## Advisory Review", requirements["required_pr_template_sections"])
+        self.assertEqual(requirements["guidance_files"][0]["heading"], "## Review guidelines")
+
     def assert_full_model_valid(self, inventory):
         (self.root / "contracts/repos.yaml").write_text(yaml.safe_dump(inventory, sort_keys=False))
         result = subprocess.run([sys.executable, str(REPO / "scripts/validate_contracts.py"), "--repo-root", str(self.root)], capture_output=True, text=True)
@@ -242,10 +249,19 @@ class ProposedSourceOwnerAuthorityTests(unittest.TestCase):
         with self.assertRaisesRegex(RepositoryRegistrationError, "differs"):
             proposed_source_owner_authority(self.root, "bootstrap-owner", {**self.binding, "provider_repository_id": "42"})
 
-    def test_missing_admitted_out_of_scope_and_existing_active_targets_do_not_borrow_bootstrap(self):
+    def test_admitted_source_owner_can_repair_controls_without_ordinary_authority(self):
+        self.native.admit("repo", "bootstrap-owner", classification="admitted", provider_repository=self.binding, domain_value=self.domain)
+        value = proposed_source_owner_authority(self.root, "bootstrap-owner", self.binding)
+        self.assertEqual(value["classification"], "admitted")
+        self.assertTrue(value["source_bootstrap_eligible"])
+        self.assertFalse(value["ordinary_source_eligible"])
+        self.assertFalse(value["model_writes_allowed"])
+        self.assertIsNone(value["inventory_posture"])
+
+    def test_missing_out_of_scope_and_existing_active_targets_do_not_borrow_bootstrap(self):
         with self.assertRaisesRegex(RepositoryRegistrationError, "current proposed"):
             proposed_source_owner_authority(self.root, "missing-owner", self.binding)
-        for classification in ("admitted", "out-of-scope"):
+        for classification in ("out-of-scope",):
             name = f"{classification}-owner"
             domain = self.domain if classification == "admitted" else {
                 "kind": "repo", "repo_class": None, "requires_security_bindings": None,

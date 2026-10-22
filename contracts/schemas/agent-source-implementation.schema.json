@@ -121,7 +121,7 @@
       "required": ["ordinary-source", "trusted-owner-bootstrap", "workflow-maintenance"],
       "properties": {
         "ordinary-source": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "admitted" }, "inventory_posture": { "const": "active" }, "model_writes_allowed": { "const": true }, "workflow_write": { "const": "denied" } } }] },
-        "trusted-owner-bootstrap": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "proposed" }, "inventory_posture": { "type": "null" }, "model_writes_allowed": { "const": false }, "workflow_write": { "const": "separately-approved-only" } } }] },
+        "trusted-owner-bootstrap": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": ["proposed", "admitted"] }, "inventory_posture": { "type": "null" }, "model_writes_allowed": { "const": false }, "workflow_write": { "const": "separately-approved-only" } } }] },
         "workflow-maintenance": { "allOf": [{ "$ref": "#/$defs/sourcePurpose" }, { "properties": { "intake_classification": { "const": "admitted" }, "inventory_posture": { "const": "active" }, "model_writes_allowed": { "const": false }, "workflow_write": { "const": "explicit-approval-required" } } }] }
       },
       "additionalProperties": false
@@ -224,7 +224,7 @@
       "type": "object",
       "required": ["intake_classification", "inventory_posture", "model_writes_allowed", "workflow_write", "rule"],
       "properties": {
-        "intake_classification": { "enum": ["admitted", "proposed"] },
+        "intake_classification": { "enum": ["admitted", "proposed", ["proposed", "admitted"]] },
         "inventory_posture": { "enum": ["active", null] },
         "model_writes_allowed": { "type": "boolean" },
         "workflow_write": { "enum": ["denied", "separately-approved-only", "explicit-approval-required"] },
