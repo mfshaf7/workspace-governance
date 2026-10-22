@@ -70,11 +70,17 @@ The provider installation is selected-repository only. Its minimum permissions
 are Metadata read, Contents write, Pull requests write, and Checks read.
 These remain the exact ordinary-source token permissions, even after an App-level
 Workflows grant. The contract's `source_purposes` separates ordinary source,
-trusted proposed-owner bootstrap and explicitly approved workflow maintenance.
+trusted pre-Inventory owner bootstrap and explicitly approved workflow maintenance.
 Only the latter two may use separately approved workflow-write authority; no
 model receives it. Platform owns installation selection and purpose-bound
 credential custody. An installed App or a prepared scaffold does not admit a
 repository or grant an operational runtime.
+Trusted bootstrap may repair finite missing controls for proposed or admitted
+source-only Intake absent active/retired Inventory. It preserves valid owner
+profiles, application source and independent controls; only absent trusted
+files and exact append-only missing review guidance may change. The same
+explicit source approval, Gary publication and separate exact-head human review
+remain mandatory. This is not ordinary source or model authoring authority.
 Evidence records the bindings and durable references, never private keys,
 installation tokens, or other secret values.
 

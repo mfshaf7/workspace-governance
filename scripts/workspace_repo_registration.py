@@ -58,7 +58,7 @@ def is_source_owner(name: str, entry: dict[str, Any]) -> bool:
 
 
 def proposed_source_owner_authority(repo_root: Path, name: str, expected_provider_repository: dict) -> dict:
-    """Read the real proposed entry, never a synthetic active source identity.
+    """Read real pre-Inventory Intake, never a synthetic active source identity.
 
     OOS must independently verify successful canonical custody under its
     authenticated workspace API contract and pass
@@ -76,8 +76,8 @@ def proposed_source_owner_authority(repo_root: Path, name: str, expected_provide
     if name in inventory.get("repos", {}) or name in inventory.get("retired_repos", {}):
         raise RepositoryRegistrationError("Bootstrap cannot replace an active or retired Inventory identity.")
     entry = register.get("repos", {}).get(name)
-    if not entry or entry.get("status") != "proposed" or entry["record"]["id"] != f"repo:{name}":
-        raise RepositoryRegistrationError("Bootstrap requires the current proposed Intake entry; ordinary source remains denied.")
+    if not entry or entry.get("status") not in {"proposed", "admitted"} or entry["record"]["id"] != f"repo:{name}":
+        raise RepositoryRegistrationError("Bootstrap requires current proposed or admitted Intake before Inventory; ordinary source remains denied.")
     if not _source_owner_admission_metadata(entry):
         raise RepositoryRegistrationError("This proposed owner requires explicit control/Security registration, not source-only bootstrap.")
     binding = entry["provider_repository"]
@@ -85,7 +85,7 @@ def proposed_source_owner_authority(repo_root: Path, name: str, expected_provide
         raise RepositoryRegistrationError("Bootstrap provider identity differs from current canonical custody binding or has another workspace key.")
     return {"schema_version": 1, "owner_repo": name,
             "intake_entry_ref": {"id": entry["record"]["id"], "version": entry["record"]["version"], "digest": canonical_digest(entry)},
-            "intake_register_digest": canonical_digest(register), "classification": "proposed", "inventory_posture": None,
+            "intake_register_digest": canonical_digest(register), "classification": entry["status"], "inventory_posture": None,
             "provider_repository": copy.deepcopy(binding), "owner_purpose": entry["notes"],
             "validation_behavior": copy.deepcopy(entry["validation_behavior"]),
             "source_bootstrap_eligible": True, "ordinary_source_eligible": False,
@@ -95,12 +95,20 @@ def proposed_source_owner_authority(repo_root: Path, name: str, expected_provide
 def source_owner_rule(name: str, entry: dict[str, Any]) -> dict[str, Any]:
     if not is_source_owner(name, entry):
         raise RepositoryRegistrationError("Repository requires explicit control-owner or Security-bound registration review.")
-    # No invented Security artifact, validation command, workflow or authority
-    # claim. Actual owner validation stays in its reviewed base-owned profile.
+    # Existing active-repository PR policy applies to source-only owners too.
+    # This declares required control surfaces, not passing evidence or new
+    # Security/runtime authority. App checks remain in the real owner profile.
     return {"schema_version": 1, "repo": name, "lifecycle": entry["posture"],
             "required_repo_refs": list(entry["allowed_authoritative_refs"]),
             "required_patterns": {"readme": [], "agents": []},
-            "forbidden_patterns": {"readme": [], "agents": []}}
+            "forbidden_patterns": {"readme": [], "agents": []},
+            "review_control_requirements": {
+                "guidance_files": [{"path": "AGENTS.md", "heading": "## Review guidelines",
+                                    "required_terms": ["source", "validation", "review", "authority"]}],
+                "required_github_paths": [".github/CODEOWNERS", ".github/pull_request_template.md"],
+                "required_validation_paths": [".github/workflows/validate.yaml"],
+                "pr_template_path": ".github/pull_request_template.md",
+                "required_pr_template_sections": ["## Summary", "## Governance", "## Validation", "## Advisory Review"]}}
 
 
 def source_owner_context(name: str) -> dict[str, Any]:

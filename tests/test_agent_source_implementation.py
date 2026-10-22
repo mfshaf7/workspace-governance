@@ -64,7 +64,7 @@ class AgentSourceImplementationTests(unittest.TestCase):
 
     def test_source_purposes_do_not_grant_workflow_power_to_models(self) -> None:
         purposes = self.contract["source_purposes"]
-        self.assertEqual("proposed", purposes["trusted-owner-bootstrap"]["intake_classification"])
+        self.assertEqual(["proposed", "admitted"], purposes["trusted-owner-bootstrap"]["intake_classification"])
         self.assertIsNone(purposes["trusted-owner-bootstrap"]["inventory_posture"])
         for purpose, field, value in (
             ("ordinary-source", "workflow_write", "explicit-approval-required"),

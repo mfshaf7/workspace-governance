@@ -56,6 +56,15 @@ retirement eligibility, a CI toolchain, runtime activation or Security acceptanc
 Shared/control owners and Security-bound registration require their explicit
 reviewed source change; they cannot borrow this routine source-owner path.
 
+The derived rule includes the existing active-repository pull-request review
+policy: owner review guidance, CODEOWNERS, governance/advisory PR template and
+a pull-request validation workflow. These are required surfaces, not passing
+evidence. A valid application evidence profile alone does not satisfy them.
+Missing controls use the existing trusted bootstrap before promotion, including
+an admitted source-only owner still absent from Inventory. Optional bootstrap
+CI does not waive the later active-Inventory review policy. Independent owner
+policy and application source must not be overwritten to satisfy registration.
+
 Only the exact generated index is registration data. Surrounding instructions,
 existing core/custom repo rules and context policy remain reviewed controls.
 OOS must publish and read back the complete owner-produced file set in one
