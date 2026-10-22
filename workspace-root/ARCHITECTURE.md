@@ -323,5 +323,5 @@ and `README.md` before source work. Suspended owners deny new references;
 retired owners are retained only in Inventory history.
 
 <!-- workspace-source-owner-index:start -->
-No additional source-only repository owners are registered.
+- `console-todo-1275` — `active`; owner guidance: `console-todo-1275/AGENTS.md`, `console-todo-1275/README.md`.
 <!-- workspace-source-owner-index:end -->

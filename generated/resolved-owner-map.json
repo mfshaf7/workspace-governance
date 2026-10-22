@@ -648,6 +648,50 @@
     }
   },
   "repos": {
+    "console-todo-1275": {
+      "allowed_authoritative_refs": [],
+      "lifecycle": "active",
+      "must_not_own": [
+        "Workspace governance, shared orchestration, Platform release, Security acceptance, authenticated identity or privileged runtime authority"
+      ],
+      "owns": [
+        "Own the reviewed Little List browser application source and product-local validation. Public synthetic demonstration. Shared orchestration, credentials, governance and runtime release authority remain with their existing owners. No client data, accounts, backend or public hosting is admitted."
+      ],
+      "posture": "active",
+      "provider_repository": {
+        "full_name": "mfshaf7-workspace/console-todo-1275",
+        "provider": "github",
+        "provider_repository_id": "1421451929"
+      },
+      "record": {
+        "id": "repo:console-todo-1275",
+        "last_mutation": {
+          "action": "promote",
+          "applied_at": "2026-10-22T17:13:05.952Z",
+          "id": "workspace-inventory-mutation:workspace-inventory-request:console-a85a8e96-cd44-4bd7-8a2b-76156a75687b:v1",
+          "idempotency_key": "workspace-inventory-request:console-a85a8e96-cd44-4bd7-8a2b-76156a75687b:v1",
+          "readiness_digest": "sha256:7e3d158e54d4d27d87e36a088d128e71eed46a9d08bd67ee38813b2a3e443ba2",
+          "readiness_ref": "workspace-inventory-readiness:workspace-inventory:47ff5a722a2d253b18d46a659590ed30a782f87bc2e20d32d65d1080eee2eb9f",
+          "request_digest": "sha256:b5533256ff9de1d3b68cb39b4a4cf55e1a7a737e11a874ac605cd4f664bf74f4",
+          "request_ref": "workspace-inventory-request:console-a85a8e96-cd44-4bd7-8a2b-76156a75687b"
+        },
+        "lineage": {
+          "intake_entry_version": 2,
+          "source": "workspace-intake",
+          "source_digest": "sha256:d7ce5c6553b7f2cb23ed59bef029787720e54535a8a0df93a7fdba52155e0836",
+          "source_ref": "repo:console-todo-1275"
+        },
+        "version": 1
+      },
+      "repo_class": "product-source",
+      "requires_security_bindings": false,
+      "validation_behavior": {
+        "catalog_refs": [],
+        "notes": "Proposed source-only owner. Trusted bootstrap must establish the actual fetched-base owner evidence profile before admitted Intake and active Inventory. App transition/encoding tests and base-aware Git source checks are separate from real browser and local-runtime acceptance.",
+        "posture": "covered-by-owner-repo",
+        "wgcf_graph_role": "product-runtime-source"
+      }
+    },
     "context-governance-gateway": {
       "allowed_authoritative_refs": [
         "workspace-governance",

@@ -578,5 +578,5 @@ above. Only the exact Inventory-derived index is routine registration data;
 these instructions remain a reviewed control change.
 
 <!-- workspace-source-owner-index:start -->
-No additional source-only repository owners are registered.
+- `console-todo-1275` — `active`; owner guidance: `console-todo-1275/AGENTS.md`, `console-todo-1275/README.md`.
 <!-- workspace-source-owner-index:end -->
