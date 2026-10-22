@@ -1869,6 +1869,72 @@ signals:
   - repo://operator-orchestration-service/docs/records/change-records/2026-10-14-bounded-source-realization.md
   - https://github.com/mfshaf7/governance-operations-console/pull/89
   - https://github.com/mfshaf7/security-architecture/pull/278
+- id: inventory-derived-owner-coverage-test-retains-fixed-inventory
+  title: Native Inventory registration exposes stale fixed-owner test coverage
+  trigger: repeated-operator-friction
+  failure_classes:
+  - missing-deterministic-test-seam
+  - unsafe-assumption
+  finding: >-
+    Native Inventory PR289 registers console-todo-1275 through the actual
+    Console request919a4d64 on reviewed basec197117. Provider run39640118394
+    fails exactly test_owner_evidence_profile_inventory_covers_every_active_repo:
+    the test unions only the fixed activated and excluded owner lists, while
+    the existing operator contract enables inventory_derived_source_owner_profiles.
+    The new owner is therefore absent from the test's computed inventory.
+    Production validate_cross_repo_truth already contains Inventory-derived
+    qualification; inspect that complete qualification and its affected
+    consumers before correcting test parity. Do not add the demo owner to the
+    fixed core list, waive coverage or treat this as a new capability request.
+    The native App review remains immutable, open and unmerged at ac45a861.
+    Dispose it through the existing Console recovery flow before changing its
+    canonical preparation baseline, then prepare one fresh promotion for the
+    same admitted entrant. Maintenance remains under1298 with a real owner
+    landing boundary, not another repair ART child or framework.
+    October22 execution disposed the original through actual Console cancel:
+    cancelled/complete/failure-null and provider PR289 CLOSED/unmerged at the
+    same head. The bounded parity repair exercises production qualification
+    against actual Inventory/rules with explicitly synthetic profile metadata.
+    Existing derived-owner missing-profile, foreign/custom-rule and explicit
+    exclusion tests remain required; no production qualification is weakened.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-governance/pull/289
+  - https://github.com/mfshaf7/workspace-governance/actions/runs/39640118394
+  - repo://workspace-governance/tests/test_delivery_art_lifecycle_parity.py
+  - repo://workspace-governance/contracts/delivery-art-operator-path.yaml
+  - repo://workspace-governance/scripts/validate_cross_repo_truth.py
+- id: native-inventory-continuation-exceeds-registry-caller-budget
+  title: Native Inventory continuation outlives the Console request budget
+  trigger: repeated-operator-friction
+  failure_classes:
+  - rollout-evidence-gap
+  - missing-deterministic-test-seam
+  finding: >-
+    Both explicit continuations of the same actual request919a4d64 returned
+    Console502 workspace_registry_oos_unavailable after the Registry client's
+    shared12000ms request budget, while backend work continued. The first
+    retained provider_rejected failure has no proven upstream root cause and
+    must not be attributed to the caller timeout. After reading that original
+    state, one explicit Console retry opened native PR289; the same original
+    request reached review-required with failure null and no duplicate.
+    Cold recovery worked, but earlier immediate-response intercepted browser
+    conformance did not establish the real ten-file provider operation's
+    latency behavior. Inspect both Promotion and Lifecycle consumers and
+    applicable existing bounded operation budgets before any source repair.
+    Reuse an appropriate existing bounded request pattern; do not introduce
+    another asynchronous framework, hidden writer, poller or generic lock.
+    No caller-budget change has been implemented or proven at this checkpoint.
+    Subsequent contract review assigns reuse, not a new source requirement:
+    existing durable original-request recovery succeeded in the real witness.
+    A bounded caller timeout is not itself evidence of lost work or a broken
+    recovery contract. Preserve this observation without inventing a larger
+    timeout, another mechanism or a mandatory Console maintenance unit.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-governance/pull/289
+  - repo://governance-operations-console/src/workspace-registry/server/workspace-registry-oos-client.ts
+  - repo://operator-orchestration-service/src/workspace-inventory/provider-client.js
 resolution:
   after_action_ref: null
   control_refs: []
@@ -1886,6 +1952,20 @@ follow_up:
   owner_repo: workspace-governance
   due_on: '2026-10-23'
   note: >-
+    October22 evening recovery confirms Intake288 merged and the entrant is
+    admitted/v2. Inventory289 remains open and unmerged with the fixed-owner
+    coverage-test failure recorded above; the actual app import and final
+    acceptance remain outstanding. Initial runtime restoration was blocked by
+    invalid operator Vault authentication, not memory pressure; operator login
+    restored access and normal activation141024Z now proves live/current
+    composition and original919 Console readback. That original was then
+    cancelled normally and PR289 closed unmerged before baseline repair.
+    The native289 Inventory independently reproduces old-test failure and
+    repaired-test success with unchanged production qualification. Capture is
+    retained in maintenance-1275-inventory-coverage-parity; implementation and
+    publication follows exact-head full CI and reviewed maintenance sequencing.
+    The earlier checkpoint below is retained as history, not
+    current admission or Security acceptance truth.
     Re-reviewed October22 after interruption crossed the operator's local
     midnight. Registry repairs OOS356 and Console101 are merged, but their exact
     Security acceptance and recommissioning remain pending. Intake request
