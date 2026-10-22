@@ -54,6 +54,43 @@ owned by OpenProject. The accepted baseline transition receipt is also issued
 by OOS and binds Studio's committed baseline record. A Studio record is not
 itself an OOS acceptance receipt.
 
+## Durable owner source evidence
+
+The normal source handoff should reuse the actual finalized Delivery Review
+Packet, including its merged-PR and durable WGCF custody evidence. It must bind
+the accepted Delivery target, selected repository and accountable operator.
+Unmerged source, a repair packet for another initiative, and caller-authored
+approval or receipt strings do not establish durable ownership.
+
+The source-import change records inert metadata at
+`records/prototype-source-imports/<prototype-id>.json` using the
+[source-import manifest schema](../contracts/schemas/prototype-source-import-manifest.schema.json).
+It identifies the accepted Studio packet/source, Delivery application receipt,
+provider-bound intended owner, custody strategy and complete regular-file byte
+mapping. It is **not** a receipt or an approval. The native owner reader must
+verify the exact approved Studio source, actual canonical owner merge and every
+mapped byte; a valid schema alone proves none of those facts. Duplicate source
+or target paths, omitted source files, unsafe paths, wrong provider/subject,
+unapproved source, rewritten ancestry and changed bytes must be denied.
+
+Do not put the future owner merge SHA, fabricated human approval or a future
+Closure receipt in that source change. Actual review/finalization supplies the
+real owner merge binding afterwards. One durable Review Packet may support both
+owner-acceptance and separately verified source-transfer facts. Transfer
+discovery must retain its exact owner-acceptance reference; it must not scan
+unrelated work or invent a second receipt ledger.
+
+After native graduation and applicable product admission, a later reviewed
+product-owner manifest can name the real source merge and completed custody
+evidence. It cannot claim graduation while Studio still owns incubation custody.
+Local browser proof can use the existing bounded, base-owned evidence profile;
+it does not imply a persistent hosted service, Platform runtime activation,
+private/client qualification or public release.
+
+This defines the evidence input and required checks, not current operating
+acceptance. The OOS producer/reader, WGCF consumer and exact composed Security /
+Platform qualification must be proved before this path is advertised as live.
+
 The request, source event, merged readback, and terminal receipt schemas live under
 [`contracts/schemas/`](../contracts/schemas/). Source and target owners must
 retain separate receipts so the project phase, source custody, runtime, release,
