@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Inert Prototype source-import metadata; not an acceptance receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "artifact_type", "prototype_id", "owner_repo",
+    "provider_repository", "delivery_target_ref", "delivery_packet_ref",
+    "accepted_delivery_target_receipt_ref", "prototype_source_revision",
+    "requested_custody", "transfer_strategy", "file_mappings"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "prototype-source-import-manifest" },
+    "prototype_id": { "$ref": "#/$defs/identifier" },
+    "owner_repo": { "$ref": "#/$defs/identifier" },
+    "provider_repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "provider_repository_id", "full_name"],
+      "properties": {
+        "provider": { "const": "github" },
+        "provider_repository_id": { "type": "string", "maxLength": 20, "pattern": "^[1-9][0-9]*$" },
+        "full_name": { "type": "string", "maxLength": 240, "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9._-]*$" }
+      }
+    },
+    "delivery_target_ref": { "type": "string", "maxLength": 160, "pattern": "^openproject://work_packages/[1-9][0-9]*$" },
+    "delivery_packet_ref": { "type": "string", "maxLength": 512, "pattern": "^record://delivery-packets/[a-z0-9][a-z0-9._-]*$" },
+    "accepted_delivery_target_receipt_ref": { "type": "string", "maxLength": 512, "pattern": "^oos://receipts/prototype-delivery-application/[0-9a-f]{64}$" },
+    "prototype_source_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "requested_custody": { "enum": ["dedicated-owner-repo", "shared-owner-repo"] },
+    "transfer_strategy": { "enum": ["transfer", "already-owned"] },
+    "file_mappings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_path", "owner_path", "sha256"],
+        "properties": {
+          "source_path": { "$ref": "#/$defs/path" },
+          "owner_path": { "$ref": "#/$defs/path" },
+          "sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "maxLength": 128, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "path": {
+      "type": "string",
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*(?:^|/)\\.git(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+    }
+  }
+}

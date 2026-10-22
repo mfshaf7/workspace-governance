@@ -228,6 +228,7 @@ PROTOTYPE_CLOSURE_ARTIFACT_SCHEMAS = (
     "contracts/schemas/prototype-closure-history-event.schema.json",
     "contracts/schemas/prototype-closure-studio-readback.schema.json",
     "contracts/schemas/prototype-closure-receipt.schema.json",
+    "contracts/schemas/prototype-source-import-manifest.schema.json",
 )
 PRODUCT_PUBLICATION_ARTIFACT_CASES = {
     "manifest": (

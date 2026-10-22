@@ -31,6 +31,104 @@ scope:
   - source-behavior
   - runtime-composition
 signals:
+- id: maintenance-identity-cli-still-uses-frozen-inventory-after-native-promotion
+  title: Maintenance issuance rejects current Inventory while the normal provider supports current records
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After native Inventory293 added the first source-only owner, the normal
+    maintenance deliver command stopped before issuing a credential: current
+    contracts/repos.yaml no longer matches the legacy identity definition's
+    fixed legacy-repository baseline digest. Existing load_operating_contract
+    already supports contract_from_record_snapshot when the normal Platform
+    provider injects a fresh snapshot, but the CLI always selects the frozen
+    file verifier. This is not a failed Console source grant or permission to
+    repin the baseline or widen installation selection. Prove the existing
+    baseline and current accepted record authority separately; preserve exact
+    selected-repository identity, active state and all legacy IDs. Any bounded
+    bootstrap must retain the reviewed baseline and fresh current eligibility
+    proof, not skip the identity check or run an unreviewed issuer. Extend the
+    existing current-record path for normal maintenance and prove issuance,
+    revocation and native promotion-to-maintenance together before calling the
+    source workflow repaired. Keep this in the existing Platform maintenance
+    unit and operating-truth candidate; no new ART child or source identity.
+    The initial failed command issued no access and no source was published.
+  source_refs:
+  - openproject://work_packages/1298
+  - https://github.com/mfshaf7/workspace-governance/pull/293
+  - repo://platform-engineering/scripts/agent_source_identity.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/platform_operation_provider.py
+  - repo://workspace-governance/skills-src/source-implementation-operator/SKILL.md
+- id: publication-owner-configuration-remains-single-product-after-native-registration
+  title: Active Publication does not yet read a newly registered source-only product owner
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    October23 whole-path inspection before product source implementation
+    confirms Publication is enabled in actual OOS and WGCF. The actual WGCF
+    publication owner-root mapping contains only governance-operations-console.
+    ProductPublicationAuthority requires the manifest owner in that mapping,
+    and product_publication_platform.py commissions only its policy's one
+    configured owner. Source-only repository Inventory success therefore does
+    not itself qualify a later Little List manifest. Inspect the existing
+    bounded source-owner projection and fresh product inventory reader as one
+    dependency with durable-source graduation; do not add a manual host mount,
+    arbitrary owner roots, hidden publication writer, copied Console manifest
+    or a second product lifecycle engine. Preserve the existing internal-only
+    Publication decision and explicit product admission. A new owner requires
+    real product/owner binding and current committed source, not merely a repo
+    name. Actual local browser proof can reuse the bounded owner evidence
+    runner; no new generic preview service is justified by this finding.
+    This is existing1298 acceptance maintenance, not a new repair ART child.
+    No Little List publication command or product Inventory mutation has been
+    issued, and no manifest or operating acceptance is claimed.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/product_publication_contracts.py
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/product_publication_readiness.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/product_publication_platform.py
+  - repo://operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+- id: durable-source-graduation-has-no-normal-owner-proof-reader
+  title: Normal Closure cannot consume a newly admitted durable owner's evidence
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    October23 lookahead before applying Delivery1306's product plan proves
+    the declared graduate-source transition still requires actual durable
+    owner acceptance and exact transfer or already-owned evidence. Production
+    server.js calls createRuntime without injected owner readers; Closure's
+    normal runtime registers only Studio, Delivery, OOS and Platform readers.
+    Its normal owner-readback service also excludes all three durable-owner
+    evidence fields. The conformance test injects a synthetic durable-owner
+    reader, so that proof cannot qualify this normal product transition.
+    Native owner setup7075 and source-only Inventorya85a have succeeded with
+    real reviewed source, readback, revoked source access and owned cleanup;
+    neither proves durable app custody. Product source is not imported yet,
+    and no graduation request or canonical Delivery tree has been submitted.
+    Preserve the same idea, source and accepted target. Inspect and reuse the
+    existing committed owner-evidence/source-reader boundary for a bounded
+    real producer and consumer before calling a later owner manifest proof.
+    Do not fabricate receipt strings, copy synthetic readers into production,
+    treat reference syntax as authority, add a generic proof framework or
+    create repair ART children. Existing acceptance1298 maintenance remains
+    the work home. Exact fix shape and security/source commissioning need
+    inspection; this capture is not implementation approval or gap closure.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - repo://operator-orchestration-service/src/server.js
+  - repo://operator-orchestration-service/src/runtime.js
+  - repo://operator-orchestration-service/src/prototype-closure/runtime.js
+  - repo://operator-orchestration-service/src/prototype-closure/owner-evidence.js
+  - repo://operator-orchestration-service/src/prototype-closure/owner-readback-service.js
+  - repo://operator-orchestration-service/test/prototype-closure-runtime.test.js
 - id: physical-owner-parent-mount-omits-reviewed-child-mountpoints
   title: Sanitized source parent was tested without the existing nested read-only mounts
   trigger: repeated-operator-friction
