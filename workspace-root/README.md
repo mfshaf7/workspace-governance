@@ -450,5 +450,5 @@ does not confer control-plane or runtime authority. Suspended entries deny new
 references; retired owners remain in Inventory history rather than this index.
 
 <!-- workspace-source-owner-index:start -->
-No additional source-only repository owners are registered.
+- `console-todo-1275` — `active`; owner guidance: `console-todo-1275/AGENTS.md`, `console-todo-1275/README.md`.
 <!-- workspace-source-owner-index:end -->
