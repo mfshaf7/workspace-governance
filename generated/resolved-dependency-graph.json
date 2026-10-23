@@ -335,6 +335,26 @@
       "from": "governance-operations-console",
       "to": "governance-operations-console",
       "type": "authoritative-reference"
+    },
+    {
+      "from": "console-todo-1275",
+      "to": "platform-engineering",
+      "type": "authoritative-reference"
+    },
+    {
+      "from": "console-todo-1275",
+      "to": "security-architecture",
+      "type": "security-reference"
+    },
+    {
+      "from": "console-todo-1275",
+      "to": "console-todo-1275",
+      "type": "runtime-input"
+    },
+    {
+      "from": "console-todo-1275",
+      "to": "console-todo-1275",
+      "type": "authoritative-reference"
     }
   ]
 }
