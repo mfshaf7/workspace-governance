@@ -121,3 +121,43 @@ products:
         readiness_ref: workspace-inventory-lifecycle-readiness:workspace-inventory-lifecycle:d7fb35299d018fb39e975dcc5283eb0a087fa052eec3e845ab7ed8e86d78385e
         readiness_digest: sha256:9a3531f2bcac400698ba2804baf9cb584a641f3a7bc5801fd16c7cbc4ea668f3
         applied_at: '2026-10-12T21:02:05.921Z'
+  console-todo-1275:
+    posture: active
+    maturity: owner-managed
+    lifecycle: owner-managed
+    platform_owner: platform-engineering
+    security_owner: security-architecture
+    runtime_owner: console-todo-1275
+    source_owners:
+    - console-todo-1275
+    stage_supported: false
+    governed_prod_promotion: false
+    highest_real_endpoint: owner-managed-source
+    validation_behavior:
+      catalog_refs: []
+      notes: The durable console-todo-1275 owner maintains source and owner-local
+        validation. Merged application source 7efd4c3e87e2d41e10b252daf473db416e03090f
+        is covered by finalized Review Packet wgcf://artifacts/delivery-art/sha256/73c9c02aaaefc71b72f4e00a4d7fb903514f46ef6ef23048f7a44f9f40ca64eb.
+        The accepted owner profile contains nine task-unit cases, exact base/head
+        validation and seven serial real-browser cases. No new WGCF catalog, stage/prod
+        environment, release authority or hosting is claimed. Final accepted-base
+        browser qualification and internal Publication remain separate pending work.
+      posture: covered-by-owner-repo
+      wgcf_graph_role: product-readiness-aggregate
+    record:
+      id: product:console-todo-1275
+      version: 1
+      lineage:
+        source: workspace-intake
+        source_ref: product:console-todo-1275
+        source_digest: sha256:f308e8116ea908238c293ba655e3bfa3a98cd512b18158a2ba2bf3d192335b94
+        intake_entry_version: 2
+      last_mutation:
+        id: workspace-inventory-mutation:workspace-inventory-request:console-04ee7293-2e6a-4d3a-a4ff-2cb90263f6e8:v1
+        action: promote
+        idempotency_key: workspace-inventory-request:console-04ee7293-2e6a-4d3a-a4ff-2cb90263f6e8:v1
+        request_ref: workspace-inventory-request:console-04ee7293-2e6a-4d3a-a4ff-2cb90263f6e8
+        request_digest: sha256:daf770cc2f39b0576d322b2911e187256c863fe3a6eb2e509177317e3d1667a7
+        readiness_ref: workspace-inventory-readiness:workspace-inventory:de693cb92d3b5977c843146ce9f46e580ca2907ceaa0217580efa265c6f6fe8c
+        readiness_digest: sha256:8b9db78f4a8e2cedc53304e3b53f99c8466d2012ffdf2227a42b7e03ab6df662
+        applied_at: '2026-10-23T15:21:15.417Z'
