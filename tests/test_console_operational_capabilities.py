@@ -95,7 +95,7 @@ class ConsoleOperationalCapabilitiesTests(unittest.TestCase):
 
         self.assertInvalid(invalid, "observed status must exactly match profile")
 
-    def test_repository_custody_is_an_explicit_non_live_journey_stage(self) -> None:
+    def test_repository_custody_keeps_its_explicit_qualified_journey_stage(self) -> None:
         capabilities = self.contract["console_operational_capabilities"]["capabilities"]
         custody = next(
             capability
@@ -106,7 +106,7 @@ class ConsoleOperationalCapabilitiesTests(unittest.TestCase):
         self.assertEqual(custody["journey_stage"], "repository-custody")
         self.assertEqual(
             custody["observed_status"]["profile"],
-            "implemented-uncommissioned",
+            "operational-live",
         )
 
     def test_live_mode_cannot_fall_back_to_fixtures(self) -> None:

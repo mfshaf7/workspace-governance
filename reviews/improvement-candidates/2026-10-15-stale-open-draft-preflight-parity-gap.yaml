@@ -1,0 +1,47 @@
+schema_version: 1
+id: 2026-10-15-stale-open-draft-preflight-parity-gap
+title: Enforce stale-open completion evidence in local draft validation
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: The managed mutation-draft validator accepted malformed stale-open completion
+  evidence that the live OOS broker rejected, contrary to the documented preflight
+  contract.
+regression_of: null
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - missing-deterministic-test-seam
+  - workflow-doctrine-gap
+  finding: draft validate returned valid=true for Feature 1283 even though every Test
+    Result Evidence and Validation Evidence line lacked its required typed prefix;
+    two submit attempts reached the broker before validation_failure exposed the mismatch.
+  source_refs:
+  - openproject://work_packages/1283
+  - runtime://oos/delivery-art/mutation-draft/stale-open-close-validation-parity
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Add shared completion-evidence
+    validation to the stale-open-close managed draft path with regression tests, then land
+    through owner-maintenance review before child 1288 starts.'

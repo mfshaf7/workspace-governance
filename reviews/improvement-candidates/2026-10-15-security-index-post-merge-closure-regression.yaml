@@ -1,0 +1,69 @@
+schema_version: 1
+id: 2026-10-15-security-index-post-merge-closure-regression
+title: Security-evidenced owner merges again escaped the post-merge index dependency
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: >-
+  Operator Orchestration Service PR 341 and Workspace Governance Control Fabric
+  PR 110 merged security-evidenced change records, but normal completion did not
+  force the dependent Security Architecture index refresh. The stale generated
+  index was discovered only when the later Console runtime-security preflight
+  ran the authoritative Security evidence validator.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-29-security-change-record-index-sequencing-regression.yaml
+status: triaged
+source_type: machine-audit
+scope:
+  related_repos:
+    - operator-orchestration-service
+    - security-architecture
+    - workspace-governance
+    - workspace-governance-control-fabric
+  related_products:
+    - governance-operations-console
+  related_components:
+    - operator-orchestration-service
+    - workspace-governance-control-fabric
+  change_classes:
+    - platform-contract
+    - source-behavior
+signals:
+  - id: machine-visible-workflow-drift
+    title: Post-merge Security index dependency was not enforced before completion
+    trigger: closed-lesson-regression
+    failure_classes:
+      - learning-closure-regression
+      - rollout-evidence-gap
+      - workflow-doctrine-gap
+    finding: >-
+      security-architecture/scripts/validate_security_evidence.py reported the
+      generated security-change-record index out of date after the OOS and WGCF
+      owner changes were already merged and reported complete. The existing
+      record-level preflight cannot run successfully until the owner record is
+      present on remote main, but no post-merge lifecycle action forced the
+      required dependent Security landing before completion was reported.
+    source_refs:
+      - github://operator-orchestration-service/pulls/341
+      - github://workspace-governance-control-fabric/pulls/110
+      - security-architecture/registers/security-change-record-index.yaml
+      - openproject://work_packages/1299
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Current drift will be repaired by regenerating and landing the Security
+    index in the same bounded Security maintenance sequence that refreshes the
+    Console runtime decision. Durable prevention still requires operator
+    approval before implementation.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Extend the source
+    lifecycle''s post-merge projection so a merged security-evidenced owner record returns
+    one exact security-index-refresh-required action and cannot reach final close or workspace-clean
+    completion until the generated Security index is current on security-architecture main.
+    Preserve the executable order: owner record merges first, generated Security dependency
+    lands second.'

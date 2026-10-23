@@ -71,7 +71,7 @@ console_operational_capabilities:
   operating_truth:
     observed_at: '2026-10-15T13:38:38Z'
     observation_scope: local-dev-integration
-    source_ref: wgcf://artifacts/delivery-art/sha256/8ad9c43664bb580a2eef7a23a8ddfa77c95bdea7bfc00efcb424d5008b71062a
+    source_ref: openproject://work_packages/1298
     reuse_requires_profile: operational-live
     fresh_evidence_required: true
     stale_or_missing_behavior: not-reusable
@@ -191,12 +191,12 @@ console_operational_capabilities:
         - contracts/prototype-maturity.yaml
         - contracts/prototype-closure.yaml
       observed_status:
-        profile: fixture-demonstration
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: unavailable
+        runtime_state: available
         evidence_state: validated
-        demonstration_source: fixture
+        demonstration_source: live-authority
     - id: delivery-planning-operation
       journey_order: 3
       journey_stage: delivery-planning
@@ -227,12 +227,12 @@ console_operational_capabilities:
       authority_refs:
         - contracts/delivery-art-operator-path.yaml
       observed_status:
-        profile: fixture-demonstration
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: unavailable
+        runtime_state: available
         evidence_state: validated
-        demonstration_source: fixture
+        demonstration_source: live-authority
     - id: architecture-operation
       journey_order: 4
       journey_stage: architecture-decision
@@ -302,12 +302,12 @@ console_operational_capabilities:
       authority_refs:
         - contracts/repository-custody.yaml
       observed_status:
-        profile: implemented-uncommissioned
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: unavailable
+        runtime_state: available
         evidence_state: validated
-        demonstration_source: none
+        demonstration_source: live-authority
     - id: source-realization-operation
       journey_order: 6
       journey_stage: source-realization
@@ -478,12 +478,12 @@ console_operational_capabilities:
         - contracts/workspace-active-inventory.yaml
         - contracts/workspace-inventory-lifecycle.yaml
       observed_status:
-        profile: implemented-uncommissioned
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: unavailable
+        runtime_state: available
         evidence_state: validated
-        demonstration_source: none
+        demonstration_source: live-authority
     - id: runtime-release-operation
       journey_order: 11
       journey_stage: runtime-and-release
@@ -523,10 +523,10 @@ console_operational_capabilities:
         - contracts/developer-integration-profiles.yaml
         - contracts/durable-orchestration.yaml
       observed_status:
-        profile: degraded-live
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: degraded
+        runtime_state: available
         evidence_state: validated
         demonstration_source: live-authority
     - id: product-portfolio-operation
@@ -558,12 +558,12 @@ console_operational_capabilities:
         - contracts/products.yaml
         - contracts/product-publication.yaml
       observed_status:
-        profile: fixture-demonstration
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: unavailable
+        runtime_state: available
         evidence_state: validated
-        demonstration_source: fixture
+        demonstration_source: live-authority
     - id: journey-recovery-audit-operation
       journey_order: 13
       journey_stage: interruption-recovery-and-audit
@@ -602,9 +602,9 @@ console_operational_capabilities:
         - contracts/delivery-art-operator-path.yaml
         - contracts/work-home-routing.yaml
       observed_status:
-        profile: degraded-live
+        profile: operational-live
         contract_state: defined
         implementation_state: implemented
-        runtime_state: degraded
+        runtime_state: available
         evidence_state: validated
         demonstration_source: live-authority

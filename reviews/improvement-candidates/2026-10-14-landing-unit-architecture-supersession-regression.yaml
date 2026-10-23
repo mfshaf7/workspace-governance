@@ -1,0 +1,170 @@
+schema_version: 1
+id: 2026-10-14-landing-unit-architecture-supersession-regression
+title: Scope architecture supersession to the active Landing Unit
+recorded_on: '2026-10-14'
+owner_repo: workspace-governance
+summary: >-
+  Delivery 1275 corrected unrelated Security-gate topology while source work
+  item 1285 already had an open pull request and durable merge-ready evidence.
+  OOS compared the entire Architecture Packet decision fingerprint, so the
+  unrelated correction stranded an otherwise unchanged Landing Unit and
+  offered only recovery paths that truthfully did not match its state.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: active-landing-unit-invalidated-by-unrelated-architecture-change
+  title: Whole-packet supersession stranded an unchanged active Landing Unit
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    Work item 1285 retained the same Landing Unit identity, covered item,
+    owner, merge-ready conformance cases, execution prerequisites, and Security
+    merge gate after Delivery 1275's Architecture Packet was corrected. OOS
+    nevertheless projected architecture-superseded because another Landing
+    Unit's Security topology changed and the whole-packet decision fingerprint
+    changed. Pristine reconstruction was correctly unavailable because source
+    and evidence existed, while both documented recovery modes correctly
+    rejected the open evidence-bearing PR. The durable fix is to compare a
+    canonical active-Landing-Unit architecture projection and fail closed only
+    when that projection changes; exact packet references remain recorded for
+    audit and any local-unit change still requires reconstruction or recovery.
+  source_refs:
+  - openproject://work_packages/1275
+  - openproject://work_packages/1285
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/331
+  - wgcf://artifacts/delivery-art/sha256/4ac60808d499a4f90392a2bc9d69d09e834f6e4e01ed9be9bd4664efcbf4e826
+  - wgcf://artifacts/delivery-art/sha256/ea428f9ad9a14368aa9f789be278d3aac44def2cb2a4bc31caec7768f03335bb
+  - workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
+- id: superseded-architecture-revalidated-as-current-dependency
+  title: A current validator rejected immutable superseded architecture history
+  trigger: repeated-operator-friction
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    After the active-Landing-Unit comparison was commissioned, current
+    architecture lookup still failed because OOS recursively applied today's
+    architecture semantic validator to the corrected packet's immutable
+    superseded predecessor. That predecessor was invalid under the newly landed
+    cross-topology cycle rule, which is exactly why it was superseded. Current
+    architecture and Review Packet reads must verify historical dependency
+    structure, content digest, custody, reference bindings, and original
+    evidence semantics without retroactively requiring old immutable packets to
+    satisfy every later architecture rule. New work-start transitions must
+    separately require the exact current Architecture Packet reference so the
+    compatibility rule cannot admit superseded design for new work.
+  source_refs:
+  - openproject://work_packages/1285
+  - operator-orchestration-service/src/delivery-art/service.js
+  - operator-orchestration-service/src/delivery-art/contracts.js
+  - workspace-governance/reviews/improvement-candidates/2026-09-30-delivery-art-historical-artifact-compatibility-gap.yaml
+  - wgcf://artifacts/delivery-art/sha256/4ac60808d499a4f90392a2bc9d69d09e834f6e4e01ed9be9bd4664efcbf4e826
+  - wgcf://artifacts/delivery-art/sha256/ea428f9ad9a14368aa9f789be278d3aac44def2cb2a4bc31caec7768f03335bb
+  - https://github.com/mfshaf7/workspace-governance-control-fabric/pull/110
+  - https://github.com/mfshaf7/security-architecture/pull/259
+- id: compatible-session-left-on-superseded-artifacts
+  title: Compatible architecture detection did not refresh active session evidence
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    The first active-Landing-Unit fix correctly stopped classifying item 1285 as
+    architecture-superseded, but returned no replacement binding to the active
+    session. Its lifecycle plan therefore continued reading the immutable
+    predecessor Architecture Packet and old work-start artifact, and the live
+    validator still projected architecture-invalid. Compatible detection must
+    lead to one bounded, crash-resumable normal-continuation refresh that
+    serially binds the exact current packet and a new durable work-start,
+    invalidates only stale Review Packet/readiness projections, preserves
+    source work, and continues to require reconstruction or recovery when the
+    local Landing Unit changes.
+  source_refs:
+  - openproject://work_packages/1285
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/test/delivery-art-work-session.test.js
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/331
+  - wgcf://artifacts/delivery-art/sha256/4ac60808d499a4f90392a2bc9d69d09e834f6e4e01ed9be9bd4664efcbf4e826
+  - wgcf://artifacts/delivery-art/sha256/ea428f9ad9a14368aa9f789be278d3aac44def2cb2a4bc31caec7768f03335bb
+- id: compatible-consumer-invalidated-by-authority-attempt-identity
+  title: Recovery-only authority identity change invalidated an unchanged gated consumer
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    Architecture Packet digest
+    02840790fc36f5f8311d2d66cadec0d5e9ad98184aff3d88c6ff106a2d0afef4
+    changed only the reopened Security authority Landing Unit identity for work
+    item 1303, while preserving the Platform gate, accepted artifact, authority
+    work item, owner, and exact-tree evidence requirement. The active-Landing-
+    Unit compatibility fingerprint nevertheless treated the producer Landing
+    Unit attempt identifier in handoff 1303-1291 as a semantic change to active
+    Platform session 1291. OOS then reported architecture-recovery-required for
+    an open pull request with a local Review Packet, a state that neither
+    pristine reconstruction nor the bounded recovery modes can safely archive.
+    Recovery-attempt identity must not invalidate a consumer whose authority,
+    evidence contract, gate, and source boundary are unchanged.
+  source_refs:
+  - openproject://work_packages/1291
+  - openproject://work_packages/1303
+  - architecture-packet:delivery-1275-v1
+  - https://github.com/mfshaf7/platform-engineering/pull/310
+  - operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: validator
+    path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_readiness.py
+    owner_repo: workspace-governance-control-fabric
+    note: >-
+      WGCF PR 110 keeps full current semantic validation on the active
+      Architecture Packet and Review Packet lineage while resolving an
+      Architecture Packet superseded ancestor through exact canonical
+      integrity and custody evidence without reactivating its obsolete
+      semantics.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-15-delivery-art-superseded-architecture-lineage.md
+    owner_repo: security-architecture
+    note: >-
+      Security PR 259 approves the exact WGCF repair head for source merge and
+      bounded dev-integration replay without granting stage or production
+      authority.
+  note: >-
+    The historical-supersession signal is durably repaired by WGCF PR 110,
+    approved by Security PR 259, and deployed as image sha-b52c8c4. Work item
+    1291 remains open while OOS repairs the active-Landing-Unit compatibility
+    projection for a recovery-only producer identity change and then repeats
+    the exact Security, merge, and operating-readiness sequence. The broader
+    candidate remains accepted until item 1299 closes the combined lesson.
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: The 2026-10-16
+    follow-up was missed while Epic1275 qualification remained blocked. Re-review on 2026-10-18
+    through the same1299 closure path; preserve the original missed date and do not imply
+    closure. Land active-Landing-Unit semantic supersession in the existing 1285 OOS Landing
+    Unit, prove unchanged and changed projection cases, then close this regression through
+    the planned 1299 Workspace Governance cleanup landing.'

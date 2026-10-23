@@ -31,6 +31,716 @@ scope:
   - source-behavior
   - runtime-composition
 signals:
+- id: derived-source-owner-profile-inherits-unrequired-architecture-binding
+  title: Keep derived product validation separate from architecture-case claims
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - workflow-doctrine-gap
+  finding: During final1299 validation the whole-workspace audit rejected the accepted Little
+    List owner profile solely because every command has conformance_binding none. Both app
+    source units explicitly require no Architecture Packet and their finalized packets contain
+    actual nine-unit and seven-browser proof. The inventory-derived global check inherited
+    the core control-plane matching-fidelity requirement without any architecture cases to
+    bind. Correct only that derived-owner false requirement in the existing Workspace Governance
+    validator; preserve profile presence, owner identity, tests/validations and explicit core
+    activation requirements. OOS exact-base preflight must continue rejecting insufficient
+    kind/fidelity coverage whenever an accepted architecture actually declares cases. This
+    is absorbed into existing1299 validation and guidance, not another application change,
+    source evidence claim or ART child.
+  source_refs:
+  - openproject://work_packages/1299
+  - openproject://work_packages/1310
+  - workspace-governance/scripts/validate_cross_repo_truth.py
+  - console-todo-1275/contracts/delivery-art-work-session/evidence-profile.json
+- id: optional-closeout-follow-up-omitted-from-local-preflight
+  title: Validate every entered optional completion field before closeout
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    On October24 the actual Little List closeout correctly rejected a plain
+    paragraph in Residual Follow-Up after recording its guided Demo, Closing
+    and Inspect & Adapt steps. Codex's local completion preflight had omitted
+    that optional field and therefore did not prove the entire entered
+    payload. The original rejected command and changed canonical revision
+    were retained. A fresh Console read showed native readiness ready; the
+    corrected flat bullet passed the existing native validator including
+    the optional field, and a separately reviewed command completed Epic1306.
+    This is an input/preflight miss, not evidence of an application defect or
+    grounds for another ART child or closeout state machine. Final guidance
+    must use the existing completion format for every entered optional field
+    and inspect modal navigation or a discard confirmation before another
+    action is queued.
+  source_refs:
+  - openproject://work_packages/1299
+  - oos://delivery-closeout-outcomes/delivery-closeout-command:console-92c301d8-da30-48b8-b372-63b81b5f4434
+  - oos://delivery-closeout-receipts/delivery-closeout-command:console-303d4797-96c3-40cd-a72b-da1cf2bf247f
+  - operator-orchestration-service/src/completion-evidence.js
+- id: closeout-readiness-conflated-with-source-freshness
+  title: Preserve fresh canonical closeout blockers as readable domain state
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Read-only preflight of the remaining real closeout proved that OOS returns
+    HTTP200 with a freshly observed canonical Delivery1306 closeout snapshot,
+    exact ART binding and actionable missing-demo/open-objective/PM2 reasons.
+    Its domain projection_state is not_ready. The generic source-envelope
+    mapper translates that domain value to freshness unknown, so the Console
+    correctly rejects the envelope as source_projection_stale and hides the
+    actual closeout guidance. This is not an expired receipt or an unavailable
+    ART owner. Keep source freshness distinct from domain closeout readiness
+    at this exact successful native read boundary. Preserve all canonical
+    readiness, incomplete-work, expiry, wrong-owner and unavailable-source
+    denials; do not globally classify unknown/stale projection data as current.
+    Repair this with the earned PI-review adapter in one ordered maintenance
+    sequence and one composed Security/runtime qualification, before resuming
+    normal business closeout. The existing final source packet was also read
+    back: its nine unit checks and seven real-browser operating checks passed;
+    no replacement app source or fabricated acceptance is required.
+    The same end-to-end closeout inspection also proved a causal prerequisite
+    error in the existing wizard and OOS adapter: they require demo, Closing
+    and Inspect & Adapt to be stored before invoking the guided command that
+    records those exact reviewed fields in that order. A clean execution tree
+    must be able to prepare that existing guided command when only those three
+    inline evidence steps remain. Preserve every incomplete-child, blocked,
+    weak/missing evidence, ownership, unknown-reason, stale-revision and
+    reconciliation denial. The native backend must still record the demo,
+    validate entry to Closing, record Inspect & Adapt, and validate final done
+    in its original order. Reuse the existing prepare action and operation;
+    do not invent extra review workflows or mark missing evidence complete.
+  source_refs:
+  - openproject://work_packages/1306
+  - openproject://work_packages/1311
+  - repo://operator-orchestration-service/src/app.js
+  - repo://operator-orchestration-service/src/console-source-authority.js
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/delivery-closeout-oos-client.ts
+- id: earned-pi-review-not-reachable-from-console
+  title: Expose the existing earned PI review before native objective closeout
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    The real Little List source units, graduation, product admission, active
+    Inventory and internal Publication are complete. Feature1307 now closes
+    through the actual Console stale-open helper with valid evidence. The
+    remaining PI Objective1311 intentionally has no fabricated planning-time
+    Actual Business Value or review outcome. Its native completion context
+    correctly denies completion because required execution fields are
+    incomplete. The existing OOS initiative pi-review operation records those
+    earned fields, but the accepted Console has no corresponding operator
+    control. Narrative tree editing and non-source completion cannot replace
+    that operation. Reuse the existing PI-review authority through a bounded
+    Console adapter with exact objective/initiative scope, native writable
+    values, explicit accountable review, original-target readback and no
+    automatic completion. Inspect the remaining initiative-closeout sequence
+    and evidence projection in the same pass before assigning a source delta.
+    No new ART child, architecture packet, planning-time earned outcome,
+    backend operation, source credential scope or completion bypass is needed.
+  source_refs:
+  - openproject://work_packages/1311
+  - openproject://work_packages/1306
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+  - repo://operator-orchestration-service/docs/api/openapi.json
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-item-completion-modal.tsx
+- id: non-source-completion-not-reachable-from-console
+  title: Finish genuine non-source outcomes through the Console without creating source work
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual source graduation, Proposed-to-Admitted reclassification and initial active product
+    Inventory registration for Little List all succeeded through native Console workflows, with terminal
+    receipts and fresh-browser recovery. Item1309 is explicitly a non-source domain outcome; its
+    required evidence now exists. The actual direct Governed Work Session only offers two source
+    Landing Unit models and source authorization. Initiative closeout is a different Epic-level route.
+    No explicit non-source evidence completion is exposed for this exact item, although the existing
+    OOS POST /v1/delivery-work-items/{work_item_id}/complete contract supports evidence-backed work-item
+    completion. Do not create a dummy source session, borrow a source packet, force status through
+    narrative editing or use a hidden canonical writer. Extend the existing Console adapter using
+    the native completion boundary and preserve backend readiness, narrative, evidence and open-descendant
+    checks. Inspect the remaining real Publication entry and commissioning prerequisites in the same
+    bounded planning pass, before assigning another source delta. Actual Publication mode currently
+    returns console_product_publication_not_selected; that configuration prerequisite is not itself
+    evidence of a code defect. Pre-landing consumer inspection also proved that
+    native source-session merge changes provider main while the Publication
+    source projector still required manual host-main alignment; existing owner
+    bootstrap checkout is intentionally pre-Inventory only. Extend the existing
+    generated read-only Platform clone with exact public-provider main,
+    forward-history and regular-file checks, preserving the host checkout and
+    source identity. Include native Git positive and rewrite/unsafe/unavailable
+    denial proof in the same Platform maintenance and composed Security review.
+    No extra ART item, workflow, credential or background source execution is
+    justified. Source and engineering proof are not operating acceptance.
+    First live item1309 completion was correctly rejected by the native owner:
+    the operator entered plain Changed Surfaces paragraphs instead of the
+    existing explained flat bullets and left path-like receipt references
+    undecorated. This was an input-contract miss, not an OOS defect. Its native
+    readiness was ready and the owner validation failed before any canonical
+    change; audit correlation de03f7d0-23cb-49bb-a0bd-637f1ea0c9d7 proves that.
+    The new Console adapter also inherited the generic twelve-second timeout
+    instead of the existing seventy-five-second native ART operation budget,
+    hiding the slower native validation rejection. Corrected actual evidence
+    passes the native completion validator. Extend the existing Console field
+    guidance and basic format checks, and reuse the existing ART latency budget
+    so owner rejections remain actionable without CLI diagnostics. Preserve
+    explicit original-target read recovery; no OOS guard or source requirement
+    is weakened. Perform this bounded maintenance before continuing item1310.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1309
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-work-session-modal.tsx
+  - repo://governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-work-session-live-types.ts
+  - repo://operator-orchestration-service/docs/api/openapi.json
+  - repo://operator-orchestration-service/src/delivery-service.js
+- id: intake-reclassification-origin-and-denial-not-visible
+  title: Retain the entrant origin and show owner findings during reclassification
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual Proposed product request111757fc succeeded and Security baseline322
+    merged. The next Admitted update d3ba01f5 was correctly denied by WGCF:
+    source-identity-changed, Updates must preserve the original entrant source.
+    Adding Security context to the new entrant form recomputed its source
+    digest from c2ff3985 to0d45baad. This was the wrong way to reclassify the
+    original candidate, not a reason to weaken source identity. Console
+    strips native readiness findings and shows only rejected, so diagnosing
+    that cause required a read-only native journal inspection. Its journal
+    can reopen completed requests but cannot reuse their exact candidate in
+    a fresh explicit classification review. Extend those existing controls:
+    show validated owner findings and reuse a selected completed direct
+    candidate with original provenance and metadata, after a fresh pending
+    check and normal preparation/review. No new OOS API, immutable-request
+    edit, source substitution, metadata editor or ART repair child is needed.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1309
+  - repo://governance-operations-console/src/workspace-registry/presentation/workspace-registry-intake-dialog.tsx
+  - repo://governance-operations-console/src/console-integration/workspace-intake/workspace-intake-live-contract.ts
+  - repo://workspace-governance/scripts/workspace_intake.py
+- id: product-admitted-before-security-review-coverage
+  title: Product classification skipped the existing Proposed review prerequisite
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console direct product classification acknowledged request534744ba
+    and correctly recovered it in a cold browser with duplicate submission
+    disabled. OOS prepared WG PR296, but local and provider review-coverage
+    checks reject admitted product console-todo-1275 without its Security
+    product review entry. This is an operator planning/contract-reading miss,
+    not a runtime defect or reason to weaken the validator. The existing
+    coverage contract permits Proposed classification while that review is
+    prepared, then requires it for Admitted and active Inventory. Cancel the
+    unmerged admitted attempt, retain its history, classify Proposed through
+    Console, complete the actual Security product review, and update the same
+    canonical record to Admitted before Inventory promotion. Do not recreate
+    the repository or add a repair story. The initial Continue also exceeded
+    the Console response deadline, while the same retained OOS request
+    completed review preparation in about14 seconds; Console journal reopen
+    recovered that actual state with no replay. That recovery is operating
+    evidence, not demonstrated source corruption or a timeout bypass.
+  source_refs:
+  - openproject://work_packages/1309
+  - https://github.com/mfshaf7/workspace-governance/pull/296
+  - repo://workspace-governance/scripts/validate_review_coverage.py
+  - repo://security-architecture/registers/review-inventory.yaml
+- id: publication-phase-is-not-parent-art-closeout-status
+  title: Keep operational owner evidence distinct from parent ART administration
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Inspection initially equated completed functional delivery with requiring
+    the parent ART Epic to be closed before Publication. The actual
+    Publication contract assigns source-and-lifecycle evidence to the product
+    owner manifest and validates operational phase, durable custody and
+    not-applicable or released posture. It has no parent ART Epic status
+    binding. A delivered, accepted and owner-maintained application may still
+    have final operating qualification and publication administration open.
+    Do not invent a parent-closeout prerequisite or restructure ART to satisfy
+    it. The current primary Architecture Packet explicitly makes1298 a
+    non-source Console qualification item. Keep that mapping, existing1310 as
+    the app's final source unit, the actual app source/Review Packet and native
+    owner/graduation receipts. Before attesting operational phase, verify
+    actual functional delivery and durable owner acceptance; a declaration
+    cannot substitute for missing evidence. Defer source-session close if
+    needed until this child's real Publication outcome is available. No
+    reparenting, retirement, architecture revision, repair story or additional
+    app source PR is justified by the earlier narrow interpretation. Overall
+    Epic completion still requires all actual outcome and cleanup evidence.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - openproject://work_packages/1310
+  - repo://workspace-governance/contracts/project-lifecycle.yaml
+  - repo://workspace-governance/contracts/product-publication.yaml
+  - repo://workspace-governance/scripts/product_publication_contract.py
+- id: direct-product-intake-missing-console-entry
+  title: Direct product Intake exists but cannot be opened or recovered in Console
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    After native source graduation succeeded for proposal-1305, product
+    console-todo-1275 remains absent from active product inventory. The
+    accepted Delivery1306 plan requires product admission before final
+    Publication1310. Existing Intake contracts and OOS submission support
+    operator-authored direct product classification, but Console mounts the
+    shared Intake dialog only for repository custody and applied Delivery
+    closeout. That latter route is too late for this accepted sequence.
+    Existing request listing is also restricted to repository custody, so
+    merely mounting a product form would leave cold recovery incomplete.
+    Extend the current Registry/Intake entry and existing caller-bound OOS
+    journal for direct product/component targets. Preserve repository custody
+    attestation semantics and clearly distinguish operator-authored direct
+    metadata from source-owner attestation. Do not close/reopen Delivery,
+    repeat repository admission, create a repair story, or forecast product
+    registration or publication evidence.
+  source_refs:
+  - openproject://work_packages/1309
+  - openproject://work_packages/1310
+  - repo://governance-operations-console/src/workspace-registry/presentation/workspace-registry-workspace.tsx
+  - repo://operator-orchestration-service/src/workspace-intake/service.js
+  - repo://workspace-governance/docs/workspace-intake.md
+- id: graduated-source-hides-pending-closure-reconciliation
+  title: Terminal Studio source hides an unfinished owner Closure request
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    The real graduation request53886673 passed owner readiness and generated
+    Studio PR41. Exact-head validation passed93 tests and provider CI; its
+    delegated approved merge e04dfd2 changes only the registry and history0002.
+    A fresh actual Console reads graduated source and dedicated-owner custody,
+    but the retained OOS request is still review-required with no terminal
+    receipt. Dashboard removes Closure controls when Studio is graduated;
+    History can inspect this pending request but cannot resume it. Source
+    completion and OOS reconciliation are different facts. Preserve the
+    existing request, source event, accepted app packet and Delivery1306;
+    extend the existing resume route rather than recreate source or invent
+    another ART child. Inspect the complete remaining Platform disposition
+    path before choosing the source maintenance boundary. Its documented
+    recorder is a CLI path; normal composed owner readback and current runtime
+    absence or revocation must be proven rather than assumed. The earlier
+    public GitHub quota denial was observed403/remaining0 and cleared at its
+    declared reset; it was not a local crash or justification to widen trust.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1309
+  - https://github.com/mfshaf7/workspace-prototype-studio/pull/41
+  - repo://governance-operations-console/src/domain-workspaces/prototype/presentation/dashboards/prototype-dashboard/prototype-dashboard-lifecycle-panel.tsx
+  - repo://governance-operations-console/src/domain-workspaces/prototype/presentation/dialogs/history/prototype-history-modal.tsx
+  - repo://operator-orchestration-service/src/prototype-closure/platform-evidence-reader.js
+  - repo://platform-engineering/docs/components/operator-orchestration-service/prototype-closure-identity.md
+- id: narrative-rewrite-loses-native-delivery-binding
+  title: Delivery narrative replacement loses the accepted Prototype tracking marker
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual source graduation for proposal-1305 retained request53886673 but
+    WGCF returned503. Native diagnostics prove the accepted Delivery lookup
+    times out at five seconds; a diagnostic-only longer read returns404.
+    The current Delivery1306 description has no application marker, while
+    trusted native activity7866 still contains the integrity-valid original
+    receipt. Target1306, owner console-todo-1275 and version ancestry remain
+    correct. Earlier complete narrative rewrites did not retain the hidden
+    marker; generic description writers allow that loss. Graduation also
+    omits the already recorded Studio delivery_target_ref from its owner
+    lookup and scans the ART instead. Inspect both the normal writer and
+    existing bound-target lookup consumers before selecting a repair. The
+    same full-description replacement also drops current ART artifact-pointer
+    entries from Operator work notes; a native initiative/context rewrite
+    regression now proves those exact references and original projection
+    times must survive, while pointer changes stay with their controlled
+    projection workflow. Preserve
+    completed app source1308 and its finalized packet, the real Delivery and
+    the retained graduation request. No replacement app, receipt, source
+    acceptance, architecture version or ART repair child is justified.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - openproject://work_packages/1309
+  - repo://operator-orchestration-service/src/openproject-client.js
+  - repo://operator-orchestration-service/src/delivery-ingress/prototype-adapter.js
+  - repo://operator-orchestration-service/src/prototype-closure/owner-evidence.js
+  - repo://workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/prototype_closure_evidence.py
+- id: promoted-main-only-checkout-hides-published-source
+  title: Source publication succeeds but main-only clone hides its upstream
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    Actual Console source publication created Gary app PR5 at5cff0d3 and
+    provider CI passed, but native lifecycle still reports unpushed and offers
+    publication again. The trusted bootstrap creates a single-branch main
+    checkout. Publisher verifies the actual provider head and writes the exact
+    refs/remotes/origin/source-branch bookmark, but Git @{u} cannot resolve a
+    branch excluded from the clone's fetch mapping. A real isolated Git proof
+    reproduces exit128 despite the exact published bookmark. Read the recorded
+    origin/source-branch ref used by the publisher; retain clean/branch/base,
+    exact-head and provider PR checks. Preserve the real source session and PR,
+    without republishing or weakening acceptance. Cleanup audit reads actual
+    provider branches; do not invent a new tracking ledger or Git config policy.
+  source_refs:
+  - https://github.com/mfshaf7-workspace/console-todo-1275/pull/5
+  - repo://operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+  - repo://operator-orchestration-service/src/delivery-art/agent-source-identity.js
+  - openproject://work_packages/1298
+  - openproject://work_packages/1308
+- id: human-publication-fallback-after-gary-admission-denial
+  title: Human publication violated the required Gary source identity boundary
+  trigger: delegated-execution-control-breach
+  failure_classes:
+  - delegated-scope-control-miss
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    October23 app baseline profile repair could not obtain the legacy-core
+    maintenance credential for the newly promoted organization owner. Native
+    source-intent preflight was itself blocked by the bad baseline. Codex
+    requested a human-publication exception, then treated a generic continue
+    message as approval and published app PR3 using the human account while
+    retaining Gary Git author/committer. GitHub correctly rejected the merge
+    because the human was the last pusher. The operator reaffirmed that Gary
+    must always be the publisher and PR author. Closed unmerged PR3, deleted
+    its remote branch and preserved exact Gary commit locally. No rules were
+    changed; the temporary rule-bypass question is withdrawn and must not be
+    acted on. Existing source identity instructions already prohibit this
+    fallback. Preserve the separation and repair the actual admitted Gary path
+    rather than altering provider review rules or borrowing credentials.
+  source_refs:
+  - https://github.com/mfshaf7-workspace/console-todo-1275/pull/3
+  - repo://platform-engineering/scripts/agent_source_identity.py
+  - repo://operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - openproject://work_packages/1298
+- id: app-source-preflight-optional-architecture-and-narrative-shape
+  title: First actual app-source preflight exposes optional-packet and narrative gaps
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  finding: >-
+    October23 actual Console first-session preparation for1308 succeeds but
+    blocks on a missing Architecture Packet and invalid Execution Context.
+    All six actual descriptions contain correct native structured context
+    bullets plus a Codex-authored prose line inside that constrained section.
+    Correct only that line through the existing reviewed Console description
+    update; preserve narrative, metadata, notes and earned-outcome boundaries.
+    The initial response also labeled missing optional architecture as required.
+    Codex repeated that requirement too early before checking the ordinary
+    source-work contract. The documented non-architecture path is supported by
+    the controller, but the composed runtime adapter calls the strict current
+    packet resolver, whose exact absent-reference404 becomes a blocker.
+    Preserve real missing-record, permission, invalid/revoked/stale-packet and
+    dependency failures; only explicit no-projected-packet absence may become
+    null. Do not manufacture cross-repository architecture for a simple
+    source-only app or mutate business state through CLI. Check its accepted
+    base evidence-profile baseline against this ordinary path before source
+    resources. Existing app plan remains two source units with native
+    graduation/product outcome between them, not another planning mechanism.
+    Follow-up producer inspection found scaffold.ownerProfile and its generated
+    owner-control test unconditionally require a matching-fidelity command,
+    forcing architecture-case coupling even when an ordinary profile's real
+    baseline tests must run unconditionally. Repairing only the app copy would
+    leave this cause in future scaffolds. Permit schema-valid actual tests and
+    validations without requiring an architecture-bound command; retain exact
+    case/fidelity coverage at normal source preflight and preserve existing
+    independent profiles. Cover the ordinary producer-to-native-consumer path
+    before the same coherent Security acceptance, not through another ART item.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - openproject://work_packages/1308
+  - repo://operator-orchestration-service/src/delivery-art/work-session-runtime.js
+  - repo://operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - repo://operator-orchestration-service/src/delivery-narrative.js
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+- id: unstarted-native-work-session-read-not-exercised
+  title: Source work status cannot display the valid decision-required state
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - rollout-evidence-gap
+  finding: >-
+    October23 next-step read-only preflight for actual Story1308 returned a
+    missing source_revision error. Direct authenticated native JSON read is200
+    with valid decision-required state and null session_id/session_revision;
+    the same native canonical-envelope request is502. The handler reads a
+    nonexistent result.updated_at except when source authorization exists.
+    Native controller results expose session_revision, which is correctly null
+    before a session exists. Existing HTTP conformance covered a source-bound
+    session, leaving first entry untested. Reuse full-observation digest/time
+    for the read envelope without inventing a stored session revision, starting
+    work through CLI, or weakening canonical admission. Prove absent, ordinary
+    and source-authorized sessions through the actual producer and consumer;
+    preserve the domain command revision and normal Console start decision.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1308
+  - repo://operator-orchestration-service/src/app.js
+  - repo://operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - repo://operator-orchestration-service/test/delivery-art-work-session-service.test.js
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/delivery-work-session-oos-client.ts
+- id: refinement-retained-run-poll-binding-not-cross-owner-tested
+  title: Successful canonical Refinement run cannot pass the Console poll binding
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  finding: >-
+    October23 actual Console Refinement apply returned202 for retained run
+    refinement-run:53a17bb35fa3e8712254b2469dc94f62d. All three operations and
+    accepted-value readback completed at04:55:26UTC with real receipt activity7896,
+    zero created refs and all six existing records updated. First Console run
+    poll nevertheless returned502 source_authority_conflict. The actual OOS
+    handler supplies package-scoped delivery-package://<package-id> coordinates
+    for its strict run schema, which has no source object. The Console readRun
+    instead expects an OpenProject source-item coordinate copied from packet
+    projection. Its fixture stamps that assumed binding and never crosses the
+    actual OOS envelope producer. The existing native full projection correctly
+    recovers the completed run/receipt and proves this is not an apply failure.
+    Cold actual Console recovery displays the genuine receipt but calls it an
+    immutable local prototype archive, drops its durable URI/digests and native
+    event times, and mixes Receipt Recorded with Needs Review/apply instructions.
+    This repeats the already captured Work Design source-versus-preview miss.
+    Before publication, the candidate browser also exposed repeated packet GET
+    failure on the accepted runtime. Two direct native reads prove identical
+    envelope version-5/event_sequence5 but different projected_at values; that
+    timestamp was the only changed top-level payload field. The immutable-state
+    comparison correctly rejects different snapshots at one sequence. This
+    aggregate was stamped with its Work Design input version, not the whole
+    observation. Work Design's aggregate reader has the same explicit input
+    version mapping and per-read projected_at producer. Reuse existing OOS
+    full-snapshot digest and projection-time ordering for these composite
+    responses, preserving their domain input revision for mutation concurrency.
+    Do not weaken consumer integrity, ignore arbitrary fields or invent a
+    counter, ledger, protocol version or architecture mechanism. Cross-owner
+    tests must cover repeated observations as well as run transitions before
+    the same coherent source repair is published.
+    Align the existing run consumer and recovered receipt presentation with
+    native package/run binding and actual canonical evidence. Retain exact
+    authority, owner, package, run, poll path and completed receipt checks;
+    preserve command/operator acceptance without inventing a same-operator
+    restriction on authorized read-only history. Prove actual
+    producer-to-consumer conformance, running/terminal/cold
+    recovery and foreign identity denial, not another self-consistent stub.
+    No relaxed source check, new mechanism, repair ART child or repeated apply
+    is authorized. Existing1298 owns the maintenance; preserve completed run.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306/activities/7896
+  - repo://operator-orchestration-service/src/app.js
+  - repo://operator-orchestration-service/contracts/refinement/run-projection.schema.json
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/refinement-catalog-oos-client.ts
+  - repo://governance-operations-console/tests/operation-runtime/refinement-catalog-live-adapter.test.mjs
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/refinement/view-model/refinement-history-model.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/refinement/view-model/refinement-hub-model.ts
+- id: successful-owner-result-hidden-by-empty-diagnostic-projection
+  title: A diagnostic query hid a completed canonical write and prolonged monitoring
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  finding: >-
+    October23 actual Console PI creation succeeded at04:40:23UTC with applied
+    receipt633a65f3-ab4f-48e9-a0df-5f25dddd281e and new PI Objective1311.
+    The operator's read-only log query inspected result.effect rather than
+    result.event.effect. Applying optional keys to that absent value emitted
+    an empty stream, suppressing the entire selected response. The last saved
+    UI inspection was also the applying snapshot, not a new live observation.
+    Codex incorrectly reported an ongoing owner wait and spent about two minutes
+    checking healthy components while the successful response was already in
+    the private log. No duplicate write or source repair occurred. Read the
+    actual envelope before interpreting a diagnostic's empty output as absence;
+    preserve absent fields explicitly rather than dropping the containing
+    event, and request a fresh UI inspection instead of treating an old
+    applying snapshot as current. This is an operator-evidence interpretation
+    miss, not a backend defect, timing failure or justification for a new
+    mechanism. Preserve the actual applied receipt and continue the same tree.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1311
+  - oos://delivery-change-receipts/delivery-change-command:console-add_work_item-633a65f3-ab4f-48e9-a0df-5f25dddd281e
+- id: planning-create-inputs-and-native-pi-commit-writer-not-exercised
+  title: Read-only routing proof omitted mandatory creation inputs and canonical planning writes
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  - unsafe-assumption
+  finding: >-
+    October23 accepted Console107/Security312 activation and native post-reader
+    passed. Actual UI PI Objective creation command1a328373-df79-4de4-be40-
+    811e63538850 was rejected before mutation: Target PI is mandatory before a
+    PI Objective exists. Before and after source digests are identical. The
+    inline tree draft/plan carries only type, title and description, despite
+    native typed creation accepting Target PI and Iteration. The existing
+    planning contract also requires Iteration when any non-Epic item is PI
+    committed; PI Objective, Task and Milestone always require Target PI.
+    Earlier read-only browser proof stopped at one local review operation and
+    did not exercise those required payload fields against the native writer.
+    Full next-stage source inspection also proves that current Refinement
+    packet fields route work-item Target PI through bulk_update, whose activity
+    calls generic updateDeliveryWorkItem. Native Feature PI commitment explicitly
+    denies that route and requires coordinated initiative plan/apply. Existing
+    plan_apply activity is present but not emitted by the current packet and
+    does not carry accepted planning metadata into its plan. Native plan identity
+    is intentionally parent/type/subject matching; do not invent unsupported id
+    fields or call that documented reconciliation itself a defect. This is an
+    incomplete existing producer/consumer implementation, not a new planning
+    requirement or justification to weaken canonical guards. Inspect complete
+    create, PI commitment, metadata/readiness, replay and canonical readback
+    together before the next bounded maintenance source batch. The workflow
+    already passes accepted request data to readback, but the activity drops it
+    and records observed references without checking accepted field values.
+    Refinement explicitly does not authorize execution; do not add an automatic
+    Ready transition as an invented requirement. Reuse existing
+    typed input fields and coordinated plan/apply authority; no new engine,
+    architecture version, repair ART child or CLI business-write workaround.
+    Existing1298 owns the repair. Preserve the rejected receipt and original
+    successful Work Design activity7885; no PI Objective was created.
+  source_refs:
+  - openproject://work_packages/1298
+  - oos://delivery-change-receipts/delivery-change-command:console-add_work_item-1a328373-df79-4de4-be40-811e63538850
+  - repo://operator-orchestration-service/src/delivery-taxonomy.js
+  - repo://operator-orchestration-service/src/delivery-planning-workflow.json
+  - repo://operator-orchestration-service/src/refinement/packet-model.js
+  - repo://operator-orchestration-service/src/refinement/activities.js
+  - repo://operator-orchestration-service/src/openproject-client.js
+  - repo://governance-operations-console/src/domain-workspaces/delivery/work-model/execution/execution-tree-change-plan.ts
+- id: canonical-delivery-planning-navigation-and-handoff-not-recovered
+  title: Live planning components exist but canonical operator entry and recovery are incomplete
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  - unsafe-assumption
+  finding: >-
+    October23 full accepted activation and native reader passed. Fresh actual
+    Console navigation places Delivery1306 in Refinement after its successful
+    Work Design apply. Work Design register correctly no longer lists the
+    active phase, but Refinement's View Work Design Handoff reports Finalized
+    Brief Source Unavailable: it depends on an absent local source package,
+    rather than displaying the existing durable OOS application and explaining
+    separately that browser-local brief files are not canonical. The Home and
+    persistent workspace status also hardcode future/local OOS mutation text
+    despite canonical OOS source reads and the real applied write. Execution's
+    board lists only execution/audit packages; Open Work Item opens only a
+    source session, and canonical inventory deliberately has no synthetic
+    available_actions. Thus the existing legal tree editor/PI Objective menu
+    cannot be reached for the planning-stage initiative before PI commitment.
+    Earlier menu/parent-matrix tests did not prove this operator entry path.
+    Extend existing direct entry with read-only canonical tree inspection,
+    reuse the existing fresh OOS tree draft/review/apply route, and project
+    existing Work Design receipt history through its existing handoff dialog.
+    Keep local brief/snapshot absence explicit; never reconstruct fake evidence,
+    force Ready, replay creation, invent permission or add repair ART items.
+    Prove actual route entry, local draft, canonical apply/readback and cold
+    handoff recovery together. Existing1298 owns this maintenance correction.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306/activities/7885
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/execution-board-surface.tsx
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/shared/package-actions/package-handoff-evidence.tsx
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workspace/workspace-status-model.ts
+- id: live-work-design-receipt-labelled-as-preview
+  title: Canonical Work Design success retains disconnected-preview presentation
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - contract-drift
+  finding: >-
+    October23 the actual Console Work Design apply for Delivery1306 returned201,
+    complete canonical readback, created refs1307 through1310 and durable
+    activity7885. Current Move still calls that receipt mock, the progress rail
+    calls it preview, and the log description promises future live wiring.
+    Existing history also conflates local snapshot evidence with canonical
+    apply evidence. This is presentation drift, not failed creation or a new
+    delivery requirement. Thread the existing runtime mode and actual receipt
+    evidence through the existing views; retain explicit disconnected-preview
+    labels and distinguish browser-local snapshots from backend persistence.
+    Exercise both modes, completed projection recovery and absent/error
+    evidence. Do not replay the successful apply or create repair ART items.
+    Existing1298 owns the maintenance correction before app source work.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306/activities/7885
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/work-design/view-model/work-design-current-move.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/work-design/view-model/work-design-history-model.ts
+- id: planning-advice-client-deadline-shorter-than-admitted-provider
+  title: Actual governed advice succeeds after Console has already stopped waiting
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    October23 after accepted full activation, the original Delivery1306 Console
+    context assist reached CGG and the gateway; OOS advice_ready success at
+    23:55:38 follows its CGG packet at23:54:58. Console had already returned502
+    work_design_oos_unavailable after its fixed12second budget. The admitted
+    existing model profile permits60seconds and one retry. Work Design applies
+    the read deadline to all commands; Refinement advice uses the same generic
+    short Delivery request default. Earlier transport proof used immediate
+    fetch fixtures and missed the actual waiting boundary. Extend only the
+    existing planning command clients with a bounded command deadline covering
+    that existing upstream budget, retaining short reads, immutable acceptance,
+    exact response checks, model limits and all denials. No new model, retry
+    mechanism, receipt store or direct CLI advice substitute. Existing1298
+    owns this correction. Preserve the failed Console response and successful
+    original OOS audit evidence; do not call the timeout an upstream failure.
+    Full retry lookahead also proves that CGG binds requested_at into its
+    immutable projection digest, while Console derives identical advice call
+    ids from unchanged input and OOS issues a fresh requested_at on each call.
+    A deliberate second advice invocation would therefore collide with the
+    previous projection key. Give each explicit suggestion-only advice call
+    its own invocation identity, with no automatic retry; retain stable
+    immutable identities for accepted canonical apply. Do not weaken CGG
+    replay checks, edit stored receipts or duplicate source acceptance.
+  source_refs:
+  - openproject://work_packages/1298
+  - openproject://work_packages/1306
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/work-design-oos-client.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/refinement-catalog-oos-client.ts
+  - repo://platform-engineering/security/governed-ai-model-profiles.yaml
+- id: refinement-native-packet-review-gate-not-exercised
+  title: Parser and editor conformance missed the actual Apply readiness decision
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - rollout-evidence-gap
+  - unsafe-assumption
+  - contract-drift
+  finding: >-
+    October23 lookahead after planning source landings reproduced a remaining
+    native producer/consumer mismatch before any actual Work Design apply.
+    OOS metadata-review is an open gate without oos_route, while the existing
+    Console metadata draft review can resolve only a gate bound to the native
+    Delivery metadata route. Even metadataReady true leaves Apply disabled.
+    Native packet-to-Console parser/editor tests passed but omitted the actual
+    refinementCanApplyWithMetadataReview decision. That was insufficient
+    terminal-path coverage, not a new operator requirement. Extend the existing
+    OOS gate with its actual existing route; test unresolved draft denial and
+    reviewed draft acceptance through the actual Console function, preserving
+    blocked/stale and canonical writer guards. Do not pre-write metadata using
+    CLI, invent an editor/mechanism, or add an ART repair child. Existing1298
+    owns the correction; the original request and failed proof are preserved.
+  source_refs:
+  - openproject://work_packages/1298
+  - repo://operator-orchestration-service/src/refinement/packet-model.js
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/refinement/view-model/refinement-gate-model.ts
 - id: complete-runtime-omits-registered-work-design-context-boundary
   title: Complete Console runtime passes readiness without its Work Design caller binding
   trigger: machine-visible-workflow-drift
@@ -2164,67 +2874,59 @@ resolution:
     provisioning and its credential, readiness, state, and Console bindings.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-23'
-  note: >-
-    Current October23 local checkpoint: operator continuation approved the
-    bounded extension described below. Actual Console cancelled original d1dc;
-    PR291 is closed unmerged, with its exact source and history retained.
-    Repair is in progress in owner-isolated maintenance Landing Units; no
-    merged or operating acceptance is claimed. Native real-Git repair/replay
-    proves three review-surface writes and preserves application/independent
-    control bytes. Full native registration and all-owner proof must pass
-    before the first repair merge, followed by exact Security acceptance,
-    normal activation and actual Console operating proof. No new repair ART
-    children or generic migration framework. Retain prior checkpoints as history.
-    Previous October22 checkpoint: native PR291 was held unmerged. Its full local
-    CI and provider check fail the missing PR-control rule requirements; every
-    remaining workflow step separately passes, which is not full CI success.
-    The required owner review surfaces are genuinely absent. Existing bootstrap
-    refuses admitted entrants and produces no source plan for an existing
-    valid profile, while ordinary source requires active Inventory. Do not
-    bypass those boundaries, merge invalid registration or mutate old receipts.
-    Proposed disposition is extend the existing trusted bootstrap and derived
-    registration coverage, not a new subsystem: control-only repair before
-    Inventory, including already-admitted source-only owners, with preserved
-    independent content and existing explicit source/human gates. This changes
-    the current proposed-only eligibility boundary and needs an operator design
-    decision before implementation; the continuation above now records that
-    approval without backdating it. Retain earlier checkpoints as history.
-    October22 evening recovery confirms Intake288 merged and the entrant is
-    admitted/v2. Inventory289 remains open and unmerged with the fixed-owner
-    coverage-test failure recorded above; the actual app import and final
-    acceptance remain outstanding. Initial runtime restoration was blocked by
-    invalid operator Vault authentication, not memory pressure; operator login
-    restored access and normal activation141024Z now proves live/current
-    composition and original919 Console readback. That original was then
-    cancelled normally and PR289 closed unmerged before baseline repair.
-    The native289 Inventory independently reproduces old-test failure and
-    repaired-test success with unchanged production qualification. Capture is
-    retained in maintenance-1275-inventory-coverage-parity; implementation and
-    publication follows exact-head full CI and reviewed maintenance sequencing.
-    The earlier checkpoint below is retained as history, not
-    current admission or Security acceptance truth.
-    Re-reviewed October22 after interruption crossed the operator's local
-    midnight. Registry repairs OOS356 and Console101 are merged, but their exact
-    Security acceptance and recommissioning remain pending. Intake request
-    console-6d904255-6953-48c2-adc3-3ebf70fd4fe2 was cancelled through the Console
-    after its immutable source review failed on canonical overdue learning
-    records; WG286 is closed unmerged. The entrant is still proposed/v1, not
-    admitted or active. The durable-owner app import and final end-to-end
-    acceptance remain outstanding. The next accountable review is October23;
-    retain earlier missed checkpoints below and do not treat these repairs or
-    this review as closure, a waiver, or approval for another mechanism.
-    October20 review checkpoint is overdue at the October21 local-date
-    continuation. Reviewed still open; October21 is the next review checkpoint,
-    not a completion promise or permission for another closing control.
-    Original October18 review checkpoint was missed; explicitly re-reviewed
-    October19 after the staged admission-transition miss. That review scheduled
-    October20, which was also missed. Local learning capture was preserved but
-    not landed: both actual WG286 CI39597206006 and its full local rehearsal
-    correctly fail on four canonical October20 deadlines. Land the existing
-    reviewed open-record reconciliation before revalidating the Intake source;
-    do not waive the date gate, mark the lessons closed or invent new controls.
-    Correct the existing consumers and prove native promotion-to-issuance
-    before revised source publication. No new closing control is approved.
-    Close through the existing Epic 1275 final-guidance Landing Unit after the
-    repaired end-to-end browser journey proves every dependency live.
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Current October23
+    local checkpoint: operator continuation approved the bounded extension described below.
+    Actual Console cancelled original d1dc; PR291 is closed unmerged, with its exact source
+    and history retained. Repair is in progress in owner-isolated maintenance Landing Units;
+    no merged or operating acceptance is claimed. Native real-Git repair/replay proves three
+    review-surface writes and preserves application/independent control bytes. Full native
+    registration and all-owner proof must pass before the first repair merge, followed by
+    exact Security acceptance, normal activation and actual Console operating proof. No new
+    repair ART children or generic migration framework. Retain prior checkpoints as history.
+    Previous October22 checkpoint: native PR291 was held unmerged. Its full local CI and provider
+    check fail the missing PR-control rule requirements; every remaining workflow step separately
+    passes, which is not full CI success. The required owner review surfaces are genuinely
+    absent. Existing bootstrap refuses admitted entrants and produces no source plan for an
+    existing valid profile, while ordinary source requires active Inventory. Do not bypass
+    those boundaries, merge invalid registration or mutate old receipts. Proposed disposition
+    is extend the existing trusted bootstrap and derived registration coverage, not a new
+    subsystem: control-only repair before Inventory, including already-admitted source-only
+    owners, with preserved independent content and existing explicit source/human gates. This
+    changes the current proposed-only eligibility boundary and needs an operator design decision
+    before implementation; the continuation above now records that approval without backdating
+    it. Retain earlier checkpoints as history. October22 evening recovery confirms Intake288
+    merged and the entrant is admitted/v2. Inventory289 remains open and unmerged with the
+    fixed-owner coverage-test failure recorded above; the actual app import and final acceptance
+    remain outstanding. Initial runtime restoration was blocked by invalid operator Vault
+    authentication, not memory pressure; operator login restored access and normal activation141024Z
+    now proves live/current composition and original919 Console readback. That original was
+    then cancelled normally and PR289 closed unmerged before baseline repair. The native289
+    Inventory independently reproduces old-test failure and repaired-test success with unchanged
+    production qualification. Capture is retained in maintenance-1275-inventory-coverage-parity;
+    implementation and publication follows exact-head full CI and reviewed maintenance sequencing.
+    The earlier checkpoint below is retained as history, not current admission or Security
+    acceptance truth. Re-reviewed October22 after interruption crossed the operator''s local
+    midnight. Registry repairs OOS356 and Console101 are merged, but their exact Security
+    acceptance and recommissioning remain pending. Intake request console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
+    was cancelled through the Console after its immutable source review failed on canonical
+    overdue learning records; WG286 is closed unmerged. The entrant is still proposed/v1,
+    not admitted or active. The durable-owner app import and final end-to-end acceptance remain
+    outstanding. The next accountable review is October23; retain earlier missed checkpoints
+    below and do not treat these repairs or this review as closure, a waiver, or approval
+    for another mechanism. October20 review checkpoint is overdue at the October21 local-date
+    continuation. Reviewed still open; October21 is the next review checkpoint, not a completion
+    promise or permission for another closing control. Original October18 review checkpoint
+    was missed; explicitly re-reviewed October19 after the staged admission-transition miss.
+    That review scheduled October20, which was also missed. Local learning capture was preserved
+    but not landed: both actual WG286 CI39597206006 and its full local rehearsal correctly
+    fail on four canonical October20 deadlines. Land the existing reviewed open-record reconciliation
+    before revalidating the Intake source; do not waive the date gate, mark the lessons closed
+    or invent new controls. Correct the existing consumers and prove native promotion-to-issuance
+    before revised source publication. No new closing control is approved. Close through the
+    existing Epic 1275 final-guidance Landing Unit after the repaired end-to-end browser journey
+    proves every dependency live.'

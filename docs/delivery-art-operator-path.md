@@ -1,9 +1,10 @@
 # Delivery ART Operator Path
 
-The target Console-complete evolution of this path is defined in
-[`delivery-art-console-complete-lifecycle.md`](delivery-art-console-complete-lifecycle.md).
-This document remains the current primary operator procedure while that
-initiative is implemented and qualified.
+The connected normal Console procedure is
+[`console-operational-capabilities.md`](console-operational-capabilities.md).
+This document governs its Delivery authority and evidence boundaries. The
+[Console-complete lifecycle design](delivery-art-console-complete-lifecycle.md)
+retains the architecture lineage and recovery model.
 
 ## Purpose
 
@@ -28,7 +29,14 @@ Machine-readable companion contract:
 
 ## Canonical Entrypoint
 
-Normal ART work should start from the broker CLI:
+Normal ART work starts in Console → Delivery → Execution. Use Open Work Item
+for an exact target, Prepare Session for its owner-bound Landing Unit decision,
+and the current source-authorization and work-session controls. Genuine
+non-source outcomes use the separate Non-source completion path. The
+[Console procedure](https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/delivery-execution-work-sessions.md)
+describes the exact current controls.
+
+For engineering diagnostics or recovery, the existing broker CLI remains:
 
 ```bash
 cd /home/mfshaf7/projects/operator-orchestration-service

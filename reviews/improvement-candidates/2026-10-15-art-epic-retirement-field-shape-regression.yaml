@@ -1,0 +1,75 @@
+schema_version: 1
+id: 2026-10-15-art-epic-retirement-field-shape-regression
+title: Retire Epic shells without requiring an inapplicable Iteration field
+recorded_on: '2026-10-15'
+owner_repo: operator-orchestration-service
+summary: >-
+  The broker-owned retirement route requires every work-package form to expose
+  the Iteration field used by executable non-Epic scope. OpenProject Epic forms
+  do not expose that field, so otherwise valid retirement of parked,
+  superseded initiative shells fails after all descendants are terminal.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-04-25-art-parking-probe-nullable-field-contract-drift.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - openproject
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: epic-retirement-requires-inapplicable-iteration
+  title: The parking route rejects Epic retirement when Iteration is absent by design
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - missing-deterministic-test-seam
+  finding: >-
+    Retirement of parked Epic 896 failed on 2026-10-12 with
+    missing_iteration_field and remained unreconciled. The exact failure
+    repeated for Epic 698 during work item 1297 after all of its remaining
+    descendants had been completed or explicitly retired. The client correctly
+    normalizes Iteration for executable non-Epic work but treats the field as
+    mandatory even when the target type is Epic and the OpenProject form omits
+    it by design.
+  source_refs:
+  - openproject://work_packages/896
+  - openproject://work_packages/698
+  - openproject://work_packages/1297
+  - operator-orchestration-service/src/openproject-client.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/openproject-client.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 341 permits only Epic retirement forms to omit Iteration while
+      retaining the existing fail-closed check for executable non-Epic work.
+  - type: test
+    path: operator-orchestration-service/test/openproject-client.test.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      Reproduces the live Epic form shape, proves no Iteration value is
+      fabricated or written, and retains strict non-Epic coverage.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-15-epic-retirement-field-shape.md
+    owner_repo: operator-orchestration-service
+    note: >-
+      Records exact form-contract, validation, rollout, rollback, and live
+      replay evidence for merged OOS revision
+      c87d1fa7a242c495fae7c942b1437af78acfc094.
+  note: >-
+    Closed after PR 341 passed 1,330 tests with no failures, merged, entered the
+    active refinement-catalog composition, and the managed broker draft retired
+    Epic 698 without an Iteration write. The post-replay execution summary
+    reports zero open descendants and preserves all completed evidence.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
