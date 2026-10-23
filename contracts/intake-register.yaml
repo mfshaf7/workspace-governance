@@ -2,31 +2,31 @@ schema_version: 2
 repos: {}
 products:
   console-todo-1275:
-    status: proposed
+    status: admitted
     decision_source: operator
     owner_route: workspace-governance
     record:
       id: product:console-todo-1275
-      version: 1
+      version: 2
       source:
         class: direct
         digest: sha256:c2ff39854f94471efa5fa0e439795f85c40276870b77ef7f03440d29543dc9aa
         ref: console://workspace-intake/direct/product/console-todo-1275
       decision:
-        id: workspace-intake-decision:console-111757fc-129b-4097-8e93-a40d75c291bc
-        ref: workspace-intake-decision:workspace-intake-decision:console-111757fc-129b-4097-8e93-a40d75c291bc
-        digest: sha256:aac325629c661bbe92806b3f2e4a2a1a922aa930b5f42c20a159778e0317b55c
+        id: workspace-intake-decision:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c
+        ref: workspace-intake-decision:workspace-intake-decision:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c
+        digest: sha256:13819f97e937cfb937e69c01e1aeb903402f037b28d220f26a1fd1dc0ebe7f48
         source: operator
         operator_ref: governance-operations-console
-        decided_at: '2026-10-23T13:59:30.953Z'
+        decided_at: '2026-10-23T15:11:29.160Z'
       last_mutation:
-        id: workspace-intake-mutation:workspace-intake-request:console-111757fc-129b-4097-8e93-a40d75c291bc:v1:apply
-        idempotency_key: workspace-intake-request:console-111757fc-129b-4097-8e93-a40d75c291bc:v1
-        request_ref: workspace-intake-request:workspace-intake-request:console-111757fc-129b-4097-8e93-a40d75c291bc
-        request_digest: sha256:ed448a5f5b1f92aac610c541c5eace5a390bc284f99eb1595e9a45464e89004d
-        decision_ref: workspace-intake-decision:workspace-intake-decision:console-111757fc-129b-4097-8e93-a40d75c291bc
-        decision_digest: sha256:aac325629c661bbe92806b3f2e4a2a1a922aa930b5f42c20a159778e0317b55c
-        applied_at: '2026-10-23T14:00:26.181Z'
+        id: workspace-intake-mutation:workspace-intake-request:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c:v1:apply
+        idempotency_key: workspace-intake-request:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c:v1
+        request_ref: workspace-intake-request:workspace-intake-request:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c
+        request_digest: sha256:798d90f14e7f8596fa3bd55ace8c7ed171e6b1d2357293dd3f69540693458a1d
+        decision_ref: workspace-intake-decision:workspace-intake-decision:console-5a7dfdbe-f8a6-44d7-a0b3-4f9cc19f1b5c
+        decision_digest: sha256:13819f97e937cfb937e69c01e1aeb903402f037b28d220f26a1fd1dc0ebe7f48
+        applied_at: '2026-10-23T15:11:48.603Z'
     validation_behavior:
       catalog_refs: []
       notes: The durable console-todo-1275 owner maintains source and owner-local
