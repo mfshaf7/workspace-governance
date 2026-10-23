@@ -68,6 +68,25 @@ admission checks are engineering conformance; the real Console owner operations
 and receipts above are operating proof. Historical acceptance does not replace
 fresh owner readiness before a future mutation.
 
+## Runtime Recovery During Final Guidance
+
+A credential rollout interrupted the final-guidance source operation. The old
+OOS PID-only transaction lease mistook a replacement container's PID1 for the
+dead holder. OOS PR372 merged the descriptor-held kernel lock repair at
+`b3120858c3dfea51748b87495dec244740f440c9`; Security PR327 accepted that exact
+composition at `c0113bb8df27785ba205cddd335c63a65f835074`. The normal Platform
+activation receipt `20261023T220958Z-activate.json` reports the composition
+current. The actual container source matches the reviewed helper, and the
+unflagged native consumer accepted the full nested composition.
+
+Real shared-state API-image tests proved exclusion between two PID1 containers
+and successful acquisition by a replacement PID1 after SIGKILL. Migration
+quiesced old writers and archived only the proven abandoned records. Existing
+credential and record refresh was restored. The original Console1299 session
+recovered its owner evidence and merge-ready custody without republishing the
+source or recreating the product. These are bounded recovery and continuation
+proofs; the primary initiative's final acceptance remains separate.
+
 ## Final Source And Follow-Up Boundary
 
 The remaining primary procedure, rollback and cleanup instructions are in
@@ -78,12 +97,14 @@ ordinary product has no architecture cases. Core activation requirements and
 native exact-base case coverage remain enforced. No app source was changed to
 manufacture an architecture evidence claim.
 
-On October24 the operator explicitly requested improvement-candidate work after
-Epic completion. The eleven still-open pending lessons retain their actual
-owners and missed checkpoint history, with the next review on October25. They
-are not marked closed by this report. Existing closed lessons retain their
-landed evidence. Older unique candidate PRs173 and191 are preserved for that
-review; no unproven source or historical finding is deleted.
+On October24 the operator explicitly requested that every pending improvement
+candidate be resolved and closed after the Epic work, including the unique
+records in older PRs173 and191. Preserving records or advancing review dates
+does not satisfy that request. The eleven pre-existing open lessons retain
+their actual owners and missed checkpoint history while awaiting that closure
+work. The newly exposed PID-reuse lesson has its landed repair and actual
+activation/continuation proof. No unproven source or historical finding is
+deleted, and this report does not falsely close the remaining lessons.
 
 Final system completion still requires this source unit's finalized Review
 Packet, exact source admission where required, parent and primary PI/Epic

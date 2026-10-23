@@ -109,6 +109,15 @@ its own access, validation and runtime decisions.
 | Completion | Use Non-source completion for actual evidence-only outcomes. For a PI Objective, explicitly record earned actual value and native outcome, then separately confirm completion. Source work uses its existing finalized Review Packet and Close Landing Unit. |
 | Parents | Reconcile a completed parent after terminal child coverage. Epics use Inspect Closeout: review completion, Demo, Inspect & Adapt and exact impact, then apply the native guided operation. An admitted product uses existing-product change rather than duplicate Intake. |
 
+The source author runs the fetched-base CI-equivalent checks and prepares the
+complete validation evidence before the first Review Packet is sealed. Include
+the actual command with its arguments, fetched base ref and commit, exact head,
+result and retained proof. The owner-acquired profile evidence remains separate;
+it does not replace additional engineering validation required by the changed
+surface. Review that complete evidence before invoking Draft Review Packet.
+An already sealed packet is immutable; source authors must follow the existing
+artifact recovery procedure instead of overwriting its recorded content.
+
 Detailed owner procedures remain linked from this one connected route:
 
 - [Repository custody](https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/repository-custody-live-integration.md),
@@ -164,6 +173,12 @@ explained flat bullets; test/validation fields use their native prefixes.
 Optional Residual Follow-Up also requires flat bullets. Include every entered
 optional field in an engineering preflight. Inspect the current modal and any
 discard confirmation before issuing the next action.
+
+When maintenance repairs the blocked runtime, prove the admitted fix is
+actually running and the owner is ready before resuming the original command.
+A merged source repair is not an active runtime repair. Keep migration pauses
+within the actual writer-quiescence window and restore the existing credential
+and record refresh afterward; do not relax freshness to accommodate the pause.
 
 Normal source closeout retires only its owned resources and revokes its exact
 scope. Revert a merged owner Landing Unit through its reviewed source path;

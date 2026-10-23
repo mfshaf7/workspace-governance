@@ -1,0 +1,95 @@
+schema_version: 1
+id: 2026-10-24-private-transaction-pid-reuse-recovery-gap
+title: Release private transaction locks on actual process death
+recorded_on: '2026-10-24'
+owner_repo: operator-orchestration-service
+summary: An interrupted source publication left a PID-only lease; the replacement
+  container reused PID 1 and denied normal evidence continuation.
+regression_of: null
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  - security-architecture
+  related_products: []
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - live-drift-repair
+signals:
+- id: live-art-mutation-proof-gap
+  title: A live ART mutation or closeout bug was discovered, but normal delivery continued
+    before the exact blocker, smallest faithful regression, and one live repair proof
+    were locked.
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The source-intent lock predates the replacement API pod by 98 seconds and
+    names PID 1. The new container also runs Node as PID 1, so process.kill(pid,0)
+    mistakes the new process for the dead holder. Project Evidence twice returned
+    state_busy despite the original PR being published and approved. The first containment
+    safely archived that exact orphan after all shared-state writers terminated. Codex
+    then resumed primary evidence before activating the merged durable repair. Pausing
+    the refresh timer through the longer review window also exceeded its five-minute
+    record freshness bound; restoring it performed a legitimate pending credential
+    rollout during another old-code source effect, reproducing the same PID-reuse
+    orphan. This was an avoidable sequencing mistake. Activate the repaired source
+    before continuing primary effects, and bound quiescence to the actual migration
+    window rather than weakening freshness or suppressing normal credential consumption.
+  source_refs:
+  - openproject://work_packages/1299
+  - runtime://devint-accepted-idea-delivery-mfshaf7/platform-operation/source-intent-lock
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/372
+  - https://github.com/mfshaf7/security-architecture/pull/327
+  - oos://delivery-art/work-session-command-receipts/work-session-command%3Aconsole-continue-ce6fe5de-60a7-4ba3-a404-32af2cafa77a
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/src/persistence/private-file-transactions.js
+    owner_repo: operator-orchestration-service
+    note: OOS372 replaces PID inference with descriptor-held kernel ownership through
+      the full asynchronous operation.
+  - type: test
+    path: operator-orchestration-service/test/private-file-transactions.test.js
+    owner_repo: operator-orchestration-service
+    note: Real process contention and graceful/SIGKILL recovery; same-process exclusion,
+      exception release, legacy ownership refusal and tooling denial.
+  - type: doc
+    path: operator-orchestration-service/docs/operations/private-transaction-recovery.md
+    owner_repo: operator-orchestration-service
+    note: Existing owner procedure requires quiesced legacy migration and rollback,
+      evidence preservation and original-operation recovery.
+  - type: change-record
+    path: operator-orchestration-service/docs/records/change-records/2026-10-24-private-transaction-process-recovery.md
+    owner_repo: operator-orchestration-service
+    note: Actual source repair and review boundary; indexed by the merged Security
+      dependency.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.md
+    owner_repo: security-architecture
+    note: Security327 accepts canonical OOSb3120858c3dfea51748b87495dec244740f440c9
+      with unchanged authority scope.
+  - type: doc
+    path: workspace-governance/docs/console-operational-capabilities.md
+    owner_repo: workspace-governance
+    note: 'Clarifies existing ordering: activate the actual repair before continuation
+      and author complete CI validation before first packet custody, without a new
+      gate or workflow.'
+  note: Closed by merged OOS372 b3120858c3dfea51748b87495dec244740f440c9 and Security327
+    c0113bb8df27785ba205cddd335c63a65f835074, passing native CI and real PID1 container
+    replacement proof, normal activation receipt 20261023T220958Z-activate.json, actual
+    running helper equality and unflagged full nested reader acceptance. The original
+    Console1299 session then recovered owner evidence and merge-ready custody through
+    command console-continue-ce6fe5de-60a7-4ba3-a404-32af2cafa77a. Both exact source
+    grants and all maintenance branches/worktrees were retired; both owner strict
+    audits pass. The final guidance also clarifies the existing CI-before-first-custody
+    order after a late authoring correction. No new ART child, architecture version,
+    permission or timer was introduced.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
