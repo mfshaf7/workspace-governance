@@ -1,0 +1,76 @@
+schema_version: 1
+id: 2026-10-25-agent-workspace-mode-completeness
+title: Bind Agent modes to current context and preserve native-dialog access
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: Complete the accepted Focus/page and Workspace/whole-Console semantics through existing owner
+  projections, OOS/CGG transport and native modal patterns. Repair the concrete producer and presentation
+  boundaries together without a new service, ART forest or architecture version.
+scope:
+  related_repos:
+  - governance-operations-console
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-25-agent-workspace-mode-completeness.yaml
+- workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+- https://github.com/mfshaf7/governance-operations-console/pull/121
+- security-architecture/docs/reviews/components/2026-10-24-configurable-ai-routing.md
+lessons:
+- id: complete-context-and-native-surface-boundaries
+  title: Prove context selection, scope and native presentation as one operator path
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: Existing native workspace dialogs blocked the floating Agent outside their top layer. Registry
+    fell through to Governed Releases; Focus received workspace scope although the server required
+    page scope. The synthetic workspace factory did not provide current whole-Console information.
+    Home disabling Workspace followed its old narrower contract and was not itself a defect. The operator
+    accepted Focus for the selected visible page/record and Workspace for the whole Console. Interaction
+    proof also exposed a prompt racing the asynchronous old-session close.
+  impact: Console PR121 merged reviewed Gary head e6b7366a66858bda993dd8f443e60a641f0c43b5 as equal-tree
+    b98956a0ab10c11c933c1b9ec7d3ad781967509d. All713 semantic tests, guards, types, production build,
+    repository validation, dependency audit and CI40140638181 passed. Eight explicit synthetic browser
+    cases passed. Independent current-owner reads qualified all8 sources and the produced candidate
+    passed the real request parser. These close the source-learning control; exact-source Security
+    acceptance, final full activation, real browser model/receipt proof and source cleanup remain
+    separately required before overall maintenance completion.
+  status: closed
+  expected_control_types:
+  - workflow
+  - test
+  - runbook
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/console-shell/context/agent-workspace-context.ts
+    owner_repo: governance-operations-console
+    note: Bounded validated owner reads, correct page identity, explicit partial/expired/preview coverage
+      and whole-Console Workspace context; no canonical authority.
+  - type: workflow
+    path: governance-operations-console/src/agent-console/state/use-agent-console-controller.ts
+    owner_repo: governance-operations-console
+    note: Stable request state, guarded asynchronous mode/session handover and queued open-and-run;
+      native presentation uses the existing modal-aware pattern.
+  - type: test
+    path: governance-operations-console/tests/console-architecture/agent-workspace-context.test.mjs
+    owner_repo: governance-operations-console
+    note: Actual producer-to-request matrix for every workspace identity, independent scope denial,
+      current DTO shapes, missing/stale/preview isolation and unchanged budget.
+  - type: test
+    path: governance-operations-console/tests/browser/agent-workspace.spec.mjs
+    owner_repo: governance-operations-console
+    note: Explicit synthetic browser proof of native-dialog interaction, keyboard/focus, mode handover,
+      retained prompts/transcripts and a pending invocation across navigation; not operating evidence.
+  - type: runbook
+    path: governance-operations-console/docs/product/agent-console-live-integration.md
+    owner_repo: governance-operations-console
+    note: Primary operator surface describes both modes, source coverage/expiry, native and nested
+      dialog behavior, exact admission boundaries and separate real commissioning proof.
+  follow_up:
+    owner_repo: null
+    due_on: null
+    note: null
