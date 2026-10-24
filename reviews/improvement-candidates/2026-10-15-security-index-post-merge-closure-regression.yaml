@@ -10,7 +10,7 @@ summary: >-
   index was discovered only when the later Console runtime-security preflight
   ran the authoritative Security evidence validator.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-04-29-security-change-record-index-sequencing-regression.yaml
-status: triaged
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -48,22 +48,44 @@ signals:
       - openproject://work_packages/1299
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: >-
-    Current drift will be repaired by regenerating and landing the Security
-    index in the same bounded Security maintenance sequence that refreshes the
-    Console runtime decision. Durable prevention still requires operator
-    approval before implementation.
+  control_refs:
+  - owner_repo: workspace-governance
+    path: workspace-governance/scripts/validate_structured_record.py
+    type: validator
+    note: A security-evidenced owner record also requires the current generated Security index.
+  - owner_repo: security-architecture
+    path: security-architecture/scripts/render_security_change_record_index.py
+    type: validator
+    note: Checks the generated index against actual current owner records.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The final primary procedure
+    now explicitly requires structured-record and generated Security-index validation after a security-evidenced
+    owner merge and before adjacent closeout, with the dependent index landing after the owner record exists on
+    remote main. Actual OOS repair records and Security index refresh were sequenced and verified in the accepted
+    composition. Reuse these existing fail-closed checks and the landed procedure. The historical proposal for an
+    extra source-lifecycle action is superseded, not falsely claimed as implemented.
+
+
+    Historical resolution context (not current status): Current drift will be repaired by regenerating and landing
+    the Security index in the same bounded Security maintenance sequence that refreshes the Console runtime decision.
+    Durable prevention still requires operator approval before implementation.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Extend the source lifecycle''s
+    post-merge projection so a merged security-evidenced owner record returns one exact security-index-refresh-required
+    action and cannot reach final close or workspace-clean completion until the generated Security index is current
+    on security-architecture main. Preserve the executable order: owner record merges first, generated Security
+    dependency lands second.", "owner_repo": "workspace-governance"}'
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Extend the source
-    lifecycle''s post-merge projection so a merged security-evidenced owner record returns
-    one exact security-index-refresh-required action and cannot reach final close or workspace-clean
-    completion until the generated Security index is current on security-architecture main.
-    Preserve the executable order: owner record merges first, generated Security dependency
-    lands second.'
+  owner_repo: null
+  due_on: null
+  note: null

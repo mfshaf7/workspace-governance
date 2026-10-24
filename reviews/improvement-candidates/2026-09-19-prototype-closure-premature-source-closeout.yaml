@@ -1,0 +1,96 @@
+schema_version: 1
+id: 2026-09-19-prototype-closure-premature-source-closeout
+title: Prototype Closure source closed without concrete owner readers
+recorded_on: '2026-09-19'
+owner_repo: operator-orchestration-service
+summary: ART 1150 was closed after an injected-reader composition landed, while normal
+  OOS lacked concrete owner adapters and WGCF/Platform authority remained unavailable.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance-control-fabric
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: operator-half-baked-callout
+  title: The operator explicitly said the work is half-baked, incomplete, sloppy,
+    or should have been caught already.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Merged PR 214 and a passing synthetic test were treated as satisfying owner-backed
+    composition despite runtime injection being absent and baseline receipt ownership
+    conflicting with implemented maturity source.
+  source_refs:
+  - openproject://work_packages/1150
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/214
+- id: reopened-work-item-terminal-alias-preflight-miss
+  title: Reopened work reused a terminal Landing Unit identity.
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    After #1101 was reopened for the ingress-first Closure correction,
+    work start returned its earlier closed session. Replaying work close
+    removed the stale alias, but reusing the old Landing Unit ID created a
+    session shadowed by its terminal cleanup receipt. A distinct correction
+    Landing Unit ID under the same ART child restored the normal path. #1149
+    reproduced the same identity collision. The preflight must check both
+    terminal cleanup and Landing Unit identity before work start.
+  source_refs:
+  - openproject://work_packages/1101
+  - openproject://work_packages/1149
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/prototype-closure/runtime.js
+    type: workflow
+    note: Wires the normal configured Closure runtime.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/prototype-closure/durable-owner-reader.js
+    type: workflow
+    note: Reads actual durable owner evidence instead of relying on injected readers.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/prototype-closure/baseline-owner-reader.js
+    type: workflow
+    note: Binds the actual producer-owned baseline evidence.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    type: runbook
+    note: Separates source, operating readiness, remaining-work classification and immutable Landing Unit scope.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. Reconciled the unique historical
+    PR191 record. Current normal Closure has concrete owner readers and the real Little List graduation completed
+    through its original request with native receipt and durable owner source. Source tests alone are not terminal
+    operating evidence. The secondary reopened-item finding was invalid reuse of a terminal Landing Unit identity:
+    retain its immutable cleanup receipt, inspect current remaining work and use a genuinely distinct Landing Unit
+    only when new source scope exists. Existing work-start scope identity and the landed remaining-work/cleanup
+    procedure preserve that boundary; no mechanism to reopen or overwrite terminal source custody is introduced.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-09-30", "note":
+    "Resolve exact owner authority and readback contracts and add a non-synthetic configured-path gate before closing
+    1150 again. Review the reopened-work-item preflight after the current correction is delivered; use a distinct
+    correction Landing Unit without creating another ART child.", "owner_repo": "operator-orchestration-service"}'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

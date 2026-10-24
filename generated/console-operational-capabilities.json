@@ -684,7 +684,7 @@
   "operating_truth": {
     "fresh_evidence_required": true,
     "observation_scope": "local-dev-integration",
-    "observed_at": "2026-10-15T13:38:38Z",
+    "observed_at": "2026-10-24T01:51:43.133012Z",
     "reuse_requires_profile": "operational-live",
     "source_ref": "openproject://work_packages/1298",
     "stale_or_missing_behavior": "not-reusable"

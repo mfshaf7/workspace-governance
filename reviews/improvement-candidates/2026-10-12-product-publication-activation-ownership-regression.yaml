@@ -13,7 +13,7 @@ summary: Epic 894 repeated the closed activation-ownership planning failure by
   archive and restore directly to a prior publication result without proving the
   required Workspace Inventory transition or a fresh schema-v2 owner manifest.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-08-delivery-plan-activation-ownership-regression.yaml
-status: accepted
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -145,57 +145,83 @@ resolution:
   - type: change-record
     path: operator-orchestration-service/docs/records/change-records/2026-10-12-product-publication-security-decision-binding.md
     owner_repo: operator-orchestration-service
-    note: Repairs exact Security decision verification before readiness access or journal mutation without activating the runtime.
+    note: Repairs exact Security decision verification before readiness access or journal mutation without activating
+      the runtime.
   - type: change-record
     path: operator-orchestration-service/docs/records/change-records/2026-10-12-product-publication-target-posture-binding.md
     owner_repo: operator-orchestration-service
-    note: Constrains the initial source-owned activation scope to internal publication before readiness access or journal mutation.
+    note: Constrains the initial source-owned activation scope to internal publication before readiness access or
+      journal mutation.
   - type: contract
     path: governance-operations-console/product-publication/manifest.json
     owner_repo: governance-operations-console
-    note: Supplies the exact product-owner source snapshot and current unlisted local-preview lifecycle evidence required by WGCF.
+    note: Supplies the exact product-owner source snapshot and current unlisted local-preview lifecycle evidence
+      required by WGCF.
   - type: change-record
     path: platform-engineering/docs/records/change-records/2026-10-13-product-lifecycle-maintenance-commissioning.md
     owner_repo: platform-engineering
-    note: Records the repaired verifier envelopes, public-boundary process-loss probe, rollout-before-tunnel ordering, exact commissioning sequence, and finalized operating evidence for work item 1273.
+    note: Records the repaired verifier envelopes, public-boundary process-loss probe, rollout-before-tunnel ordering,
+      exact commissioning sequence, and finalized operating evidence for work item 1273.
   - type: change-record
     path: operator-orchestration-service/docs/records/change-records/2026-10-13-operating-evidence-failure-precedence.md
     owner_repo: operator-orchestration-service
-    note: Makes recorded conformance failure take precedence over missing evidence and repairs the recovery route to the active retry-required lifecycle state.
-  note: >-
-    Epic 894 and Feature 924 are now complete. The existing Workspace Registry
-    lifecycle and Product Publication paths were repaired without adding another
-    ART child, backend, authority, or parallel workflow. Work item 1273 closed
-    with merged Platform PR 302, finalized operating-ready evidence, successful
-    operating and process-loss verification, and complete source-resource cleanup.
-    The candidate remains accepted because the durable planning control must still
-    prevent the combined owner-gate, verifier-fidelity, dependency-pin propagation,
-    rollout-ordering, and recovery-state gaps before a future implementation starts.
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22
-    after interruption crossed the operator''s local midnight. This accepted lesson remains
-    open: Feature924 containment is complete but the existing final-guidance planning control
-    is not landed. The next accountable review is October23; earlier missed checkpoints below
-    are retained. This is a review appointment, not completion evidence. October20 review
-    checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21
-    is the next review checkpoint, not a completion promise or permission for another closing
-    control. The 2026-10-16 follow-up was missed while Epic1275 qualification remained blocked.
-    The October18 checkpoint was also missed; this reviewed October21 continuation does not
-    close the lesson or erase either earlier missed date. Land the operator-approved extension
-    of the existing delivery-plan activation validation so a plan cannot pass when an owner-controlled
-    source gate, required owner evidence, prerequisite owner transition, independent acceptance
-    verifier, accepted target-scope binding, or complete operator-sequence conformance case
-    is absent from the ordered Landing Units. Close through a linked after-action only after
-    the Feature 924 repair and durable planning control both land.
+    note: Makes recorded conformance failure take precedence over missing evidence and repairs the recovery route
+      to the active retry-required lifecycle state.
+  - owner_repo: workspace-governance
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    type: contract
+    note: Current architecture topology and v6 runtime activation chains keep human authority, source ownership
+      and commissioning explicit.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The original Feature924 publication
+    repair and its owner-specific controls are landed. The current v6 contract explicitly orders human authority,
+    source-owner activation and commissioning, while the primary procedure reviews complete owner handoffs, target
+    scope, verifier fidelity, rollout, recovery and terminal proof before implementation. The real Little List journey
+    exercised the already existing internal Publication route and recovered its original receipt. Close against
+    these actual controls and accepted local scope; do not create another publication mechanism or universal project
+    requirement.
 
-    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson remains open.
-    The existing final-guidance owner still owes the control described above; current admission/authoring
-    tests do not close that work. Next accountable review is 2026-10-20, not a claimed completion
-    deadline. This records a missed follow-up and its current disposition; it does not erase
-    the prior due dates or mark unlanded controls as implemented.'
+
+    Historical resolution context (not current status): Epic 894 and Feature 924 are now complete. The existing
+    Workspace Registry lifecycle and Product Publication paths were repaired without adding another ART child, backend,
+    authority, or parallel workflow. Work item 1273 closed with merged Platform PR 302, finalized operating-ready
+    evidence, successful operating and process-loss verification, and complete source-resource cleanup. The candidate
+    remains accepted because the durable planning control must still prevent the combined owner-gate, verifier-fidelity,
+    dependency-pin propagation, rollout-ordering, and recovery-state gaps before a future implementation starts.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-23
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22 after
+    interruption crossed the operator''s local midnight. This accepted lesson remains open: Feature924 containment
+    is complete but the existing final-guidance planning control is not landed. The next accountable review is October23;
+    earlier missed checkpoints below are retained. This is a review appointment, not completion evidence. October20
+    review checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21 is the
+    next review checkpoint, not a completion promise or permission for another closing control. The 2026-10-16 follow-up
+    was missed while Epic1275 qualification remained blocked. The October18 checkpoint was also missed; this reviewed
+    October21 continuation does not close the lesson or erase either earlier missed date. Land the operator-approved
+    extension of the existing delivery-plan activation validation so a plan cannot pass when an owner-controlled
+    source gate, required owner evidence, prerequisite owner transition, independent acceptance verifier, accepted
+    target-scope binding, or complete operator-sequence conformance case is absent from the ordered Landing Units.
+    Close through a linked after-action only after the Feature 924 repair and durable planning control both land.
+Re-reviewed
+    on 2026-10-19 during Epic1275 source preparation: the lesson remains open. The existing final-guidance owner
+    still owes the control described above; current admission/authoring tests do not close that work. Next accountable
+    review is 2026-10-20, not a claimed completion deadline. This records a missed follow-up and its current disposition;
+    it does not erase the prior due dates or mark unlanded controls as implemented.", "owner_repo": "workspace-governance"}'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -12,7 +12,7 @@ summary: >-
   five status dimensions but did not record or validate an observed status for
   each capability before planning marked it reusable.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-13-preexisting-capability-ownership-regression.yaml
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -2859,74 +2859,176 @@ signals:
   - repo://workspace-governance/scripts/validate_pull_request_controls.py
   - repo://workspace-governance/scripts/workspace_repo_registration.py
   - repo://workspace-governance/docs/pull-request-review-and-automation.md
+- id: approved-source-expiry-hides-renewal-continuation
+  title: Approved source work cannot continue after its hourly credential expires
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: Actual1299 scope remains approved until 2026-10-24T00:25:48.824Z while its hourly credential expired
+    at 2026-10-23T22:45:59Z. At22:53:59Z native source status correctly requests credential rotation, but the Console
+    exposes only Waiting although the exact still-approved scope is selected. OOS already renews that immutable
+    approval before a real continue action. The UI drops agent-source-credential-required, hiding the request that
+    performs renewal. Reuse guarded continue only with the exact selected approved scope. Keep missing, expired,
+    revoked, suspended, invalid and unavailable authority denied. No new source permission or token handling is
+    needed.
+  source_refs:
+  - openproject://work_packages/1299
+  - governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-work-session-modal.tsx
+  - operator-orchestration-service/src/platform-operation/service.js
+- id: same-source-evidence-revision-reuses-immutable-packet-key
+  title: Normal evidence revision reuses an immutable source-only packet identity
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  - rollout-evidence-gap
+  finding: The normal source continuation automatically publishes, acquires owner evidence, drafts and seals merge-ready
+    custody before stopping at its next gate. The plan incorrectly assumed an operator pause before the first seal
+    and repeated source changes as an escape from immutable-key collisions. Current ADA source is already correctly
+    published and must not be changed again merely to attach CI proof. Existing lifecycle preMergeEvidenceTransition
+    explicitly requires a new immutable Review Packet when editable evidence changes; deliveryArtPreMergeReviewPacketId
+    hashes only source identity, so two actual owner-authored candidates with the same source and changed validation
+    evidence receive the same packet id but different content digests. Pure current-owner reproduction confirms
+    this contradiction, with no business writes. Earlier native409 collision is retained in the prior recovery proof.
+    Correct the existing evidence-revision identity semantics and prove the complete normal stale-evidence -> new
+    draft -> durable custody path against immutable-key enforcement, including unchanged-evidence reuse and historical
+    durable packet preservation. This is existing OOS lifecycle maintenance under the approved regression-repair
+    authority, not a new ART child, architecture version, permission, writer identity or registry override. Reuse
+    accepted source ADA and original session. Do not fabricate another source head or use finalization supersession
+    before merge.
+  source_refs:
+  - openproject://work_packages/1299
+  - operator-orchestration-service/src/delivery-art/lifecycle.js
+  - operator-orchestration-service/src/delivery-art/lifecycle-authoring.js
+  - operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+  - operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+- id: catalog-observation-time-left-at-original-audit
+  title: Capability observation timestamp remained at the original audit after qualification
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - contract-drift
+  - unsafe-assumption
+  finding: 'Pre-admission review of actual WGPR300 found operating_truth.observed_at still 2026-10-15T13:38:38Z
+    while the source reference changed to actual qualified journey1298 and multiple observed profiles changed to
+    operational-live. The primary procedure calls this one dated operating observation. Correct the metadata from
+    a real fresh canonical qualification observation in the already required post-Epic candidate cleanup. This does
+    not block the actual Console route or grant reuse: fresh_evidence_required remains true and stale or missing
+    proof remains not-reusable. Record it as non-blocking governance-data cleanup, not another ART defect or source-workflow
+    mechanism. Preserve the genuine completed journey, current source proof and final admission sequence.'
+  source_refs:
+  - workspace-governance/contracts/console-operational-capabilities.yaml
+  - workspace-governance/docs/console-operational-capabilities.md
+  - openproject://work_packages/1298
+  - workspace-governance/reports/console-journey-1275-qualification.md
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: >-
-    Proposed closure: extend the existing capability contract and planning
-    preflight so every reused capability carries current five-dimensional
-    operating status, authoritative evidence references, and an activation
-    verdict. Reuse must be rejected when the observed profile is anything
-    other than operational-live for a terminal journey dependency. Repair the
-    existing Epic 1275 plan and reopen only acceptance-disproven children. The
-    complete-runtime owner proof must also assert every terminal capability
-    named by the downstream acceptance journey, including live repository
-    provisioning and its credential, readiness, state, and Console bindings.
+  control_refs:
+  - owner_repo: workspace-governance
+    path: workspace-governance/contracts/console-operational-capabilities.yaml
+    type: contract
+    note: Separates declared, implemented, admitted and operational observations and requires fresh owner evidence.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  - owner_repo: workspace-governance
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    type: contract
+    note: Current architecture topology and v6 runtime activation chains keep human authority, source ownership
+      and commissioning explicit.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    type: workflow
+    note: Configured-path preflight checks narrative, exact accepted-base evidence coverage, source admission and
+      current owner boundaries before source resources.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/lifecycle-authoring.js
+    type: workflow
+    note: Same-source evidence revisions receive distinct immutable custody without rewriting earlier packets.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/delivery-execution-work-sessions.md
+    type: runbook
+    note: Exposes actual owner-backed source continuation, evidence-only completion and earned PI review.
+  - owner_repo: platform-engineering
+    path: platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+    type: workflow
+    note: Validates the complete exact-source runtime, caller consumption, fresh owner records and bounded credential
+      currency.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. All retained findings were
+    reconciled against the completed real Console journey, current owner controls and accepted scope. The original
+    72 signals remain intact and exactly three later captured signals are added. Approved credential renewal and
+    same-source immutable evidence revision are merged and have actual original-session operating proof; the final
+    source finalized and closed without another source change. Correct the stale catalogue observation timestamp
+    from the fresh canonical October24 qualification read, regenerate its compact view and retain historical observation
+    context. Private client source, hosting and stage/prod remain explicitly unqualified after the operator accepted
+    the public local exercise; closing this lesson does not claim those capabilities. Hardware or broad future workflow
+    guarantees are not inferred. The durable controls and actual whole-journey witness close the learning record,
+    rather than preservation or a revised due date.
+
+
+    Historical resolution context (not current status): Proposed closure: extend the existing capability contract
+    and planning preflight so every reused capability carries current five-dimensional operating status, authoritative
+    evidence references, and an activation verdict. Reuse must be rejected when the observed profile is anything
+    other than operational-live for a terminal journey dependency. Repair the existing Epic 1275 plan and reopen
+    only acceptance-disproven children. The complete-runtime owner proof must also assert every terminal capability
+    named by the downstream acceptance journey, including live repository provisioning and its credential, readiness,
+    state, and Console bindings.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-23
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Current October23 local
+    checkpoint: operator continuation approved the bounded extension described below. Actual Console cancelled original
+    d1dc; PR291 is closed unmerged, with its exact source and history retained. Repair is in progress in owner-isolated
+    maintenance Landing Units; no merged or operating acceptance is claimed. Native real-Git repair/replay proves
+    three review-surface writes and preserves application/independent control bytes. Full native registration and
+    all-owner proof must pass before the first repair merge, followed by exact Security acceptance, normal activation
+    and actual Console operating proof. No new repair ART children or generic migration framework. Retain prior
+    checkpoints as history. Previous October22 checkpoint: native PR291 was held unmerged. Its full local CI and
+    provider check fail the missing PR-control rule requirements; every remaining workflow step separately passes,
+    which is not full CI success. The required owner review surfaces are genuinely absent. Existing bootstrap refuses
+    admitted entrants and produces no source plan for an existing valid profile, while ordinary source requires
+    active Inventory. Do not bypass those boundaries, merge invalid registration or mutate old receipts. Proposed
+    disposition is extend the existing trusted bootstrap and derived registration coverage, not a new subsystem:
+    control-only repair before Inventory, including already-admitted source-only owners, with preserved independent
+    content and existing explicit source/human gates. This changes the current proposed-only eligibility boundary
+    and needs an operator design decision before implementation; the continuation above now records that approval
+    without backdating it. Retain earlier checkpoints as history. October22 evening recovery confirms Intake288
+    merged and the entrant is admitted/v2. Inventory289 remains open and unmerged with the fixed-owner coverage-test
+    failure recorded above; the actual app import and final acceptance remain outstanding. Initial runtime restoration
+    was blocked by invalid operator Vault authentication, not memory pressure; operator login restored access and
+    normal activation141024Z now proves live/current composition and original919 Console readback. That original
+    was then cancelled normally and PR289 closed unmerged before baseline repair. The native289 Inventory independently
+    reproduces old-test failure and repaired-test success with unchanged production qualification. Capture is retained
+    in maintenance-1275-inventory-coverage-parity; implementation and publication follows exact-head full CI and
+    reviewed maintenance sequencing. The earlier checkpoint below is retained as history, not current admission
+    or Security acceptance truth. Re-reviewed October22 after interruption crossed the operator''s local midnight.
+    Registry repairs OOS356 and Console101 are merged, but their exact Security acceptance and recommissioning remain
+    pending. Intake request console-6d904255-6953-48c2-adc3-3ebf70fd4fe2 was cancelled through the Console after
+    its immutable source review failed on canonical overdue learning records; WG286 is closed unmerged. The entrant
+    is still proposed/v1, not admitted or active. The durable-owner app import and final end-to-end acceptance remain
+    outstanding. The next accountable review is October23; retain earlier missed checkpoints below and do not treat
+    these repairs or this review as closure, a waiver, or approval for another mechanism. October20 review checkpoint
+    is overdue at the October21 local-date continuation. Reviewed still open; October21 is the next review checkpoint,
+    not a completion promise or permission for another closing control. Original October18 review checkpoint was
+    missed; explicitly re-reviewed October19 after the staged admission-transition miss. That review scheduled October20,
+    which was also missed. Local learning capture was preserved but not landed: both actual WG286 CI39597206006
+    and its full local rehearsal correctly fail on four canonical October20 deadlines. Land the existing reviewed
+    open-record reconciliation before revalidating the Intake source; do not waive the date gate, mark the lessons
+    closed or invent new controls. Correct the existing consumers and prove native promotion-to-issuance before
+    revised source publication. No new closing control is approved. Close through the existing Epic 1275 final-guidance
+    Landing Unit after the repaired end-to-end browser journey proves every dependency live.", "owner_repo": "workspace-governance"}'
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Current October23
-    local checkpoint: operator continuation approved the bounded extension described below.
-    Actual Console cancelled original d1dc; PR291 is closed unmerged, with its exact source
-    and history retained. Repair is in progress in owner-isolated maintenance Landing Units;
-    no merged or operating acceptance is claimed. Native real-Git repair/replay proves three
-    review-surface writes and preserves application/independent control bytes. Full native
-    registration and all-owner proof must pass before the first repair merge, followed by
-    exact Security acceptance, normal activation and actual Console operating proof. No new
-    repair ART children or generic migration framework. Retain prior checkpoints as history.
-    Previous October22 checkpoint: native PR291 was held unmerged. Its full local CI and provider
-    check fail the missing PR-control rule requirements; every remaining workflow step separately
-    passes, which is not full CI success. The required owner review surfaces are genuinely
-    absent. Existing bootstrap refuses admitted entrants and produces no source plan for an
-    existing valid profile, while ordinary source requires active Inventory. Do not bypass
-    those boundaries, merge invalid registration or mutate old receipts. Proposed disposition
-    is extend the existing trusted bootstrap and derived registration coverage, not a new
-    subsystem: control-only repair before Inventory, including already-admitted source-only
-    owners, with preserved independent content and existing explicit source/human gates. This
-    changes the current proposed-only eligibility boundary and needs an operator design decision
-    before implementation; the continuation above now records that approval without backdating
-    it. Retain earlier checkpoints as history. October22 evening recovery confirms Intake288
-    merged and the entrant is admitted/v2. Inventory289 remains open and unmerged with the
-    fixed-owner coverage-test failure recorded above; the actual app import and final acceptance
-    remain outstanding. Initial runtime restoration was blocked by invalid operator Vault
-    authentication, not memory pressure; operator login restored access and normal activation141024Z
-    now proves live/current composition and original919 Console readback. That original was
-    then cancelled normally and PR289 closed unmerged before baseline repair. The native289
-    Inventory independently reproduces old-test failure and repaired-test success with unchanged
-    production qualification. Capture is retained in maintenance-1275-inventory-coverage-parity;
-    implementation and publication follows exact-head full CI and reviewed maintenance sequencing.
-    The earlier checkpoint below is retained as history, not current admission or Security
-    acceptance truth. Re-reviewed October22 after interruption crossed the operator''s local
-    midnight. Registry repairs OOS356 and Console101 are merged, but their exact Security
-    acceptance and recommissioning remain pending. Intake request console-6d904255-6953-48c2-adc3-3ebf70fd4fe2
-    was cancelled through the Console after its immutable source review failed on canonical
-    overdue learning records; WG286 is closed unmerged. The entrant is still proposed/v1,
-    not admitted or active. The durable-owner app import and final end-to-end acceptance remain
-    outstanding. The next accountable review is October23; retain earlier missed checkpoints
-    below and do not treat these repairs or this review as closure, a waiver, or approval
-    for another mechanism. October20 review checkpoint is overdue at the October21 local-date
-    continuation. Reviewed still open; October21 is the next review checkpoint, not a completion
-    promise or permission for another closing control. Original October18 review checkpoint
-    was missed; explicitly re-reviewed October19 after the staged admission-transition miss.
-    That review scheduled October20, which was also missed. Local learning capture was preserved
-    but not landed: both actual WG286 CI39597206006 and its full local rehearsal correctly
-    fail on four canonical October20 deadlines. Land the existing reviewed open-record reconciliation
-    before revalidating the Intake source; do not waive the date gate, mark the lessons closed
-    or invent new controls. Correct the existing consumers and prove native promotion-to-issuance
-    before revised source publication. No new closing control is approved. Close through the
-    existing Epic 1275 final-guidance Landing Unit after the repaired end-to-end browser journey
-    proves every dependency live.'
+  owner_repo: null
+  due_on: null
+  note: null

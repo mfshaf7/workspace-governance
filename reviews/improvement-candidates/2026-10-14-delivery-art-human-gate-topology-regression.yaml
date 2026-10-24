@@ -13,7 +13,7 @@ summary: >-
   Platform tree before item 1291 had produced the exact candidate policy tree
   that the gate was meant to authorize.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-08-24-art-architecture-topology-capture-regression.yaml
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -83,44 +83,60 @@ resolution:
   - type: contract
     path: workspace-governance/contracts/delivery-art-operator-path.yaml
     owner_repo: workspace-governance
-    note: Requires one satisfiable pre-source schedule across work, source-landing, and early human-gate authority edges.
+    note: Requires one satisfiable pre-source schedule across work, source-landing, and early human-gate authority
+      edges.
   - type: validator
     path: workspace-governance/scripts/validate_contracts.py
     owner_repo: workspace-governance
     note: Rejects the Epic 1275 cycle shape and preserves a positive separately schedulable gate vector.
-  note: >-
-    The operator approved the repair. Epic 1275 now uses separate Security
-    authority items and Landing Units for source realization, orchestration,
-    and platform operation, and the invalid Architecture Packet was superseded.
-    The new exact-tree regression requires the existing planning and work-session
-    controls to enforce candidate-source-before-authority-close ordering: the
-    gated Landing Unit may prepare and publish its candidate, Security must bind
-    that exact candidate tree, and only then may the gated merge proceed.
-    Candidate closure still waits for that temporal rule and validator parity to
-    land in Workspace Governance, OOS, and WGCF through the planned final-guidance
-    Landing Unit; no additional ART child is required.
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22
-    after interruption crossed the operator''s local midnight. Exact-head reviews of maintenance
-    repairs do not close the existing final-guidance candidate-source ordering and validator-parity
-    work. The next accountable review is October23; earlier missed checkpoints below are retained.
-    This is a review appointment, not completion evidence. October20 review checkpoint is
-    overdue at the October21 local-date continuation. Reviewed still open; October21 is the
-    next review checkpoint, not a completion promise or permission for another closing control.
-    The 2026-10-16 follow-up was missed while Epic1275 qualification remained blocked. The
-    October18 checkpoint was also missed; review continues on October21 through the same final-guidance
-    work. Preserve earlier missed dates and do not imply closure. Rehearse the corrected 1291
-    candidate -> 1303 exact-tree acceptance -> 1291 merge order, then land the candidate-source-before-authority-close
-    rule and validator parity through the existing Epic 1275 final-guidance work.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session.js
+    type: workflow
+    note: The current lifecycle enforces the declared gate at its exact blocked transition.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The corrected architecture
+    and current validators separate source candidates, exact-source Security authority, source merge and runtime
+    activation. The whole-plan procedure requires candidate source to exist before exact-source review and preserves
+    the correct review-before-merge or review-before-activation boundary. The accepted Epic completed this ordered
+    route with finalized evidence. Reuse the existing topology, gate enforcement and exact-source reader; an additional
+    generic temporal mechanism suggested in the historical follow-up is not needed or represented as implemented.
 
-    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson remains open.
-    The existing final-guidance owner still owes the control described above; current admission/authoring
-    tests do not close that work. Next accountable review is 2026-10-20, not a claimed completion
-    deadline. This records a missed follow-up and its current disposition; it does not erase
-    the prior due dates or mark unlanded controls as implemented.'
+
+    Historical resolution context (not current status): The operator approved the repair. Epic 1275 now uses separate
+    Security authority items and Landing Units for source realization, orchestration, and platform operation, and
+    the invalid Architecture Packet was superseded. The new exact-tree regression requires the existing planning
+    and work-session controls to enforce candidate-source-before-authority-close ordering: the gated Landing Unit
+    may prepare and publish its candidate, Security must bind that exact candidate tree, and only then may the gated
+    merge proceed. Candidate closure still waits for that temporal rule and validator parity to land in Workspace
+    Governance, OOS, and WGCF through the planned final-guidance Landing Unit; no additional ART child is required.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-23
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22 after
+    interruption crossed the operator''s local midnight. Exact-head reviews of maintenance repairs do not close
+    the existing final-guidance candidate-source ordering and validator-parity work. The next accountable review
+    is October23; earlier missed checkpoints below are retained. This is a review appointment, not completion evidence.
+    October20 review checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21
+    is the next review checkpoint, not a completion promise or permission for another closing control. The 2026-10-16
+    follow-up was missed while Epic1275 qualification remained blocked. The October18 checkpoint was also missed;
+    review continues on October21 through the same final-guidance work. Preserve earlier missed dates and do not
+    imply closure. Rehearse the corrected 1291 candidate -> 1303 exact-tree acceptance -> 1291 merge order, then
+    land the candidate-source-before-authority-close rule and validator parity through the existing Epic 1275 final-guidance
+    work.
+Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson remains open. The existing final-guidance
+    owner still owes the control described above; current admission/authoring tests do not close that work. Next
+    accountable review is 2026-10-20, not a claimed completion deadline. This records a missed follow-up and its
+    current disposition; it does not erase the prior due dates or mark unlanded controls as implemented.", "owner_repo":
+    "workspace-governance"}'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

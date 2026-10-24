@@ -69,7 +69,7 @@ console_operational_capabilities:
       evidence_state: validated
       demonstration_source: live-authority
   operating_truth:
-    observed_at: '2026-10-15T13:38:38Z'
+    observed_at: '2026-10-24T01:51:43.133012Z'
     observation_scope: local-dev-integration
     source_ref: openproject://work_packages/1298
     reuse_requires_profile: operational-live
