@@ -1,0 +1,194 @@
+schema_version: 1
+id: 2026-10-25-authorized-continuation-and-execution-boundaries
+title: Continue authorized delivery and prove the actual execution boundaries
+recorded_on: '2026-10-25'
+owner_repo: workspace-governance
+summary: >-
+  Epic1313 exposed premature conversational stops and cross-component proof misses.
+  Apply the existing continuation, work-home, exact-head, identity, commissioning
+  and evidence rules; no additional control plane or closing mechanism is needed.
+  Correct the actual owner behavior and prove the failing boundary rather than
+  multiplying ART children or treating a source check as runtime completion.
+scope:
+  related_repos:
+  - workspace-governance
+  - platform-engineering
+  - operator-orchestration-service
+  - governance-operations-console
+  - context-governance-gateway
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-24-premature-stop-after-authorized-planning.yaml
+- openproject://work_packages/1313
+- openproject://work_packages/1321
+- https://github.com/mfshaf7/operator-orchestration-service/pull/374
+- https://github.com/mfshaf7/governance-operations-console/pull/118
+- https://github.com/mfshaf7/platform-engineering/pull/335
+- https://github.com/mfshaf7/platform-engineering/pull/336
+- https://github.com/mfshaf7/platform-engineering/pull/337
+- https://github.com/mfshaf7/platform-engineering/pull/338
+- https://github.com/mfshaf7/platform-engineering/pull/339
+- https://github.com/mfshaf7/platform-engineering/pull/340
+- https://github.com/mfshaf7/security-architecture/pull/336
+- https://github.com/mfshaf7/governance-operations-console/pull/119
+- https://github.com/mfshaf7/context-governance-gateway/pull/30
+- https://github.com/mfshaf7/operator-orchestration-service/pull/375
+- https://github.com/mfshaf7/security-architecture/pull/337
+- https://github.com/mfshaf7/security-architecture/pull/338
+- https://github.com/mfshaf7/security-architecture/pull/339
+lessons:
+- id: continuation-and-canonical-result-truth
+  title: Progress and acknowledgements do not end authorized work or prove completion
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    The agent stopped after planning/status despite executable authorized work,
+    missed required narrative and identifier contracts, and confused transport
+    success with accepted business state. Existing source preflight correctly
+    rejected incomplete inputs. Repair those inputs, read the actual owner result,
+    and continue through the normal workflow without another approval prompt.
+  impact: >-
+    The operator had to request continuation and correct state claims. Native
+    finalized packets, closeout, scoped revocation and strict owner cleanup were
+    subsequently executed for the five original source children;1321 remains its
+    honest separate operating front. No new mechanism or ART child closes this lesson.
+  status: closed
+  expected_control_types: [doc, workflow, skill]
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Existing canonical workflow, readiness, evidence and non-source completion rules remain decisive.
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Existing standing delegation was executed; no repeated permission gate or skill-source change was needed.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-service.js
+    owner_repo: operator-orchestration-service
+    note: Native source sessions and terminal owner results supplied actual completion rather than narrative assertions.
+  follow_up: {owner_repo: null, due_on: null, note: null}
+- id: required-empty-advisor-options
+  title: Empty input still carries required owner DTO fields
+  failure_class: unsafe-assumption
+  trigger: machine-visible-workflow-drift
+  finding: >-
+    Normal short-text Refinement advice failed before inference because Console
+    omitted target.allowed_values for an empty list although the OOS request
+    schema requires that array for every field type. Nonempty-select fixtures
+    missed the producer/owner contract boundary. This is a concrete existing
+    mismatch, not a reason to widen the owner contract or change the proof field.
+  impact: >-
+    The generic profile call passed while the normal Console consumer rejected
+    an ordinary short-text field. Preserve the required empty list, test the
+    producer wire DTO and repeat the original real Console field before closure.
+  status: closed
+  expected_control_types: [workflow, test]
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/domain-workspaces/delivery/server/refinement-catalog-oos-client.ts
+    owner_repo: governance-operations-console
+    note: PR119 preserves the required allowed_values array for all admitted field types, including empty lists; the original normal short-text field subsequently completed through the real owners.
+  - type: test
+    path: governance-operations-console/tests/operation-runtime/refinement-catalog-live-adapter.test.mjs
+    owner_repo: governance-operations-console
+    note: The producer wire test covers all four field types and fails on the original conditional omission; all705 Console tests and exact-head checks passed.
+  follow_up: {owner_repo: null, due_on: null, note: null}
+- id: execution-boundary-proof
+  title: Component checks must include their real handoff and retained execution state
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    Independent checks missed post-turn credential custody classification, packaged
+    schema dependencies, the evidence runner environment, image-import permission,
+    candidate-versus-squash identity, provider inventory versus output budgets and
+    retained root-owned audit storage. Each is a concrete boundary with its own
+    producer, execution identity and failure phase; an adjacent passing component
+    check cannot establish it. A failed test assumption is not automatically a
+    defect, and an uncertain submitted turn must not become fallback or re-inference.
+  impact: >-
+    Operating proof required bounded owner repairs. Landed fixes preserve original
+    reviewed provenance, use the existing image publication path, separate bounded
+    metadata from output, hand exact audit bytes to the existing nonroot owner and
+    stop old writers during cutover. Actual old audit history remained byte-identical;
+    original-ID replay stayed frozen, then fresh real-provider calls passed all seven
+    current tasks with coherent audit and effective-selection evidence. This proves
+    the repaired boundaries, not completion of the remaining native-account and
+    whole-initiative qualification. Source-draft probes were inert, never applied.
+  status: closed
+  expected_control_types: [workflow, test, runbook, doc]
+  control_refs:
+  - type: workflow
+    path: platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/gateway_app.py
+    owner_repo: platform-engineering
+    note: Nonroot retained-audit handoff and private append preconditions precede serving and inference.
+  - type: workflow
+    path: platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/ollama_adapter.py
+    owner_repo: platform-engineering
+    note: Metadata and task output retain separate bounded reads without relaxing identity or output validation.
+  - type: test
+    path: platform-engineering/scripts/test_ai_task_routing.py
+    owner_repo: platform-engineering
+    note: Real HTTP registration, receipt replay and negative limits cover the inventory boundary and phase-safe fallback.
+  - type: test
+    path: platform-engineering/scripts/test_governed_ai_gateway_runtime.py
+    owner_repo: platform-engineering
+    note: Preserved history, private append state and missing/nonregular pre-dispatch denial complement the separately executed real-UID handoff proof.
+  - type: runbook
+    path: platform-engineering/products/governance-operations-console/runbooks/operate-complete-runtime.md
+    owner_repo: platform-engineering
+    note: Existing operator procedure owns source acceptance, publication, retained-state cutover, commissioning and unknown-outcome recovery.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-24-configurable-ai-routing.md
+    owner_repo: security-architecture
+    note: Exact candidate/tree acceptance retains identity, account, network and model-permission boundaries for the actual repairs.
+  follow_up: {owner_repo: null, due_on: null, note: null}
+
+- id: registered-projection-boundary
+  title: Use the real registered projection boundary and its separate digest meanings
+  failure_class: unsafe-assumption
+  trigger: machine-visible-workflow-drift
+  finding: >-
+    Normal Refinement proof exposed a missing registered CGG caller-secret runtime
+    projection, then a consumer comparison that confused the full CGG projection
+    digest with its separate assist-context digest. The consumer fixture repeated
+    the mistaken equality. Existing contracts already define both boundaries;
+    repair their owners rather than widening admission, changing field types,
+    inventing a new authority or claiming a generic profile call proves the route.
+  impact: >-
+    CGG PR30 and OOS PR375 landed after exact-head owner tests, actual image proof
+    and accountable review, with Security338/339 binding their actual merges.
+    The original normal short-text Console request returned200 ready at13 through
+    actual CGG and Codex high. Audit local-ledger:45ecf24bb5d9042f6927a5145944e04ff554a9a4d1d3a4a9d1f25927a61e37f9
+    and selection ai-routing-selection:3c80be9872f8930ef01e4991d93d6a12c3ce12b75336a010212d43a3ed9b781d
+    retain the real result. Aggregate source-annotation reconciliation uses the
+    existing composition activation and remains part of1321 operating closeout;
+    this learning closure does not claim whole-initiative completion.
+  status: closed
+  expected_control_types: [workflow, test, doc]
+  control_refs:
+  - type: workflow
+    path: context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+    owner_repo: context-governance-gateway
+    note: Dedicated credential projection, exact caller validation, private readiness and lifecycle cleanup restore the already registered Refinement boundary.
+  - type: test
+    path: context-governance-gateway/tests/test_dev_integration_profile.py
+    owner_repo: context-governance-gateway
+    note: Missing, wrong-boundary, wrong-caller, malformed, ephemeral and missing/mismatched readiness cases passed with all98 owner tests.
+  - type: workflow
+    path: operator-orchestration-service/src/refinement/service.js
+    owner_repo: operator-orchestration-service
+    note: The existing full projection envelope and separate assist-context digest are checked without removing caller, source, packet, task, redaction or authority binding.
+  - type: test
+    path: operator-orchestration-service/test/refinement-service.test.js
+    owner_repo: operator-orchestration-service
+    note: The actual owner formula fails against the old consumer; recomputed tampered envelopes still fail separate binding checks before invocation. All1619 passing tests plus2 documented skips and built API/worker smoke passed.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-24-configurable-ai-routing.md
+    owner_repo: security-architecture
+    note: Exact actual merged-source acceptance preserves purpose, credential, receipt and action boundaries; current normal request proof supplies operating evidence.
+  follow_up: {owner_repo: null, due_on: null, note: null}
