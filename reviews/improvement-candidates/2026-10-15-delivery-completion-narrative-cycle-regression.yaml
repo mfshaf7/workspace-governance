@@ -1,0 +1,65 @@
+schema_version: 1
+id: 2026-10-15-delivery-completion-narrative-cycle-regression
+title: Validate completion narratives against Delivery execution sequencing
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: >-
+  Delivery 1275 work item 1288 required the later Platform Landing Unit to be
+  merged in its Definition of Done even though the accepted execution graph
+  required 1288 to close before the Security and Platform sequence could
+  complete. Structural graph validation passed because the contradictory
+  narrative dependency was not machine-readable.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - architecture-shaping
+signals:
+- id: completion-narrative-created-hidden-dependency-cycle
+  title: A child Definition of Done contradicted the accepted Landing Unit graph
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  - rollout-evidence-gap
+  finding: >-
+    Work item 1288 said both OOS and Platform Landing Units had to be merged
+    before 1288 could close. The accepted architecture graph requires 1288
+    before Console work items 1289 and 1292, then Security work item 1303, and
+    only then Platform work item 1291 may merge. Treating the narrative as a
+    real dependency therefore creates an impossible cycle that the v3
+    temporal-satisfiability validator did not detect. The immediate planning
+    repair scopes 1288 to its OOS contract and fail-closed adapter seam while
+    preserving live Platform implementation and commissioning in 1291, 1292,
+    and 1298.
+  source_refs:
+  - openproject://work_packages/1275
+  - openproject://work_packages/1288
+  - openproject://work_packages/1291
+  - openproject://work_packages/1303
+  - workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Extend Delivery
+    architecture planning and validation so completion narratives cannot add hidden cross-child
+    prerequisites that contradict the machine-readable execution plan; close this regression
+    in the existing work item 1299 final-guidance Landing Unit.'

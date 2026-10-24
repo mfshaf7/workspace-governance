@@ -1,5 +1,9 @@
 # Console-Complete Delivery ART Lifecycle
 
+The current connected operator procedure and dated qualification are in
+[`console-operational-capabilities.md`](console-operational-capabilities.md).
+This document retains the architecture lineage and lifecycle boundaries.
+
 This document defines the target operator path for completing governed Delivery
 ART work without reconstructing procedure from repository docs or routinely
 using a terminal. It extends the existing Delivery ART operator path; it does

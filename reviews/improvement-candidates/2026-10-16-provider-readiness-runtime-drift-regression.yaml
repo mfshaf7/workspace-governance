@@ -1,0 +1,80 @@
+schema_version: 1
+id: 2026-10-16-provider-readiness-runtime-drift-regression
+title: Check actual provider integrity before reporting governed AI readiness
+recorded_on: '2026-10-16'
+owner_repo: platform-engineering
+summary: >-
+  Post-crash health inspection found Ollama 0.40.5 behind profiles pinned to
+  0.40.1. Gateway readiness reported eligible profiles ready, while its actual
+  provider integrity checks rejected inference. The earlier version-drift
+  lesson reconciled a pin but did not make readiness observe the provider.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-governed-ai-runtime-version-drift.yaml
+status: new
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components:
+  - governed-ai-gateway
+  change_classes:
+  - live-drift-repair
+  - runtime-composition
+signals:
+- id: configured-eligibility-misrepresented-as-provider-readiness
+  title: Ready profiles failed the real provider integrity check
+  trigger: closed-lesson-regression
+  failure_classes:
+  - rollout-evidence-gap
+  - host-drift-undetected
+  finding: >-
+    Actual upstream GET /api/version returned 0.40.5 and qwen3:8b retained the
+    approved digest. The deployed adapter raised ProviderIntegrityError for
+    Source Realization, Work Design and Agent Console, despite gateway
+    /readyz reporting each ready. The operator approved matching the current
+    installed patch, preserving exact version and digest enforcement, and
+    repairing the existing readiness path rather than adding a new monitor.
+  source_refs:
+  - openproject://work_packages/1298
+  - runtime://devint-governed-ai-gateway-mfshaf7/provider-integrity
+  - platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/gateway_app.py
+  - platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/ollama_adapter.py
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: contract
+    path: platform-engineering/security/governed-ai-model-profiles.yaml
+    owner_repo: platform-engineering
+    note: Platform PR317 merged 6d7536e6f5f6815bb088214f16acbd5aabcbc00f pins all five existing local bindings to operator-approved 0.40.5 and unchanged exact model digest.
+  - type: test
+    path: platform-engineering/scripts/test_governed_ai_ollama_adapter.py
+    owner_repo: platform-engineering
+    note: Native local HTTP metadata proof covers version, digest and unavailable-provider denial without inference.
+  - type: test
+    path: platform-engineering/scripts/test_governed_ai_gateway_runtime.py
+    owner_repo: platform-engineering
+    note: Readiness distinguishes actual provider integrity from eligible policy and deduplicates identical binding observations.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.md
+    owner_repo: security-architecture
+    note: Security PR275 merged 63956e64e9eedeaacc73c4f54fd11b77a7ee4f22 accepts the exact source set and Platform tree before operating activation.
+  note: >-
+    Approved source repair and exact Security acceptance landed. Normal
+    activation passed at 12:14Z and the existing governed Agent Console
+    positive, unauthorized-denial and synthetic-session-close proof passed.
+    Actual gateway metadata reports 0.40.5 with all five profiles ready. This
+    candidate remains open only for reconciliation in the already pending
+    Workspace Governance final-guidance work, not another source repair.
+    No new ART child, model, provider, data scope or source authority was added.
+follow_up:
+  owner_repo: platform-engineering
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Reconcile landed
+    controls and retained operating evidence through the existing final-guidance Landing Unit;
+    do not manufacture another runtime source successor.'

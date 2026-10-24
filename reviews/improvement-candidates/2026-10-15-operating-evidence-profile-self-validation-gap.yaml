@@ -1,0 +1,216 @@
+schema_version: 1
+id: 2026-10-15-operating-evidence-profile-self-validation-gap
+title: Validate candidate evidence profiles and preserve configuration failures
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: >-
+  Delivery 1275 Platform source changed its own Delivery ART evidence profile,
+  but pre-merge evidence executed the previously admitted base profile and no
+  owner check validated the candidate profile against the OOS schema. After
+  merge, OOS rejected an out-of-range timeout before it could persist failed
+  operating evidence, leaving the governed recovery path unavailable. After
+  failure projection and recovery were repaired, the invalid accepted base
+  profile also blocked a fresh governed session from starting, with no bounded
+  route for the profile to repair itself. The replacement attempt then exposed
+  that source tests asserted credential projection but did not prove the
+  projected OOS state path was writable or that rollback removed the failing
+  binding before waiting for OOS readiness. A later governed successor exposed
+  another missing precondition: post-merge operating evidence runs from the PR
+  worktree, while the Platform composition runner defaulted its own source to
+  the workspace main checkout and rejected the two paths as conflicting. After
+  that repair, the live proof exposed a self-hosting conflict: its full
+  teardown stopped the source executor supervising the proof, so the restored
+  executor could not safely reconcile the still-pending acquisition.
+  Evidence-preserving recovery then rejected that outcome-unknown state because
+  it admitted explicit evidence failure but not interruption before the first
+  result was recorded.
+regression_of: null
+status: accepted
+source_type: machine-audit
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - operator-orchestration-service
+  change_classes:
+  - source-behavior
+signals:
+- id: candidate-profile-bypassed-premerge-validation
+  title: A self-modified evidence profile failed only after its source merged
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - missing-deterministic-test-seam
+  - rollout-evidence-gap
+  - workflow-doctrine-gap
+  finding: >-
+    Platform PR 303 set the complete-runtime operating command timeout to 3600
+    seconds while the OOS evidence-profile schema permits at most 1800. The
+    base profile drove pre-merge evidence, Platform validation did not validate
+    the candidate profile against the OOS schema, and the post-merge schema
+    exception was not projected as invalid operating evidence for governed
+    recovery.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/platform-engineering/pull/303
+  - repo://operator-orchestration-service/contracts/delivery-art-work-session/evidence-profile.schema.json
+- id: invalid-base-profile-had-no-self-repair-path
+  title: The accepted invalid profile blocked its own governed replacement
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  - missing-deterministic-test-seam
+  finding: >-
+    After the immutable failed attempt was archived, work-session preflight
+    correctly rejected the invalid Platform base profile but provided no safe
+    way to start a replacement that repaired that profile. Trusting candidate
+    commands would violate the evidence boundary; requiring only the invalid
+    base created a dead end.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/337
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+- id: operating-proof-missed-runtime-state-and-recovery-preconditions
+  title: Source validation did not prove writable runtime state or recoverable rollback order
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - missing-deterministic-test-seam
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    The reviewed complete-runtime source injected
+    OOS_PLATFORM_OPERATION_STATE_ROOT=/var/lib/oos/platform-operation without
+    mounting writable state for the UID-1000 OOS process. Live activation
+    therefore failed with EACCES. The documented rollback then waited for the
+    already-failing OOS deployment before removing that binding, delaying
+    recovery. Existing unit tests proved secret custody and environment
+    removal but not filesystem writability, Kubernetes state projection, or
+    failure-first rollback sequencing.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/platform-engineering/pull/304
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/test_console_complete_runtime.py
+- id: operating-proof-worktree-source-selection-conflict
+  title: Post-merge proof did not bind the Platform runner to its reviewed worktree
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - missing-deterministic-test-seam
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    OOS correctly acquired operating evidence from Platform PR 306's reviewed
+    head worktree. The complete-runtime verifier nevertheless invoked the
+    shared composition runner without an explicit Platform repo path, so the
+    profile owner resolved to workspace main while the runner itself resolved
+    to the PR worktree. The runner rejected those conflicting checkouts before
+    activation. Security review also had to distinguish the evidence source
+    head from the squash-merge commit even though both shared the same tree.
+    Source tests did not cover execution from a non-main worktree.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/platform-engineering/pull/306
+  - https://github.com/mfshaf7/platform-engineering/pull/307
+  - https://github.com/mfshaf7/security-architecture/pull/256
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/scripts/dev_integration.py
+- id: operating-proof-tore-down-its-own-executor
+  title: Full runtime teardown interrupted custody of its own operating proof
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - missing-deterministic-test-seam
+  - rollout-evidence-gap
+  - unsafe-assumption
+  finding: >-
+    The complete-runtime verifier correctly tears down and restores the whole
+    refinement-catalog composition, but Delivery ART executes that verifier as
+    a child of the accepted-idea-delivery source executor. Profile teardown
+    terminates the executor process group before it can persist and return the
+    evidence receipt. The restored executor then sees a pending acquisition
+    with no replayable result, making a blind retry repeat the same
+    self-interference. Source tests covered runtime restart and result replay
+    independently but did not prove operating evidence whose target lifecycle
+    includes its supervising executor.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/platform-engineering/pull/308
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/339
+  - repo://operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+  - repo://operator-orchestration-service/src/delivery-art/source-action-result-store.js
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - repo://platform-engineering/scripts/dev_integration_host_services.py
+- id: interrupted-acquisition-had-no-evidence-preserving-recovery
+  title: Outcome-unknown operating acquisition could not enter reviewed replacement
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  - missing-deterministic-test-seam
+  finding: >-
+    The r3 source executor was terminated before returning any operating result,
+    so the session correctly remained acquisition-required. The existing
+    evidence-preserving recovery path admitted a superseded architecture or an
+    explicit failed result only. It rejected the exact merged session even
+    though a reviewed verifier source repair was required and recovery would
+    preserve the merge-ready packet while forcing the successor to repeat all
+    evidence.
+  source_refs:
+  - openproject://work_packages/1291
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/340
+  - repo://operator-orchestration-service/src/delivery-art/work-session-controller.js
+  - repo://operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    path: operator-orchestration-service/docs/records/change-records/2026-10-15-owner-evidence-profile-failure-projection.md
+    owner_repo: operator-orchestration-service
+    note: PR 337 records candidate and accepted-profile failures without trusting candidate commands.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 339 detaches live operating evidence from the supervising source
+      executor process group so a governed whole-composition teardown can
+      restore the executor and still return the exact result.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    owner_repo: operator-orchestration-service
+    note: >-
+      OOS PR 340 admits the existing evidence-preserving replacement path when
+      an exact merged acquisition was interrupted before any result was
+      recorded, while forcing the successor to reacquire all operating
+      evidence.
+  - type: workflow
+    path: platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+    owner_repo: platform-engineering
+    note: >-
+      Platform PR 309 serializes whole-composition proof and replays only a
+      digest-valid receipt bound to the exact reviewed revisions, Security
+      decision, complete proof shape, and restored normal availability.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.md
+    owner_repo: security-architecture
+    note: >-
+      Security PR 258 accepts the exact OOS PR 339 and 340 and Platform PR 309
+      recovery boundary for bounded dev-integration commissioning.
+  note: >-
+    The source and recovery controls are merged. The final Platform operating
+    receipt `20261015T105042Z-verify-operating.json` passed activation,
+    restart, rollback, teardown, restored normal availability, and exact
+    receipt replay; OOS then issued readiness and closed work item 1291. Item
+    1299 still needs to bind these controls into the final operator guidance
+    and learning closeout before this candidate is marked closed.
+follow_up:
+  owner_repo: operator-orchestration-service
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Reconcile the
+    merged profile validation, invalid-base replacement, writable-state and rollback-order
+    checks, reviewed-worktree source selection, detached evidence execution, interrupted-acquisition
+    recovery, and exact receipt replay into item 1299 final guidance and closure proof.'

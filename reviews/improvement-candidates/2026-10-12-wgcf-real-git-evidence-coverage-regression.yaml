@@ -56,26 +56,26 @@ resolution:
     No ART child, evidence mechanism, or architecture change is required.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-10-23'
-  note: >-
-    Re-reviewed October22 after interruption crossed the operator's local
-    midnight. Required evidence-kind/fidelity coverage still belongs to the
-    existing final-guidance work; source containment does not close this lesson.
-    The next accountable review is October23; earlier missed checkpoints below
-    are retained. This is a review appointment, not completion evidence.
-    October20 review checkpoint is overdue at the October21 local-date
-    continuation. Reviewed still open; October21 is the next review checkpoint,
-    not a completion promise or permission for another closing control.
-    The 2026-10-16 follow-up was missed while Epic1275 qualification remained
-    blocked. The October18 checkpoint was also missed; reviewed October21,
-    source containment is still not lesson closure.
-    Extend the existing initiative compatibility validator to prove every
-    required evidence-kind and fidelity pair before the first source session.
-    Do not implement the durable closing control without operator approval.
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22
+    after interruption crossed the operator''s local midnight. Required evidence-kind/fidelity
+    coverage still belongs to the existing final-guidance work; source containment does not
+    close this lesson. The next accountable review is October23; earlier missed checkpoints
+    below are retained. This is a review appointment, not completion evidence. October20 review
+    checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21
+    is the next review checkpoint, not a completion promise or permission for another closing
+    control. The 2026-10-16 follow-up was missed while Epic1275 qualification remained blocked.
+    The October18 checkpoint was also missed; reviewed October21, source containment is still
+    not lesson closure. Extend the existing initiative compatibility validator to prove every
+    required evidence-kind and fidelity pair before the first source session. Do not implement
+    the durable closing control without operator approval.
 
-    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson
-    remains open. The existing final-guidance owner still owes the control
-    described above; current admission/authoring tests do not close that work.
-    Next accountable review is 2026-10-20, not a claimed completion deadline.
-    This records a missed follow-up and its current disposition; it does not
-    erase the prior due dates or mark unlanded controls as implemented.
+    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson remains open.
+    The existing final-guidance owner still owes the control described above; current admission/authoring
+    tests do not close that work. Next accountable review is 2026-10-20, not a claimed completion
+    deadline. This records a missed follow-up and its current disposition; it does not erase
+    the prior due dates or mark unlanded controls as implemented.'

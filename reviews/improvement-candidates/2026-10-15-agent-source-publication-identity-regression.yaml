@@ -1,0 +1,48 @@
+schema_version: 1
+id: 2026-10-15-agent-source-publication-identity-regression
+title: Prevent ambient-human PR publication in maintenance landing units
+recorded_on: '2026-10-15'
+owner_repo: workspace-governance
+summary: A maintenance landing unit again opened its first pull request through the
+  ambient human GitHub session even though the closed Agent-source workflow requires
+  Agent Gary to author and publish the review branch.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-agent-source-operator-preflight-regression.yaml
+status: new
+source_type: conversation
+scope:
+  related_repos:
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: operator-repeated-mistake-callout
+  title: The operator explicitly said the miss is a repeated mistake and expects the
+    system to learn from it.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  finding: OOS PR 333 was opened through the human mfshaf7 session, making accountable
+    self-review impossible; it had to be closed and recreated unchanged as Agent Gary
+    PR 334.
+  source_refs:
+  - conversation:2026-10-15-standing-delegation-and-agent-source-regression
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/333
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/334
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-10-25'
+  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
+    candidates and remaining cleanup. This record remains open for that explicitly requested
+    follow-up; no proposed closing control is represented as landed. October25 is the next
+    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
+    was missed and is retained in this history. Previous recorded follow-up: Select and land
+    one deterministic maintenance publication path that cannot use the ambient human gh session;
+    retain human credentials only for exact-head review and merge.'

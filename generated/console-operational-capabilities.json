@@ -76,14 +76,14 @@
         "baseline",
         "delivery-routed"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
-        "demonstration_source": "fixture",
+        "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "fixture-demonstration",
-        "runtime_state": "unavailable"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "prototype.land",
@@ -127,14 +127,14 @@
         "closing",
         "done"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
-        "demonstration_source": "fixture",
+        "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "fixture-demonstration",
-        "runtime_state": "unavailable"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "delivery.plan",
@@ -228,14 +228,14 @@
         "reconciled",
         "revoked"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
-        "demonstration_source": "none",
+        "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "implemented-uncommissioned",
-        "runtime_state": "unavailable"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "repository.prepare",
@@ -476,14 +476,14 @@
         "suspended",
         "retired"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
-        "demonstration_source": "none",
+        "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "implemented-uncommissioned",
-        "runtime_state": "unavailable"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "workspace.classify-intake",
@@ -532,14 +532,14 @@
         "suspended",
         "retired"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
         "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "degraded-live",
-        "runtime_state": "degraded"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "runtime.start",
@@ -584,14 +584,14 @@
         "listed",
         "withdrawn"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
-        "demonstration_source": "fixture",
+        "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "fixture-demonstration",
-        "runtime_state": "unavailable"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "product.publish",
@@ -640,14 +640,14 @@
         "cancelled",
         "complete"
       ],
-      "observed_profile_qualifies_for_reuse": false,
+      "observed_profile_qualifies_for_reuse": true,
       "observed_status": {
         "contract_state": "defined",
         "demonstration_source": "live-authority",
         "evidence_state": "validated",
         "implementation_state": "implemented",
-        "profile": "degraded-live",
-        "runtime_state": "degraded"
+        "profile": "operational-live",
+        "runtime_state": "available"
       },
       "operator_intent_ids": [
         "journey.resume",
@@ -686,7 +686,7 @@
     "observation_scope": "local-dev-integration",
     "observed_at": "2026-10-15T13:38:38Z",
     "reuse_requires_profile": "operational-live",
-    "source_ref": "wgcf://artifacts/delivery-art/sha256/8ad9c43664bb580a2eef7a23a8ddfa77c95bdea7bfc00efcb424d5008b71062a",
+    "source_ref": "openproject://work_packages/1298",
     "stale_or_missing_behavior": "not-reusable"
   },
   "schema_version": 1,

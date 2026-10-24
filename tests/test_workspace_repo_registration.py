@@ -160,6 +160,21 @@ class SourceOwnerProjectionTests(unittest.TestCase):
                                 {"id": "fixture-validation", "kind": "validations", "conformance_binding": "none"}]}
         target.write_text(json.dumps(profile))
         self.assertEqual(check(), [])
+        # An ordinary source-only product does not invent architecture cases
+        # merely to satisfy workspace Inventory coverage. Its real work-start
+        # profile must still supply tests and validations.
+        profile["commands"][0]["conformance_binding"] = "none"
+        target.write_text(json.dumps(profile))
+        self.assertEqual(check(), [])
+        profile["commands"] = profile["commands"][:1]
+        target.write_text(json.dumps(profile))
+        self.assertTrue(any("tests and validations" in error for error in check()))
+        profile["commands"].append({"id": "fixture-validation", "kind": "validations", "conformance_binding": "none"})
+        target.write_text(json.dumps(profile))
+        # Explicit core activation policy is unchanged by derived admission.
+        coverage["activated_owner_repos"] = ["synthetic-source"]
+        self.assertTrue(any("matching-fidelity evidence acquisition" in error for error in check()))
+        coverage["activated_owner_repos"] = []
         profile["owner_repo"] = "substituted-owner"
         target.write_text(json.dumps(profile))
         self.assertTrue(any("owner_repo must equal synthetic-source" in error for error in check()))

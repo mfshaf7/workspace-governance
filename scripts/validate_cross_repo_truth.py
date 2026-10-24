@@ -676,7 +676,12 @@ def delivery_art_owner_evidence_profile_coverage_errors(
         kinds = {command.get("kind") for command in commands}
         if not {"tests", "validations"}.issubset(kinds):
             errors.append(f"{path}: profile must provide tests and validations")
-        if not any(
+        # Explicit control-plane activation retains its established minimum.
+        # Inventory-derived product owners may have no architecture cases:
+        # binding ordinary unit/browser checks to invented cases would make a
+        # false evidence claim. Exact-base work-start preflight still compares
+        # every actual architecture case's kind and fidelity with its profile.
+        if repo_name in activated and not any(
             command.get("conformance_binding") == "matching-fidelity"
             for command in commands
         ):
