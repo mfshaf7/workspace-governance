@@ -1,0 +1,116 @@
+schema_version: 1
+id: 2026-10-25-authorized-continuation-and-execution-boundaries
+title: Continue authorized delivery and prove the actual execution boundaries
+recorded_on: '2026-10-25'
+owner_repo: workspace-governance
+summary: >-
+  Epic1313 exposed premature conversational stops and cross-component proof misses.
+  Apply the existing continuation, work-home, exact-head, identity, commissioning
+  and evidence rules; no additional control plane or closing mechanism is needed.
+  Correct the actual owner behavior and prove the failing boundary rather than
+  multiplying ART children or treating a source check as runtime completion.
+scope:
+  related_repos:
+  - workspace-governance
+  - platform-engineering
+  - operator-orchestration-service
+  - governance-operations-console
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-24-premature-stop-after-authorized-planning.yaml
+- openproject://work_packages/1313
+- openproject://work_packages/1321
+- https://github.com/mfshaf7/operator-orchestration-service/pull/374
+- https://github.com/mfshaf7/governance-operations-console/pull/118
+- https://github.com/mfshaf7/platform-engineering/pull/335
+- https://github.com/mfshaf7/platform-engineering/pull/336
+- https://github.com/mfshaf7/platform-engineering/pull/337
+- https://github.com/mfshaf7/platform-engineering/pull/338
+- https://github.com/mfshaf7/platform-engineering/pull/339
+- https://github.com/mfshaf7/platform-engineering/pull/340
+- https://github.com/mfshaf7/security-architecture/pull/336
+lessons:
+- id: continuation-and-canonical-result-truth
+  title: Progress and acknowledgements do not end authorized work or prove completion
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    The agent stopped after planning/status despite executable authorized work,
+    missed required narrative and identifier contracts, and confused transport
+    success with accepted business state. Existing source preflight correctly
+    rejected incomplete inputs. Repair those inputs, read the actual owner result,
+    and continue through the normal workflow without another approval prompt.
+  impact: >-
+    The operator had to request continuation and correct state claims. Native
+    finalized packets, closeout, scoped revocation and strict owner cleanup were
+    subsequently executed for the five original source children;1321 remains its
+    honest separate operating front. No new mechanism or ART child closes this lesson.
+  status: closed
+  expected_control_types: [doc, workflow, skill]
+  control_refs:
+  - type: doc
+    path: workspace-governance/docs/delivery-art-operator-path.md
+    owner_repo: workspace-governance
+    note: Existing canonical workflow, readiness, evidence and non-source completion rules remain decisive.
+  - type: skill
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    owner_repo: workspace-governance
+    note: Existing standing delegation was executed; no repeated permission gate or skill-source change was needed.
+  - type: workflow
+    path: operator-orchestration-service/src/delivery-art/work-session-service.js
+    owner_repo: operator-orchestration-service
+    note: Native source sessions and terminal owner results supplied actual completion rather than narrative assertions.
+  follow_up: {owner_repo: null, due_on: null, note: null}
+- id: execution-boundary-proof
+  title: Component checks must include their real handoff and retained execution state
+  failure_class: unsafe-assumption
+  trigger: repeated-operator-friction
+  finding: >-
+    Independent checks missed post-turn credential custody classification, packaged
+    schema dependencies, the evidence runner environment, image-import permission,
+    candidate-versus-squash identity, provider inventory versus output budgets and
+    retained root-owned audit storage. Each is a concrete boundary with its own
+    producer, execution identity and failure phase; an adjacent passing component
+    check cannot establish it. A failed test assumption is not automatically a
+    defect, and an uncertain submitted turn must not become fallback or re-inference.
+  impact: >-
+    Operating proof required bounded owner repairs. Landed fixes preserve original
+    reviewed provenance, use the existing image publication path, separate bounded
+    metadata from output, hand exact audit bytes to the existing nonroot owner and
+    stop old writers during cutover. Actual old audit history remained byte-identical;
+    original-ID replay stayed frozen, then fresh real-provider calls passed all seven
+    current tasks with coherent audit and effective-selection evidence. This proves
+    the repaired boundaries, not completion of the remaining native-account and
+    whole-initiative qualification. Source-draft probes were inert, never applied.
+  status: closed
+  expected_control_types: [workflow, test, runbook, doc]
+  control_refs:
+  - type: workflow
+    path: platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/gateway_app.py
+    owner_repo: platform-engineering
+    note: Nonroot retained-audit handoff and private append preconditions precede serving and inference.
+  - type: workflow
+    path: platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/ollama_adapter.py
+    owner_repo: platform-engineering
+    note: Metadata and task output retain separate bounded reads without relaxing identity or output validation.
+  - type: test
+    path: platform-engineering/scripts/test_ai_task_routing.py
+    owner_repo: platform-engineering
+    note: Real HTTP registration, receipt replay and negative limits cover the inventory boundary and phase-safe fallback.
+  - type: test
+    path: platform-engineering/scripts/test_governed_ai_gateway_runtime.py
+    owner_repo: platform-engineering
+    note: Preserved history, private append state and missing/nonregular pre-dispatch denial complement the separately executed real-UID handoff proof.
+  - type: runbook
+    path: platform-engineering/products/governance-operations-console/runbooks/operate-complete-runtime.md
+    owner_repo: platform-engineering
+    note: Existing operator procedure owns source acceptance, publication, retained-state cutover, commissioning and unknown-outcome recovery.
+  - type: doc
+    path: security-architecture/docs/reviews/components/2026-10-24-configurable-ai-routing.md
+    owner_repo: security-architecture
+    note: Exact candidate/tree acceptance retains identity, account, network and model-permission boundaries for the actual repairs.
+  follow_up: {owner_repo: null, due_on: null, note: null}

@@ -1,0 +1,194 @@
+schema_version: 1
+id: 2026-10-24-premature-stop-after-authorized-planning
+title: Continue authorized work beyond planning checkpoints
+recorded_on: '2026-10-24'
+owner_repo: workspace-governance
+summary: The operator authorized proceeding with Epic 1313, but the agent ended at
+  a planning checkpoint and required another continue request despite an executable
+  next design step.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - workspace-governance
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: repeated-corrective-follow-up
+  title: Repeated unnecessary stop after authorization
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  - workflow-doctrine-gap
+  finding: 'A progress report was treated as the end of an authorized task. No operator
+    decision or external prerequisite required the stop; implementation preparation
+    could continue. Recurrence after OOS PR374 approval: the operator asked for a
+    quick status update during authorized Epic1313 execution; the agent sent a final
+    response and stopped while native current-head evidence was pending, despite no
+    new operator decision being required. The operator again had to request continuation.
+    A status question is steering, not a task-completion boundary.'
+  source_refs:
+  - openproject://work_packages/1313
+  - 'conversation: operator asked why did you stop after authorizing work'
+  - 'conversation: operator asked why did you stop again instead of finishing it after
+    PR374 status update'
+- id: incomplete-plan-narrative-and-result-readback
+  title: Source start exposed incomplete planned records and misread operation result
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: Created initiative records used prose without their required narrative
+    sections. The ready transition returned HTTP 200 with business status rejected,
+    but was reported as successful during continuity summarization. Native source
+    preflight correctly blocked source start. Repair the existing records and inspect
+    terminal business status; do not invent a new validator or defect.
+  source_refs:
+  - openproject://work_packages/1313
+  - openproject://work_packages/1316
+- id: landing-unit-id-contract-input
+  title: Planning checked architecture format but missed source resource identifier
+    format
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: Used Landing Unit names accepted by architecture/start but rejected by
+    the existing resource/cleanup manifest. Source continuation created a pristine
+    worktree before rejecting resource registration. Correct inputs to delivery-1313-prefixed
+    identifiers and use existing pristine-session reconstruction, preserving prior
+    artifacts. Do not widen validators or invent a new mechanism to accommodate malformed
+    inputs.
+  source_refs:
+  - openproject://work_packages/1313
+  - openproject://work_packages/1316
+- id: post-completion-custody-classification
+  title: Cross-component credential failure could incorrectly permit model fallback
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: At merged Platform source08c3498, a synthetic Codex turn completed successfully,
+    then a Vault account sink ProviderUnavailable escaped as a pre-submission availability
+    error. Task routing permits that class to use an explicit fallback. Existing tests
+    covered transport, Vault and routing separately but missed this cross-component
+    phase boundary. Correct the producer to fail closed on post-completion custody
+    failure and add a regression test, using the standing maintenance repair path
+    without another ART child.
+  source_refs:
+  - https://github.com/mfshaf7/platform-engineering/pull/334
+  - openproject://work_packages/1313
+  - openproject://work_packages/1316
+- id: runtime-packaging-dependency-closure
+  title: Local proof omitted packaging for a new runtime schema dependency
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: OOS1317 local source/API checks and1618tests passed, but the new unconditional
+    effective-selection schema import was not added to the Dockerfile's explicit contract
+    COPY list. PR374 image smoke caught this before merge; the exact pre-fix image
+    reproduced ENOENT at /app/contracts/governed-ai/effective-selection.schema.json.
+    Correct the same Landing Unit and run the existing actual image startup/worker
+    smoke before publication. Reuse the existing CI-equivalent validation requirement;
+    do not add a new control or ART child for this omission.
+  source_refs:
+  - openproject://work_packages/1317
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/374
+  - https://github.com/mfshaf7/operator-orchestration-service/actions/runs/40081815219
+- id: owner-evidence-test-environment-closure
+  title: Newly admitted composition tests inherited terminal operator identity
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - unsafe-assumption
+  finding: Platform PR336 source-local checks and GitHub CI passed, but its new
+    complete-runtime test wrapper inherited USER from the terminal. The existing
+    owner-evidence environment intentionally excludes that identity. Reproducing
+    the actual allowlist plus CI=true and NO_COLOR=1 failed the same admitted
+    suite with invalid operator identity. Set an explicit test fixture principal
+    in the tests, preserve runtime and evidence isolation, and verify the exact
+    admitted environment before republishing the same Landing Unit. No new
+    control, approval requirement or ART child is required.
+  source_refs:
+  - openproject://work_packages/1320
+  - https://github.com/mfshaf7/platform-engineering/pull/336
+- id: runtime-image-import-permission-precondition
+  title: Commissioning assumed access to the root-only container runtime
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Platform PR336 built and verified its fixed image without proving that
+    the admitted user-systemd operator could import it into k3s. The actual accepted
+    activation failed at k3s ctr images import because the containerd socket is
+    root-only and passwordless sudo is unavailable. The failed supervisor retries
+    were stopped. Source validation and image construction did not establish this
+    runtime prerequisite. Preserve the accepted source and owner state; resolve
+    image delivery through the existing platform boundary before claiming activation.
+    Do not grant broad host permissions or create another ART child to hide it.
+  source_refs:
+  - openproject://work_packages/1320
+  - https://github.com/mfshaf7/platform-engineering/pull/336
+- id: reviewed-candidate-versus-runtime-source-identity
+  title: Exact tree acceptance was not carried into runtime revision binding
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: After the image-delivery repair actually deployed and Console model
+    registry returned live HTTP200, final commissioning rejected a healthy
+    Platform provider. Actual catalog source was the squash-merge commit
+    cc254ddc4ee6d0b25e7d8f15ba6fd44507fd2bd4 while the resolved execution revision
+    incorrectly retained reviewed candidate bf5e6484edbb26baace6c88240c8de36c414196e.
+    The existing exact Security tree check had already passed. Tests covered
+    source gating and provider freshness separately with equal revision fixtures,
+    but omitted this real Git candidate-to-squash boundary. Preserve original
+    reviewed revisions and strict tree/clean-source acceptance; bind runtime
+    catalog and marker to the actual accepted execution revision. Add a real
+    Git squash regression and retain changed-tree/dirty-source denial. No
+    metadata forgery, post-review Platform pin edit, new mechanism or ART child.
+  source_refs:
+  - openproject://work_packages/1320
+  - https://github.com/mfshaf7/platform-engineering/pull/336
+  - https://github.com/mfshaf7/platform-engineering/pull/337
+- id: provider-metadata-versus-task-output-budget
+  title: Model verification applied task output limits to provider inventory
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: Actual Console model registration rejected qwen3:8b twice before inference
+    because the shared Ollama adapter applied the 4096-byte verification output
+    limit to GET /api/tags. The real inventory is 5242 bytes. An exact within-gateway
+    adapter diagnostic reproduced provider output exceeds the task byte limit,
+    while the same synthetic chat returned valid JSON. Separate bounded metadata
+    reads from bounded model output; retain inventory size, identity, output and
+    no-fallback integrity checks. Existing small-inventory tests missed the
+    cross-boundary case. Repair as bounded maintenance under existing1321 without
+    another ART child or architecture version.
+  source_refs:
+  - openproject://work_packages/1321
+  - https://github.com/mfshaf7/platform-engineering/pull/334
+- id: retained-volume-nonroot-audit-handoff
+  title: Nonroot commissioning did not prove append access to retained audit history
+  trigger: repeated-operator-friction
+  failure_classes:
+  - unsafe-assumption
+  finding: After live model registration and browser configuration passed,
+    actual Agent Console and intake calls disconnected while saving the gateway
+    audit record. Logs prove PermissionError on audit-ledger.jsonl; runtime UID1000
+    retained a root-owned0644 ledger in the existing root-owned0777 PVC directory.
+    New model-management state is correctly UID1000 and works. Source checks used
+    fresh writable volumes and missed historical root-owned state. Preserve all
+    history and original uncertain invocation identities. Prove a bounded nonroot
+    ownership handoff before admitting inference, with one writer during cutover;
+    no root grant, deleted ledger or invented success receipt.
+  source_refs:
+  - openproject://work_packages/1321
+  - https://github.com/mfshaf7/platform-engineering/pull/336
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+  control_refs: []
+  note: Existing continuation and owner controls were applied; concrete behavior repairs landed with boundary proof, including live retained-history preservation, frozen uncertain replay and all-seven-task real provider results. This closes the captured misses, not Epic1313 or its remaining native-account qualification. No new instruction, skill, validator or ART child was invented.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
