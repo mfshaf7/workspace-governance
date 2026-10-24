@@ -14,6 +14,9 @@ scope:
   - platform-engineering
   - workspace-governance
   - operator-orchestration-service
+  - governance-operations-console
+  - context-governance-gateway
+  - security-architecture
   related_products: []
   related_components: []
   change_classes:
@@ -184,10 +187,64 @@ signals:
   source_refs:
   - openproject://work_packages/1321
   - https://github.com/mfshaf7/platform-engineering/pull/336
+- id: required-empty-advisor-options
+  title: Console omitted a required empty array from Refinement advice
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  finding: Actual normal short-text Refinement advice returned OOS400 before
+    inference. The owner assist-request schema requires target.allowed_values
+    for every field type, while the Console adapter omits it when the list is
+    empty. Existing producer tests used only nonempty select choices. Preserve
+    the required empty array and prove the DTO boundary; do not widen OOS,
+    switch field types to hide the failure or invent a new ART child.
+  source_refs:
+  - openproject://work_packages/1321
+  - governance-operations-console/src/domain-workspaces/delivery/server/refinement-catalog-oos-client.ts
+  - operator-orchestration-service/contracts/refinement/assist-request.schema.json
+- id: refinement-provider-runtime-binding
+  title: Registered Refinement credential was not delivered to the CGG runtime
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  finding: >-
+    After the required-empty-array Console correction merged as PR119, the same
+    ordinary short-text request reached CGG and returned403 caller not admitted.
+    Live OOS has its dedicated Refinement caller secret reference and configured
+    CGG endpoint, but the actual shared CGG API deployment has no Refinement
+    caller secret environment binding. The current CGG profile renderer handles
+    Work Design and Agent Console but omits the registered Refinement binding.
+    The workspace composition contract already declares that binding. Restore
+    the existing declared boundary in its owner profile; preserve dedicated
+    credentials, default-off standalone behavior and real consumer proof.
+  source_refs:
+  - openproject://work_packages/1321
+  - context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+  - workspace-governance/contracts/developer-integration-profiles.yaml
+- id: refinement-projection-digest-contract
+  title: Consumer compared distinct CGG projection and assist-context digests
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - unsafe-assumption
+  finding: >-
+    With the registered credential delivered, CGG returned200 ready for the
+    original normal short-text advice, but OOS returned502 projection mismatch.
+    CGG request_digest authenticates canonical binding plus refinement_context;
+    binding.context_digest separately binds assist_request_digest. OOS instead
+    required both digests to equal assist_request_digest. Its readyProjection
+    fixture repeats that mistaken equality. Correct the consumer against the
+    existing owner digest construction, retain all caller/packet/task/context
+    checks, test rejection of the old digest and tampered binding, and repeat
+    actual normal Console proof. Do not weaken CGG receipts or invent ART work.
+  source_refs:
+  - openproject://work_packages/1321
+  - operator-orchestration-service/src/refinement/service.js
+  - operator-orchestration-service/test/refinement-service.test.js
+  - context-governance-gateway/apps/api/src/cgg_api/refinement.py
 resolution:
   after_action_ref: workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
   control_refs: []
-  note: Existing continuation and owner controls were applied; concrete behavior repairs landed with boundary proof, including live retained-history preservation, frozen uncertain replay and all-seven-task real provider results. This closes the captured misses, not Epic1313 or its remaining native-account qualification. No new instruction, skill, validator or ART child was invented.
+  note: Existing continuation controls and concrete owner corrections are covered by the four closed lessons. The unchanged normal short-text Refinement route completed through real CGG and Codex with current owner receipts after the producer, registered credential and digest-semantic repairs. No new instruction, skill, validator, control plane or ART child is needed;1321 retains final aggregate operating closeout truth.
 follow_up:
   owner_repo: null
   due_on: null
