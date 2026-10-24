@@ -1,0 +1,50 @@
+schema_version: 1
+id: 2026-10-25-codex-account-contention-fallback
+title: Classify native account contention before inference without losing explicit
+  fallback
+recorded_on: '2026-10-25'
+owner_repo: platform-engineering
+summary: Real Codex-primary concurrency returned invocation-in-progress for a distinct
+  request instead of using its configured local fallback. The reverse provider direction
+  exposes an untested admission boundary.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-24-premature-stop-after-authorized-planning.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - platform-engineering
+  - security-architecture
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Actual configuration13 uses gpt-6.1-sol high primary with verified qwen3:8b
+    false and gemma3:4b null fallbacks. A real Codex source-profile turn completed200
+    while an independent intake identity returned409 invocation-in-progress without
+    effective selection. VaultCodexAccount.project acquires account.lock before submission;
+    raw BlockingIOError escapes CodexBackend.adapter and is caught by InvocationJournal
+    as if its own invocation lock were busy. Classify only account projection entry
+    contention as pre-submission ProviderBusy, preserve post-submission uncertainty
+    and old frozen identities, and prove both provider directions with actual owner
+    mutex/routing and live evidence. No new ART item, policy or workflow engine.
+  source_refs:
+  - openproject://work_packages/1321
+  - platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/model_management.py
+  - platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/provider_accounts.py
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-25-native-account-admission-and-fallback.yaml
+  control_refs: []
+  note: Landed Platform341 and matching Security340 preserve the pre-submission boundary and account serialization; actual filesystem-mutex/routing, post-dispatch negatives and exact source CI validate the correction. The linked closed lesson explicitly retains required live reverse-fallback and current runtime proof in1321 rather than claiming operating completion from source controls.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

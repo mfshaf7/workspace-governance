@@ -1,0 +1,63 @@
+schema_version: 1
+id: 2026-10-25-native-account-admission-and-fallback
+title: Distinguish native account admission from invocation identity and submission
+recorded_on: '2026-10-25'
+owner_repo: platform-engineering
+summary: >-
+  The reverse real-provider concurrency test exposed an existing account-entry
+  error that typed provider fixtures and the opposite provider direction did
+  not exercise. Extend the existing selected adapter's pre-submission boundary;
+  preserve account serialization, explicit routes and original unknown outcomes.
+scope:
+  related_repos: [platform-engineering, security-architecture, workspace-governance]
+  related_products: [governance-operations-console]
+  related_components: []
+  change_classes: [source-behavior]
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-25-codex-account-contention-fallback.yaml
+- workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+- openproject://work_packages/1321
+- https://github.com/mfshaf7/platform-engineering/pull/341
+- https://github.com/mfshaf7/security-architecture/pull/340
+lessons:
+- id: native-account-entry-before-submission
+  title: Real provider admission must preserve configured fallback without inventing duplicate work
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    A real Codex-primary turn completed200 while a different intake identity
+    returned409 invocation-in-progress instead of using its explicit verified
+    local fallback. The native account mutex is acquired before dispatch, but
+    raw BlockingIOError escaped the selected adapter and reached the invocation
+    journal's broad lock handler. Injecting ProviderBusy and proving the opposite
+    provider direction could not establish this account-admission boundary.
+  impact: >-
+    The original real409 remains retained and is not relabeled successful.
+    The landed repair catches contention only while entering account
+    projection, using the existing ProviderBusy outcome. Dispatch, persistence
+    and context-exit failures remain outside that catch. The real filesystem
+    mutex through routed invocation reproduces409 before correction and proves
+    fallback, exhaustion and frozen replay afterward. Platform341 landed as
+    4bcd94ed47d0fc2c146848b6c8b249d4d7278bc1 with reviewed candidate tree
+    633b4b3c8b5a3f2a9f12a0ec1fa2721c6308866e; source CI40125875053 and
+    matching Security340 CI40126591168 passed. The phase guard passed25 focused
+    tests,90 integration tests and12 exact committed owner checks. Required
+    live reverse-direction proof remains non-source operating work in1321.
+    This learning closure does not claim live entitlement or whole-Epic
+    completion; old409 identities remain retained and cannot silently retry.
+  status: closed
+  expected_control_types: [workflow, test, runbook]
+  control_refs:
+  - type: workflow
+    path: platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/model_management.py
+    owner_repo: platform-engineering
+    note: Only account projection entry contention maps to existing ProviderBusy before submission; dispatch, persistence and context-exit stay outside that catch.
+  - type: test
+    path: platform-engineering/scripts/test_ai_task_routing.py
+    owner_repo: platform-engineering
+    note: Actual account projection and filesystem mutex through routed gateway reproduce409 and prove explicit fallback, exhaustion and exact frozen replay; separate post-dispatch/exit cases prohibit broad busy mapping.
+  - type: runbook
+    path: platform-engineering/products/governance-operations-console/runbooks/operate-complete-runtime.md
+    owner_repo: platform-engineering
+    note: Existing operator procedure states pre-submission availability, explicit fallback and retained uncertainty boundaries; no new workflow engine or policy is introduced.
+  follow_up: {owner_repo: null, due_on: null, note: null}
