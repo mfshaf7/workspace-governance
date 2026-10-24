@@ -1,0 +1,83 @@
+schema_version: 1
+id: 2026-10-25-agent-workspace-mode-completeness
+title: Complete Agent mode selection and workspace context identity
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: Workspace inspection confirms pre-existing modal accessibility, mode-to-context compatibility
+  and Registry identity flaws; current Workspace context is still a static preview rather than live
+  whole-Console data.
+regression_of: workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - context-governance-gateway
+  - governance-operations-console
+  - operator-orchestration-service
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine miss that
+    should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The live Console disables Workspace on Command Center because it only supplies page scope,
+    which matches the current contract and is not itself a defect. Opening a full workspace enables
+    the value in source but its native modal intercepts clicks on the floating Agent expander outside
+    that dialog. A fresh browser reproduced the blocked click in Dev Integration. Registered Workspace
+    Registry reaches the generic workspace factory fallback and receives Governed Releases context;
+    this was reproduced by the actual constructor and observed in the browser. Every current workspace
+    factory returns synthetic summaries. The browser policy permits focused interaction with the workspace
+    candidate, while the actual same-origin server denies that combination422; a source-derived route
+    probe confirmed the exact denial. Existing OOS and CGG contracts already support workspace scope.
+    These are pre-existing gaps, not a regression of the separately completed reference-count repair.
+    Whole-Console versus current-workspace meaning is being clarified with the operator before implementation;
+    missing whole-Console capability must not be represented as a violation of the narrower existing
+    contract.
+  source_refs:
+  - governance-operations-console/src/console-shell/context/agent-context-candidates.ts
+  - governance-operations-console/src/agent-console/model/agent-context-policy.ts
+  - governance-operations-console/src/agent-console/server/agent-request-policy.ts
+  - governance-operations-console/src/agent-console/presentation/model-interaction-dock.tsx
+  - governance-operations-console/src/teras/teras-modal-foundation.tsx
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-25-agent-workspace-mode-completeness.yaml
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/console-shell/context/agent-workspace-context.ts
+    owner_repo: governance-operations-console
+    note: Bounded validated owner reads, correct page identity, explicit partial/expired/preview coverage
+      and whole-Console Workspace context; no canonical authority.
+  - type: workflow
+    path: governance-operations-console/src/agent-console/state/use-agent-console-controller.ts
+    owner_repo: governance-operations-console
+    note: Stable request state, guarded asynchronous mode/session handover and queued open-and-run;
+      native presentation uses the existing modal-aware pattern.
+  - type: test
+    path: governance-operations-console/tests/console-architecture/agent-workspace-context.test.mjs
+    owner_repo: governance-operations-console
+    note: Actual producer-to-request matrix for every workspace identity, independent scope denial,
+      current DTO shapes, missing/stale/preview isolation and unchanged budget.
+  - type: test
+    path: governance-operations-console/tests/browser/agent-workspace.spec.mjs
+    owner_repo: governance-operations-console
+    note: Explicit synthetic browser proof of native-dialog interaction, keyboard/focus, mode handover,
+      retained prompts/transcripts and a pending invocation across navigation; not operating evidence.
+  - type: runbook
+    path: governance-operations-console/docs/product/agent-console-live-integration.md
+    owner_repo: governance-operations-console
+    note: Primary operator surface describes both modes, source coverage/expiry, native and nested
+      dialog behavior, exact admission boundaries and separate real commissioning proof.
+  note: Operator approved whole-Console Workspace semantics and the coherent repair. The landed Console
+    source and producer/native-browser tests implement the closing control; final accepted-runtime
+    commissioning remains explicit maintenance closeout, not an invented successor story.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
