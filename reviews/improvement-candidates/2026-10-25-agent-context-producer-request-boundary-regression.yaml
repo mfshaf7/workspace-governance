@@ -1,0 +1,66 @@
+schema_version: 1
+id: 2026-10-25-agent-context-producer-request-boundary-regression
+title: Exercise Agent context producers against the request boundary
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: Agent context construction can emit more references than the same Console
+  request validator permits; one-reference operating probes missed the producer-to-request
+  boundary.
+regression_of: workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - governance-operations-console
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The operator reported context candidate refs must contain at most 8 entries.
+    The current live Agent probe reports online, and a nine-reference same-origin
+    request reproduces HTTP422 with that exact error. Console request validation runs
+    before invokeGovernedAgent and any OOS or provider call. The Focus context builder
+    concatenates subject, source, receipt and evidence references without a list bound,
+    while parseStringList permits at most eight. The browser announces OOS submission
+    before server acceptance. The earlier real-provider Agent qualification supplied
+    a synthetic one-reference candidate, so it did not prove actual page-context construction.
+    The original browser request was not captured; its exact reference count and selected
+    source remain unverified. Repair should align the existing producer and request
+    contract, preserve canonical evidence and use producer-to-route coverage rather
+    than relax limits or claim a model failure.
+  source_refs:
+  - governance-operations-console/src/agent-console/server/agent-request-policy.ts
+  - governance-operations-console/src/console-shell/context/agent-context-candidates.ts
+  - governance-operations-console/src/agent-console/state/use-agent-console-controller.ts
+  - governance-operations-console/tests/console-architecture/console-agent-context.test.mjs
+  - https://github.com/mfshaf7/governance-operations-console/pull/120
+  - https://github.com/mfshaf7/security-architecture/pull/342
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-25-agent-context-producer-request-boundary.yaml
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/console-shell/context/agent-context-candidates.ts
+    owner_repo: governance-operations-console
+    note: Unique stable reference selection shares the unchanged server limit, discloses omissions and retains full owner evidence.
+  - type: test
+    path: governance-operations-console/tests/console-architecture/console-agent-context.test.mjs
+    owner_repo: governance-operations-console
+    note: Actual Focus producer output enters the real request validator at the limit, beyond it and with duplicates; independent safety denials remain.
+  - type: runbook
+    path: governance-operations-console/docs/product/agent-console-live-integration.md
+    owner_repo: governance-operations-console
+    note: Defines bounded reference projection and distinguishes sending context from acknowledged OOS admission.
+  note: Closed on landed Console120 source controls and exact Security342 acceptance. Final accepted-runtime browser proof remains explicit maintenance closeout, not a claim made by this source-learning record.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
