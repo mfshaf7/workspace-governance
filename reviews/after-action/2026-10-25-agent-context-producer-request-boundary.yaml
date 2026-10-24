@@ -1,0 +1,66 @@
+schema_version: 1
+id: 2026-10-25-agent-context-producer-request-boundary
+title: Exercise actual Agent context construction against its request boundary
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: >-
+  The previous real-provider qualification used a synthetic one-reference
+  candidate. Actual default Focus context contained nine references and its
+  normal browser request failed before OOS. Repair the existing bounded
+  projection and test producer output through the unchanged request boundary.
+scope:
+  related_repos: [governance-operations-console, security-architecture, workspace-governance]
+  related_products: [governance-operations-console]
+  related_components: []
+  change_classes: [source-behavior]
+source_refs:
+- workspace-governance/reviews/improvement-candidates/2026-10-25-agent-context-producer-request-boundary-regression.yaml
+- workspace-governance/reviews/after-action/2026-10-25-authorized-continuation-and-execution-boundaries.yaml
+- https://github.com/mfshaf7/governance-operations-console/pull/120
+- https://github.com/mfshaf7/security-architecture/pull/342
+lessons:
+- id: actual-context-producer-to-request-boundary
+  title: A successful model call does not prove page-context construction
+  failure_class: learning-closure-regression
+  trigger: closed-lesson-regression
+  finding: >-
+    Focus concatenated subject, source, receipt and evidence references without
+    the request validator's eight-entry bound. A fresh browser's original
+    default selection sent nine references and returned422 with the reported
+    error. The UI claimed OOS submission before server acceptance. The earlier
+    real model call used one synthetic reference, so it bypassed this producer
+    boundary despite exercising the actual downstream services. The original
+    operator browser request itself was not captured and is not reconstructed.
+  impact: >-
+    Console120 landed reviewed Gary candidate
+    f7c0121992e6e0a56146fd5aa4d331270c1e833e as identical-tree merge
+    34ed8eaa8c1681a3fb75c08be5b806ed748cd439. It selects unique references in
+    stable subject/source/receipt/evidence order within the existing limit,
+    explicitly discloses bounded selection and preserves canonical owner
+    evidence. The server shares the same unchanged list limit and retains
+    independent rejection. Initial status text now describes validation.
+    Producer/request tests reproduce the old422 and cover the limit, larger
+    lists, duplicates, unchanged input and safety denials. All708 product tests,
+    architecture guards, typecheck, production build, repository validation and
+    dependency audit passed; exact source CI40133194994 passed. Security342
+    accepts actual merged Console source with all10 paired source/tree/
+    architecture tokens matched; exact Security CI40133483382 passed and merge
+    554311ea8ffe1895238d65c1fa664ba8fc0f52b0 landed. Final accepted-runtime
+    activation and actual repaired browser proof remain maintenance closeout;
+    source-learning closure does not claim that later operating success.
+  status: closed
+  expected_control_types: [workflow, test, runbook]
+  control_refs:
+  - type: workflow
+    path: governance-operations-console/src/console-shell/context/agent-context-candidates.ts
+    owner_repo: governance-operations-console
+    note: Bounded unique reference projection retains complete owner evidence and visible selection disclosure; no permission or admission bypass.
+  - type: test
+    path: governance-operations-console/tests/console-architecture/console-agent-context.test.mjs
+    owner_repo: governance-operations-console
+    note: Actual producer output passes through existing request and CGG-required policy checks; boundary, duplicates, immutability and independent denial cases are exercised.
+  - type: runbook
+    path: governance-operations-console/docs/product/agent-console-live-integration.md
+    owner_repo: governance-operations-console
+    note: Existing primary surface explains selected references, full evidence location and acknowledgement boundaries without adding another workflow.
+  follow_up: {owner_repo: null, due_on: null, note: null}
