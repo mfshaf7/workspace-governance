@@ -1,0 +1,108 @@
+schema_version: 1
+id: 2026-09-12-prototype-maturity-preflight-miss
+title: Prototype Maturity work exposed late cross-owner assumptions
+recorded_on: '2026-09-12'
+owner_repo: workspace-governance
+summary: >-
+  The operator reports that Feature #920 required repeated correction after work
+  started because the full owner and workflow boundary was not inspected first.
+  Feature #921 must not repeat that sequence; its source, target, identity,
+  runtime, and evidence contracts need one pre-implementation decision.
+regression_of: null
+status: closed
+source_type: conversation
+scope:
+  related_repos:
+    - workspace-governance
+    - workspace-prototype-studio
+    - operator-orchestration-service
+  related_products:
+    - governance-operations-console
+  related_components: []
+  change_classes:
+    - architecture-shaping
+signals:
+  - id: prototype-maturity-late-cross-owner-discovery
+    title: Feature 920 needed repeated correction after implementation began
+    trigger: repeated-operator-friction
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      The operator explicitly called out narrow inspection and repeated late
+      fixes during #920. Initial #921 inspection already found an ambiguous
+      Delivery-versus-source-custody closure rule and no authorized closure
+      writer in the currently commissioned Prototype identities. These are
+      architecture decisions, not isolated code defects.
+    source_refs:
+      - conversation:2026-09-12-feature-921-preflight-callout
+      - openproject://work_packages/920
+      - openproject://work_packages/921
+  - id: prototype-closure-agent-source-repository-admission-miss
+    title: Closure source owners were absent from Agent Gary's admitted repository set
+    trigger: machine-visible-workflow-drift
+    failure_classes:
+      - workflow-doctrine-gap
+      - rollout-evidence-gap
+    finding: >-
+      OOS work continue for #1104 failed with agent_source_repository_not_admitted.
+      The selected-repository App and pinned Platform/OOS definitions omit both
+      WGCF (#1104) and the Console (#1108), although both were planned as
+      source-backed Landing Units in the approved #892 architecture packet.
+      Source repository admission was not verified before #921 implementation.
+    source_refs:
+      - openproject://work_packages/1104
+      - openproject://work_packages/1108
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: workspace-governance
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    type: contract
+    note: Current architecture topology and v6 runtime activation chains keep human authority, source ownership
+      and commissioning explicit.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    type: workflow
+    note: Configured-path preflight checks narrative, exact accepted-base evidence coverage, source admission and
+      current owner boundaries before source resources.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    type: test
+    note: Existing regressions cover incomplete accepted-base evidence, terminal narratives, semantic supersession
+      and recovery.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/source-repository-admission.js
+    type: workflow
+    note: Checks the exact current provider and admitted source-owner boundary before source work.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. Reconciled the unique historical
+    PR191 record without losing its original findings. Current whole-initiative planning, explicit v6 activation
+    ownership and configured source preflight cover the missed cross-owner, identity and accepted-base boundaries
+    before implementation. Actual public app source admission, Prototype Maturity/Closure and downstream product
+    classification completed under the reviewed owner controls. This closes the planning lesson against current
+    source and operating proof; it does not add a project-specific rule or expand every prototype into mandatory
+    Delivery.
+
+
+    Historical resolution context (not current status): Capture only the signal now. Do not auto-land a new validator
+    or expand Feature #921 from this record before the cross-owner preflight is discussed.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-09-30", "note":
+    "Compare the #921 architecture packet and execution against #920 late discoveries, then propose the smallest
+    durable preflight control.", "owner_repo": "workspace-governance"}'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

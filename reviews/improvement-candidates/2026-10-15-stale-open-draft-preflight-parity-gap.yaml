@@ -7,7 +7,7 @@ summary: The managed mutation-draft validator accepted malformed stale-open comp
   evidence that the live OOS broker rejected, contrary to the documented preflight
   contract.
 regression_of: null
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -33,15 +33,35 @@ signals:
   - runtime://oos/delivery-art/mutation-draft/stale-open-close-validation-parity
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/art-workflow-artifacts.js
+    type: validator
+    note: All completion-evidence mutations, including stale-open closeout, use the same native semantic validator.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/art-workflow-artifacts.test.js
+    type: test
+    note: Exercises completion and stale-open draft parity with malformed native completion prose.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/delivery-execution-work-sessions.md
+    type: runbook
+    note: Documents evidence-only parent reconciliation and separate earned review.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The shared completion-evidence
+    mutation preflight is already landed and covers stale-open drafts. Current full entered-field preflight passed
+    before six actual Console parent closeouts; each returned canonical done with valid evidence. The separate earned
+    PI review and completion also completed through the existing owner path. Close against actual shared validation
+    and operating proof, without inventing another parent-completion mechanism.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Add shared completion-evidence
+    validation to the stale-open-close managed draft path with regression tests, then land through owner-maintenance
+    review before child 1288 starts.", "owner_repo": "operator-orchestration-service"}'
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Add shared completion-evidence
-    validation to the stale-open-close managed draft path with regression tests, then land
-    through owner-maintenance review before child 1288 starts.'
+  owner_repo: null
+  due_on: null
+  note: null

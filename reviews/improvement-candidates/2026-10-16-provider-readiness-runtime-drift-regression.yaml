@@ -9,7 +9,7 @@ summary: >-
   provider integrity checks rejected inference. The earlier version-drift
   lesson reconciled a pin but did not make readiness observe the provider.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-09-governed-ai-runtime-version-drift.yaml
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -47,7 +47,8 @@ resolution:
   - type: contract
     path: platform-engineering/security/governed-ai-model-profiles.yaml
     owner_repo: platform-engineering
-    note: Platform PR317 merged 6d7536e6f5f6815bb088214f16acbd5aabcbc00f pins all five existing local bindings to operator-approved 0.40.5 and unchanged exact model digest.
+    note: Platform PR317 merged 6d7536e6f5f6815bb088214f16acbd5aabcbc00f pins all five existing local bindings to
+      operator-approved 0.40.5 and unchanged exact model digest.
   - type: test
     path: platform-engineering/scripts/test_governed_ai_ollama_adapter.py
     owner_repo: platform-engineering
@@ -55,26 +56,46 @@ resolution:
   - type: test
     path: platform-engineering/scripts/test_governed_ai_gateway_runtime.py
     owner_repo: platform-engineering
-    note: Readiness distinguishes actual provider integrity from eligible policy and deduplicates identical binding observations.
+    note: Readiness distinguishes actual provider integrity from eligible policy and deduplicates identical binding
+      observations.
   - type: doc
     path: security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.md
     owner_repo: security-architecture
-    note: Security PR275 merged 63956e64e9eedeaacc73c4f54fd11b77a7ee4f22 accepts the exact source set and Platform tree before operating activation.
-  note: >-
-    Approved source repair and exact Security acceptance landed. Normal
-    activation passed at 12:14Z and the existing governed Agent Console
-    positive, unauthorized-denial and synthetic-session-close proof passed.
-    Actual gateway metadata reports 0.40.5 with all five profiles ready. This
-    candidate remains open only for reconciliation in the already pending
-    Workspace Governance final-guidance work, not another source repair.
-    No new ART child, model, provider, data scope or source authority was added.
+    note: Security PR275 merged 63956e64e9eedeaacc73c4f54fd11b77a7ee4f22 accepts the exact source set and Platform
+      tree before operating activation.
+  - owner_repo: platform-engineering
+    path: platform-engineering/products/governance-operations-console/runbooks/operate-complete-runtime.md
+    type: runbook
+    note: Requires current actual provider verification, exact source acceptance and normal activation.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The historical provider repair
+    is landed and the current reviewed bindings supersede its earlier 0.40.5 observation. Normal complete-runtime
+    activation on October24 and the native full reader passed with the accepted current source and active governed
+    source profile. Exact version/digest integrity remains enforced; no downgrade, wildcard, model replacement or
+    provider authority expansion was used. The existing final guidance and operating witness now complete the previously
+    pending reconciliation.
+
+
+    Historical resolution context (not current status): Approved source repair and exact Security acceptance landed.
+    Normal activation passed at 12:14Z and the existing governed Agent Console positive, unauthorized-denial and
+    synthetic-session-close proof passed. Actual gateway metadata reports 0.40.5 with all five profiles ready. This
+    candidate remains open only for reconciliation in the already pending Workspace Governance final-guidance work,
+    not another source repair. No new ART child, model, provider, data scope or source authority was added.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Reconcile landed controls
+    and retained operating evidence through the existing final-guidance Landing Unit; do not manufacture another
+    runtime source successor.", "owner_repo": "platform-engineering"}'
 follow_up:
-  owner_repo: platform-engineering
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Reconcile landed
-    controls and retained operating evidence through the existing final-guidance Landing Unit;
-    do not manufacture another runtime source successor.'
+  owner_repo: null
+  due_on: null
+  note: null

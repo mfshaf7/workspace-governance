@@ -11,7 +11,7 @@ summary: >-
   894 Landing Units as covered even though it did not prove every required
   evidence-kind and fidelity pair used by configured-path preflight.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-12-wgcf-owner-evidence-profile-regression.yaml
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -47,35 +47,57 @@ resolution:
   - type: contract
     path: workspace-governance-control-fabric/contracts/delivery-art-work-session/evidence-profile.json
     owner_repo: workspace-governance-control-fabric
-    note: >-
-      WGCF PR 104 adds real-git owner-test acquisition alongside the existing
-      real-git source-diff validation and unblocks configured-path admission.
-  note: >-
-    Immediate containment extends the existing WGCF base-owned profile with
-    real-git test acquisition and proved configured-path admission for 1267.
-    No ART child, evidence mechanism, or architecture change is required.
-follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-23 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22
-    after interruption crossed the operator''s local midnight. Required evidence-kind/fidelity
-    coverage still belongs to the existing final-guidance work; source containment does not
-    close this lesson. The next accountable review is October23; earlier missed checkpoints
-    below are retained. This is a review appointment, not completion evidence. October20 review
-    checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21
-    is the next review checkpoint, not a completion promise or permission for another closing
-    control. The 2026-10-16 follow-up was missed while Epic1275 qualification remained blocked.
-    The October18 checkpoint was also missed; reviewed October21, source containment is still
-    not lesson closure. Extend the existing initiative compatibility validator to prove every
-    required evidence-kind and fidelity pair before the first source session. Do not implement
-    the durable closing control without operator approval.
+    note: WGCF PR 104 adds real-git owner-test acquisition alongside the existing real-git source-diff validation
+      and unblocks configured-path admission.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    type: workflow
+    note: Configured-path preflight checks narrative, exact accepted-base evidence coverage, source admission and
+      current owner boundaries before source resources.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    type: test
+    note: Existing regressions cover incomplete accepted-base evidence, terminal narratives, semantic supersession
+      and recovery.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. Current configured-path preflight
+    checks required source-evidence kinds and the declared merge-ready case fidelities on the exact accepted base
+    before source resources or credentials. Existing positive and incomplete-profile tests exercise that boundary,
+    and the real app source sessions completed it. Evidence kinds and conformance-case fidelities are independent
+    requirements, not a fabricated Cartesian pair or new case_kind field. The original proposed wording is superseded
+    by that actual contract.
 
-    Re-reviewed on 2026-10-19 during Epic1275 source preparation: the lesson remains open.
-    The existing final-guidance owner still owes the control described above; current admission/authoring
-    tests do not close that work. Next accountable review is 2026-10-20, not a claimed completion
-    deadline. This records a missed follow-up and its current disposition; it does not erase
-    the prior due dates or mark unlanded controls as implemented.'
+
+    Historical resolution context (not current status): Immediate containment extends the existing WGCF base-owned
+    profile with real-git test acquisition and proved configured-path admission for 1267. No ART child, evidence
+    mechanism, or architecture change is required.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-23
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Re-reviewed October22 after
+    interruption crossed the operator''s local midnight. Required evidence-kind/fidelity coverage still belongs
+    to the existing final-guidance work; source containment does not close this lesson. The next accountable review
+    is October23; earlier missed checkpoints below are retained. This is a review appointment, not completion evidence.
+    October20 review checkpoint is overdue at the October21 local-date continuation. Reviewed still open; October21
+    is the next review checkpoint, not a completion promise or permission for another closing control. The 2026-10-16
+    follow-up was missed while Epic1275 qualification remained blocked. The October18 checkpoint was also missed;
+    reviewed October21, source containment is still not lesson closure. Extend the existing initiative compatibility
+    validator to prove every required evidence-kind and fidelity pair before the first source session. Do not implement
+    the durable closing control without operator approval.
+Re-reviewed on 2026-10-19 during Epic1275 source preparation:
+    the lesson remains open. The existing final-guidance owner still owes the control described above; current admission/authoring
+    tests do not close that work. Next accountable review is 2026-10-20, not a claimed completion deadline. This
+    records a missed follow-up and its current disposition; it does not erase the prior due dates or mark unlanded
+    controls as implemented.", "owner_repo": "workspace-governance"}'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

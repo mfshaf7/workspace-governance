@@ -7,7 +7,7 @@ summary: A maintenance landing unit again opened its first pull request through 
   ambient human GitHub session even though the closed Agent-source workflow requires
   Agent Gary to author and publish the review branch.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-09-30-agent-source-operator-preflight-regression.yaml
-status: new
+status: closed
 source_type: conversation
 scope:
   related_repos:
@@ -34,15 +34,36 @@ signals:
   - https://github.com/mfshaf7/operator-orchestration-service/pull/334
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/owner-source-cli.js
+    type: workflow
+    note: The bounded maintenance prepare/publish command resolves the exact protected Gary scope and refuses ambient-human
+      implementation publication.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/owner-source-cli.test.js
+    type: test
+    note: Covers admitted provider identity and maintenance publication boundaries.
+  - owner_repo: workspace-governance
+    path: workspace-governance/skills-src/source-implementation-operator/SKILL.md
+    type: skill
+    note: Separates Gary source authorship/publication from delegated human review and merge.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The deterministic owner-maintenance
+    source path is already landed and used for the reviewed Console, OOS and Security repairs. Gary authored and
+    published those source changes; mfshaf7 performed exact-head review and the permitted merge. The current closure
+    unit follows that same path. No new identity, privilege or fallback is required, and no historical human publication
+    is relabeled as Gary work.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Select and land one deterministic
+    maintenance publication path that cannot use the ambient human gh session; retain human credentials only for
+    exact-head review and merge.", "owner_repo": "workspace-governance"}'
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Select and land
-    one deterministic maintenance publication path that cannot use the ambient human gh session;
-    retain human credentials only for exact-head review and merge.'
+  owner_repo: null
+  due_on: null
+  note: null

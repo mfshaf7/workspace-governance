@@ -10,7 +10,7 @@ summary: >-
   complete. Structural graph validation passed because the contradictory
   narrative dependency was not machine-readable.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
-status: new
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -50,16 +50,45 @@ signals:
   - workspace-governance/reviews/improvement-candidates/2026-09-09-delivery-plan-temporal-satisfiability.yaml
 resolution:
   after_action_ref: null
-  control_refs: []
-  note: null
+  control_refs:
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session-controller.js
+    type: workflow
+    note: Configured-path preflight checks narrative, exact accepted-base evidence coverage, source admission and
+      current owner boundaries before source resources.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    type: test
+    note: Existing regressions cover incomplete accepted-base evidence, terminal narratives, semantic supersession
+      and recovery.
+  - owner_repo: workspace-governance
+    path: workspace-governance/contracts/delivery-art-operator-path.yaml
+    type: contract
+    note: Current architecture topology and v6 runtime activation chains keep human authority, source ownership
+      and commissioning explicit.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The landed primary procedure
+    requires reading completion narratives alongside the full machine-readable start/close plan before implementation
+    and resolving later-child prerequisites that would make a predecessor impossible to close. Configured-path preflight
+    exposes native narrative blockers and current conformance obligations. The accepted initiative completed its
+    whole ordered scope. This is a whole-plan review plus existing executable gates, not a claim that arbitrary
+    prose dependencies are parsed automatically or a reason to add a new rigid parser.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Extend Delivery architecture
+    planning and validation so completion narratives cannot add hidden cross-child prerequisites that contradict
+    the machine-readable execution plan; close this regression in the existing work item 1299 final-guidance Landing
+    Unit.", "owner_repo": "workspace-governance"}'
 follow_up:
-  owner_repo: workspace-governance
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Extend Delivery
-    architecture planning and validation so completion narratives cannot add hidden cross-child
-    prerequisites that contradict the machine-readable execution plan; close this regression
-    in the existing work item 1299 final-guidance Landing Unit.'
+  owner_repo: null
+  due_on: null
+  note: null

@@ -85,28 +85,81 @@ quiesced old writers and archived only the proven abandoned records. Existing
 credential and record refresh was restored. The original Console1299 session
 recovered its owner evidence and merge-ready custody without republishing the
 source or recreating the product. These are bounded recovery and continuation
-proofs; the primary initiative's final acceptance remains separate.
+proofs; the primary initiative's separate final acceptance is recorded below.
 
 ## Final Source And Follow-Up Boundary
 
-The remaining primary procedure, rollback and cleanup instructions are in
+The primary procedure, rollback and cleanup instructions are in
 [Console Operational Capabilities](../docs/console-operational-capabilities.md).
-The final source unit also corrects a workspace audit that required an
+The final source unit corrected a workspace audit that required an
 architecture-case binding for every Inventory-derived owner even when the
 ordinary product has no architecture cases. Core activation requirements and
 native exact-base case coverage remain enforced. No app source was changed to
 manufacture an architecture evidence claim.
 
-On October24 the operator explicitly requested that every pending improvement
-candidate be resolved and closed after the Epic work, including the unique
-records in older PRs173 and191. Preserving records or advancing review dates
-does not satisfy that request. The eleven pre-existing open lessons retain
-their actual owners and missed checkpoint history while awaiting that closure
-work. The newly exposed PID-reuse lesson has its landed repair and actual
-activation/continuation proof. No unproven source or historical finding is
-deleted, and this report does not falsely close the remaining lessons.
+## Terminal Primary Acceptance
 
-Final system completion still requires this source unit's finalized Review
-Packet, exact source admission where required, parent and primary PI/Epic
-acceptance, exact cleanup and a passing WGCF workspace clean-state receipt.
-Those later results must come from their owners rather than be invented here.
+The actual Console applied Epic1275 closeout at `2026-10-24T01:49:50.249Z`.
+Canonical status is `done` in PM² `Closing`. The guided command recorded the
+System Demo, Closing transition and Inspect & Adapt review after the owner
+reported zero open descendants, blockers, missing evidence, weak evidence,
+weak done narratives and missing owners.
+
+| Boundary | Actual terminal evidence |
+| --- | --- |
+| Final guidance source | WG PR300 merged at `2a6ed1dfd5849f837083eadba629f65ab76cf49e`; finalized Review Packet `wgcf://artifacts/delivery-art/sha256/d37e2ff2b00baa587948eb0ac118be06ee53ac64b85301b5ae6f7fa516fb0683`. |
+| Source retirement | Native1299 cleanup receipt is complete: its session-created worktree and local/remote branches were removed. Exact owner strict audit passed. Revocation operation `platform-operation:9c0e079208f9c04569185196` succeeded, receipt `sha256:2bf7cc0e06a7ca8cf8bd76eed33337528802a5789e77e9a7fa7557d7e74e4c69`. |
+| Parent coverage | Features1277,1280,1287,1290,1293 and1296 separately returned canonical `done` with valid completion evidence through the Console completed-parent route; Feature1283 was already complete. |
+| Earned objective | Objective1276 recorded actual value10 / `Met` with the accepted-outcome rationale, then completed through a separate Console decision with valid native evidence. |
+| Epic closeout | Applied command `delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce`; receipt `oos://delivery-closeout-receipts/delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce`; digest `sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0`. |
+| Pre-maintenance workspace state | WGCF `authority:workspace-clean-state` receipt `control-receipt:ec2905b2837322cc5aba35b9` passed all five branch, contract, parity, structure and layout checks after primary source cleanup. |
+
+Security PR330 accepted the final guidance source in the existing composed
+decision. Normal activation `20261024T012148Z-activate.json` and the unflagged
+full nested Security reader passed. The actual Console renewed approved source
+access after hourly credential expiry using the existing approval, then revised
+evidence for the same source head without replacing earlier immutable custody.
+Console PR117 and OOS PR373 supply those shared controls; the real original1299
+session provided their operating witness. They remain shared delivery behavior
+for later work, rather than app-specific completion exceptions.
+
+Fresh canonical Console reads at `2026-10-24T01:51:43.133012Z` observed the Epic's
+closed outcome history and qualification1298's done state with valid evidence.
+The capability catalogue observation timestamp now records this readback,
+replacing the stale October15 audit timestamp. This observes retained genuine
+qualification evidence; it does not manufacture another execution or grant
+future reuse without fresh owner readiness.
+
+## Pending-Lesson Reconciliation
+
+The operator requested resolution and closure of every pending candidate after
+the Epic. This maintenance source records those resolutions for eleven carried
+records and four unique historical records from
+[PR173](https://github.com/mfshaf7/workspace-governance/pull/173) and
+[PR191](https://github.com/mfshaf7/workspace-governance/pull/191).
+Original findings, dates, regression links and missed follow-up history remain
+intact. Existing durable controls and actual operating evidence close the
+lessons; obsolete proposals are identified rather than implemented as new
+mechanisms. Exactly three later operating-truth signals join the original72.
+
+The older latency finding already has the narrow exact-item status API and a
+test that rejects full-project reads. Security-index closure uses existing
+structured-record and generated-index checks plus the primary procedure. The
+reopened-work finding does not authorize reuse or replacement of terminal
+Landing Unit custody. Private client source, hosting and stage/prod remain
+explicitly outside this accepted public local exercise.
+
+The September6 Kubernetes finding was checked against the actual existing
+Platform controls at `5f2ea37da1b8a50ea90e6929fb30b894ce3c0ad8`. The native
+`NativeWorkflowCredentialOwnershipTests` passed four cases in32.876seconds with
+the documented `CONSOLE_NATIVE_KUBE_PROOF_NAMESPACE` opt-in. All five actual
+workflow producers' revocation patches passed server strategic dry-run with
+their declared mount paths removed and deployment resource versions unchanged.
+Read-only metadata checks of the five active workflow Secrets found no
+client-side last-applied credential copy. Synthetic test objects were removed;
+no real credential or deployment was replaced for this proof.
+
+The observation-metadata change requires the existing exact-source Security
+reacceptance and normal activation path. Maintenance source cleanup and its
+final workspace clean-state receipt remain separately recorded by their owners;
+the earlier pre-maintenance receipt cannot stand in for those later results.

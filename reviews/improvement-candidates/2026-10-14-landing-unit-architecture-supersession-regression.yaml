@@ -10,7 +10,7 @@ summary: >-
   unrelated correction stranded an otherwise unchanged Landing Unit and
   offered only recovery paths that truthfully did not match its state.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-04-owner-evidence-profile-coverage-regression.yaml
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -135,36 +135,53 @@ resolution:
   - type: validator
     path: workspace-governance-control-fabric/packages/control_fabric_core/src/control_fabric_core/delivery_art_readiness.py
     owner_repo: workspace-governance-control-fabric
-    note: >-
-      WGCF PR 110 keeps full current semantic validation on the active
-      Architecture Packet and Review Packet lineage while resolving an
-      Architecture Packet superseded ancestor through exact canonical
-      integrity and custody evidence without reactivating its obsolete
-      semantics.
+    note: WGCF PR 110 keeps full current semantic validation on the active Architecture Packet and Review Packet
+      lineage while resolving an Architecture Packet superseded ancestor through exact canonical integrity and custody
+      evidence without reactivating its obsolete semantics.
   - type: doc
     path: security-architecture/docs/reviews/components/2026-10-15-delivery-art-superseded-architecture-lineage.md
     owner_repo: security-architecture
-    note: >-
-      Security PR 259 approves the exact WGCF repair head for source merge and
-      bounded dev-integration replay without granting stage or production
-      authority.
-  note: >-
-    The historical-supersession signal is durably repaired by WGCF PR 110,
-    approved by Security PR 259, and deployed as image sha-b52c8c4. Work item
-    1291 remains open while OOS repairs the active-Landing-Unit compatibility
-    projection for a recovery-only producer identity change and then repeats
-    the exact Security, merge, and operating-readiness sequence. The broader
-    candidate remains accepted until item 1299 closes the combined lesson.
+    note: Security PR 259 approves the exact WGCF repair head for source merge and bounded dev-integration replay
+      without granting stage or production authority.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-art-work-session.test.js
+    type: test
+    note: Existing regressions cover incomplete accepted-base evidence, terminal narratives, semantic supersession
+      and recovery.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/work-session.js
+    type: workflow
+    note: Compares applicable Landing Unit and human-gate semantics without invalidating unrelated unchanged work.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The landed OOS and WGCF controls
+    distinguish immutable historical custody from current applicable Landing Unit semantics. Existing tests cover
+    unrelated architecture changes and recovery-only authority attempt changes while retaining denials for real
+    semantic changes. The original session completed without recreating product or source history; the combined
+    lesson is now closed with the completed final guidance and operating proof.
+
+
+    Historical resolution context (not current status): The historical-supersession signal is durably repaired by
+    WGCF PR 110, approved by Security PR 259, and deployed as image sha-b52c8c4. Work item 1291 remains open while
+    OOS repairs the active-Landing-Unit compatibility projection for a recovery-only producer identity change and
+    then repeats the exact Security, merge, and operating-readiness sequence. The broader candidate remains accepted
+    until item 1299 closes the combined lesson.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: The 2026-10-16 follow-up
+    was missed while Epic1275 qualification remained blocked. Re-review on 2026-10-18 through the same1299 closure
+    path; preserve the original missed date and do not imply closure. Land active-Landing-Unit semantic supersession
+    in the existing 1285 OOS Landing Unit, prove unchanged and changed projection cases, then close this regression
+    through the planned 1299 Workspace Governance cleanup landing.", "owner_repo": "operator-orchestration-service"}'
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: The 2026-10-16
-    follow-up was missed while Epic1275 qualification remained blocked. Re-review on 2026-10-18
-    through the same1299 closure path; preserve the original missed date and do not imply
-    closure. Land active-Landing-Unit semantic supersession in the existing 1285 OOS Landing
-    Unit, prove unchanged and changed projection cases, then close this regression through
-    the planned 1299 Workspace Governance cleanup landing.'
+  owner_repo: null
+  due_on: null
+  note: null

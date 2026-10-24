@@ -25,7 +25,7 @@ summary: >-
   it admitted explicit evidence failure but not interruption before the first
   result was recorded.
 regression_of: null
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -171,46 +171,62 @@ resolution:
   - type: workflow
     path: operator-orchestration-service/src/delivery-art/lifecycle-cli-adapters.js
     owner_repo: operator-orchestration-service
-    note: >-
-      OOS PR 339 detaches live operating evidence from the supervising source
-      executor process group so a governed whole-composition teardown can
-      restore the executor and still return the exact result.
+    note: OOS PR 339 detaches live operating evidence from the supervising source executor process group so a governed
+      whole-composition teardown can restore the executor and still return the exact result.
   - type: workflow
     path: operator-orchestration-service/src/delivery-art/work-session-controller.js
     owner_repo: operator-orchestration-service
-    note: >-
-      OOS PR 340 admits the existing evidence-preserving replacement path when
-      an exact merged acquisition was interrupted before any result was
-      recorded, while forcing the successor to reacquire all operating
-      evidence.
+    note: OOS PR 340 admits the existing evidence-preserving replacement path when an exact merged acquisition was
+      interrupted before any result was recorded, while forcing the successor to reacquire all operating evidence.
   - type: workflow
     path: platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
     owner_repo: platform-engineering
-    note: >-
-      Platform PR 309 serializes whole-composition proof and replays only a
-      digest-valid receipt bound to the exact reviewed revisions, Security
-      decision, complete proof shape, and restored normal availability.
+    note: Platform PR 309 serializes whole-composition proof and replays only a digest-valid receipt bound to the
+      exact reviewed revisions, Security decision, complete proof shape, and restored normal availability.
   - type: doc
     path: security-architecture/docs/reviews/components/2026-10-15-governance-console-platform-operation.md
     owner_repo: security-architecture
-    note: >-
-      Security PR 258 accepts the exact OOS PR 339 and 340 and Platform PR 309
-      recovery boundary for bounded dev-integration commissioning.
-  note: >-
-    The source and recovery controls are merged. The final Platform operating
-    receipt `20261015T105042Z-verify-operating.json` passed activation,
-    restart, rollback, teardown, restored normal availability, and exact
-    receipt replay; OOS then issued readiness and closed work item 1291. Item
-    1299 still needs to bind these controls into the final operator guidance
-    and learning closeout before this candidate is marked closed.
+    note: Security PR 258 accepts the exact OOS PR 339 and 340 and Platform PR 309 recovery boundary for bounded
+      dev-integration commissioning.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-art/review-evidence-acquisition.js
+    type: workflow
+    note: Keeps exact source/profile acquisition and result custody explicit.
+  - owner_repo: workspace-governance
+    path: workspace-governance/docs/console-operational-capabilities.md
+    type: runbook
+    note: The landed primary procedure requires whole-initiative review, current owner proof, exact-source admission,
+      interruption recovery and evidence-backed closeout.
+  - owner_repo: workspace-governance
+    path: workspace-governance/reports/console-journey-1275-qualification.md
+    type: doc
+    note: Correlates the real qualified app, native owner operations, accepted scope, finalized source and terminal
+      acceptance.
+  note: 'Closed on 2026-10-24 after actual Epic1275 terminal acceptance through Console command delivery-closeout-command:console-5f6a9d32-728a-4125-aa18-8fa998c2c2ce,
+    receipt sha256:ad6de83b461eaa1bfc8a93f98b09fffe7c483db948b9e23c3d6128dddec945c0. The owner-profile, detached
+    operating evidence, interrupted-acquisition recovery and serialized lifecycle proof repairs were already merged
+    and accepted. The native complete-runtime proof and later normal activations returned restored readiness, and
+    final source1299 acquired evidence, finalized and closed through the normal Console lifecycle. Final guidance
+    now binds those existing controls and separates source conformance from actual operating proof. No additional
+    evidence framework or new source successor is required.
+
+
+    Historical resolution context (not current status): The source and recovery controls are merged. The final Platform
+    operating receipt `20261015T105042Z-verify-operating.json` passed activation, restart, rollback, teardown, restored
+    normal availability, and exact receipt replay; OOS then issued readiness and closed work item 1291. Item 1299
+    still needs to bind these controls into the final operator guidance and learning closeout before this candidate
+    is marked closed.
+
+
+    Prior follow-up retained for audit; superseded by this completed resolution: {"due_on": "2026-10-25", "note":
+    "Operator decision on October24: finish Epic1275 first, then pick up the improvement candidates and remaining
+    cleanup. This record remains open for that explicitly requested follow-up; no proposed closing control is represented
+    as landed. October25 is the next accountable review checkpoint, not a completion claim. The prior 2026-10-18
+    checkpoint was missed and is retained in this history. Previous recorded follow-up: Reconcile the merged profile
+    validation, invalid-base replacement, writable-state and rollback-order checks, reviewed-worktree source selection,
+    detached evidence execution, interrupted-acquisition recovery, and exact receipt replay into item 1299 final
+    guidance and closure proof.", "owner_repo": "operator-orchestration-service"}'
 follow_up:
-  owner_repo: operator-orchestration-service
-  due_on: '2026-10-25'
-  note: 'Operator decision on October24: finish Epic1275 first, then pick up the improvement
-    candidates and remaining cleanup. This record remains open for that explicitly requested
-    follow-up; no proposed closing control is represented as landed. October25 is the next
-    accountable review checkpoint, not a completion claim. The prior 2026-10-18 checkpoint
-    was missed and is retained in this history. Previous recorded follow-up: Reconcile the
-    merged profile validation, invalid-base replacement, writable-state and rollback-order
-    checks, reviewed-worktree source selection, detached evidence execution, interrupted-acquisition
-    recovery, and exact receipt replay into item 1299 final guidance and closure proof.'
+  owner_repo: null
+  due_on: null
+  note: null
