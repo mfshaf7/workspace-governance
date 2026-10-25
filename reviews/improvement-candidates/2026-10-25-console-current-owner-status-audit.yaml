@@ -1,0 +1,120 @@
+schema_version: 1
+id: 2026-10-25-console-current-owner-status-audit
+title: Current Console owner state is obscured by historical receipts and profile snapshots
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: The wider Console review confirmed an active repository displayed as admission ready from
+  provisioning history, and a normal Purpose profiles view showing a suspended disconnected snapshot
+  of a currently active Platform profile.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - platform-engineering
+  - workspace-governance
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine miss that
+    should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Actual retained successful OOS custody request for provider1421451929 produces console-todo-1275
+    with admissionState ready, Review Admission and a next action to prepare Workspace Intake. Actual
+    current Workspace Registry has the exact owner repository active. The configured-live Repository
+    controller constructs its register only from custody request results and does not reconcile current
+    canonical inventory. Preserve historical custody evidence while deriving current admission/status/actions/counts
+    from current owner truth. Inspect adjacent Console surfaces for the same class before defining
+    the final bounded correction; do not invent lifecycle mutations or new ART children. Actual Purpose
+    profiles browser inspection also shows intake-classifier-v1 Suspended, Pending Selection and
+    Maintain suspension from a disconnected contract snapshot, while current Platform policy declares
+    that profile active with its selected dev-integration binding. The normal tab describes its register
+    as canonical. Models and routing separately reads live configuration13 with three registrations
+    and correctly labels backend health as not probed. Treat the legacy profile-view selection and
+    current-source presentation as a separate facet of this audit, not as evidence that live model
+    routing is suspended. Do not infer runtime provider health from policy alone. Portfolio stale
+    readiness was verified expired and is not misclassified as a defect; initial Publication availability
+    observations converged on fresh reads and are not a proven persistent failure.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/console-status-audit-20261025/repository-current-versus-receipt-proof.json
+  - local-evidence://operator-orchestration-service/.art/console-status-audit-20261025/repository-screen.txt
+  - local-evidence://operator-orchestration-service/.art/console-status-audit-20261025/model-purpose-screen.txt
+  - repo://platform-engineering/security/governed-ai-model-profiles.yaml
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/repository/live-runtime/repository-inventory-live-projection.ts
+    note: Current canonical inventory by the exact approved repository owner reference supersedes
+      historical custody handoffs. Active, suspended, retired and unavailable states drive the same
+      register, counts, next action and review projection. Native receipt and provider identity remain
+      history.
+  - type: workflow
+    owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/repository/presentation/surface/use-repository-control-controller.ts
+    note: Uses existing WGCF continuity read with visible-page refresh. Prepare intake requires current
+      custody and inventory and a ready unadmitted repository; existing or unverified inventory cannot
+      offer duplicate intake.
+  - type: workflow
+    owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/model-operations/server/model-operations-api-routes.ts
+    note: Configured or partially live Console without accepted Purpose profile artifacts returns
+      explicit unavailable, without historical sample substitution. Wholly disconnected design preview
+      is labelled. Actual accepted artifact verification and independent live Models and routing
+      stay unchanged.
+  - type: test
+    owner_repo: governance-operations-console
+    path: governance-operations-console/tests/operation-runtime/repository-current-inventory.test.mjs
+    note: Meaningful lifecycle, exact-identity, absence, owner failure/recovery, receipt preservation
+      and counts/action cases. Full product proof passes740 semantic tests, architecture guards,
+      types, production build, repository validation, zero-vulnerability audit and fetched-base whitespace.
+  - type: test
+    owner_repo: governance-operations-console
+    path: governance-operations-console/tests/model-operations/model-operations-live-integration.test.mjs
+    note: Covers intentionally disconnected versus configured/partially live Console, absent and
+      partial profile evidence, and existing private artifact integrity and OOS source ordering/authorization
+      denials.
+  - type: doc
+    owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/repository-custody-live-integration.md
+    note: Primary operator procedure explains current inventory versus historical receipt, exact
+      repository identity, unavailable-source intake denial and separate runtime/Security authority.
+  - type: doc
+    owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/model-operations-live-integration.md
+    note: Primary operator procedure explains unavailable Purpose profile source, explicit design
+      preview and independent live runtime routing.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-26-console-current-owner-status.md
+    note: Exact merged Console bb320511 accepted by Security PR352 mergedf19c3ea, preserving every
+      other source/tree/architecture/gate binding. Six actual-owner composition/resolver cases and
+      current-primary resolver pass.
+  note: Operator approved both bounded corrections on 2026-10-26 with "lets fix it now". Gary Console
+    PR126 mergedbb320511a98dc95ea39a5a51aee7580d9df28b47 after delegated exact-head review and CI40210571392.
+    Gary Security PR352 mergedf19c3eaff65ccf87d394d082e7260ea860c543e5 after exact review and CI40211012121.
+    Existing full activation20261025T163045Z-activate and fresh status20261025T163201Z-status prove
+    composition current and Console live/current at the exact accepted source. Actual native browser
+    proof without fixture interception or workflow mutation shows LittleList Admitted, Ready0/Admitted1,
+    Review Repository, and duplicate intake disabled; actual canonical inventory remains active and
+    original custody requests/receipts are byte-for-byte equivalent as parsed JSON. Purpose profiles
+    shows explicit unavailable and disabled request without old suspended/pending-selection samples.
+    Independent live routing configuration13 and three registrations are unchanged; provider health
+    is not inferred from registration. Five browser checks pass with no page errors; screenshots
+    visually reviewed. Both implementation credentials are revoked and source worktrees/local/remote
+    branches retired, with strict owner audits passing. No new ART child, lifecycle mutation, authority,
+    architecture version or shared mechanism was introduced. This closes the two confirmed display/source-selection
+    findings; it does not commission missing Purpose profile evidence or claim universal Console
+    route qualification.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
