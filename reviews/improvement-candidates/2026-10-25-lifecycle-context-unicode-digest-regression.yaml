@@ -1,0 +1,92 @@
+schema_version: 1
+id: 2026-10-25-lifecycle-context-unicode-digest-regression
+title: Lifecycle context producer and CGG disagree on Unicode digest bytes
+recorded_on: '2026-10-25'
+owner_repo: operator-orchestration-service
+summary: The actual Prototype model-draft path reaches CGG but its Unicode source
+  list digest uses different canonical bytes. Both Prototype and Delivery producers
+  and their shared response validator require the existing CGG boundary format.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-25-prototype-landing-unicode-codec-regression.yaml
+status: closed
+source_type: rehearsal
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - context-governance-gateway
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: Actual Console native scoped session succeeds, but its model generation
+    fails before model dispatch. Exact retained-request replay through the commissioned
+    OOS CGG client returns400/context_projection_invalid and sources_digest does not
+    match the canonical source list. OOS Prototype and Delivery lifecycle producers
+    use the ART UTF8 canonicalDigest; CGG lifecycle.py explicitly uses ensure_ascii=True.
+    The shared OOS response validator also expects the ART digest for the CGG projection
+    envelope. Earlier fixtures compute both sides in JavaScript and miss this real
+    cross-language Unicode boundary. Align only lifecycle-projection wire digests
+    with the existing CGG format across BOTH producers and the shared response
+    validator; retain ART, Landing, internal source custody and content bytes. Prove
+    actual OOS-to-CGG request/result/replay and tamper denials with Unicode, then exact
+    source acceptance, normal activation and native explicitly linked generation
+    retry. Preserve the failed attempt and forbid raw context or model bypass.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-context-native-diagnostic-private.json
+  - repo://operator-orchestration-service/src/source-authoring/prototype-context.js
+  - repo://operator-orchestration-service/src/source-authoring/context-contract.js
+  - repo://operator-orchestration-service/src/delivery-art/lifecycle-context.js
+  - repo://context-governance-gateway/apps/api/src/cgg_api/lifecycle.py
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/source-authoring/context-contract.js
+    note: PR379 merged8827eaa aligns both authoring source-list producers and shared
+      CGG envelope validation with the existing ASCII-escaped wire contract while
+      preserving source bytes, ART/Landing/internal custody and failed history.
+  - type: test
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/prototype-authoring-context.test.js
+    note: Independent Python serializer checks cover Unicode, astral, DEL, BOM and
+      CRLF data; companion Delivery and native nested-error tests reproduce three
+      failures before repair. All36 focused cases and1637 full tests pass, with two
+      existing optional skips. Nine actual OOS-to-CGG ASGI request/result/replay/denial
+      cases pass without model or source authority.
+  - type: runbook
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/docs/operations/operator-source-editing.md
+    note: Documents the existing wire boundary and explicit linked retry after a
+      typed context denial, preserving all immutable failed attempts.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-lifecycle-context-unicode-wire.md
+    note: PR348 merged387392e accepts actual OOS8827eaa in the unchanged composition;
+      its indexed owner record and six actual resolver checks are current.
+  note: Exact OOS CI40164087886 and Security CI40164496814 pass with accountable human
+    approval. Both repair credentials revoked, worktrees/branches retired and strict
+    owner lifecycle audits pass. Normal activation20261025T052344Z and status20261025T052612Z
+    succeed with current composition and retained model configuration13. In the same
+    original source request/session/approved scope, explicitly linked generation435f8670
+    references the retained failed e62f57f2 attempt and produces a real admitted CGG
+    packet artifact-20261025T053437Z-a17b8e71d4 plus an inert model draft through the
+    actual Console server authorization/client. Native owner readback confirms
+    prototype-source-authoring-v1, managed-codex/gpt-6.1-sol/high, suggestion-produced
+    and configuration13. No source application or commit occurred. This closes
+    lifecycle Unicode compatibility; remaining editor/readback and real app
+    operating acceptance remains in1328/1329 and the separate native history-reference
+    candidate rather than being claimed complete here.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

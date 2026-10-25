@@ -1,0 +1,89 @@
+schema_version: 1
+id: 2026-10-25-prototype-source-owner-ref-freshness-regression
+title: Prototype source inspection does not refresh canonical owner-main refs
+recorded_on: '2026-10-25'
+owner_repo: operator-orchestration-service
+summary: After native Landing succeeds, canonical records expose its new commit but
+  source preparation cannot inspect it because the host owner repository has not fetched
+  that main ref.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: rehearsal
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: Native Landing succeeded at32e5b40a with current record authority. Original
+    Console source request returned409; verified server-adapter diagnostic replay
+    of the SAME immutable input exposed owner_code prototype_source_inspection_unavailable,
+    with no retained request. Host Studio HEAD/origin-main remain accepted84b and
+    git cat-file32e fails. Source adapter inspectCommittedSource tests ancestry against
+    local origin/main before any fetch, then clones only local objects. This makes
+    the normal native Landing-to-authoring handoff depend on a manual Git refresh.
+    Reuse the bounded hardened fixed owner origin/main fetch before ancestry/snapshot,
+    preserving the commissioned code checkout, exact source/authority restrictions
+    and all no-side-effect preparation rules. Prove actual remote-main advancement
+    with stale local refs, wrong-branch and unavailable-owner denials, and the rest
+    of the draft/session flow before exact Security reacceptance and one normal activation.
+    No new ART child, credential, source ledger or cache mechanism.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-editor-preparation-diagnostic.json
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-proof-landing-corrected-finalized.json
+  - repo://operator-orchestration-service/src/source-authoring/prototype-source-adapter.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/source-authoring/prototype-source-adapter.js
+    note: Gary PR378 merged104739ad refreshes the fixed admitted owner main ref before
+      the existing ancestry guard and detached data inspection, preserving the
+      commissioned executable checkout and all read-only authority boundaries.
+  - type: test
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/prototype-authoring-source.test.js
+    note: Real remote-main advancement reproduces the missing local object before
+      repair; wrong-branch and unavailable-origin denials remain enforced. Full1634
+      tests pass with two existing optional skips; all28 downstream focused cases,
+      owner CI-equivalent checks and actual API/worker image smoke pass.
+  - type: runbook
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/docs/operations/operator-source-editing.md
+    note: Canonical source preparation refreshes main without operator Git commands,
+      checkout movement, source grants or model invocation.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-prototype-source-ref-freshness.md
+    note: Fresh exact composed acceptance and generated owner-record index landed
+      with Security PR347; all six actual resolver sandbox checks pass.
+  note: Standing required-repair approval covers this finite maintenance attached1328.
+    Exact-head OOS CI40161505344 and Security CI40161883671 pass with accountable human
+    approval. Both credentials revoked and extra source resources retired; both strict
+    owner lifecycle audits pass. Normal activation20261025T043824Z and status20261025T043943Z
+    succeed on OOS104739ad and Securityec0fa26, with a new commissioned source-executor
+    process. The SAME original immutable source request1230a18d was confirmed missing
+    before retry, then returned native Console200/prepared. Live before/after Git
+    observations prove its missing32e object and stale origin/main84b were refreshed
+    automatically to32e while HEAD84b and the clean executable checkout stayed unchanged.
+    Six additional actual Studio Python and broker sandbox checks prove the same
+    handoff, replay and exact source metadata plan. This closes source-ref freshness;
+    remaining editor and real app operating acceptance stays in1328/1329.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

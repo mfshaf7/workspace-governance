@@ -1,0 +1,87 @@
+schema_version: 1
+id: 2026-10-25-prototype-landing-unicode-codec-regression
+title: Landing still borrows the legacy packet codec after Maturity Unicode repair
+recorded_on: '2026-10-25'
+owner_repo: workspace-prototype-studio
+summary: The real1328 native Prototype Landing exercise rejects unchanged current
+  Studio source as stale because Landing hashes its Unicode registry with ASCII escapes
+  while the existing readiness observer uses UTF8.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: rehearsal
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - workspace-governance-control-fabric
+  - workspace-prototype-studio
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  finding: Actual Console preparation on Studioe04dfd2 emitted registry digest5cf9ee17.
+    Native WGCF readiness on the same exact source returned9e01a343 and source-state-stale
+    before any apply, preparation or PR. Recomputing the exact committed registry
+    proves these are respectively ensure_ascii=True and False. Studio Landing imports
+    the shared Delivery packet content_digest for all artifacts, registry/records
+    and readbacks; Console/OOS/WGCF Landing use compact sorted UTF8. The earlier closed
+    Maturity codec lesson corrected Maturity and its Closure bridge but left this
+    Landing consumer on the legacy packet helper. Reuse the established Landing/native
+    UTF8 contract consistently across both source-state and artifacts; retain unrelated
+    Delivery/Closure byte protocols, exact integrity/staleness denials and immutable
+    failed requests. Prove native cross-owner Unicode request/readiness/owner apply/replay/readback
+    and changed-input denial before exact Security acceptance and commissioning. No
+    new story, flag, hash waiver or new canonicalization service.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-proof-landing-prepared.json
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-proof-landing-continued.json
+  - repo://workspace-prototype-studio/packages/prototype_landing/landing.py
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: workspace-prototype-studio
+    path: workspace-prototype-studio/packages/prototype_landing/landing.py
+    note: Gary PR42 merged84b7e7a aligns the entire native Landing artifact/state/readback
+      chain with existing Console/OOS/WGCF UTF8 while preserving imported manifest
+      and separate Delivery/Closure codecs.
+  - type: test
+    owner_repo: workspace-prototype-studio
+    path: workspace-prototype-studio/tests/test_prototype_landing.py
+    note: Reproduces original registry mismatch and native Unicode artifact rejection
+      before repair, then proves Unicode state/apply/replay/readback and tamper denial.
+      Full95 tests and all owner validation pass.
+  - type: runbook
+    owner_repo: workspace-prototype-studio
+    path: workspace-prototype-studio/docs/prototype-landing.md
+    note: Documents exact native bytes, separate protocol formats and immutable stopped-request
+      recovery.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-prototype-landing-unicode.md
+    note: Fresh exact-source acceptance, six actual cross-owner sandbox checks and
+      separate live commissioning requirement.
+  note: Operator standing required-repair approval covers this finite maintenance
+    correction attached1328, without a new ART item or hash waiver. Studio CI40158278806
+    and Security CI40158645818 passed at exact Gary heads and human review. Both credentials
+    revoked, trees matched merges and strict owner resource audits passed. Actual
+    new accepted runtime activation20261025T034638Z/status20261025T034739Z passed
+    with Studio84b and Security758, config13 retained. Corrected SAME-subject native
+    Landing with Unicode name/objective passed actual WGCF readiness, owner preparation
+    and CI40159564500, then exact human review/merge PR43 and native succeeded merged
+    readback at32e5b40a4198ee8a468697502dc73324334cac70. Original failed request remains
+    unchanged with no apply/PR. This closes the Landing codec regression; the remaining
+    editor/app operating exercise remains tracked by1328/1329 rather than being claimed
+    complete here.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

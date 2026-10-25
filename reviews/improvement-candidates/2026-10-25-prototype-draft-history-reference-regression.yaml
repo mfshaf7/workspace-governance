@@ -1,0 +1,92 @@
+schema_version: 1
+id: 2026-10-25-prototype-draft-history-reference-regression
+title: Shared Console draft validator assumes Delivery history references for Prototype
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: Real Prototype model amendment and import save succeeds in OOS, but Console readback
+  rejects the native structured history reference as if it were a Delivery string reference,
+  leaving the save acknowledgement unconfirmed.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: rehearsal
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - security-architecture
+  - platform-engineering
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: Native OOS saved the actual edited HTML and imported UTF8/BOM/CRLF notes at digest6424bb51
+    with operator-amended-model provenance; unsafe and binary inputs are absent. Both canonical
+    owner reads return200. Console readPrototypeSourceDraft rejects the owner reply as outside
+    the bounded text-source contract. Its shared assertSourceDraft requires previous_draft_ref
+    to be a string. Actual Prototype writeArtifact returns the closed object with request_id
+    and digest, while Delivery returns its existing relative artifact-name string. The reference
+    artifact hash is intentionally distinct from previous_draft_digest, which hashes the
+    prior change set. HTTP fixtures represented both owners with Delivery strings and missed
+    this real amendment path. Correct workflow-specific native reference validation with
+    exact object keys/request binding/digest, preserve Delivery's existing string contract
+    and reject cross-domain, foreign and malformed references. Reconcile the original immutable
+    save after exact source acceptance and existing governed restart; never rewrite the
+    saved bytes, model receipt or owner history.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-draft-readback-diagnostic.json
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/prototype-owner-amended-draft-raw.json
+  - repo://governance-operations-console/src/console-integration/source-authoring/source-editor-contract.ts
+  - repo://operator-orchestration-service/src/source-authoring/prototype-store.js
+  - repo://operator-orchestration-service/src/source-authoring/operator-drafts.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: governance-operations-console
+    path: governance-operations-console/src/console-integration/source-authoring/source-editor-contract.ts
+    note: Gary PR124 merged e83dcbf validates native Prototype closed request_id/digest
+      history references separately from unchanged Delivery string references. Exact request
+      binding and malformed, foreign and cross-domain denials remain enforced.
+  - type: test
+    owner_repo: governance-operations-console
+    path: governance-operations-console/tests/operation-runtime/source-editor-contract.test.mjs
+    note: Faithful native reference fixtures and two regression cases fail before correction.
+      All18 focused cases and731 full Console tests, architecture/types/build, repository/public-source
+      validation, production dependency audit and fetched-base checks pass.
+  - type: runbook
+    owner_repo: governance-operations-console
+    path: governance-operations-console/docs/security-and-data-boundaries.md
+    note: Documents the separate native history references and preserves original model
+      evidence versus operator-amended bytes.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-prototype-draft-history-reference.md
+    note: PR349 merged58ba1d8 accepts actual Console e83dcbf with unchanged OOS8827eaa;
+      six composed resolver checks pass.
+  note: Required repair uses standing operator maintenance authorization without a new ART
+    child or architecture. Exact GOC CI40168066233 and Security CI40168611174 pass with
+    accountable human approval. Both credentials revoked, reviewed/merged trees identical,
+    worktrees/branches retired and strict owner lifecycle audits pass. Existing runtime
+    restart20261025T062158Z and status20261025T062552Z succeed with current composition.
+    Actual Console replay of ORIGINAL save command876ef319 returns200/replayed=true and
+    the SAME retained digest6424bb51, revision and UTF8/BOM/CRLF import bytes. New stale-save
+    identity with old revision returns409 without mutation. Actual browser reload confirms
+    original objective, current bytes and separate operator-amended-model provenance; a
+    cold browser reopens the same digest. Wrong digest acceptance is denied before owner
+    source effects. The operator cancels the unapplied attempt through the actual Console.
+    An incidental private browser exact-label locator error was corrected from live DOM
+    evidence without product changes. This closes native history compatibility; remaining
+    browser generation, scope retirement and real LittleList delivery stay explicit1328/1329
+    acceptance work.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
