@@ -1,0 +1,69 @@
+schema_version: 1
+id: 2026-10-25-console-live-source-path-regression
+title: Verify actual Console source consumers before primary checkout advancement
+recorded_on: '2026-10-25'
+owner_repo: workspace-governance
+summary: Primary Console checkout advancement hot-reloaded uncommissioned editor source
+  into the existing development server and caused HTTP 500 until the accepted source
+  path was restored.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: review
+scope:
+  related_repos:
+  - governance-operations-console
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - temporary-containment
+signals:
+- id: late-root-cause-discovery
+  title: A simpler prerequisite, permission, environment, or contract check was proven
+    only after deeper analysis had already expanded.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - diagnostic-ordering-miss
+  - learning-closure-regression
+  - unsafe-assumption
+  finding: After PR122 merged at a9711c0, the existing npm run dev Console process
+    watched the primary GOC checkout. Only the credential-refresh code consumer had
+    been pinned to accepted source; the frontend WorkingDirectory had not been proven
+    before main advancement. Missing new CodeMirror dependencies caused HTML500 on
+    native1326 close. The existing frontend was restored to accepted b989 source with
+    the same private environment and an exact temporary WorkingDirectory override;
+    HTTP200 and native session status recovered. This repeats the earlier running-process
+    versus accepted-source lesson. Native close was not claimed successful. The fix
+    must check actual ExecStart, WorkingDirectory, source and dependencies before
+    checkout advance, retain all existing source consumers on accepted code until
+    commissioning, and remove the temporary overrides during1328. No new service,
+    workflow authority or ART repair item is justified.
+  source_refs:
+  - https://github.com/mfshaf7/governance-operations-console/pull/122
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/goc-close-result.json
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/goc-after-preview-recovery-status.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: runbook
+    owner_repo: governance-operations-console
+    path: governance-operations-console/README.md
+    note: Gary PR123, exact candidate0f786bb59cf12a71c0c36a06896232c6ed303528, merged3d41dfe71ead39c01ef7032d80824929559d3853,
+      extends the existing development procedure to inspect actual frontend command/source/dependencies
+      plus the repository-refresh consumer before primary checkout advance. It keeps
+      both on accepted code and requires normal commissioned source/readback before
+      snapshot retirement.
+  note: Within the operator standing authorization for required maintenance, the proportionate
+    closing control reuses the existing primary development and complete-runtime procedures.
+    Repository/public-source/fetched-base whitespace checks and CI40156245984 passed;
+    exact human review, credential revocation and strict owner cleanup passed. Both
+    actual source consumers were identified and contained; the existing frontend was
+    restored to HTTP200. No new service, validator, authority, architecture version
+    or ART repair child was introduced. Subsequent exact Security acceptance landed
+    through native1327. Final current-source operating commissioning remains explicitly
+    tracked by1328, rather than being claimed complete by this learning record.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
