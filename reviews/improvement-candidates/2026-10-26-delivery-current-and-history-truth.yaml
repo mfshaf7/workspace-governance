@@ -1,0 +1,141 @@
+schema_version: 1
+id: 2026-10-26-delivery-current-and-history-truth
+title: Delivery surfaces omit completed owner records and intake lineage
+recorded_on: '2026-10-26'
+owner_repo: governance-operations-console
+summary: Six-surface native audit confirms missing completed Delivery inventory, Intake/custody lineage and
+  activity history, plus an undisclosed Execution board/selection scope mismatch. Actual LittleList intake,
+  Work Design, Refinement and closeout records remain retained and readable.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine miss that should
+    stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'Actual native Console Delivery workspace is live HTTP200 with one parked package, zero intake_sources
+    and zero audit_events. Its owner adapter requests include_done=false and projector constructs empty intake/apply/audit
+    collections. Actual LittleList delivery1306 closeout is live/current/done; its Work Design read is live/current/applied
+    with retained receipt and four created work items. Treat missing Intake projection and undiscoverable completed
+    Delivery history as confirmed read-composition gaps, while checking whether current-stage Work Design/Refinement
+    filters are intentional. Complete the six-surface audit before defining a bounded repair; preserve owner
+    records and do not reopen completed ART work. Completed six primary native screens and three detail views
+    without business writes or page errors. Exact current Prototype Delivery application read succeeds and
+    points to delivery1306 with original approved custody and backlinks. Work Design history has the applied
+    application and created1307-1310; Refinement has its completed run linked to that application; closeout
+    is done. Home and Latest History consume an always-empty audit_events projection. Execution counts zero
+    Deferred packages while its globally selected sidebar shows parked87 Deferred with83open children; the
+    different scopes are not disclosed. Work Design/Refinement current-stage filters are intentional, but completed
+    history must remain discoverable under the existing contract. Catalog independently reads14items/112values
+    and correctly lists console-todo-1275 active/used7; do not call it a broken app portfolio. Inventory visibility
+    must not grant eligibility or source custody authority. One initial intake GET timed out; fresh retry200
+    means no persistent read failure is established. Final pre-activation comparison against actual owner records
+    also caught normalization precision: closeout outcome_ref differs from its original receipt.ref and receipt.digest;
+    preserve both independently. The Proposal current record version must not substitute for an unretained
+    original handoff source version. Correct these under the same approved maintenance scope before final operating
+    proof. Actual native first commissioning showed37 old Proposal backlinks without original handoff proof,
+    correctly unavailable; four actual admissions including LittleList are verified. Visual inspection caught
+    an unbounded evidence-issue list crowding the Intake register; use the existing bounded scrolling list
+    and filter issues consistently before final acceptance. Native activation final reads failed during startup,
+    then the built-in retry cycled the broker tunnel; stop the repeated startup attempt, prove existing component
+    health and recover through existing Platform procedures. Do not classify legacy missing proof as defective
+    work or reopen it. Controlled final startup now proved an actual Delivery readiness timeout: Prototype200
+    completed, Delivery200 arrived after90054ms while the native90sec reader had timed out. Captured model
+    generation/receive timestamps attribute46-103seconds to Intake composition. Target listing scans all ART
+    work packages for each page, and every Proposal candidate redundantly rereads its fresh listed target and
+    schema form. Repair this demonstrated read amplification under the same approved maintenance before final
+    proof; preserve exact live target-set parity, current owner proof and source-only receipt refresh without
+    cross-request cache.'
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/delivery-intake-truth-20261026/delivery-workspace.json
+  - local-evidence://operator-orchestration-service/.art/delivery-intake-truth-20261026/app-1306-work-design.json
+  - local-evidence://operator-orchestration-service/.art/delivery-intake-truth-20261026/audit-report.json
+  - local-evidence://operator-orchestration-service/.art/delivery-intake-truth-20261026/browser-audit.json
+  - local-evidence://operator-orchestration-service/.art/delivery-intake-truth-20261026/browser-details.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/original-record-conformance.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/intake-read-cost-proof.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/activation-receipt.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/current-status-receipt.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/browser-proof.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/source-cleanup-proof.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/layout-source-cleanup-proof.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/intake-source-cleanup-proof.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-history-reader.js
+    type: workflow
+    note: Authenticated bounded native owner history preserves original Intake/custody, Work Design, Refinement
+      and native closeout receipts independently of current stage eligibility.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/openproject-client.js
+    type: workflow
+    note: Fresh Epic-scoped target inventory and reciprocal Proposal proof remove demonstrated read amplification
+      without a cache, timeout increase or weakened acceptance.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-history-reader.test.js
+    type: test
+    note: Exercises exact target authorization, independent section coverage, native receipt/digest preservation
+      and explicit unretained historical values.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/prototype-delivery-adapter.test.js
+    type: test
+    note: Proves original source custody and native application lineage without duplicate intake consumption.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/docs/operations/delivery-workflow-operator-surface.md
+    type: runbook
+    note: Documents bounded read-only Intake/history and preserved command authority.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-history-projection.ts
+    type: workflow
+    note: Composes retained canonical inventory, original source proof and explicit unavailable coverage.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/tests/operation-runtime/delivery-history-truth.test.mjs
+    type: test
+    note: Covers Current versus History, coherent selection/counts and preserved active-stage eligibility.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/domain-contracts/delivery.md
+    type: doc
+    note: Defines truthful stage scope, original admitted source and owner history semantics.
+  - owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-26-delivery-owner-history.md
+    type: doc
+    note: Accepted the final exact OOS and Console source while retaining existing identity, runtime and trust
+      boundaries.
+  note: 'Closed on 2026-10-26 after the operator-approved extension landed through Gary-authored OOS PR381/382/383,
+    Console PR127/128 and exact-source Security PR353/354/355. Final sources OOS c4b5481316e8b65bee9bcedebe9dff44e4c72652,
+    Console 48d7602b3e2ca76c5323e37bfedfdf2964db5983 and Security 9a65978435c708a0b522cfb2471fd92276e9328a
+    passed their full owner validation and provider CI. Native activation 20261025T200601Z and fresh status
+    20261025T200836Z both succeeded with current composition, live/current Console, active provider, Delivery43
+    and Prototype5. Actual Chromium exercised all six Delivery surfaces in Current and History without API
+    writes or browser errors. The original completed Little List Delivery1306 is discoverable through History
+    from Home, Intake, Work Design, Refinement and Execution, with all seven retained events and exact native
+    original receipt/digest coordinates independently checked against owner reads; screenshots were reviewed.
+    Long legacy-proof issues remain bounded and filter coherently. Catalog retains its independent metadata
+    meaning. Same-backend profiling preserved all43 targets, four admissions and37 explicitly unavailable historical
+    handoffs while Intake read time fell from79.485sec to5.045sec; final normal activation proves the read
+    repair operates without readiness bypass. Older missing original native proof is disclosed, not fabricated
+    or treated as new defective work. Completed ART remains closed and no repair ART items were created. All
+    source worktrees/branches and exact source credentials were retired before this learning closeout; the
+    learning Landing Unit follows the same reviewed merge and cleanup path. Historical approved scope: Operator
+    approved the coherent shared Delivery projection/history repair on 2026-10-26: lets begin the work. Extend
+    existing OOS canonical read composition and Console current/history views, Intake/custody and receipt trace,
+    and coherent count/selection scope; retain active-stage behavior and existing command authority. Prove
+    the actual completed LittleList journey after reload before closing.'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
