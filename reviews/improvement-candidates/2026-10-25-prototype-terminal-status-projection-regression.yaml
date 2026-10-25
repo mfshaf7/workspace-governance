@@ -1,0 +1,87 @@
+schema_version: 1
+id: 2026-10-25-prototype-terminal-status-projection-regression
+title: Graduated prototype is displayed and counted as movement ready
+recorded_on: '2026-10-25'
+owner_repo: governance-operations-console
+summary: The actual Console To-do record is graduated with Open History, but the register
+  status and movement-ready aggregate still use its retained baseline readiness.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: A validator, quality gate, or delivery read model exposed a workflow or doctrine
+    miss that should stop normal execution.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The current live prototype-proposal-1305 projection has lifecycle graduated,
+    currentMove archive/Open History, baseline ready-for-movement and no open issues.
+    prototypeRecordStatusLabel only handles retired as terminal, then returns Movement
+    ready from the historical baseline. getPrototypeWorkspaceStats also counts baseline
+    readiness without terminal lifecycle exclusion. Preserve the original baseline
+    and graduation records; correct derived terminal display, tone and readiness counts
+    with lifecycle-aware cases. No backend graduation mutation or ART reopening is
+    required. Inspection of the same surface also found a Dashboard lifecycle override
+    from a retained Closure preparation, historical handoff defaults shown as current,
+    and source-authoring entry actions on terminal records. Correct the coherent current
+    status surface while preserving history, Preview inspection, pending Closure recovery
+    and real active blockers.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/prototype-status-20261025/live-record.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/prototype/read-model/selectors/prototype-workspace-selectors.ts
+    note: Gary PR125 merged5e77181 gives terminal and graduating lifecycle precedence
+      over historical baseline and Landing inputs; current readiness, attention and
+      default selection distinguish active work from retained history.
+  - type: test
+    owner_repo: governance-operations-console
+    path: governance-operations-console/tests/prototype/prototype-terminal-status.test.mjs
+    note: Meaningful cases cover graduated, retired and graduating records against
+      retained baseline, returned and blocked inputs; active blockers and readiness;
+      preserved historical evidence and current canonical lifecycle over old Closure
+      preparation. All735 semantic cases and full product checks pass at exact Gary5759519.
+  - type: doc
+    owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/domain-contracts/prototype.md
+    note: Documents current lifecycle presentation, historical baseline separation,
+      active-only readiness and terminal source-authoring visibility with retained
+      History, Preview inspection and owner authority.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-prototype-terminal-status.md
+    note: Gary PR351 mergedcdf2b09 accepts exact Console5e77181 in the existing composition,
+      preserving all other source/tree bindings and authority boundaries. Current owner
+      evidence and six composed resolver cases pass; commissioning remains separate.
+  note: The operator approved correction on 2026-10-25 with "lets fix it now".
+    Gary Console PR125 merged5e77181 after exact human review and CI40201931430;
+    Security PR351 mergedcdf2b09 after exact human review and CI40202344454. The
+    existing composed resolver passed with all unrelated bindings preserved. Normal
+    restart detected two host helpers using the old command configuration; actual
+    profile status proved configuration-changed rather than a crashed pod. Existing
+    full activation reconciled the profile and helpers without new source or manual
+    state relabelling. Receipt20261025T144429Z-activate proves composition current and
+    Console live/current. Actual post-activation browser checks prove the three corrected
+    record badges, zero Movement Ready and Returned counts, terminal selected-panel and
+    Dashboard source-authoring absence, historical baseline caption and graduated handoff
+    detail. No fixture interception or workflow mutation was used. Before/after owner
+    readback proves all five records retain lifecycle, baseline, candidate, source and
+    current-action evidence. Both implementation credentials are revoked; source worktrees
+    and local/remote branches are retired with strict owner audits passing. No new ART
+    child, lifecycle mutation, architecture version or shared control was introduced.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
