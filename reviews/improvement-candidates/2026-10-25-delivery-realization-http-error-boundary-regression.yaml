@@ -1,0 +1,86 @@
+schema_version: 1
+id: 2026-10-25-delivery-realization-http-error-boundary-regression
+title: Delivery source first-use errors lose their native HTTP contract
+recorded_on: '2026-10-25'
+owner_repo: operator-orchestration-service
+summary: The actual ordinary Delivery editor cannot start an operator-authored draft because
+  the broker converts the real no-draft404 into an internal500.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: rehearsal
+scope:
+  related_repos:
+  - governance-operations-console
+  - platform-engineering
+  - security-architecture
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - contract-drift
+  - learning-closure-regression
+  - rollout-evidence-gap
+  finding: Current1329 source scope, work session, branch/base and source workspace are
+    valid. Actual owner realization is not-started; its real source kernel deliberately
+    throws DeliveryArtSourceRealizationError with404 for the absent first draft. The HTTP
+    handler forwards that class to a global catch which does not recognize it, so the Console
+    receives internal_error500 and correctly refuses to treat it as absent. Existing real-kernel
+    HTTP tests start by saving and omit the empty-draft and typed conflict paths. Extend
+    the existing typed HTTP error mapping for this exact class, add real-kernel initial404
+    and stale409 proofs plus unknown-error500 preservation, then accept exact source and
+    continue the same existing app session. No dummy draft, model generation, fallback,
+    new ART child or architecture change.
+  source_refs:
+  - local-evidence://operator-orchestration-service/.art/source-editor-20261025/1329-native-empty-draft-diagnostic.json
+  - repo://operator-orchestration-service/src/delivery-art/source-realization.js
+resolution:
+  after_action_ref: null
+  control_refs:
+  - type: workflow
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/app.js
+    note: Gary PR380 mergedbb53937 adds only the existing typed realization error class
+      beside existing typed HTTP errors. Native empty draft404 and stale409 are preserved;
+      unexpected errors remain bounded500.
+  - type: test
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/delivery-art-work-session-service.test.js
+    note: Real private-kernel HTTP first-use test fails500-versus404 before correction,
+      then covers initial no-attempt404, file reads, save/replay200, stale409 with unchanged
+      draft, malformed400, wrong operator403 and unknown500 without private sentinel detail.
+      All1637 runnable tests and two normal skips,14 other CI-equivalent checks and actual
+      API/worker image smoke pass.
+  - type: runbook
+    owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/docs/operations/operator-source-editing.md
+    note: Explains the normal first-use absence contract and forbids dummy drafts, model
+      invocation or a fallback to bypass an unavailable owner.
+  - type: doc
+    owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-25-delivery-realization-http-errors.md
+    note: Gary PR350 mergedbb438c6 accepts exact OOSbb53937 while preserving all other composition
+      bindings. Generated tagged-record index/current owner evidence and six actual resolver
+      cases pass.
+  note: The standing operator maintenance approval covers this finite correction attached
+    existing1329, without new ART child, API, schema, architecture or source scope. Exact
+    OOS CI40192882943 and Security CI40193606179 pass with accountable human approval; both
+    credentials revoked, reviewed/merged trees equal, owner worktrees/branches retired and
+    strict audits pass. Existing full activation20261025T124600Z and fresh status20261025T124753Z
+    succeed. Actual same-session Console draft endpoint now returns declared404; the same
+    existing app source session/scope opens the real editor, keyboard-edits HTML, imports
+    CSS, and saves exact authored bytes at retained digest67cbc75d with operator origin
+    and no borrowed model receipt. Actual browser reload succeeds; a cold browser sees the
+    same draft/objective, stale save409 and wrong-digest acceptance409 leave digest/revision
+    unchanged. No source dummy, model draft or frontend exception suppression was used.
+    The1329 blocker is cleared through its native workflow. The separate actual Gary source
+    commit/PR/merge/app proof remains explicit1329 work, not a claim made by this learning
+    closure.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
