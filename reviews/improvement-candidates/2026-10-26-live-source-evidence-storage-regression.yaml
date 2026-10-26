@@ -1,0 +1,62 @@
+schema_version: 1
+id: 2026-10-26-live-source-evidence-storage-regression
+title: Keep local evidence out of protected live source state
+recorded_on: '2026-10-26'
+owner_repo: platform-engineering
+summary: Unignored local diagnostics dirtied a protected live owner checkout and blocked automatic credential renewal
+  during otherwise isolated source maintenance.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-26-delivery-post-closeout-read-instability.yaml
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - platform-engineering
+  - governance-operations-console
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: unignored-operational-evidence
+  title: Diagnostic custody crossed the protected source boundary
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: During the operator-approved memory maintenance, the agent created platform-engineering/.art/console-runtime-memory-20261026
+    without first verifying Git ignore coverage. Platform did not ignore that directory. The live primary became
+    untracked/dirty, and the existing credential timer correctly rejected activation preconditions. Source itself
+    remained unchanged and diagnostic files were not staged or published. This repeats the earlier recorded primary-capture
+    ordering problem. The agent moved the complete evidence directory to the Console owner verified ignored .art
+    storage, preserved all evidence, removed only the empty original directory and started the existing renewal
+    service. Add the smallest owner-local artifact ignore protection and verify real renewal/recovery before closure;
+    no new ART item or global instruction gate.
+  source_refs:
+  - 'conversation: memory maintenance execution correction on2026-10-26'
+  - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/plan.json
+  - repo://platform-engineering/.gitignore
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: platform-engineering
+    path: platform-engineering/.gitignore
+    type: doc
+    note: Owner-local .art ignore covers diagnostic custody as well as review packets.
+  - owner_repo: platform-engineering
+    path: platform-engineering/docs/records/change-records/2026-10-26-console-prebuilt-runtime-memory.md
+    type: doc
+    note: Records exact execution correction, preserved evidence and source/renewal boundary.
+  note: Closed after Gary Platform PR342/merged3a686e9 and exact Security PR359/mergede85e55e, successful source
+    CI and delegated exact-head approval. Full diagnostic directory moved intact to verified ignored Console/.art;
+    no diagnostic or secret content was published. Canonical Platform main is clean. Native credential renewal succeeded11:57:46Z
+    and12:01:16Z after containment; exact accepted-source renewal succeeded20261026T122356Z (serviceExecMainStatus0).
+    Normal full activation20261026T122212Z refreshed the legitimate owning session and native browser proved the
+    actual authenticated Account; no expiry edits, widened TTL, copied credentials or alternate sign-in. Both owner
+    worktrees, branches and source credentials retired with exact strict owner audits. Private evidence lives at
+    local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/. The separate memory candidate
+    retains its actual pending host restart/readback.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
