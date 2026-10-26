@@ -49,6 +49,12 @@ signals:
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/repaired-kubernetes-cache-proof.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/plan.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/current-operating-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-image-audit-summary.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/validation-mutation-incident.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-delete-options-disposable-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-query-options-reproduction.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-declared-inventory-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-root-factory-proof.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -171,12 +177,27 @@ resolution:
     replace mutable data blindly. No new ART/architecture version, new control plane, RAM-test gate or Desktop work
     is introduced.
 
+    The operator then explicitly authorized implementation. Same unmerged Platform PR345 now holds the bounded
+    checker, owner-operation exclusion, shared-consumer plan and frontend rebuild, with a dependent Security review
+    staged. Native read-only inspection covered17images and203874filesystem entries; two additional cached tools
+    differ from trusted image layers: MinIO client usr/bin/mc and Temporal admin usr/local/bin/temporal. Pre-merge
+    checks corrected retained diagnostic views and bound the actual administration factory to canonical Platform-Core.
+    During validation an intended URI-query dry run with a DeleteOptions body retired the already-completed WGCF
+    storage-provisioning pod61960144-3d0e-46d8-917e-585a4ccc7dd2. Its completed Job0723d931-e762-43a4-82c3-2ccea29242a8
+    remains succeeded and database/object-storage PVCs remain Bound. No database/volume was targeted and no completed
+    provisioning work is recreated. This is an agent validation miss, not a new business defect or hardware diagnosis.
+    Further real-resource validation deletion stopped. Disposable ConfigMap proof verifies explicit body dryRunAll
+    retains the exact object and wrong UID preconditions reject deletion; the disposable object was removed. Preserve
+    this incident and finish the same maintenance unit. Completed Job definitions must remain in artifact coverage
+    after their Pods are retired, using their declared cached immutable image identity rather than an upgraded tag.
+    Automatic repair is still NOT activated; original repaired Console remains on prior accepted source pending review.
+
     '
 follow_up:
   owner_repo: platform-engineering
   due_on: '2026-10-28'
-  note: Design and implement the requested bounded automatic artifact-integrity/recovery extension in the existing
-    Platform lifecycle and its primary operator procedure, covering declared component artifacts with trusted baselines
-    and safe restore methods. Preserve database volumes, secrets and unique source work; verify normal Console/history
-    and failure-stop behavior. Known imperfect RAM is an operator-accepted constraint, not a request for more hardware
-    diagnosis. Current specific cache repair and native recovery are proven; automatic durable control remains pending.
+  note: Finish exact Platform source and dependent Security acceptance for the staged bounded recovery extension,
+    native automatic restoration of both newly identified cached tools, normal authenticated Console/history/model
+    and credential-renewal proof, and source lifecycle cleanup. Preserve database volumes, secrets and unique work.
+    Retain the validation miss and disposable dry-run/body proof. Known imperfect RAM is accepted and not a new
+    hardware-diagnosis request. Original PostgreSQL repair is proven; automatic durable operating proof remains pending.
