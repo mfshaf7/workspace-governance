@@ -1,0 +1,240 @@
+schema_version: 1
+id: 2026-10-26-console-long-running-development-memory
+title: Use a bounded prebuilt runtime for the everyday Console
+recorded_on: '2026-10-26'
+owner_repo: platform-engineering
+summary: Repeated workstation memory pain exposed a long-lived development compiler in the everyday Console service.
+  Separate normal serving from editing and validate whole-host memory behavior.
+regression_of: null
+status: accepted
+source_type: conversation
+scope:
+  related_repos:
+  - platform-engineering
+  - governance-operations-console
+  - security-architecture
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - runtime-composition
+signals:
+- id: long-running-development-runtime-memory
+  title: Everyday frontend retained development-compiler memory
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The managed frontend uses npm run dev. After seven hours its Next process held about8.1GiB, almost all
+    private anonymous memory; a frontend-only restart reduced the service from8.4GiB to about2GiB after UI compilation.
+    This proves retained process memory, not a specific heap leak. Windows vmmem remained about19.4GiB because its
+    footprint includes cache/VM memory separately from Linux availability. Exact WSL3.0.3 source gates automatic
+    reclaim on two-minute CPU use at or below0.5%; a current120-second sample averaged7.53%, with no eligible interval.
+    The earlier inactive-profile shutdown lesson remains valid; this is a distinct needed-service runtime-mode issue.
+    Operator approved standalone normal serving, isolated hot-reload development, measured budgets and host reclamation
+    verification before returning to capability gaps.
+  source_refs:
+  - 'conversation: operator approved the permanent Console and WSL memory plan'
+  - local-evidence://governance-operations-console/.art/console-memory-20261026/result.json
+  - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/plan.json
+  - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/wsl-reclaim-eligibility.json
+  - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/wsl-normal-stack-after-recovery.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/cached-binary-corruption-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/fresh-postgres-image-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/postgres-binary-comparison.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/retry-containment.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/runtime-alignment/native-operating-proof/commissioning-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/runtime-alignment/native-operating-proof/all-six-profile-readiness.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/independent-image-layer-identity.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/cache-recovery-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/repaired-kubernetes-cache-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/plan.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/current-operating-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-image-audit-summary.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/validation-mutation-incident.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-delete-options-disposable-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-query-options-reproduction.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-declared-inventory-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-root-factory-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-install-receipt.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/post-reboot-artifact-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/current-native-operating-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-memory-summary.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/merged-owner-source-cleanup.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: platform-engineering
+    path: platform-engineering/products/governance-operations-console/scripts/console_frontend_artifact.py
+    type: script
+    note: Serves exact-source standalone output in private state with validated code and bounded process resources.
+  - owner_repo: platform-engineering
+    path: platform-engineering/products/governance-operations-console/runbooks/operate-complete-runtime.md
+    type: doc
+    note: Normal serving, isolated hot-reload development, recovery and measured memory procedures.
+  - owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-26-console-prebuilt-runtime-memory.md
+    type: doc
+    note: Accepts exact Platform source/tree and separates source approval from native and host operating proof.
+  note: 'Platform Gary PR342 merged3a686e9ee4eafb2e3a617b0248731cbfc5564af5 and exact Security PR359 mergede85e55ede1e3832c180304ea5b18b98e2142a9dc,
+    with delegated exact-head approval, successful provider CI and reviewed/merged tree equality. Full local Platform
+    validation and focused artifact/process/budget cases passed. This extends existing runtime maintenance, with
+    no new ART item, architecture version or recurring cache-flush service.
+
+
+    Before reboot, normal activation20261026T122212Z and recovery20261026T122828Z passed live/current. Native Chromium
+    passed the cockpit and all12 destinations, preserving42 Proposals,43 Delivery roots,5 Prototypes, model registry
+    revision13/three registrations, authenticated Account and LittleList original seven-event history. No browser
+    errors, failed API reads, business writes or model requests. Five-minute30-observation service maximum141.2MiB,
+    manager peak142.7MiB, minimum guest available11.85GiB and zero automatic restarts. Runtime3GiB soft/4GiB hard/1GiB
+    swap budgets were verified. This is bounded short-term proof, not indefinite stability assurance. Separate120-second
+    normal-stack observation averaged7.13% CPUbusy, above installed WSL3.0.3''s <=0.5% reclaim idle gate; Windows
+    VM/cache memory is distinct from frontend RSS.
+
+
+    After the operator reboot, the20GB memory ceiling and6GB swap are proven active: MemTotal20001MiB and SwapTotal6144MiB.
+    Memory pressure averages/totals remainedzero and swapunused. Windows configuration preserves unrelated settings
+    and has an exact original backup. Capacity activation is complete; fresh whole-stack native verification remains
+    incomplete.
+
+
+    Post-boot recovery was interrupted by observed memory-access faults in two Node processes, Python and Go/k3s.
+    k3s logged fatal fault/SIGSEGV at14:13:12Z. Its interrupted composition rollback removed/stopped its owning
+    startup unit. A single deliberate normal recovery after Docker/k3s readiness reached accepted-idea-delivery
+    up but returned139 at14:22:19Z, then rollback again stopped the controller. No further activation retry was
+    started. These observations do not prove a bad RAM module, corrupted source, a new application defect or memory-limit
+    exhaustion. Python package checksums pass; no WHEA hardware event returned since boot. Windows reports mixed16GB/8GB
+    RAM kits, a diagnostic lead only. Physical memory/CPU configuration and WSL/environment causes remain unverified.
+
+
+    Keep this same candidate accepted and same PR/Landing Unit open until the environment is stable enough for fresh
+    native verification. Do not treat source tests or the activated limit as complete operating acceptance. Preserve
+    source and evidence; do not create speculative repair stories or change production controls to bypass failed
+    live proof. Evidence: local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/standalone-memory-summary.json,
+    native-destinations-report.json, post-boot-memory.json and post-boot-faults.json.
+
+
+    Later recovery source is reviewed and landed: Platform PR343 fixes failed-start compensation removing its own
+    recovery registration; Security PR360 accepts that exact correction. Platform PR344 e43abde20b01dfea997c55d3149f1ecb02e0665e
+    / Security PR361 a8bf1b81319ab123ac480a395e341bcd11486482 align all six existing Ollama bindings from0.40.8
+    to actual0.40.11, preserving the complete model digest and all other authority. Native all-six metadata readiness
+    passed before a separate Delivery exit139 and completed compensation. This fixes an intentional version-integrity
+    refusal; it is not a segmentation-fault cure. Existing retry policy is3starts per10-minute window, not a lifetime
+    attempt cap. A manual stop once interrupted Temporal rollback; the existing native rollback completed the exact
+    prior deployed revision with data retained. Future containment waits for the owner operation to finish before
+    preventing a subsequent retry.
+
+
+    After the next operator restart, initial fault count waszero, then one repeated pg_isready crash every5seconds
+    produced39messages. Grouping proved those39were the same utility, not39independent component failures. The source
+    blobs and the two containers'' binary hashes matched each other, but that was insufficient to establish runtime
+    integrity because both used the same cached image. A fresh independent extraction of the EXACT immutable postgres
+    image docker.io/library/postgres@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50 runs
+    pg_isready --version successfully. Both cached Kubernetes copies return139 even for --version. Trusted and cached
+    files are both115376bytes; trustedSHA256 c48b0e154f92bfadec65d6b9b9a902343262a769b92d69222ab8e332d04656c8 differs
+    from cached3398cfdec5fbebb882be95ad48f2e301ea2cd40ed4a7d4124c9267a401c99bbb at exactly offset7188, expectedbyte0/observed1
+    (onebit). This is proven cached runtime binary corruption; why the bit changed is unverified. System library
+    package audit passed and the loader hash matches the fresh image; no claim that this explains every earlier
+    Node/Python fault.
+
+
+    Preserved both binary copies, exact checksums/byte diff, same-image fresh version proof and owner containment
+    evidence. Temporary diagnostic containers had no networking, no database mounts,128MiB limit and automatic removal.
+    Automatic recovery''s current operation completed its compensation before the next retry was stopped at17:11:08UTC.
+    No running owner upgrade was killed. Refresh only the proven affected runtime cache through owner maintenance,
+    preserve all database volumes/history, verify the trusted binary before normal recovery, then finish current/history/identity/model
+    and restart proof. Keep this candidate accepted; no speculative source patch, new ART item or new architecture.
+    The current RAM setup is untested per operator; no faulty module or hardware root cause is established.
+
+
+
+    Targeted cache recovery then verified all12stored config/layer blob SHA256 values are valid. The independent
+    fresh image and cached image have identical linux/amd64 rootfs layer chain. Thus the demonstrated wrong bit
+    is in the unpacked snapshot rather than the trusted compressed archive. With no remaining containers using that
+    exact image and owner compensation complete, native synchronous image GC retired only the three aliases and
+    affected unpacked snapshot, then native CRI restored the SAME immutable digest and original deployment tag.
+    No PVC, database data, source, permission or provider/version change was made. A disposable nonprivileged Kubernetes
+    pod with no database mounts or service-account token now runs pg_isready16.13 successfully and reports trustedSHA256c48b0e154f92bfadec65d6b9b9a902343262a769b92d69222ab8e332d04656c8.
+    The exact-UID test pod was removed. Before that refresh this boot had81pg_isreadyfaults and no other kernel
+    fault classes. Normal complete-runtime recovery against the repaired cache has started; full operating acceptance
+    is still pending and must not be inferred from the disposable proof.
+
+
+
+    Post-cache recovery now PASSED normal complete-runtime activation: retained supervisor receipt20261026T173457Z
+    and delegated final readback20261026T173543Z, followed by normal credential renewal20261026T173631Z. Fresh Chromium
+    cockpit and all12Console destinations pass with no browser errors, failed API reads, business writes or model
+    requests. Authenticated Account,42Proposals,43Delivery roots and LittleList original seven-event history are
+    retained. All five profiles are active. The67observations retained minimum11742MiB available, no swap use and
+    no memory stalls; the managed frontend is around130MiB with its3GiBsoft/4GiBhard/1GiBswap limits. Kernel/systemd
+    MONOTONIC timestamps show no new native fault after this repaired-cache activation; raw retained message counts
+    can shrink when the kernel ring buffer rotates and must not be subtracted as a crash counter.
+
+
+    Operator explicitly accepts that current RAM is not100%healthy and may cause recurring bit flips; further hardware
+    diagnosis is no longer a prerequisite for this work. The requested next outcome is a proper automatic integrity-check
+    and bounded recovery procedure. Keep this candidate accepted for that durable control, not because the currently
+    observed cache corruption is still unrepaired. Recommendation is EXTEND existing Platform lifecycle, artifact
+    checks, privileged bootstrap and status/receipts: declared trusted artifacts across the composition, independent
+    checksum baseline, preserve data/unique source work, serialize safe quiesce and exact-version artifact replacement,
+    full owner/Console revalidation, and visible stop after a bounded failed repair. Existing frontend manifests
+    and immutable artifact locks are reused. The automatic procedure remains a reviewed architecture proposal, not
+    implemented or accepted operating control; it cannot guarantee recovery from arbitrary faulty-RAM effects or
+    replace mutable data blindly. No new ART/architecture version, new control plane, RAM-test gate or Desktop work
+    is introduced.
+
+    The operator then explicitly authorized implementation. Same unmerged Platform PR345 now holds the bounded
+    checker, owner-operation exclusion, shared-consumer plan and frontend rebuild, with a dependent Security review
+    staged. Native read-only inspection covered17images and203874filesystem entries; two additional cached tools
+    differ from trusted image layers: MinIO client usr/bin/mc and Temporal admin usr/local/bin/temporal. Pre-merge
+    checks corrected retained diagnostic views and bound the actual administration factory to canonical Platform-Core.
+    During validation an intended URI-query dry run with a DeleteOptions body retired the already-completed WGCF
+    storage-provisioning pod61960144-3d0e-46d8-917e-585a4ccc7dd2. Its completed Job0723d931-e762-43a4-82c3-2ccea29242a8
+    remains succeeded and database/object-storage PVCs remain Bound. No database/volume was targeted and no completed
+    provisioning work is recreated. This is an agent validation miss, not a new business defect or hardware diagnosis.
+    Further real-resource validation deletion stopped. Disposable ConfigMap proof verifies explicit body dryRunAll
+    retains the exact object and wrong UID preconditions reject deletion; the disposable object was removed. Preserve
+    this incident and finish the same maintenance unit. Completed Job definitions must remain in artifact coverage
+    after their Pods are retired, using their declared cached immutable image identity rather than an upgraded tag.
+    Automatic repair is still NOT activated; original repaired Console remains on prior accepted source pending review.
+    Pre-merge causal review also moved artifact/consumer confirmation before enabling Platform capabilities, avoiding
+    a self-dependent completion gate. New activation unit tests had emitted14synthetic artifact receipts into operator
+    private state; only receipts with the exact synthetic decision digest and repeated-c test revision were quarantined,
+    preserving all native receipts. Unit receipt roots are now private temporary directories. Preserve this validation
+    containment evidence and require actual operating proof rather than interpreting test output as runtime acceptance.
+
+    Platform PR345 merged1e687aac02ec04b504c925fcf1e8f05820a2fde7 with reviewed tree
+    a95a67d0916ec3be8b147acbbb378afabb9bbfe5; Security PR362 mergedbb1c1e3199bd71d9a6ffb70b12b0bd6b14d753df
+    selects that exact source. Full local and hosted source checks, delegated exact-head review and tree equality
+    passed. The first Platform hosted job stalled in Ubuntu mirror metadata download; its unchanged retry passed.
+    After another operator-reported PC crash, the existing normal supervisor recovered without manual restart,
+    full complete-runtime status passed and the credential timer renewed successfully. Boot89787d22-2279-45f3-8514-0c22926836c6
+    had about12GiB available and zero pressure averages at initial recovery checks. No crash root cause is inferred.
+
+    Root helper installation then succeeded at20261026T202417Z and independently checked all17images healthy.
+    The two earlier cached-tool mismatches were absent after the reboot. Therefore no image replacement is needed
+    or authorized by this result, and native automatic replacement has not been exercised. Do not inject corruption
+    into operator workloads or describe a healthy scan as a successful repair. The same reviewed normal activation
+    is in progress. Preserve this distinction between implemented bounded control, unit/native diagnostic evidence
+    and unexercised live replacement. No mutable-data integrity or arbitrary hardware recovery guarantee follows.
+
+    Reviewed-source activation completed20261026T203719Z with healthy artifact journal and retained supervisor;
+    all17images passed both installed checks. Native read-only Chromium then passed all12destinations, exact
+    authenticated principal/roles/session, nine current owners,42Proposals,43Delivery roots and the original
+    LittleList1305-to1306 owner receipt and seven-event completed history. Zero browser errors, failed API reads,
+    business writes or model requests. Normal credential timer is restored; native refresh-credentials receipt20261026T204221Z passed.
+    Across79startup observations minimum available memory was11510.7MiB, maximum swap use4.2MiB; frontend current
+    memory129MiB/peak134MiB with zero restarts and unchanged3GiBsoft/4GiBhard/1GiBswap limits. The full accepted-source
+    startup including independent artifact checks took13minutes; do not equate this observed run with indefinite
+    hardware stability. Platform and Security source credentials were revoked, merged worktrees/branches retired,
+    and both exact strict owner cleanup audits passed.
+
+    '
+follow_up:
+  owner_repo: platform-engineering
+  due_on: '2026-10-28'
+  note: The bounded control is implemented, reviewed, installed and healthy-source startup/current-history checks
+    pass. Native automatic cache replacement remains unexercised because both prior tool mismatches disappeared
+    after the reboot; there is no currently damaged artifact to replace. Preserve this as the remaining operating
+    evidence limitation for the first genuine supported incident. Do not inject corruption into operator workloads,
+    invent source changes, keep healthy work blocked, or require RAM diagnosis merely to manufacture that proof.
+    Retain this candidate accepted with its owner and due date rather than claiming unobserved live restoration.
