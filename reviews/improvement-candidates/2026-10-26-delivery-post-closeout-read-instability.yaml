@@ -1,0 +1,157 @@
+schema_version: 1
+id: 2026-10-26-delivery-post-closeout-read-instability
+title: Delivery read instability after successful closeout witness
+recorded_on: '2026-10-26'
+owner_repo: operator-orchestration-service
+summary: Native profiling proved expensive whole-ART child-graph scans and serial owner-evidence composition.
+  The approved repair preserves global views while separating operational trees from original historical evidence.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-26-delivery-current-and-history-truth.yaml
+status: closed
+source_type: manual
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: 'Root document is HTTP200 from WSL and Windows; native services/pods are running with available
+    memory. Fresh Chromium saw Delivery workspace HTTP503 after55.571sec and HTTP200 after64.109sec. Operator
+    clarified empty content is inside Delivery. Current intentionally excludes completed/parked/retired records;
+    do not classify that scope as data loss or invent a code defect. Prove actual History data, ongoing credential
+    refresh and backend timing before selecting repair. Earlier accepted source/history proof remains retained;
+    this signal captures the follow-up without rewriting that history. Operator now confirms records are visible
+    and asks why loading remains slow. A single direct native GET completed HTTP200 in45.813sec with43 packages,4
+    original Intake sources and37 explicitly unavailable historical proof records;38done/1parked/4retired explains
+    empty Current scope. Inventory projection was generated29.596sec after request start; remaining source-evidence
+    composition took16.215sec. These wall-time checkpoints locate both parts of the cost, not a proved database/query
+    root cause. The browser hook already prevents overlapping requests within one mount; no overlap bug is
+    established. The private browser diagnostic waited on an unavailable modal selector after a failed request
+    and was explicitly stopped; that harness wait is not product load timing. Native credential refresh succeeded
+    before the initial failure. During candidate capture one record was briefly written to the active WG primary
+    and one later refresh rejected its dirty-source precondition; the record was moved to the isolated learning
+    worktree immediately and the next native refresh succeeded. That capture-ordering mistake occurred after
+    the original slow-read evidence and does not explain it. During the approved growth/performance work, the
+    unmerged draft shifted Delivery toward selected-package-only navigation and could narrow the existing global
+    overview. The operator challenged whether capabilities were being downgraded. Reject that draft before
+    publication: preserve the existing global views, counts, filters, navigation, evidence and action paths.
+    Exact source controller/modal/hook/default API route have been restored from the accepted base, and rejected
+    unique draft files are preserved in private evidence. No source commit, publication or runtime activation
+    from this performance work has occurred. Future performance acceptance must prove capability equivalence
+    and scaling, rather than substituting a smaller workflow for the original one. Subsequent native owner profiling
+    measured a14749ms full inventory and5476ms Intake composition. The corrected console overview retained all43
+    package roots and the complete parked/active trees in7683ms; scoped summaries matched the full owner summaries
+    exactly. These are owner-call measurements, not final browser acceptance. Synthetic capability tests preserve
+    global Current/History packages, totals, filters, operational trees and original custody with2000 archived roots.
+    Proposal source inspection found duplicate projection/history scans and a separate page-continuation mismatch:
+    the documented and native offset is a1-based page number, while the service incremented it by item count.
+    A read-only native proof found42 Proposals and disjoint pages1/2/3; the Console previously loaded only25.
+    Correct the continuation and retain all bounded global pages, rejecting changed totals or repeated identities.
+    Prototype optimization caches only parsed immutable Git content by exact revision; admission, trusted-ref checks
+    and mutable workflow journals remain fresh. The corrected owners landed as OOS PR384 and Console PR129,
+    followed by exact composed Security PR356. Native activation20261025T234820Z and fresh status20261025T234940Z
+    succeeded. The actual browser proved all43 roots, four original admissions,37 explicit missing-proof records
+    and the original7-event LittleList chain from History Home. It then caught a real refresh continuity regression:
+    the next full Intake poll published its first partial page over a previously complete snapshot, temporarily
+    removing the filtered LittleList row. Sidebar Loading was explicit, but Intake summary still showed0 and
+    the empty-filter message was misleading. Preserve the last complete verified snapshot during refresh, retain
+    it with explicit stale coverage on transient failure within the existing observation bound, clear it on denial,
+    and label initial unknown totals/loading rows explicitly. Keep this within the same accepted maintenance;
+    the native proof has not passed, so closure remains pending.'
+  source_refs:
+  - 'conversation: operator reports Console slow then Delivery empty immediately after repair completion'
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/load-check.json
+  - local-evidence://operator-orchestration-service/.art/delivery-truth-repair-20261026/post-closeout-single-read.json
+  - governance-operations-console/src/domain-workspaces/delivery/server/delivery-workspace-oos-client.ts
+  - governance-operations-console/src/domain-workspaces/delivery/live-runtime/use-delivery-workspace-live-runtime.ts
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/browser-proof-first-native.json
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/browser-proof.json
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/browser-fault-proof.json
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/surface-native-after.json
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/activation-continuity-receipt.json
+  - local-evidence://operator-orchestration-service/.art/console-read-performance-20261026/current-status-continuity-receipt.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-service.js
+    type: workflow
+    note: Complete global package roots and batched operational trees preserve global scope while deferring unused terminal graphs.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/delivery-history-reader.js
+    type: workflow
+    note: Bounded native target pages retain original owner proof and inspected-root coverage without blocking inventory.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/proposal-workflow/service.js
+    type: workflow
+    note: Fresh combined projection and original history snapshot removes duplicate owner scans without caching mutable authority.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/src/prototype-landing/records-client.js
+    type: workflow
+    note: One immutable revision parse cache retains fresh admission and trusted-ref checks, clone isolation and existing byte bounds.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/console-integration/source-authority/concurrent-source-read.ts
+    type: workflow
+    note: Same-authority pending-only GET reuse is isolated by operator, credentials, endpoint, scope and transport and evicted on settlement.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-history-projection.ts
+    type: workflow
+    note: Complete verified Intake snapshots survive partial background pages and transient failures within the original observation bound.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/tests/operation-runtime/delivery-overview-parity.test.mjs
+    type: test
+    note: Global Current/History and operational-tree equivalence,2000 archived roots, unknown totals and repeated refresh continuity are regression-covered.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/tests/operation-runtime/proposal-live-adapter.test.mjs
+    type: test
+    note: Global owner pagination retains older records and rejects repeated or shifted scope with bounded snapshot concurrency.
+  - owner_repo: operator-orchestration-service
+    path: operator-orchestration-service/test/prototype-records.test.js
+    type: test
+    note: Growing immutable snapshots retain bounded cold concurrency, warm clone isolation and denial after trusted-ref revocation.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/delivery-execution-work-sessions.md
+    type: runbook
+    note: Defines independent original evidence loading, unknown totals, retained snapshot refresh and fresh command authority.
+  - owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-26-delivery-owner-history.md
+    type: doc
+    note: Accepts exact reviewed sources and cache/read boundaries while requiring separate native operating proof.
+  note: 'Closed on2026-10-26 after approved maintenance landed through Gary OOS PR384, Console PR129/130 and
+    exact-source Security PR356/357, with delegated exact-head human reviews and successful provider CI. Final
+    owners are OOS f06880edd177516835699651ace3861ff0a81939, Console1fefa9d7c560796a4553ecee343c97e5721ef549
+    and Security99a2e1fdd263f0f801c41f8128de770c575be035. Full local owner checks passed, including1654 backend
+    tests plus two intentional skips and final91 HTTP tests, and753 Console semantic tests, architecture, typecheck,
+    production build, public-source validation and zero production dependency vulnerabilities. Native final
+    activation20261026T002110Z and fresh status20261026T002231Z passed with live/current Console and current
+    composition. Actual Chromium passed all twelve Current/History surface combinations. All43 roots, four
+    original admissions and37 explicitly unavailable historical proof records were preserved. The original
+    seven-event Little List1306 chain and exact receipt/digest coordinates were verified independently from
+    Home, Intake, Work Design, Refinement and Execution. Original data was never missing. The first native
+    refresh failure is retained; its complete-snapshot replacement correction passed the repeated native witness.
+    Final first inventory read6821ms, warm2836ms; simultaneous tabs received the same43-package revision and
+    exact observation at7422/7421ms. Reads under concurrent history/poll load varied up to16.5seconds; the
+    improvement is measured, not an unconditional latency guarantee. Native Proposal read3737ms retained all42
+    records rather than the newest25; Prototype reads1356/845ms retained live owner mode. Other selected reads
+    returned200. Activity remained explicitly partial with its bounded500events, and unselected Runtime
+    Observations remained disconnected-preview; neither is relabeled fully live. Controlled browser503/403
+    simulations after real native success proved stale/original-observation retention, successful later evidence
+    not making failed inventory fresh, recovery on fresh retry and clearing on denied access. These simulations
+    are distinct from native acceptance. Native browser proof had zero business API writes and page errors;
+    simulated failure checks also had zero writes. No model invocation or fabricated history was used. Implementation/acceptance worktrees and branches were
+    retired with strict owner audits and exact credential revocation before this learning closeout. The learning
+    Landing Unit follows the same reviewed merge and cleanup path. Historical authorization: operator approved
+    the five-part repair and the same expensive-read fix across surfaces, while explicitly requiring global
+    capability preservation and growth proof. No new ART item, instruction gate or cache service was introduced.'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
