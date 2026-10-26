@@ -48,6 +48,7 @@ signals:
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/cache-recovery-result.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/repaired-kubernetes-cache-proof.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/plan.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/current-operating-proof.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -146,11 +147,36 @@ resolution:
     fault classes. Normal complete-runtime recovery against the repaired cache has started; full operating acceptance
     is still pending and must not be inferred from the disposable proof.
 
+
+
+    Post-cache recovery now PASSED normal complete-runtime activation: retained supervisor receipt20261026T173457Z
+    and delegated final readback20261026T173543Z, followed by normal credential renewal20261026T173631Z. Fresh Chromium
+    cockpit and all12Console destinations pass with no browser errors, failed API reads, business writes or model
+    requests. Authenticated Account,42Proposals,43Delivery roots and LittleList original seven-event history are
+    retained. All five profiles are active. The67observations retained minimum11742MiB available, no swap use and
+    no memory stalls; the managed frontend is around130MiB with its3GiBsoft/4GiBhard/1GiBswap limits. Kernel/systemd
+    MONOTONIC timestamps show no new native fault after this repaired-cache activation; raw retained message counts
+    can shrink when the kernel ring buffer rotates and must not be subtracted as a crash counter.
+
+
+    Operator explicitly accepts that current RAM is not100%healthy and may cause recurring bit flips; further hardware
+    diagnosis is no longer a prerequisite for this work. The requested next outcome is a proper automatic integrity-check
+    and bounded recovery procedure. Keep this candidate accepted for that durable control, not because the currently
+    observed cache corruption is still unrepaired. Recommendation is EXTEND existing Platform lifecycle, artifact
+    checks, privileged bootstrap and status/receipts: declared trusted artifacts across the composition, independent
+    checksum baseline, preserve data/unique source work, serialize safe quiesce and exact-version artifact replacement,
+    full owner/Console revalidation, and visible stop after a bounded failed repair. Existing frontend manifests
+    and immutable artifact locks are reused. The automatic procedure remains a reviewed architecture proposal, not
+    implemented or accepted operating control; it cannot guarantee recovery from arbitrary faulty-RAM effects or
+    replace mutable data blindly. No new ART/architecture version, new control plane, RAM-test gate or Desktop work
+    is introduced.
+
     '
 follow_up:
   owner_repo: platform-engineering
   due_on: '2026-10-28'
-  note: Refresh the proven one-bit-corrupted cached runtime artifact while retaining owner database state; verify
-    actual binary integrity and normal complete Console recovery/current-history evidence. Diagnose why cached bytes
-    changed and independently assess remaining native faults; current RAM has not been tested. Keep this same candidate
-    and PR314 accepted/open until the required operating outcome is proven.
+  note: Design and implement the requested bounded automatic artifact-integrity/recovery extension in the existing
+    Platform lifecycle and its primary operator procedure, covering declared component artifacts with trusted baselines
+    and safe restore methods. Preserve database volumes, secrets and unique source work; verify normal Console/history
+    and failure-stop behavior. Known imperfect RAM is an operator-accepted constraint, not a request for more hardware
+    diagnosis. Current specific cache repair and native recovery are proven; automatic durable control remains pending.
