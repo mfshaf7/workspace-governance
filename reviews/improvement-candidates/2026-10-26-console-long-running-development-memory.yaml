@@ -53,29 +53,45 @@ resolution:
     path: security-architecture/docs/reviews/components/2026-10-26-console-prebuilt-runtime-memory.md
     type: doc
     note: Accepts exact Platform source/tree and separates source approval from native and host operating proof.
-  note: 'Platform Gary PR342 merged3a686e9ee4eafb2e3a617b0248731cbfc5564af5 and Security PR359 mergede85e55ede1e3832c180304ea5b18b98e2142a9dc
-    passed exact-head review and CI with identical reviewed/merged trees. Existing complete-runtime activation20261026T122212Z
-    passed live/current with43 Delivery roots,5 Prototypes and model registry revision13/three registrations. Fresh
-    native cockpit passed Account/session,42 Proposals,43 Delivery roots and original LittleList seven-event history
-    with no business writes/model requests. Warm managed service about136MiB versus previous8.4GiB long-lived development
-    service; this is bounded short-term operating evidence, not proof of indefinite stability. Full-destination
-    sampling and reclaim verification continue. Windows20GB/6GB configuration is written with exact original backup,
-    but requires WSL VM restart and activated readback. Candidate deliberately remains accepted until that proof
-    completes; no new ART item, architecture version or recurring cache-flush service. Fresh Chromium also passed
-    all12 Console destinations and175 API reads (all200), zero page errors and zero attempted business writes. Five-minute
-    operating sample:30 observations, service maximum141.2MiB, manager peak142.7MiB, minimum guest available11.85GiB,
-    zero automatic restarts; runtime3GiB soft/4GiB hard/1GiB swap budgets verified. This is short-term native proof,
-    not an indefinite leak-free claim. Local evidence: local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/standalone-memory-summary.json
-    and native-destinations-report.json. Normal complete-runtime recovery20261026T122828Z passed; the same source-bound
-    artifact and budgets reloaded, followed by live/current owner status. Separate120-second normal-stack observation
-    after build/test-browser/validators stopped averaged7.13% CPUbusy; the <=0.5% WSL idle window was not met. Windows
-    working set stayed about16.21GiB while the frontend service stayed about112MiB: retained VM/cache and required
-    backends remain separate from frontend use. No periodic cache flush, reclaim daemon or unsupported idle override
-    was added.20GB is a host protection ceiling, not a promise that Task Manager stays tiny or that all crashes
-    are fixed. Actual configured ceiling activation/readback after operator restart remains the only planned operating
-    dependency; keep this same PR/Landing Unit open across the restart.'
+  note: 'Platform Gary PR342 merged3a686e9ee4eafb2e3a617b0248731cbfc5564af5 and exact Security PR359 mergede85e55ede1e3832c180304ea5b18b98e2142a9dc,
+    with delegated exact-head approval, successful provider CI and reviewed/merged tree equality. Full local Platform
+    validation and focused artifact/process/budget cases passed. This extends existing runtime maintenance, with
+    no new ART item, architecture version or recurring cache-flush service.
+
+
+    Before reboot, normal activation20261026T122212Z and recovery20261026T122828Z passed live/current. Native Chromium
+    passed the cockpit and all12 destinations, preserving42 Proposals,43 Delivery roots,5 Prototypes, model registry
+    revision13/three registrations, authenticated Account and LittleList original seven-event history. No browser
+    errors, failed API reads, business writes or model requests. Five-minute30-observation service maximum141.2MiB,
+    manager peak142.7MiB, minimum guest available11.85GiB and zero automatic restarts. Runtime3GiB soft/4GiB hard/1GiB
+    swap budgets were verified. This is bounded short-term proof, not indefinite stability assurance. Separate120-second
+    normal-stack observation averaged7.13% CPUbusy, above installed WSL3.0.3''s <=0.5% reclaim idle gate; Windows
+    VM/cache memory is distinct from frontend RSS.
+
+
+    After the operator reboot, the20GB memory ceiling and6GB swap are proven active: MemTotal20001MiB and SwapTotal6144MiB.
+    Memory pressure averages/totals remainedzero and swapunused. Windows configuration preserves unrelated settings
+    and has an exact original backup. Capacity activation is complete; fresh whole-stack native verification remains
+    incomplete.
+
+
+    Post-boot recovery was interrupted by observed memory-access faults in two Node processes, Python and Go/k3s.
+    k3s logged fatal fault/SIGSEGV at14:13:12Z. Its interrupted composition rollback removed/stopped its owning
+    startup unit. A single deliberate normal recovery after Docker/k3s readiness reached accepted-idea-delivery
+    up but returned139 at14:22:19Z, then rollback again stopped the controller. No further activation retry was
+    started. These observations do not prove a bad RAM module, corrupted source, a new application defect or memory-limit
+    exhaustion. Python package checksums pass; no WHEA hardware event returned since boot. Windows reports mixed16GB/8GB
+    RAM kits, a diagnostic lead only. Physical memory/CPU configuration and WSL/environment causes remain unverified.
+
+
+    Keep this same candidate accepted and same PR/Landing Unit open until the environment is stable enough for fresh
+    native verification. Do not treat source tests or the activated limit as complete operating acceptance. Preserve
+    source and evidence; do not create speculative repair stories or change production controls to bypass failed
+    live proof. Evidence: local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/standalone-memory-summary.json,
+    native-destinations-report.json, post-boot-memory.json and post-boot-faults.json.'
 follow_up:
   owner_repo: platform-engineering
   due_on: '2026-10-28'
-  note: Complete approved maintenance and verify source-bound serving, measured memory headroom, WSL reclaim eligibility
-    and host configuration activation.
+  note: Retain the accepted runtime/capacity source and evidence; diagnose actual cross-runtime post-boot faults,
+    then finish fresh native health/history and close this same candidate/PR. Hardware cause and BIOS tuning state
+    remain unverified.
