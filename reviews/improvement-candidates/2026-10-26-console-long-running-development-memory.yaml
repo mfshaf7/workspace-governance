@@ -55,6 +55,11 @@ signals:
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-query-options-reproduction.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-declared-inventory-proof.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-root-factory-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-install-receipt.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/post-reboot-artifact-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/current-native-operating-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-memory-summary.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/merged-owner-source-cleanup.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -191,13 +196,45 @@ resolution:
     this incident and finish the same maintenance unit. Completed Job definitions must remain in artifact coverage
     after their Pods are retired, using their declared cached immutable image identity rather than an upgraded tag.
     Automatic repair is still NOT activated; original repaired Console remains on prior accepted source pending review.
+    Pre-merge causal review also moved artifact/consumer confirmation before enabling Platform capabilities, avoiding
+    a self-dependent completion gate. New activation unit tests had emitted14synthetic artifact receipts into operator
+    private state; only receipts with the exact synthetic decision digest and repeated-c test revision were quarantined,
+    preserving all native receipts. Unit receipt roots are now private temporary directories. Preserve this validation
+    containment evidence and require actual operating proof rather than interpreting test output as runtime acceptance.
+
+    Platform PR345 merged1e687aac02ec04b504c925fcf1e8f05820a2fde7 with reviewed tree
+    a95a67d0916ec3be8b147acbbb378afabb9bbfe5; Security PR362 mergedbb1c1e3199bd71d9a6ffb70b12b0bd6b14d753df
+    selects that exact source. Full local and hosted source checks, delegated exact-head review and tree equality
+    passed. The first Platform hosted job stalled in Ubuntu mirror metadata download; its unchanged retry passed.
+    After another operator-reported PC crash, the existing normal supervisor recovered without manual restart,
+    full complete-runtime status passed and the credential timer renewed successfully. Boot89787d22-2279-45f3-8514-0c22926836c6
+    had about12GiB available and zero pressure averages at initial recovery checks. No crash root cause is inferred.
+
+    Root helper installation then succeeded at20261026T202417Z and independently checked all17images healthy.
+    The two earlier cached-tool mismatches were absent after the reboot. Therefore no image replacement is needed
+    or authorized by this result, and native automatic replacement has not been exercised. Do not inject corruption
+    into operator workloads or describe a healthy scan as a successful repair. The same reviewed normal activation
+    is in progress. Preserve this distinction between implemented bounded control, unit/native diagnostic evidence
+    and unexercised live replacement. No mutable-data integrity or arbitrary hardware recovery guarantee follows.
+
+    Reviewed-source activation completed20261026T203719Z with healthy artifact journal and retained supervisor;
+    all17images passed both installed checks. Native read-only Chromium then passed all12destinations, exact
+    authenticated principal/roles/session, nine current owners,42Proposals,43Delivery roots and the original
+    LittleList1305-to1306 owner receipt and seven-event completed history. Zero browser errors, failed API reads,
+    business writes or model requests. Normal credential timer is restored; native refresh-credentials receipt20261026T204221Z passed.
+    Across79startup observations minimum available memory was11510.7MiB, maximum swap use4.2MiB; frontend current
+    memory129MiB/peak134MiB with zero restarts and unchanged3GiBsoft/4GiBhard/1GiBswap limits. The full accepted-source
+    startup including independent artifact checks took13minutes; do not equate this observed run with indefinite
+    hardware stability. Platform and Security source credentials were revoked, merged worktrees/branches retired,
+    and both exact strict owner cleanup audits passed.
 
     '
 follow_up:
   owner_repo: platform-engineering
   due_on: '2026-10-28'
-  note: Finish exact Platform source and dependent Security acceptance for the staged bounded recovery extension,
-    native automatic restoration of both newly identified cached tools, normal authenticated Console/history/model
-    and credential-renewal proof, and source lifecycle cleanup. Preserve database volumes, secrets and unique work.
-    Retain the validation miss and disposable dry-run/body proof. Known imperfect RAM is accepted and not a new
-    hardware-diagnosis request. Original PostgreSQL repair is proven; automatic durable operating proof remains pending.
+  note: The bounded control is implemented, reviewed, installed and healthy-source startup/current-history checks
+    pass. Native automatic cache replacement remains unexercised because both prior tool mismatches disappeared
+    after the reboot; there is no currently damaged artifact to replace. Preserve this as the remaining operating
+    evidence limitation for the first genuine supported incident. Do not inject corruption into operator workloads,
+    invent source changes, keep healthy work blocked, or require RAM diagnosis merely to manufacture that proof.
+    Retain this candidate accepted with its owner and due date rather than claiming unobserved live restoration.
