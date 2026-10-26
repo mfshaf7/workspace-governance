@@ -38,6 +38,16 @@ signals:
   - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/plan.json
   - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/wsl-reclaim-eligibility.json
   - local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/wsl-normal-stack-after-recovery.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/cached-binary-corruption-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/fresh-postgres-image-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/postgres-binary-comparison.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/retry-containment.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/runtime-alignment/native-operating-proof/commissioning-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/runtime-alignment/native-operating-proof/all-six-profile-readiness.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/independent-image-layer-identity.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/cache-recovery-result.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/repaired-kubernetes-cache-proof.json
+  - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/post-third-restart/post-cache-recovery/plan.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -88,10 +98,59 @@ resolution:
     native verification. Do not treat source tests or the activated limit as complete operating acceptance. Preserve
     source and evidence; do not create speculative repair stories or change production controls to bypass failed
     live proof. Evidence: local-evidence://governance-operations-console/.art/console-runtime-memory-20261026/standalone-memory-summary.json,
-    native-destinations-report.json, post-boot-memory.json and post-boot-faults.json.'
+    native-destinations-report.json, post-boot-memory.json and post-boot-faults.json.
+
+
+    Later recovery source is reviewed and landed: Platform PR343 fixes failed-start compensation removing its own
+    recovery registration; Security PR360 accepts that exact correction. Platform PR344 e43abde20b01dfea997c55d3149f1ecb02e0665e
+    / Security PR361 a8bf1b81319ab123ac480a395e341bcd11486482 align all six existing Ollama bindings from0.40.8
+    to actual0.40.11, preserving the complete model digest and all other authority. Native all-six metadata readiness
+    passed before a separate Delivery exit139 and completed compensation. This fixes an intentional version-integrity
+    refusal; it is not a segmentation-fault cure. Existing retry policy is3starts per10-minute window, not a lifetime
+    attempt cap. A manual stop once interrupted Temporal rollback; the existing native rollback completed the exact
+    prior deployed revision with data retained. Future containment waits for the owner operation to finish before
+    preventing a subsequent retry.
+
+
+    After the next operator restart, initial fault count waszero, then one repeated pg_isready crash every5seconds
+    produced39messages. Grouping proved those39were the same utility, not39independent component failures. The source
+    blobs and the two containers'' binary hashes matched each other, but that was insufficient to establish runtime
+    integrity because both used the same cached image. A fresh independent extraction of the EXACT immutable postgres
+    image docker.io/library/postgres@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50 runs
+    pg_isready --version successfully. Both cached Kubernetes copies return139 even for --version. Trusted and cached
+    files are both115376bytes; trustedSHA256 c48b0e154f92bfadec65d6b9b9a902343262a769b92d69222ab8e332d04656c8 differs
+    from cached3398cfdec5fbebb882be95ad48f2e301ea2cd40ed4a7d4124c9267a401c99bbb at exactly offset7188, expectedbyte0/observed1
+    (onebit). This is proven cached runtime binary corruption; why the bit changed is unverified. System library
+    package audit passed and the loader hash matches the fresh image; no claim that this explains every earlier
+    Node/Python fault.
+
+
+    Preserved both binary copies, exact checksums/byte diff, same-image fresh version proof and owner containment
+    evidence. Temporary diagnostic containers had no networking, no database mounts,128MiB limit and automatic removal.
+    Automatic recovery''s current operation completed its compensation before the next retry was stopped at17:11:08UTC.
+    No running owner upgrade was killed. Refresh only the proven affected runtime cache through owner maintenance,
+    preserve all database volumes/history, verify the trusted binary before normal recovery, then finish current/history/identity/model
+    and restart proof. Keep this candidate accepted; no speculative source patch, new ART item or new architecture.
+    The current RAM setup is untested per operator; no faulty module or hardware root cause is established.
+
+
+
+    Targeted cache recovery then verified all12stored config/layer blob SHA256 values are valid. The independent
+    fresh image and cached image have identical linux/amd64 rootfs layer chain. Thus the demonstrated wrong bit
+    is in the unpacked snapshot rather than the trusted compressed archive. With no remaining containers using that
+    exact image and owner compensation complete, native synchronous image GC retired only the three aliases and
+    affected unpacked snapshot, then native CRI restored the SAME immutable digest and original deployment tag.
+    No PVC, database data, source, permission or provider/version change was made. A disposable nonprivileged Kubernetes
+    pod with no database mounts or service-account token now runs pg_isready16.13 successfully and reports trustedSHA256c48b0e154f92bfadec65d6b9b9a902343262a769b92d69222ab8e332d04656c8.
+    The exact-UID test pod was removed. Before that refresh this boot had81pg_isreadyfaults and no other kernel
+    fault classes. Normal complete-runtime recovery against the repaired cache has started; full operating acceptance
+    is still pending and must not be inferred from the disposable proof.
+
+    '
 follow_up:
   owner_repo: platform-engineering
   due_on: '2026-10-28'
-  note: Retain the accepted runtime/capacity source and evidence; diagnose actual cross-runtime post-boot faults,
-    then finish fresh native health/history and close this same candidate/PR. Hardware cause and BIOS tuning state
-    remain unverified.
+  note: Refresh the proven one-bit-corrupted cached runtime artifact while retaining owner database state; verify
+    actual binary integrity and normal complete Console recovery/current-history evidence. Diagnose why cached bytes
+    changed and independently assess remaining native faults; current RAM has not been tested. Keep this same candidate
+    and PR314 accepted/open until the required operating outcome is proven.
