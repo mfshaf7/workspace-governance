@@ -1,0 +1,128 @@
+schema_version: 1
+id: 2026-10-26-console-cockpit-truthfulness
+title: Align primary Console operating claims with current owner truth
+recorded_on: '2026-10-26'
+owner_repo: governance-operations-console
+summary: Whole-Console inspection proved older attention and account presentation paths still diverge from live
+  owner-backed domain workspaces. Repair existing boundaries and qualify the combined interface rather than treating
+  domain GET success as whole-Console truth.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-15-console-capability-operating-truth-regression.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - security-architecture
+  - platform-engineering
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: machine-visible-workflow-drift
+  title: Primary operating summaries are not derived from the current domain owner state
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: The accepted live Focus contract excludes fixture candidates, but Environment attention is seeded by
+    July fixtures and marked current/source-projected. Six live domain workspaces lack connected primary attention
+    feeds. Pulse emits global zero/CLEAR under incomplete coverage and calls attention moves running operations.
+    Account uses synthetic identity while server enforcement reads a current authenticated Platform session. Agent
+    health wording exceeds its OOS-readyz-only probe; commit accounting is labelled memory pressure; a catalog address
+    is obsolete. The existing Lifecycle journal has no normal workflow linkage despite retained real handoff receipts.
+    Delivery Home still exposes a labelled local mock assistant. Prior bounded Repository, Prototype and Delivery
+    history corrections remain intact; uncommissioned capabilities are separate honest limitations. Operator approved
+    planning and repair after receiving the read-only whole-Console report. Use the standing maintenance repair
+    path, preserving completed initiatives and original evidence.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/inspection-report.md
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/repair-plan.json
+  - repo://governance-operations-console/docs/product/surface-contracts/command-center-focus.md
+  - repo://operator-orchestration-service/docs/operations/lifecycle-transition-operator-surface.md
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/commissioned-metadata.json
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/native-cockpit-report.json
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/native-destinations-report.json
+  - local-evidence://governance-operations-console/.art/console-truthfulness-inspection-20261026/native-focus-routes-report.json
+resolution:
+  after_action_ref: null
+  control_refs:
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/console-integration/live-attention.ts
+    type: workflow
+    note: Current owner records feed Focus with explicit missing, malformed and expired coverage.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/console-shell/context/use-agent-workspace-context.ts
+    type: workflow
+    note: One bounded, nonoverlapping owner pass supplies both presentation and admitted Agent context.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/console-integration/identity/server/console-operator-identity-route.ts
+    type: workflow
+    note: Exact enforcing-session principal match supplies safe display identity with fail-closed unavailable access.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/lifecycle-transitions/read-model/native-transition-composition.ts
+    type: workflow
+    note: Native owner readbacks coexist with canonical journal records without fabricating phases, receipts or
+      original times.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/src/domain-workspaces/prototype/read-model/native-lifecycle-outcomes.ts
+    type: workflow
+    note: Validated successful graduation and exact accepted native receipt preserve original handoff evidence across
+      later owner actions.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/tests/console-architecture/console-cockpit-truth.test.mjs
+    type: test
+    note: Cross-surface regression cases cover evidence freshness, terminal filtering, incomplete zero, session
+      custody, commit accounting and native provenance.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/surface-contracts/command-center-focus.md
+    type: doc
+    note: Defines live attention provenance and honest unavailable coverage.
+  - owner_repo: governance-operations-console
+    path: governance-operations-console/docs/product/surface-contracts/lifecycle-transitions.md
+    type: doc
+    note: Distinguishes native owner confirmations and acknowledgements from generic journal controls.
+  - owner_repo: security-architecture
+    path: security-architecture/docs/reviews/components/2026-10-26-console-cockpit-truthfulness.md
+    type: doc
+    note: Exact source acceptance retains existing identity, model, command and runtime trust boundaries.
+  note: 'Closed on2026-10-26 after approved maintenance landed through Gary Console PR131 (f208f67c03e2cce1d036d108636328b11d6164aa)
+    and exact-source Security PR358 (09b4ed9ca2e64e8ed1da46ca5a5caeaf4a834dfe), with delegated exact-head human
+    approval, successful provider CI and exact reviewed/merged tree equality. All761 Console semantic tests, architecture
+    guards, TypeScript, production build, staged public-source validator/compile and production dependency audit
+    passed. Current owner contracts and regression tests replace presentation-only assumptions; no new instruction
+    gate, architecture version, ART repair child or workflow ledger was added.
+
+
+    Existing normal Platform activation20261026T040334Z and fresh status20261026T040350Z passed: composition current,
+    Console live/current, provider active, Delivery43, Prototype5, model registry revision13 with three verified
+    registrations and provider health explicitly not probed. The watched primary source advanced only after exact
+    Security acceptance, with frontend and credential timer paused for the controlled dependency/source cutover;
+    normal activation restored both. Actual service source and selected revision match the accepted Console.
+
+
+    Fresh Chromium passed targeted cockpit checks and all12 destinations:195 API readbacks succeeded, with zero
+    page errors and no business writes or model requests. Account matches the real authenticated Platform operator
+    and roles. Focus has nine current owner inputs; real Prototype218 Landing and Orchestration admission-review
+    moves route directly to their correct owners before those workspaces are opened. Delivery Home opens the existing
+    governed Agent. Lifecycle shows the original LittleList native owner confirmation and target1306 alongside clearly
+    labelled Proposal source acknowledgements; missing journal phases and original application time remain unprojected.
+    The same live owner data retains all42 Proposals,43 Delivery roots and LittleList''s seven-event completed original
+    chain. The Focus-route read-only witness blocked the known automatic Prototype Closure preparation before server
+    dispatch; that preparation was not applied or counted as a business effect. Its first overbroad harness assertion
+    is retained separately and the correctly classified repeat passed. Existing unavailable Purpose-profile evidence,
+    unselected component observations and blocked Orchestration execution remain honest limitations, not invented
+    defects or new activation scope.
+
+
+    The stronger closure binds existing product contracts, safe owner projectors, explicit coverage/provenance,
+    cross-surface regression cases and actual whole-Console/native-route proof. Console and Security source credentials,
+    worktrees and branches were retired with strict owner audits before this learning closeout. This learning Landing
+    Unit follows the same reviewed merge and cleanup path. Historical authorization: operator approved the audit-derived
+    repair with now lets plan and begin with the fix.'
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null
