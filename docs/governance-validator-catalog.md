@@ -233,3 +233,12 @@ families. This is required because current operator validation spans:
 The goal is not to move ownership of those commands into WGCF. The goal is to
 let WGCF decide what can be invoked, under which profile, and how the evidence
 is compacted and receipted.
+
+## Mounted repository metadata
+
+The repository structure check reads the origin of its exact resolved repository
+root with a command-scoped Git safe-directory entry and hooks disabled. It
+ignores ambient Git overrides and global/system configuration. This allows the
+same read-only validator in a container with a different filesystem user;
+remote identity validation remains mandatory. No wildcard trust, ownership
+change, persistent Git configuration or credential is required.

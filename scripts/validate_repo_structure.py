@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -231,17 +232,6 @@ GITHUB_REPO_RE = re.compile(
 )
 
 
-def run(cmd: list[str], *, cwd: Path | None = None) -> str:
-    result = subprocess.run(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        check=True,
-        text=True,
-        capture_output=True,
-    )
-    return result.stdout.strip()
-
-
 def normalize_repository_url(value: str | None) -> str | None:
     if not value:
         return None
@@ -249,6 +239,19 @@ def normalize_repository_url(value: str | None) -> str | None:
     if match:
         return f"github.com/{match.group('owner')}/{match.group('repo')}"
     return value.strip().removesuffix(".git")
+
+
+def repository_origin(repo_root: Path) -> str:
+    """Read only this admitted checkout, including a differently owned mount."""
+    root = repo_root.resolve()
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    environment.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"})
+    result = subprocess.run(
+        ["git", "-c", f"safe.directory={root}", "-c", f"core.hooksPath={os.devnull}",
+         "-C", str(root), "remote", "get-url", "origin"],
+        env=environment, check=True, text=True, capture_output=True,
+    )
+    return result.stdout.strip()
 
 
 def main() -> int:
@@ -297,7 +300,7 @@ def main() -> int:
                 )
 
     try:
-        origin = run(["git", "-C", str(repo_root), "remote", "get-url", "origin"])
+        origin = repository_origin(repo_root)
     except subprocess.CalledProcessError as exc:
         errors.append(exc.stdout.strip() or exc.stderr.strip() or str(exc))
     else:
