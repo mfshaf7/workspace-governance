@@ -1,0 +1,652 @@
+schema_version: 1
+id: 2026-10-27-console-planning-route-bypass
+title: Reconcile Console delivery workflow and execution preflight misses
+recorded_on: '2026-10-27'
+owner_repo: workspace-governance
+summary: >-
+  Historical aggregate from the Epic1332 exercise, beginning with engineering
+  planning that bypassed the requested Console path and a false Work Design
+  blocker diagnosis. The findings below preserve the evidence as it was first
+  observed; they are not a list of current product defects. Subsequent owner
+  repairs and operating proof completed Epic1332. The remaining concern is
+  consistent execution of existing native-workflow and full-input preflight
+  controls, which still recurred during the Epic1363 closeout.
+regression_of: null
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - platform-engineering
+  - context-governance-gateway
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - architecture-shaping
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The agent used native Console Capture, Triage, Disposition and Handoff for Proposal1331,
+    then used OOS initiative governance and plan apply from the engineering CLI to frame Epic1332
+    and create Features1333-1335. The operator explicitly questioned that bypass. This did not
+    prove the requested normal Console planning path. No capability source implementation has
+    started and no Work Design application receipt is claimed. Preserve all existing records
+    and audit history; resume through native Work Design and classify any actual blocker before
+    another engineering fallback. Reuse the established Console-first workflow rather than inventing
+    another rule, ledger or repair story.
+  source_refs:
+  - 'conversation: operator asked whether this was in Work Design and then explicitly questioned
+    use of the Console for planning'
+  - openproject://work_packages/1332
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-governance.draft.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-plan.draft.json
+- id: late-root-cause-discovery
+  title: Planned backlog decomposition was mistaken for prohibited executable work
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: After finding Work Design's Feature-and-story draft readiness check, the agent claimed
+    that backlog stories were forbidden, called the check a native planning blocker, used that
+    rationale in Feature1336's engineering recovery note, and proposed removing the gate. The
+    operator challenged the missing story breakdown before implementation. The current Platform
+    rolling-wave contract explicitly permits new, non-executable planned User stories under
+    backlog Features with blank Target PI. The existing OOS positive test confirms that behavior.
+    Work Design also explicitly permits manual completion without advisor evidence. The agent
+    conflated planned decomposition with executable commitment, and advisor limitations with
+    a manual-workflow failure. No source gate change or final Work Design apply occurred. Preserve
+    the actual audit history, correct the false rationale, and keep genuine advisor draft/diagram
+    gaps separate from an unproven planning defect. Reuse the current contract and positive/negative
+    cases; do not invent a new planning rule or control from this miss.
+  source_refs:
+  - 'conversation: operator asked why Feature-only work was proposed and whether Features require
+    story breakdown'
+  - https://github.com/mfshaf7/platform-engineering/blob/main/products/openproject/runbooks/plan-delivery-art.md
+  - https://github.com/mfshaf7/operator-orchestration-service/blob/main/test/openproject-client.test.js
+  - https://github.com/mfshaf7/operator-orchestration-service/blob/main/docs/contracts/work-design-v1.md
+  - openproject://work_packages/1336
+- id: native-public-and-canonical-identity-boundary
+  title: Native advisor proof exposed a public descriptor identity used as API identity
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: 'The new Work Design draft scope used the public delivery_package_id delivery-1332
+    instead of the API''s delivery-package:1332. Source tests used canonical-only fixtures and
+    missed that composition boundary. The first commissioned native question failed400 before
+    model invocation; no draft changed. Preserve strict source/package binding and reuse the
+    existing deliveryLivePackageRef helper in both scope producers. Add a public-ID-shaped request-contract
+    witness and complete native operating proof before declaring advisor completion. This is
+    an implementation miss in the approved maintenance, not a new planning gate, Defect forest
+    or governance mechanism. After the identity correction, the commissioned request reached
+    the configured High-effort Work Design model, but its draft scope was dropped by the final
+    Console-to-OOS request builder. The ordinary prose response was safely refused by the inert-draft
+    parser. This is the same incomplete adapter-chain proof: testing the role scope and the
+    OOS service independently did not prove the actual emitted request body. Add faithful outgoing-body
+    witnesses for both Context and Build Tree; preserve the failed invocation and strict parsing.
+    With the transport corrected, the native canvas exposed a fractional y coordinate. The advice
+    service reused the integer-only ART canonical JSON serializer for its structured draft scope
+    and returned500 before CGG/model dispatch. Integer-only fixtures missed that native data
+    shape. Preserve all geometry and ART canonical restrictions; carry the local scope as exact
+    JSON text inside its digest-bound advice envelope, as the generic advisor already does.
+    Prove fractional custom-card/position/sketch data through the real service context and invocation
+    path before commissioning again.'
+  source_refs:
+  - https://github.com/mfshaf7/governance-operations-console/pull/132
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-commissioned-question-result.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-commissioned-question-request.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-identity-commissioned-question-result.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-transport-commissioned-question-result.json
+- id: native-context-autosave-resume
+  title: The current autosaved workspace was displaced by its older named checkpoint
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Actual model note and diagram drafting succeeded. A later fresh open loaded the older
+    named Context Session ahead of its newer valid autosaved current workspace. The6747-character
+    note reverted to121characters; the preserved current diagram has13cards while its named
+    checkpoint has1. Existing Workbench rules say autosave protects local continuity without
+    attesting a transition. Preserve the current cache and model receipts, then correct restore
+    precedence without changing storage shape or canonical handoff authority. Named checkpoints
+    remain explicit saves. Prove latest local edits survive reopening and canonical source seeds
+    still win before claiming advisor save/reopen completion.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-autosave-before-recovery.json
+  - https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/operation-workbench-contract.md
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-json-commissioned-diagram-result.json
+- id: native-advisor-content-boundary
+  title: Advisor note output exceeded the existing native request capacity
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: The actual model authored a9347-character Context note and the draft parser accepted
+    it under its default24000 limit. Existing OOS assist and apply contracts cap that note at8000.
+    Save/reopen retained the value correctly, exposing a later-action boundary mismatch. The
+    Context note also had no ordinary manual editor despite manual drafting being the stated
+    fallback. Preserve the original model result and diagram, enforce the existing note capacity
+    in the actual scope, expose bounded ordinary editing through the same dirty/lock controls,
+    and recover the earlier valid model-authored note through the UI. No truncation, backend
+    relaxation or localStorage mutation.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-content-boundary-witness.json
+  - https://github.com/mfshaf7/operator-orchestration-service/blob/main/contracts/work-design/assist-request.schema.json
+- id: verified-registry-planning-facts
+  title: Configuration revision was mistaken for a model-selection count
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Engineering input described thirteen model/effort selections, and that wording reached
+    the local model note and initial Feature draft. A fresh native registry read proves13 is
+    configuration revision, with three models, one task override and seven task entries; the
+    source registry has six purpose profiles. Correct the local note and tree before canonical
+    application, preserving all actual selections. No runtime configuration change or new control
+    is justified by this factual planning error.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/model-registry-planning-current.json
+- id: operator-visibility-of-local-drafts
+  title: A saved automation-browser diagram was not visible in the operator browser
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The diagram was created and saved through the native Console in its persistent automation
+    browser. The operator's separate browser could not see that localStorage draft. The agent
+    reported it as built without first making that visibility distinction. Existing Work Design
+    Apply publishes the tree, not canvas sessions. Preserve that documented local boundary;
+    do not invent shared draft storage as a workaround. Native Export produced a4200x3049 PNG,
+    copied to the operator Downloads, and the location and limitation were explained. Canonical
+    tree application remains pending.
+  source_refs:
+  - 'conversation: operator asked whether the diagram was already built because it was not visible'
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/Epic-1332-Console-diagram.png
+  - repo://operator-orchestration-service/contracts/work-design/apply-request.schema.json
+- id: retired-refinement-metadata-scope
+  title: A retired historical Feature is treated as current required Refinement metadata
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The normal Console Work Design application created ten planned stories and updated
+    existing1333-1335 with canonical receipt8220. Fresh owner readback proves that planning
+    scope. The live Refinement packet nonetheless includes retired1336 among required mutable
+    metadata targets, with missing Target PI and other fields. Authoritative continuation confirms1336
+    remains retired; canonical planning explicitly exempts retired work from PI requirements.
+    Preserve the complete source tree and historical record while excluding terminal descendants
+    from editable metadata eligibility and form requests. Do not reopen, delete or assign fake
+    metadata to retired work, weaken current-item requirements, or create another ART defect.
+    Prove mixed current/terminal branches and retain open descendants under historical ancestors
+    in the eligible scope.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/refinement-retired-scope-witness.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-native-work-design-fresh-owner-readback.json
+  - https://github.com/mfshaf7/operator-orchestration-service/blob/main/src/delivery-taxonomy.js
+- id: planning-inspection-selection-regression
+  title: Direct planning inspection resolves the target then drops its selection
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: 'Actual Console Open Work Item1332 / Inspect ART Tree resolves the canonical planning
+    root but renders no selected tree: the board selection uses only execution-filtered packages.
+    Existing regression checks the resolver without composing selectedPackage. Preserve current
+    execution counts and all canonical action authority; resolve the explicitly inspected selection
+    from current canonical inventory and prove actual native tree visibility before creating
+    the PI Objective. This is regression of prior canonical-planning-navigation work, not a
+    new requirement.'
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-direct-tree-inspection.txt
+  - repo://governance-operations-console/tests/delivery/canonical-planning-navigation.test.mjs
+- id: paired-security-source-list-omission
+  title: Finite source binding advanced without its paired written-review list
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Security370 advanced the exact OOS/Console pins in YAML and described the scoped
+    delta, but the corresponding Markdown source list still held previous commits. Existing
+    Platform commissioning rejected the incomplete pair before workload effects. Correct the
+    existing list, verify every existing required token against the actual paired decision before
+    publication, and retry ordinary commissioning. This is an agent record-authoring omission,
+    not a missing product capability or reason for another gate, ART child, policy weakening
+    or architecture version.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/refinement-terminal-commissioning.log
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+- id: dependent-shell-after-failed-source-preflight
+  title: Dependent local commands continued after source preflight failed
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Intermittent public-source observation prevented CGG source credential delivery.
+    A multi-line shell sequence continued after failed maintenance prepare and made an unpublished
+    local commit under the already configured Agent Gary identity. The publisher correctly denied
+    missing preflight custody; no human publication or authority bypass occurred. After credential
+    delivery succeeded, prepare completed and the unpublished commit was amended under the prepared
+    Gary identity before normal publication. Use explicit successful tool results and fail-fast
+    shell execution for dependent mutations; existing preflight and publisher guards already
+    enforce the boundary. No new control or ART item is justified.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/cgg-startup-source-identity.log
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/cgg-startup-source-publish.json
+  - repo://operator-orchestration-service/scripts/owner_source_cli.mjs
+- id: purpose-review-identity-overstatement
+  title: Architecture prose overstated separation in the existing Purpose review contract
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Before source work started, owner-code inspection showed that the current model-profile
+    service deliberately lets its bound operator submit and explicitly review the same caller-owned
+    request, while its runtime requires a distinct Platform fulfillment caller. The accepted
+    planning prose had instead described distinct requester, reviewer and fulfiller and prohibited
+    requester review. That is an agent-created requirement, not a product defect. Correct the
+    conformance wording and capability boundary in the existing architecture before the first
+    work start; preserve explicit human review and the actual distinct fulfillment boundary.
+    Do not add another reviewer account, policy gate, source repair or ART child to satisfy
+    the mistaken prose. Native architecture replacement is material correction of that false
+    authorization claim, not a new architecture per retry.
+  source_refs:
+  - repo://operator-orchestration-service/src/model-profile-request/service.js
+  - repo://operator-orchestration-service/src/model-profile-request/runtime.js
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-native-architecture-authoring-retry-1-persist-result.json
+- id: engineering-credential-before-native-source-scope
+  title: An engineering token was delivered before the normal Console source approval
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: The agent followed the engineering-only credential delivery before reading the current
+    native source-authorization procedure. Normal work start correctly required a source intent,
+    and the subsequent Console issuer correctly refused to borrow the already projected engineering
+    credential. The exact native scope was approved but its first owner issue failed before
+    a Platform intent state was created. Revoke only the separately delivered engineering credential
+    and recover the original native intent and owner operation through the existing Console
+    reconciliation. This is a skipped precondition and operator-path mistake, not a product
+    defect or reason to bypass credential custody or add another ART item.
+  source_refs:
+  - repo://operator-orchestration-service/docs/operations/platform-operation-adapter.md
+  - repo://platform-engineering/scripts/agent_source_intent.py
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1337-native-source-start-issue-result.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1337-engineering-credential-revocation.json
+- id: native-purpose-review-surface-missing
+  title: Existing Purpose review semantics lacked an operator surface in the Console
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The full native Purpose path had been planned from existing OOS service capabilities,
+    but the Console only exposed create/submit and a latest-request summary. That could not
+    prove explicit review, changes and original-request recovery without an engineering client.
+    Extend the existing Console source Landing Unit1337 with request-bound history, canonical
+    direct reads, the existing typed OOS review transitions and explicit evidence. Retain the
+    bound operator's existing review permission and distinct Platform fulfillment; do not invent
+    a second human account or another backend permission. Full source validation passes at the
+    Gary candidate, but final composed acceptance and native operating1339 remain necessary
+    before claiming this surface operational.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/model-operations/presentation/surface/model-operations-control-overview-panel.tsx
+  - repo://operator-orchestration-service/src/model-profile-request/service.js
+  - openproject://work_packages/1337
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1337-committed-validation-binding.json
+- id: native-source-timeout-command-continuity
+  title: A completed native source operation lost client retry identity after HTTP timeout
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Console publication of the exact Gary1337 head returned HTTP502 timeout, while GitHub
+    and the native work-session read independently proved PR138 and durable merge-ready evidence.
+    The existing client transport clears its retained command on every non-success HTTP response,
+    including an uncertain server timeout, contrary to the documented same-command recovery
+    rule. The current dialog offers read retry only when its projection is offline, while this
+    write failure leaves the last projection current. Repair the existing transport to retain
+    identity for uncertain timeout/server failures and expose its existing read-only refresh
+    in the active session. Use owner-repo maintenance after the current source Landing Unit
+    closeout, before further primary work; no ART child, new engine, larger timeout or authority
+    relaxation is justified. Source repair is merged in Console PR139 at7aa73d070bb0dc369f4f7e772c8f232a6585c133
+    after790 passing tests, hosted CI, exact delegated review, credential revocation and source-resource
+    retirement. Operating acceptance is staged under the existing final composition work.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/delivery/live-runtime/use-delivery-work-session-live-runtime.ts
+  - repo://governance-operations-console/docs/product/delivery-execution-work-sessions.md
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1337-native-source-publish-continue-result.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1337-after-publication-owner-readback.json
+  - https://github.com/mfshaf7/governance-operations-console/pull/138
+  - https://github.com/mfshaf7/governance-operations-console/pull/139
+- id: staged-source-blocked-accepted-runtime-refresh
+  title: Advancing the primary Console checkout stopped the accepted runtime refresh
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: The agent recorded eventual composed reacceptance but missed that the existing refresh
+    service verifies the current primary Console checkout against the accepted runtime pin on
+    every tick. After source1337 advanced primary main, refresh stopped and the five-minute
+    canonical record checkpoint expired, blocking1342 source access. This is a sequencing and
+    environment-binding miss, not a missing capability or justification for another ART item.
+    Preserve the accepted standalone runtime and use the existing bounded repo-path mechanism
+    against its exact accepted source while staged source awaits final composed acceptance.
+    Remove that temporary source binding after normal commissioning; do not weaken exact-source
+    validation.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_complete_runtime.py
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1342-record-cache-diagnostic.log
+  - openproject://work_packages/1342
+- id: native-source-multi-item-scope-selection
+  title: Native source preparation cannot express an existing multi-story Landing Unit
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: Inspection before the accepted shared Platform Landing Unit proved that OOS requires
+    an exact Architecture Packet coverage match and already accepts multiple covered work items,
+    while the Console form and server decision adapter retain the generated one-item draft without
+    any coverage input. A multi-story source unit cannot be started through that form. Extend
+    the existing reviewed decision input and source-scope preparation to select bounded covered
+    ART references, preserving server-derived identity and the existing owner/Architecture checks.
+    Repair and commission through maintenance before beginning the shared Platform source unit;
+    do not split the accepted landing boundary, manufacture an ART child or bypass source authority.
+    The whole-owner evidence-profile check did not prove this native UI input path.
+  source_refs:
+  - repo://operator-orchestration-service/src/delivery-art/work-session.js
+  - repo://governance-operations-console/src/domain-workspaces/delivery/server/delivery-work-session-oos-client.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/surfaces/execution-board/work-session/execution-work-session-modal.tsx
+  - openproject://work_packages/1338
+- id: model-profile-worktree-owner-discovery
+  title: A worktree grouping directory was mistaken for the OOS checkout
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: The existing real-Git model-profile protocol tests failed eight cases before reaching
+    the new history behavior. The locked OOS commit exists in the authoritative checkout, and
+    the documented explicit OOS_REPO_ROOT override makes the focused case pass. Default discovery
+    selected the nearer non-Git .worktrees/operator-orchestration-service grouping directory
+    merely because it is a directory. Restrict both existing default selectors to actual checkout
+    Git markers, preserving explicit owner-path overrides. This is a small existing-path repair
+    in the already-touched Platform lifecycle source/test, covered by its coherent source Landing
+    Unit; no new ART child, protocol, gate or timeout is required. Preserve the failing owner-path
+    witness and rerun the real-Git protocol against the correct source.
+  source_refs:
+  - repo://platform-engineering/scripts/model_profile_lifecycle.py
+  - repo://platform-engineering/scripts/test_model_profile_lifecycle.py
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1338-platform-history-tests.log
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1338-platform-history-scoped-tests.log
+- id: local-ci-owner-override-masked-hosted-layout
+  title: A local-only owner override hid a missing declared CI checkout fallback
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: Platform candidate cbefa2e passed local make validate with OOS_REPO_ROOT supplied
+    to every child. Hosted CI supplies that override only to the legacy protocol command,
+    and checks out its locked OOS source at the already-declared /tmp location. The new
+    durable composition test searched only workspace ancestors and raised StopIteration
+    before reaching its cases. Preserve the failed run and repair that fixture lookup to
+    reuse the existing CI checkout. Verify the actual CI layout without the extra global
+    override before publishing the corrected same-PR head. This is an unmerged test setup
+    miss, not a product defect or new ART, workflow permission, authority or control need.
+    The accepted final Security gate permits review of an exact locally validated unmerged
+    candidate and CI-equivalent evidence. Do not invent a hosted-CI-before-Security prerequisite;
+    keep hosted CI mandatory before Platform merge, while following that accepted source
+    review sequence. No authority bypass or another architecture version is justified.
+    Pre-merge inspection also found the new durable adapter and fixture used a short
+    Kubernetes DNS name while the existing shared composition emits the full cluster
+    name and overrides that variable. Exact-target validation would deny startup. Reuse
+    the existing projection producer in the adapter and test the effective composed
+    environment through the actual OOS validator, rather than duplicating its expected
+    address in a fixture. Preserve strict target equality and repair the same unmerged
+    Platform Landing Unit before final review; do not create another story or mechanism.
+  source_refs:
+  - https://github.com/mfshaf7/platform-engineering/actions/runs/40573050370
+  - https://github.com/mfshaf7/platform-engineering/pull/347
+  - repo://platform-engineering/products/governance-operations-console/scripts/test_console_durable_composition.py
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1338-platform-hosted-ci-failure.log
+- id: corrected-local-head-hidden-by-merge-ready-cache
+  title: A corrected local candidate remained hidden behind the prior merge-ready packet
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    After final Security1345 closed, Platform PR347 still pointed at cbefa2e while
+    its same-session clean Gary worktree contained corrected a2fd810. Native
+    session read returned source not-required and requested approval of the old
+    PR head. Both publication and approved credential continuation were hidden.
+    The lifecycle inspects current checkout source after a merge-ready packet
+    only when the remote PR head has already changed, so the normal publisher
+    cannot expose a still-unpublished corrected local head. Preserve the old
+    durable packet, same PR, exact source intent and all review history. Use
+    bounded reconstructable-local-state recovery before normal Gary publication;
+    verify an eventual owner repair against both local-ahead and remote-head
+    revision paths without relaxing exact-head CI or approval. No new ART child,
+    architecture version, engineering token or raw Git push is justified.
+  source_refs:
+  - repo://operator-orchestration-service/src/delivery-art/lifecycle-controller.js
+  - repo://operator-orchestration-service/src/delivery-art/lifecycle.js
+  - https://github.com/mfshaf7/platform-engineering/pull/347
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1338-native-access-renewal-effective-target-page.txt
+- id: status-response-stopped-approved-execution
+  title: A progress question ended execution of already approved work
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The operator repeatedly instructed completion and asked for occasional updates.
+    The agent nevertheless ended the latest turn after reporting partial source progress,
+    leaving the same authorized Platform Landing Unit unfinished. The operator again had
+    to ask why work stopped. A progress question does not revoke the standing execution
+    instruction. Resume the existing work without another approval, keeping updates in
+    commentary while meaningful independent progress remains possible. Reuse the existing
+    autonomy and continuation instructions; this signal does not justify a new gate,
+    workflow engine, ART child or source control.
+  source_refs:
+  - 'conversation: operator asked so why did you stop after the Epic1332 progress update'
+  - openproject://work_packages/1332
+- id: private-context-output-dirtied-execution-checkout
+  title: Local context capture used the execution checkout as its custody root
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    During native Purpose qualification preparation, the local CGG pack command
+    ran from the Console execution checkout and created seven untracked .cgg
+    files. The subsequent composed activation correctly refused the dirty
+    Console repository. This was an operator placement error, not an application
+    defect or evidence of source corruption. Stop the retained activation before
+    retry, preserve every artifact byte while moving the entire local custody
+    directory into the existing ignored private evidence root, prove the source
+    clean, and retry the existing activation. Reuse the existing private-custody
+    and clean-source procedures; no new source control or ART child is required.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-local-context-custody-relocation.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-purpose-context-admission.json
+- id: purpose-fulfiller-stored-but-not-consumed
+  title: Resumed activation retains a backend process with stale caller credentials
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    Accepted commissioning reached its final live status check at22:09:53Z and
+    refused incomplete model-profile bindings. The real backend process reports
+    request enablement, correct human binding, distinct fulfillment caller and
+    state root, but authenticated=false for that fulfiller. The actual Kubernetes
+    Secret contains both its allowed ID and credential; the Deployment has no
+    direct caller-auth environment override; its one ready pod was created
+    at22:08:23Z. Exact Secret-consumption timing remains unverified. The existing binding helper hashes desired settings
+    and Secret values into a pod annotation; that same annotation survives a
+    repeated composition up. Its unit runner reads authentication from mutable
+    desired Secret data rather than a separate consumed pod environment, so it
+    does not witness this stale consumer. Preserve fail-closed status, pause full
+    activation retries, and use the existing owner restart for bounded recovery.
+    Prove the exact consumption/retry cause before choosing a durable owner fix;
+    do not rotate identities, weaken authentication or create another ART child.
+    A separate consumed-environment witness reproduces the stale process on the
+    unchanged source. Extend the existing Secret-resource-version consumption
+    pattern already used by workflow credentials. Full committed validation then
+    exposed two old rollback fixture roots that still pointed at the operator
+    workspace: the newly present genuine activation bundle entered a mocked
+    retirement path. Bind those fixtures to their own temporary workspaces;
+    preserve the live generation and do not interpret mocked unit rollback as
+    native retirement evidence.
+  source_refs:
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_profile_requests.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/test_console_profile_requests.py
+  - openproject://work_packages/1339
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-live-fulfiller-consumption-before-recovery.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-stale-consumer-source-witness.json
+- id: admitted-durable-run-has-no-console-start-action
+  title: Native run-start proof was planned against an inspection-only Console adapter
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    The accepted Epic1332 operating case explicitly requires starting the admitted
+    validation-readiness run through Console. A real native read returns the
+    definition with all14 admission gates satisfied and start_allowed=true, but
+    its Definitions dashboard exposes inspection/design only and Runs is empty.
+    Console source exposes GET orchestration inventory and POST existing-run
+    controls, with no start adapter or action. OOS already implements the bounded
+    authenticated POST /v1/orchestration/runs protocol. Earlier capability reuse
+    assumed monitoring and control covered origination. Preserve all original
+    authority and the existing definition; add the missing bounded Console
+    start/review/recovery action as owner maintenance before final composed
+    source acceptance. Use live source coordinates and the authenticated bound
+    human, preserve request/run identity on unknown acknowledgement, and never
+    substitute a CLI-created run as native Console-start proof. No new ART child,
+    backend engine, model privilege or activation generation is justified.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1346-native-start-surface-readback.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1346-native-start-surface-page.png
+  - repo://governance-operations-console/src/domain-workspaces/orchestration/server/orchestration-api-routes.ts
+  - repo://operator-orchestration-service/contracts/orchestration/run-request.schema.json
+  - openproject://work_packages/1346
+- id: activation-started-before-integrity-check-finished
+  title: A dependent activation was launched while its integrity preflight still held the lifecycle lock
+  trigger: machine-visible-workflow-drift
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    After the three reviewed maintenance merges, the agent launched normal
+    activation while the preceding check-integrity command was still running.
+    The retained service started at23:24:19Z; its Python process was observed
+    waiting on the lifecycle file lock, and the earlier check completed at
+    23:26:56Z. Activation then made source/runtime progress but reached the
+    existing15-minute service deadline at23:39:19Z. That initial lock wait
+    consumed part of the startup budget. It is a proven scheduling error and
+    possible contributor, not proof that a clean serial startup fits the
+    deadline or that the application source is defective. Stop automatic
+    retries, preserve the interrupted state, inspect its last completed stage,
+    and retry the existing lifecycle only after preflight completion. Reuse
+    the existing sequential-dependent-operations instruction; do not add a
+    timeout workaround, engine or ART child from this evidence alone.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/capability-recovery-normal-activation-result.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/capability-recovery-normal-activation.log
+  - openproject://work_packages/1332
+- id: purpose-qualification-reused-an-already-bound-caller
+  title: Qualification preflight checked source structure but missed the runtime caller uniqueness contract
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    The agent planned a new suspended profile using the existing active intake
+    caller. The source-shape validator accepted that structure, but the committed
+    full owner CI correctly rejected it: the runtime resolver requires unique
+    caller_id entries, each mapped to one required logical profile. This was a
+    test-setup and preflight mistake, not proof that the runtime uniqueness rule
+    is defective. Candidate33dc624 remained local and was never published or
+    activated; all six active profiles and the retained runtime are unchanged.
+    Preserve the failed request, candidate, CI output and exact rollback bundle.
+    Use the existing request correction or terminal-failure path, prove any
+    corrected suspended qualification against both the source validator and
+    actual runtime resolver before another approval/application, and keep any
+    new qualification-only caller inactive with no credential or active grant.
+    Do not weaken caller uniqueness, add a Defect forest or invent a new source
+    engine merely to complete the exercise. Recovery also requires binding the
+    exact clean worktree HEAD after an auditable rollback commit, not merely
+    reusing the canonical baseline commit because its file bytes match. The
+    owner rejected that stale source-version input before changing source;
+    the corrected Platform decision binds the actual rollback HEAD. Original
+    failure history and rejected candidate remain preserved. This is another
+    preflight-input correction, not a reason to relax the source binding.
+  source_refs:
+  - repo://platform-engineering/dev-integration/profiles/governed-ai-gateway/runtime/model_profile_resolver.py
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-profile-source-ci-results.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-suspended-proposal-source-shape-preflight.json
+  - oos://model-profile-requests/model-profile-request:console-5f34e213-0600-49e1-ae39-53c407e7a216
+- id: completion-evidence-format-not-checked-before-native-entry
+  title: Completion prose missed the existing typed evidence format
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    After the actual Purpose operating verifier passed, the agent prepared
+    plain prose for fields whose existing Console contract requires flat
+    changed-outcome bullets and PASS/FAIL-labelled evidence bullets. The UI
+    correctly kept submission disabled; no POST was dispatched and a fresh
+    owner read proves story1339 stayed new. This is another skipped input
+    contract check, not a demonstrated product defect. Preserve the failed
+    private helper artifacts, correct the text to the existing contract and
+    validate it before native entry. Do not add a workflow, relax evidence
+    validation or invent a repair item to compensate for the invalid input.
+    A subsequent client-format correction still omitted the owner's inline
+    path formatting rule; OOS returned422 before mutation and native readback
+    again showed new. The existing documented validate:completion-evidence
+    command covers the full owner format and must be used for the execution
+    payload, not just the narrower client parser. No system change is needed.
+  source_refs:
+  - repo://governance-operations-console/src/domain-workspaces/delivery/live-runtime/delivery-item-completion-contract.ts
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-native-completion-initial-context.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1339-native-completion-page.txt
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/1363-native-closeout-reviewed-command-response.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/1363-native-closeout-complete-owner-preflight-input.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/1363-native-closeout-complete-canonical-readback.json
+- id: model-management-behavior-tests-read-mutable-runtime-registry
+  title: Model-management synthetic tests missed the existing fixture-isolation control
+  trigger: late-root-cause-discovery
+  failure_classes:
+  - diagnostic-ordering-miss
+  finding: >-
+    The corrected suspended qualification passes actual source validation and
+    the complete runtime resolver, but full committed CI exposed five errors
+    in test_console_model_management.py because synthetic behavior cases read
+    the current mutable registry. Their runtime owner_policy deliberately
+    accepts only the exact reviewed six-profile task boundary. That guard is
+    correct for commissioning and must remain unchanged; the source-only
+    qualification must not expand its task or account grants. This repeats the
+    fixture-isolation issue already addressed by governed_ai_test_support.py
+    and scripts/fixtures/governed-ai. Bind these synthetic behavior cases to
+    that existing frozen fixture in a disposable root, retain real source and
+    complete registry conformance separately, and prove the actual guard still
+    rejects an extra suspended profile. Preserve the failing committed CI.
+    This is a bounded owner test-isolation repair under the approved maintenance
+    authority, not a new profile activation or workflow mechanism. Record its
+    actual source landing and final finite source acceptance before closure.
+  source_refs:
+  - repo://platform-engineering/scripts/governed_ai_test_support.py
+  - repo://platform-engineering/scripts/fixtures/governed-ai/README.md
+  - repo://platform-engineering/products/governance-operations-console/scripts/test_console_model_management.py
+  - repo://platform-engineering/products/governance-operations-console/scripts/console_model_management.py
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: >-
+    Reviewed2026-10-30 against the current source and retained operating
+    evidence. Epic1332 has a canonical closed/done readback; the original
+    Work Design application and the Purpose and durable-runtime evidence are
+    retained under its existing private packet. Product repairs recorded in
+    these historical signals must not be reopened merely because the initial
+    findings use present tense. The separate entry/startup after-action closes
+    its three evidenced findings. Execution discipline remains triaged:
+    Epic1363 closeout automation reused stale board, route and payload
+    assumptions, then preflighted required fields without the optional
+    residual-follow-up field. The owner correctly rejected that format;
+    inspecting the current contract, using its serializer and validating the
+    full evidence allowed native completion. Existing controls were not
+    consistently used, so successful recovery alone does not justify claiming
+    this execution concern resolved. Preserve the original rejection and
+    successful result. No new product defect, control or ART child is inferred.
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-11-06'
+  note: >-
+    Review application of the existing Console-first, current-contract,
+    sequential-operation and complete-payload preflight procedures across
+    connected operator steps. Distinguish already resolved product findings
+    from repeated agent execution errors, and propose any genuinely missing
+    control for operator review before implementation. Preserve normal story
+    decomposition and all retired records. This open review is not a new
+    prerequisite for unrelated Console maintenance and authorizes no planning
+    gate removal or additional repair mechanism.

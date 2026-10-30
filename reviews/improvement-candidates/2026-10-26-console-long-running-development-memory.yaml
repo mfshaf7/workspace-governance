@@ -60,6 +60,11 @@ signals:
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/current-native-operating-proof.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/native-memory-summary.json
   - local-evidence://governance-operations-console/.art/console-restart-recovery-20261026/automatic-recovery/merged-owner-source-cleanup.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/commissioning-hocus-repair-progress.log
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/restart-checkpoint.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/post-reboot-image-restoration-root-output.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/post-reboot-full-integrity-report.json
+  - local-evidence://governance-operations-console/.art/provider-onboarding-plan-20261030/commissioning-success-source.json
 resolution:
   after_action_ref: null
   control_refs:
@@ -228,13 +233,35 @@ resolution:
     hardware stability. Platform and Security source credentials were revoked, merged worktrees/branches retired,
     and both exact strict owner cleanup audits passed.
 
+    Reviewed2026-10-30 against the first retained genuine incidents. Detection,
+    shared-consumer quiescence and failed-attempt latching operated. The exact
+    Hocuspocus repair stopped after removing image aliases because containerd
+    retained the unpacked snapshot; the incident journal and original controller
+    identity/replica count were preserved. After the operator reboot, inspected
+    restoration pulled the SAME immutable image, restored only its original
+    aliases, passed the trusted byte comparison and all18image checks, and
+    restored the original controller through UID and replica preconditions.
+    Normal activation20261030T112049Z confirmed healthy artifact state and live
+    Console operation with model configuration/history unchanged. Database
+    volumes were untouched. This is genuine assisted-recovery evidence, not a
+    successful unattended image replacement. Keep that remaining operating
+    limitation explicit rather than equating source tests, a healthy scan or
+    administrator completion with autonomous recovery. The operator accepts
+    recurring RAM risk and asks for earlier notification and checkpointed
+    restart advice when the same symptoms recur; no hardware diagnosis is a
+    prerequisite for healthy Console work.
+
     '
 follow_up:
   owner_repo: platform-engineering
-  due_on: '2026-10-28'
-  note: The bounded control is implemented, reviewed, installed and healthy-source startup/current-history checks
-    pass. Native automatic cache replacement remains unexercised because both prior tool mismatches disappeared
-    after the reboot; there is no currently damaged artifact to replace. Preserve this as the remaining operating
-    evidence limitation for the first genuine supported incident. Do not inject corruption into operator workloads,
-    invent source changes, keep healthy work blocked, or require RAM diagnosis merely to manufacture that proof.
-    Retain this candidate accepted with its owner and due date rather than claiming unobserved live restoration.
+  due_on: '2026-11-06'
+  note: >-
+    Review the recorded snapshot-retention stop against the existing one-attempt
+    recovery contract and determine which incident conditions are supported
+    automatically. Preserve the genuine assisted-recovery result and qualify
+    unattended replacement separately. Propose an owner repair only if the
+    existing contract and actual consumers prove a violation; no new repair is
+    approved by this record update. Do not inject corruption, weaken failed-
+    attempt latching, block healthy Console work or require a RAM diagnosis to
+    manufacture proof. Keep this candidate accepted while that operating
+    limitation remains unresolved.

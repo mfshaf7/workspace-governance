@@ -1,0 +1,43 @@
+schema_version: 1
+id: 2026-10-27-proposal-handoff-source-conflict
+title: Native Proposal handoff encounters conflicting source evidence
+recorded_on: '2026-10-27'
+owner_repo: operator-orchestration-service
+summary: The native handoff of the newly accepted capability-completion Proposal fails with source_authority_conflict before a Delivery target exists.
+regression_of: workspace-governance/reviews/improvement-candidates/2026-10-26-delivery-current-and-history-truth.yaml
+status: closed
+source_type: machine-audit
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: native-proposal-handoff-conflict
+  title: An accepted live workflow cannot advance through its normal Console handoff
+  trigger: closed-lesson-regression
+  failure_classes:
+  - learning-closure-regression
+  - workflow-doctrine-gap
+  finding: Native Console Capture created Proposal idea-1331 and Triage plus Disposition returned canonical outcomes. The subsequent Handoff command did not advance. A controlled replay of the exact original command identity through the same Console endpoint returned HTTP502 with code source_authority_conflict and message The canonical source returned conflicting state for one event sequence. A fresh documented OOS projection read remains current, accepted, version-2, with handoff not-requested and no target. Preserve the original request and owner history; do not create another Proposal or Delivery target, reset ordering state, bypass the source envelope, or infer root cause from the error alone. Determine whether the producer envelope or consumer admission is wrong against the accepted versioning contract before changing source.
+  source_refs:
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-handoff-command-reconciliation.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-handoff-request.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-current-projection.txt
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-native-source-shapes.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/query-shaped-source-audit.json
+  - repo://governance-operations-console/docs/product/proposal-live-integration.md
+resolution:
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-28-console-entry-and-startup-closure.yaml
+  control_refs: []
+  note: >-
+    Closed against OOS PR385, exact Security acceptance and actual recovery of the same Proposal command into delivery1332. Producer views are distinct and stable; consumer ordering was preserved. Prior events are unchanged and one prepare plus one apply are retained. The original read-performance producer change f06880ed and the initially unproven diagnosis remain historical context; no envelope version or target duplication was introduced.
+follow_up:
+  owner_repo: null
+  due_on: null
+  note: null

@@ -1,0 +1,150 @@
+schema_version: 1
+id: 2026-10-28-console-entry-and-startup-closure
+title: Close verified Console entry and startup findings against real owner evidence
+recorded_on: '2026-10-28'
+owner_repo: workspace-governance
+summary: >-
+  Close three independently verified findings from the Console capability
+  exercise: mode-independent Proposal wording, query-shaped source identity,
+  and liveness applied during CGG dependency installation. Each has its actual
+  owner fix and bounded operating witness. Reviewed2026-10-30: all referenced
+  fixes remain ancestors of current owner source. The separate Purpose and
+  durable recovery exercise subsequently completed Epic1332 with canonical
+  closed/done readback; this record still closes only the three findings below.
+scope:
+  related_repos:
+  - governance-operations-console
+  - operator-orchestration-service
+  - context-governance-gateway
+  - security-architecture
+  - workspace-governance
+  related_products:
+  - governance-operations-console
+  related_components:
+  - context-governance-gateway
+  change_classes:
+  - source-behavior
+  - runtime-composition
+source_refs:
+  - workspace-governance/reviews/improvement-candidates/2026-10-27-proposal-capture-live-mode-copy.yaml
+  - workspace-governance/reviews/improvement-candidates/2026-10-27-proposal-handoff-source-conflict.yaml
+  - workspace-governance/reviews/improvement-candidates/2026-10-27-cgg-startup-liveness-install-loop.yaml
+  - https://github.com/mfshaf7/governance-operations-console/commit/4b4cf9f1eab78887270b8a5d1007400aec95bcae
+  - https://github.com/mfshaf7/operator-orchestration-service/pull/385
+  - https://github.com/mfshaf7/security-architecture/pull/363
+  - https://github.com/mfshaf7/context-governance-gateway/pull/31
+  - https://github.com/mfshaf7/security-architecture/pull/372
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-native-handoff-recovery-proof.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/advisor-boundaries-capture-caption.txt
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/cgg-startup-read-only-rollout-probe.json
+  - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/1332-console-guided-closeout-canonical-readback.json
+lessons:
+  - id: native-modal-wording-follows-owner-mode
+    title: Describe the actual Proposal mode at its native capture surface
+    failure_class: learning-closure-regression
+    trigger: closed-lesson-regression
+    finding: >-
+      The live capture controller already wrote through canonical OOS, but its
+      modal repeated disconnected-preview wording. The broader surface audit
+      had missed this modal; misleading text did not prove a missing backend.
+    impact: >-
+      Console commit4b4cf9f1eab78887270b8a5d1007400aec95bcae makes both the
+      description and note follow previewMode. Its source is an ancestor of the
+      accepted Console0f58ce9. Actual native modal inspection proves the live
+      wording and absence of the old preview-only claims without another
+      business write. Canonical capture and original handoff are independently
+      evidenced by idea1331 and delivery1332. Preview wording remains explicit.
+    status: closed
+    expected_control_types:
+    - workflow
+    - doc
+    control_refs:
+    - type: workflow
+      path: governance-operations-console/src/domain-workspaces/proposal/presentation/dialogs/capture/proposal-capture-modal.tsx
+      owner_repo: governance-operations-console
+      note: Native description and note derive from the actual previewMode boundary.
+    - type: doc
+      path: governance-operations-console/docs/product/proposal-live-integration.md
+      owner_repo: governance-operations-console
+      note: Existing primary procedure separates canonical capture from disconnected preview and later decisions.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
+  - id: query-shaped-representations-have-distinct-bindings
+    title: Preserve canonical concurrency while separating read representations
+    failure_class: learning-closure-regression
+    trigger: closed-lesson-regression
+    finding: >-
+      OOS gave a plain Proposal projection and its record-plus-history snapshot
+      the same source binding, revision and event cursor despite different
+      payload shapes. The Console correctly rejected the conflicting envelope.
+      The earlier read-performance change had not accounted for representation
+      identity; weakening consumer ordering or recreating the Proposal would
+      have hidden the producer defect.
+    impact: >-
+      OOS PR385 merged8519ff0537ae6cd00ae7f45d835e41723985ee18 and Security
+      PR363 mergedcc1ac4b92a19b0c4a9897fd8ef646fa8954096ed. Native repaired
+      reads prove distinct stable views. Recovery reused original command
+      proposal-command:idea-1331:handoff:a77421c9 and applied exactly one target
+      delivery1332 through the real Console. Two prior events were preserved;
+      the final four unique events contain one prepare and one applied event.
+      The related query-shaped producer audit, owner tests, source acceptance,
+      normal activation and owner cleanup are retained in the actual proof.
+    status: closed
+    expected_control_types:
+    - workflow
+    - doc
+    - test
+    control_refs:
+    - type: workflow
+      path: operator-orchestration-service/src/console-source-authority.js
+      owner_repo: operator-orchestration-service
+      note: Canonical read-view identity is stable and distinct while resource concurrency and event ordering remain strict.
+    - type: test
+      path: operator-orchestration-service/test/console-source-authority.test.js
+      owner_repo: operator-orchestration-service
+      note: Producer binding and shape tests retain stable reads and reject conflicting or mismatched representations.
+    - type: doc
+      path: operator-orchestration-service/docs/contracts/console-source-authority.md
+      owner_repo: operator-orchestration-service
+      note: Primary source authority contract distinguishes resource state and query-shaped representation identity.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
+  - id: bounded-startup-before-normal-liveness
+    title: Give admitted dependency startup its bounded startup probe
+    failure_class: rollout-evidence-gap
+    trigger: machine-visible-workflow-drift
+    finding: >-
+      CGG liveness killed its API while startup dependency installation was
+      still running. Actual Kubernetes events identified the liveness cause;
+      exit137 alone was not evidence of OOM. Readiness and steady-state
+      liveness were correct controls applied before startup had completed.
+    impact: >-
+      CGG PR31 mergede29c59a4ed56048f6aa47bb924899566a5e68bae with identical
+      reviewed tree842a8722ed1a0e85b905b7410ee1843047fddf09. Security PR372
+      accepted the exact source. The existing manifest now bounds startup to
+      300seconds before normal readiness/liveness take over. Actual native
+      PostgreSQL, MinIO, API and worker rollouts succeeded; read-only API exec
+      with and without stdin succeeded. Later complete-runtime activation and
+      current owner observations independently confirmed the accepted CGG
+      source. No alternate image, authority, ART child or monitor was added.
+    status: closed
+    expected_control_types:
+    - workflow
+    - runbook
+    control_refs:
+    - type: workflow
+      path: context-governance-gateway/dev-integration/profiles/context-governance-gateway/scripts/common.sh
+      owner_repo: context-governance-gateway
+      note: Existing API manifest uses a bounded startupProbe and retains its normal readiness/liveness checks.
+    - type: runbook
+      path: context-governance-gateway/dev-integration/profiles/context-governance-gateway/README.md
+      owner_repo: context-governance-gateway
+      note: Existing admitted profile remains the normal local runtime, status and recovery surface.
+    follow_up:
+      owner_repo: null
+      due_on: null
+      note: null
