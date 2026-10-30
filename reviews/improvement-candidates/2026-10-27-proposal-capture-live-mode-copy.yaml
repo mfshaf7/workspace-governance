@@ -5,7 +5,7 @@ recorded_on: '2026-10-27'
 owner_repo: governance-operations-console
 summary: The live Capture Proposal modal retains a preview-only warning although its controller dispatches the existing canonical OOS capture path.
 regression_of: workspace-governance/reviews/improvement-candidates/2026-10-26-console-cockpit-truthfulness.yaml
-status: accepted
+status: closed
 source_type: machine-audit
 scope:
   related_repos:
@@ -31,10 +31,11 @@ signals:
   - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-form.png
   - local-evidence://governance-operations-console/.art/console-capability-completion-20261027/proposal-form-controls.json
 resolution:
-  after_action_ref: null
+  after_action_ref: workspace-governance/reviews/after-action/2026-10-28-console-entry-and-startup-closure.yaml
   control_refs: []
-  note: The operator authorized completion of the three existing capability gaps. This caption correction belongs to the same Console first-use and truthful-owner-boundary work. No source fix has landed. The local learning Landing Unit decision was persisted immediately after branch creation rather than before it; routing and exact scope were reconciled before tracked source edits or publication. Keep that ordering miss visible without manufacturing another work item or control.
+  note: >-
+    Closed against the landed mode-aware native modal and its real read-only Console witness, linked in the after-action. Canonical capture and original handoff are separately proven. The learning Landing Unit decision was originally persisted after branch creation and reconciled before tracked source edits; this ordering miss remains explicit rather than backdated.
 follow_up:
-  owner_repo: governance-operations-console
-  due_on: '2026-10-28'
-  note: Make the existing modal reflect its actual live versus disconnected-preview path, prove the normal canonical capture and preview isolation, and close against the same reviewed Console Landing Unit.
+  owner_repo: null
+  due_on: null
+  note: null
