@@ -165,6 +165,13 @@ governance_control_fabric_operator_surface:
   minimum_api_surface:
     service_posture: local-first API surface for future runtime integration; day-one implementation may expose CLI only until security and platform gates approve service runtime
     endpoints:
+      - endpoint_id: product-publication-preparation
+        method: GET
+        path: /v1/product-publication/preparations/{product_id}
+        phase_id: discover-status
+        purpose: resolve committed publication manifest references for one registered product using existing owner source mounts; preparation neither evaluates readiness nor publishes or modifies source
+        response_record_id: authority-reference
+        mutates_authority: false
       - endpoint_id: healthz
         method: GET
         path: /healthz
