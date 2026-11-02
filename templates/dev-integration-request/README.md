@@ -24,9 +24,8 @@ Required request information:
 - runtime dependencies
 - expected canonical backend writes, if any
 - whether identity, secrets, runtime privilege, or AI review is involved
-- requested by
-- request record system
-- request record ref
+- requested by (derived from the verified operator)
+- request record system and ref (returned by OOS, not manually entered)
 
 Additional required information for `persistent` requests:
 
@@ -81,11 +80,25 @@ Use `build-admitted` for the bootstrap gap where service code and profile-owned
 runtime wiring must be built before `active` smoke can honestly pass. Do not
 use it as launch evidence.
 
-Current implementation note:
+## Current request workflow
 
-- the current request surface adapter may be OpenProject
-- the contract should still record only:
-  - `request_record.system`
-  - `request_record.ref`
+Use **Dev Integration → Request Profile** in the Console. OOS owns the durable
+request, exact operator attribution, receipt and original-request recovery.
+Submission and status remain in Dev Integration. Routine profile requests do
+not create Proposal or Delivery ART items.
 
-That keeps the model reusable if the request surface changes later.
+After owner review, reference the exact original request in the profile record:
+
+- `request_record.system: oos`
+- `request_record.ref: oos://dev-integration/requests/<request_id>`
+
+Recording a request does not admit, implement or start the profile. Workspace
+Governance retains admission, Platform retains runtime execution, and Security
+retains its applicable review. Existing OpenProject or document references on
+older profiles remain historical provenance and do not require replacement.
+
+The generic `request_record.system` and `request_record.ref` fields remain
+adapter-neutral. A future workflow change must reconcile the operator procedure,
+selected adapter and implementation together. Contract selection alone does not
+prove that the runtime adapter is activated; unavailable submission must remain
+visible in the Console until commissioning passes.

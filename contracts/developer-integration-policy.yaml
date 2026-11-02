@@ -167,9 +167,9 @@ controlled_proof:
     - post-proof runtime state was retained without governed reclassification
 request_admission:
   current_request_adapter:
-    system: openproject
-    owner_repo: platform-engineering
-    target_ref: openproject://projects/workspace-proposals
+    system: oos
+    owner_repo: operator-orchestration-service
+    target_ref: oos://dev-integration/requests
   required_request_fields:
     - request_record.system
     - request_record.ref
