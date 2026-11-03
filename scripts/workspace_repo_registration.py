@@ -92,6 +92,37 @@ def proposed_source_owner_authority(repo_root: Path, name: str, expected_provide
             "model_writes_allowed": False, "canonical_mutation": False, "runtime_activation": False}
 
 
+
+def active_source_owner_verification_authority(repo_root: Path, name: str, expected_provider_repository: dict) -> dict:
+    """Read an active source-only owner for an exact reviewed verification change.
+
+    This never re-admits an owner or lends Proposed bootstrap authority to an
+    active repository. Shared/control and Security-bound owners remain excluded.
+    """
+    from contracts_lib import load_yaml
+    from workspace_intake import canonical_digest, provider_repository_conflicts
+    if not isinstance(name, str) or not NAME.fullmatch(name):
+        raise RepositoryRegistrationError("Verification setup requires an exact repository key.")
+    inventory = load_yaml(repo_root / "contracts/repos.yaml")
+    intake = load_yaml(repo_root / "contracts/intake-register.yaml")
+    entry = inventory.get("repos", {}).get(name)
+    if (not entry or name in intake.get("repos", {}) or name in inventory.get("retired_repos", {})
+            or entry.get("posture") != "active" or not is_source_owner(name, entry)):
+        raise RepositoryRegistrationError("Verification setup requires a current active source-only owner; suspended, retired and control owners are denied.")
+    binding = entry["provider_repository"]
+    if binding != expected_provider_repository or provider_repository_conflicts(repo_root, binding, name):
+        raise RepositoryRegistrationError("Verification setup requires exact, uniquely bound canonical provider custody.")
+    envelope = entry["record"]
+    if not isinstance(envelope.get("version"), int) or envelope["version"] < 1:
+        raise RepositoryRegistrationError("Verification setup requires a versioned active owner.")
+    return {"schema_version": 1, "owner_repo": name, "classification": "active", "inventory_posture": "active",
+            "intake_entry_ref": None,
+            "inventory_entry_ref": {"id": envelope["id"], "version": envelope["version"], "digest": canonical_digest(entry)},
+            "provider_repository": copy.deepcopy(binding), "owner_purpose": " ".join(entry["owns"]),
+            "source_bootstrap_eligible": False, "verification_setup_eligible": True,
+            "ordinary_source_eligible": True, "model_writes_allowed": False,
+            "canonical_mutation": False, "runtime_activation": False}
+
 def source_owner_rule(name: str, entry: dict[str, Any]) -> dict[str, Any]:
     if not is_source_owner(name, entry):
         raise RepositoryRegistrationError("Repository requires explicit control-owner or Security-bound registration review.")

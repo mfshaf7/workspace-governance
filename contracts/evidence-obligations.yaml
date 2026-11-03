@@ -30,3 +30,56 @@ evidence_by_change_class:
       - containment evidence
       - expiry or follow-up owner
       - governing follow-up reference
+
+application_verification:
+  owner_repo: workspace-governance
+  principle: Governance and source-integrity validation remain independent of application
+    verification maturity.
+  profile_modes:
+  - unconfigured
+  - manual
+  - automated
+  - mixed
+  command_scopes:
+  - source-controls
+  - application
+  legacy_profile_rule: Preserve existing profiles and their declared requirements; omission
+    of maturity metadata never grants a new waiver.
+  registration:
+    source_controls_required: true
+    application_test_plan_required: false
+    application_commands_required: false
+    application_markers_required: false
+  development:
+    unconfigured_application_allowed: true
+    source_validation_required: true
+    explicit_conformance_requirements_preserved: true
+    trust_boundary_requirements_preserved: true
+  operational_handover:
+    acceptance_evidence_required: true
+    allowed_verification_methods:
+    - manual
+    - automated
+    - mixed
+    unconfigured_is_passing: false
+    source_controls_are_application_evidence: false
+  governed_release:
+    supported_platform_release_path_required: true
+    applicable_verification_security_and_operations_evidence_required: true
+    unconfigured_is_passing: false
+  portfolio:
+    operational_ownership_required: true
+    publication_grants_release_authority: false
+    production_runtime_required: false
+  later_configuration:
+    active_repository_supported: true
+    exact_source_review_required: true
+    independent_owner_controls_preserved: true
+    historical_evidence_immutable: true
+  denied_claims:
+  - unconfigured means passed
+  - missing tests mean not applicable
+  - source-control validation proves application behavior
+  - manual plan is completed manual verification
+  - registered test commands prove tests passed
+  - ordinary source authority may be granted from Proposed status alone

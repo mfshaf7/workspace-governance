@@ -1,20 +1,235 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "evidence_by_change_class"],
+  "required": [
+    "schema_version",
+    "evidence_by_change_class",
+    "application_verification"
+  ],
   "properties": {
-    "schema_version": { "type": "integer", "minimum": 1 },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
     "evidence_by_change_class": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": {
         "type": "object",
-        "required": ["required"],
+        "required": [
+          "required"
+        ],
         "properties": {
-          "required": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          "required": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         },
         "additionalProperties": false
       }
+    },
+    "application_verification": {
+      "type": "object",
+      "required": [
+        "owner_repo",
+        "principle",
+        "profile_modes",
+        "command_scopes",
+        "legacy_profile_rule",
+        "registration",
+        "development",
+        "operational_handover",
+        "governed_release",
+        "portfolio",
+        "later_configuration",
+        "denied_claims"
+      ],
+      "properties": {
+        "owner_repo": {
+          "const": "workspace-governance"
+        },
+        "principle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile_modes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "command_scopes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "legacy_profile_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registration": {
+          "type": "object",
+          "required": [
+            "source_controls_required",
+            "application_test_plan_required",
+            "application_commands_required",
+            "application_markers_required"
+          ],
+          "properties": {
+            "source_controls_required": {
+              "type": "boolean"
+            },
+            "application_test_plan_required": {
+              "type": "boolean"
+            },
+            "application_commands_required": {
+              "type": "boolean"
+            },
+            "application_markers_required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "development": {
+          "type": "object",
+          "required": [
+            "unconfigured_application_allowed",
+            "source_validation_required",
+            "explicit_conformance_requirements_preserved",
+            "trust_boundary_requirements_preserved"
+          ],
+          "properties": {
+            "unconfigured_application_allowed": {
+              "type": "boolean"
+            },
+            "source_validation_required": {
+              "type": "boolean"
+            },
+            "explicit_conformance_requirements_preserved": {
+              "type": "boolean"
+            },
+            "trust_boundary_requirements_preserved": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "operational_handover": {
+          "type": "object",
+          "required": [
+            "acceptance_evidence_required",
+            "allowed_verification_methods",
+            "unconfigured_is_passing",
+            "source_controls_are_application_evidence"
+          ],
+          "properties": {
+            "acceptance_evidence_required": {
+              "type": "boolean"
+            },
+            "allowed_verification_methods": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "unconfigured_is_passing": {
+              "type": "boolean"
+            },
+            "source_controls_are_application_evidence": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "governed_release": {
+          "type": "object",
+          "required": [
+            "supported_platform_release_path_required",
+            "applicable_verification_security_and_operations_evidence_required",
+            "unconfigured_is_passing"
+          ],
+          "properties": {
+            "supported_platform_release_path_required": {
+              "type": "boolean"
+            },
+            "applicable_verification_security_and_operations_evidence_required": {
+              "type": "boolean"
+            },
+            "unconfigured_is_passing": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "portfolio": {
+          "type": "object",
+          "required": [
+            "operational_ownership_required",
+            "publication_grants_release_authority",
+            "production_runtime_required"
+          ],
+          "properties": {
+            "operational_ownership_required": {
+              "type": "boolean"
+            },
+            "publication_grants_release_authority": {
+              "type": "boolean"
+            },
+            "production_runtime_required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "later_configuration": {
+          "type": "object",
+          "required": [
+            "active_repository_supported",
+            "exact_source_review_required",
+            "independent_owner_controls_preserved",
+            "historical_evidence_immutable"
+          ],
+          "properties": {
+            "active_repository_supported": {
+              "type": "boolean"
+            },
+            "exact_source_review_required": {
+              "type": "boolean"
+            },
+            "independent_owner_controls_preserved": {
+              "type": "boolean"
+            },
+            "historical_evidence_immutable": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        "denied_claims": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

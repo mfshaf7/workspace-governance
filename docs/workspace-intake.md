@@ -138,3 +138,28 @@ artifact, or unmerged branch is not completion.
 - hard deletion of intake history
 - treating intake admission as runtime activation or product maturity
 - accepting model output without an explicit operator disposition
+
+
+## Application Verification Maturity
+
+Repository registration establishes exact custody, ownership and safe source
+controls. It does not require an application testing strategy, commands or
+application marker paths before development. Governance validation participation
+is still recorded; the ordinary source-only participation metadata can be derived
+from the reviewed repository type and owner boundary. It is not a claim that
+application tests exist or have passed.
+
+The existing evidence contract defines this separation in
+[`application_verification`](../contracts/evidence-obligations.yaml). A new owner
+can begin with source-control validation and application verification marked
+`unconfigured`. It must still complete reviewed active registration before ordinary
+source authoring. The bounded bootstrap is not permission to author applications
+under Proposed status.
+
+The same owner must be able to configure application verification after active
+registration through an exact-source reviewed owner change. Manual plans,
+automated commands and mixed approaches are distinct from completed results.
+Delivery/operational handover requires evidence appropriate to its accepted scope,
+and supported stage/production decisions retain their Platform and Security
+requirements. Existing profiles, declared conformance obligations and immutable
+receipts must remain valid; missing metadata is never a waiver.
