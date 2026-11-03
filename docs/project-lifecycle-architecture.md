@@ -239,3 +239,28 @@ retirement transition remains `contract-only`. WGCF evaluation, target-system
 application, Console projection wiring, stage, and production are not claimed
 as live. The deterministic proof verifies these maturity boundaries; it is not
 evidence of production operation.
+
+
+## Application Verification And Project Maturity
+
+The five lifecycle axes remain unchanged. Application verification is evidence
+about a project, not a sixth lifecycle authority or a replacement runtime lane.
+The stage requirements are defined in the existing
+[evidence-obligations contract](../contracts/evidence-obligations.yaml).
+
+- Registration retains custody, ownership, review and source-control validation,
+  while application verification may be unconfigured.
+- Development retains applicable runtime isolation, source-integrity and explicit
+  conformance requirements. Basic source checks do not prove application behavior.
+- Operational handover requires real acceptance evidence, using manual, automated
+  or mixed verification as appropriate to the accepted scope and risk. A plan is
+  not a result, and missing tests cannot be relabelled as passed or not applicable.
+- A governed release uses its actual supported Platform path and the applicable
+  application, Security and operational evidence. Contract-only transition names
+  do not create an executable release gate.
+- Portfolio publication retains operational ownership and audience rules. An
+  operational local-only product can be listed without a production deployment.
+
+Existing owners and evidence remain intact. Adding or updating verification on an
+active owner requires review of the exact source and preserves independent owner
+controls; it does not repeat registration or rewrite historical receipts.

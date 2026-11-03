@@ -15,7 +15,7 @@ from contracts_lib import load_yaml
 from workspace_repo_registration import (GUIDANCE_PATHS, INDEX_START, INDEX_END,
     RepositoryRegistrationError, inventory_companion_projection, is_source_owner,
     source_owner_index, source_owner_rule, validate_source_owner_guidance_delta,
-    source_owner_context, source_owner_raw_context, validate_registration_companions, proposed_source_owner_authority)
+    source_owner_context, source_owner_raw_context, validate_registration_companions, proposed_source_owner_authority, active_source_owner_verification_authority)
 from validate_cross_repo_truth import validate_workspace_root_repo_coverage, delivery_art_owner_evidence_profile_coverage_errors
 
 
@@ -299,3 +299,27 @@ class ProposedSourceOwnerAuthorityTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ActiveVerificationAuthorityTests(unittest.TestCase):
+    def test_active_owner_is_bound_without_fabricating_intake_or_write_authority(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); (root / "contracts").mkdir()
+            entry = source_entry()
+            def save():
+                (root / "contracts/repos.yaml").write_text(yaml.safe_dump({"repos": {"synthetic-source": entry}, "retired_repos": {}}))
+                (root / "contracts/intake-register.yaml").write_text(yaml.safe_dump({"schema_version": 2, "repos": {}, "products": {}, "components": {}}))
+            save()
+            authority = active_source_owner_verification_authority(root, "synthetic-source", entry["provider_repository"])
+            self.assertIsNone(authority["intake_entry_ref"])
+            self.assertEqual(authority["inventory_entry_ref"]["id"], "repo:synthetic-source")
+            self.assertFalse(authority["source_bootstrap_eligible"])
+            self.assertTrue(authority["verification_setup_eligible"])
+            self.assertFalse(authority["model_writes_allowed"])
+            for posture in ["suspended", "retired"]:
+                entry["posture"] = entry["lifecycle"] = posture; save()
+                with self.assertRaises(RepositoryRegistrationError):
+                    active_source_owner_verification_authority(root, "synthetic-source", entry["provider_repository"])
+            entry["posture"] = entry["lifecycle"] = "active"; entry["requires_security_bindings"] = True; save()
+            with self.assertRaises(RepositoryRegistrationError):
+                active_source_owner_verification_authority(root, "synthetic-source", entry["provider_repository"])
