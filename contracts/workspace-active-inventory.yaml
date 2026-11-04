@@ -4,7 +4,7 @@ operator_surface_path: docs/workspace-active-inventory.md
 architecture:
   initiative_ref: openproject://work_packages/890
   contract_work_ref: openproject://work_packages/1071
-purpose: Promote one admitted Workspace Intake entrant into exactly one canonical active repository, product, or component record through a reviewed source change.
+purpose: Promote one admitted Workspace Intake entrant into exactly one canonical active record through its recorded authority. Retained Git-backed entrants use reviewed source; internal source-only repository records use the approved instance-operational-records contract.
 canonical_truth:
   intake_register: contracts/intake-register.yaml
   inventories:
@@ -13,8 +13,8 @@ canonical_truth:
     component: contracts/components.yaml
   rules:
     - An entrant identity exists in Workspace Intake or active inventory, never both.
-    - Promotion removes one admitted intake entry and adds one active record in the same reviewed source change.
-    - Merged Workspace Governance source is authority; WGCF decisions, OOS state, and Console projections are evidence only.
+    - Git-backed promotion removes one admitted intake entry and adds one active record in the same reviewed source change. Internal repository promotion advances the same aggregate from Intake to Inventory in one database transaction, retaining lineage and monotonic version history.
+    - Merged Workspace Governance source remains authority for retained Git-backed records. Internal repository records are authoritative only in the installation-private WGCF store under the native Governance policy and exact operator decision. OOS coordination and Console projections are not alternate authorities.
     - Repository promotion preserves the exact admitted provider_repository binding, including its immutable provider/id pair and current coordinates; it cannot invent or substitute another physical repository.
     - Repository promotion preserves the admitted repo_class and requires_security_bindings classification; changing either requires reviewing Intake first rather than weakening admission through promotion.
 record_contract:
@@ -50,6 +50,7 @@ promotion_contract:
     - WGCF readiness bound to the same request and source versions
     - idempotency and correlation keys
   source_rules:
+    - These source-mutation rules apply to retained Git-backed records. Internal repository transitions use the native instance-operational-records contract and do not publish operational metadata.
     - The command is denied on main, master, and detached heads.
     - The owner lock covers source reads, validation, comparison, replacement, and artifact emission.
     - Both resulting contracts validate and the complete owner-derived registration companions are rendered before any canonical file is replaced.

@@ -1,0 +1,166 @@
+schema_version: 1
+owner_repo: workspace-governance
+operator_surface_path: docs/instance-operational-records.md
+purpose: Keep installation operational records private without requiring a records Git repository.
+implementation_posture: unpublished-maintenance
+schema_refs:
+  command: contracts/schemas/instance-operational-command.schema.json
+  receipt: contracts/schemas/instance-operational-receipt.schema.json
+  repository_intake_request: contracts/schemas/instance-repository-intake-request.schema.json
+  repository_inventory_request: contracts/schemas/instance-repository-inventory-request.schema.json
+  repository_intake_decision: contracts/schemas/workspace-intake-decision.schema.json
+authority:
+  policy: workspace-governance
+  runtime_storage: workspace-governance-control-fabric
+  operator_workflow: operator-orchestration-service
+  runtime_and_credentials: platform-engineering
+  security_acceptance: security-architecture
+  operator_projection: governance-operations-console
+  rule: WGCF persists accepted instance decisions under Governance policy; database possession is not decision authority.
+storage:
+  backend: existing-wgcf-database
+  isolation: installation
+  instance_id: explicit-stable-installation-identifier
+  records_are_private: true
+  project_visibility_changes_storage: false
+  public_git_publication_allowed: false
+  records_git_repository_required: false
+  credential_values_allowed: false
+  rule: Project names, descriptions, provider coordinates, decisions and history are operational data, even for a public project repository.
+scope:
+  first_record_kind: repo
+  first_routes:
+    - repository-custody-to-intake
+    - intake-classification
+    - source-owner-setup
+    - active-inventory-promotion
+    - inventory-lifecycle
+    - source-owner-authority-readback
+  later_record_kinds:
+    - product
+    - component
+  rule: Repository qualification does not claim that every existing workflow has migrated.
+record_identity:
+  key: [instance_id, record_id]
+  record_id: repo:<canonical-repository-key>
+  source_identity: immutable-positive-decimal-github-repository-id
+  source_coordinates: current-full-name
+  provider_unique_within_instance: true
+  intake_inventory_overlap_allowed: false
+  rule: One aggregate moves from intake to inventory; promotion never creates a second independently writable identity.
+transaction:
+  canonicalization: workspace-canonical-json-v1
+  compare_and_swap: [expected_version, expected_digest]
+  create_precondition: both-null-and-identity-absent
+  update_precondition: exact-current-version-and-digest
+  version: starts-at-one-and-increments-once-per-accepted-change
+  idempotency_scope: [instance_id, idempotency_key]
+  accepted_ai_suggestion_unique: [instance_id, ai_decision_id]
+  replay: Exact authenticated caller, request and decision binding returns the original durable result even after later changes.
+  conflict: Reuse with different content or caller fails before mutation.
+  atomic_writes: [current-record, immutable-revision, operation-receipt]
+  hard_delete_allowed: false
+  receipt_rule: Success requires a transactional durable readback; no invented Git commit, PR, merge or source revision.
+  rollback: A newly approved compensating transition preserves original history.
+decision_boundary:
+  browser_direct_database_write: false
+  autonomous_ai_acceptance: false
+  explicit_operator_acceptance: true
+  readiness_required: true
+  policy_revision_required: true
+  rule: The runtime write adapter accepts only a server-validated transition bound to the authenticated caller, exact current state, accepted decision and readiness evidence. A client-provided allowed flag or digest is insufficient.
+repository_intake:
+  planner: scripts/workspace_instance_records.py
+  request_artifact: instance-repository-intake-request
+  decision_shape: existing-workspace-intake-decision
+  source: authenticated-canonical-repository-custody
+  metadata: existing-repository-intake-domain-record
+  first_governed_scope: product-source-with-covered-by-owner-repo-validation
+  classifications: [out-of-scope, proposed, admitted]
+  concurrency: exact-internal-record-version-and-digest
+  global_register_digest_required: false
+  source_preservation: updates-preserve-original-source-and-provider-identity
+  admitted_requires: current-trusted-owner-controls-and-canonical-checkout-readiness
+  ai: existing-governed-profile-and-explicit-operator-acceptance-with-unique-suggestion-identity
+  legacy_overlap: deny-current-or-retired-key-and-provider-identity-conflicts
+  policy_rule: Reuse the existing domain schemas, decision bindings, AI policy and entry producer. Internal decisions have no source-review or merge obligation; project code retains those controls.
+repository_inventory:
+  planner: scripts/workspace_instance_inventory.py
+  request_artifact: instance-repository-inventory-request
+  actions: [promote, update, suspend, retire, restore]
+  accepted_decision: exact-request-with-explicit-operator-acceptance
+  eligibility: same-existing-source-only-domain-and-lifecycle-semantics
+  promotion_precondition: current-admitted-intake-with-identical-classification-and-provider-binding
+  promotion_identity: same-aggregate-next-version-with-retained-intake-lineage
+  lifecycle_precondition: exact-current-source-only-inventory-version-and-digest
+  restore_precondition: latest-suspension-or-retirement-receipt-digest
+  history: immutable-operational-revisions-and-receipts
+  rule: No new runtime, Security, model, CI or application acceptance is inferred from promotion or lifecycle metadata.
+read_surface:
+  caller: existing-authenticated-governance-reader-or-oos-workflow-service
+  oos_operation: read-instance-records
+  source_authority_reader: optional-distinct-platform-reader-with-no-generic-record-access
+  source_authority_operation: read-instance-source-authority
+  installation_selection: server-configuration-only
+  routes:
+    list: GET /v1/instance-records/repositories
+    selected_status: GET /v1/instance-records/repository-status?name=<ordered-name>&name=<ordered-name>
+    detail: GET /v1/instance-records/repositories/{name}
+    history: GET /v1/instance-records/repositories/{name}/history
+    source_authority: GET /v1/instance-records/repositories/{name}/source-authority?operation=<bootstrap|configure-verification|ordinary-source>
+    provider_source_authority: GET /v1/instance-records/provider-repositories/github/{provider_repository_id}/source-authority?operation=<bootstrap|configure-verification|ordinary-source>
+  maximum_page_size: 100
+  list_shape: compact-metadata-with-version-digest-and-provider-binding
+  default_enabled: false
+  unavailable_rule: An unavailable database is a 503, never an empty successful register or permission to fall back to another authority.
+  absence_rule: An authenticated detail read returns a 200 installation-bound envelope with found false and null record and receipt; an unrecognized API route is not proof of record absence.
+write_surface:
+  preparation: GET /v1/instance-records/repositories/{name}/intake/preparation
+  acceptance: POST /v1/instance-records/repositories/{name}/intake
+  inventory_preparation: GET /v1/instance-records/repositories/{name}/inventory/preparation
+  inventory_acceptance: POST /v1/instance-records/repositories/{name}/inventory
+  inventory_original_readback: POST /v1/instance-records/repositories/{name}/inventory/readback
+  original_readback: POST /v1/instance-records/repositories/{name}/intake/readback
+  original_readback_authority: existing-authenticated-governance-reader-no-canonical-mutation
+  caller: authenticated-oos-workflow-service
+  operation: accept-instance-decision
+  read_only_reader_can_write: false
+  reconciler_can_write: false
+  source_attestation_authority: operator-orchestration-service-canonical-custody
+  operator_binding_authority: operator-orchestration-service-authenticated-operator
+  owner_controls_authority: existing-oos-bootstrap-and-platform-canonical-checkout-readback
+  canonical_acceptance: native-governance-policy-plus-transactional-instance-record-readback
+  recovery: Check the original durable operation before replanning; exact original operator input returns its original receipt, while changed input conflicts.
+  readiness_retention: The original command retains the full accepted operator input, canonical custody attestation and server-produced readiness body, bound by the immutable receipt.
+  cancel_boundary: OOS may cancel before the first canonical write attempt. Once attempted it must resolve the original outcome; compensation is a separately accepted change.
+  retry_boundary: Read the serialized original outcome before refreshing source evidence or retrying an uncertain write.
+legacy:
+  existing_git_records: read-only-bootstrap-until-explicit-migration
+  source_receipts: immutable
+  pending_source_requests: resume-original-authority-and-request-identity
+  same_key_conflict: fail-closed-unless-exact-explicit-import
+  migration_evidence: exact-source-revision-path-record-digest-and-original-envelope
+  duplicate_or_shadow_authority_allowed: false
+  automatic_public_export: false
+  derived_views: installation-private-materialization-only
+  rule: An internal store is authoritative only for records assigned to it. Existing Git-backed records and in-flight source reviews keep their recorded authority until explicit cutover; a cache cannot silently become canonical truth.
+source_boundary:
+  project_code: selected-project-git-repository
+  source_review: unchanged-agent-gary-author-and-accountable-human-review
+  account_metadata_reader: unchanged-metadata-read-only
+  private_inspection: separately-approved-exact-repository-contents-read-scope
+  ai_projection: approved-provider-policy-and-context-admission-required
+  registration_invokes_ai: false
+  eligibility_projection: Native Governance source-owner rules over the exact internal record, with positive legacy proof required before choosing a Git reader.
+  delivery_repository_readiness:
+    authority: current-active-source-only-inventory
+    expected_reference: exact-installation-record-version-digest-and-policy
+    effective_rule: accepted-native-source-authority-policy
+    fresh_linking: reevaluate-current-eligibility-before-linking
+    rule: Extend the existing WGCF readiness receipt without inventing a public repository rule, Git revision or application test requirement. Suspension, stale identity or unavailable native authority blocks fresh linking; it does not select legacy authority or migrate Catalog records.
+  source_projection_does_not_grant: [credentials, source-write, model-access, runtime-activation]
+  rule: Operational record acceptance grants neither project source writes, runtime activation, release nor security acceptance.
+release:
+  activation: separate-platform-and-security-acceptance
+  installer_development_in_scope: false
+  packaging_rule: Software and shared contracts are versioned; installed operational state is internal and backed up with the installation. Git connections manage project source, not installation record storage.

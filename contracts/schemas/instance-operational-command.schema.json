@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Internal operational record persistence command",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "instance_id",
+    "record_id",
+    "idempotency_key",
+    "expected",
+    "action",
+    "record",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "instance_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^repo:[a-z0-9][a-z0-9._-]{0,185}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "expected": {
+      "type": "object",
+      "required": [
+        "version",
+        "digest"
+      ],
+      "properties": {
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "digest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "version": {
+              "type": "null"
+            },
+            "digest": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "version": {
+              "type": "integer"
+            },
+            "digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      ]
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "record": {
+      "type": "object"
+    },
+    "decision": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Internal adapter input. A server-owned readiness and decision validator is mandatory; schema validity does not authorize a write."
+}

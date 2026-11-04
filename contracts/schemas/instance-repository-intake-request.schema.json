@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "request_id",
+    "requested_at",
+    "requester_ref",
+    "source",
+    "target",
+    "action",
+    "requested_classification",
+    "owner_route",
+    "requested_record",
+    "expected_state",
+    "idempotency_key",
+    "request_digest",
+    "policy_ref",
+    "instance_id",
+    "custody_request_id"
+  ],
+  "$defs": {
+    "providerRepository": {
+      "type": "object",
+      "required": [
+        "provider",
+        "provider_repository_id",
+        "full_name"
+      ],
+      "properties": {
+        "provider": {
+          "const": "github"
+        },
+        "provider_repository_id": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "full_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "validationBehavior": {
+      "type": "object",
+      "required": [
+        "posture",
+        "wgcf_graph_role",
+        "catalog_refs",
+        "notes"
+      ],
+      "properties": {
+        "posture": {
+          "$ref": "#/$defs/text"
+        },
+        "wgcf_graph_role": {
+          "$ref": "#/$defs/text"
+        },
+        "catalog_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/text"
+          },
+          "uniqueItems": true
+        },
+        "notes": {
+          "$ref": "#/$defs/text"
+        }
+      },
+      "additionalProperties": false
+    },
+    "repoRecord": {
+      "type": "object",
+      "required": [
+        "kind",
+        "repo_class",
+        "requires_security_bindings",
+        "security_owner",
+        "notes",
+        "provider_repository"
+      ],
+      "properties": {
+        "kind": {
+          "const": "repo"
+        },
+        "repo_class": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "provider_repository": {
+          "$ref": "#/$defs/providerRepository"
+        },
+        "requires_security_bindings": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "security_owner": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "$ref": "#/$defs/text"
+        },
+        "validation_behavior": {
+          "$ref": "#/$defs/validationBehavior"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "artifact_type": {
+      "const": "instance-repository-intake-request"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requester_ref": {
+      "$ref": "#/$defs/text"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "class",
+        "ref",
+        "digest"
+      ],
+      "properties": {
+        "class": {
+          "const": "repository-custody"
+        },
+        "ref": {
+          "$ref": "#/$defs/text",
+          "pattern": "^oos://repository-custody/requests/[^/]+/intake/[0-9a-f]{64}$"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "kind",
+        "name",
+        "record_id"
+      ],
+      "properties": {
+        "kind": {
+          "const": "repo"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "maxLength": 186
+        },
+        "record_id": {
+          "type": "string",
+          "pattern": "^repo:[a-z0-9][a-z0-9._-]*$",
+          "maxLength": 191
+        }
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "enum": [
+        "add",
+        "update"
+      ]
+    },
+    "requested_classification": {
+      "enum": [
+        "out-of-scope",
+        "proposed",
+        "admitted"
+      ]
+    },
+    "owner_route": {
+      "$ref": "#/$defs/text"
+    },
+    "requested_record": {
+      "$ref": "#/$defs/repoRecord"
+    },
+    "expected_state": {
+      "type": "object",
+      "required": [
+        "record_version",
+        "record_digest"
+      ],
+      "properties": {
+        "record_version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "record_digest": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "record_version": {
+              "type": "null"
+            },
+            "record_digest": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "properties": {
+            "record_version": {
+              "type": "integer"
+            },
+            "record_digest": {
+              "$ref": "#/$defs/digest"
+            }
+          }
+        }
+      ]
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "request_digest": {
+      "$ref": "#/$defs/digest"
+    },
+    "policy_ref": {
+      "type": "object",
+      "required": [
+        "repo",
+        "revision",
+        "contract_digest"
+      ],
+      "properties": {
+        "repo": {
+          "const": "workspace-governance"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "contract_digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "additionalProperties": false
+    },
+    "instance_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$"
+    },
+    "custody_request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "title": "Installation-private repository intake request"
+}
