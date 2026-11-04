@@ -76,21 +76,35 @@ def proposed_source_owner_authority(repo_root: Path, name: str, expected_provide
     if name in inventory.get("repos", {}) or name in inventory.get("retired_repos", {}):
         raise RepositoryRegistrationError("Bootstrap cannot replace an active or retired Inventory identity.")
     entry = register.get("repos", {}).get(name)
-    if not entry or entry.get("status") not in {"proposed", "admitted"} or entry["record"]["id"] != f"repo:{name}":
+    if binding := (entry or {}).get("provider_repository"):
+        if provider_repository_conflicts(repo_root, binding, name):
+            raise RepositoryRegistrationError("Bootstrap provider identity has another workspace key.")
+    return {**proposed_source_owner_entry(name, entry, expected_provider_repository),
+            "intake_register_digest": canonical_digest(register)}
+
+
+def proposed_source_owner_entry(name: str, entry: dict, expected_provider_repository: dict) -> dict:
+    """Pure source-only eligibility shared by Git and installation authorities.
+
+    The caller must validate canonical storage, uniqueness and freshness first.
+    This projection grants no credential, checkout, source write or model access.
+    """
+    from workspace_intake import canonical_digest
+    if (not isinstance(name, str) or not NAME.fullmatch(name) or not isinstance(entry, dict)
+            or entry.get("status") not in {"proposed", "admitted"} or entry.get("record", {}).get("id") != f"repo:{name}"):
         raise RepositoryRegistrationError("Bootstrap requires current proposed or admitted Intake before Inventory; ordinary source remains denied.")
     if not _source_owner_admission_metadata(entry):
         raise RepositoryRegistrationError("This proposed owner requires explicit control/Security registration, not source-only bootstrap.")
     binding = entry["provider_repository"]
-    if binding != expected_provider_repository or provider_repository_conflicts(repo_root, binding, name):
-        raise RepositoryRegistrationError("Bootstrap provider identity differs from current canonical custody binding or has another workspace key.")
+    if binding != expected_provider_repository:
+        raise RepositoryRegistrationError("Bootstrap provider identity differs from current canonical custody binding.")
     return {"schema_version": 1, "owner_repo": name,
             "intake_entry_ref": {"id": entry["record"]["id"], "version": entry["record"]["version"], "digest": canonical_digest(entry)},
-            "intake_register_digest": canonical_digest(register), "classification": entry["status"], "inventory_posture": None,
+            "classification": entry["status"], "inventory_posture": None,
             "provider_repository": copy.deepcopy(binding), "owner_purpose": entry["notes"],
             "validation_behavior": copy.deepcopy(entry["validation_behavior"]),
             "source_bootstrap_eligible": True, "ordinary_source_eligible": False,
             "model_writes_allowed": False, "canonical_mutation": False, "runtime_activation": False}
-
 
 
 def active_source_owner_verification_authority(repo_root: Path, name: str, expected_provider_repository: dict) -> dict:
@@ -112,6 +126,16 @@ def active_source_owner_verification_authority(repo_root: Path, name: str, expec
     binding = entry["provider_repository"]
     if binding != expected_provider_repository or provider_repository_conflicts(repo_root, binding, name):
         raise RepositoryRegistrationError("Verification setup requires exact, uniquely bound canonical provider custody.")
+    return active_source_owner_entry(name, entry, expected_provider_repository)
+
+
+def active_source_owner_entry(name: str, entry: dict, expected_provider_repository: dict) -> dict:
+    """Pure active source-only projection after authoritative storage validation."""
+    from workspace_intake import canonical_digest
+    if (not isinstance(entry, dict) or entry.get("posture") != "active" or not is_source_owner(name, entry)
+            or entry.get("provider_repository") != expected_provider_repository):
+        raise RepositoryRegistrationError("Active source operations require the current exact source-only owner.")
+    binding = entry["provider_repository"]
     envelope = entry["record"]
     if not isinstance(envelope.get("version"), int) or envelope["version"] < 1:
         raise RepositoryRegistrationError("Verification setup requires a versioned active owner.")

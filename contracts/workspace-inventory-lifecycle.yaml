@@ -12,7 +12,7 @@ canonical_truth:
     component: contracts/components.yaml
   history: contracts/workspace-inventory-history.yaml
   rules:
-    - Merged Workspace Governance source is the only canonical lifecycle truth.
+    - Existing Git-backed records retain merged Workspace Governance source as canonical lifecycle truth. New internal source-only repository records follow instance-operational-records.yaml, with their own versioned database authority and receipts.
     - Every accepted mutation increments the record version and appends exactly one immutable history event.
     - A lifecycle request changes one canonical record and never creates or deletes its identity.
     - Explicit repository provider/id pairs cannot be removed, substituted or assigned to another workspace key. Reviewed full_name coordinates may change after a real provider rename or transfer without changing physical identity; legacy records without a provider binding remain valid.
@@ -58,6 +58,7 @@ command_contract:
     - WGCF readiness for the same request and observed state
     - idempotency and correlation keys
   source_rules:
+    - These source-mutation rules apply to retained Git-backed records. Internal repository transitions use the native instance-operational-records contract and do not publish operational metadata.
     - The command is denied on main, master, and detached heads.
     - The owner lock covers source reads, validation, mutation, replacement, and artifact emission.
     - The changed inventory and history both validate and owner-derived registration companions are rendered before any canonical file is replaced.

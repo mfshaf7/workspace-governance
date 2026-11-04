@@ -23,6 +23,14 @@ separately so implementation cannot drift from the approved workflow shape:
 
 ## Current Direction
 
+The approved operational-state target is now explicit in
+[Internal operational records](instance-operational-records.md): installed
+project records live in private runtime storage for public and private projects.
+Git remains the software/shared-policy and project-source review mechanism.
+The initial repository route is unpublished maintenance; existing source-backed
+records retain authority until explicit migration and activation. This does not
+start installer development or claim an all-workflow migration.
+
 `workspace-governance` is still the active workspace control plane today, but it
 currently carries both:
 
