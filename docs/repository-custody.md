@@ -148,15 +148,17 @@ cannot complete, repair, or imply a mutation.
 
 ## Provisioning Controls
 
-The first `provision-new` capability is deliberately narrower than the general
-provider-neutral custody model. It creates GitHub repositories only inside the
-organization bound to the approved GitHub App installation. Personal-account
-creation, personal access tokens, and ambient `gh` authentication are not
-fallbacks.
+`provision-new` creates GitHub repositories in the explicitly connected personal
+account or organization bound to the selected GitHub App installation. One
+installation can connect both account types and choose a default destination;
+this is not a permanent company or solo-developer mode. Each connection retains
+its own provider account identity, grants and credential bindings. Permission
+denial never selects a different account, personal access token or ambient `gh`
+credential. Metadata, source and provider mutation access remain separate.
 
 The request must explicitly bind:
 
-- organization owner and repository name
+- selected account, account type and repository name
 - description and visibility
 - README initialization
 - issues, projects, wiki, and discussions toggles
@@ -171,7 +173,7 @@ coordinates, initialized state, visibility, features, and merge policy. Any
 mismatch fails closed.
 
 If the create response is lost or readback is interrupted, OOS reconciles the
-original request through canonical organization/name coordinates before it may
+original request through canonical account/name coordinates before it may
 retry. It never deletes a repository as automatic compensation and never sends
 a blind second create request.
 
@@ -189,6 +191,20 @@ A successful custody receipt may become input to a later Workspace Intake
 request. It performs no downstream transition by itself. Active inventory,
 Delivery Catalog linkage, and product admission remain separate explicit
 actions owned by their domains.
+
+The pending Console maintenance coordinates these existing actions through
+Workspace Registry: select the verified custody identity, complete the Intake
+review and source controls, then activate the existing Inventory candidate.
+Repository Control hands over that identity rather than offering a second local
+admission decision. Only current active Inventory and the existing WGCF readiness
+evaluation permit normal project source use; a create/link or historical local
+demonstration receipt cannot satisfy that gate. Inspection, approved setup and
+original-outcome recovery remain available before activation. Application
+verification retains its separate, stage-appropriate requirements.
+
+The operator procedure is owned by the
+[Console repository onboarding surface](https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/repository-onboarding.md).
+This describes the unpublished source candidate, not activated installation proof.
 
 ## Current Maturity
 

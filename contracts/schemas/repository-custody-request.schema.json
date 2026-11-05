@@ -110,7 +110,7 @@
           "target": {
             "required": ["owner_scope"],
             "properties": {
-              "owner_scope": { "const": "organization" },
+              "owner_scope": { "enum": ["personal", "organization"] },
               "provider_repository_id": { "type": "null" }
             }
           },

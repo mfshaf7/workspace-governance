@@ -110,7 +110,7 @@
         "provider": { "const": "github" },
         "provider_host": { "const": "github.com" },
         "owner": { "$ref": "#/$defs/text" },
-        "owner_scope": { "const": "organization" },
+        "owner_scope": { "enum": ["personal", "organization"] },
         "name": { "$ref": "#/$defs/text" },
         "settings": { "$ref": "#/$defs/provisioningSettings" }
       },

@@ -227,9 +227,11 @@ class RepositoryCustodyTests(unittest.TestCase):
         request["authority"]["token"] = "not-allowed"
         self.assertInvalid("request", request)
 
-    def test_provisioning_requires_organization_scope_and_explicit_settings(self) -> None:
+    def test_provisioning_accepts_personal_scope_and_requires_explicit_settings(self) -> None:
         request = copy.deepcopy(self.provision_fixtures["request"])
         request["target"]["owner_scope"] = "personal"
+        self.validators["request"].validate(request)
+        request["target"]["owner_scope"] = "unconnected"
         self.assertInvalid("request", request)
 
         request = copy.deepcopy(self.provision_fixtures["request"])

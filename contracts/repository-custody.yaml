@@ -91,10 +91,10 @@ provisioning_controls:
   first_provider_scope:
     provider: github
     provider_host: github.com
-    owner_scope: organization
-    rule: The first provisioning capability creates only inside the organization bound to the approved GitHub App installation; personal-account creation is not an admitted fallback.
+    owner_scopes: [personal, organization]
+    rule: Creation uses the exact personal account or organization bound to the selected verified GitHub App installation. Account choice never authorizes a fallback credential or another account.
   required_request_controls:
-    - organization-owner
+    - connected-account
     - repository-name
     - description
     - visibility
@@ -129,7 +129,7 @@ provisioning_controls:
         - delete_branch_on_merge
       rule: Every merge setting is explicit and verified through provider readback.
   decision_rule: An allowed provisioning decision carries the exact approved target and settings with next_action create-provider; it has no provider repository ID before creation.
-  readback_rule: Provisioning succeeds only when immutable provider identity, organization owner, canonical name, visibility, initialized state, features, and merge policy match the allowed decision.
+  readback_rule: Provisioning succeeds only when immutable provider identity, selected account, account type, canonical name, visibility, initialized state, features, and merge policy match the allowed decision.
   no_compensation_rule: A timeout or partial success is reconciled through canonical coordinates and provider readback; the system never compensates by deleting a repository.
 custody_states:
   unrecorded:
@@ -360,7 +360,7 @@ denied_shortcuts:
   - secret values embedded in requests, decisions, readbacks, or receipts
   - hard provider deletion in contract version 1
   - compensating delete after partial provisioning success
-  - provision-new request with personal owner scope
+  - provision-new request outside the selected verified account or using another account credential
   - provision-new request that relies on provider defaults instead of explicit baseline settings
   - provisioning success without exact applied-settings and initialized-state readback
   - ambiguous transfer that combines workspace custody with provider ownership
