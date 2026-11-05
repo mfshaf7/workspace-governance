@@ -82,11 +82,11 @@
       "properties": {
         "first_provider_scope": {
           "type": "object",
-          "required": ["provider", "provider_host", "owner_scope", "rule"],
+          "required": ["provider", "provider_host", "owner_scopes", "rule"],
           "properties": {
             "provider": { "const": "github" },
             "provider_host": { "const": "github.com" },
-            "owner_scope": { "const": "organization" },
+            "owner_scopes": { "const": ["personal", "organization"] },
             "rule": { "$ref": "#/$defs/text" }
           },
           "additionalProperties": false

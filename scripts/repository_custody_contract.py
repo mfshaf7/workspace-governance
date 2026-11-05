@@ -110,14 +110,14 @@ def contract_issues(contract: dict, active_repo_names: Iterable[str]) -> list[st
     if (
         first_scope.get("provider") != "github"
         or first_scope.get("provider_host") != "github.com"
-        or first_scope.get("owner_scope") != "organization"
+        or first_scope.get("owner_scopes") != ["personal", "organization"]
     ):
         issues.append(
-            "provisioning_controls.first_provider_scope must remain GitHub organization-only"
+            "provisioning_controls.first_provider_scope must bind connected GitHub personal accounts and organizations"
         )
 
     expected_request_controls = {
-        "organization-owner",
+        "connected-account",
         "repository-name",
         "description",
         "visibility",
