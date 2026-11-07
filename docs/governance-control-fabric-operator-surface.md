@@ -117,6 +117,7 @@ Required endpoint meanings:
 
 - `GET /healthz`
 - `GET /readyz`
+- `GET /v1/projections/workspace-continuity` (complete continuity, or `view=products` for a bounded product register page)
 - `GET /v1/status`
 - `POST /v1/source-snapshots`
 - `POST /v1/validation-plans`
@@ -228,3 +229,26 @@ Runtime implementation should not start until:
 The primary runtime operator surface is:
 
 - [workspace-governance-control-fabric/docs/operations/operator-surface.md](https://github.com/mfshaf7/workspace-governance-control-fabric/blob/main/docs/operations/operator-surface.md)
+
+### Bounded product register reads
+
+The existing authenticated continuity read supports `view=products` with
+`query`, `maturity`, `posture` and an opaque `cursor`. The response is an explicit
+`workspace-products-page`, never a partial response pretending to be complete
+workspace continuity. Pages contain at most 25 products, a filtered total, the
+exact selection and authority revision, plus a digest binding the returned
+content. A changed revision or selection requires first-page refresh. An exact
+`id=product:<name>` read stays independent of the visible page.
+
+Only selected product readiness is hydrated for a page. Complete continuity
+retains its full global scope and latest-readiness semantics; runtime batching
+may improve its retrieval without weakening evidence freshness, actor scoping
+or validation. Product pages issue no decisions, approvals or publication
+authority, and preserve current, stale and unavailable readiness distinctions.
+
+
+This read-contract extension is operator-approved maintenance, Landing Unit
+Decision: feature_single_landing_unit,
+maintenance-register-query-contract-20261107. Contract publication precedes WGCF
+implementation adoption and its Console consumer. Runtime acceptance and operating
+proof remain with the existing Security/Platform composition workflow.
