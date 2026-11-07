@@ -254,14 +254,15 @@ resolution:
     '
 follow_up:
   owner_repo: platform-engineering
-  due_on: '2026-11-06'
-  note: >-
-    Review the recorded snapshot-retention stop against the existing one-attempt
-    recovery contract and determine which incident conditions are supported
-    automatically. Preserve the genuine assisted-recovery result and qualify
-    unattended replacement separately. Propose an owner repair only if the
-    existing contract and actual consumers prove a violation; no new repair is
-    approved by this record update. Do not inject corruption, weaken failed-
-    attempt latching, block healthy Console work or require a RAM diagnosis to
-    manufacture proof. Keep this candidate accepted while that operating
-    limitation remains unresolved.
+  due_on: '2026-11-14'
+  note: Review the recorded snapshot-retention stop against the existing one-attempt recovery contract
+    and determine which incident conditions are supported automatically. Preserve the genuine assisted-recovery
+    result and qualify unattended replacement separately. Propose an owner repair only if the existing
+    contract and actual consumers prove a violation; no new repair is approved by this record update.
+    Do not inject corruption, weaken failed- attempt latching, block healthy Console work or require a
+    RAM diagnosis to manufacture proof. Keep this candidate accepted while that operating limitation remains
+    unresolved. Reviewed 2026-11-07 for register-batch publication. Source delivery of the bounded standalone
+    runtime remains evidenced; the recorded containerd snapshot-retention case still proves assisted recovery
+    only. No fresh unattended corruption/replacement proof exists, so status and that limitation remain
+    unchanged. Preserve the existing no-injection/no-speculative-repair restrictions. Next owner review
+    is 2026-11-14 after this UI publication; this follow-up does not add a UI release prerequisite.

@@ -640,13 +640,14 @@ resolution:
     successful result. No new product defect, control or ART child is inferred.
 follow_up:
   owner_repo: workspace-governance
-  due_on: '2026-11-06'
-  note: >-
-    Review application of the existing Console-first, current-contract,
-    sequential-operation and complete-payload preflight procedures across
-    connected operator steps. Distinguish already resolved product findings
-    from repeated agent execution errors, and propose any genuinely missing
-    control for operator review before implementation. Preserve normal story
-    decomposition and all retired records. This open review is not a new
-    prerequisite for unrelated Console maintenance and authorizes no planning
-    gate removal or additional repair mechanism.
+  due_on: '2026-11-14'
+  note: Review application of the existing Console-first, current-contract, sequential-operation and complete-payload
+    preflight procedures across connected operator steps. Distinguish already resolved product findings
+    from repeated agent execution errors, and propose any genuinely missing control for operator review
+    before implementation. Preserve normal story decomposition and all retired records. This open review
+    is not a new prerequisite for unrelated Console maintenance and authorizes no planning gate removal
+    or additional repair mechanism. Reviewed 2026-11-07 for register-batch publication. Retained evidence
+    distinguishes completed product fixes from the still-open execution-discipline review. No new control,
+    defect, ART item or closure is inferred. Preserve existing scope and review the already documented
+    procedures at the next owner checkpoint, 2026-11-14; this record is not a prerequisite for unrelated
+    Console UI maintenance.
