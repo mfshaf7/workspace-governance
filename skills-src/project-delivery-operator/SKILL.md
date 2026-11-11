@@ -26,6 +26,35 @@ Use this skill when a serious initiative is already running inside
 
 ### Initiative Architecture Preflight
 
+#### Context Session Explains The System
+
+When using Console Work Design, Context Session establishes understanding of
+the system being built; Build Tree decomposes that understanding into ART work.
+Before drafting context, inspect the relevant current contracts, implementation
+and runtime evidence through their authorized surfaces. Reuse an accepted
+architecture when unchanged and explain the relevant delta. ART fields define
+delivery scope and constraints; they do not substitute for system inspection.
+
+Explain current and intended actors, responsibilities, interactions and
+boundaries. Cover data ownership, access, failures and recovery where relevant;
+distinguish proven facts, proposed behavior and unanswered questions. Non-runtime
+work can explain rules, information and handoffs without invented services.
+Never claim that the Console advisor inspected code or live state absent from
+its admitted context. Supply the needed bounded evidence or ask for it.
+
+Diagrams must concern the target system. Do not copy a Work Design/ART process
+diagram unless that process is the actual subject. A runtime interaction such
+as user -> interface -> service -> data -> response can explain architecture.
+A sequence such as write contracts -> implement -> test -> review belongs in
+the work breakdown and is not sufficient architectural context on its own.
+
+Before finalizing the existing brief, review whether its note/sketch explains
+how the target system works and what remains uncertain. Snapshot custody is not
+proof of architectural correctness. Match the detail to the work; do not impose
+a notation, node count, keyword gate or full-workspace redraw on every change.
+Preserve explicit-request-only advisor edits and operator finalization. Use the
+[Console Work Design procedure](https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/work-design-live-integration.md#context-session-understand-the-system).
+
 Before source implementation for an architecture-shaping initiative,
 cross-repo protocol, or control-plane change:
 

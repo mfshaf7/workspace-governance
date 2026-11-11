@@ -619,6 +619,34 @@ signals:
   - repo://platform-engineering/scripts/fixtures/governed-ai/README.md
   - repo://platform-engineering/products/governance-operations-console/scripts/test_console_model_management.py
   - repo://platform-engineering/products/governance-operations-console/scripts/console_model_management.py
+- id: context-session-architecture-versus-delivery-plan
+  title: Context Session must explain the system being designed before ART decomposition
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: >-
+    On2026-11-11 the operator reported recent Context Sessions sketching ART
+    work steps instead of the underlying system architecture. Those historical
+    diagrams have not been individually audited here. Current source inspection
+    confirms contributing guidance gaps: the Work Design diagram starters use
+    the Work Design boundary, OpenProject ART, Inspect ART and Build Draft Tree
+    as their subject; the OOS context task only asks to review the current
+    context decision; and the finalize requirements verify saved session and
+    snapshot custody without establishing architectural understanding. The
+    broader delivery skill already requires architecture preflight, but does
+    not explicitly bind the Context Session to that system-under-design view.
+    Preserve the separate Build Tree role and existing explicit-request-only
+    draft policy. Propose extending current guidance, task instructions,
+    contextual starters and review with proportionate architectural content
+    and positive/negative examples. No new ART item, mandatory diagram format,
+    semantic keyword gate or automatic edit is authorized by this capture.
+  source_refs:
+  - 'conversation: operator distinguished system architecture from ART work steps and asked how to prevent recurrence'
+  - repo://governance-operations-console/src/domain-workspaces/delivery/product-adapters/context-board/work-design-context-board-starters.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/work-design/view-model/work-design-shell-view-model.ts
+  - repo://governance-operations-console/src/domain-workspaces/delivery/presentation/workflows/work-design/artifacts/context-brief/work-design-context-finalize-requirements.ts
+  - repo://operator-orchestration-service/src/work-design/service.js
+  - repo://workspace-governance/skills-src/project-delivery-operator/SKILL.md
 resolution:
   after_action_ref: null
   control_refs: []
