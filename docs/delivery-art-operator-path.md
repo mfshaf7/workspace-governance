@@ -56,6 +56,26 @@ OpenProject start-here planning surface first:
 
 ## Work-Home Classification
 
+### System Context Before Work Breakdown
+
+In Console Work Design, Context Session explains the system being designed;
+Build Tree describes the work required to realize it. Inspect the relevant
+contracts, code and runtime evidence before presenting architectural facts.
+Reuse accepted architecture and describe the change rather than redrawing
+unrelated systems. Identify responsibilities, interactions, relevant boundaries
+and unknowns; non-runtime work can describe rules and information handoffs.
+
+A runtime request/data/response sequence may explain architecture. A list of
+ART steps such as design, implement, test and review does not establish that
+understanding. The Work Design application itself is the subject only when
+the accepted work is about that application. Review architectural meaning at
+the existing brief checkpoint; no diagram notation, node count or keyword gate
+is required. Saved snapshots establish custody, not architectural truth.
+
+The [Console Work Design procedure](https://github.com/mfshaf7/governance-operations-console/blob/main/docs/product/work-design-live-integration.md#context-session-understand-the-system)
+owns the operator-facing instructions. Advisor drafting stays explicitly
+requested and finalization remains an operator decision.
+
 Before doing meaningful work that is not already covered by the active ART
 item, classify its home through the workspace work-home routing contract:
 
