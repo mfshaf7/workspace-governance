@@ -16,8 +16,8 @@ delivery_art_operator_path:
     capability_source:
       repo: operator-orchestration-service
       manifest_path: contracts/delivery-art-lifecycle/capabilities.json
-      manifest_digest: sha256:dbaa372cac39894a711f5d02445bc5667057c77b9ff4ff48a42f7c2cd3b05581
-      activated_at_commit: 92f0967242f535b46aad9e585c72694c6ff1863b
+      manifest_digest: sha256:f9079ce78717991ed15908da30f2c73de9debfb6b1c57a553ab55dbb34fa9e7e
+      activated_at_commit: 6657d58cf8025270cea75e1eb0394b903b4f866c
     capability_projection:
       schema_version: 2
       contract_id: operator-orchestration-service.delivery-art-lifecycle.v2
@@ -138,10 +138,9 @@ delivery_art_operator_path:
           contract_version: 2
           normal_path: true
         - id: work-session-resource-retirement
-          state: human-gated
+          state: implemented
           contract_version: 1
           normal_path: true
-          activation_work_item_id: work-item-970
         - id: resumable-lifecycle-reconciliation
           state: compatibility
           contract_version: 1

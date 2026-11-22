@@ -254,7 +254,7 @@ resolution:
     '
 follow_up:
   owner_repo: platform-engineering
-  due_on: '2026-11-14'
+  due_on: '2026-12-06'
   note: Review the recorded snapshot-retention stop against the existing one-attempt recovery contract
     and determine which incident conditions are supported automatically. Preserve the genuine assisted-recovery
     result and qualify unattended replacement separately. Propose an owner repair only if the existing
@@ -264,5 +264,10 @@ follow_up:
     unresolved. Reviewed 2026-11-07 for register-batch publication. Source delivery of the bounded standalone
     runtime remains evidenced; the recorded containerd snapshot-retention case still proves assisted recovery
     only. No fresh unattended corruption/replacement proof exists, so status and that limitation remain
-    unchanged. Preserve the existing no-injection/no-speculative-repair restrictions. Next owner review
-    is 2026-11-14 after this UI publication; this follow-up does not add a UI release prerequisite.
+    unchanged. Preserve the existing no-injection/no-speculative-repair restrictions. Rechecked 2026-11-22.
+    The normal frontend was active at approximately 113 MiB with zero automatic restarts and the recorded
+    3 GiB high, 4 GiB maximum, and 1 GiB swap limits. The current integrity runner and operator runbook
+    explicitly classify a retained shared unpacked snapshot as operator-required. The recorded incident
+    is consistent with that guard and still provides assisted recovery evidence. At the 2026-12-06 owner
+    review, check newly observed eligible incidents for unattended replacement evidence and revise the
+    operating limit only if a native result supports it. Keep the candidate accepted.
