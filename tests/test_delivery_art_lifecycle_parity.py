@@ -55,7 +55,7 @@ def capability_manifest() -> dict:
         ("operating-readiness", "implemented", 2, True),
         ("review-packet-finalization", "implemented", 2, True),
         ("art-closeout", "implemented", 2, True),
-        ("work-session-resource-retirement", "human-gated", 1, True),
+        ("work-session-resource-retirement", "implemented", 1, True),
         ("resumable-lifecycle-reconciliation", "compatibility", 1, False),
         ("review-packet-v1-compatibility", "compatibility", 1, False),
         ("temporal-lifecycle-adapter", "planned", 1, False),
@@ -74,11 +74,6 @@ def capability_manifest() -> dict:
         for capability in capabilities
         if capability["id"] == "agent-source-identity-consumption"
     )["activation_work_item_id"] = "work-item-1137"
-    next(
-        capability
-        for capability in capabilities
-        if capability["id"] == "work-session-resource-retirement"
-    )["activation_work_item_id"] = "work-item-970"
     return {
         "schema_version": 2,
         "contract_id": "operator-orchestration-service.delivery-art-lifecycle.v2",
