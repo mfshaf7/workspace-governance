@@ -24,7 +24,10 @@ from workspace_intake import (
     _validate_decision_bindings, _validate_domain_record, _validate_register,
     artifact_digest, canonical_digest, validate_artifact,
 )
-from workspace_repo_registration import _source_owner_admission_metadata
+from workspace_repo_registration import (
+    NAME, RepositoryRegistrationError, _source_owner_admission_metadata,
+    active_source_owner_entry,
+)
 
 
 class InstancePolicyError(WorkspaceIntakeError):
@@ -36,6 +39,55 @@ def instance_policy_ref(policy_root: Path, revision: str) -> dict:
             "contract_digest": "sha256:" + hashlib.sha256(
                 (policy_root / "contracts/instance-operational-records.yaml").read_bytes()
             ).hexdigest()}
+
+
+def plan_legacy_repository_migration(*, source_revision: str, name: str,
+                                     authority_records: dict, source_file_digest: str,
+                                     expected_provider_repository: dict) -> dict:
+    """Bind a read-only cutover plan to an already verified Git snapshot."""
+    if (not isinstance(source_revision, str) or not re.fullmatch(r"[0-9a-f]{40}", source_revision)
+            or not isinstance(source_file_digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", source_file_digest)
+            or not isinstance(name, str) or not NAME.fullmatch(name)):
+        raise InstancePolicyError("An exact verified Git record revision and repository key are required.")
+    if not isinstance(authority_records, dict) or set(authority_records) != {"intake", "inventory", "retired"} or any(
+        not isinstance(collection, dict) for collection in authority_records.values()
+    ):
+        raise InstancePolicyError("All current legacy repository authority collections are required.")
+    inventory = authority_records["inventory"]
+    entry = inventory.get(name)
+    if name in authority_records["intake"] or name in authority_records["retired"]:
+        raise InstancePolicyError("Overlapping repository claims require an explicit authority decision before migration.")
+    try:
+        eligible = active_source_owner_entry(name, entry, expected_provider_repository)
+    except (RepositoryRegistrationError, KeyError, TypeError, AttributeError) as exc:
+        raise InstancePolicyError("Select the exact active Git-backed source repository.") from exc
+    binding = eligible["provider_repository"]
+    claims = []
+    for collection, rows in authority_records.items():
+        for key, row in rows.items():
+            provider = row.get("provider_repository") if isinstance(row, dict) else None
+            if isinstance(provider, dict) and all(provider.get(field) == binding[field] for field in ("provider", "provider_repository_id")):
+                claims.append((collection, key))
+    if claims != [("inventory", name)]:
+        raise InstancePolicyError("The immutable provider identity has overlapping legacy registrations.")
+    envelope = entry["record"]
+    if (envelope.get("id") != f"repo:{name}" or not isinstance(envelope.get("lineage"), dict)
+            or not isinstance(envelope.get("last_mutation"), dict)):
+        raise InstancePolicyError("The original repository envelope is incomplete.")
+    mutation = envelope["last_mutation"]
+    for field in ("request", "readiness"):
+        if (not isinstance(mutation.get(f"{field}_ref"), str) or not mutation[f"{field}_ref"]
+                or not re.fullmatch(r"sha256:[0-9a-f]{64}", str(mutation.get(f"{field}_digest", "")))):
+            raise InstancePolicyError("The original repository evidence references are incomplete.")
+    source = {"repository": "workspace-governance", "revision": source_revision,
+              "path": "contracts/repos.yaml", "file_digest": source_file_digest,
+              "record_id": envelope["id"], "record_digest": canonical_digest(entry),
+              "original_envelope": copy.deepcopy(envelope)}
+    evidence = {"schema_version": 1, "artifact_type": "legacy-repository-migration-plan",
+                "source": source, "provider_repository": copy.deepcopy(binding),
+                "proposed_record": {"phase": "inventory", **copy.deepcopy(entry)},
+                "canonical_mutation": False}
+    return {**evidence, "plan_digest": canonical_digest(evidence)}
 
 
 def plan_repository_intake(
@@ -198,6 +250,13 @@ def main() -> int:
         if len(raw) > 262_144:
             raise InstancePolicyError("Instance policy input exceeds its read bound.")
         value = json.loads(raw)
+        if isinstance(value, dict) and value.get("operation") == "plan-legacy-repository-migration":
+            if set(value) != {"operation", "source_revision", "name", "authority_records", "source_file_digest",
+                              "expected_provider_repository"}:
+                raise InstancePolicyError("Internal migration evidence input is invalid.")
+            result = plan_legacy_repository_migration(**{key: field for key, field in value.items() if key != "operation"})
+            print(json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(",", ":")))
+            return 0
         if isinstance(value, dict) and value.get("operation") == "source-authority":
             if set(value) != {"operation", "instance_id", "name", "current", "source_operation", "policy_revision"}:
                 raise InstancePolicyError("Internal source projection input is invalid.")
