@@ -19,6 +19,16 @@ envelope. Pending Git reviews resume their original request and authority.
 The internal store must not silently shadow a source record with the same key or
 provider identity. A private copy of a public source snapshot is still a cache.
 
+For a retained active source-only repository, prepare migration from the verified
+Git authority and review the resulting plan digest. The plan binds the source
+path, commit, record digest, original envelope and provider repository ID. The
+reviewed Git cutover removes the original active authority in the next commit.
+The internal import accepts only that exact cutover and its reviewed first
+parent, with neither a competing Git claim nor an internal record. The
+repository's physical source stays in the same GitHub repository. Preserve the
+original envelope in the accepted operation and verify internal eligibility
+and original custody/history through the owning workflows after readback.
+
 New operational repository registrations use one internal record identity for
 intake, setup and inventory. Promotion changes that identity's state atomically.
 Every accepted change has a version, digest, authenticated decision, readiness

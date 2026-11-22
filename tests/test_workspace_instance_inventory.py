@@ -8,7 +8,7 @@ from unittest import TestCase
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from workspace_instance_inventory import plan_repository_inventory
-from workspace_instance_records import InstancePolicyError, instance_policy_ref, project_repository_source_authority
+from workspace_instance_records import InstancePolicyError, instance_policy_ref, plan_legacy_repository_migration, project_repository_source_authority
 from workspace_intake import canonical_digest
 import test_workspace_instance_records as intake_fixtures
 
@@ -68,6 +68,21 @@ class InstanceInventoryPolicyTests(TestCase):
         self.assertTrue(source["ordinary_source_eligible"])
         self.assertFalse(source["model_writes_allowed"])
         self.assertNotIn("merge_commit", str(result))
+
+    def test_legacy_migration_plan_preserves_exact_registration_and_refuses_competing_claims(self):
+        entry = self.accepted()["record"]
+        del entry["phase"]
+        collections = {"intake": {}, "inventory": {"synthetic-project": entry}, "retired": {}}
+        args = {"source_revision": "a" * 40, "name": "synthetic-project", "authority_records": collections,
+                "source_file_digest": canonical_digest("committed inventory"),
+                "expected_provider_repository": entry["provider_repository"]}
+        plan = plan_legacy_repository_migration(**args)
+        self.assertEqual(plan["source"]["original_envelope"], entry["record"])
+        self.assertEqual(plan["source"]["record_digest"], canonical_digest(entry))
+        self.assertFalse(plan["canonical_mutation"])
+        collections["retired"]["different-name"] = copy.deepcopy(entry)
+        with self.assertRaises(InstancePolicyError):
+            plan_legacy_repository_migration(**args)
 
     def test_proposed_intake_or_changed_identity_cannot_be_promoted(self):
         for change in [lambda v: v["record"].update(status="proposed"),
