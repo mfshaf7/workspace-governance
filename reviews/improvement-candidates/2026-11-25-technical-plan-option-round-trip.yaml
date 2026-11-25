@@ -1,0 +1,40 @@
+schema_version: 1
+id: 2026-11-25-technical-plan-option-round-trip
+title: Technical Plan option changes can silently discard draft input
+recorded_on: '2026-11-25'
+owner_repo: workspace-governance
+summary: Changing applicability in an editable Technical Plan replaced saved access
+  rules or lifecycle details with null. Returning to the previous option showed empty
+  inputs.
+regression_of: null
+status: triaged
+source_type: manual
+scope:
+  related_repos:
+  - governance-operations-console
+  related_products: []
+  related_components: []
+  change_classes:
+  - source-behavior
+signals:
+- id: repeated-corrective-follow-up
+  title: The same workflow needed another corrective follow-up in the same task or
+    session.
+  trigger: repeated-operator-friction
+  failure_classes:
+  - workflow-doctrine-gap
+  finding: The preview scope and layout walkthrough missed switching a populated option
+    away and back. Cover populated variants, switching, and reopening a saved draft
+    through the actual form.
+  source_refs:
+  - 'conversation: operator reported missing Access and execution notes after switching
+    the option back'
+resolution:
+  after_action_ref: null
+  control_refs: []
+  note: null
+follow_up:
+  owner_repo: workspace-governance
+  due_on: '2026-11-28'
+  note: Review and approve the strongest durable control before treating this lesson
+    as closed.

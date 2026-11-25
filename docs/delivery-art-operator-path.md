@@ -276,6 +276,12 @@ historical interpretation.
 
 The machine schema is
 [`delivery-art-architecture-packet.schema.json`](../contracts/schemas/delivery-art-architecture-packet.schema.json).
+V6 authoring uses the standard installation runtime boundaries for ordinary
+work. Record explicit lifecycle or authorization models when the project adds
+those requirements. Record evidence handoffs when another repository needs
+the result. Plans still bind the exact scope, prerequisites, rollback,
+applicable approvals, and verification cases.
+
 OOS and WGCF must prove identical owner-and-phase selection against
 [`architecture-packet-v6-activation-parity-vectors.valid.json`](../contracts/fixtures/delivery-art-workflow/architecture-packet-v6-activation-parity-vectors.valid.json)
 for current v6 activation; the v5 vector remains historical compatibility proof.
