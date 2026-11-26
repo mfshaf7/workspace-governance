@@ -445,7 +445,9 @@ evidence are verified, OOS will persist a
 [`delivery_art_work_session_resource_manifest`](../contracts/schemas/delivery-art-work-session-resource-manifest.schema.json)
 inside the active session directory and process only resources bound to that
 session. The allowed resource types are Git worktrees, local branches, remote
-branches, and allowlisted managed session state.
+branches, and allowlisted managed session state. The manifest and cleanup
+receipt preserve the exact Landing Unit ID approved in the Technical Plan,
+including named groups and generated change groups.
 
 Every resource records `session-created`, `pre-existing`, or `ambiguous`
 provenance. Only a `session-created` resource with the retirement retention

@@ -106,6 +106,39 @@ class DeliveryArtResourceRetirementContractTests(unittest.TestCase):
         self.assertEqual(self.schema_errors(self.receipt_schema, receipt), [])
         self.assertEqual(cleanup_receipt_semantic_issues(receipt), [])
 
+    def test_approved_plan_ids_bind_the_manifest_and_cleanup_receipt(self) -> None:
+        architecture = load_json(Path("contracts/schemas/delivery-art-architecture-packet.schema.json"))
+        for schema in (self.manifest_schema, self.receipt_schema):
+            self.assertEqual(schema["$defs"]["landingUnitId"], architecture["$defs"]["landingUnitId"])
+        for landing_unit_id in (
+            "landing-unit:1384-source-command-foundation",
+            "change-ef5359f1-9a09-4ba8-9290-dedd1ba3827d",
+        ):
+            for generation in ("", ":r2"):
+                with self.subTest(landing_unit_id=landing_unit_id, generation=generation):
+                    manifest = copy.deepcopy(self.manifest)
+                    receipt = copy.deepcopy(self.receipt)
+                    session_id = f"work-session:delivery-1384:{landing_unit_id}{generation}"
+                    for artifact in (manifest, receipt):
+                        artifact.update(
+                            delivery_id="delivery-1384",
+                            landing_unit_id=landing_unit_id,
+                            session_id=session_id,
+                        )
+                    receipt["receipt_id"] = f"cleanup-receipt:{session_id}"
+                    for resource in manifest["resources"]:
+                        resource["locator"]["ownership_marker"] = session_id
+
+                    self.assertEqual(self.schema_errors(self.manifest_schema, manifest), [])
+                    self.assertEqual(resource_manifest_semantic_issues(manifest), [])
+                    self.assertEqual(self.schema_errors(self.receipt_schema, receipt), [])
+                    self.assertEqual(cleanup_receipt_semantic_issues(receipt), [])
+
+                    manifest["session_id"] = f"work-session:delivery-1384:{landing_unit_id}:r0"
+                    self.assertTrue(resource_manifest_semantic_issues(manifest))
+                    receipt["receipt_id"] = "cleanup-receipt:work-session:delivery-1384:another-unit"
+                    self.assertTrue(cleanup_receipt_semantic_issues(receipt))
+
     def test_cleanup_receipt_rejects_nonterminal_resource_outcome(self) -> None:
         invalid = copy.deepcopy(self.receipt)
         invalid["resources"][0]["outcome"] = "blocked"
