@@ -748,6 +748,17 @@ remains in custody and a retry reuses its digest-bound reference. Workflow
 compensation must not delete evidence; retention or deletion is a separate,
 explicit lifecycle control.
 
+For Console Technical Plan review, OOS binds approval to the active
+OpenProject plan and the observed Work Sessions. It reads the latest WGCF
+custody reference for the exact Delivery and architecture packet identity
+through `GET /v1/artifacts/delivery-art/architecture-packets/latest`.
+Only the configured OOS registry writer can use this lookup. The response
+identifies that subject and returns its verified immutable artifact reference
+or a null reference for a subject with no generations. An edited retry
+supersedes the latest stored generation after fresh review, including a
+stored generation that never became active. The optimistic OpenProject
+projection still compares the reviewed active reference before writing.
+
 Corrections append a superseding artifact; they do not replace prior evidence.
 Every durable architecture, work-start, merge-ready, and finalized Review
 Packet records when it was persisted and carries its WGCF custody receipt.
