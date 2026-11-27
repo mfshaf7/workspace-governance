@@ -179,6 +179,13 @@ governance_control_fabric_operator_surface:
         purpose: resolve committed publication manifest references for one registered product using existing owner source mounts; preparation neither evaluates readiness nor publishes or modifies source
         response_record_id: authority-reference
         mutates_authority: false
+      - endpoint_id: delivery-architecture-custody-head
+        method: GET
+        path: /v1/artifacts/delivery-art/architecture-packets/latest
+        phase_id: discover-status
+        purpose: let the authenticated OOS registry writer resolve the latest verified durable reference for one exact Delivery and architecture packet subject; OpenProject determines the active approved plan
+        response_record_id: authority-reference
+        mutates_authority: false
       - endpoint_id: healthz
         method: GET
         path: /healthz
